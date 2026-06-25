@@ -96,6 +96,7 @@
             <button class="tool-btn" onclick="createQRCode()"><div class="icon">📱</div><div class="label">QR-Kod</div></button>
             <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Tavla</div></button>
             <button class="tool-btn" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
+            <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             
             <div style="width: 1px; background: #ddd; margin: 0 4px;"></div>
             <button class="tool-btn" onclick="arrangeWidgets()"><div class="icon">🧲</div><div class="label">Ordna</div></button>
@@ -395,6 +396,49 @@
     .popup-name { font-size: 80px; font-weight: 900; color: #ff3b30; text-shadow: 2px 2px 0 rgba(0,0,0,0.1); font-family: 'Comic Sans MS', sans-serif; word-break: break-word; max-width: 80vw; }
     .popup-confetti { position: absolute; width: 10px; height: 10px; top: -20px; box-shadow: 0 0 5px currentColor; animation: pop-confetti-fall linear infinite; }
     @keyframes pop-confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+    /* BRAIN BREAK WIDGET */
+    .bb-widget { min-width: 320px; }
+    .bb-container { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+    .bb-header-row { display: flex; align-items: center; gap: 8px; }
+    .bb-icon { font-size: 20px; }
+    .bb-title-label { font-size: 13px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; }
+    .bb-badge { background: #f3e8ff; color: #7c3aed; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; border: 1px solid #d8b4fe; }
+    .bb-video-area { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; background: #000; position: relative; min-height: 120px; }
+    .bb-video-area iframe { width: 100%; height: 100%; border: none; }
+    .bb-file-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .bb-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg,#f3e8ff,#ede9fe); color: #7c3aed; font-size: 40px; gap: 8px; cursor: pointer; }
+    .bb-placeholder span { font-size: 13px; font-weight: 700; color: #7c3aed; }
+    .bb-activity-label { font-size: 13px; color: #555; font-weight: 600; text-align: center; min-height: 18px; }
+    .bb-main-btn { width: 100%; padding: 12px; background: linear-gradient(135deg,#7c3aed,#a855f7); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(124,58,237,0.35); }
+    .bb-main-btn:hover { background: linear-gradient(135deg,#6d28d9,#9333ea); transform: translateY(-1px); }
+    .bb-main-btn:active { transform: translateY(0); }
+
+    /* ADMIN PANEL inuti widgeten */
+    .bb-admin-panel { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .bb-admin-title { font-size: 11px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+    .bb-unlock-row { display: flex; gap: 6px; }
+    .bb-pw-input { flex: 1; padding: 7px 10px; border: 1.5px solid #d8b4fe; border-radius: 8px; font-size: 13px; outline: none; font-family: inherit; }
+    .bb-pw-input:focus { border-color: #7c3aed; }
+    .bb-unlock-btn { padding: 7px 12px; background: #7c3aed; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; }
+    .bb-unlock-btn:hover { background: #6d28d9; }
+    .bb-admin-tools { display: flex; flex-direction: column; gap: 8px; }
+    .bb-add-section { background: white; border: 1px solid #e9d5ff; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 7px; }
+    .bb-add-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bb-input { width: 100%; padding: 7px 10px; border: 1.5px solid #e9d5ff; border-radius: 8px; font-size: 13px; outline: none; font-family: inherit; box-sizing: border-box; }
+    .bb-input:focus { border-color: #7c3aed; }
+    .bb-row { display: flex; gap: 6px; align-items: center; }
+    .bb-add-btn { padding: 7px 12px; background: #7c3aed; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
+    .bb-add-btn:hover { background: #6d28d9; }
+    .bb-add-btn.danger { background: #ef4444; }
+    .bb-add-btn.danger:hover { background: #dc2626; }
+    .bb-list-area { max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .bb-list-item { display: flex; align-items: center; justify-content: space-between; background: white; border: 1px solid #e9d5ff; border-radius: 8px; padding: 5px 8px; font-size: 12px; font-weight: 600; color: #444; gap: 6px; }
+    .bb-list-item span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bb-del-btn { background: none; border: none; color: #f87171; cursor: pointer; font-size: 14px; flex-shrink: 0; padding: 0 2px; }
+    .bb-del-btn:hover { color: #dc2626; }
+    .bb-lock-btn { width: 100%; padding: 7px; background: #e9d5ff; color: #7c3aed; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .bb-lock-btn:hover { background: #d8b4fe; }
 </style>
 
 <script>
@@ -862,6 +906,287 @@
     function createStickyNote(config){if(config===undefined)config=null;const body=createWidget('KLISTERLAPP',220,'sticky-note',config);const titleInput=document.createElement('input');titleInput.type='text';titleInput.className='sticky-title-input';titleInput.placeholder='Rubrik...';if(config&&config.data&&config.data.title)titleInput.value=config.data.title;const txt=document.createElement('textarea');txt.className='sticky-textarea';txt.placeholder='Kom-ihåg...';if(config&&config.data&&config.data.text)txt.value=config.data.text;body.appendChild(titleInput);body.appendChild(txt);}
     function createAlphabetWidget(config) {if(config === undefined) config = null;let appWrapper = document.getElementById('cb-app-wrapper');let defaultWidth = Math.min(1100, appWrapper.offsetWidth - 40);let body = createWidget('SVENSKA ALFABETET', defaultWidth, 'alphabet-widget', config);if(!config) {let widgetEl = body.parentElement.parentElement;widgetEl.style.top = '45px';widgetEl.style.left = ((appWrapper.offsetWidth - defaultWidth) / 2) + 'px';}let container = document.createElement('div');container.className = 'alphabet-container';let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ".split('');let colors = ['#FF3B30', '#FF9500', '#FFCC00', '#4CD964', '#5AC8FA', '#007AFF', '#5856D6', '#FF2D55', '#E560A3', '#00C7BE'];for(let i=0; i<letters.length; i++) {let span = document.createElement('span');span.className = 'alpha-letter';span.innerText = letters[i];span.style.color = colors[i % colors.length];let rot = (i % 2 === 0 ? 1 : -1) * (Math.floor(Math.random() * 6) + 2);let up = (i % 3 === 0 ? -3 : (i % 2 === 0 ? 3 : 0));span.style.transform = 'translateY(' + up + 'px) rotate(' + rot + 'deg)';span.addEventListener('mouseenter', () => {if ('speechSynthesis' in window) {window.speechSynthesis.cancel(); let msg = new SpeechSynthesisUtterance(letters[i]);msg.lang = 'sv-SE';msg.rate = 0.9;window.speechSynthesis.speak(msg);}});container.appendChild(span);}body.appendChild(container);}
     function createBirthdayWidget(config) {if(config === undefined) config = null;const body = createWidget('GRATTIS', 400, 'grattis-widget', config);const container = document.createElement('div');container.className = 'grattis-container';const confettiContainer = document.createElement('div');confettiContainer.className = 'confetti-container';const colors = ['#FF3B30', '#FF9500', '#FFCC00', '#4CD964', '#5AC8FA', '#a64dff', '#FF2D55'];for(let i=0; i<40; i++) {let conf = document.createElement('div');conf.className = 'confetti';conf.style.left = (Math.random() * 100) + '%';conf.style.color = colors[Math.floor(Math.random() * colors.length)];conf.style.backgroundColor = 'currentColor';conf.style.animationDuration = (Math.random() * 2 + 1.5) + 's'; conf.style.animationDelay = (Math.random() * 3) + 's';if(Math.random() > 0.5) { conf.style.borderRadius = '50%'; }confettiContainer.appendChild(conf);}const deco1 = document.createElement('div'); deco1.className = 'grattis-deco grattis-deco-1'; deco1.innerHTML = '🌸';const deco2 = document.createElement('div'); deco2.className = 'grattis-deco grattis-deco-2'; deco2.innerHTML = '🎈';const deco3 = document.createElement('div'); deco3.className = 'grattis-deco grattis-deco-3'; deco3.innerHTML = '💙';const deco4 = document.createElement('div'); deco4.className = 'grattis-deco grattis-deco-4'; deco4.innerHTML = '🎈';const deco5 = document.createElement('div'); deco5.className = 'grattis-deco grattis-deco-5'; deco5.innerHTML = '🌸';const deco6 = document.createElement('div'); deco6.className = 'grattis-deco grattis-deco-6'; deco6.innerHTML = '🎈';const title = document.createElement('h2');title.className = 'grattis-title';title.innerText = 'Grattis på födelsedagen!';const nameInput = document.createElement('input');nameInput.type = 'text';nameInput.className = 'grattis-name-input';nameInput.placeholder = 'Klicka för namn...';const playBtn = document.createElement('button');playBtn.className = 'btn btn-primary hover-menu';playBtn.style.marginTop = '10px';playBtn.style.borderRadius = '20px';playBtn.style.padding = '8px 16px';playBtn.style.fontSize = '14px';playBtn.style.cursor = 'pointer';playBtn.innerHTML = '🎵 Spela Melodin';playBtn.onclick = () => {const AudioContext = window.AudioContext || window.webkitAudioContext;if (!AudioContext) return alert('Din webbläsare stöder inte ljuduppspelning.');const ctx = new AudioContext();const G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99;const melody = [[G4, 250], [G4, 125], [A4, 500], [G4, 500], [C5, 500], [B4, 1000], [0, 200]];let startTime = ctx.currentTime;melody.forEach(([freq, duration]) => {const durSec = duration / 1000;if (freq > 0) {const osc = ctx.createOscillator();const gain = ctx.createGain();osc.type = 'triangle'; osc.frequency.value = freq;osc.connect(gain);gain.connect(ctx.destination);osc.start(startTime);gain.gain.setValueAtTime(0, startTime);gain.gain.linearRampToValueAtTime(0.5, startTime + 0.05);gain.gain.exponentialRampToValueAtTime(0.001, startTime + durSec - 0.05);osc.stop(startTime + durSec);}startTime += durSec + 0.05; });};nameInput.oninput = () => saveBoardState();if (config && config.data && config.data.name) { nameInput.value = config.data.name; }container.appendChild(confettiContainer); container.appendChild(deco1); container.appendChild(deco2); container.appendChild(deco3);container.appendChild(deco4); container.appendChild(deco5); container.appendChild(deco6);container.appendChild(title); container.appendChild(nameInput); container.appendChild(playBtn);body.appendChild(container);}
+
+    // ===== BRAIN BREAK WIDGET =====
+    const BB_ADMIN_PW = 'admin123';
+    const BB_STORAGE_KEY = 'brainBreakActivities_v1';
+
+    function getBBActivities() {
+        try { const d = localStorage.getItem(BB_STORAGE_KEY); return d ? JSON.parse(d) : []; } catch(e) { return []; }
+    }
+    function saveBBActivities(arr) {
+        localStorage.setItem(BB_STORAGE_KEY, JSON.stringify(arr));
+    }
+
+    function createBrainBreak(config) {
+        if(config === undefined) config = null;
+        const body = createWidget('BRAIN BREAK', 380, 'bb-widget', config);
+        let isAdminUnlocked = false;
+
+        const container = document.createElement('div');
+        container.className = 'bb-container';
+
+        // Header
+        const headerRow = document.createElement('div');
+        headerRow.className = 'bb-header-row';
+        headerRow.innerHTML = '<span class="bb-icon">🕺</span><span class="bb-title-label">Pulshöjare</span><span class="bb-badge">Brain Break</span>';
+
+        // Video area
+        const videoArea = document.createElement('div');
+        videoArea.className = 'bb-video-area';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'bb-placeholder';
+        placeholder.innerHTML = '<span style="font-size:36px">🎬</span><span>Tryck "Aktivitet" för att starta!</span>';
+        videoArea.appendChild(placeholder);
+
+        // Activity label
+        const actLabel = document.createElement('div');
+        actLabel.className = 'bb-activity-label';
+        actLabel.innerText = '';
+
+        // Main button (always visible)
+        const mainBtn = document.createElement('button');
+        mainBtn.className = 'bb-main-btn';
+        mainBtn.innerHTML = '🎲 Aktivitet';
+        mainBtn.onclick = () => {
+            const activities = getBBActivities();
+            if(activities.length === 0) {
+                actLabel.innerText = 'Inga aktiviteter tillagda ännu!';
+                videoArea.innerHTML = '';
+                videoArea.appendChild(placeholder);
+                return;
+            }
+            const pick = activities[Math.floor(Math.random() * activities.length)];
+            actLabel.innerText = pick.name || '';
+            videoArea.innerHTML = '';
+            if(pick.type === 'youtube') {
+                const iframe = document.createElement('iframe');
+                iframe.className = 'bb-video-area';
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                iframe.allowFullscreen = true;
+                iframe.src = pick.embedUrl;
+                videoArea.appendChild(iframe);
+            } else if(pick.type === 'file') {
+                const vid = document.createElement('video');
+                vid.className = 'bb-file-video';
+                vid.src = pick.dataUrl;
+                vid.controls = true;
+                vid.autoplay = true;
+                videoArea.appendChild(vid);
+            }
+        };
+
+        // Admin panel (hidden by default)
+        const adminPanel = document.createElement('div');
+        adminPanel.className = 'bb-admin-panel';
+        adminPanel.style.display = 'none';
+
+        // --- Unlock row ---
+        const adminTitle = document.createElement('div');
+        adminTitle.className = 'bb-admin-title';
+        adminTitle.innerHTML = '🔐 Admin — Hantera aktiviteter';
+
+        const unlockRow = document.createElement('div');
+        unlockRow.className = 'bb-unlock-row';
+        const pwInput = document.createElement('input');
+        pwInput.type = 'password';
+        pwInput.className = 'bb-pw-input';
+        pwInput.placeholder = 'Admin-lösenord...';
+        pwInput.onkeydown = (e) => { if(e.key === 'Enter') unlockBtn.click(); };
+        const unlockBtn = document.createElement('button');
+        unlockBtn.className = 'bb-unlock-btn';
+        unlockBtn.innerText = 'Lås upp';
+        unlockRow.appendChild(pwInput);
+        unlockRow.appendChild(unlockBtn);
+
+        const adminTools = document.createElement('div');
+        adminTools.className = 'bb-admin-tools';
+        adminTools.style.display = 'none';
+
+        // --- Add YouTube section ---
+        const ytSection = document.createElement('div');
+        ytSection.className = 'bb-add-section';
+        ytSection.innerHTML = '<div class="bb-add-label">📺 Lägg till YouTube-video</div>';
+        const ytUrlInput = document.createElement('input');
+        ytUrlInput.className = 'bb-input';
+        ytUrlInput.placeholder = 'Klistra in YouTube-länk...';
+        const ytNameInput = document.createElement('input');
+        ytNameInput.className = 'bb-input';
+        ytNameInput.placeholder = 'Namn på aktiviteten (valfritt)';
+        const ytRow = document.createElement('div');
+        ytRow.className = 'bb-row';
+        const ytAddBtn = document.createElement('button');
+        ytAddBtn.className = 'bb-add-btn';
+        ytAddBtn.innerText = '+ Lägg till';
+        ytAddBtn.onclick = () => {
+            const url = ytUrlInput.value.trim();
+            if(!url) return;
+            const embedUrl = youtubeToEmbed(url);
+            if(!embedUrl) { alert('Ogiltig YouTube-länk. Prova med en vanlig youtube.com-länk.'); return; }
+            const activities = getBBActivities();
+            activities.push({ type: 'youtube', embedUrl, name: ytNameInput.value.trim() || 'Pausdans', url });
+            saveBBActivities(activities);
+            ytUrlInput.value = '';
+            ytNameInput.value = '';
+            renderList();
+        };
+        ytRow.appendChild(ytAddBtn);
+        ytSection.appendChild(ytUrlInput);
+        ytSection.appendChild(ytNameInput);
+        ytSection.appendChild(ytRow);
+
+        // --- Add file section ---
+        const fileSection = document.createElement('div');
+        fileSection.className = 'bb-add-section';
+        fileSection.innerHTML = '<div class="bb-add-label">📁 Lägg till video från dator</div>';
+        const fileNameInput = document.createElement('input');
+        fileNameInput.className = 'bb-input';
+        fileNameInput.placeholder = 'Namn på aktiviteten (valfritt)';
+        const fileRow = document.createElement('div');
+        fileRow.className = 'bb-row';
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'video/*';
+        fileInput.style.display = 'none';
+        const filePickBtn = document.createElement('button');
+        filePickBtn.className = 'bb-add-btn';
+        filePickBtn.innerText = '📂 Välj fil';
+        filePickBtn.onclick = () => fileInput.click();
+        fileInput.onchange = () => {
+            const file = fileInput.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const activities = getBBActivities();
+                activities.push({ type: 'file', dataUrl: e.target.result, name: fileNameInput.value.trim() || file.name });
+                saveBBActivities(activities);
+                fileNameInput.value = '';
+                fileInput.value = '';
+                renderList();
+            };
+            reader.readAsDataURL(file);
+        };
+        fileRow.appendChild(filePickBtn);
+        fileRow.appendChild(fileInput);
+        fileSection.appendChild(fileNameInput);
+        fileSection.appendChild(fileRow);
+
+        // --- List ---
+        const listSection = document.createElement('div');
+        listSection.className = 'bb-add-section';
+        const listLabel = document.createElement('div');
+        listLabel.className = 'bb-add-label';
+        listLabel.innerText = '📋 Sparade aktiviteter';
+        const listArea = document.createElement('div');
+        listArea.className = 'bb-list-area';
+        listSection.appendChild(listLabel);
+        listSection.appendChild(listArea);
+
+        function renderList() {
+            listArea.innerHTML = '';
+            const activities = getBBActivities();
+            if(activities.length === 0) {
+                listArea.innerHTML = '<div style="font-size:12px;color:#aaa;text-align:center;padding:8px;">Inga aktiviteter tillagda ännu.</div>';
+                return;
+            }
+            activities.forEach((a, i) => {
+                const item = document.createElement('div');
+                item.className = 'bb-list-item';
+                const icon = a.type === 'youtube' ? '📺' : '📁';
+                const nameSpan = document.createElement('span');
+                nameSpan.title = a.name || '';
+                nameSpan.innerText = icon + ' ' + (a.name || 'Aktivitet ' + (i+1));
+                const delBtn = document.createElement('button');
+                delBtn.className = 'bb-del-btn';
+                delBtn.innerHTML = '🗑';
+                delBtn.title = 'Ta bort';
+                delBtn.onclick = () => {
+                    const arr = getBBActivities();
+                    arr.splice(i, 1);
+                    saveBBActivities(arr);
+                    renderList();
+                };
+                item.appendChild(nameSpan);
+                item.appendChild(delBtn);
+                listArea.appendChild(item);
+            });
+        }
+
+        // Lock button
+        const lockBtn = document.createElement('button');
+        lockBtn.className = 'bb-lock-btn';
+        lockBtn.innerText = '🔒 Lås admin';
+        lockBtn.onclick = () => {
+            isAdminUnlocked = false;
+            adminTools.style.display = 'none';
+            pwInput.value = '';
+            unlockRow.style.display = 'flex';
+            lockBtn.style.display = 'none';
+        };
+
+        unlockBtn.onclick = () => {
+            if(pwInput.value === BB_ADMIN_PW) {
+                isAdminUnlocked = true;
+                adminTools.style.display = 'flex';
+                unlockRow.style.display = 'none';
+                lockBtn.style.display = 'block';
+                renderList();
+            } else {
+                pwInput.style.borderColor = '#ef4444';
+                setTimeout(() => { pwInput.style.borderColor = ''; }, 800);
+            }
+        };
+
+        adminTools.appendChild(ytSection);
+        adminTools.appendChild(fileSection);
+        adminTools.appendChild(listSection);
+        adminTools.appendChild(lockBtn);
+
+        adminPanel.appendChild(adminTitle);
+        adminPanel.appendChild(unlockRow);
+        adminPanel.appendChild(adminTools);
+
+        // Toggle admin panel visibility (small gear icon in header)
+        const gearBtn = document.createElement('span');
+        gearBtn.innerText = ' ⚙️';
+        gearBtn.style.cursor = 'pointer';
+        gearBtn.style.fontSize = '16px';
+        gearBtn.style.marginLeft = 'auto';
+        gearBtn.title = 'Admin-inställningar';
+        gearBtn.onclick = () => {
+            const visible = adminPanel.style.display !== 'none';
+            adminPanel.style.display = visible ? 'none' : 'flex';
+            adminPanel.style.flexDirection = 'column';
+        };
+        headerRow.appendChild(gearBtn);
+
+        container.appendChild(headerRow);
+        container.appendChild(videoArea);
+        container.appendChild(actLabel);
+        container.appendChild(mainBtn);
+        container.appendChild(adminPanel);
+        body.appendChild(container);
+    }
+
+    function youtubeToEmbed(url) {
+        try {
+            // Stöd för: youtube.com/watch?v=..., youtu.be/..., youtube.com/shorts/...
+            let videoId = null;
+            const u = new URL(url);
+            if(u.hostname.includes('youtu.be')) {
+                videoId = u.pathname.slice(1);
+            } else if(u.hostname.includes('youtube.com')) {
+                videoId = u.searchParams.get('v') || u.pathname.split('/').pop();
+            }
+            if(!videoId) return null;
+            videoId = videoId.split('?')[0].split('&')[0];
+            return 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+        } catch(e) { return null; }
+    }
+    // ===== SLUT BRAIN BREAK =====
     
     // UPPFRÄSCHAD LEKTIONS-WIDGET 
     function createLessonPlan(config) {
