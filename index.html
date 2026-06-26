@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -10,7 +11,7 @@
 
 <div id="cb-app-wrapper">
     <div id="watermark"></div>
-
+A
     <div id="custom-confirm-overlay" style="display: none;">
         <div class="custom-confirm-box">
             <div id="custom-confirm-text" class="custom-confirm-text">Är du säker?</div>
@@ -581,9 +582,16 @@
         document.getElementById('standard-login-view').style.display = 'block';
         document.getElementById('admin-password').value = '';
     }
-    function verifyAdmin() {
+    // Lösenord lagras aldrig i klartext — jämförelse sker via SHA-256
+    const ADMIN_PW_HASH = 'eec2871516df5c1067f12c3b0c27adfe28ef50ac3b5f19e7ea42c7ad2e36eb28';
+    async function sha256(str) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function verifyAdmin() {
         const pass = document.getElementById('admin-password').value;
-        if (pass === 'admin123') { renderAdminList(); } 
+        const hash = await sha256(pass);
+        if (hash === ADMIN_PW_HASH) { renderAdminList(); } 
         else { alert("Fel admin-lösenord!"); }
     }
     function renderAdminList() {
@@ -909,14 +917,27 @@
     function createBirthdayWidget(config) {if(config === undefined) config = null;const body = createWidget('GRATTIS', 400, 'grattis-widget', config);const container = document.createElement('div');container.className = 'grattis-container';const confettiContainer = document.createElement('div');confettiContainer.className = 'confetti-container';const colors = ['#FF3B30', '#FF9500', '#FFCC00', '#4CD964', '#5AC8FA', '#a64dff', '#FF2D55'];for(let i=0; i<40; i++) {let conf = document.createElement('div');conf.className = 'confetti';conf.style.left = (Math.random() * 100) + '%';conf.style.color = colors[Math.floor(Math.random() * colors.length)];conf.style.backgroundColor = 'currentColor';conf.style.animationDuration = (Math.random() * 2 + 1.5) + 's'; conf.style.animationDelay = (Math.random() * 3) + 's';if(Math.random() > 0.5) { conf.style.borderRadius = '50%'; }confettiContainer.appendChild(conf);}const deco1 = document.createElement('div'); deco1.className = 'grattis-deco grattis-deco-1'; deco1.innerHTML = '🌸';const deco2 = document.createElement('div'); deco2.className = 'grattis-deco grattis-deco-2'; deco2.innerHTML = '🎈';const deco3 = document.createElement('div'); deco3.className = 'grattis-deco grattis-deco-3'; deco3.innerHTML = '💙';const deco4 = document.createElement('div'); deco4.className = 'grattis-deco grattis-deco-4'; deco4.innerHTML = '🎈';const deco5 = document.createElement('div'); deco5.className = 'grattis-deco grattis-deco-5'; deco5.innerHTML = '🌸';const deco6 = document.createElement('div'); deco6.className = 'grattis-deco grattis-deco-6'; deco6.innerHTML = '🎈';const title = document.createElement('h2');title.className = 'grattis-title';title.innerText = 'Grattis på födelsedagen!';const nameInput = document.createElement('input');nameInput.type = 'text';nameInput.className = 'grattis-name-input';nameInput.placeholder = 'Klicka för namn...';const playBtn = document.createElement('button');playBtn.className = 'btn btn-primary hover-menu';playBtn.style.marginTop = '10px';playBtn.style.borderRadius = '20px';playBtn.style.padding = '8px 16px';playBtn.style.fontSize = '14px';playBtn.style.cursor = 'pointer';playBtn.innerHTML = '🎵 Spela Melodin';playBtn.onclick = () => {const AudioContext = window.AudioContext || window.webkitAudioContext;if (!AudioContext) return alert('Din webbläsare stöder inte ljuduppspelning.');const ctx = new AudioContext();const G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99;const melody = [[G4, 250], [G4, 125], [A4, 500], [G4, 500], [C5, 500], [B4, 1000], [0, 200]];let startTime = ctx.currentTime;melody.forEach(([freq, duration]) => {const durSec = duration / 1000;if (freq > 0) {const osc = ctx.createOscillator();const gain = ctx.createGain();osc.type = 'triangle'; osc.frequency.value = freq;osc.connect(gain);gain.connect(ctx.destination);osc.start(startTime);gain.gain.setValueAtTime(0, startTime);gain.gain.linearRampToValueAtTime(0.5, startTime + 0.05);gain.gain.exponentialRampToValueAtTime(0.001, startTime + durSec - 0.05);osc.stop(startTime + durSec);}startTime += durSec + 0.05; });};nameInput.oninput = () => saveBoardState();if (config && config.data && config.data.name) { nameInput.value = config.data.name; }container.appendChild(confettiContainer); container.appendChild(deco1); container.appendChild(deco2); container.appendChild(deco3);container.appendChild(deco4); container.appendChild(deco5); container.appendChild(deco6);container.appendChild(title); container.appendChild(nameInput); container.appendChild(playBtn);body.appendChild(container);}
 
     // ===== BRAIN BREAK WIDGET =====
-    const BB_ADMIN_PW = 'admin123';
+    // Lösenord jämförs via SHA-256 — aldrig i klartext
+    const BB_ADMIN_PW_HASH = 'eec2871516df5c1067f12c3b0c27adfe28ef50ac3b5f19e7ea42c7ad2e36eb28';
     const BB_STORAGE_KEY = 'brainBreakActivities_v1';
 
-    function getBBActivities() {
+    async function getBBActivities() {
+        // Försök hämta från delad artifact storage (synkad för alla användare)
+        try {
+            const result = await window.storage.get(BB_STORAGE_KEY, true);
+            if (result && result.value) return JSON.parse(result.value);
+        } catch(e) {}
+        // Fallback: lokalt localStorage om storage inte är tillgängligt
         try { const d = localStorage.getItem(BB_STORAGE_KEY); return d ? JSON.parse(d) : []; } catch(e) { return []; }
     }
-    function saveBBActivities(arr) {
-        localStorage.setItem(BB_STORAGE_KEY, JSON.stringify(arr));
+    async function saveBBActivities(arr) {
+        const json = JSON.stringify(arr);
+        // Spara i delad artifact storage (synkad för alla användare)
+        try {
+            await window.storage.set(BB_STORAGE_KEY, json, true);
+        } catch(e) {}
+        // Spara även lokalt som backup
+        try { localStorage.setItem(BB_STORAGE_KEY, json); } catch(e) {}
     }
 
     function createBrainBreak(config) {
@@ -949,8 +970,10 @@
         const mainBtn = document.createElement('button');
         mainBtn.className = 'bb-main-btn';
         mainBtn.innerHTML = '🎲 Aktivitet';
-        mainBtn.onclick = () => {
-            const activities = getBBActivities();
+        mainBtn.onclick = async () => {
+            mainBtn.disabled = true;
+            const activities = await getBBActivities();
+            mainBtn.disabled = false;
             if(activities.length === 0) {
                 actLabel.innerText = 'Inga aktiviteter tillagda ännu!';
                 videoArea.innerHTML = '';
@@ -1022,14 +1045,14 @@
         const ytAddBtn = document.createElement('button');
         ytAddBtn.className = 'bb-add-btn';
         ytAddBtn.innerText = '+ Lägg till';
-        ytAddBtn.onclick = () => {
+        ytAddBtn.onclick = async () => {
             const url = ytUrlInput.value.trim();
             if(!url) return;
             const embedUrl = youtubeToEmbed(url);
             if(!embedUrl) { alert('Ogiltig YouTube-länk. Prova med en vanlig youtube.com-länk.'); return; }
-            const activities = getBBActivities();
+            const activities = await getBBActivities();
             activities.push({ type: 'youtube', embedUrl, name: ytNameInput.value.trim() || 'Pausdans', url });
-            saveBBActivities(activities);
+            await saveBBActivities(activities);
             ytUrlInput.value = '';
             ytNameInput.value = '';
             renderList();
@@ -1060,10 +1083,10 @@
             const file = fileInput.files[0];
             if(!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const activities = getBBActivities();
+            reader.onload = async (e) => {
+                const activities = await getBBActivities();
                 activities.push({ type: 'file', dataUrl: e.target.result, name: fileNameInput.value.trim() || file.name });
-                saveBBActivities(activities);
+                await saveBBActivities(activities);
                 fileNameInput.value = '';
                 fileInput.value = '';
                 renderList();
@@ -1086,9 +1109,10 @@
         listSection.appendChild(listLabel);
         listSection.appendChild(listArea);
 
-        function renderList() {
+        async function renderList() {
+            listArea.innerHTML = '<div style="font-size:12px;color:#aaa;text-align:center;padding:8px;">Laddar...</div>';
+            const activities = await getBBActivities();
             listArea.innerHTML = '';
-            const activities = getBBActivities();
             if(activities.length === 0) {
                 listArea.innerHTML = '<div style="font-size:12px;color:#aaa;text-align:center;padding:8px;">Inga aktiviteter tillagda ännu.</div>';
                 return;
@@ -1104,10 +1128,10 @@
                 delBtn.className = 'bb-del-btn';
                 delBtn.innerHTML = '🗑';
                 delBtn.title = 'Ta bort';
-                delBtn.onclick = () => {
-                    const arr = getBBActivities();
+                delBtn.onclick = async () => {
+                    const arr = await getBBActivities();
                     arr.splice(i, 1);
-                    saveBBActivities(arr);
+                    await saveBBActivities(arr);
                     renderList();
                 };
                 item.appendChild(nameSpan);
@@ -1128,13 +1152,14 @@
             lockBtn.style.display = 'none';
         };
 
-        unlockBtn.onclick = () => {
-            if(pwInput.value === BB_ADMIN_PW) {
+        unlockBtn.onclick = async () => {
+            const hash = await sha256(pwInput.value);
+            if(hash === BB_ADMIN_PW_HASH) {
                 isAdminUnlocked = true;
                 adminTools.style.display = 'flex';
                 unlockRow.style.display = 'none';
                 lockBtn.style.display = 'block';
-                renderList();
+                await renderList();
             } else {
                 pwInput.style.borderColor = '#ef4444';
                 setTimeout(() => { pwInput.style.borderColor = ''; }, 800);
@@ -1148,6 +1173,10 @@
 
         adminPanel.appendChild(adminTitle);
         adminPanel.appendChild(unlockRow);
+        const sharedNote = document.createElement('div');
+        sharedNote.style.cssText = 'font-size:11px;color:#22c55e;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:6px 10px;margin-bottom:8px;';
+        sharedNote.innerHTML = '🌐 <strong>Delad lista</strong> – aktiviteter sparas och syns för alla användare.';
+        adminTools.prepend(sharedNote);
         adminPanel.appendChild(adminTools);
 
         // Toggle admin panel visibility (small gear icon in header)
