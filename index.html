@@ -397,8 +397,10 @@ A
     @keyframes pop-confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
 
     /* ADMIN-PANEL (endast admin) */
-    #admin-fab { position: absolute; top: 20px; left: 20px; z-index: 10000; background: #7c3aed; color: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(124,58,237,0.35); border: none; cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: all 0.2s; font-family: inherit; }
-    #admin-fab:hover { background: #6d28d9; transform: translateY(-2px); }
+    #admin-corner { position: absolute; top: 0; left: 0; width: 46px; height: 46px; z-index: 10000; }
+    #admin-fab { position: absolute; top: 14px; left: 14px; background: #7c3aed; color: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(124,58,237,0.35); border: none; cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: inherit; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s; }
+    #admin-corner.admin-show #admin-fab { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    #admin-fab:hover { background: #6d28d9; }
     #admin-panel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 26000; display: flex; align-items: center; justify-content: center; }
     .admin-panel-box { background: white; width: 90%; max-width: 560px; max-height: 80vh; border-radius: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; animation: popIn 0.2s ease-out; }
     .admin-panel-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; background: #7c3aed; color: white; }
@@ -577,14 +579,23 @@ A
 
     // ---- ADMIN: visa och hantera vilka som använder appen ----
     function updateAdminButton(){
-        const existing = document.getElementById('admin-fab');
+        const existing = document.getElementById('admin-corner');
         if (currentUser && isAdminEmail(currentUser)){
             if (!existing){
+                const zone = document.createElement('div'); zone.id = 'admin-corner';
                 const b = document.createElement('button');
-                b.id = 'admin-fab'; b.title = 'Hantera användare';
+                b.id = 'admin-fab'; b.title = 'Hantera användare (göms under presentationer)';
                 b.innerHTML = '👥 Användare';
                 b.onclick = openAdminPanel;
-                document.getElementById('cb-app-wrapper').appendChild(b);
+                zone.appendChild(b);
+                document.getElementById('cb-app-wrapper').appendChild(zone);
+                let hideT = null;
+                const show = ()=>{ clearTimeout(hideT); zone.classList.add('admin-show'); };
+                const hideSoon = ()=>{ clearTimeout(hideT); hideT = setTimeout(()=> zone.classList.remove('admin-show'), 500); };
+                zone.addEventListener('mouseenter', show);
+                zone.addEventListener('mouseleave', hideSoon);
+                b.addEventListener('mouseenter', show);
+                b.addEventListener('mouseleave', hideSoon);
             }
         } else if (existing){ existing.remove(); }
     }
