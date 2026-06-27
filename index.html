@@ -56,7 +56,7 @@
     
 
     <div id="side-pocket-zone">
-        <div id="side-pocket-tab">📌<span id="sp-feed-dot"></span></div>
+        <div id="side-pocket-tab"><span id="sp-tab-icon">❮</span><span id="sp-feed-dot"></span></div>
         <div id="side-pocket-panel">
             <div class="sp-section">
                 <div class="sp-head">📄 Sidor</div>
@@ -116,9 +116,13 @@
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon">📱</div><div class="label">QR-Kod</div></button>
-            <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Tavla</div></button>
+            <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
             <button class="tool-btn" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
-            
+            <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
+            <button class="tool-btn" onclick="createWeekSchedule()"><div class="icon">🗓️</div><div class="label">Veckoschema</div></button>
+            <button class="tool-btn" onclick="createChecklist()"><div class="icon">✅</div><div class="label">Checklista</div></button>
+            <button class="tool-btn" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
+
             <div style="width: 1px; background: #ddd; margin: 0 4px;"></div>
             <button class="tool-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
             <button class="tool-btn" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
@@ -172,6 +176,7 @@
     #cb-app-wrapper.theme-purple .canvas-page { background-color: #f4ebff; background-image: radial-gradient(#d6bdf2 1.5px, transparent 1.5px); background-size: 24px 24px; }
     #cb-app-wrapper.theme-cork .canvas-page { background-color: #f7e6d2; background-image: radial-gradient(rgba(0,0,0,0.06) 2px, transparent 2px); background-size: 10px 10px; }
     #cb-app-wrapper.theme-blank .canvas-page { background-color: #ffffff; background-image: none; }
+    #cb-app-wrapper.no-watermark #watermark { display: none !important; }
     
     #fullscreen-btn { position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); cursor: pointer; font-size: 18px; color: #333; transition: all 0.2s; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; font-weight: bold; }
     #fullscreen-btn:hover { background-color: #e5e5ea; transform: scale(1.05); }
@@ -227,8 +232,10 @@
     .sp-msg-del { position: absolute; top: 4px; right: 5px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 11px; padding: 0; }
     .sp-msg-del:hover { color: #ff3b30; }
     .sp-msg.mine { background: #eef3ff; border-color: #cfe0ff; }
-    #sp-feed-dot { position: absolute; top: 4px; right: 4px; width: 9px; height: 9px; background: #ff3b30; border-radius: 50%; border: 1.5px solid white; display: none; }
-    #sp-feed-dot.show { display: block; }
+    #sp-tab-icon { font-size: 18px; font-weight: 900; color: #777; line-height: 1; }
+    #sp-feed-dot { position: absolute; top: 6px; right: 4px; width: 13px; height: 13px; background: #ff3b30; border-radius: 50%; border: 2px solid white; box-sizing: border-box; display: none; z-index: 2; }
+    #sp-feed-dot.show { display: block; animation: sp-dot-pulse 1.5s ease-out infinite; }
+    @keyframes sp-dot-pulse { 0% { box-shadow: 0 0 0 0 rgba(255,59,48,0.65); } 70% { box-shadow: 0 0 0 7px rgba(255,59,48,0); } 100% { box-shadow: 0 0 0 0 rgba(255,59,48,0); } }
     
     #pages-nav-v6 { position: absolute; bottom: 120px; right: 20px; background: rgba(255, 255, 255, 0.95); padding: 4px 8px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); z-index: 10000; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); opacity: 0.15; transition: opacity 0.3s ease; }
     #pages-nav-v6:hover { opacity: 1; }
@@ -501,6 +508,38 @@
     .admin-user-mail { font-size: 13px; color: #666; word-break: break-all; }
     .admin-user-last { font-size: 11px; color: #999; margin-top: 2px; }
 
+    /* BILD-WIDGET */
+    .img-area { width:100%; min-height:140px; flex:1; display:flex; align-items:center; justify-content:center; background:#f4f4f7; border-radius:10px; overflow:hidden; }
+    .img-el { max-width:100%; max-height:100%; object-fit:contain; display:block; }
+    .img-placeholder { display:flex; flex-direction:column; align-items:center; gap:6px; color:#bbb; font-size:34px; }
+    .img-placeholder span { font-size:12px; font-weight:600; }
+    .img-controls { margin-top:8px; }
+
+    /* VECKOSCHEMA */
+    .week-widget { min-width:560px; }
+    .week-grid { display:flex; gap:6px; width:100%; height:100%; }
+    .week-col { flex:1; display:flex; flex-direction:column; min-width:0; }
+    .week-day { background:#007aff; color:white; font-size:12px; font-weight:800; text-align:center; padding:5px; border-radius:8px 8px 0 0; }
+    .week-cell { flex:1; min-height:120px; border:1px solid #e5e5ea; border-top:none; border-radius:0 0 8px 8px; padding:6px; font-size:13px; outline:none; overflow-y:auto; background:white; line-height:1.4; }
+    .week-cell:focus { background:#f0f8ff; }
+
+    /* CHECKLISTA */
+    .check-title { width:100%; font-size:15px; font-weight:800; border:none; border-bottom:2px solid #eee; outline:none; padding:4px 2px; margin-bottom:8px; font-family:inherit; }
+    .check-title:focus { border-bottom-color:#007aff; }
+    .check-list { display:flex; flex-direction:column; gap:4px; }
+    .check-item { display:flex; align-items:center; gap:7px; background:#f9f9fb; border-radius:8px; padding:5px 8px; }
+    .check-item input[type=checkbox] { width:18px; height:18px; cursor:pointer; flex-shrink:0; }
+    .check-text { flex:1; min-width:0; border:none; background:transparent; outline:none; font-size:14px; font-family:inherit; color:#333; }
+    .check-item.done .check-text { text-decoration:line-through; color:#aaa; }
+    .check-del { background:none; border:none; color:#f87171; cursor:pointer; font-size:13px; flex-shrink:0; }
+    .check-del:hover { color:#dc2626; }
+
+    /* SLUMPA-HJUL */
+    .wheel-wrap { position:relative; width:240px; margin:6px auto; }
+    .wheel-canvas { display:block; }
+    .wheel-pointer { position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:26px; color:#333; z-index:2; text-shadow:0 1px 2px rgba(0,0,0,0.3); pointer-events:none; }
+    .wheel-names { min-height:60px; }
+
     /* GREJ OF THE DAY WIDGET STILMALL */
     .gotd-clue-box { background: rgba(124, 58, 237, 0.08); border: 1.5px solid rgba(124, 58, 237, 0.2); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; font-size: 15px; color: #333; line-height: 1.4; text-align: center; width: 100%; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
     .gotd-facts-box { display: flex; flex-direction: column; gap: 4px; width: 100%; margin-bottom: 4px; animation: popIn 0.2s ease-out; }
@@ -513,7 +552,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-    let widgetCount = 0; let pagesListV6 = []; let currentPageIndexV6 = -1;
+    let widgetCount = 0; let pagesListV6 = []; let currentPageIndexV6 = -1; let topZ = 100;
     window.isLoadingBoard = true; let currentUser = null; let currentUserName = '';
 
     /* =====================================================================
@@ -829,6 +868,10 @@
                 else if (type === 'BELÖNING') { state.data.points = w.querySelectorAll('.reward-star').length; }
                 else if (type === 'GRATTIS') { state.data.name = w.querySelector('.grattis-name-input')?.value || ''; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
+                else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
+                else if (type === 'VECKOSCHEMA') { state.data.days = []; w.querySelectorAll('.week-cell').forEach(c=> state.data.days.push(c.innerHTML)); }
+                else if (type === 'CHECKLISTA') { state.data.title = w.querySelector('.check-title')?.value || ''; state.data.items = []; w.querySelectorAll('.check-item').forEach(r=> state.data.items.push({ text: r.querySelector('.check-text')?.value || '', done: r.querySelector('input[type=checkbox]')?.checked || false })); }
+                else if (type === 'SLUMPA-HJUL') { state.data.names = w.querySelector('.wheel-names')?.value || ''; }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -860,7 +903,7 @@
             else if (w.type === 'KLOCKA & DATUM') createRealTimeClock(w);
             else if (w.type === 'LEKTIONSSCHEMA') createLessonPlan(w);
             else if (w.type === 'TÄRNING') createDice(w);
-            else if (w.type === 'TAVLA-TEMA') createBgSelector(w);
+            else if (w.type === 'TAVLA-TEMA' || w.type === 'BAKGRUND') createBgSelector(w);
             else if (w.type === 'RITPLATTA') createWhiteboard(w);
             else if (w.type === 'QR-KOD') createQRCode(w);
             else if (w.type === 'ARBETSSÄTT') createWorkSymbols(w);
@@ -870,6 +913,10 @@
             else if (w.type === 'SVENSKA ALFABETET') createAlphabetWidget(w);
             else if (w.type === 'GRATTIS') createBirthdayWidget(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
+            else if (w.type === 'BILD') createImageWidget(w);
+            else if (w.type === 'VECKOSCHEMA') createWeekSchedule(w);
+            else if (w.type === 'CHECKLISTA') createChecklist(w);
+            else if (w.type === 'SLUMPA-HJUL') createWheel(w);
             else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
             else if (w.type === 'GREJ OF THE DAY') createGOTD(w);
         } catch(err){ console.warn(err); }
@@ -910,12 +957,15 @@
         lockIcon.onclick = (e) => { e.stopPropagation(); widget.classList.toggle('locked'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
         if(config && config.minimized) { body.style.display = 'none'; widget.dataset.minimized = 'true'; }
         if(typeof presentationLocked !== 'undefined' && presentationLocked) widget.classList.add('locked');
+        widget.style.zIndex = ++topZ;
         return body;
     }
     
     function makeDraggable(el, h) {
         let p1=0, p2=0, p3=0, p4=0;
         h.addEventListener('pointerdown', (e) => {
+            // Klick på rubriken/remsan tar fram just den widgeten överst
+            const _w = el.closest && el.closest('.widget'); if(_w) _w.style.zIndex = ++topZ;
             if(el.classList.contains('locked') || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName) || e.target.hasAttribute('contenteditable') || e.target.classList.contains('schedule-color-strip') || (e.target.closest && e.target.closest('.widget-controls'))) return;
             e.preventDefault(); p3=e.clientX; p4=e.clientY;
             try { h.setPointerCapture(e.pointerId); } catch(_){}
@@ -1031,7 +1081,15 @@
     function openQuickLink(url){ const u=normalizeUrl(url); if(u) window.open(u, '_blank', 'noopener'); }
 
     // ---- PERSONALFLÖDE (delad chatt i sidofickan) ----
-    let feedMessages = [], feedListening = false;
+    const FEED_MAX_AGE_DAYS = 30; // inlägg äldre än så här gallras bort automatiskt
+    let feedMessages = [], feedListening = false, feedPruned = false;
+    function pruneOldFeed(){
+        if(feedPruned || !fbDB) return;
+        const cutoff = Date.now() - FEED_MAX_AGE_DAYS*24*60*60*1000;
+        const old = feedMessages.filter(m => (m.ts||0) > 0 && m.ts < cutoff);
+        feedPruned = true;
+        old.forEach(m => { fbDB.collection('feed').doc(m.id).delete().catch(()=>{}); });
+    }
     function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function linkifyText(s){ return escapeHtml(s).replace(/(https?:\/\/[^\s]+)/g, function(u){ return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>'; }); }
     function feedSeenKey(){ return 'mintavla_feedSeen_'+currentUser; }
@@ -1042,7 +1100,7 @@
             fbDB.collection('feed').orderBy('ts','desc').limit(60).onSnapshot(snap => {
                 feedMessages = []; snap.forEach(d => feedMessages.push(Object.assign({id:d.id}, d.data())));
                 feedMessages.reverse();
-                renderFeed(); updateFeedDot();
+                renderFeed(); updateFeedDot(); pruneOldFeed();
             }, err => console.warn('[MinTavla] flöde-fel:', err));
         } catch(e){ console.warn(e); feedListening = false; }
     }
@@ -1101,14 +1159,17 @@
     // ==========================================
     function createDailySchedule(config){
         const body = createWidget('DAGENS SCHEMA', 450, 'schedule-widget', config);
-        const topStrip = document.createElement('div'); topStrip.style = 'background:#ff3b30;color:white;font-weight:bold;height:44px;padding:0 15px;display:flex;justify-content:space-between;align-items:center;cursor:move;'; topStrip.innerHTML = `<span>Dagens schema</span><div><span style='cursor:pointer;margin-right:10px;' class='sch-lock-icon'>🔓</span><span style='cursor:pointer;'>✖</span></div>`;
+        const widgetEl = body.parentElement.parentElement;
+        const topStrip = document.createElement('div'); topStrip.style = 'background:#ff3b30;color:white;font-weight:bold;height:44px;padding:0 15px;display:flex;justify-content:space-between;align-items:center;cursor:move;'; topStrip.innerHTML = `<span>Dagens schema</span><div class='widget-controls'><span class='widget-ctrl-icon sch-min'>➖</span><span class='widget-ctrl-icon sch-lock-icon'>🔓</span><span class='widget-ctrl-icon sch-close'>✖</span></div>`;
         body.appendChild(topStrip); makeDraggable(body.parentElement, topStrip);
-        const lockIcon = topStrip.querySelector('.sch-lock-icon'); lockIcon.innerHTML = body.parentElement.parentElement.classList.contains('locked') ? '🔒' : '🔓';
-        lockIcon.onclick = (e) => { e.stopPropagation(); body.parentElement.parentElement.classList.toggle('locked'); lockIcon.innerHTML = body.parentElement.parentElement.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
-        topStrip.lastChild.lastChild.onclick = (e) => { e.stopPropagation(); customConfirm("Stäng?", () => { body.parentElement.parentElement.remove(); saveBoardState(); }); };
+        const schContent = document.createElement('div'); schContent.className = 'sched-content';
+        const lockIcon = topStrip.querySelector('.sch-lock-icon'); lockIcon.innerHTML = widgetEl.classList.contains('locked') ? '🔒' : '🔓';
+        lockIcon.onclick = (e) => { e.stopPropagation(); widgetEl.classList.toggle('locked'); lockIcon.innerHTML = widgetEl.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
+        topStrip.querySelector('.sch-close').onclick = (e) => { e.stopPropagation(); customConfirm("Vill du stänga rutan?", () => { widgetEl.remove(); saveBoardState(); }); };
+        topStrip.querySelector('.sch-min').onclick = (e) => { e.stopPropagation(); const hidden = schContent.style.display === 'none'; schContent.style.display = hidden ? '' : 'none'; widgetEl.dataset.minimized = hidden ? 'false' : 'true'; saveBoardState(); };
 
-        const hr = document.createElement('div'); hr.style = 'display:flex;padding:8px 10px;background:#f2f2f7;border-bottom:1px solid #d1d1d6;font-weight:bold;font-size:12px;color:#333;'; hr.innerHTML = "<div style='width:10px;'></div><div style='width:65px;text-align:center;'>Tid</div><div style='width:45px;text-align:center;'>Bild</div><div style='flex-grow:1;padding-left:5px;'>Aktivitet</div><div style='width:24px;'></div>"; body.appendChild(hr);
-        const cont = document.createElement('div'); cont.style.padding='10px'; body.appendChild(cont);
+        const hr = document.createElement('div'); hr.style = 'display:flex;padding:8px 10px;background:#f2f2f7;border-bottom:1px solid #d1d1d6;font-weight:bold;font-size:12px;color:#333;'; hr.innerHTML = "<div style='width:10px;'></div><div style='width:65px;text-align:center;'>Tid</div><div style='width:45px;text-align:center;'>Bild</div><div style='flex-grow:1;padding-left:5px;'>Aktivitet</div><div style='width:24px;'></div>"; schContent.appendChild(hr);
+        const cont = document.createElement('div'); cont.style.padding='10px'; schContent.appendChild(cont);
         
         function addRow(ti, ta, ic, co){
             const r = document.createElement('div'); r.className='schedule-row';
@@ -1122,7 +1183,9 @@
         }
         if(config && config.data && config.data.rows) config.data.rows.forEach(r => addRow(r.time, r.task, r.icon||'📝', r.color));
         else { addRow('08:15','Morgonsamling','💬','#e5e5ea'); addRow('09:00','Matematik','🧮','#e5e5ea'); addRow('10:30','Svenska','🔤','#e5e5ea'); }
-        const act = document.createElement('div'); act.style.padding='10px'; const ab=document.createElement('button'); ab.className='btn btn-primary'; ab.innerText='+ Rad'; ab.onclick=()=>{addRow('08:30','Lektion','📝','#e5e5ea');saveBoardState();}; act.appendChild(ab); body.appendChild(act);
+        const act = document.createElement('div'); act.style.padding='10px'; const ab=document.createElement('button'); ab.className='btn btn-primary'; ab.innerText='+ Rad'; ab.onclick=()=>{addRow('08:30','Lektion','📝','#e5e5ea');saveBoardState();}; act.appendChild(ab); schContent.appendChild(act);
+        body.appendChild(schContent);
+        if(config && config.minimized){ body.style.display=''; schContent.style.display='none'; }
     }
 
     function createLessonPlan(config) {
@@ -1445,6 +1508,87 @@
         }
     }
 
+    function createImageWidget(config){
+        const body = createWidget('BILD', 300, '', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `
+            <div class='img-area'></div>
+            <div class='img-controls hover-menu'>
+                <input type='text' class='img-url sp-input' placeholder='Bildlänk (https://...)' style='margin-bottom:6px;'>
+                <div class='sp-row'><button class='btn btn-primary img-use' style='flex:1;'>Visa länk</button><button class='btn btn-secondary img-upload-btn' style='flex:1;'>Ladda upp</button></div>
+                <input type='file' accept='image/*' class='img-file' style='display:none;'>
+            </div>`;
+        const area=body.querySelector('.img-area'), urlInp=body.querySelector('.img-url'), useBtn=body.querySelector('.img-use'), upBtn=body.querySelector('.img-upload-btn'), fileInp=body.querySelector('.img-file');
+        const setImg=(src)=>{ if(!src){ area.innerHTML=`<div class='img-placeholder'>🖼️<span>Klistra in en bildlänk eller ladda upp</span></div>`; widget.dataset.imgSrc=''; return; } const im=document.createElement('img'); im.className='img-el'; im.src=src; area.innerHTML=''; area.appendChild(im); widget.dataset.imgSrc=src; };
+        useBtn.onclick=()=>{ let u=urlInp.value.trim(); if(!u) return; if(!/^(https?:|data:)/.test(u)) u='https://'+u; setImg(u); urlInp.value=''; saveBoardState(); };
+        upBtn.onclick=()=> fileInp.click();
+        fileInp.onchange=()=>{ const f=fileInp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ setImg(r.result); saveBoardState(); }; r.readAsDataURL(f); };
+        setImg((config && config.data && config.data.src) ? config.data.src : '');
+    }
+
+    function createWeekSchedule(config){
+        const body = createWidget('VECKOSCHEMA', 640, 'week-widget', config);
+        const days=['Måndag','Tisdag','Onsdag','Torsdag','Fredag'];
+        body.innerHTML = `<div class='week-grid'>`+days.map((d,i)=>`<div class='week-col'><div class='week-day'>${d}</div><div class='week-cell' contenteditable='true' data-day='${i}'></div></div>`).join('')+`</div>`;
+        const cells = body.querySelectorAll('.week-cell');
+        if(config && config.data && config.data.days){ config.data.days.forEach((html,i)=>{ if(cells[i]) cells[i].innerHTML=html; }); }
+        cells.forEach(c=> c.oninput = saveBoardState);
+    }
+
+    function createChecklist(config){
+        const body = createWidget('CHECKLISTA', 300, '', config);
+        body.innerHTML = `<input class='check-title' placeholder='Rubrik (t.ex. Lektionsmål)'><div class='check-list'></div><button class='btn btn-primary check-add hover-menu' style='width:100%;margin-top:8px;'>+ Lägg till</button>`;
+        const title=body.querySelector('.check-title'), list=body.querySelector('.check-list'), addBtn=body.querySelector('.check-add');
+        const addItem=(text='', done=false)=>{
+            const row=document.createElement('div'); row.className='check-item'+(done?' done':'');
+            const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=done; cb.onchange=()=>{ row.classList.toggle('done', cb.checked); saveBoardState(); };
+            const inp=document.createElement('input'); inp.className='check-text'; inp.value=text; inp.placeholder='Skriv...'; inp.oninput=saveBoardState;
+            const del=document.createElement('button'); del.className='check-del hover-menu'; del.innerHTML='✕'; del.onclick=()=>{ row.remove(); saveBoardState(); };
+            row.appendChild(cb); row.appendChild(inp); row.appendChild(del); list.appendChild(row);
+        };
+        addBtn.onclick=()=>{ addItem(); saveBoardState(); };
+        title.oninput=saveBoardState;
+        if(config && config.data){ title.value=config.data.title||''; (config.data.items||[]).forEach(it=> addItem(it.text, it.done)); }
+        else { addItem('',false); addItem('',false); }
+    }
+
+    function createWheel(config){
+        const body = createWidget('SLUMPA-HJUL', 320, '', config);
+        body.innerHTML = `<textarea class='name-input hover-menu wheel-names' placeholder='Ett namn per rad...'></textarea><div class='wheel-wrap'><div class='wheel-pointer'>▼</div><canvas class='wheel-canvas' width='240' height='240'></canvas></div><button class='btn btn-primary wheel-spin' style='width:100%;'>🎡 Snurra!</button>`;
+        const txt=body.querySelector('.wheel-names'), cvs=body.querySelector('.wheel-canvas'), spinBtn=body.querySelector('.wheel-spin');
+        const ctx=cvs.getContext('2d'); let angle=0, spinning=false;
+        const colors=['#ff3b30','#ff9500','#ffcc00','#4cd964','#5ac8fa','#007aff','#5856d6','#ff2d55'];
+        const names=()=> txt.value.split('\n').map(s=>s.trim()).filter(Boolean);
+        function draw(){
+            const ns=names(); const n=Math.max(ns.length,1); const R=cvs.width/2; ctx.clearRect(0,0,cvs.width,cvs.height);
+            ctx.save(); ctx.translate(R,R); ctx.rotate(angle);
+            for(let i=0;i<n;i++){
+                const a0=i/n*2*Math.PI, a1=(i+1)/n*2*Math.PI;
+                ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R-2,a0,a1); ctx.closePath(); ctx.fillStyle=colors[i%colors.length]; ctx.fill();
+                if(ns[i]){ ctx.save(); ctx.rotate((a0+a1)/2); ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; const lbl=ns[i].length>12?ns[i].slice(0,12)+'…':ns[i]; ctx.fillText(lbl, R-14, 5); ctx.restore(); }
+            }
+            ctx.restore();
+            ctx.beginPath(); ctx.arc(R,R,16,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#ddd'; ctx.stroke();
+        }
+        function spin(){
+            const ns=names(); if(ns.length===0 || spinning) return; spinning=true;
+            const n=ns.length, seg=2*Math.PI/n;
+            const target = angle + 2*Math.PI*5 + Math.random()*2*Math.PI;
+            const start=angle, dur=3600, t0=performance.now();
+            function frame(now){
+                const p=Math.min((now-t0)/dur,1); const ease=1-Math.pow(1-p,3);
+                angle = start + (target-start)*ease; draw();
+                if(p<1){ requestAnimationFrame(frame); }
+                else { spinning=false; let rel=(((-Math.PI/2 - angle) % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI); const idx=Math.floor(rel/seg) % n; saveBoardState(); showWinnerPopup(ns[idx]); }
+            }
+            requestAnimationFrame(frame);
+        }
+        spinBtn.onclick=spin;
+        txt.oninput=()=>{ draw(); saveBoardState(); };
+        if(config && config.data && config.data.names) txt.value=config.data.names;
+        draw();
+    }
+
     function createNoiseMeter(config){
         const body = createWidget('LJUDNIVÅ', 150, 'noise-widget', config);
         body.innerHTML = `<div class='noise-meter'><div class='noise-fill'></div></div><div class='noise-status hover-menu'>Tryck för att starta 🎤</div><button class='btn btn-primary noise-btn hover-menu' style='width:100%;margin-top:8px;'>Starta mätning</button>`;
@@ -1538,9 +1682,22 @@
 
     // TAVLA-TEMA
     function createBgSelector(config){
-        const body=createWidget('TAVLA-TEMA',240,'',config); body.innerHTML=`<div class='bg-panel'></div>`; const p=body.firstChild;
-        [{n:'Standard',cl:'',dot:'dot-std'},{n:'Linjerat',cl:'theme-lined',dot:'dot-lin'},{n:'Rutigt',cl:'theme-grid',dot:'dot-grd'},{n:'Mörkt',cl:'theme-dark',dot:'dot-drk'},{n:'Grön',cl:'theme-chalkboard',dot:'dot-chk'}].forEach(t=>{
-            let d=document.createElement('div'); d.className='bg-dot ' + t.dot; d.title = t.n; d.onclick=()=>{ document.getElementById('cb-app-wrapper').className=t.cl; saveBoardState(); }; p.appendChild(d);
+        const body=createWidget('BAKGRUND',260,'',config); body.innerHTML=`<div class='bg-panel'></div>`; const p=body.firstChild;
+        const themes = [
+            {n:'Standard',cl:'',sw:'radial-gradient(#ccc 1.5px, transparent 1.5px)',size:'7px 7px',bg:'#fff'},
+            {n:'Linjerat',cl:'theme-lined',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)'},
+            {n:'Rutigt',cl:'theme-grid',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff'},
+            {n:'Mörkt',cl:'theme-dark',sw:'radial-gradient(#444 1px, transparent 1px)',size:'6px 6px',bg:'#222'},
+            {n:'Grön tavla',cl:'theme-chalkboard',sw:'#1e3f20'},
+            {n:'Blank – utan vattenstämpel',cl:'theme-blank no-watermark',sw:'#ffffff',border:'2px solid #d8d8dc'},
+            {n:'Vit rutig – utan vattenstämpel',cl:'theme-grid no-watermark',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff',border:'2px solid #d8d8dc'},
+            {n:'Vit linjär – utan vattenstämpel',cl:'theme-lined no-watermark',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)',border:'2px solid #d8d8dc'}
+        ];
+        themes.forEach(t=>{
+            let d=document.createElement('div'); d.className='bg-dot'; d.title=t.n;
+            d.style.background=t.sw; if(t.bg) d.style.backgroundColor=t.bg; if(t.size) d.style.backgroundSize=t.size; if(t.border) d.style.border=t.border;
+            d.onclick=()=>{ document.getElementById('cb-app-wrapper').className=t.cl; saveBoardState(); };
+            p.appendChild(d);
         });
     }
 
@@ -1584,14 +1741,16 @@
         const tab = document.getElementById('side-pocket-tab');
         const panel = document.getElementById('side-pocket-panel');
         let spTimer = null;
-        const openP = ()=>{ clearTimeout(spTimer); zone.classList.add('open'); if(typeof markFeedSeen==='function') markFeedSeen(); };
-        const closeP = ()=>{ clearTimeout(spTimer); spTimer = setTimeout(()=> zone.classList.remove('open'), 350); };
+        const icon = document.getElementById('sp-tab-icon');
+        const setIcon = ()=>{ if(icon) icon.textContent = zone.classList.contains('open') ? '❯' : '❮'; };
+        const openP = ()=>{ clearTimeout(spTimer); zone.classList.add('open'); setIcon(); if(typeof markFeedSeen==='function') markFeedSeen(); };
+        const closeP = ()=>{ clearTimeout(spTimer); spTimer = setTimeout(()=>{ zone.classList.remove('open'); setIcon(); }, 350); };
         tab.addEventListener('mouseenter', openP);
         tab.addEventListener('mouseleave', closeP);
         panel.addEventListener('mouseenter', openP);
         panel.addEventListener('mouseleave', closeP);
         // klick kvar för touch-tavlor (ingen hover där)
-        tab.onclick = ()=>{ zone.classList.toggle('open'); if(zone.classList.contains('open') && typeof markFeedSeen==='function') markFeedSeen(); };
+        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); if(zone.classList.contains('open') && typeof markFeedSeen==='function') markFeedSeen(); };
     })();
 </script>
 </body>
