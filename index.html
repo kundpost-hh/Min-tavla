@@ -54,21 +54,39 @@
     <button id="fullscreen-btn" onclick="toggleFullScreen()" title="Helskärm">⛶</button>
     <div id="canvas-container-v6"></div>
     
-    <div id="pages-nav-v6">
-        <div class="drag-handle-nav" title="Dra för att flytta">⋮⋮</div>
-        <button id="prev-page-btn-v6" class="nav-btn" onclick="prevPageV6()" title="Föregående sida">‹</button>
-        <span id="page-count-v6">1 / 1</span>
-        <button id="next-page-btn-v6" class="nav-btn" onclick="nextPageV6()" title="Nästa sida">›</button>
-        <div style="width: 1px; height: 16px; background-color: rgba(0,0,0,0.1);"></div>
-        <button id="add-page-btn-v6" class="nav-btn add-page-btn" onclick="addPageV6()" title="Lägg till ny blank sida">✚</button>
-    </div>
 
     <div id="side-pocket-zone">
-        <div id="side-pocket-tab">📌</div>
+        <div id="side-pocket-tab">📌<span id="sp-feed-dot"></span></div>
         <div id="side-pocket-panel">
-            <div class="side-pocket-title">Mina sidor</div>
-            <div class="side-pocket-grid" id="side-pocket-grid"></div>
-            <div id="side-pocket-reset" class="side-pocket-reset">Återställ ikoner</div>
+            <div class="sp-section">
+                <div class="sp-head">📄 Sidor</div>
+                <div id="sp-pages"></div>
+                <button class="sp-add-btn" onclick="addPageV6()">+ Ny sida</button>
+            </div>
+            <div class="sp-section">
+                <div class="sp-head">🗂️ Mallar</div>
+                <div id="sp-templates"></div>
+                <div class="sp-admin-only" id="sp-template-add">
+                    <input class="sp-input" id="sp-template-name" placeholder="Mallnamn...">
+                    <button class="sp-add-btn" onclick="saveCurrentPageAsTemplate()">💾 Spara denna sida som mall</button>
+                </div>
+            </div>
+            <div class="sp-section">
+                <div class="sp-head">🔗 Snabblänkar</div>
+                <div id="sp-links"></div>
+                <div class="sp-admin-only" id="sp-link-add">
+                    <input class="sp-input" id="sp-link-name" placeholder="Namn (t.ex. Bingel)">
+                    <div class="sp-row"><input class="sp-input" id="sp-link-url" placeholder="https://..."><button class="sp-add-btn sp-add-mini" onclick="addQuickLink()">+</button></div>
+                </div>
+            </div>
+            <div class="sp-section">
+                <div class="sp-head">💬 Personalflöde</div>
+                <div id="sp-feed" class="sp-feed"></div>
+                <div class="sp-row" id="sp-feed-compose">
+                    <input class="sp-input" id="sp-feed-input" placeholder="Dela en länk, tanke eller fråga..." onkeydown="if(event.key==='Enter') sendFeedMessage()">
+                    <button class="sp-add-btn sp-add-mini" onclick="sendFeedMessage()">➤</button>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -102,6 +120,7 @@
             <button class="tool-btn" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
             
             <div style="width: 1px; background: #ddd; margin: 0 4px;"></div>
+            <button class="tool-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
             <button class="tool-btn" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
             <button class="tool-btn" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
         </div>
@@ -171,7 +190,7 @@
     #side-pocket-zone { position: fixed; top: 50%; right: 0; transform: translateY(-50%); z-index: 10500; width: 0; height: 64px; }
     #side-pocket-tab { position: absolute; top: 0; right: 0; width: 26px; height: 64px; background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); border-right: none; border-radius: 14px 0 0 14px; box-shadow: -4px 4px 16px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: #888; transition: all 0.25s ease; }
     #side-pocket-zone.open #side-pocket-tab { width: 18px; color: #555; background: rgba(255,255,255,0.98); }
-    #side-pocket-panel { position: absolute; top: 50%; right: 0; transform: translateY(-50%) translateX(100%); width: 220px; max-height: 80vh; overflow-y: auto; background: rgba(255, 255, 255, 0.97); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid rgba(0,0,0,0.08); padding: 14px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+    #side-pocket-panel { position: absolute; top: 50%; right: 0; transform: translateY(-50%) translateX(100%); width: 268px; max-height: 84vh; overflow-y: auto; background: rgba(255, 255, 255, 0.97); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid rgba(0,0,0,0.08); padding: 14px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
     #side-pocket-zone.open #side-pocket-panel { opacity: 1; visibility: visible; transform: translateY(-50%) translateX(-26px); pointer-events: auto; }
     .side-pocket-title { font-size: 12px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-bottom: 10px; }
     .side-pocket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -182,6 +201,34 @@
     .side-pocket-item .icon { font-size: 24px; font-weight: 800; color: #444; margin-bottom: 4px; pointer-events: none; }
     .side-pocket-name { width: 100%; text-align: center; font-size: 10px; font-weight: 600; color: #3a3a3c; background: transparent; border: none; border-bottom: 1px solid transparent; outline: none; font-family: inherit; padding: 2px 0; cursor: text; }
     .side-pocket-name:hover, .side-pocket-name:focus { border-bottom-color: #007aff; }
+    .sp-section { margin-bottom: 14px; }
+    .sp-head { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+    .sp-add-btn { width: 100%; padding: 7px; background: #007aff; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 4px; }
+    .sp-add-btn:hover { background: #006ee0; }
+    .sp-add-mini { width: auto; padding: 7px 11px; margin-top: 0; flex-shrink: 0; }
+    .sp-input { width: 100%; padding: 6px 8px; border: 1.5px solid #e5e5ea; border-radius: 7px; font-size: 12px; outline: none; font-family: inherit; box-sizing: border-box; margin-bottom: 5px; }
+    .sp-input:focus { border-color: #007aff; }
+    .sp-row { display: flex; gap: 5px; align-items: center; }
+    .sp-item { display: flex; align-items: center; gap: 5px; background: #f7f7f9; border: 1px solid rgba(0,0,0,0.06); border-radius: 9px; padding: 5px 7px; margin-bottom: 5px; transition: background 0.15s; }
+    .sp-item.current { background: #eef3ff; border-color: #b9d4ff; }
+    .sp-item-name { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #333; background: transparent; border: none; border-bottom: 1px solid transparent; outline: none; font-family: inherit; padding: 2px 0; cursor: text; text-overflow: ellipsis; }
+    .sp-item-name:hover, .sp-item-name:focus { border-bottom-color: #007aff; }
+    .sp-item-go { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #333; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sp-icon-btn { background: none; border: none; cursor: pointer; font-size: 13px; padding: 1px 3px; flex-shrink: 0; opacity: 0.7; }
+    .sp-icon-btn:hover { opacity: 1; transform: scale(1.15); }
+    .sp-empty { font-size: 11px; color: #aaa; font-style: italic; padding: 2px 0 6px; }
+    .sp-feed { max-height: 230px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px; background: #f7f7f9; border-radius: 10px; margin-bottom: 6px; }
+    .sp-msg { background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: 9px; padding: 6px 8px; position: relative; }
+    .sp-msg-head { display: flex; align-items: baseline; gap: 5px; margin-bottom: 2px; }
+    .sp-msg-author { font-size: 11px; font-weight: 800; color: #007aff; }
+    .sp-msg-time { font-size: 9px; color: #aaa; }
+    .sp-msg-text { font-size: 12px; color: #333; line-height: 1.35; word-break: break-word; white-space: pre-wrap; }
+    .sp-msg-text a { color: #007aff; text-decoration: underline; }
+    .sp-msg-del { position: absolute; top: 4px; right: 5px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 11px; padding: 0; }
+    .sp-msg-del:hover { color: #ff3b30; }
+    .sp-msg.mine { background: #eef3ff; border-color: #cfe0ff; }
+    #sp-feed-dot { position: absolute; top: 4px; right: 4px; width: 9px; height: 9px; background: #ff3b30; border-radius: 50%; border: 1.5px solid white; display: none; }
+    #sp-feed-dot.show { display: block; }
     
     #pages-nav-v6 { position: absolute; bottom: 120px; right: 20px; background: rgba(255, 255, 255, 0.95); padding: 4px 8px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); z-index: 10000; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); opacity: 0.15; transition: opacity 0.3s ease; }
     #pages-nav-v6:hover { opacity: 1; }
@@ -467,7 +514,7 @@
 
 <script>
     let widgetCount = 0; let pagesListV6 = []; let currentPageIndexV6 = -1;
-    window.isLoadingBoard = true; let currentUser = null;
+    window.isLoadingBoard = true; let currentUser = null; let currentUserName = '';
 
     /* =====================================================================
        CENTRAL MOLNLAGRING via FIREBASE
@@ -530,7 +577,9 @@
             board:      localStorage.getItem('boardStateV6_' + currentUser) || '',
             classLists: localStorage.getItem('savedClassLists_' + currentUser) || '',
             gotdLists:  localStorage.getItem('savedGOTDLists_') || '',
-            wordLists:  localStorage.getItem('savedWordLists_') || ''
+            wordLists:  localStorage.getItem('savedWordLists_') || '',
+            templates:  localStorage.getItem('mintavla_templates_' + currentUser) || '',
+            links:      localStorage.getItem('mintavla_links_' + currentUser) || ''
         };
     }
 
@@ -541,6 +590,8 @@
         if (typeof d.classLists === 'string' && d.classLists) localStorage.setItem('savedClassLists_' + currentUser, d.classLists);
         if (typeof d.gotdLists === 'string' && d.gotdLists) localStorage.setItem('savedGOTDLists_', d.gotdLists);
         if (typeof d.wordLists === 'string' && d.wordLists) localStorage.setItem('savedWordLists_', d.wordLists);
+        if (typeof d.templates === 'string') localStorage.setItem('mintavla_templates_' + currentUser, d.templates);
+        if (typeof d.links === 'string') localStorage.setItem('mintavla_links_' + currentUser, d.links);
     }
 
     // Gör om e-post till en säker dokument-nyckel (Firestore tillåter inte vissa tecken)
@@ -606,7 +657,7 @@
                     return;
                 }
             } catch(e){ /* om kontrollen inte går, släpp ändå in */ }
-            fbUser = user; currentUser = email;
+            fbUser = user; currentUser = email; currentUserName = name || email;
             localStorage.setItem('classboardzUser', currentUser);
             await registerUser(email, name);
             await syncFromCloud(email);
@@ -727,6 +778,7 @@
         if (!window.cloudReady) {
             // Firebase ej konfigurerad -> kör lokalt så att appen går att använda/förhandsvisa
             currentUser = localStorage.getItem('classboardzUser') || 'lokal';
+            currentUserName = 'Du';
             localStorage.setItem('classboardzUser', currentUser);
             document.getElementById('login-overlay').style.display = 'none';
             migrateOldLists(currentUser); initBoard();
@@ -758,15 +810,11 @@
     }
 
     // SPAR KANAL - SYNCAD OCH SÄKRAD FÖR FLERA ANVÄNDARE
-    function saveBoardState() {
-        if(window.isLoadingBoard || !currentUser) return;
-        const pages = []; const canvasPages = document.querySelectorAll('.canvas-page');
-        canvasPages.forEach(page => {
-            const pageData = { id: page.id, bgImage: page.style.backgroundImage, widgets: [] };
-            page.querySelectorAll('.widget').forEach(w => {
+    // Serialisera en widget till ett state-objekt (används av spar, duplicera sida och mallar)
+    function serializeWidget(w){
                 const type = w.dataset.widgetType;
                 const state = { type: type, x: parseInt(w.style.left), y: parseInt(w.style.top), w: parseInt(w.style.width), h: parseInt(w.style.height), minimized: w.dataset.minimized === 'true', locked: w.classList.contains('locked'), data: {} };
-                
+
                 if (type === 'KLISTERLAPP') { state.data.title = w.querySelector('.sticky-title-input')?.value || ''; state.data.text = w.querySelector('.sticky-textarea')?.value || ''; }
                 else if (type === 'TEXTEDITOR') { state.data.html = w.querySelector('.editor-content')?.innerHTML || ''; }
                 else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.value || '📝', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea' }); }); }
@@ -793,8 +841,46 @@
                     state.data.currentFacts = btnRoll ? btnRoll.dataset.currentFacts : '';
                     state.data.currentAnswer = btnRoll ? btnRoll.dataset.currentAnswer : '';
                 }
-                pageData.widgets.push(state);
-            });
+                return state;
+    }
+
+    // Skapa en widget från ett sparat state (används av initBoard, duplicera sida och mallar)
+    function spawnWidgetFromState(w){
+        try {
+            if (w.type === 'KLISTERLAPP') createStickyNote(w);
+            else if (w.type === 'TEXTEDITOR') createTextEditor(w);
+            else if (w.type === 'DAGSSCHEMA' || w.type === 'DAGENS SCHEMA') createDailySchedule(w);
+            else if (w.type === 'TABELL') createTableWidget(w);
+            else if (w.type === 'SKAPA GRUPPER') createGroupMaker(w);
+            else if (w.type === 'SLUMPA NAMN') createRandomName(w);
+            else if (w.type === 'TRAFIKLJUS') createTrafficLight(w);
+            else if (w.type === 'LJUDNIVÅ') createNoiseMeter(w);
+            else if (w.type === 'DIGITAL TIMER') createTimer(w);
+            else if (w.type === 'ANALOG TIMER') createAnalogTimer(w);
+            else if (w.type === 'KLOCKA & DATUM') createRealTimeClock(w);
+            else if (w.type === 'LEKTIONSSCHEMA') createLessonPlan(w);
+            else if (w.type === 'TÄRNING') createDice(w);
+            else if (w.type === 'TAVLA-TEMA') createBgSelector(w);
+            else if (w.type === 'RITPLATTA') createWhiteboard(w);
+            else if (w.type === 'QR-KOD') createQRCode(w);
+            else if (w.type === 'ARBETSSÄTT') createWorkSymbols(w);
+            else if (w.type === 'BELÖNING') createRewardSystem(w);
+            else if (w.type === 'MINIRÄKNARE') createCalculator(w);
+            else if (w.type === 'BRÅK / TID') createFractionVisualizer(w);
+            else if (w.type === 'SVENSKA ALFABETET') createAlphabetWidget(w);
+            else if (w.type === 'GRATTIS') createBirthdayWidget(w);
+            else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
+            else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
+            else if (w.type === 'GREJ OF THE DAY') createGOTD(w);
+        } catch(err){ console.warn(err); }
+    }
+
+    function saveBoardState() {
+        if(window.isLoadingBoard || !currentUser) return;
+        const pages = []; const canvasPages = document.querySelectorAll('.canvas-page');
+        canvasPages.forEach(page => {
+            const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, widgets: [] };
+            page.querySelectorAll('.widget').forEach(w => { pageData.widgets.push(serializeWidget(w)); });
             pages.push(pageData);
         });
         localStorage.setItem('boardStateV6_' + currentUser, JSON.stringify({ pages: pages, activePage: currentPageIndexV6, bodyClass: document.getElementById('cb-app-wrapper').className }));
@@ -823,6 +909,7 @@
         header.querySelector('.btn-min').onclick = (e) => { e.stopPropagation(); const m = body.style.display === 'none'; body.style.display = m ? 'flex' : 'none'; widget.dataset.minimized = m ? 'false' : 'true'; saveBoardState(); };
         lockIcon.onclick = (e) => { e.stopPropagation(); widget.classList.toggle('locked'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
         if(config && config.minimized) { body.style.display = 'none'; widget.dataset.minimized = 'true'; }
+        if(typeof presentationLocked !== 'undefined' && presentationLocked) widget.classList.add('locked');
         return body;
     }
     
@@ -849,10 +936,162 @@
     }
 
     // PAGES LOGIK
-    function createPageV6(isInitial = false) { const pageId = Date.now() + '-' + Math.random().toString(16).slice(2); const canvasPage = document.createElement('div'); canvasPage.className = 'canvas-page'; canvasPage.id = pageId; document.getElementById('canvas-container-v6').appendChild(canvasPage); pagesListV6.push({ id: pageId, canvas: canvasPage }); if (isInitial) goToPageByIndexV6(0); else goToPageByIndexV6(pagesListV6.length - 1); }
-    function goToPageByIndexV6(index) { if (index < 0 || index >= pagesListV6.length) return; const canvasPages = document.querySelectorAll('.canvas-page'); for(let i=0; i<canvasPages.length; i++) { canvasPages[i].classList.remove('active'); } pagesListV6[index].canvas.classList.add('active'); currentPageIndexV6 = index; updatePagesNavV6(); }
+    function createPageV6(isInitial = false) { const pageId = Date.now() + '-' + Math.random().toString(16).slice(2); const canvasPage = document.createElement('div'); canvasPage.className = 'canvas-page'; canvasPage.id = pageId; document.getElementById('canvas-container-v6').appendChild(canvasPage); pagesListV6.push({ id: pageId, canvas: canvasPage, name: '' }); if (isInitial) goToPageByIndexV6(0); else goToPageByIndexV6(pagesListV6.length - 1); renderSidePocket(); }
+    function goToPageByIndexV6(index) { if (index < 0 || index >= pagesListV6.length) return; const canvasPages = document.querySelectorAll('.canvas-page'); for(let i=0; i<canvasPages.length; i++) { canvasPages[i].classList.remove('active'); } pagesListV6[index].canvas.classList.add('active'); currentPageIndexV6 = index; updatePagesNavV6(); renderSidePocket(); }
     function prevPageV6() { goToPageByIndexV6(currentPageIndexV6 - 1); saveBoardState(); } function nextPageV6() { goToPageByIndexV6(currentPageIndexV6 + 1); saveBoardState(); } function addPageV6() { createPageV6(); saveBoardState(); }
-    function updatePagesNavV6() { document.getElementById('page-count-v6').innerText = (currentPageIndexV6 + 1) + ' / ' + pagesListV6.length; document.getElementById('prev-page-btn-v6').disabled = (currentPageIndexV6 <= 0); document.getElementById('next-page-btn-v6').disabled = (currentPageIndexV6 >= pagesListV6.length - 1); }
+    function updatePagesNavV6() { const pc = document.getElementById('page-count-v6'); if(pc){ const nm = pagesListV6[currentPageIndexV6] ? pagesListV6[currentPageIndexV6].name : ''; pc.innerText = (nm ? nm + ' · ' : '') + (currentPageIndexV6 + 1) + ' / ' + pagesListV6.length; } const pb=document.getElementById('prev-page-btn-v6'); if(pb) pb.disabled = (currentPageIndexV6 <= 0); const nb=document.getElementById('next-page-btn-v6'); if(nb) nb.disabled = (currentPageIndexV6 >= pagesListV6.length - 1); }
+
+    // ---- SIDHANTERING (duplicera, ta bort, namnge) ----
+    function renamePageV6(index, name){ if(!pagesListV6[index]) return; pagesListV6[index].name = name; pagesListV6[index].canvas.dataset.pageName = name; updatePagesNavV6(); saveBoardState(); }
+    function duplicatePageV6(index){
+        if(!pagesListV6[index]) return;
+        const states = []; pagesListV6[index].canvas.querySelectorAll('.widget').forEach(w => states.push(serializeWidget(w)));
+        const srcName = pagesListV6[index].name;
+        createPageV6(); // skapar och går till ny sida (sist)
+        const newIdx = pagesListV6.length - 1;
+        states.forEach(st => spawnWidgetFromState(st));
+        if(srcName) renamePageV6(newIdx, 'Kopia av ' + srcName);
+        saveBoardState(); renderSidePocket();
+    }
+    function deletePageV6(index){
+        if(pagesListV6.length <= 1){ customAlert('Du kan inte ta bort den sista sidan.', 'ℹ️'); return; }
+        customConfirm('Ta bort sidan' + (pagesListV6[index].name ? ' "'+pagesListV6[index].name+'"' : ' '+(index+1)) + '? Allt på den försvinner.', ()=>{
+            pagesListV6[index].canvas.remove(); pagesListV6.splice(index, 1);
+            if(currentPageIndexV6 >= pagesListV6.length) currentPageIndexV6 = pagesListV6.length - 1;
+            goToPageByIndexV6(currentPageIndexV6); saveBoardState(); renderSidePocket();
+        });
+    }
+    // ---- SIDOFICKA: render + mallar + snabblänkar (PERSONLIGA per användare) ----
+    let spTemplates = [], spLinks = [];
+    function spLoadPersonal(key){ try { return JSON.parse(localStorage.getItem('mintavla_'+key+'_'+currentUser)||'[]'); } catch(e){ return []; } }
+    function spSavePersonal(key, items){ try { localStorage.setItem('mintavla_'+key+'_'+currentUser, JSON.stringify(items)); } catch(e){} syncToCloud(); }
+    function refreshPocketData(){ spTemplates = spLoadPersonal('templates'); spLinks = spLoadPersonal('links'); renderSidePocket(); setupFeedListener(); }
+    function spCanManage(){ return true; } // var och en hanterar sina egna mallar och länkar
+
+    function renderSidePocket(){
+        const pagesEl = document.getElementById('sp-pages'); if(!pagesEl) return;
+        const manage = spCanManage();
+        document.querySelectorAll('.sp-admin-only').forEach(el => el.style.display = manage ? '' : 'none');
+        // SIDOR
+        pagesEl.innerHTML = '';
+        pagesListV6.forEach((pg, i)=>{
+            const row = document.createElement('div'); row.className = 'sp-item' + (i===currentPageIndexV6 ? ' current' : '');
+            const go = document.createElement('button'); go.className='sp-icon-btn'; go.innerHTML = (i===currentPageIndexV6?'▸':'·'); go.title='Gå till sidan'; go.onclick=()=>{ goToPageByIndexV6(i); saveBoardState(); };
+            const name = document.createElement('input'); name.className='sp-item-name'; name.value = pg.name||''; name.placeholder='Sida '+(i+1); name.onchange=()=> renamePageV6(i, name.value.trim());
+            const dup = document.createElement('button'); dup.className='sp-icon-btn'; dup.innerHTML='⧉'; dup.title='Duplicera sidan'; dup.onclick=()=> duplicatePageV6(i);
+            const del = document.createElement('button'); del.className='sp-icon-btn'; del.innerHTML='🗑'; del.title='Ta bort sidan'; del.onclick=()=> deletePageV6(i);
+            row.appendChild(go); row.appendChild(name); row.appendChild(dup); row.appendChild(del);
+            pagesEl.appendChild(row);
+        });
+        // MALLAR
+        const tEl = document.getElementById('sp-templates'); tEl.innerHTML='';
+        if(spTemplates.length===0) tEl.innerHTML='<div class="sp-empty">Inga mallar än.</div>';
+        spTemplates.forEach((t, i)=>{
+            const row=document.createElement('div'); row.className='sp-item';
+            const nm=document.createElement('div'); nm.className='sp-item-go'; nm.innerText=t.name||('Mall '+(i+1)); nm.title='Klicka för att infoga som ny sida'; nm.onclick=()=> insertTemplate(t);
+            row.appendChild(nm);
+            if(manage){ const del=document.createElement('button'); del.className='sp-icon-btn'; del.innerHTML='🗑'; del.title='Ta bort mall'; del.onclick=()=> deleteTemplate(i); row.appendChild(del); }
+            tEl.appendChild(row);
+        });
+        // LÄNKAR
+        const lEl = document.getElementById('sp-links'); lEl.innerHTML='';
+        if(spLinks.length===0) lEl.innerHTML='<div class="sp-empty">Inga länkar än.</div>';
+        spLinks.forEach((lk, i)=>{
+            const row=document.createElement('div'); row.className='sp-item';
+            const nm=document.createElement('div'); nm.className='sp-item-go'; nm.innerText=lk.name||lk.url; nm.title=lk.url; nm.onclick=()=> openQuickLink(lk.url);
+            row.appendChild(nm);
+            if(manage){ const del=document.createElement('button'); del.className='sp-icon-btn'; del.innerHTML='🗑'; del.title='Ta bort länk'; del.onclick=()=> deleteLink(i); row.appendChild(del); }
+            lEl.appendChild(row);
+        });
+    }
+
+    function saveCurrentPageAsTemplate(){
+        const inp = document.getElementById('sp-template-name');
+        const name = (inp.value||'').trim() || (pagesListV6[currentPageIndexV6] && pagesListV6[currentPageIndexV6].name) || ('Mall '+(spTemplates.length+1));
+        const widgets = []; pagesListV6[currentPageIndexV6].canvas.querySelectorAll('.widget').forEach(w=> widgets.push(serializeWidget(w)));
+        if(widgets.length===0){ customAlert('Sidan är tom – lägg något på den först.', 'ℹ️'); return; }
+        spTemplates.push({ name, widgets }); spSavePersonal('templates', spTemplates); inp.value=''; renderSidePocket();
+        customAlert('Mallen "'+name+'" sparades.', '✅');
+    }
+    function insertTemplate(t){
+        createPageV6(); const idx = pagesListV6.length-1;
+        (t.widgets||[]).forEach(st => spawnWidgetFromState(st));
+        renamePageV6(idx, t.name||''); saveBoardState(); renderSidePocket();
+    }
+    function deleteTemplate(i){ customConfirm('Ta bort mallen?', ()=>{ spTemplates.splice(i,1); spSavePersonal('templates', spTemplates); renderSidePocket(); }); }
+
+    function normalizeUrl(u){ u=(u||'').trim(); if(!u) return ''; if(!/^https?:\/\//i.test(u)) u='https://'+u; return u; }
+    function addQuickLink(){
+        const u = normalizeUrl(document.getElementById('sp-link-url').value); if(!u){ customAlert('Skriv in en länk.', 'ℹ️'); return; }
+        const n = (document.getElementById('sp-link-name').value||'').trim() || u.replace(/^https?:\/\//,'');
+        spLinks.push({ name:n, url:u }); spSavePersonal('links', spLinks);
+        document.getElementById('sp-link-name').value=''; document.getElementById('sp-link-url').value=''; renderSidePocket();
+    }
+    function deleteLink(i){ spLinks.splice(i,1); spSavePersonal('links', spLinks); renderSidePocket(); }
+    function openQuickLink(url){ const u=normalizeUrl(url); if(u) window.open(u, '_blank', 'noopener'); }
+
+    // ---- PERSONALFLÖDE (delad chatt i sidofickan) ----
+    let feedMessages = [], feedListening = false;
+    function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function linkifyText(s){ return escapeHtml(s).replace(/(https?:\/\/[^\s]+)/g, function(u){ return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>'; }); }
+    function feedSeenKey(){ return 'mintavla_feedSeen_'+currentUser; }
+    function setupFeedListener(){
+        if(!window.cloudReady || !fbDB){ renderFeed(); return; }
+        if(feedListening) return; feedListening = true;
+        try {
+            fbDB.collection('feed').orderBy('ts','desc').limit(60).onSnapshot(snap => {
+                feedMessages = []; snap.forEach(d => feedMessages.push(Object.assign({id:d.id}, d.data())));
+                feedMessages.reverse();
+                renderFeed(); updateFeedDot();
+            }, err => console.warn('[MinTavla] flöde-fel:', err));
+        } catch(e){ console.warn(e); feedListening = false; }
+    }
+    function renderFeed(){
+        const el = document.getElementById('sp-feed'); if(!el) return;
+        const compose = document.getElementById('sp-feed-compose');
+        if(!window.cloudReady){ el.innerHTML = '<div class="sp-empty">Flödet fungerar på webben när du är inloggad.</div>'; if(compose) compose.style.display='none'; return; }
+        if(compose) compose.style.display='';
+        if(feedMessages.length===0){ el.innerHTML = '<div class="sp-empty">Inga inlägg än – skriv det första!</div>'; return; }
+        el.innerHTML='';
+        feedMessages.forEach(m => {
+            const mine = (m.author === currentUser);
+            const div = document.createElement('div'); div.className = 'sp-msg' + (mine?' mine':'');
+            const t = m.ts ? new Date(m.ts) : null;
+            const time = t ? t.toLocaleString('sv-SE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+            div.innerHTML = '<div class="sp-msg-head"><span class="sp-msg-author">'+escapeHtml(m.name||m.author||'')+'</span><span class="sp-msg-time">'+time+'</span></div><div class="sp-msg-text">'+linkifyText(m.text||'')+'</div>';
+            if(mine || isAdminEmail(currentUser)){ const del=document.createElement('button'); del.className='sp-msg-del'; del.innerHTML='✕'; del.title='Ta bort inlägg'; del.onclick=()=> deleteFeedMessage(m.id); div.appendChild(del); }
+            el.appendChild(div);
+        });
+        el.scrollTop = el.scrollHeight;
+    }
+    function sendFeedMessage(){
+        const inp = document.getElementById('sp-feed-input'); const text = (inp.value||'').trim();
+        if(!text) return;
+        if(!window.cloudReady){ customAlert('Personalflödet kräver att du är inloggad på webben.', 'ℹ️'); return; }
+        fbDB.collection('feed').add({ author: currentUser, name: currentUserName||currentUser, text: text, ts: Date.now() }).catch(e=>{ console.warn(e); customAlert('Kunde inte skicka inlägget. Försök igen.', '⚠️'); });
+        inp.value=''; setTimeout(markFeedSeen, 150);
+    }
+    function deleteFeedMessage(id){ if(!fbDB) return; customConfirm('Ta bort inlägget?', ()=> fbDB.collection('feed').doc(id).delete().catch(e=>console.warn(e))); }
+    function markFeedSeen(){ const newest = feedMessages.length ? (feedMessages[feedMessages.length-1].ts||0) : 0; const prev = parseInt(localStorage.getItem(feedSeenKey())||'0'); localStorage.setItem(feedSeenKey(), String(Math.max(newest, prev))); const dot=document.getElementById('sp-feed-dot'); if(dot) dot.classList.remove('show'); }
+    function updateFeedDot(){
+        const dot = document.getElementById('sp-feed-dot'); if(!dot) return;
+        const seen = parseInt(localStorage.getItem(feedSeenKey())||'0');
+        const someoneElse = feedMessages.some(m => (m.ts||0) > seen && m.author !== currentUser);
+        const pocketOpen = document.getElementById('side-pocket-zone').classList.contains('open');
+        if(someoneElse && !pocketOpen) dot.classList.add('show'); else dot.classList.remove('show');
+        if(pocketOpen) markFeedSeen();
+    }
+
+    // ---- PRESENTATIONSLÄGE: lås hela tavlan ----
+    let presentationLocked = false;
+    function togglePresentationLock(){
+        presentationLocked = !presentationLocked;
+        document.querySelectorAll('.widget').forEach(w => w.classList.toggle('locked', presentationLocked));
+        const btn = document.getElementById('lock-board-btn');
+        if(btn){ btn.querySelector('.icon').innerText = presentationLocked ? '🔒' : '🔓'; btn.querySelector('.label').innerText = presentationLocked ? 'Lås upp' : 'Lås tavla'; }
+        document.getElementById('cb-app-wrapper').classList.toggle('board-locked', presentationLocked);
+    }
+
     function getActiveCanvasV6() { let canvas = document.querySelector('.canvas-page.active'); if (!canvas) { createPageV6(true); canvas = document.querySelector('.canvas-page.active'); } return canvas; }
     function clearCurrentPage() { customConfirm("Rensa sidan?", () => { const ac = getActiveCanvasV6(); if(ac) { ac.querySelectorAll('.widget').forEach(w => w.remove()); saveBoardState(); } }); }
     function arrangeWidgets() { const canvas = getActiveCanvasV6(); const appWrapper = document.getElementById('cb-app-wrapper'); if (!canvas) return; const widgets = Array.prototype.slice.call(canvas.querySelectorAll('.widget')); const gap = 8; let currentX = gap; let currentY = gap + 40; let maxRowHeight = 0; const canvasWidth = appWrapper.offsetWidth; for(let i=0; i<widgets.length; i++) { const w = widgets[i]; const wWidth = w.offsetWidth; const wHeight = w.offsetHeight; if (currentX + wWidth + gap > canvasWidth && currentX > gap) { currentX = gap; currentY += maxRowHeight + gap + 40; maxRowHeight = 0; } w.style.transition = 'top 0.3s ease, left 0.3s ease'; w.style.left = currentX + 'px'; w.style.top = currentY + 'px'; setTimeout(() => { w.style.transition = ''; }, 300); currentX += wWidth + gap; if (wHeight > maxRowHeight) maxRowHeight = wHeight; } setTimeout(saveBoardState, 350); }
@@ -1326,48 +1565,34 @@
                 document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
                 s.pages.forEach((p) => {
                     const pageId = p.id || Date.now() + '-' + Math.random().toString(16).slice(2);
-                    const cp = document.createElement('div'); cp.className = 'canvas-page'; cp.id = pageId; if(p.bgImage) cp.style.backgroundImage = p.bgImage;
-                    document.getElementById('canvas-container-v6').appendChild(cp); pagesListV6.push({ id: pageId, canvas: cp });
+                    const cp = document.createElement('div'); cp.className = 'canvas-page'; cp.id = pageId; if(p.bgImage) cp.style.backgroundImage = p.bgImage; if(p.name) cp.dataset.pageName = p.name;
+                    document.getElementById('canvas-container-v6').appendChild(cp); pagesListV6.push({ id: pageId, canvas: cp, name: p.name || '' });
                     cp.classList.add('active');
-                    p.widgets.forEach(w => {
-                        try {
-                            if (w.type === 'KLISTERLAPP') createStickyNote(w);
-                            else if (w.type === 'TEXTEDITOR') createTextEditor(w);
-                            else if (w.type === 'DAGSSCHEMA' || w.type === 'DAGENS SCHEMA') createDailySchedule(w);
-                            else if (w.type === 'TABELL') createTableWidget(w);
-                            else if (w.type === 'SKAPA GRUPPER') createGroupMaker(w);
-                            else if (w.type === 'SLUMPA NAMN') createRandomName(w);
-                            else if (w.type === 'TRAFIKLJUS') createTrafficLight(w);
-                            else if (w.type === 'LJUDNIVÅ') createNoiseMeter(w);
-                            else if (w.type === 'DIGITAL TIMER') createTimer(w);
-                            else if (w.type === 'ANALOG TIMER') createAnalogTimer(w);
-                            else if (w.type === 'KLOCKA & DATUM') createRealTimeClock(w);
-                            else if (w.type === 'LEKTIONSSCHEMA') createLessonPlan(w);
-                            else if (w.type === 'TÄRNING') createDice(w);
-                            else if (w.type === 'TAVLA-TEMA') createBgSelector(w);
-                            else if (w.type === 'RITPLATTA') createWhiteboard(w);
-                            else if (w.type === 'QR-KOD') createQRCode(w);
-                            else if (w.type === 'ARBETSSÄTT') createWorkSymbols(w);
-                            else if (w.type === 'BELÖNING') createRewardSystem(w);
-                            else if (w.type === 'MINIRÄKNARE') createCalculator(w);
-                            else if (w.type === 'BRÅK / TID') createFractionVisualizer(w);
-                            else if (w.type === 'SVENSKA ALFABETET') createAlphabetWidget(w);
-                            else if (w.type === 'GRATTIS') createBirthdayWidget(w);
-                            else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
-                            else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
-                            else if (w.type === 'GREJ OF THE DAY') createGOTD(w);
-                        } catch(err){ console.warn(err); }
-                    });
+                    p.widgets.forEach(w => spawnWidgetFromState(w));
                     cp.classList.remove('active');
                 });
                 goToPageByIndexV6(s.activePage || 0);
             } catch(e) { createPageV6(true); }
         } else { createPageV6(true); }
         window.isLoadingBoard = false;
+        refreshPocketData();
     }
 
     checkLogin();
-    makeDraggable(document.getElementById('pages-nav-v6'), document.querySelector('.drag-handle-nav'));
+    (function(){
+        const zone = document.getElementById('side-pocket-zone');
+        const tab = document.getElementById('side-pocket-tab');
+        const panel = document.getElementById('side-pocket-panel');
+        let spTimer = null;
+        const openP = ()=>{ clearTimeout(spTimer); zone.classList.add('open'); if(typeof markFeedSeen==='function') markFeedSeen(); };
+        const closeP = ()=>{ clearTimeout(spTimer); spTimer = setTimeout(()=> zone.classList.remove('open'), 350); };
+        tab.addEventListener('mouseenter', openP);
+        tab.addEventListener('mouseleave', closeP);
+        panel.addEventListener('mouseenter', openP);
+        panel.addEventListener('mouseleave', closeP);
+        // klick kvar för touch-tavlor (ingen hover där)
+        tab.onclick = ()=>{ zone.classList.toggle('open'); if(zone.classList.contains('open') && typeof markFeedSeen==='function') markFeedSeen(); };
+    })();
 </script>
 </body>
 </html>
