@@ -400,6 +400,7 @@
 
     /* BRAIN BREAK WIDGET */
     .bb-widget { min-width: 320px; }
+    .bb-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
     .bb-container { display: flex; flex-direction: column; gap: 10px; height: 100%; }
     .bb-header-row { display: flex; align-items: center; gap: 8px; }
     .bb-icon { font-size: 20px; }
@@ -1147,10 +1148,10 @@
         const widget = body.parentElement.parentElement;
         body.innerHTML = `
             <div class="bb-container">
-                <div class="bb-header-row"><span class="bb-icon">🕺</span><span class="bb-title-label">Brain Break</span><span class="bb-badge">0 videor</span></div>
+                <div class="bb-header-row hover-menu"><span class="bb-icon">🕺</span><span class="bb-title-label">Brain Break</span><span class="bb-badge">0 videor</span></div>
                 <div class="bb-video-area"></div>
-                <div class="bb-activity-label"></div>
-                <button class="bb-main-btn">▶ Starta rörelsepaus!</button>
+                <div class="bb-activity-label hover-menu"></div>
+                <button class="bb-main-btn hover-menu">▶ Starta rörelsepaus!</button>
                 <div class="bb-admin-panel hover-menu">
                     <div class="bb-admin-title">⚙️ Hantera videor</div>
                     <div class="bb-add-section">
