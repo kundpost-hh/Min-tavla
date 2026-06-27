@@ -95,6 +95,8 @@
             <button class="tool-btn" onclick="createAnalogTimer()"><div class="icon">⏲️</div><div class="label">A. Timer</div></button>
             <button class="tool-btn" onclick="createTimer()"><div class="icon">⏱️</div><div class="label">D. Timer</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
+            <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
+            <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon">📱</div><div class="label">QR-Kod</div></button>
             <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Tavla</div></button>
             <button class="tool-btn" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
@@ -109,6 +111,7 @@
 <style>
     #cb-app-wrapper { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; max-width: 100vw !important; max-height: 100vh !important; z-index: 99999999 !important; overflow: hidden !important; border: none !important; margin: 0 !important; padding: 0 !important; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; background-color: white; transition: background 0.3s ease; }
     #cb-app-wrapper * { box-sizing: border-box; user-select: none; }
+    .widget-header, .widget-resizer, .drag-handle-nav, .analog-clock-face, #cb-app-wrapper canvas { touch-action: none; }
     #canvas-container-v6 { width: 100%; height: 100%; position: relative; }
     #cb-app-wrapper .canvas-page { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; background-color: #ffffff; background-image: radial-gradient(#dcdcdc 1.5px, transparent 1.5px); background-size: 24px 24px; }
     #cb-app-wrapper .canvas-page.active { display: block; }
@@ -395,6 +398,42 @@
     .popup-confetti { position: absolute; width: 10px; height: 10px; top: -20px; box-shadow: 0 0 5px currentColor; animation: pop-confetti-fall linear infinite; }
     @keyframes pop-confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
 
+    /* BRAIN BREAK WIDGET */
+    .bb-widget { min-width: 320px; }
+    .bb-container { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+    .bb-header-row { display: flex; align-items: center; gap: 8px; }
+    .bb-icon { font-size: 20px; }
+    .bb-title-label { font-size: 13px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; }
+    .bb-badge { background: #f3e8ff; color: #7c3aed; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; border: 1px solid #d8b4fe; margin-left: auto; }
+    .bb-video-area { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; background: #000; position: relative; min-height: 120px; }
+    .bb-video-area iframe { width: 100%; height: 100%; border: none; }
+    .bb-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg,#f3e8ff,#ede9fe); color: #7c3aed; font-size: 40px; gap: 8px; cursor: pointer; }
+    .bb-placeholder span { font-size: 13px; font-weight: 700; color: #7c3aed; }
+    .bb-activity-label { font-size: 13px; color: #555; font-weight: 600; text-align: center; min-height: 18px; }
+    .bb-main-btn { width: 100%; padding: 12px; background: linear-gradient(135deg,#7c3aed,#a855f7); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(124,58,237,0.35); }
+    .bb-main-btn:hover { background: linear-gradient(135deg,#6d28d9,#9333ea); transform: translateY(-1px); }
+    .bb-main-btn:active { transform: translateY(0); }
+    .bb-admin-panel { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .bb-admin-title { font-size: 11px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; }
+    .bb-add-section { background: white; border: 1px solid #e9d5ff; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 7px; }
+    .bb-input { width: 100%; padding: 7px 10px; border: 1.5px solid #e9d5ff; border-radius: 8px; font-size: 13px; outline: none; font-family: inherit; box-sizing: border-box; }
+    .bb-input:focus { border-color: #7c3aed; }
+    .bb-row { display: flex; gap: 6px; align-items: center; }
+    .bb-add-btn { padding: 7px 12px; background: #7c3aed; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
+    .bb-add-btn:hover { background: #6d28d9; }
+    .bb-list-area { max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .bb-list-item { display: flex; align-items: center; justify-content: space-between; background: white; border: 1px solid #e9d5ff; border-radius: 8px; padding: 5px 8px; font-size: 12px; font-weight: 600; color: #444; gap: 6px; }
+    .bb-list-item span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bb-del-btn { background: none; border: none; color: #f87171; cursor: pointer; font-size: 14px; flex-shrink: 0; padding: 0 2px; }
+    .bb-del-btn:hover { color: #dc2626; }
+
+    /* LJUDNIVÅMÄTARE */
+    .noise-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
+    .noise-widget .widget-resizer::after { border-color: #999; }
+    .noise-meter { position: relative; width: 64px; height: 150px; margin: 4px auto 8px; background: rgba(240,240,243,0.92); border-radius: 12px; overflow: hidden; border: 2px solid #e0e0e5; display: flex; align-items: flex-end; box-shadow: inset 0 2px 6px rgba(0,0,0,0.08); }
+    .noise-fill { width: 100%; height: 0%; background: #4cd964; transition: height 0.08s linear, background 0.2s ease; }
+    .noise-status { text-align: center; font-weight: 800; font-size: 15px; color: #333; min-height: 22px; }
+
     /* ADMIN-PANEL (endast admin) */
     #admin-corner { position: absolute; top: 0; left: 0; width: 46px; height: 46px; z-index: 10000; }
     #admin-fab { position: absolute; top: 14px; left: 14px; background: #7c3aed; color: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(124,58,237,0.35); border: none; cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: inherit; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s; }
@@ -647,6 +686,25 @@
     }
     function closeAdminPanel(){ document.getElementById('admin-panel-overlay').style.display = 'none'; }
 
+    // ---- Ljud för timrar (Web Audio – inget ljudfil-beroende) ----
+    let _audioCtx = null;
+    function unlockAudio(){ try { _audioCtx = _audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if(_audioCtx.state === 'suspended') _audioCtx.resume(); } catch(e){} }
+    function playTimerSound(){
+        try {
+            unlockAudio(); if(!_audioCtx) return;
+            const ctx = _audioCtx, now = ctx.currentTime;
+            [0, 0.28, 0.56].forEach((t)=>{
+                const o = ctx.createOscillator(), g = ctx.createGain();
+                o.type = 'sine'; o.frequency.value = 880;
+                g.gain.setValueAtTime(0.0001, now + t);
+                g.gain.exponentialRampToValueAtTime(0.35, now + t + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.25);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(now + t); o.stop(now + t + 0.27);
+            });
+        } catch(e){ console.warn('Ljud kunde inte spelas:', e); }
+    }
+
     function customConfirm(message, onConfirm) {
         const overlay = document.getElementById('custom-confirm-overlay');
         const textEl = document.getElementById('custom-confirm-text');
@@ -721,6 +779,7 @@
                 else if (type === 'ARBETSSÄTT') { state.data.icon = w.querySelector('.work-symbol.active')?.dataset.icon || ''; }
                 else if (type === 'BELÖNING') { state.data.points = w.querySelectorAll('.reward-star').length; }
                 else if (type === 'GRATTIS') { state.data.name = w.querySelector('.grattis-name-input')?.value || ''; }
+                else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -767,20 +826,25 @@
     }
     
     function makeDraggable(el, h) {
-        let p1=0, p2=0, p3=0, p4=0; h.onmousedown = (e) => {
-            if(el.classList.contains('locked') || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName) || e.target.hasAttribute('contenteditable') || e.target.classList.contains('schedule-color-strip')) return;
+        let p1=0, p2=0, p3=0, p4=0;
+        h.addEventListener('pointerdown', (e) => {
+            if(el.classList.contains('locked') || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName) || e.target.hasAttribute('contenteditable') || e.target.classList.contains('schedule-color-strip') || (e.target.closest && e.target.closest('.widget-controls'))) return;
             e.preventDefault(); p3=e.clientX; p4=e.clientY;
-            document.onmouseup = () => { document.onmouseup=null; document.onmousemove=null; saveBoardState(); };
-            document.onmousemove = (ev) => { ev.preventDefault(); p1=p3-ev.clientX; p2=p4-ev.clientY; p3=ev.clientX; p4=ev.clientY; el.style.top = Math.max(40, el.offsetTop-p2)+"px"; el.style.left = (el.offsetLeft-p1)+"px"; };
-        }
+            try { h.setPointerCapture(e.pointerId); } catch(_){}
+            const move = (ev) => { ev.preventDefault(); p1=p3-ev.clientX; p2=p4-ev.clientY; p3=ev.clientX; p4=ev.clientY; el.style.top = Math.max(40, el.offsetTop-p2)+"px"; el.style.left = (el.offsetLeft-p1)+"px"; };
+            const up = () => { h.removeEventListener('pointermove',move); h.removeEventListener('pointerup',up); h.removeEventListener('pointercancel',up); saveBoardState(); };
+            h.addEventListener('pointermove',move); h.addEventListener('pointerup',up); h.addEventListener('pointercancel',up);
+        });
     }
     function makeResizable(el, r) {
-        let sX, sY, sW, sH; r.onmousedown = (e) => {
+        let sX, sY, sW, sH;
+        r.addEventListener('pointerdown', (e) => {
             if(el.classList.contains('locked')) return; e.preventDefault(); e.stopPropagation(); sX=e.clientX; sY=e.clientY; sW=el.offsetWidth; sH=el.offsetHeight;
+            try { r.setPointerCapture(e.pointerId); } catch(_){}
             const drag = (ev) => { el.style.width = (sW+ev.clientX-sX)+'px'; el.style.height = (sH+ev.clientY-sY)+'px'; };
-            const stop = () => { document.removeEventListener('mousemove',drag); document.removeEventListener('mouseup',stop); saveBoardState(); };
-            document.addEventListener('mousemove',drag); document.addEventListener('mouseup',stop);
-        }
+            const stop = () => { r.removeEventListener('pointermove',drag); r.removeEventListener('pointerup',stop); r.removeEventListener('pointercancel',stop); saveBoardState(); };
+            r.addEventListener('pointermove',drag); r.addEventListener('pointerup',stop); r.addEventListener('pointercancel',stop);
+        });
     }
 
     // PAGES LOGIK
@@ -840,10 +904,10 @@
         tb.onclick=()=>{
             if(lT){ clearInterval(lT); lT=null; tb.innerText='Start'; tin.style.display='block'; pb.style.display='none'; }
             else {
-                let v=parseInt(tin.value)||0; if(v<=0)return; lTot=v*60; lLeft=lTot; tin.style.display='none'; pb.style.display='flex'; tb.innerText='Avbryt'; pf.style.transition='none';
+                let v=parseInt(tin.value)||0; if(v<=0)return; unlockAudio(); lTot=v*60; lLeft=lTot; tin.style.display='none'; pb.style.display='flex'; tb.innerText='Avbryt'; pf.style.transition='none';
                 const upd=()=>{ let m=Math.floor(lLeft/60).toString().padStart(2,'0'), s=(lLeft%60).toString().padStart(2,'0'); pt.innerText=`${m}:${s}`; let pct=(lLeft/lTot); pf.style.transform=`scaleX(${pct})`; pf.style.background=pct<0.2?'#ff3b30':pct<0.5?'#ff9500':'#4cd964'; };
                 upd(); void pf.offsetWidth; pf.style.transition='transform 1s linear, background-color 1s ease';
-                lT=setInterval(()=>{ lLeft--; if(lLeft<=0){ clearInterval(lT); lT=null; pf.style.transform='scaleX(0)'; pt.innerText='00:00'; setTimeout(()=>alert('Lektionstiden är slut!'),100); tb.innerText='Ny'; } else { upd(); } },1000); tb.dataset.intervalId=lT;
+                lT=setInterval(()=>{ lLeft--; if(lLeft<=0){ clearInterval(lT); lT=null; pf.style.transform='scaleX(0)'; pt.innerText='00:00'; playTimerSound(); setTimeout(()=>customAlert('Lektionstiden är slut! ⏰','⏰'),100); tb.innerText='Ny'; } else { upd(); } },1000); tb.dataset.intervalId=lT;
             } saveBoardState();
         };
     }
@@ -1058,8 +1122,133 @@
         body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerText='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let idx=Math.floor(Math.random()*n.length), w=n[idx]; res.innerText=`⭐ ${w} ⭐`; if(cb.checked){ n.splice(idx,1); txt.value=n[Math.floor(Math.random()*n.length)]; } saveBoardState(); showWinnerPopup(w); } },80); };
     }
 
+    // Gemensam (central) Brain Break-videolista – delas av alla, hanteras av admin
+    async function loadBrainBreakVideos(){
+        if(!window.cloudReady || !fbDB) return null;
+        try { const snap = await fbDB.collection('config').doc('brainbreak').get(); if(snap.exists && Array.isArray(snap.data().videos)) return snap.data().videos; return []; }
+        catch(e){ console.warn('[MinTavla] Kunde inte hämta Brain Break-videor:', e); return null; }
+    }
+    function saveBrainBreakVideos(videos){
+        if(!window.cloudReady || !fbDB) return;
+        fbDB.collection('config').doc('brainbreak').set({ videos: videos, updatedAt: Date.now() }, { merge:true }).catch(e=>console.warn('[MinTavla] Kunde inte spara Brain Break-videor:', e));
+    }
+
+    function parseYouTubeId(url){
+        if(!url) return '';
+        url = url.trim();
+        const m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if(m) return m[1];
+        if(/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
+        return '';
+    }
+
+    function createBrainBreak(config){
+        const body = createWidget('BRAIN BREAK', 340, 'bb-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `
+            <div class="bb-container">
+                <div class="bb-header-row"><span class="bb-icon">🕺</span><span class="bb-title-label">Brain Break</span><span class="bb-badge">0 videor</span></div>
+                <div class="bb-video-area"></div>
+                <div class="bb-activity-label"></div>
+                <button class="bb-main-btn">▶ Starta rörelsepaus!</button>
+                <div class="bb-admin-panel hover-menu">
+                    <div class="bb-admin-title">⚙️ Hantera videor</div>
+                    <div class="bb-add-section">
+                        <input class="bb-input bb-name" placeholder="Namn (t.ex. Just Dance – Banana)">
+                        <div class="bb-row"><input class="bb-input bb-url" placeholder="Klistra in YouTube-länk..."><button class="bb-add-btn bb-add">Lägg till</button></div>
+                    </div>
+                    <div class="bb-list-area"></div>
+                </div>
+            </div>`;
+        const videoArea = body.querySelector('.bb-video-area'), actLabel = body.querySelector('.bb-activity-label'),
+              mainBtn = body.querySelector('.bb-main-btn'), badge = body.querySelector('.bb-badge'),
+              listArea = body.querySelector('.bb-list-area'), nameInp = body.querySelector('.bb-name'),
+              urlInp = body.querySelector('.bb-url'), addBtn = body.querySelector('.bb-add'),
+              adminPanel = body.querySelector('.bb-admin-panel');
+
+        // Bara admin (eller offline-läge) får hantera videorna; alla andra ser bara spela-knappen
+        const canManage = (!window.cloudReady) || isAdminEmail(currentUser);
+        if(!canManage && adminPanel) adminPanel.style.display = 'none';
+
+        let videos = [];
+        const persist = ()=>{ if(window.cloudReady) saveBrainBreakVideos(videos); else saveBoardState(); };
+        const showPlaceholder = ()=>{ videoArea.innerHTML = `<div class="bb-placeholder"><div>🕺</div><span>Tryck för en rörelsepaus</span></div>`; videoArea.querySelector('.bb-placeholder').onclick = playRandom; actLabel.innerText=''; };
+        const playVideo = (v)=>{ videoArea.innerHTML = `<iframe src="https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`; actLabel.innerText = v.name || ''; };
+        const playRandom = ()=>{ if(videos.length===0){ customAlert(canManage ? 'Lägg till minst en YouTube-video först – för muspekaren över rutan så syns panelen "Hantera videor".' : 'Det finns inga rörelsepaus-videor ännu. Be administratören lägga till några.', '🕺'); return; } playVideo(videos[Math.floor(Math.random()*videos.length)]); };
+        const renderList = ()=>{
+            widget.dataset.videos = JSON.stringify(videos);
+            badge.innerText = videos.length + (videos.length===1?' video':' videor');
+            listArea.innerHTML = '';
+            videos.forEach((v, i)=>{
+                const item = document.createElement('div'); item.className='bb-list-item';
+                const s = document.createElement('span'); s.innerText = v.name || v.id; item.appendChild(s);
+                const del = document.createElement('button'); del.className='bb-del-btn'; del.innerHTML='✕';
+                del.onclick = ()=>{ videos.splice(i,1); renderList(); persist(); };
+                item.appendChild(del); listArea.appendChild(item);
+            });
+        };
+        addBtn.onclick = ()=>{
+            const id = parseYouTubeId(urlInp.value);
+            if(!id){ customAlert('Det där såg inte ut som en giltig YouTube-länk. Klistra in en länk från youtube.com eller youtu.be.', '⚠️'); return; }
+            videos.push({ name: nameInp.value.trim() || ('Video ' + (videos.length+1)), id });
+            nameInp.value=''; urlInp.value=''; renderList(); persist();
+        };
+        mainBtn.onclick = playRandom;
+        renderList(); showPlaceholder();
+
+        // Ladda videolistan: centralt (delas av alla) om inloggad, annars lokalt (offline-test)
+        if(window.cloudReady){
+            loadBrainBreakVideos().then(list=>{ if(list){ videos = list; renderList(); showPlaceholder(); } });
+        } else {
+            videos = (config && config.data && Array.isArray(config.data.videos)) ? config.data.videos.slice() : [];
+            renderList(); showPlaceholder();
+        }
+    }
+
+    function createNoiseMeter(config){
+        const body = createWidget('LJUDNIVÅ', 150, 'noise-widget', config);
+        body.innerHTML = `<div class='noise-meter'><div class='noise-fill'></div></div><div class='noise-status hover-menu'>Tryck för att starta 🎤</div><button class='btn btn-primary noise-btn hover-menu' style='width:100%;margin-top:8px;'>Starta mätning</button>`;
+        const fill = body.querySelector('.noise-fill'), status = body.querySelector('.noise-status'), btn = body.querySelector('.noise-btn');
+        let audioCtx=null, analyser=null, micStream=null, rafId=null, running=false, data=null;
+        const stop = ()=>{ running=false; if(rafId) cancelAnimationFrame(rafId); rafId=null; if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; } if(audioCtx){ audioCtx.close().catch(()=>{}); audioCtx=null; } fill.style.height='0%'; status.innerText='Stoppad'; btn.innerText='Starta mätning'; };
+        const start = async ()=>{
+            try {
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+                const src = audioCtx.createMediaStreamSource(micStream);
+                analyser = audioCtx.createAnalyser(); analyser.fftSize = 512; data = new Uint8Array(analyser.fftSize);
+                src.connect(analyser);
+                running = true; btn.innerText='Stoppa'; status.innerText='Lyssnar…';
+                const loop = ()=>{
+                    if(!running) return;
+                    analyser.getByteTimeDomainData(data);
+                    let sum=0; for(let i=0;i<data.length;i++){ const v=(data[i]-128)/128; sum+=v*v; }
+                    const rms = Math.sqrt(sum/data.length);
+                    const level = Math.min(100, Math.round(rms*320));
+                    fill.style.height = level + '%';
+                    fill.style.background = level<40 ? '#4cd964' : level<70 ? '#ffcc00' : '#ff3b30';
+                    status.innerText = level<40 ? '🟢 Lugnt' : level<70 ? '🟡 Lite stökigt' : '🔴 För högt!';
+                    rafId = requestAnimationFrame(loop);
+                };
+                loop();
+            } catch(err){ console.warn(err); status.innerText='Ingen mikrofon 🎤'; customAlert('Kunde inte komma åt mikrofonen. Tillåt mikrofon i webbläsaren och försök igen. (Fungerar bara på webbadressen, inte en lokal fil.)', '🎤'); btn.innerText='Starta mätning'; }
+        };
+        btn.onclick = ()=>{ if(running) stop(); else start(); };
+        const widget = body.parentElement.parentElement;
+        const obs = new MutationObserver(()=>{ if(!document.body.contains(widget)){ stop(); obs.disconnect(); } });
+        const cc = document.getElementById('canvas-container-v6'); if(cc) obs.observe(cc, { childList:true, subtree:true });
+    }
+
+    function createStickyNote(config){
+        const body = createWidget('KLISTERLAPP', 240, 'sticky-note', config);
+        body.innerHTML = `<input type='text' class='sticky-title-input' placeholder='Rubrik...'><textarea class='sticky-textarea' placeholder='Skriv din lapp här...'></textarea>`;
+        const title = body.querySelector('.sticky-title-input'), ta = body.querySelector('.sticky-textarea');
+        if(config && config.data){ title.value = config.data.title || ''; ta.value = config.data.text || ''; }
+        title.oninput = saveBoardState; ta.oninput = saveBoardState;
+    }
+
     function createGroupMaker(config){
-        const body=createWidget('SKAPA GRUPPER',380,'name-widget',config); body.innerHTML=`<div class='list-selector-area hover-menu'><select class='editor-select'></select></div><textarea class='name-input hover-menu' placeholder='Skriv namn...'></textarea><div class='hover-menu' style='display:flex;gap:8px;align-items:center;margin-bottom:8px;'><span style='font-size:12px;font-weight:bold;'>Antal:</span><input type='number' min='2' max='10' value='4' class='editor-select num-g' style='width:60px;'><button class='btn btn-primary btn-roll' style='flex-grow:1;'>Slumpa grupper!</button></div><div class='group-result'></div>`;
+        const body=createWidget('SKAPA GRUPPER',380,'name-widget',config); body.innerHTML=`<div class='list-selector-area hover-menu'><select class='editor-select'></select></div><textarea class='name-input hover-menu' placeholder='Skriv namn...'></textarea><div class='hover-menu' style='display:flex;gap:8px;align-items:center;margin-bottom:8px;'><span style='font-size:12px;font-weight:bold;'>Antal:</span><input type='number' min='2' max='12' value='4' class='editor-select num-g' style='width:60px;'><button class='btn btn-primary btn-roll' style='flex-grow:1;'>Slumpa grupper!</button></div><div class='group-result'></div>`;
         const sel=body.querySelector('select'), txt=body.querySelector('textarea'), ci=body.querySelector('.num-g'), res=body.querySelector('.group-result');
         sel.onchange=()=>{ if(sel.value){ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txt.value=l[sel.value]||''; } };
         const ld=()=>{ sel.innerHTML='<option value="">-- Välj lista --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;sel.appendChild(o);}); }; ld();
@@ -1072,7 +1261,7 @@
         const ig=body.querySelector('.timer-input-group'), mi=body.querySelector('.min-i'), si=body.querySelector('.sec-i'), disp=body.querySelector('.timer-display'), btnS=body.querySelector('.btn-s'), btnR=body.querySelector('.btn-r');
         let tLeft = 300, tId = null; const upd=()=>{ let m=Math.floor(tLeft/60).toString().padStart(2,'0'), s=(tLeft%60).toString().padStart(2,'0'); disp.innerText=`${m}:${s}`; };
         if(config&&config.data){ if(config.data.min)mi.value=config.data.min; if(config.data.sec)si.value=config.data.sec; tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); upd(); }
-        btnS.onclick=()=>{ if(tId){ clearInterval(tId); tId=null; btnS.innerText='Start'; ig.style.display='flex'; } else { if(ig.style.display!=='none'){ tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); ig.style.display='none'; } btnS.innerText='Paus'; tId=setInterval(()=>{ if(tLeft>0){ tLeft--; upd(); } else { clearInterval(tId); tId=null; btnS.innerText='Start'; ig.style.display='flex'; alert('Klar!'); } },1000); } };
+        btnS.onclick=()=>{ if(tId){ clearInterval(tId); tId=null; btnS.innerText='Start'; ig.style.display='flex'; } else { unlockAudio(); if(ig.style.display!=='none'){ tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); ig.style.display='none'; } btnS.innerText='Paus'; tId=setInterval(()=>{ if(tLeft>0){ tLeft--; upd(); } else { clearInterval(tId); tId=null; btnS.innerText='Start'; ig.style.display='flex'; playTimerSound(); customAlert('Tiden är ute! ⏰','⏰'); } },1000); } };
         btnR.onclick=()=>{ clearInterval(tId); tId=null; tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); btnS.innerText='Start'; ig.style.display='flex'; upd(); };
     }
 
@@ -1081,13 +1270,13 @@
         const cf=body.querySelector('.analog-clock-face'), hnd=body.querySelector('.analog-timer-handle'), to=body.querySelector('.analog-text-overlay'), bs=body.querySelector('.btn-s'), br=body.querySelector('.btn-r');
         let tot=300, left=300, tId=null, isD=false;
         const upd=()=>{ let pct=(left/3600), deg=pct*360; cf.style.background=`conic-gradient(#ff3b30 ${deg}deg, #f2f2f7 ${deg}deg)`; hnd.style.transform=`rotate(${deg}deg)`; let m=Math.floor(left/60).toString().padStart(2,'0'), s=(left%60).toString().padStart(2,'0'); to.innerText=`${m}:${s}`; }; upd();
-        cf.onmousedown=(e)=>{
-            if(tId)return; isD=true;
+        cf.addEventListener('pointerdown',(e)=>{
+            if(tId)return; isD=true; e.preventDefault(); try { cf.setPointerCapture(e.pointerId); } catch(_){}
             const move=(ev)=>{ if(!isD)return; let r=cf.getBoundingClientRect(), x=ev.clientX-(r.left+r.width/2), y=ev.clientY-(r.top+r.height/2), a=Math.atan2(y,x)*(180/Math.PI)+90; if(a<0)a+=360; tot=Math.round((a/6)*60); left=tot; upd(); };
-            const up=()=>{ isD=false; document.removeEventListener('mousemove',move); document.removeEventListener('mouseup',up); };
-            document.addEventListener('mousemove',move); document.addEventListener('mouseup',up);
-        };
-        bs.onclick=()=>{ if(tId){ clearInterval(tId); tId=null; bs.innerText='Start'; } else { if(left<=0)return; bs.innerText='Paus'; tId=setInterval(()=>{ if(left>0){ left--; upd(); }else{ clearInterval(tId); tId=null; bs.innerText='Start'; alert('Tiden ute!'); } },1000); } };
+            const up=()=>{ isD=false; cf.removeEventListener('pointermove',move); cf.removeEventListener('pointerup',up); cf.removeEventListener('pointercancel',up); };
+            cf.addEventListener('pointermove',move); cf.addEventListener('pointerup',up); cf.addEventListener('pointercancel',up);
+        });
+        bs.onclick=()=>{ if(tId){ clearInterval(tId); tId=null; bs.innerText='Start'; } else { if(left<=0)return; unlockAudio(); bs.innerText='Paus'; tId=setInterval(()=>{ if(left>0){ left--; upd(); }else{ clearInterval(tId); tId=null; bs.innerText='Start'; playTimerSound(); customAlert('Tiden är ute! ⏰','⏰'); } },1000); } };
         br.onclick=()=>{ clearInterval(tId); tId=null; bs.innerText='Start'; tot=300; left=300; upd(); };
     }
 
@@ -1117,7 +1306,7 @@
 
     function createWhiteboard(config){
         const body=createWidget('RITPLATTA',350,'',config); body.innerHTML=`<div class='hover-menu' style='display:flex;gap:5px;margin-bottom:5px;'><input type='color' value='#000000'><button class='btn btn-secondary btn-c'>Rensa</button></div><div style='flex-grow:1;border:1px solid #ccc;min-height:150px;'><canvas style='width:100%;height:100%;cursor:crosshair;'></canvas></div>`; const cvs=body.querySelector('canvas'), ctx=cvs.getContext('2d'), clr=body.querySelector('input'), btn=body.querySelector('.btn-c');
-        setTimeout(()=>{ cvs.width=cvs.parentElement.clientWidth; cvs.height=cvs.parentElement.clientHeight; let paint=false; cvs.onmousedown=()=>{paint=true; ctx.beginPath();}; cvs.onmouseup=()=>{paint=false; saveBoardState();}; cvs.onmousemove=(e)=>{ if(!paint)return; let r=cvs.getBoundingClientRect(); ctx.lineWidth=3; ctx.lineCap='round'; ctx.strokeStyle=clr.value; ctx.lineTo(e.clientX-r.left, e.clientY-r.top); ctx.stroke(); }; btn.onclick=()=>ctx.clearRect(0,0,cvs.width,cvs.height); },200);
+        setTimeout(()=>{ cvs.width=cvs.parentElement.clientWidth; cvs.height=cvs.parentElement.clientHeight; let paint=false; cvs.addEventListener('pointerdown',(e)=>{paint=true; ctx.beginPath(); try{cvs.setPointerCapture(e.pointerId);}catch(_){}}); cvs.addEventListener('pointerup',()=>{paint=false; saveBoardState();}); cvs.addEventListener('pointercancel',()=>{paint=false;}); cvs.addEventListener('pointermove',(e)=>{ if(!paint)return; e.preventDefault(); let r=cvs.getBoundingClientRect(); ctx.lineWidth=3; ctx.lineCap='round'; ctx.strokeStyle=clr.value; ctx.lineTo(e.clientX-r.left, e.clientY-r.top); ctx.stroke(); }); btn.onclick=()=>ctx.clearRect(0,0,cvs.width,cvs.height); },200);
     }
 
     function createQRCode(config){if(config===undefined)config=null;const body=createWidget('QR-KOD',220,'',config);const input=document.createElement('input');input.type='text';input.className='list-name-input hover-menu';input.placeholder='Klistra in länk här...';input.style.marginBottom='10px';const img=document.createElement('img');img.style.width='100%';img.style.display='none';img.style.borderRadius='8px';input.onchange=()=>{if(input.value){img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(input.value)}`;img.style.display='block';}else{img.style.display='none';}saveBoardState();};if(config&&config.data&&config.data.url){input.value=config.data.url;input.onchange();}body.appendChild(input);body.appendChild(img);}
@@ -1148,6 +1337,7 @@
                             else if (w.type === 'SKAPA GRUPPER') createGroupMaker(w);
                             else if (w.type === 'SLUMPA NAMN') createRandomName(w);
                             else if (w.type === 'TRAFIKLJUS') createTrafficLight(w);
+                            else if (w.type === 'LJUDNIVÅ') createNoiseMeter(w);
                             else if (w.type === 'DIGITAL TIMER') createTimer(w);
                             else if (w.type === 'ANALOG TIMER') createAnalogTimer(w);
                             else if (w.type === 'KLOCKA & DATUM') createRealTimeClock(w);
@@ -1162,6 +1352,7 @@
                             else if (w.type === 'BRÅK / TID') createFractionVisualizer(w);
                             else if (w.type === 'SVENSKA ALFABETET') createAlphabetWidget(w);
                             else if (w.type === 'GRATTIS') createBirthdayWidget(w);
+                            else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
                             else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
                             else if (w.type === 'GREJ OF THE DAY') createGOTD(w);
                         } catch(err){ console.warn(err); }
