@@ -337,6 +337,22 @@
     .editor-toolbar { position: relative; display: flex; flex-wrap: wrap; gap: 4px; background: #f2f2f7; padding: 6px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #e5e5ea; transition: opacity 0.3s ease; } 
     .editor-btn { background: white; border: 1px solid #d1d1d6; border-radius: 4px; padding: 4px 6px; font-size: 14px; font-weight: bold; cursor: pointer; min-width: 28px; text-align: center; color: #333; }
     .editor-btn:hover { background: #e5e5ea; }
+    .ed-colors { display: inline-flex; gap: 3px; align-items: center; padding: 0 2px; }
+    .editor-color-sw { width: 18px; height: 18px; padding: 0; border-radius: 50%; border: 1px solid rgba(0,0,0,0.25); cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.12); transition: transform 0.12s; }
+    .editor-color-sw:hover { transform: scale(1.2); }
+    /* TABELL: rubrikruta + verktyg som kollapsar när muspekaren är borta */
+    .tbl-title { display: block; min-width: 140px; max-width: 100%; margin: 0 auto 6px; padding: 5px 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 15px; font-weight: 700; color: #333; text-align: center; outline: none; font-family: inherit; background: #fff; }
+    .tbl-title:focus { border-color: #007aff; }
+    .tbl-tools-top { transition: opacity .25s ease, max-height .25s ease, margin .25s ease, padding .25s ease; overflow: hidden; max-height: 140px; }
+    .widget:not(:hover):not(:focus-within) .tbl-tools-top { opacity: 0 !important; pointer-events: none; max-height: 0 !important; margin: 0 !important; padding: 0 !important; border-width: 0 !important; }
+    /* Tabell: krymp bort tomt utrymme (vänster verktyg + nedre area) när muspekaren är borta */
+    .tbl-side { transition: max-width .25s ease, max-height .25s ease, padding .25s ease, border-width .25s ease, opacity .25s ease; max-width: 60px; max-height: 240px; }
+    .table-widget:not(:hover):not(:focus-within) .tbl-side { max-width: 0 !important; max-height: 0 !important; padding: 0 !important; border-width: 0 !important; overflow: hidden; }
+    .tbl-body-row { align-items: flex-start; }
+    .table-widget:not(:hover):not(:focus-within) .tbl-body-row { gap: 0 !important; flex-grow: 0 !important; }
+    .table-widget:not(:hover):not(:focus-within) .tbl-scroll { flex-grow: 0 !important; }
+    .table-widget:not(:hover):not(:focus-within) .widget-body { height: auto !important; flex-grow: 0 !important; padding: 6px !important; }
+    .table-widget:not(:hover):not(:focus-within) .widget-inner { height: auto !important; }
     .editor-color-group { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #444; font-weight: bold; margin-left: 4px; }
     .color-picker-input { width: 22px; height: 22px; padding: 0; border: none; border-radius: 4px; cursor: pointer; overflow: hidden; }
     .editor-content { width: 100%; min-height: 60px; flex-grow: 1; border: 1px solid #e5e5ea; border-radius: 8px; padding: 10px; outline: none; font-size: 15px; background: white; overflow-y: auto; user-select: text; line-height: 1.5; }
@@ -360,8 +376,13 @@
     .timer-input-group { display: flex; gap: 4px; justify-content: center; margin-bottom: 6px; }
     .timer-input { width: 40px; text-align: center; border: 1px solid #ddd; border-radius: 6px; padding: 2px; font-size: 14px; }
     
-    .traffic-container { display: flex; flex-direction: column; gap: 8px; align-items: center; background: #222; padding: 10px; border-radius: 20px; width: 56px; margin: 0 auto; }
-    .light { width: 30px; height: 30px; border-radius: 50%; background: #444; cursor: pointer; transition: all 0.2s; }
+    .traffic-widget { min-width: 64px !important; }
+    .traffic-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; }
+    .traffic-widget .widget-resizer::after { border-color: #999; }
+    .traffic-widget .widget-body { padding: 6px !important; align-items: center; justify-content: center; overflow: hidden; }
+    .traffic-fit { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .traffic-container { display: flex; flex-direction: column; gap: 10px; align-items: center; background: #222; padding: 12px; border-radius: 18px; transform-origin: center center; flex: 0 0 auto; }
+    .light { width: 34px; height: 34px; border-radius: 50%; background: #444; cursor: pointer; transition: background 0.2s, box-shadow 0.2s; flex: 0 0 auto; }
     .light.red.active { background: #ff3b30; box-shadow: 0 0 15px #ff3b30; }
     .light.yellow.active { background: #ffcc00; box-shadow: 0 0 15px #ffcc00; }
     .light.green.active { background: #4cd964; box-shadow: 0 0 15px #4cd964; }
@@ -421,10 +442,12 @@
     
     .fraction-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid #333; margin: 0 auto 10px; transition: background 0.3s; }
     
-    .alphabet-widget .widget-inner { background: rgba(255, 255, 255, 0.95); }
+    .alphabet-widget .widget-inner { background: rgba(255, 255, 255, 0.97); }
     .alphabet-widget .widget-header { background: #FF2D55; border-bottom: 1px solid #d31a3e; }
-    .alphabet-container { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; padding: 10px 5px; }
-    .alpha-letter { font-family: 'Comic Sans MS', sans-serif; font-size: 42px; font-weight: bold; padding: 0 4px; transition: transform 0.2s; cursor: pointer; }
+    .alphabet-container { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 6px; padding: 14px 8px; overflow: hidden; }
+    .alpha-letter { font-family: 'Comic Sans MS', 'Segoe UI', sans-serif; font-size: 40px; font-weight: bold; line-height: 1; padding: 6px 8px; border-radius: 14px; transition: transform 0.2s ease, background 0.2s ease; cursor: pointer; flex: 0 0 auto; user-select: none; }
+    .alpha-letter:hover { animation: alpha-dance 0.6s ease-in-out infinite; background: rgba(255,45,85,0.08); }
+    @keyframes alpha-dance { 0% { transform: scale(1.5) rotate(0deg); } 25% { transform: scale(1.55) rotate(-13deg); } 50% { transform: scale(1.65) rotate(0deg); } 75% { transform: scale(1.55) rotate(13deg); } 100% { transform: scale(1.5) rotate(0deg); } }
 
     .grattis-widget .widget-inner { background: linear-gradient(135deg, #fff0f5 0%, #f0f8ff 100%); border: 2px solid #dcb3ff; }
     .grattis-widget .widget-header { background-color: #a64dff !important; border-bottom: none; }
@@ -442,6 +465,9 @@
     .grattis-deco-5 { top: 40%; left: 10px; animation-delay: 0.8s; }
     .grattis-deco-6 { top: 40%; right: 10px; animation-delay: 1.2s; }
     .grattis-title { color: #a64dff; font-size: 26px; font-weight: 900; margin: 0 0 10px 0; text-align: center; font-family: 'Comic Sans MS', sans-serif; z-index: 3; position: relative; }
+    .fw-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: hidden; }
+    .fw-rocket { position: absolute; top: 0; width: 4px; height: 4px; border-radius: 50%; }
+    .fw-particle { position: absolute; width: 5px; height: 5px; border-radius: 50%; }
     @keyframes grattisFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
     /* NY STIL FÖR POPUP-VINNARE (SLUMPA NAMN) */
@@ -859,7 +885,7 @@
                 else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.value || '📝', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea' }); }); }
                 else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; }
                 else if (type === 'SKAPA GRUPPER' || type === 'SLUMPA NAMN' || type === 'DAGENS ORD') { state.data.list = w.querySelector('select')?.value || ''; state.data.text = w.querySelector('.name-input')?.value || ''; if(type === 'SKAPA GRUPPER') { state.data.count = w.querySelector('input[type="number"]')?.value || '4'; state.data.result = w.querySelector('.group-result')?.innerHTML || ''; } if(type === 'SLUMPA NAMN') { state.data.removeCb = w.querySelector('input[type="checkbox"]')?.checked || false; } if(type === 'DAGENS ORD') { state.data.result = w.querySelector('.name-result')?.innerHTML || ''; } }
-                else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
+                else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
                 else if (type === 'DIGITAL TIMER' || type === 'BRÅK / TID') { const nIn = w.querySelectorAll('input[type="number"]'); if(nIn.length >= 2){ if(type === 'DIGITAL TIMER'){ state.data.min = nIn[0].value; state.data.sec = nIn[1].value; } else { state.data.num = nIn[0].value; state.data.den = nIn[1].value; } } }
                 else if (type === 'RITPLATTA') { state.data.img = w.querySelector('canvas')?.toDataURL() || ''; }
@@ -1217,11 +1243,22 @@
 
     function createTextEditor(config) {
         const body = createWidget('TEXTEDITOR', 460, 'text-widget', config); const tb = document.createElement('div'); tb.className = 'editor-toolbar hover-menu';
-        tb.innerHTML = `<select class='editor-select font-sel'><option value='3'>Normal</option><option value='5'>Rubrik</option><option value='7'>Stor</option></select><button class='editor-btn ed-b'><b>B</b></button><button class='editor-btn ed-i'><i>I</i></button><button class='editor-btn ed-u'><u>U</u></button><button class='editor-btn ed-l'>🔗</button>`;
+        tb.innerHTML = `<select class='editor-select font-sel'><option value='3'>Normal</option><option value='5'>Rubrik</option><option value='7'>Stor</option></select><button class='editor-btn ed-b'><b>B</b></button><button class='editor-btn ed-i'><i>I</i></button><button class='editor-btn ed-u'><u>U</u></button><span class='ed-colors'></span><button class='editor-btn ed-l'>🔗</button>`;
         tb.querySelector('.font-sel').onchange = (e)=>document.execCommand('fontSize',false,e.target.value);
         tb.querySelector('.ed-b').onclick = ()=>document.execCommand('bold',false,null);
         tb.querySelector('.ed-i').onclick = ()=>document.execCommand('italic',false,null);
         tb.querySelector('.ed-u').onclick = ()=>document.execCommand('underline',false,null);
+        const palette = ['#1f2937','#ff3b30','#ff9500','#34c759','#007aff','#7c3aed','#ff2d55','#ffffff'];
+        const colWrap = tb.querySelector('.ed-colors');
+        palette.forEach(col=>{
+            const sw = document.createElement('button');
+            sw.className = 'editor-color-sw';
+            sw.style.background = col;
+            sw.title = 'Textfärg';
+            // mousedown + preventDefault behåller textmarkeringen i contenteditable
+            sw.addEventListener('mousedown', (e)=>{ e.preventDefault(); document.execCommand('styleWithCSS',false,true); document.execCommand('foreColor',false,col); });
+            colWrap.appendChild(sw);
+        });
         tb.querySelector('.ed-l').onclick = ()=>{const u=prompt('Länk:','https://'); if(u)document.execCommand('createLink',false,u);};
         const ec = document.createElement('div'); ec.className = 'editor-content'; ec.setAttribute('contenteditable', 'true');
         ec.addEventListener('click', (e) => { const l = e.target.closest('a'); if (l) { e.preventDefault(); window.open(l.href, 'TPop', 'width=800,height=600,resizable=yes'); } });
@@ -1675,8 +1712,23 @@
     }
 
     function createTableWidget(config) {
-        const body = createWidget('TABELL', 450, '', config); body.innerHTML = `<div style='display:flex;gap:12px;width:100%;height:100%;'><div class='editor-toolbar hover-menu' style='display:flex;flex-direction:column;width:40px;'><button class='editor-btn row-p'>+R</button><button class='editor-btn row-m'>-R</button><button class='editor-btn col-p'>+C</button><button class='editor-btn col-m'>-C</button></div><div style='flex-grow:1;overflow:auto;'><table class='board-table' style='border:2px solid black;width:100%;'></table></div></div>`; const tbl=body.querySelector('table');
-        const cell=()=>{ let td=document.createElement('td'); td.contentEditable=true; td.style.border='1px solid black'; return td; }; if(config&&config.data&&config.data.html) tbl.innerHTML=config.data.html; else { for(let i=0;i<3;i++){ let tr=tbl.insertRow(); for(let j=0; j<3;j++)tr.appendChild(cell()); } }
+        const body = createWidget('TABELL', 460, 'table-widget', config);
+        body.innerHTML = `<div class='editor-toolbar hover-menu tbl-tools-top' style='display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:6px;'><button class='editor-btn tb-b'><b>B</b></button><button class='editor-btn tb-i'><i>I</i></button><button class='editor-btn tb-u'><u>U</u></button><span class='tb-colors' style='display:inline-flex;gap:3px;align-items:center;'></span><span style='width:1px;height:18px;background:#d1d1d6;margin:0 2px;'></span><button class='editor-btn tb-al' title='Vänster'>⬅</button><button class='editor-btn tb-ac' title='Centrera'>↔</button><button class='editor-btn tb-ar' title='Höger'>➡</button><span style='width:1px;height:18px;background:#d1d1d6;margin:0 2px;'></span><button class='editor-btn tb-fp' title='Större text'>A+</button><button class='editor-btn tb-fm' title='Mindre text'>A−</button></div><input type='text' class='tbl-title' placeholder='Rubrik...'><div class='tbl-body-row' style='display:flex;gap:12px;width:100%;flex-grow:1;'><div class='editor-toolbar hover-menu tbl-side' style='display:flex;flex-direction:column;width:40px;flex:0 0 40px;'><button class='editor-btn row-p'>+R</button><button class='editor-btn row-m'>-R</button><button class='editor-btn col-p'>+C</button><button class='editor-btn col-m'>-C</button></div><div class='tbl-scroll' style='flex-grow:1;overflow:auto;'><table class='board-table' style='border:2px solid black;width:100%;'></table></div></div>`;
+        const tbl=body.querySelector('table');
+        const titleInp=body.querySelector('.tbl-title'); if(config&&config.data&&config.data.title) titleInp.value=config.data.title; titleInp.oninput=saveBoardState;
+        const cell=()=>{ let td=document.createElement('td'); td.contentEditable=true; td.style.border='1px solid black'; td.style.padding='4px 6px'; td.style.minWidth='30px'; return td; }; if(config&&config.data&&config.data.html) tbl.innerHTML=config.data.html; else { for(let i=0;i<3;i++){ let tr=tbl.insertRow(); for(let j=0; j<3;j++)tr.appendChild(cell()); } }
+        // --- TEXTFUNKTIONER (verkar på markerad text i den aktiva cellen) ---
+        const exec=(cmd,val)=>{ document.execCommand('styleWithCSS',false,true); document.execCommand(cmd,false,val||null); saveBoardState(); };
+        const fmtBtn=(seld,cmd,val)=>{ const el=body.querySelector(seld); el.addEventListener('mousedown',(e)=>{ e.preventDefault(); exec(cmd,val); }); };
+        fmtBtn('.tb-b','bold'); fmtBtn('.tb-i','italic'); fmtBtn('.tb-u','underline');
+        fmtBtn('.tb-al','justifyLeft'); fmtBtn('.tb-ac','justifyCenter'); fmtBtn('.tb-ar','justifyRight');
+        let curSize=3;
+        body.querySelector('.tb-fp').addEventListener('mousedown',(e)=>{ e.preventDefault(); curSize=Math.min(7,curSize+1); exec('fontSize',curSize); });
+        body.querySelector('.tb-fm').addEventListener('mousedown',(e)=>{ e.preventDefault(); curSize=Math.max(1,curSize-1); exec('fontSize',curSize); });
+        const palette=['#1f2937','#ff3b30','#ff9500','#34c759','#007aff','#7c3aed','#ff2d55','#ffffff'];
+        const colWrap=body.querySelector('.tb-colors');
+        palette.forEach(col=>{ const sw=document.createElement('button'); sw.className='editor-color-sw'; sw.style.background=col; sw.title='Textfärg'; sw.addEventListener('mousedown',(e)=>{ e.preventDefault(); exec('foreColor',col); }); colWrap.appendChild(sw); });
+        tbl.addEventListener('input', saveBoardState);
         body.querySelector('.row-p').onclick=()=>{ let tr=tbl.insertRow(); for(let j=0; j<tbl.rows[0].cells.length; j++)tr.appendChild(cell()); saveBoardState(); }; body.querySelector('.row-m').onclick=()=>{ if(tbl.rows.length>1)tbl.deleteRow(-1); saveBoardState(); }; body.querySelector('.col-p').onclick=()=>{ Array.from(tbl.rows).forEach(row=>row.appendChild(cell())); saveBoardState(); }; body.querySelector('.col-m').onclick=()=>{ if(tbl.rows[0].cells.length>1)Array.from(tbl.rows).forEach(row=>row.deleteCell(-1)); saveBoardState(); };
     }
 
@@ -1702,8 +1754,12 @@
     }
 
     function createWhiteboard(config){
-        const body=createWidget('RITPLATTA',350,'',config); body.innerHTML=`<div class='hover-menu' style='display:flex;gap:5px;margin-bottom:5px;'><input type='color' value='#000000'><button class='btn btn-secondary btn-c'>Rensa</button></div><div style='flex-grow:1;border:1px solid #ccc;min-height:150px;'><canvas style='width:100%;height:100%;cursor:crosshair;'></canvas></div>`; const cvs=body.querySelector('canvas'), ctx=cvs.getContext('2d'), clr=body.querySelector('input'), btn=body.querySelector('.btn-c');
-        setTimeout(()=>{ cvs.width=cvs.parentElement.clientWidth; cvs.height=cvs.parentElement.clientHeight; let paint=false; cvs.addEventListener('pointerdown',(e)=>{paint=true; ctx.beginPath(); try{cvs.setPointerCapture(e.pointerId);}catch(_){}}); cvs.addEventListener('pointerup',()=>{paint=false; saveBoardState();}); cvs.addEventListener('pointercancel',()=>{paint=false;}); cvs.addEventListener('pointermove',(e)=>{ if(!paint)return; e.preventDefault(); let r=cvs.getBoundingClientRect(); ctx.lineWidth=3; ctx.lineCap='round'; ctx.strokeStyle=clr.value; ctx.lineTo(e.clientX-r.left, e.clientY-r.top); ctx.stroke(); }); btn.onclick=()=>ctx.clearRect(0,0,cvs.width,cvs.height); },200);
+        const body=createWidget('RITPLATTA',350,'',config); body.innerHTML=`<div class='hover-menu' style='display:flex;gap:10px;margin-bottom:5px;align-items:center;flex-wrap:wrap;'><input type='color' value='#000000' title='Färg'><label style='display:flex;align-items:center;gap:6px;font-size:12px;font-weight:bold;color:#555;'>Tjocklek<input type='range' class='pen-size' min='1' max='30' value='3' style='width:90px;'></label><span class='pen-preview' style='display:inline-block;border-radius:50%;background:#000;width:3px;height:3px;flex:0 0 auto;'></span><button class='btn btn-secondary btn-c' style='margin-left:auto;'>Rensa</button></div><div style='flex-grow:1;border:1px solid #ccc;min-height:150px;'><canvas style='width:100%;height:100%;cursor:crosshair;touch-action:none;'></canvas></div>`;
+        const cvs=body.querySelector('canvas'), ctx=cvs.getContext('2d'), clr=body.querySelector('input[type=color]'), size=body.querySelector('.pen-size'), prev=body.querySelector('.pen-preview'), btn=body.querySelector('.btn-c');
+        const updPrev=()=>{ const s=parseInt(size.value)||3; prev.style.width=s+'px'; prev.style.height=s+'px'; prev.style.background=clr.value; }; size.oninput=updPrev; clr.oninput=updPrev; updPrev();
+        setTimeout(()=>{ cvs.width=cvs.parentElement.clientWidth; cvs.height=cvs.parentElement.clientHeight;
+            if(config && config.data && config.data.img){ const im=new Image(); im.onload=()=>{ try{ ctx.drawImage(im,0,0,cvs.width,cvs.height); }catch(_){} }; im.src=config.data.img; }
+            let paint=false; cvs.addEventListener('pointerdown',(e)=>{paint=true; ctx.beginPath(); try{cvs.setPointerCapture(e.pointerId);}catch(_){}}); cvs.addEventListener('pointerup',()=>{paint=false; saveBoardState();}); cvs.addEventListener('pointercancel',()=>{paint=false;}); cvs.addEventListener('pointermove',(e)=>{ if(!paint)return; e.preventDefault(); let r=cvs.getBoundingClientRect(); ctx.lineWidth=parseInt(size.value)||3; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle=clr.value; ctx.lineTo(e.clientX-r.left, e.clientY-r.top); ctx.stroke(); }); btn.onclick=()=>{ ctx.clearRect(0,0,cvs.width,cvs.height); saveBoardState(); }; },200);
     }
 
     function createQRCode(config){if(config===undefined)config=null;const body=createWidget('QR-KOD',220,'',config);const input=document.createElement('input');input.type='text';input.className='list-name-input hover-menu';input.placeholder='Klistra in länk här...';input.style.marginBottom='10px';const img=document.createElement('img');img.style.width='100%';img.style.display='none';img.style.borderRadius='8px';input.onchange=()=>{if(input.value){img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(input.value)}`;img.style.display='block';}else{img.style.display='none';}saveBoardState();};if(config&&config.data&&config.data.url){input.value=config.data.url;input.onchange();}body.appendChild(input);body.appendChild(img);}
@@ -1712,6 +1768,173 @@
     function createWorkSymbols(config) {if(config === undefined) config = null;const body = createWidget('ARBETSSÄTT', 350, '', config);const widget = body.parentElement.parentElement;const container = document.createElement('div');container.style.display = 'flex';container.style.justifyContent = 'center';container.style.gap = '20px';container.style.alignItems = 'center';container.style.padding = '15px 10px';container.style.flexWrap = 'wrap';const symbols = [ { icon: '🤫', name: 'Tyst' }, { icon: '🗣️', name: 'Viskton' }, { icon: '👥', name: 'Samarbete' }, { icon: '🙋', name: 'Räck upp hand' } ];for(let i=0; i<symbols.length; i++) {const s = symbols[i];const wrap = document.createElement('div'); wrap.style.textAlign = 'center'; wrap.className = 'work-symbol-wrap';const el = document.createElement('div'); el.className = 'work-symbol'; el.innerHTML = s.icon; el.dataset.icon = s.icon;const label = document.createElement('div'); label.innerText = s.name; label.style.fontSize = '13px'; label.style.fontWeight = 'bold'; label.style.marginTop = '10px';if(config && config.data && config.data.icon === s.icon) el.classList.add('active');el.onclick = () => {const isActive = el.classList.contains('active');const wraps = container.querySelectorAll('.work-symbol-wrap');for(let j=0; j<wraps.length; j++) wraps[j].style.display = 'block';const syms = container.querySelectorAll('.work-symbol');for(let j=0; j<syms.length; j++) syms[j].classList.remove('active');if(!isActive) {el.classList.add('active');for(let j=0; j<syms.length; j++) { if(syms[j] !== el) syms[j].parentElement.style.display = 'none'; }widget.style.width = '160px'; widget.style.height = 'auto';} else {widget.style.width = '350px';}saveBoardState();};wrap.appendChild(el); wrap.appendChild(label); container.appendChild(wrap);}const activeEl = container.querySelector('.work-symbol.active');if(activeEl) {const syms = container.querySelectorAll('.work-symbol');for(let j=0; j<syms.length; j++) { if(syms[j] !== activeEl) syms[j].parentElement.style.display = 'none'; }widget.style.width = '160px'; widget.style.height = 'auto';}body.appendChild(container);}
     
     function createImageViewer(config){}
+
+    // ---- TRAFIKLJUS ----
+    function createTrafficLight(config){
+        if(config===undefined)config=null;
+        const body = createWidget('TRAFIKLJUS', 92, 'traffic-widget', config);
+        const widget = body.parentElement.parentElement;
+        // Tät standardstorlek som matchar ljusets form (ingen tom kant)
+        if(!config){ widget.style.width='92px'; widget.style.height='236px'; }
+        body.innerHTML = `<div class='traffic-fit'><div class='traffic-container'><div class='light red'></div><div class='light yellow'></div><div class='light green'></div></div></div>`;
+        const cont = body.querySelector('.traffic-container');
+        const lights = body.querySelectorAll('.light');
+        lights.forEach(l=>{
+            l.onclick = ()=>{
+                const wasActive = l.classList.contains('active');
+                lights.forEach(x=>x.classList.remove('active'));
+                if(!wasActive) l.classList.add('active');
+                saveBoardState();
+            };
+        });
+        if(config && config.data && config.data.color){
+            const map = {red:0, yellow:1, green:2};
+            const idx = map[config.data.color];
+            if(idx!==undefined) lights[idx].classList.add('active');
+        }
+        // Skala ljuskroppen så den fyller widgeten vid storleksändring (behåller proportioner)
+        const baseW = 58, baseH = 146; // = ljus 34 + padding/gap (måste matcha CSS)
+        const fit = ()=>{ const aw=body.clientWidth, ah=body.clientHeight; if(!aw||!ah) return; const s=Math.max(0.2, Math.min(aw/baseW, ah/baseH)); cont.style.transform='scale('+s+')'; };
+        if(window.ResizeObserver){ const ro=new ResizeObserver(fit); ro.observe(body); }
+        setTimeout(fit, 60);
+    }
+
+    // ---- BELÖNINGSSYSTEM (stjärnor) ----
+    function createRewardSystem(config){
+        if(config===undefined)config=null;
+        const body = createWidget('BELÖNING', 300, '', config);
+        body.innerHTML = `<div class='reward-stars' style='min-height:80px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;margin-bottom:12px;'></div><div class='hover-menu' style='display:flex;gap:8px;justify-content:center;'><button class='btn btn-primary btn-add' style='flex:1;'>⭐ Lägg till</button><button class='btn btn-secondary btn-rem' style='flex:1;'>➖ Ta bort</button><button class='btn btn-danger btn-clr'>🗑️</button></div>`;
+        const cont = body.querySelector('.reward-stars');
+        const addStar = ()=>{ const s=document.createElement('span'); s.className='reward-star'; s.innerHTML='⭐'; cont.appendChild(s); };
+        body.querySelector('.btn-add').onclick = ()=>{ addStar(); saveBoardState(); };
+        body.querySelector('.btn-rem').onclick = ()=>{ const stars=cont.querySelectorAll('.reward-star'); if(stars.length)stars[stars.length-1].remove(); saveBoardState(); };
+        body.querySelector('.btn-clr').onclick = ()=>{ cont.innerHTML=''; saveBoardState(); };
+        let pts = (config && config.data && config.data.points) ? config.data.points : 0;
+        for(let i=0;i<pts;i++) addStar();
+    }
+
+    // ---- MINIRÄKNARE ----
+    function createCalculator(config){
+        if(config===undefined)config=null;
+        const body = createWidget('MINIRÄKNARE', 240, '', config);
+        body.innerHTML = `<div class='calc-grid'><div class='calc-display'>0</div></div>`;
+        const grid = body.querySelector('.calc-grid');
+        const disp = body.querySelector('.calc-display');
+        const keys = ['C','←','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','='];
+        const ops = ['/','*','-','+'];
+        keys.forEach(k=>{
+            const b=document.createElement('button');
+            b.className='calc-btn'+((ops.includes(k)||k==='='||k==='%')?' op':'');
+            b.innerText=k;
+            if(k==='0') b.style.gridColumn='span 2';
+            b.onclick=()=>{
+                let cur=disp.innerText;
+                if(k==='C'){ disp.innerText='0'; return; }
+                if(k==='←'){ disp.innerText = cur.length>1 ? cur.slice(0,-1) : '0'; return; }
+                if(k==='='){ try{ let r=Function('return ('+cur.replace(/%/g,'/100')+')')(); if(!isFinite(r)) throw 0; disp.innerText=(Math.round(r*1e8)/1e8).toString(); }catch(e){ disp.innerText='Fel'; } return; }
+                if(cur==='0' && !ops.includes(k) && k!=='.' && k!=='%') disp.innerText=k;
+                else if(cur==='Fel') disp.innerText = (ops.includes(k)?'0'+k:k);
+                else disp.innerText = cur + k;
+            };
+            grid.appendChild(b);
+        });
+    }
+
+    // ---- SVENSKA ALFABETET ----
+    function createAlphabetWidget(config){
+        if(config===undefined)config=null;
+        const body = createWidget('SVENSKA ALFABETET', 720, 'alphabet-widget', config);
+        const widget = body.parentElement.parentElement;
+        // Ny widget (ej laddad från sparat läge): ta hela skärmens bredd automatiskt
+        if(!config){
+            const margin = 24;
+            widget.style.left = margin + 'px';
+            widget.style.top = '60px';
+            widget.style.width = (window.innerWidth - margin*2) + 'px';
+        }
+        const cont = document.createElement('div'); cont.className='alphabet-container';
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ'.split('');
+        const colors = ['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5856d6','#af52de'];
+        // Talsyntes: uttala bokstaven på svenska
+        const speak = (ch)=>{
+            try {
+                if(!('speechSynthesis' in window)) return;
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(ch);
+                u.lang = 'sv-SE'; u.rate = 0.75; u.pitch = 1.1;
+                const sv = window.speechSynthesis.getVoices().find(v=>/sv|swed/i.test(v.lang+v.name));
+                if(sv) u.voice = sv;
+                window.speechSynthesis.speak(u);
+            } catch(e){}
+        };
+        letters.forEach((L,i)=>{
+            const el=document.createElement('span'); el.className='alpha-letter';
+            el.innerText = L + L.toLowerCase();
+            el.style.color = colors[i%colors.length];
+            // Hover: dansa (via CSS) + uttala. Klick: uttala igen.
+            el.addEventListener('mouseenter', ()=> speak(L));
+            el.addEventListener('click', ()=> speak(L));
+            cont.appendChild(el);
+        });
+        body.appendChild(cont);
+        // Vissa webbläsare laddar röster asynkront – trigga en laddning
+        try { if('speechSynthesis' in window) window.speechSynthesis.getVoices(); } catch(e){}
+    }
+
+    // ---- GRATTIS / FÖDELSEDAG ----
+    function createBirthdayWidget(config){
+        if(config===undefined)config=null;
+        const body = createWidget('GRATTIS', 340, 'grattis-widget', config);
+        const decos = ['🎈','🎉','🎊','🎁','🥳','⭐'];
+        const decoHTML = decos.map((d,i)=>`<div class='grattis-deco grattis-deco-${i+1}'>${d}</div>`).join('');
+        body.innerHTML = `<div class='grattis-container'>${decoHTML}<div class='fw-layer'></div><div style='font-size:46px;margin-bottom:2px;z-index:3;position:relative;'>🎂</div><div class='grattis-title'>Grattis på<br>födelsedagen!</div><input type='text' class='grattis-name-input' placeholder='Skriv namn...'><div class='confetti-container'></div></div>`;
+        const inp = body.querySelector('.grattis-name-input');
+        const cc = body.querySelector('.confetti-container');
+        const fw = body.querySelector('.fw-layer');
+        inp.oninput = saveBoardState;
+        if(config && config.data && config.data.name) inp.value = config.data.name;
+        const colors=['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5856d6','#ff2d55','#a64dff'];
+        // Kontinuerligt glitterregn (CSS-animationen loopar oändligt – spruta ut bitarna en gång)
+        for(let i=0;i<90;i++){
+            const c=document.createElement('div'); c.className='confetti';
+            c.style.left=(Math.random()*100)+'%';
+            const col=colors[Math.floor(Math.random()*colors.length)];
+            c.style.color=col; c.style.background=col;
+            const sz=(5+Math.random()*7); c.style.width=sz+'px'; c.style.height=sz+'px';
+            c.style.animationDuration=(1.6+Math.random()*2.2)+'s';
+            c.style.animationDelay=(-Math.random()*3)+'s';
+            if(Math.random()>0.5) c.style.borderRadius='50%';
+            cc.appendChild(c);
+        }
+        // Fyrverkeri som skjuts upp nerifrån och briserar – loopar automatiskt
+        const launchFirework = ()=>{
+            const W=fw.clientWidth, H=fw.clientHeight; if(!W||!H || !document.body.contains(fw)) return;
+            const x=20+Math.random()*(W-40);
+            const burstY=24+Math.random()*(H*0.45);
+            const col=colors[Math.floor(Math.random()*colors.length)];
+            const rocket=document.createElement('div'); rocket.className='fw-rocket';
+            rocket.style.left=x+'px'; rocket.style.background=col; rocket.style.boxShadow='0 0 6px '+col;
+            fw.appendChild(rocket);
+            const ra=rocket.animate([{transform:'translateY('+H+'px)',opacity:1},{transform:'translateY('+burstY+'px)',opacity:1}],{duration:650,easing:'cubic-bezier(0.2,0.7,0.4,1)'});
+            ra.onfinish=()=>{
+                rocket.remove();
+                const n=14;
+                for(let i=0;i<n;i++){
+                    const ang=(i/n)*Math.PI*2, dist=28+Math.random()*32;
+                    const p=document.createElement('div'); p.className='fw-particle';
+                    p.style.left=x+'px'; p.style.top=burstY+'px'; p.style.background=col; p.style.boxShadow='0 0 6px '+col;
+                    fw.appendChild(p);
+                    const pa=p.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+(Math.cos(ang)*dist)+'px,'+(Math.sin(ang)*dist)+'px) scale(0.3)',opacity:0}],{duration:750+Math.random()*450,easing:'ease-out'});
+                    pa.onfinish=()=>p.remove();
+                }
+            };
+        };
+        const fwTimer=setInterval(()=>{ if(!document.body.contains(body)){ clearInterval(fwTimer); return; } launchFirework(); }, 850);
+        setTimeout(launchFirework, 200);
+    }
+
+    // Säker stub – TÄRNING refereras i laddning men finns ingen knapp för den
+    function createDice(config){ if(config===undefined)config=null; const body=createWidget('TÄRNING',160,'',config); body.innerHTML=`<div class='dice-box'>🎲</div>`; const d=body.querySelector('.dice-box'); const roll=()=>{ d.classList.add('rolling'); let n=0; const iv=setInterval(()=>{ d.innerText=['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)]; if(++n>8){ clearInterval(iv); d.classList.remove('rolling'); saveBoardState(); } },80); }; d.onclick=roll; }
 
     // INITIALISERING & BOOTSTRAP
     function initBoard() {
@@ -1751,6 +1974,24 @@
         panel.addEventListener('mouseleave', closeP);
         // klick kvar för touch-tavlor (ingen hover där)
         tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); if(zone.classList.contains('open') && typeof markFeedSeen==='function') markFeedSeen(); };
+    })();
+
+    // ---- HÅLL SKÄRMEN VAKEN (skjut upp datorns viloläge medan appen visas) ----
+    (function(){
+        let wakeLock = null;
+        const requestLock = async ()=>{
+            try {
+                if('wakeLock' in navigator && document.visibilityState === 'visible'){
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', ()=>{ wakeLock = null; });
+                }
+            } catch(e){ /* t.ex. ej tillåtet eller ej stöd – ignorera tyst */ }
+        };
+        // Återta låset när fliken blir synlig igen (webbläsaren släpper det vid flikbyte)
+        document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible' && !wakeLock) requestLock(); });
+        // Begär låset så snart sidan är synlig, samt vid första interaktion (vissa webbläsare kräver en gest)
+        requestLock();
+        window.addEventListener('click', function once(){ if(!wakeLock) requestLock(); }, { once:false });
     })();
 </script>
 </body>
