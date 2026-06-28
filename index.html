@@ -28,6 +28,17 @@
         </div>
     </div>
 
+    <div id="custom-prompt-overlay" style="display: none;">
+        <div class="custom-alert-box">
+            <div id="custom-prompt-text" class="custom-alert-text"></div>
+            <input id="custom-prompt-input" class="custom-prompt-input" type="text">
+            <div class="custom-confirm-actions">
+                <button id="custom-prompt-no" class="custom-confirm-btn custom-confirm-no">Avbryt</button>
+                <button id="custom-prompt-ok" class="custom-confirm-btn custom-confirm-yes">OK</button>
+            </div>
+        </div>
+    </div>
+
     <div id="admin-panel-overlay" style="display: none;">
         <div class="admin-panel-box">
             <div class="admin-panel-head">
@@ -115,7 +126,7 @@
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
-            <button class="tool-btn" onclick="createQRCode()"><div class="icon">📱</div><div class="label">QR-Kod</div></button>
+            <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="26" height="26" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
             <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
             <button class="tool-btn" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
             <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
@@ -164,6 +175,8 @@
     .custom-alert-text { font-size: 16px; color: #333; margin-bottom: 22px; font-weight: 600; line-height: 1.5; }
     .custom-alert-ok { background: #007aff; color: white; padding: 10px 0; width: 100%; border-radius: 10px; font-size: 15px; }
     .custom-alert-ok:hover { background: #006ee0; }
+    .custom-prompt-input { width: 100%; box-sizing: border-box; font-size: 15px; padding: 10px 12px; border: 2px solid #e5e5ea; border-radius: 10px; outline: none; margin-bottom: 16px; font-family: inherit; }
+    .custom-prompt-input:focus { border-color: #007aff; }
     @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     
     #watermark { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' transform='rotate(-30, 300, 200)' fill='rgba(150,150,150,0.08)' font-size='60' font-family='Arial, sans-serif' font-weight='900' letter-spacing='4'%3EHIMNASKOLAN%3C/text%3E%3C/svg%3E"); background-repeat: repeat; }
@@ -301,7 +314,7 @@
     .board-table td { border: 1px solid #d1d1d6; padding: 6px; min-width: 60px; height: 40px; outline: none; transition: background 0.2s; font-size: 14px; word-wrap: break-word; }
     .board-table td:focus { background: #f0f8ff; border-color: #007aff; }
 
-    .real-clock-face { width: 140px; height: 140px; border-radius: 50%; background: #ffffff; border: 4px solid #333; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); margin-bottom: 8px; }
+    .real-clock-face { width: 140px; height: 140px; border-radius: 50%; background: #ffffff; border: 4px solid #333; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); margin: 0 auto 8px; align-self: center; }
     .real-clock-face::after { content: ''; position: absolute; width: 10px; height: 10px; background: #333; border-radius: 50%; z-index: 5; }
     .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; background: #333; border-radius: 4px; z-index: 3; }
     .hand.hour { width: 6px; height: 40px; margin-left: -3px; }
@@ -363,7 +376,8 @@
     .schedule-row { display: flex; gap: 6px; align-items: center; width: 100%; background: #f9f9fb; padding: 6px; border-radius: 8px; border: 1px solid #e5e5ea; margin-bottom: 6px; }
     .schedule-color-strip { width: 10px; border-radius: 4px; cursor: pointer; flex-shrink: 0; transition: background-color 0.2s; background-color: #e5e5ea; align-self: stretch; min-height: 32px; }
     .schedule-time-input { width: 65px; font-weight: bold; font-size: 13px; padding: 6px 4px; border: 1px solid #d1d1d6; border-radius: 6px; text-align: center; outline: none; flex-shrink: 0; }
-    .schedule-icon-select { width: 45px; font-size: 16px; padding: 4px; border: 1px solid #d1d1d6; border-radius: 6px; outline: none; background: white; cursor: pointer; text-align: center; flex-shrink: 0;}
+    .schedule-icon-select { width: 48px; font-size: 24px; padding: 2px; border: 1px solid transparent; border-radius: 6px; outline: none; background: transparent; cursor: pointer; text-align: center; text-align-last: center; flex-shrink: 0; appearance: none; -webkit-appearance: none; -moz-appearance: none; transition: background 0.2s, border-color 0.2s; }
+    .schedule-row:hover .schedule-icon-select, .schedule-icon-select:focus { background: white; border-color: #d1d1d6; appearance: auto; -webkit-appearance: menulist; -moz-appearance: menulist; }
     .schedule-task-input { flex-grow: 1; min-width: 60px; font-size: 14px; font-weight: bold; padding: 6px 8px; border: 1px solid #d1d1d6; border-radius: 6px; outline: none; user-select: text; }
     .row-del-btn { background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 16px; font-weight: bold; padding: 2px; flex-shrink: 0; }
     
@@ -375,6 +389,12 @@
     .timer-controls { display: flex; gap: 6px; justify-content: center; }
     .timer-input-group { display: flex; gap: 4px; justify-content: center; margin-bottom: 6px; }
     .timer-input { width: 40px; text-align: center; border: 1px solid #ddd; border-radius: 6px; padding: 2px; font-size: 14px; }
+    /* Digital timer i PNG-stil: färgplatta bakom siffrorna (grön→gul→röd), inga kanter */
+    .timer-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; }
+    .timer-widget .widget-resizer::after { border-color: #999; }
+    .timer-widget .widget-body { padding: 6px !important; }
+    .timer-widget .timer-display { background: #34c759; border-radius: 18px; padding: 8px 20px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.35); font-size: 58px; line-height: 1.05; margin-bottom: 0; box-shadow: 0 6px 18px rgba(0,0,0,0.18); transition: font-size 0.2s ease, margin 0.2s ease, background-color 0.9s linear; }
+    .timer-widget:hover .timer-display, .timer-widget:focus-within .timer-display { font-size: 32px; margin-bottom: 8px; }
     
     .traffic-widget { min-width: 64px !important; }
     .traffic-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; }
@@ -394,39 +414,41 @@
     .custom-bg-area { margin-top: 10px; border-top: 1px solid #e5e5ea; padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
     .custom-bg-label { font-size: 11px; font-weight: bold; color: #666; text-align: left; }
 
-    /* LEKTIONSSCHEMA - UPPDATERAT TILL RÖTT TEMA MED 3D & TYDLIGARE TEXT */
-    .lesson-widget .widget-header { background-color: #c92a20 !important; }
-    .lesson-widget .widget-inner { background: linear-gradient(145deg, #ff4e44 0%, #d63025 100%); box-shadow: inset 0 2px 5px rgba(255,255,255,0.35), inset 0 -2px 5px rgba(0,0,0,0.2), 0 10px 30px rgba(0,0,0,0.15); border: none; padding: 10px !important; }
-    .lesson-widget .widget-body { padding: 15px; color: white; gap: 12px; }
-    .lesson-top-row { display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; }
-    .lesson-header-input { background: transparent; border: none; color: white; font-size: 22px; font-weight: bold; text-align: center; font-family: inherit; outline: none; width: 30%; min-width: 100px;}
-    .lesson-header-sep { font-weight: 300; margin: 0 10px; opacity: 0.8; }
-    .lesson-goal-row { background: rgba(0,0,0,0.15); border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; font-size: 15px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
-    .lesson-goal-label { color: #ffcc00; font-weight: bold; margin-right: 5px; }
-    .lesson-goal-input { background: transparent; border: none; color: #ffffff !important; font-size: 15px; font-family: inherit; outline: none; flex-grow: 1; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
-    .lesson-goal-input::placeholder { color: rgba(255,255,255,0.8); font-weight: normal; }
+    /* LEKTIONSSCHEMA - LJUST TEMA I LINJE MED ÖVRIGA WIDGETAR */
+    .lesson-widget .widget-header { background-color: #ff3b30 !important; }
+    .lesson-widget .widget-inner { background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 2px solid #ff3b30; }
+    .lesson-widget .widget-body { padding: 14px; color: #333; gap: 12px; }
+    .lesson-top-row { display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; background: #ff3b30; border-radius: 10px; padding: 8px 10px; }
+    .lesson-header-input { background: transparent; border: none; color: #ffffff; font-size: 22px; font-weight: bold; text-align: center; font-family: inherit; outline: none; width: 30%; min-width: 100px;}
+    .lesson-header-input::placeholder { color: rgba(255,255,255,0.75); }
+    .lesson-header-sep { font-weight: 300; margin: 0 10px; color: rgba(255,255,255,0.7); }
+    .lesson-widget .lesson-date { color: #ffffff !important; }
+    .lesson-goal-row { background: #f2f2f7; border: 1px solid #e5e5ea; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; font-size: 15px; font-weight: 600; }
+    .lesson-goal-label { color: #ff3b30; font-weight: bold; margin-right: 5px; }
+    .lesson-goal-input { background: transparent; border: none; color: #333 !important; font-size: 15px; font-family: inherit; outline: none; flex-grow: 1; font-weight: 600; }
+    .lesson-goal-input::placeholder { color: #999; font-weight: normal; }
     .lesson-cols-row { display: flex; gap: 12px; flex-grow: 1; height: 100%; min-height: 180px; }
-    .lesson-card { background: white; border-radius: 10px; padding: 12px; flex: 1; display: flex; flex-direction: column; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-    .lesson-card-title { background: transparent; border: none; color: #d63025; font-size: 17px; font-weight: bold; font-family: inherit; outline: none; margin-bottom: 8px; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    .lesson-card { background: #fafafe; border: 1px solid #e5e5ea; border-radius: 10px; padding: 12px; flex: 1; display: flex; flex-direction: column; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .lesson-card-title { background: transparent; border: none; color: #ff3b30; font-size: 17px; font-weight: bold; font-family: inherit; outline: none; margin-bottom: 8px; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 5px; }
     .lesson-card-content { flex-grow: 1; outline: none; color: #222; font-size: 15px; font-weight: 500; line-height: 1.6; overflow-y: auto; }
-    
-    /* LEKTIONSSCHEMA - NY BOTTENRAD MED TIMER */
-    .lesson-footer-row { display: flex; gap: 10px; margin-top: 10px; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.1); padding: 8px 12px; border-radius: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+
+    /* LEKTIONSSCHEMA - BOTTENRAD MED TIMER (ljust) */
+    .lesson-footer-row { display: flex; gap: 10px; margin-top: 10px; align-items: center; justify-content: space-between; background: #f2f2f7; padding: 8px 12px; border-radius: 8px; border: 1px solid #e5e5ea; }
     .lesson-link-area { display: flex; gap: 5px; flex-grow: 1; max-width: 50%; }
-    .lesson-link-input { flex-grow: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; color: white; padding: 4px 8px; font-size: 13px; outline: none; font-family: inherit; }
-    .lesson-link-input::placeholder { color: rgba(255,255,255,0.6); }
-    .lesson-link-input:focus { background: rgba(255,255,255,0.2); border-color: white; }
-    .lesson-link-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; cursor: pointer; padding: 0 10px; font-size: 12px; font-weight: bold; transition: 0.2s; }
-    .lesson-link-btn:hover { background: rgba(255,255,255,0.4); }
+    .lesson-link-input { flex-grow: 1; background: white; border: 1px solid #d1d1d6; border-radius: 4px; color: #333; padding: 4px 8px; font-size: 13px; outline: none; font-family: inherit; }
+    .lesson-link-input::placeholder { color: #999; }
+    .lesson-link-input:focus { border-color: #007aff; }
+    .lesson-link-btn { background: #007aff; border: none; color: white; border-radius: 4px; cursor: pointer; padding: 0 10px; font-size: 12px; font-weight: bold; transition: 0.2s; }
+    .lesson-link-btn:hover { filter: brightness(1.1); }
 
     .lesson-timer-wrap { display: flex; gap: 8px; align-items: center; }
-    .lesson-timer-input { width: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; color: white; padding: 4px; text-align: center; font-size: 14px; font-weight: bold; outline: none; }
-    .lesson-timer-btn { background: #ffcc00; color: #333; border: none; border-radius: 4px; cursor: pointer; padding: 4px 12px; font-weight: bold; font-size: 13px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .lesson-timer-input { width: 50px; background: white; border: 1px solid #d1d1d6; border-radius: 4px; color: #333; padding: 4px; text-align: center; font-size: 14px; font-weight: bold; outline: none; }
+    .lesson-timer-btn { background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 4px 12px; font-weight: bold; font-size: 13px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
     .lesson-timer-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
-    
-    .lesson-timer-progress-bg { position: relative; width: 100px; height: 26px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+
+    .lesson-timer-progress-bg { position: relative; width: 100px; height: 26px; background: #e5e5ea; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .lesson-timer-progress-fill { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: #4cd964; transform-origin: left; z-index: 1; }
-    .lesson-timer-text { position: relative; z-index: 2; color: white; font-family: monospace; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+    .lesson-timer-text { position: relative; z-index: 2; color: #1f2937; font-family: monospace; font-weight: bold; font-size: 15px; }
 
     .work-symbol { font-size: 40px; cursor: pointer; opacity: 0.4; filter: grayscale(100%); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 8px; border-radius: 12px; display: inline-block; margin: 0 auto; }
     .work-symbol.active { opacity: 1; filter: grayscale(0%); background: #f0f8ff; box-shadow: 0 4px 15px rgba(0,122,255,0.25); transform: scale(1.35); border: 2px solid #007aff; }
@@ -434,6 +456,16 @@
     
     .reward-star { font-size: 36px; color: #ffcc00; text-shadow: 0 2px 4px rgba(0,0,0,0.2); margin: 2px; display: inline-block; animation: pop 0.3s ease; }
     @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+    /* Belöning i PNG-stil (genomskinligt kort, stjärnor flyter) */
+    .reward-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
+    .reward-widget .widget-resizer::after { border-color: #999; }
+    .reward-stars:empty::before { content: '⭐'; font-size: 46px; opacity: 0.22; }
+    /* Svaga platshållare i tomma resultatytor så de inte ser tomma ut i vila */
+    .name-result:empty::before { content: '🎲 Tryck för att slumpa'; color: #c7c7cc; font-size: 14px; font-weight: 600; }
+    .group-result:empty::before { content: '👥 Grupperna visas här'; color: #c7c7cc; font-size: 13px; font-weight: 600; display: block; text-align: center; padding: 16px 0; }
+    /* Krymp ihop dolda kontroller i vila så slump-/ord-/grupp-korten blir kompakta */
+    .word-widget .hover-menu, .name-widget .hover-menu { transition: opacity 0.25s ease, max-height 0.25s ease, margin 0.2s ease, padding 0.2s ease; max-height: 600px; }
+    .word-widget:not(:hover):not(:focus-within) .hover-menu, .name-widget:not(:hover):not(:focus-within) .hover-menu { max-height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: hidden; }
     
     .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .calc-btn { background: #f2f2f7; border: 1px solid #d1d1d6; border-radius: 8px; padding: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.1s; }
@@ -833,9 +865,28 @@
         btnNo.onclick = () => { cleanup(); };
     }
 
+    // Egen inmatningsruta (ersätter webbläsarens prompt så vi slipper "På den här sidan står det...")
+    function customPrompt(message, defaultValue, onConfirm, placeholder) {
+        const ov = document.getElementById('custom-prompt-overlay');
+        const tx = document.getElementById('custom-prompt-text');
+        const inp = document.getElementById('custom-prompt-input');
+        const ok = document.getElementById('custom-prompt-ok');
+        const no = document.getElementById('custom-prompt-no');
+        tx.innerText = message;
+        inp.value = defaultValue || '';
+        inp.placeholder = placeholder || '';
+        ov.style.display = 'flex';
+        setTimeout(() => { inp.focus(); inp.select(); }, 50);
+        const cleanup = () => { ov.style.display = 'none'; ok.onclick = null; no.onclick = null; inp.onkeydown = null; };
+        const doConfirm = () => { const v = inp.value; cleanup(); if (v && v.trim()) onConfirm(v.trim()); };
+        ok.onclick = doConfirm;
+        no.onclick = cleanup;
+        inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); doConfirm(); } else if (e.key === 'Escape') { cleanup(); } };
+    }
+
     function toggleFullScreen() {
         const appWrapper = document.getElementById('cb-app-wrapper');
-        if (!document.fullscreenElement) { appWrapper.requestFullscreen().catch(err => { alert(`Kunde inte starta helskärmsläge: ${err.message}`); }); } 
+        if (!document.fullscreenElement) { appWrapper.requestFullscreen().catch(err => { customAlert('Kunde inte starta helskärmsläge: ' + err.message, '⚠️'); }); }
         else { document.exitFullscreen(); }
     }
 
@@ -1186,8 +1237,8 @@
     function createDailySchedule(config){
         const body = createWidget('DAGENS SCHEMA', 450, 'schedule-widget', config);
         const widgetEl = body.parentElement.parentElement;
-        const topStrip = document.createElement('div'); topStrip.style = 'background:#ff3b30;color:white;font-weight:bold;height:44px;padding:0 15px;display:flex;justify-content:space-between;align-items:center;cursor:move;'; topStrip.innerHTML = `<span>Dagens schema</span><div class='widget-controls'><span class='widget-ctrl-icon sch-min'>➖</span><span class='widget-ctrl-icon sch-lock-icon'>🔓</span><span class='widget-ctrl-icon sch-close'>✖</span></div>`;
-        body.appendChild(topStrip); makeDraggable(body.parentElement, topStrip);
+        const topStrip = document.createElement('div'); topStrip.style = 'background:#ff3b30;color:white;font-weight:bold;height:44px;padding:0 15px;display:flex;justify-content:space-between;align-items:center;cursor:move;touch-action:none;'; topStrip.innerHTML = `<span>Dagens schema</span><div class='widget-controls'><span class='widget-ctrl-icon sch-min'>➖</span><span class='widget-ctrl-icon sch-lock-icon'>🔓</span><span class='widget-ctrl-icon sch-close'>✖</span></div>`;
+        body.appendChild(topStrip); makeDraggable(widgetEl, topStrip);
         const schContent = document.createElement('div'); schContent.className = 'sched-content';
         const lockIcon = topStrip.querySelector('.sch-lock-icon'); lockIcon.innerHTML = widgetEl.classList.contains('locked') ? '🔒' : '🔓';
         lockIcon.onclick = (e) => { e.stopPropagation(); widgetEl.classList.toggle('locked'); lockIcon.innerHTML = widgetEl.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
@@ -1218,7 +1269,7 @@
         const body = createWidget('LEKTIONSSCHEMA', 700, 'lesson-widget', config); const tr = document.createElement('div'); tr.className='lesson-top-row';
         const sVal=config&&config.data?config.data.subj:'Svenska', cVal=config&&config.data?config.data.cls:'4B';
         let dt = new Date().toLocaleDateString('sv-SE', {weekday:'long', day:'numeric', month:'long'}); dt = dt.charAt(0).toUpperCase() + dt.slice(1); const dVal=config&&config.data?config.data.date:dt;
-        tr.innerHTML = `<input type='text' class='lesson-header-input' value='${sVal}' placeholder='Ämne'><span class='lesson-header-sep'>|</span><input type='text' class='lesson-header-input' value='${cVal}' placeholder='Klass'><span class='lesson-header-sep'>|</span><input type='text' class='lesson-header-input' value='${dVal}' placeholder='Datum'>`;
+        tr.innerHTML = `<input type='text' class='lesson-header-input' value='${sVal}' placeholder='Ämne'><span class='lesson-header-sep'>|</span><input type='text' class='lesson-header-input' value='${cVal}' placeholder='Klass'><span class='lesson-header-sep'>|</span><input type='text' class='lesson-header-input lesson-date' value='${dVal}' placeholder='Datum'>`;
         const gr = document.createElement('div'); gr.className='lesson-goal-row'; gr.innerHTML=`<span class='lesson-goal-label'>Mål: </span><input type='text' class='lesson-goal-input' placeholder='Skriv lektionens mål...' value='${config&&config.data?config.data.goal:""}'>`;
         const cr = document.createElement('div'); cr.className='lesson-cols-row';
         function makeCard(t,h){ const cd=document.createElement('div'); cd.className='lesson-card'; cd.innerHTML=`<input type='text' class='lesson-card-title' value='${t}'><div class='lesson-card-content' contenteditable='true'>${h}</div>`; cr.appendChild(cd); }
@@ -1259,7 +1310,13 @@
             sw.addEventListener('mousedown', (e)=>{ e.preventDefault(); document.execCommand('styleWithCSS',false,true); document.execCommand('foreColor',false,col); });
             colWrap.appendChild(sw);
         });
-        tb.querySelector('.ed-l').onclick = ()=>{const u=prompt('Länk:','https://'); if(u)document.execCommand('createLink',false,u);};
+        tb.querySelector('.ed-l').onclick = ()=>{
+            const sel=window.getSelection(); const savedRange = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+            customPrompt('Klistra in länken här:', 'https://', (u)=>{
+                if(savedRange){ sel.removeAllRanges(); sel.addRange(savedRange); }
+                document.execCommand('createLink',false,u);
+            }, 'https://exempel.se');
+        };
         const ec = document.createElement('div'); ec.className = 'editor-content'; ec.setAttribute('contenteditable', 'true');
         ec.addEventListener('click', (e) => { const l = e.target.closest('a'); if (l) { e.preventDefault(); window.open(l.href, 'TPop', 'width=800,height=600,resizable=yes'); } });
         if(config && config.data && config.data.html) ec.innerHTML = config.data.html; body.appendChild(tb); body.appendChild(ec);
@@ -1274,7 +1331,7 @@
         body.querySelector('.btn-save').onclick=()=>{ let t=ni.value.trim(), cn=txt.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; l[t]=cn; localStorage.setItem('savedWordLists_',JSON.stringify(l)); ni.value=''; loadW(); sel.value=t; saveBoardState(); };
         body.querySelector('.btn-del').onclick=()=>{ if(!sel.value)return; customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; delete l[sel.value]; localStorage.setItem('savedWordLists_',JSON.stringify(l)); txt.value=''; res.innerHTML=''; loadW(); saveBoardState(); }); };
         if(config&&config.data){ if(config.data.list) setTimeout(()=>sel.value=config.data.list, 100); if(config.data.text) txt.value=config.data.text; if(config.data.result) res.innerHTML=config.data.result; }
-        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerHTML='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let w=n[Math.floor(Math.random()*n.length)]; res.innerHTML=`<span style='color:#ff3b30;font-size:36px;font-weight:900;'>${w}</span>`; saveBoardState(); } },80); };
+        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerHTML='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let w=n[Math.floor(Math.random()*n.length)]; res.innerHTML=`<span style='color:#ff3b30;font-size:36px;font-weight:900;'>${w}</span>`; saveBoardState(); showWinnerPopup(w); } },80); };
     }
 
     // ---- POPUP-HJÄLPARE (konfetti + vinnarruta + Grej of the day-steg) ----
@@ -1297,11 +1354,24 @@
     }
 
     // Enkel vinnarruta (används av Slumpa namn m.fl.)
+    // Känner igen vanliga svenska pojk-/flicknamn → blå resp. rosa färg (null om okänt/ord)
+    const BOY_NAMES = new Set(('william liam noah hugo lucas oliver oscar elias alexander adam filip philip anton axel erik albin leon theo theodore gustav ludvig vincent melvin arvid sixten frank otto wilmer sam charlie nils edvin isak isac leo benjamin alfred viktor victor emil felix jacob jakob joel elliot elliott malte love hjalmar kasper casper loke vidar mans theodor walter henry milo ebbe frans nicolas carl karl johan anders andreas daniel david fredrik henrik jonas lars magnus marcus markus martin mattias matias mikael micke niklas patrik peter robin simon stefan tobias tom pontus sebastian rasmus linus kalle pelle olle sven gunnar bo bertil ali muhammed mohammed mohamed ahmed omar hassan yusuf ibrahim adam aron aaron noel colin kevin dennis jonathan jonatan max alfons folke ivar julius jim john george elton').split(' '));
+    const GIRL_NAMES = new Set(('alice maja vera ella ebba wilma freja astrid alma olivia elsa agnes lilly lily saga selma alva ines stella signe klara clara iris molly julia emma ellen isabelle isabella tuva lova nora stina tilde linnea elvira hanna nellie sara sofia sophia sofie felicia moa ida emilia amanda matilda elin wilhelmina edith greta hilda ester thea liv juni tindra cornelia leah lea nova meja ronja mira maria anna karin kristina christina lena eva birgitta ingrid margareta linda malin jenny johanna josefin camilla cecilia caroline frida rebecca therese victoria lisa nina petra sandra susanne ulrika asta doris majken minna siri jasmine jasmin amina fatima zara nour layla yara mariam aisha tilda tyra alicia celine wilda vilda livia ada maja sigrid disa hedda elise lovisa rakel rebecka tora ingela ester').split(' '));
+    function nameGenderColor(raw){
+        if(!raw) return null;
+        let t = String(raw).trim().toLowerCase().replace(/[⭐🌟✨\s].*$/,'').replace(/[^a-zåäöéèüæø-]/g,'');
+        if(!t) return null;
+        if(BOY_NAMES.has(t)) return '#007aff';   // blå
+        if(GIRL_NAMES.has(t)) return '#ff3ea5';   // rosa
+        return null;
+    }
+
     function showWinnerPopup(name){
         const wrapper = document.getElementById('cb-app-wrapper');
         const overlay = document.createElement('div');
         overlay.className = 'popup-overlay';
-        overlay.innerHTML = `<div class='popup-box'><div class='popup-title'>Vinnare</div><div class='popup-name'>${name}</div></div>`;
+        const gc = nameGenderColor(name);
+        overlay.innerHTML = `<div class='popup-box'><div class='popup-name'${gc?` style='color:${gc}'`:''}>${name}</div></div>`;
         wrapper.appendChild(overlay);
         spawnPopupConfetti(overlay);
         const box = overlay.querySelector('.popup-box');
@@ -1459,7 +1529,7 @@
         body.querySelector('.btn-save').onclick=()=>{ let t=ni.value.trim(), cn=txt.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; l[t]=cn; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); ni.value=''; loadN(); sel.value=t; saveBoardState(); };
         body.querySelector('.btn-del').onclick=()=>{ if(!sel.value)return; customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; delete l[sel.value]; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); txt.value=''; res.innerText=''; loadN(); saveBoardState(); }); };
         if(config&&config.data){ if(config.data.list) setTimeout(()=>sel.value=config.data.list,100); if(config.data.text) txt.value=config.data.text; if(config.data.removeCb!==undefined) cb.checked=config.data.removeCb; }
-        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerText='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let idx=Math.floor(Math.random()*n.length), w=n[idx]; res.innerText=`⭐ ${w} ⭐`; if(cb.checked){ n.splice(idx,1); txt.value=n[Math.floor(Math.random()*n.length)]; } saveBoardState(); showWinnerPopup(w); } },80); };
+        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerText='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let idx=Math.floor(Math.random()*n.length), w=n[idx]; const gc=nameGenderColor(w)||'#ff3b30'; res.innerHTML=`<span style='color:${gc}'>⭐ ${w} ⭐</span>`; if(cb.checked){ n.splice(idx,1); txt.value=n[Math.floor(Math.random()*n.length)]; } saveBoardState(); showWinnerPopup(w); } },80); };
     }
 
     // Gemensam (central) Brain Break-videolista – delas av alla, hanteras av admin
@@ -1658,11 +1728,15 @@
         const widget = body.parentElement.parentElement;
         const obs = new MutationObserver(()=>{ if(!document.body.contains(widget)){ stop(); obs.disconnect(); } });
         const cc = document.getElementById('canvas-container-v6'); if(cc) obs.observe(cc, { childList:true, subtree:true });
+        // Starta mätningen automatiskt direkt när widgeten öppnas (inom användarens klick → mic-tillåtelse kan begäras)
+        status.innerText = 'Startar… 🎤';
+        if(!config) start();
+        else setTimeout(start, 150); // återställd från sparat läge: försök starta om tillåtelse redan finns
     }
 
     function createStickyNote(config){
         const body = createWidget('KLISTERLAPP', 240, 'sticky-note', config);
-        body.innerHTML = `<input type='text' class='sticky-title-input' placeholder='Rubrik...'><textarea class='sticky-textarea' placeholder='Skriv din lapp här...'></textarea>`;
+        body.innerHTML = `<input type='text' class='sticky-title-input' placeholder='Ex. frånvarande/Vi saknar ...'><textarea class='sticky-textarea' placeholder='Skriv din lapp här...'></textarea>`;
         const title = body.querySelector('.sticky-title-input'), ta = body.querySelector('.sticky-textarea');
         if(config && config.data){ title.value = config.data.title || ''; ta.value = config.data.text || ''; }
         title.oninput = saveBoardState; ta.oninput = saveBoardState;
@@ -1674,16 +1748,19 @@
         sel.onchange=()=>{ if(sel.value){ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txt.value=l[sel.value]||''; } };
         const ld=()=>{ sel.innerHTML='<option value="">-- Välj lista --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;sel.appendChild(o);}); }; ld();
         if(config&&config.data){ if(config.data.list) setTimeout(()=>sel.value=config.data.list,100); if(config.data.text) txt.value=config.data.text; if(config.data.count) ci.value=config.data.count; if(config.data.result) res.innerHTML=config.data.result; }
-        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); let ng=parseInt(ci.value)||2; if(n.length===0)return; for(let i=n.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=n[i];n[i]=n[j];n[j]=t;} let g=[]; for(let i=0;i<ng;i++)g.push([]); n.forEach((x,i)=>g[i%ng].push(x)); res.innerHTML=''; g.forEach((x,i)=>{ if(x.length===0)return; let card=document.createElement('div'); card.className='group-card'; card.innerHTML=`<div class='group-title'>Grupp ${i+1}</div>`+x.map(y=>`<div>${y}</div>`).join(''); res.appendChild(card); }); saveBoardState(); };
+        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); let ng=parseInt(ci.value)||2; if(n.length===0)return; for(let i=n.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=n[i];n[i]=n[j];n[j]=t;} let g=[]; for(let i=0;i<ng;i++)g.push([]); n.forEach((x,i)=>g[i%ng].push(x)); res.innerHTML=''; g.forEach((x,i)=>{ if(x.length===0)return; let card=document.createElement('div'); card.className='group-card'; card.innerHTML=`<div class='group-title'>Grupp ${i+1}</div>`+x.map(y=>{const c=nameGenderColor(y); return `<div${c?` style='color:${c};font-weight:700'`:''}>${y}</div>`;}).join(''); res.appendChild(card); }); saveBoardState(); };
     }
 
     function createTimer(config) {
-        const body = createWidget('DIGITAL TIMER', 220, '', config); body.innerHTML = `<div class='timer-input-group hover-menu'><input class='timer-input min-i' value='05' type='number'>:<input class='timer-input sec-i' value='00' type='number'></div><div class='timer-display'>05:00</div><div class='timer-controls hover-menu'><button class='btn btn-primary btn-s'>Start</button><button class='btn btn-danger btn-r'>Nollställ</button></div>`;
+        const body = createWidget('DIGITAL TIMER', 240, 'timer-widget', config); body.innerHTML = `<div class='timer-input-group hover-menu'><input class='timer-input min-i' value='05' type='number'>:<input class='timer-input sec-i' value='00' type='number'></div><div class='timer-display'>05:00</div><div class='timer-controls hover-menu'><button class='btn btn-primary btn-s'>Start</button><button class='btn btn-danger btn-r'>Nollställ</button></div>`;
         const ig=body.querySelector('.timer-input-group'), mi=body.querySelector('.min-i'), si=body.querySelector('.sec-i'), disp=body.querySelector('.timer-display'), btnS=body.querySelector('.btn-s'), btnR=body.querySelector('.btn-r');
-        let tLeft = 300, tId = null; const upd=()=>{ let m=Math.floor(tLeft/60).toString().padStart(2,'0'), s=(tLeft%60).toString().padStart(2,'0'); disp.innerText=`${m}:${s}`; };
-        if(config&&config.data){ if(config.data.min)mi.value=config.data.min; if(config.data.sec)si.value=config.data.sec; tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); upd(); }
-        btnS.onclick=()=>{ if(tId){ clearInterval(tId); tId=null; btnS.innerText='Start'; ig.style.display='flex'; } else { unlockAudio(); if(ig.style.display!=='none'){ tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); ig.style.display='none'; } btnS.innerText='Paus'; tId=setInterval(()=>{ if(tLeft>0){ tLeft--; upd(); } else { clearInterval(tId); tId=null; btnS.innerText='Start'; ig.style.display='flex'; playTimerSound(); customAlert('Tiden är ute! ⏰','⏰'); } },1000); } };
-        btnR.onclick=()=>{ clearInterval(tId); tId=null; tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); btnS.innerText='Start'; ig.style.display='flex'; upd(); };
+        let tLeft = 300, tTotal = 300, tId = null;
+        const setColor=()=>{ const frac = tTotal>0 ? Math.max(0, Math.min(1, tLeft/tTotal)) : 1; disp.style.background = `hsl(${Math.round(frac*120)}, 72%, 47%)`; };
+        const upd=()=>{ let m=Math.floor(tLeft/60).toString().padStart(2,'0'), s=(tLeft%60).toString().padStart(2,'0'); disp.innerText=`${m}:${s}`; setColor(); };
+        if(config&&config.data){ if(config.data.min)mi.value=config.data.min; if(config.data.sec)si.value=config.data.sec; tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); tTotal=tLeft||1; }
+        upd();
+        btnS.onclick=()=>{ if(tId){ clearInterval(tId); tId=null; btnS.innerText='Start'; ig.style.display='flex'; } else { unlockAudio(); if(ig.style.display!=='none'){ tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); tTotal=tLeft||1; ig.style.display='none'; } btnS.innerText='Paus'; tId=setInterval(()=>{ if(tLeft>0){ tLeft--; upd(); } else { clearInterval(tId); tId=null; btnS.innerText='Start'; ig.style.display='flex'; disp.style.background='#ff3b30'; playTimerSound(); customAlert('Tiden är ute! ⏰','⏰'); } },1000); } };
+        btnR.onclick=()=>{ clearInterval(tId); tId=null; tLeft=(parseInt(mi.value)||0)*60+(parseInt(si.value)||0); tTotal=tLeft||1; btnS.innerText='Start'; ig.style.display='flex'; upd(); };
     }
 
     function createAnalogTimer(config){
@@ -1762,7 +1839,7 @@
             let paint=false; cvs.addEventListener('pointerdown',(e)=>{paint=true; ctx.beginPath(); try{cvs.setPointerCapture(e.pointerId);}catch(_){}}); cvs.addEventListener('pointerup',()=>{paint=false; saveBoardState();}); cvs.addEventListener('pointercancel',()=>{paint=false;}); cvs.addEventListener('pointermove',(e)=>{ if(!paint)return; e.preventDefault(); let r=cvs.getBoundingClientRect(); ctx.lineWidth=parseInt(size.value)||3; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle=clr.value; ctx.lineTo(e.clientX-r.left, e.clientY-r.top); ctx.stroke(); }); btn.onclick=()=>{ ctx.clearRect(0,0,cvs.width,cvs.height); saveBoardState(); }; },200);
     }
 
-    function createQRCode(config){if(config===undefined)config=null;const body=createWidget('QR-KOD',220,'',config);const input=document.createElement('input');input.type='text';input.className='list-name-input hover-menu';input.placeholder='Klistra in länk här...';input.style.marginBottom='10px';const img=document.createElement('img');img.style.width='100%';img.style.display='none';img.style.borderRadius='8px';input.onchange=()=>{if(input.value){img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(input.value)}`;img.style.display='block';}else{img.style.display='none';}saveBoardState();};if(config&&config.data&&config.data.url){input.value=config.data.url;input.onchange();}body.appendChild(input);body.appendChild(img);}
+    function createQRCode(config){if(config===undefined)config=null;const body=createWidget('QR-KOD',220,'',config);const input=document.createElement('input');input.type='text';input.className='list-name-input hover-menu';input.placeholder='Klistra in länk här...';input.style.marginBottom='10px';const hint=document.createElement('div');hint.innerHTML='📱<div style="font-size:12px;font-weight:600;color:#c7c7cc;margin-top:6px;">Klistra in en länk:<br>och tryck på Enter</div>';hint.style.cssText='text-align:center;font-size:40px;opacity:0.5;padding:14px 0;';const img=document.createElement('img');img.style.width='100%';img.style.display='none';img.style.borderRadius='8px';const refresh=()=>{if(input.value){img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(input.value)}`;img.style.display='block';hint.style.display='none';}else{img.style.display='none';hint.style.display='block';}};input.onchange=()=>{refresh();saveBoardState();};input.onkeydown=(e)=>{if(e.key==='Enter'){e.preventDefault();refresh();saveBoardState();}};if(config&&config.data&&config.data.url){input.value=config.data.url;}refresh();body.appendChild(input);body.appendChild(hint);body.appendChild(img);}
     
     // ARBETSSÄTT WIDGET ÅTERSTÄLLD TILL DET URSPRUNGLIGA GÖMMA-BETEENDET
     function createWorkSymbols(config) {if(config === undefined) config = null;const body = createWidget('ARBETSSÄTT', 350, '', config);const widget = body.parentElement.parentElement;const container = document.createElement('div');container.style.display = 'flex';container.style.justifyContent = 'center';container.style.gap = '20px';container.style.alignItems = 'center';container.style.padding = '15px 10px';container.style.flexWrap = 'wrap';const symbols = [ { icon: '🤫', name: 'Tyst' }, { icon: '🗣️', name: 'Viskton' }, { icon: '👥', name: 'Samarbete' }, { icon: '🙋', name: 'Räck upp hand' } ];for(let i=0; i<symbols.length; i++) {const s = symbols[i];const wrap = document.createElement('div'); wrap.style.textAlign = 'center'; wrap.className = 'work-symbol-wrap';const el = document.createElement('div'); el.className = 'work-symbol'; el.innerHTML = s.icon; el.dataset.icon = s.icon;const label = document.createElement('div'); label.innerText = s.name; label.style.fontSize = '13px'; label.style.fontWeight = 'bold'; label.style.marginTop = '10px';if(config && config.data && config.data.icon === s.icon) el.classList.add('active');el.onclick = () => {const isActive = el.classList.contains('active');const wraps = container.querySelectorAll('.work-symbol-wrap');for(let j=0; j<wraps.length; j++) wraps[j].style.display = 'block';const syms = container.querySelectorAll('.work-symbol');for(let j=0; j<syms.length; j++) syms[j].classList.remove('active');if(!isActive) {el.classList.add('active');for(let j=0; j<syms.length; j++) { if(syms[j] !== el) syms[j].parentElement.style.display = 'none'; }widget.style.width = '160px'; widget.style.height = 'auto';} else {widget.style.width = '350px';}saveBoardState();};wrap.appendChild(el); wrap.appendChild(label); container.appendChild(wrap);}const activeEl = container.querySelector('.work-symbol.active');if(activeEl) {const syms = container.querySelectorAll('.work-symbol');for(let j=0; j<syms.length; j++) { if(syms[j] !== activeEl) syms[j].parentElement.style.display = 'none'; }widget.style.width = '160px'; widget.style.height = 'auto';}body.appendChild(container);}
@@ -1802,7 +1879,7 @@
     // ---- BELÖNINGSSYSTEM (stjärnor) ----
     function createRewardSystem(config){
         if(config===undefined)config=null;
-        const body = createWidget('BELÖNING', 300, '', config);
+        const body = createWidget('BELÖNING', 300, 'reward-widget', config);
         body.innerHTML = `<div class='reward-stars' style='min-height:80px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;margin-bottom:12px;'></div><div class='hover-menu' style='display:flex;gap:8px;justify-content:center;'><button class='btn btn-primary btn-add' style='flex:1;'>⭐ Lägg till</button><button class='btn btn-secondary btn-rem' style='flex:1;'>➖ Ta bort</button><button class='btn btn-danger btn-clr'>🗑️</button></div>`;
         const cont = body.querySelector('.reward-stars');
         const addStar = ()=>{ const s=document.createElement('span'); s.className='reward-star'; s.innerHTML='⭐'; cont.appendChild(s); };
@@ -1891,8 +1968,10 @@
         const inp = body.querySelector('.grattis-name-input');
         const cc = body.querySelector('.confetti-container');
         const fw = body.querySelector('.fw-layer');
-        inp.oninput = saveBoardState;
+        const applyNameColor = ()=>{ inp.style.color = nameGenderColor(inp.value) || '#007aff'; };
+        inp.oninput = ()=>{ applyNameColor(); saveBoardState(); };
         if(config && config.data && config.data.name) inp.value = config.data.name;
+        applyNameColor();
         const colors=['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5856d6','#ff2d55','#a64dff'];
         // Kontinuerligt glitterregn (CSS-animationen loopar oändligt – spruta ut bitarna en gång)
         for(let i=0;i<90;i++){
