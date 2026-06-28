@@ -309,8 +309,15 @@
 
     .schedule-widget .widget-header { display: none !important; }
     .schedule-widget .widget-inner { border: 2px solid #ff3b30; padding: 0 !important; overflow: hidden; }
-    .schedule-widget.minimized { min-height: 0 !important; width: auto !important; min-width: 0 !important; }
-    .schedule-widget.minimized .sched-top-strip { white-space: nowrap; }
+    .schedule-widget.minimized { min-height: 0 !important; height: auto !important; }
+    .schedule-widget.minimized .widget-inner, .schedule-widget.minimized .widget-body { height: auto !important; }
+    .schedule-widget.minimized .widget-inner { border-width: 0 !important; }
+    .sched-top-strip { transition: height 0.2s ease, padding 0.2s ease; white-space: nowrap; }
+    .schedule-widget.minimized .sched-top-strip { height: 4px !important; padding: 0 !important; overflow: hidden; border-radius: 0; }
+    .schedule-widget.minimized .sched-top-strip > * { opacity: 0; transition: opacity 0.15s ease; }
+    .schedule-widget.minimized:hover .widget-inner { border-width: 2px !important; }
+    .schedule-widget.minimized:hover .sched-top-strip { height: 44px !important; padding: 0 15px !important; }
+    .schedule-widget.minimized:hover .sched-top-strip > * { opacity: 1; }
     .schedule-widget .widget-body { padding: 0 !important; display: flex; flex-direction: column; position: relative; height: 100%; overflow-y: auto; }
     
     .widget-header span { color: white; }
