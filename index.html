@@ -73,6 +73,8 @@
                 <div class="sp-head">📄 Sidor</div>
                 <div id="sp-pages"></div>
                 <button class="sp-add-btn" onclick="addPageV6()">+ Ny sida</button>
+                <button class="sp-add-btn sp-dup-btn" onclick="duplicateCurrentPageV6()" title="Kopiera sidan du tittar på just nu">⧉ Kopiera: <span id="sp-dup-current-name">denna sida</span></button>
+                <button class="sp-add-btn sp-export-btn" onclick="exportCurrentPageImage()" title="Spara den visade sidan som en bild (PNG)">🖼️ Spara sidan som bild</button>
             </div>
             <div class="sp-section">
                 <div class="sp-head">🗂️ Mallar</div>
@@ -133,6 +135,10 @@
             <button class="tool-btn" onclick="createWeekSchedule()"><div class="icon">🗓️</div><div class="label">Veckoschema</div></button>
             <button class="tool-btn" onclick="createChecklist()"><div class="icon">✅</div><div class="label">Checklista</div></button>
             <button class="tool-btn" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
+            <button class="tool-btn" onclick="createAttendance()"><div class="icon">🙋</div><div class="label">Närvaro</div></button>
+            <button class="tool-btn" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
+            <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
+            <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
 
             <div style="width: 1px; background: #ddd; margin: 0 4px;"></div>
             <button class="tool-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
@@ -229,6 +235,18 @@
     .sp-row { display: flex; gap: 5px; align-items: center; }
     .sp-item { display: flex; align-items: center; gap: 5px; background: #f7f7f9; border: 1px solid rgba(0,0,0,0.06); border-radius: 9px; padding: 5px 7px; margin-bottom: 5px; transition: background 0.15s; }
     .sp-item.current { background: #eef3ff; border-color: #b9d4ff; }
+    .sp-day-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+    .sp-day-chip { position: relative; width: 36px; height: 36px; border-radius: 10px; border: none; color: #fff; font-weight: 800; font-size: 16px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.22); transition: transform 0.12s ease, box-shadow 0.12s ease; font-family: inherit; line-height: 1; }
+    .sp-day-chip.today::after { content: '★'; position: absolute; top: -9px; right: -7px; font-size: 15px; color: #ffcc00; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .sp-day-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.28); }
+    .sp-day-chip.current { outline: 3px solid #1f2937; outline-offset: 2px; transform: translateY(-2px); }
+    .sp-fixed-divider { height: 2px; background: #e0e0e5; border-radius: 2px; margin: 2px 4px 12px; }
+    .sp-lesson-chip { font-size: 14px; }
+    .sp-dup-btn { background: #34c759 !important; margin-top: 6px; }
+    .sp-dup-btn:hover { filter: brightness(1.05); }
+    #sp-dup-current-name { font-weight: 800; text-decoration: underline; }
+    .sp-export-btn { background: #5856d6 !important; margin-top: 6px; }
+    .sp-export-btn:hover { filter: brightness(1.05); }
     .sp-item-name { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #333; background: transparent; border: none; border-bottom: 1px solid transparent; outline: none; font-family: inherit; padding: 2px 0; cursor: text; text-overflow: ellipsis; }
     .sp-item-name:hover, .sp-item-name:focus { border-bottom-color: #007aff; }
     .sp-item-go { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #333; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -314,16 +332,27 @@
     .board-table td { border: 1px solid #d1d1d6; padding: 6px; min-width: 60px; height: 40px; outline: none; transition: background 0.2s; font-size: 14px; word-wrap: break-word; }
     .board-table td:focus { background: #f0f8ff; border-color: #007aff; }
 
-    .real-clock-face { width: 140px; height: 140px; border-radius: 50%; background: #ffffff; border: 4px solid #333; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); margin: 0 auto 8px; align-self: center; }
-    .real-clock-face::after { content: ''; position: absolute; width: 10px; height: 10px; background: #333; border-radius: 50%; z-index: 5; }
-    .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; background: #333; border-radius: 4px; z-index: 3; }
+    .real-clock-face { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #ffffff 0%, #f4f4f7 100%); border: 5px solid #1f2937; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.12); margin: 0 auto 8px; align-self: center; }
+    .real-clock-face::after { content: ''; position: absolute; width: 12px; height: 12px; background: #1f2937; border: 2px solid #ff3b30; border-radius: 50%; z-index: 6; }
+    .clock-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
+    .clock-widget .widget-resizer::after { border-color: #999; }
+    .clock-widget .time-display { text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
+    .clock-widget .date-display { text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
+    .clock-tick { position: absolute; left: 50%; top: 7px; transform-origin: 50% 68px; pointer-events: none; }
+    .clock-tick.minor { width: 1px; height: 5px; margin-left: -0.5px; background: #c7c7cc; }
+    .clock-tick.major { width: 3px; height: 9px; margin-left: -1.5px; background: #555; border-radius: 1px; }
+    .clock-tick.big { width: 3.5px; height: 13px; margin-left: -1.75px; background: #1f2937; border-radius: 1px; }
+    .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; background: #1f2937; border-radius: 6px; z-index: 3; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
     .hand.hour { width: 6px; height: 40px; margin-left: -3px; }
-    .hand.minute { width: 4px; height: 55px; margin-left: -2px; }
-    .hand.second { width: 2px; height: 65px; margin-left: -1px; background: #ff3b30; z-index: 4; }
+    .hand.minute { width: 4px; height: 58px; margin-left: -2px; }
+    .hand.second { width: 2px; height: 66px; margin-left: -1px; background: #ff3b30; z-index: 4; box-shadow: none; }
     .date-display { font-size: 13px; font-weight: 700; color: #333; text-transform: capitalize; text-align: center; }
     .time-display { font-size: 22px; font-weight: 900; color: #007aff; text-align: center; margin-bottom: 4px; font-family: monospace; }
     
     .analog-timer-container { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .atimer-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
+    .atimer-widget .widget-resizer::after { border-color: #999; }
+    .atimer-widget .analog-hint, .atimer-widget .analog-text-overlay { text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
     .analog-clock-face { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(#ff3b30 360deg, #f2f2f7 0deg); border: 4px solid #333; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); cursor: grab; }
     .analog-clock-face:active { cursor: grabbing; }
     .analog-clock-face::after { content: ''; position: absolute; width: 8px; height: 8px; background: #333; border-radius: 50%; pointer-events: none; z-index: 2; }
@@ -460,6 +489,28 @@
     .reward-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
     .reward-widget .widget-resizer::after { border-color: #999; }
     .reward-stars:empty::before { content: '⭐'; font-size: 46px; opacity: 0.22; }
+    /* STOPPUR */
+    .sw-display { font-size: 46px; font-weight: 800; text-align: center; font-family: monospace; color: #1f2937; margin-bottom: 8px; }
+    /* KAMERA */
+    .cam-wrap { position: relative; width: 100%; background: #111; border-radius: 10px; overflow: hidden; min-height: 180px; display: flex; align-items: center; justify-content: center; }
+    .cam-video { width: 100%; height: 100%; max-height: 70vh; object-fit: contain; display: block; }
+    .cam-status { position: absolute; color: #fff; font-size: 13px; font-weight: 600; text-align: center; padding: 12px; }
+    /* NÄRVARO */
+    .att-count { text-align: center; font-weight: 800; font-size: 16px; color: #333; margin: 4px 0 8px; }
+    .att-grid { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+    .att-name { border: none; border-radius: 9px; padding: 6px 11px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+    .att-name.present { background: #34c759; color: #fff; }
+    .att-name.absent { background: #e9e9ee; color: #aaa; text-decoration: line-through; box-shadow: none; }
+    /* KLASSPOÄNG (burk) */
+    .classreward-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
+    .classreward-widget .widget-resizer::after { border-color: #999; }
+    .classreward-widget .cr-count { text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
+    .cr-reward { width: 100%; text-align: center; font-weight: 800; border: none; border-bottom: 2px solid #e5e5ea; outline: none; font-family: inherit; font-size: 14px; padding: 4px; background: transparent; color: #7c3aed; margin-bottom: 6px; text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
+    .cr-jar { width: 92px; height: 112px; margin: 4px auto; border: 4px solid #1f2937; border-top-width: 7px; border-radius: 10px 10px 18px 18px; position: relative; overflow: hidden; background: rgba(255,255,255,0.55); box-shadow: inset 0 -2px 6px rgba(0,0,0,0.08); }
+    .cr-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: #5ac8fa; transition: height 0.45s ease, background 0.45s ease; }
+    .cr-jar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 36px; pointer-events: none; }
+    .cr-count { text-align: center; font-weight: 800; font-size: 20px; color: #333; margin-top: 4px; }
+    .cr-goal { text-align: center; border: 1px solid #d1d1d6; border-radius: 6px; font-size: 13px; padding: 3px; }
     /* Svaga platshållare i tomma resultatytor så de inte ser tomma ut i vila */
     .name-result:empty::before { content: '🎲 Tryck för att slumpa'; color: #c7c7cc; font-size: 14px; font-weight: 600; }
     .group-result:empty::before { content: '👥 Grupperna visas här'; color: #c7c7cc; font-size: 13px; font-weight: 600; display: block; text-align: center; padding: 16px 0; }
@@ -944,6 +995,8 @@
                 else if (type === 'ARBETSSÄTT') { state.data.icon = w.querySelector('.work-symbol.active')?.dataset.icon || ''; }
                 else if (type === 'BELÖNING') { state.data.points = w.querySelectorAll('.reward-star').length; }
                 else if (type === 'GRATTIS') { state.data.name = w.querySelector('.grattis-name-input')?.value || ''; }
+                else if (type === 'NÄRVARO') { state.data.text = w.querySelector('.att-names')?.value || ''; state.data.list = w.querySelector('.att-sel')?.value || ''; state.data.absent = [...w.querySelectorAll('.att-name.absent')].map(b=>b.textContent); }
+                else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VECKOSCHEMA') { state.data.days = []; w.querySelectorAll('.week-cell').forEach(c=> state.data.days.push(c.innerHTML)); }
@@ -989,6 +1042,10 @@
             else if (w.type === 'BRÅK / TID') createFractionVisualizer(w);
             else if (w.type === 'SVENSKA ALFABETET') createAlphabetWidget(w);
             else if (w.type === 'GRATTIS') createBirthdayWidget(w);
+            else if (w.type === 'NÄRVARO') createAttendance(w);
+            else if (w.type === 'KLASSPOÄNG') createClassReward(w);
+            else if (w.type === 'KAMERA') createCamera(w);
+            else if (w.type === 'STOPPUR') createStopwatch(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
             else if (w.type === 'BILD') createImageWidget(w);
             else if (w.type === 'VECKOSCHEMA') createWeekSchedule(w);
@@ -1004,10 +1061,13 @@
         const pages = []; const canvasPages = document.querySelectorAll('.canvas-page');
         canvasPages.forEach(page => {
             const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, widgets: [] };
+            if(page.dataset.day !== undefined && page.dataset.day !== '') pageData.day = parseInt(page.dataset.day);
+            if(page.dataset.lesson !== undefined && page.dataset.lesson !== '') pageData.lesson = parseInt(page.dataset.lesson);
             page.querySelectorAll('.widget').forEach(w => { pageData.widgets.push(serializeWidget(w)); });
             pages.push(pageData);
         });
-        localStorage.setItem('boardStateV6_' + currentUser, JSON.stringify({ pages: pages, activePage: currentPageIndexV6, bodyClass: document.getElementById('cb-app-wrapper').className }));
+        const activeId = (pagesListV6[currentPageIndexV6] && pagesListV6[currentPageIndexV6].id) || '';
+        localStorage.setItem('boardStateV6_' + currentUser, JSON.stringify({ pages: pages, activePage: currentPageIndexV6, activePageId: activeId, bodyClass: document.getElementById('cb-app-wrapper').className }));
         syncToCloud();
     }
 
@@ -1063,6 +1123,51 @@
     }
 
     // PAGES LOGIK
+    // ---- FASTA TAVLOR: veckodagar (M T O T F) + lektioner (L1–L5), var sin färg, kan ej tas bort ----
+    const DAY_DEFS = [
+        { idx:0, label:'M', name:'Måndag',  color:'#ff3b30' },
+        { idx:1, label:'T', name:'Tisdag',  color:'#ff9500' },
+        { idx:2, label:'O', name:'Onsdag',  color:'#34c759' },
+        { idx:3, label:'T', name:'Torsdag', color:'#007aff' },
+        { idx:4, label:'F', name:'Fredag',  color:'#7c3aed' }
+    ];
+    const LESSON_DEFS = [
+        { idx:0, label:'L1', name:'Lektion 1', color:'#ff3b30' },
+        { idx:1, label:'L2', name:'Lektion 2', color:'#ff9500' },
+        { idx:2, label:'L3', name:'Lektion 3', color:'#34c759' },
+        { idx:3, label:'L4', name:'Lektion 4', color:'#007aff' },
+        { idx:4, label:'L5', name:'Lektion 5', color:'#7c3aed' }
+    ];
+    function todayDayIndex(){ const d = new Date().getDay(); return (d>=1 && d<=5) ? d-1 : 0; }
+    function weekdayDate(idx){ try { const now=new Date(); const dow=now.getDay(); const off=(dow===0?-6:1-dow); const monday=new Date(now); monday.setDate(now.getDate()+off); const d=new Date(monday); d.setDate(monday.getDate()+idx); return d.toLocaleDateString('sv-SE',{day:'numeric',month:'short'}); } catch(e){ return ''; } }
+    function ensureFixedPages(){
+        const container = document.getElementById('canvas-container-v6');
+        const dayPages = {}, lessonPages = {}, regular = [];
+        pagesListV6.forEach(pg => {
+            if(pg.day!==undefined && pg.day!==null && DAY_DEFS[pg.day]) dayPages[pg.day]=pg;
+            else if(pg.lesson!==undefined && pg.lesson!==null && LESSON_DEFS[pg.lesson]) lessonPages[pg.lesson]=pg;
+            else regular.push(pg);
+        });
+        let created = 0;
+        DAY_DEFS.forEach(d => {
+            if(!dayPages[d.idx]){
+                const pageId = 'day-'+d.idx+'-'+Math.random().toString(16).slice(2);
+                const cp = document.createElement('div'); cp.className='canvas-page'; cp.id=pageId; cp.dataset.day=String(d.idx); cp.dataset.pageName=d.name;
+                container.appendChild(cp); dayPages[d.idx] = { id: pageId, canvas: cp, name: d.name, day: d.idx }; created++;
+            } else { const pg = dayPages[d.idx]; pg.day=d.idx; pg.canvas.dataset.day=String(d.idx); if(!pg.name) pg.name=d.name; }
+        });
+        LESSON_DEFS.forEach(l => {
+            if(!lessonPages[l.idx]){
+                const pageId = 'lesson-'+l.idx+'-'+Math.random().toString(16).slice(2);
+                const cp = document.createElement('div'); cp.className='canvas-page'; cp.id=pageId; cp.dataset.lesson=String(l.idx); cp.dataset.pageName=l.name;
+                container.appendChild(cp); lessonPages[l.idx] = { id: pageId, canvas: cp, name: l.name, lesson: l.idx }; created++;
+            } else { const pg = lessonPages[l.idx]; pg.lesson=l.idx; pg.canvas.dataset.lesson=String(l.idx); if(!pg.name) pg.name=l.name; }
+        });
+        pagesListV6 = [0,1,2,3,4].map(i=>dayPages[i]).concat([0,1,2,3,4].map(i=>lessonPages[i])).concat(regular);
+        pagesListV6.forEach(pg => container.appendChild(pg.canvas)); // synka DOM-ordning med listan
+        return created;
+    }
+
     function createPageV6(isInitial = false) { const pageId = Date.now() + '-' + Math.random().toString(16).slice(2); const canvasPage = document.createElement('div'); canvasPage.className = 'canvas-page'; canvasPage.id = pageId; document.getElementById('canvas-container-v6').appendChild(canvasPage); pagesListV6.push({ id: pageId, canvas: canvasPage, name: '' }); if (isInitial) goToPageByIndexV6(0); else goToPageByIndexV6(pagesListV6.length - 1); renderSidePocket(); }
     function goToPageByIndexV6(index) { if (index < 0 || index >= pagesListV6.length) return; const canvasPages = document.querySelectorAll('.canvas-page'); for(let i=0; i<canvasPages.length; i++) { canvasPages[i].classList.remove('active'); } pagesListV6[index].canvas.classList.add('active'); currentPageIndexV6 = index; updatePagesNavV6(); renderSidePocket(); }
     function prevPageV6() { goToPageByIndexV6(currentPageIndexV6 - 1); saveBoardState(); } function nextPageV6() { goToPageByIndexV6(currentPageIndexV6 + 1); saveBoardState(); } function addPageV6() { createPageV6(); saveBoardState(); }
@@ -1070,6 +1175,24 @@
 
     // ---- SIDHANTERING (duplicera, ta bort, namnge) ----
     function renamePageV6(index, name){ if(!pagesListV6[index]) return; pagesListV6[index].name = name; pagesListV6[index].canvas.dataset.pageName = name; updatePagesNavV6(); saveBoardState(); }
+    function activePageLabel(){
+        const pg = pagesListV6[currentPageIndexV6]; if(!pg) return 'denna sida';
+        if(pg.day!=null && DAY_DEFS[pg.day]) return DAY_DEFS[pg.day].name;
+        if(pg.lesson!=null && LESSON_DEFS[pg.lesson]) return LESSON_DEFS[pg.lesson].name;
+        if(pg.name) return pg.name;
+        let n=0; for(let i=0;i<pagesListV6.length;i++){ const p=pagesListV6[i]; if(p.day==null && p.lesson==null){ n++; if(i===currentPageIndexV6) return 'Sida '+n; } }
+        return 'denna sida';
+    }
+    function duplicateCurrentPageV6(){ duplicatePageV6(currentPageIndexV6); }
+    function _loadScriptOnce(src){ return new Promise((res,rej)=>{ if([...document.scripts].some(s=>s.src===src)) return res(); const s=document.createElement('script'); s.src=src; s.onload=()=>res(); s.onerror=()=>rej(new Error('load fail')); document.head.appendChild(s); }); }
+    async function exportCurrentPageImage(){
+        const target = document.querySelector('.canvas-page.active'); if(!target){ return; }
+        try {
+            if(!window.html2canvas) await _loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+            const canvas = await window.html2canvas(target, { backgroundColor:'#ffffff', scale:2, useCORS:true, logging:false });
+            const a=document.createElement('a'); a.download='min-tavla-'+String(activePageLabel()||'sida').replace(/[^\wåäöÅÄÖ-]+/g,'_')+'.png'; a.href=canvas.toDataURL('image/png'); a.click();
+        } catch(e){ console.warn('Bildexport misslyckades, försöker skriva ut istället:', e); try{ window.print(); }catch(_){} }
+    }
     function duplicatePageV6(index){
         if(!pagesListV6[index]) return;
         const states = []; pagesListV6[index].canvas.querySelectorAll('.widget').forEach(w => states.push(serializeWidget(w)));
@@ -1081,6 +1204,7 @@
         saveBoardState(); renderSidePocket();
     }
     function deletePageV6(index){
+        if(pagesListV6[index] && ((pagesListV6[index].day!==undefined && pagesListV6[index].day!==null) || (pagesListV6[index].lesson!==undefined && pagesListV6[index].lesson!==null))){ customAlert('De fasta tavlorna (veckodagar och lektioner) kan inte tas bort.', 'ℹ️'); return; }
         if(pagesListV6.length <= 1){ customAlert('Du kan inte ta bort den sista sidan.', 'ℹ️'); return; }
         customConfirm('Ta bort sidan' + (pagesListV6[index].name ? ' "'+pagesListV6[index].name+'"' : ' '+(index+1)) + '? Allt på den försvinner.', ()=>{
             pagesListV6[index].canvas.remove(); pagesListV6.splice(index, 1);
@@ -1099,17 +1223,46 @@
         const pagesEl = document.getElementById('sp-pages'); if(!pagesEl) return;
         const manage = spCanManage();
         document.querySelectorAll('.sp-admin-only').forEach(el => el.style.display = manage ? '' : 'none');
-        // SIDOR
+        // VECKODAGSTAVLOR (fasta) – chip-rad överst
         pagesEl.innerHTML = '';
+        const dayRow = document.createElement('div'); dayRow.className='sp-day-row';
+        const today = todayDayIndex();
         pagesListV6.forEach((pg, i)=>{
+            if(pg.day===undefined || pg.day===null) return;
+            const d = DAY_DEFS[pg.day]; if(!d) return;
+            const chip = document.createElement('button'); chip.className='sp-day-chip' + (i===currentPageIndexV6 ? ' current' : '') + (pg.day===today ? ' today' : '');
+            chip.textContent = d.label; chip.style.background = d.color; chip.title = d.name + ' ' + weekdayDate(pg.day);
+            chip.onclick=()=>{ goToPageByIndexV6(i); saveBoardState(); };
+            dayRow.appendChild(chip);
+        });
+        pagesEl.appendChild(dayRow);
+        // LINJE under veckodagarna
+        const fixedDivider = document.createElement('div'); fixedDivider.className='sp-fixed-divider'; pagesEl.appendChild(fixedDivider);
+        // LEKTIONER (fasta) – chip-rad
+        const lessonRow = document.createElement('div'); lessonRow.className='sp-day-row sp-lesson-row';
+        pagesListV6.forEach((pg, i)=>{
+            if(pg.lesson===undefined || pg.lesson===null) return;
+            const l = LESSON_DEFS[pg.lesson]; if(!l) return;
+            const chip = document.createElement('button'); chip.className='sp-day-chip sp-lesson-chip' + (i===currentPageIndexV6 ? ' current' : '');
+            chip.textContent = l.label; chip.style.background = l.color; chip.title = l.name;
+            chip.onclick=()=>{ goToPageByIndexV6(i); saveBoardState(); };
+            lessonRow.appendChild(chip);
+        });
+        pagesEl.appendChild(lessonRow);
+        // ÖVRIGA SIDOR
+        let regNo = 0;
+        pagesListV6.forEach((pg, i)=>{
+            if((pg.day!==undefined && pg.day!==null) || (pg.lesson!==undefined && pg.lesson!==null)) return;
+            regNo++;
             const row = document.createElement('div'); row.className = 'sp-item' + (i===currentPageIndexV6 ? ' current' : '');
             const go = document.createElement('button'); go.className='sp-icon-btn'; go.innerHTML = (i===currentPageIndexV6?'▸':'·'); go.title='Gå till sidan'; go.onclick=()=>{ goToPageByIndexV6(i); saveBoardState(); };
-            const name = document.createElement('input'); name.className='sp-item-name'; name.value = pg.name||''; name.placeholder='Sida '+(i+1); name.onchange=()=> renamePageV6(i, name.value.trim());
-            const dup = document.createElement('button'); dup.className='sp-icon-btn'; dup.innerHTML='⧉'; dup.title='Duplicera sidan'; dup.onclick=()=> duplicatePageV6(i);
+            const name = document.createElement('input'); name.className='sp-item-name'; name.value = pg.name||''; name.placeholder='Sida '+regNo; name.onchange=()=> renamePageV6(i, name.value.trim());
             const del = document.createElement('button'); del.className='sp-icon-btn'; del.innerHTML='🗑'; del.title='Ta bort sidan'; del.onclick=()=> deletePageV6(i);
-            row.appendChild(go); row.appendChild(name); row.appendChild(dup); row.appendChild(del);
+            row.appendChild(go); row.appendChild(name); row.appendChild(del);
             pagesEl.appendChild(row);
         });
+        // Uppdatera etiketten på kopiera-knappen så den visar sidan man tittar på
+        const dupLbl = document.getElementById('sp-dup-current-name'); if(dupLbl) dupLbl.textContent = activePageLabel();
         // MALLAR
         const tEl = document.getElementById('sp-templates'); tEl.innerHTML='';
         if(spTemplates.length===0) tEl.innerHTML='<div class="sp-empty">Inga mallar än.</div>';
@@ -1354,24 +1507,11 @@
     }
 
     // Enkel vinnarruta (används av Slumpa namn m.fl.)
-    // Känner igen vanliga svenska pojk-/flicknamn → blå resp. rosa färg (null om okänt/ord)
-    const BOY_NAMES = new Set(('william liam noah hugo lucas oliver oscar elias alexander adam filip philip anton axel erik albin leon theo theodore gustav ludvig vincent melvin arvid sixten frank otto wilmer sam charlie nils edvin isak isac leo benjamin alfred viktor victor emil felix jacob jakob joel elliot elliott malte love hjalmar kasper casper loke vidar mans theodor walter henry milo ebbe frans nicolas carl karl johan anders andreas daniel david fredrik henrik jonas lars magnus marcus markus martin mattias matias mikael micke niklas patrik peter robin simon stefan tobias tom pontus sebastian rasmus linus kalle pelle olle sven gunnar bo bertil ali muhammed mohammed mohamed ahmed omar hassan yusuf ibrahim adam aron aaron noel colin kevin dennis jonathan jonatan max alfons folke ivar julius jim john george elton').split(' '));
-    const GIRL_NAMES = new Set(('alice maja vera ella ebba wilma freja astrid alma olivia elsa agnes lilly lily saga selma alva ines stella signe klara clara iris molly julia emma ellen isabelle isabella tuva lova nora stina tilde linnea elvira hanna nellie sara sofia sophia sofie felicia moa ida emilia amanda matilda elin wilhelmina edith greta hilda ester thea liv juni tindra cornelia leah lea nova meja ronja mira maria anna karin kristina christina lena eva birgitta ingrid margareta linda malin jenny johanna josefin camilla cecilia caroline frida rebecca therese victoria lisa nina petra sandra susanne ulrika asta doris majken minna siri jasmine jasmin amina fatima zara nour layla yara mariam aisha tilda tyra alicia celine wilda vilda livia ada maja sigrid disa hedda elise lovisa rakel rebecka tora ingela ester').split(' '));
-    function nameGenderColor(raw){
-        if(!raw) return null;
-        let t = String(raw).trim().toLowerCase().replace(/[⭐🌟✨\s].*$/,'').replace(/[^a-zåäöéèüæø-]/g,'');
-        if(!t) return null;
-        if(BOY_NAMES.has(t)) return '#007aff';   // blå
-        if(GIRL_NAMES.has(t)) return '#ff3ea5';   // rosa
-        return null;
-    }
-
     function showWinnerPopup(name){
         const wrapper = document.getElementById('cb-app-wrapper');
         const overlay = document.createElement('div');
         overlay.className = 'popup-overlay';
-        const gc = nameGenderColor(name);
-        overlay.innerHTML = `<div class='popup-box'><div class='popup-name'${gc?` style='color:${gc}'`:''}>${name}</div></div>`;
+        overlay.innerHTML = `<div class='popup-box'><div class='popup-name'>${name}</div></div>`;
         wrapper.appendChild(overlay);
         spawnPopupConfetti(overlay);
         const box = overlay.querySelector('.popup-box');
@@ -1529,7 +1669,7 @@
         body.querySelector('.btn-save').onclick=()=>{ let t=ni.value.trim(), cn=txt.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; l[t]=cn; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); ni.value=''; loadN(); sel.value=t; saveBoardState(); };
         body.querySelector('.btn-del').onclick=()=>{ if(!sel.value)return; customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; delete l[sel.value]; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); txt.value=''; res.innerText=''; loadN(); saveBoardState(); }); };
         if(config&&config.data){ if(config.data.list) setTimeout(()=>sel.value=config.data.list,100); if(config.data.text) txt.value=config.data.text; if(config.data.removeCb!==undefined) cb.checked=config.data.removeCb; }
-        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerText='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let idx=Math.floor(Math.random()*n.length), w=n[idx]; const gc=nameGenderColor(w)||'#ff3b30'; res.innerHTML=`<span style='color:${gc}'>⭐ ${w} ⭐</span>`; if(cb.checked){ n.splice(idx,1); txt.value=n[Math.floor(Math.random()*n.length)]; } saveBoardState(); showWinnerPopup(w); } },80); };
+        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerText='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let idx=Math.floor(Math.random()*n.length), w=n[idx]; res.innerText=`⭐ ${w} ⭐`; if(cb.checked){ n.splice(idx,1); txt.value=n[Math.floor(Math.random()*n.length)]; } saveBoardState(); showWinnerPopup(w); } },80); };
     }
 
     // Gemensam (central) Brain Break-videolista – delas av alla, hanteras av admin
@@ -1696,6 +1836,101 @@
         draw();
     }
 
+    // ---- STOPPUR (räknar uppåt) ----
+    function createStopwatch(config){
+        if(config===undefined)config=null;
+        const body = createWidget('STOPPUR', 220, 'stopwatch-widget', config);
+        body.innerHTML = `<div class='sw-display'>00:00</div><div class='timer-controls hover-menu'><button class='btn btn-primary sw-start'>Start</button><button class='btn btn-danger sw-reset'>Nollställ</button></div>`;
+        const disp=body.querySelector('.sw-display'), btnS=body.querySelector('.sw-start'), btnR=body.querySelector('.sw-reset');
+        let elapsed=0, tId=null, t0=0;
+        const fmt=(s)=>{ s=Math.floor(s); const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60; const pad=n=>n.toString().padStart(2,'0'); return h>0 ? (h+':'+pad(m)+':'+pad(sec)) : (pad(m)+':'+pad(sec)); };
+        const render=()=>{ disp.textContent = fmt(elapsed); };
+        const tick=()=>{ elapsed = (performance.now()-t0)/1000; render(); };
+        btnS.onclick=()=>{ if(tId){ clearInterval(tId); tId=null; btnS.textContent='Start'; } else { t0 = performance.now() - elapsed*1000; tId=setInterval(tick, 200); btnS.textContent='Paus'; } };
+        btnR.onclick=()=>{ clearInterval(tId); tId=null; elapsed=0; btnS.textContent='Start'; render(); };
+        const widget = body.parentElement.parentElement;
+        const obs = new MutationObserver(()=>{ if(!document.body.contains(widget)){ if(tId)clearInterval(tId); obs.disconnect(); } });
+        const cc = document.getElementById('canvas-container-v6'); if(cc) obs.observe(cc, { childList:true, subtree:true });
+        render();
+    }
+
+    // ---- DOKUMENTKAMERA / WEBBKAMERA ----
+    function createCamera(config){
+        if(config===undefined)config=null;
+        const body = createWidget('KAMERA', 360, 'camera-widget', config);
+        body.innerHTML = `<div class='cam-wrap'><video class='cam-video' autoplay playsinline muted></video><div class='cam-status'>Startar kamera… 📷</div></div><div class='hover-menu' style='display:flex;gap:6px;margin-top:8px;'><button class='btn btn-primary cam-toggle' style='flex:1;'>⏸️ Frys bild</button><button class='btn btn-secondary cam-switch'>🔄 Byt kamera</button></div>`;
+        const video=body.querySelector('.cam-video'), status=body.querySelector('.cam-status'), toggle=body.querySelector('.cam-toggle'), switchBtn=body.querySelector('.cam-switch');
+        let stream=null, facing='environment', frozen=false;
+        const stop=()=>{ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } };
+        const start=async()=>{
+            stop(); frozen=false; toggle.innerHTML='⏸️ Frys bild'; status.style.display='block'; status.textContent='Startar kamera… 📷';
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode: facing }, audio:false });
+                video.srcObject = stream; status.style.display='none';
+            } catch(e){
+                try { stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false }); video.srcObject=stream; status.style.display='none'; }
+                catch(e2){ console.warn(e2); status.style.display='block'; status.textContent='Ingen kamera 📷 – tillåt kamera i webbläsaren (fungerar på webbadressen, inte lokal fil).'; }
+            }
+        };
+        toggle.onclick=()=>{ if(frozen){ video.play(); frozen=false; toggle.innerHTML='⏸️ Frys bild'; } else { video.pause(); frozen=true; toggle.innerHTML='▶️ Spela igen'; } };
+        switchBtn.onclick=()=>{ facing = (facing==='environment')?'user':'environment'; start(); };
+        const widget = body.parentElement.parentElement;
+        const obs = new MutationObserver(()=>{ if(!document.body.contains(widget)){ stop(); obs.disconnect(); } });
+        const cc = document.getElementById('canvas-container-v6'); if(cc) obs.observe(cc, { childList:true, subtree:true });
+        start();
+    }
+
+    // ---- NÄRVARO ----
+    function createAttendance(config){
+        if(config===undefined)config=null;
+        const body = createWidget('NÄRVARO', 320, 'attend-widget', config);
+        body.innerHTML = `<div class='list-selector-area hover-menu'><select class='editor-select att-sel'></select></div><textarea class='name-input hover-menu att-names' placeholder='Ett namn per rad...'></textarea><div class='att-count'>0 / 0 här</div><div class='att-grid'></div><div class='hover-menu' style='margin-top:8px;'><button class='btn btn-secondary att-all' style='width:100%;'>Markera alla som här</button></div>`;
+        const sel=body.querySelector('.att-sel'), txt=body.querySelector('.att-names'), grid=body.querySelector('.att-grid'), countEl=body.querySelector('.att-count');
+        let absent = new Set((config&&config.data&&config.data.absent)||[]);
+        const loadLists=()=>{ sel.innerHTML='<option value="">-- Välj klass --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;sel.appendChild(o);}); }; loadLists();
+        const render=()=>{
+            const names = txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0);
+            grid.innerHTML=''; let present=0;
+            names.forEach(nm=>{
+                const isAbs = absent.has(nm); if(!isAbs) present++;
+                const b=document.createElement('button'); b.className='att-name '+(isAbs?'absent':'present'); b.textContent=nm;
+                b.onclick=()=>{ if(absent.has(nm)) absent.delete(nm); else absent.add(nm); render(); saveBoardState(); };
+                grid.appendChild(b);
+            });
+            countEl.textContent = present+' / '+names.length+' här';
+        };
+        sel.onchange=()=>{ if(!sel.value)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txt.value=l[sel.value]||''; absent.clear(); render(); saveBoardState(); };
+        txt.oninput=()=>{ render(); saveBoardState(); };
+        body.querySelector('.att-all').onclick=()=>{ absent.clear(); render(); saveBoardState(); };
+        if(config&&config.data){ if(config.data.text) txt.value=config.data.text; if(config.data.list) setTimeout(()=>{ sel.value=config.data.list; },50); }
+        render();
+    }
+
+    // ---- KLASSPOÄNG (gemensam belöningsburk) ----
+    function createClassReward(config){
+        if(config===undefined)config=null;
+        const body = createWidget('KLASSPOÄNG', 230, 'classreward-widget', config);
+        body.innerHTML = `<input class='cr-reward hover-menu' placeholder='Belöning (t.ex. Filmfredag)'><div class='cr-jar'><div class='cr-fill'></div><div class='cr-jar-text'></div></div><div class='cr-count'>0 / 20</div><div class='hover-menu' style='display:flex;gap:6px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap;'><button class='btn btn-danger cr-minus'>➖</button><button class='btn btn-primary cr-plus' style='flex:1;'>⭐ Poäng</button><span style='font-size:12px;font-weight:bold;'>Mål</span><input type='number' class='cr-goal' min='1' value='20' style='width:48px;'></div>`;
+        const reward=body.querySelector('.cr-reward'), fill=body.querySelector('.cr-fill'), jarText=body.querySelector('.cr-jar-text'), countEl=body.querySelector('.cr-count'), goalInp=body.querySelector('.cr-goal');
+        let points = (config&&config.data&&config.data.points)||0;
+        if(config&&config.data){ if(config.data.reward) reward.value=config.data.reward; if(config.data.goal) goalInp.value=config.data.goal; }
+        const upd=(celebrate)=>{
+            let goal=Math.max(1,parseInt(goalInp.value)||20);
+            points=Math.max(0,Math.min(points,goal));
+            const pct=Math.round((points/goal)*100);
+            fill.style.height=pct+'%';
+            fill.style.background = pct>=100 ? '#34c759' : pct>=60 ? '#ffcc00' : '#5ac8fa';
+            countEl.textContent = points+' / '+goal;
+            jarText.textContent = pct>=100 ? '🎉' : '';
+            if(celebrate && pct>=100) showWinnerPopup((reward.value.trim()||'Målet nått!')+' 🎉');
+        };
+        reward.oninput=()=> saveBoardState();
+        goalInp.oninput=()=>{ upd(false); saveBoardState(); };
+        body.querySelector('.cr-plus').onclick=()=>{ const goal=Math.max(1,parseInt(goalInp.value)||20); const was=points; points++; upd(points>=goal && was<goal); saveBoardState(); };
+        body.querySelector('.cr-minus').onclick=()=>{ if(points>0)points--; upd(false); saveBoardState(); };
+        upd(false);
+    }
+
     function createNoiseMeter(config){
         const body = createWidget('LJUDNIVÅ', 150, 'noise-widget', config);
         body.innerHTML = `<div class='noise-meter'><div class='noise-fill'></div></div><div class='noise-status hover-menu'>Tryck för att starta 🎤</div><button class='btn btn-primary noise-btn hover-menu' style='width:100%;margin-top:8px;'>Starta mätning</button>`;
@@ -1748,7 +1983,7 @@
         sel.onchange=()=>{ if(sel.value){ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txt.value=l[sel.value]||''; } };
         const ld=()=>{ sel.innerHTML='<option value="">-- Välj lista --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;sel.appendChild(o);}); }; ld();
         if(config&&config.data){ if(config.data.list) setTimeout(()=>sel.value=config.data.list,100); if(config.data.text) txt.value=config.data.text; if(config.data.count) ci.value=config.data.count; if(config.data.result) res.innerHTML=config.data.result; }
-        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); let ng=parseInt(ci.value)||2; if(n.length===0)return; for(let i=n.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=n[i];n[i]=n[j];n[j]=t;} let g=[]; for(let i=0;i<ng;i++)g.push([]); n.forEach((x,i)=>g[i%ng].push(x)); res.innerHTML=''; g.forEach((x,i)=>{ if(x.length===0)return; let card=document.createElement('div'); card.className='group-card'; card.innerHTML=`<div class='group-title'>Grupp ${i+1}</div>`+x.map(y=>{const c=nameGenderColor(y); return `<div${c?` style='color:${c};font-weight:700'`:''}>${y}</div>`;}).join(''); res.appendChild(card); }); saveBoardState(); };
+        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); let ng=parseInt(ci.value)||2; if(n.length===0)return; for(let i=n.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=n[i];n[i]=n[j];n[j]=t;} let g=[]; for(let i=0;i<ng;i++)g.push([]); n.forEach((x,i)=>g[i%ng].push(x)); res.innerHTML=''; g.forEach((x,i)=>{ if(x.length===0)return; let card=document.createElement('div'); card.className='group-card'; card.innerHTML=`<div class='group-title'>Grupp ${i+1}</div>`+x.map(y=>`<div>${y}</div>`).join(''); res.appendChild(card); }); saveBoardState(); };
     }
 
     function createTimer(config) {
@@ -1764,7 +1999,7 @@
     }
 
     function createAnalogTimer(config){
-        const body=createWidget('ANALOG TIMER',200,'',config); body.innerHTML=`<div class='analog-timer-container'><div class='analog-hint'>Dra för att ställa</div><div class='analog-clock-face'><div class='analog-timer-handle'></div><div class='analog-text-overlay'>05:00</div></div><div class='timer-controls hover-menu'><button class='btn btn-primary btn-s'>Start</button><button class='btn btn-danger btn-r'>Nollställ</button></div></div>`;
+        const body=createWidget('ANALOG TIMER',200,'atimer-widget',config); body.innerHTML=`<div class='analog-timer-container'><div class='analog-hint hover-menu'>Dra för att ställa</div><div class='analog-clock-face'><div class='analog-timer-handle'></div><div class='analog-text-overlay'>05:00</div></div><div class='timer-controls hover-menu'><button class='btn btn-primary btn-s'>Start</button><button class='btn btn-danger btn-r'>Nollställ</button></div></div>`;
         const cf=body.querySelector('.analog-clock-face'), hnd=body.querySelector('.analog-timer-handle'), to=body.querySelector('.analog-text-overlay'), bs=body.querySelector('.btn-s'), br=body.querySelector('.btn-r');
         let tot=300, left=300, tId=null, isD=false;
         const upd=()=>{ let pct=(left/3600), deg=pct*360; cf.style.background=`conic-gradient(#ff3b30 ${deg}deg, #f2f2f7 ${deg}deg)`; hnd.style.transform=`rotate(${deg}deg)`; let m=Math.floor(left/60).toString().padStart(2,'0'), s=(left%60).toString().padStart(2,'0'); to.innerText=`${m}:${s}`; }; upd();
@@ -1779,7 +2014,9 @@
     }
 
     function createRealTimeClock(config){
-        const body=createWidget('KLOCKA & DATUM',220,'',config); body.innerHTML=`<div class='time-display'>00:00</div><div class='real-clock-face'><div class='hand hour'></div><div class='hand minute'></div><div class='hand second'></div></div><div class='date-display'></div>`; const td=body.children[0], cf=body.children[1], dd=body.children[2], hh=cf.children[0], mh=cf.children[1], sh=cf.children[2];
+        const body=createWidget('KLOCKA & DATUM',220,'clock-widget',config); body.innerHTML=`<div class='time-display'>00:00</div><div class='real-clock-face'><div class='hand hour'></div><div class='hand minute'></div><div class='hand second'></div></div><div class='date-display'></div>`; const td=body.children[0], cf=body.children[1], dd=body.children[2], hh=cf.children[0], mh=cf.children[1], sh=cf.children[2];
+        // Timstreck (12 grova) + minutstreck (60 tunna), 12/3/6/9 extra tydliga
+        for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
         setInterval(()=>{ const now=new Date(); td.innerText=now.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'}); dd.innerText=now.toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'}); sh.style.transform=`rotate(${(now.getSeconds()/60)*360}deg)`; mh.style.transform=`rotate(${(now.getMinutes()/60)*360}deg)`; hh.style.transform=`rotate(${(now.getHours()%12/12)*360}deg)`; },100);
     }
 
@@ -1810,6 +2047,28 @@
     }
 
     // TAVLA-TEMA
+    // ---- TEMABAKGRUNDER (SVG-vektor – knivskarpa i obegränsad upplösning) ----
+    const IMG_THEMES = (function(){
+        const det = (seed)=>{ let s=seed; return ()=>{ s=(s*1103515245+12345)&0x7fffffff; return s/0x7fffffff; }; };
+        const stars=(n,w,h,seed,color)=>{ const r=det(seed); let o=''; for(let i=0;i<n;i++){ o+=`<circle cx='${(r()*w)|0}' cy='${(r()*h)|0}' r='${(r()*1.8+0.5).toFixed(1)}' fill='${color}' opacity='${(r()*0.6+0.3).toFixed(2)}'/>`; } return o; };
+        const trees=()=>{ let o=''; const xs=[120,300,520,760,980,1180,1420]; xs.forEach((x,i)=>{ const y=815-(i%2)*8; o+=`<rect x='${x-9}' y='${y}' width='18' height='42' fill='#9c6b3f'/><polygon points='${x},${y-118} ${x-46},${y} ${x+46},${y}' fill='#7bc47f'/><polygon points='${x},${y-150} ${x-36},${y-58} ${x+36},${y-58}' fill='#8fd093'/>`; }); return o; };
+        const flakes=()=>{ const r=det(31); let o=''; for(let i=0;i<55;i++){ o+=`<text x='${(r()*1600)|0}' y='${(r()*640)|0}' font-size='${(r()*12+7)|0}' fill='#bcdcf5' opacity='${(r()*0.6+0.3).toFixed(2)}'>❄</text>`; } return o; };
+        return [
+            { cl:'theme-img-space', name:'🚀 Rymden',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><radialGradient id='s' cx='28%' cy='24%' r='100%'><stop offset='0%' stop-color='#22335c'/><stop offset='60%' stop-color='#101a33'/><stop offset='100%' stop-color='#070b16'/></radialGradient></defs><rect width='1600' height='900' fill='url(#s)'/>${stars(150,1600,900,7,'#ffffff')}<circle cx='1285' cy='205' r='95' fill='#cdd6f4'/><circle cx='1258' cy='185' r='95' fill='#101a33' opacity='0.16'/><circle cx='1305' cy='235' r='13' fill='#9aa6d6' opacity='0.5'/><circle cx='1252' cy='232' r='8' fill='#9aa6d6' opacity='0.5'/></svg>` },
+            { cl:'theme-img-ocean', name:'🌊 Hav',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='o' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#c7eeff'/><stop offset='45%' stop-color='#8ad4f0'/><stop offset='100%' stop-color='#2f8fc4'/></linearGradient></defs><rect width='1600' height='900' fill='url(#o)'/><circle cx='250' cy='160' r='70' fill='#fff7cc' opacity='0.85'/><path d='M0 620 Q 400 560 800 620 T 1600 620 V900 H0 Z' fill='#ffffff' opacity='0.12'/><path d='M0 700 Q 400 640 800 700 T 1600 700 V900 H0 Z' fill='#ffffff' opacity='0.14'/><path d='M0 780 Q 400 720 800 780 T 1600 780 V900 H0 Z' fill='#ffffff' opacity='0.16'/></svg>` },
+            { cl:'theme-img-forest', name:'🌳 Skog',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#cdeffd'/><stop offset='55%' stop-color='#eaf7e6'/><stop offset='100%' stop-color='#d4eccf'/></linearGradient></defs><rect width='1600' height='900' fill='url(#f)'/><circle cx='1330' cy='170' r='64' fill='#ffe9a8' opacity='0.9'/><path d='M0 760 Q 300 690 640 760 T 1600 740 V900 H0 Z' fill='#a9d9a0' opacity='0.65'/><g opacity='0.9'>${trees()}</g></svg>` },
+            { cl:'theme-img-winter', name:'❄️ Vinter',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='w' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#dff1ff'/><stop offset='100%' stop-color='#f4fbff'/></linearGradient></defs><rect width='1600' height='900' fill='url(#w)'/>${flakes()}<path d='M0 710 Q 380 645 760 705 T 1600 695 V900 H0 Z' fill='#ffffff' opacity='0.9'/><path d='M0 805 Q 420 755 820 805 T 1600 795 V900 H0 Z' fill='#eaf6ff'/></svg>` },
+            { cl:'theme-img-sunset', name:'🌅 Solnedgång',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='su' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#ffd9a0'/><stop offset='45%' stop-color='#ff9e6d'/><stop offset='100%' stop-color='#e96a8b'/></linearGradient></defs><rect width='1600' height='900' fill='url(#su)'/><circle cx='800' cy='430' r='150' fill='#fff2c2' opacity='0.9'/><path d='M0 770 Q 400 720 800 760 T 1600 760 V900 H0 Z' fill='#7a3b5a' opacity='0.5'/><path d='M0 820 Q 400 790 800 815 T 1600 815 V900 H0 Z' fill='#54293f' opacity='0.55'/></svg>` }
+        ];
+    })();
+    function injectBackgroundThemeCSS(){ if(document.getElementById('img-theme-style')) return; const st=document.createElement('style'); st.id='img-theme-style'; st.textContent = IMG_THEMES.map(t=>`#cb-app-wrapper.${t.cl} .canvas-page{background-image:url("data:image/svg+xml,${encodeURIComponent(t.svg)}") !important;background-size:cover !important;background-position:center !important;background-repeat:no-repeat !important;}`).join('\n'); document.head.appendChild(st); }
+    injectBackgroundThemeCSS();
+
     function createBgSelector(config){
         const body=createWidget('BAKGRUND',260,'',config); body.innerHTML=`<div class='bg-panel'></div>`; const p=body.firstChild;
         const themes = [
@@ -1826,6 +2085,13 @@
             let d=document.createElement('div'); d.className='bg-dot'; d.title=t.n;
             d.style.background=t.sw; if(t.bg) d.style.backgroundColor=t.bg; if(t.size) d.style.backgroundSize=t.size; if(t.border) d.style.border=t.border;
             d.onclick=()=>{ document.getElementById('cb-app-wrapper').className=t.cl; saveBoardState(); };
+            p.appendChild(d);
+        });
+        // Temabakgrunder (bilder) – pricken förhandsvisar bakgrunden, utan vattenstämpel
+        IMG_THEMES.forEach(t=>{
+            let d=document.createElement('div'); d.className='bg-dot'; d.title=t.name;
+            d.style.backgroundImage=`url("data:image/svg+xml,${encodeURIComponent(t.svg)}")`; d.style.backgroundSize='cover'; d.style.backgroundPosition='center';
+            d.onclick=()=>{ document.getElementById('cb-app-wrapper').className=t.cl+' no-watermark'; saveBoardState(); };
             p.appendChild(d);
         });
     }
@@ -1968,10 +2234,8 @@
         const inp = body.querySelector('.grattis-name-input');
         const cc = body.querySelector('.confetti-container');
         const fw = body.querySelector('.fw-layer');
-        const applyNameColor = ()=>{ inp.style.color = nameGenderColor(inp.value) || '#007aff'; };
-        inp.oninput = ()=>{ applyNameColor(); saveBoardState(); };
+        inp.oninput = saveBoardState;
         if(config && config.data && config.data.name) inp.value = config.data.name;
-        applyNameColor();
         const colors=['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5856d6','#ff2d55','#a64dff'];
         // Kontinuerligt glitterregn (CSS-animationen loopar oändligt – spruta ut bitarna en gång)
         for(let i=0;i<90;i++){
@@ -2018,6 +2282,7 @@
     // INITIALISERING & BOOTSTRAP
     function initBoard() {
         let savedData = localStorage.getItem('boardStateV6_' + currentUser);
+        let newDays = 0;
         if (savedData) {
             try {
                 const s = JSON.parse(savedData); document.getElementById('cb-app-wrapper').className = s.bodyClass || '';
@@ -2025,16 +2290,24 @@
                 s.pages.forEach((p) => {
                     const pageId = p.id || Date.now() + '-' + Math.random().toString(16).slice(2);
                     const cp = document.createElement('div'); cp.className = 'canvas-page'; cp.id = pageId; if(p.bgImage) cp.style.backgroundImage = p.bgImage; if(p.name) cp.dataset.pageName = p.name;
-                    document.getElementById('canvas-container-v6').appendChild(cp); pagesListV6.push({ id: pageId, canvas: cp, name: p.name || '' });
+                    const hasDay = (p.day!==undefined && p.day!==null);
+                    const hasLesson = (p.lesson!==undefined && p.lesson!==null);
+                    if(hasDay) cp.dataset.day = String(p.day);
+                    if(hasLesson) cp.dataset.lesson = String(p.lesson);
+                    document.getElementById('canvas-container-v6').appendChild(cp); pagesListV6.push({ id: pageId, canvas: cp, name: p.name || '', day: hasDay ? p.day : undefined, lesson: hasLesson ? p.lesson : undefined });
                     cp.classList.add('active');
                     p.widgets.forEach(w => spawnWidgetFromState(w));
                     cp.classList.remove('active');
                 });
-                goToPageByIndexV6(s.activePage || 0);
-            } catch(e) { createPageV6(true); }
-        } else { createPageV6(true); }
+                newDays = ensureFixedPages();
+                let idx = s.activePageId ? pagesListV6.findIndex(pg=>pg.id===s.activePageId) : -1;
+                if(idx < 0) idx = (typeof s.activePage==='number' && s.activePage < pagesListV6.length) ? s.activePage : 0;
+                goToPageByIndexV6(idx);
+            } catch(e) { document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
+        } else { document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
         window.isLoadingBoard = false;
         refreshPocketData();
+        if(newDays > 0) saveBoardState();
     }
 
     checkLogin();
