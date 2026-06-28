@@ -252,6 +252,7 @@
     .sp-item-go { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #333; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .sp-icon-btn { background: none; border: none; cursor: pointer; font-size: 13px; padding: 1px 3px; flex-shrink: 0; opacity: 0.7; }
     .sp-icon-btn:hover { opacity: 1; transform: scale(1.15); }
+    .sp-play-btn { color: #34c759; font-size: 17px; opacity: 1; line-height: 1; }
     .sp-empty { font-size: 11px; color: #aaa; font-style: italic; padding: 2px 0 6px; }
     .sp-feed { max-height: 230px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px; background: #f7f7f9; border-radius: 10px; margin-bottom: 6px; }
     .sp-msg { background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: 9px; padding: 6px 8px; position: relative; }
@@ -1255,7 +1256,7 @@
             if((pg.day!==undefined && pg.day!==null) || (pg.lesson!==undefined && pg.lesson!==null)) return;
             regNo++;
             const row = document.createElement('div'); row.className = 'sp-item' + (i===currentPageIndexV6 ? ' current' : '');
-            const go = document.createElement('button'); go.className='sp-icon-btn'; go.innerHTML = (i===currentPageIndexV6?'▸':'·'); go.title='Gå till sidan'; go.onclick=()=>{ goToPageByIndexV6(i); saveBoardState(); };
+            const go = document.createElement('button'); go.className='sp-icon-btn sp-play-btn'; go.innerHTML='▶'; go.title='Öppna sidan'; go.onclick=()=>{ goToPageByIndexV6(i); saveBoardState(); };
             const name = document.createElement('input'); name.className='sp-item-name'; name.value = pg.name||''; name.placeholder='Sida '+regNo; name.onchange=()=> renamePageV6(i, name.value.trim());
             const del = document.createElement('button'); del.className='sp-icon-btn'; del.innerHTML='🗑'; del.title='Ta bort sidan'; del.onclick=()=> deletePageV6(i);
             row.appendChild(go); row.appendChild(name); row.appendChild(del);
