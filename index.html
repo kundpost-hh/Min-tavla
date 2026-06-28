@@ -309,6 +309,8 @@
 
     .schedule-widget .widget-header { display: none !important; }
     .schedule-widget .widget-inner { border: 2px solid #ff3b30; padding: 0 !important; overflow: hidden; }
+    .schedule-widget.minimized { min-height: 0 !important; width: auto !important; min-width: 0 !important; }
+    .schedule-widget.minimized .sched-top-strip { white-space: nowrap; }
     .schedule-widget .widget-body { padding: 0 !important; display: flex; flex-direction: column; position: relative; height: 100%; overflow-y: auto; }
     
     .widget-header span { color: white; }
@@ -1391,13 +1393,13 @@
     function createDailySchedule(config){
         const body = createWidget('DAGENS SCHEMA', 450, 'schedule-widget', config);
         const widgetEl = body.parentElement.parentElement;
-        const topStrip = document.createElement('div'); topStrip.style = 'background:#ff3b30;color:white;font-weight:bold;height:44px;padding:0 15px;display:flex;justify-content:space-between;align-items:center;cursor:move;touch-action:none;'; topStrip.innerHTML = `<span>Dagens schema</span><div class='widget-controls'><span class='widget-ctrl-icon sch-min'>➖</span><span class='widget-ctrl-icon sch-lock-icon'>🔓</span><span class='widget-ctrl-icon sch-close'>✖</span></div>`;
+        const topStrip = document.createElement('div'); topStrip.className='sched-top-strip'; topStrip.style = 'background:#ff3b30;color:white;font-weight:bold;height:44px;padding:0 15px;display:flex;justify-content:space-between;align-items:center;gap:14px;cursor:move;touch-action:none;'; topStrip.innerHTML = `<span>Dagens schema</span><div class='widget-controls'><span class='widget-ctrl-icon sch-min'>➖</span><span class='widget-ctrl-icon sch-lock-icon'>🔓</span><span class='widget-ctrl-icon sch-close'>✖</span></div>`;
         body.appendChild(topStrip); makeDraggable(widgetEl, topStrip);
         const schContent = document.createElement('div'); schContent.className = 'sched-content';
         const lockIcon = topStrip.querySelector('.sch-lock-icon'); lockIcon.innerHTML = widgetEl.classList.contains('locked') ? '🔒' : '🔓';
         lockIcon.onclick = (e) => { e.stopPropagation(); widgetEl.classList.toggle('locked'); lockIcon.innerHTML = widgetEl.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
         topStrip.querySelector('.sch-close').onclick = (e) => { e.stopPropagation(); customConfirm("Vill du stänga rutan?", () => { widgetEl.remove(); saveBoardState(); }); };
-        topStrip.querySelector('.sch-min').onclick = (e) => { e.stopPropagation(); const hidden = schContent.style.display === 'none'; schContent.style.display = hidden ? '' : 'none'; widgetEl.dataset.minimized = hidden ? 'false' : 'true'; saveBoardState(); };
+        topStrip.querySelector('.sch-min').onclick = (e) => { e.stopPropagation(); const hidden = schContent.style.display === 'none'; schContent.style.display = hidden ? '' : 'none'; widgetEl.dataset.minimized = hidden ? 'false' : 'true'; widgetEl.classList.toggle('minimized', !hidden); saveBoardState(); };
 
         const hr = document.createElement('div'); hr.style = 'display:flex;padding:8px 10px;background:#f2f2f7;border-bottom:1px solid #d1d1d6;font-weight:bold;font-size:12px;color:#333;'; hr.innerHTML = "<div style='width:10px;'></div><div style='width:65px;text-align:center;'>Tid</div><div style='width:45px;text-align:center;'>Bild</div><div style='flex-grow:1;padding-left:5px;'>Aktivitet</div><div style='width:24px;'></div>"; schContent.appendChild(hr);
         const cont = document.createElement('div'); cont.style.padding='10px'; schContent.appendChild(cont);
@@ -1416,7 +1418,7 @@
         else { addRow('08:15','Morgonsamling','💬','#e5e5ea'); addRow('09:00','Matematik','🧮','#e5e5ea'); addRow('10:30','Svenska','🔤','#e5e5ea'); }
         const act = document.createElement('div'); act.className='hover-menu'; act.style.padding='10px'; const ab=document.createElement('button'); ab.className='btn btn-primary'; ab.innerText='+ Rad'; ab.onclick=()=>{addRow('08:30','Lektion','📝','#e5e5ea');saveBoardState();}; act.appendChild(ab); schContent.appendChild(act);
         body.appendChild(schContent);
-        if(config && config.minimized){ body.style.display=''; schContent.style.display='none'; }
+        if(config && config.minimized){ body.style.display=''; schContent.style.display='none'; widgetEl.classList.add('minimized'); }
     }
 
     function createLessonPlan(config) {
