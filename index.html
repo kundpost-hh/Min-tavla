@@ -109,6 +109,7 @@
         <div class="tool-group">
             <button class="tool-btn" onclick="createLessonPlan()"><div class="icon">📋</div><div class="label">Lektion</div></button>
             <button class="tool-btn" onclick="createDailySchedule()"><div class="icon">📆</div><div class="label">Schema</div></button>
+            <button class="tool-btn" onclick="createCalendarWidget()"><div class="icon">📅</div><div class="label">Kalender</div></button>
             <button class="tool-btn" onclick="createTextEditor()"><div class="icon">📝</div><div class="label">Text</div></button>
             <button class="tool-btn" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
             <button class="tool-btn" onclick="createWhiteboard()"><div class="icon">🖍️</div><div class="label">Rita</div></button>
@@ -574,6 +575,44 @@
     .alpha-letter:hover { animation: alpha-dance 0.6s ease-in-out infinite; background: rgba(255,45,85,0.08); }
     @keyframes alpha-dance { 0% { transform: scale(1.5) rotate(0deg); } 25% { transform: scale(1.55) rotate(-13deg); } 50% { transform: scale(1.65) rotate(0deg); } 75% { transform: scale(1.55) rotate(13deg); } 100% { transform: scale(1.5) rotate(0deg); } }
 
+    /* ---- KALENDER ---- */
+    .calendar-widget .widget-inner { background:#fff; }
+    .cal-wrap { display:flex; flex-direction:column; width:100%; font-size:12px; user-select:none; }
+    .cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:6px; }
+    .cal-nav { width:34px; height:34px; border:none; border-radius:10px; background:#f0f0f5; color:#333; font-size:22px; line-height:1; cursor:pointer; transition:background .2s; flex-shrink:0; }
+    .cal-nav:hover { background:#e0e0ea; }
+    .cal-titlebox { display:flex; flex-direction:column; align-items:center; gap:3px; }
+    .cal-month { font-size:16px; font-weight:800; color:#1d1d1f; white-space:nowrap; }
+    .cal-today-btn { border:none; background:#007aff; color:#fff; font-size:10px; font-weight:700; padding:2px 12px; border-radius:20px; cursor:pointer; }
+    .cal-today-btn:hover { background:#0062cc; }
+    .cal-grid-head, .cal-grid { display:grid; grid-template-columns:32px repeat(7,1fr); gap:3px; }
+    .cal-grid-head { margin-bottom:3px; }
+    .cal-wd { text-align:center; font-size:10px; font-weight:700; color:#8e8e93; padding:2px 0; }
+    .cal-wd.cal-wk { color:#c7c7cc; font-size:9px; }
+    .cal-wd.cal-we { color:#ff3b30; }
+    .cal-cell { min-height:46px; }
+    .cal-wknum { display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#a9a9b2; background:#f7f7fa; border-radius:8px; }
+    .cal-day { position:relative; border:1px solid #ececf0; border-radius:8px; padding:3px 4px; cursor:pointer; overflow:hidden; transition:background .15s, border-color .15s; display:flex; flex-direction:column; }
+    .cal-day:hover { border-color:#007aff; background:#f5faff; }
+    .cal-day.cal-empty { border:none; background:transparent; cursor:default; }
+    .cal-dnum { font-size:13px; font-weight:700; color:#1d1d1f; line-height:1.1; }
+    .cal-nd { font-size:8.5px; color:#8e8e93; line-height:1.05; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cal-day.cal-weekend .cal-dnum { color:#ff3b30; }
+    .cal-day.cal-today { background:#007aff !important; border-color:#007aff !important; }
+    .cal-day.cal-today .cal-dnum, .cal-day.cal-today .cal-nd { color:#fff; }
+    .cal-day.cal-hasnote { background:#fff4d6; border-color:#ffd84d; }
+    .cal-day.cal-hasnote:hover { background:#ffeeb0; }
+    .cal-note-dot { position:absolute; top:4px; right:4px; width:7px; height:7px; border-radius:50%; background:#ff9500; box-shadow:0 0 0 2px #fff; }
+    .cal-day.cal-today .cal-note-dot { box-shadow:0 0 0 2px #007aff; }
+    .cal-popup-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:99999999; display:flex; align-items:center; justify-content:center; }
+    .cal-popup { background:#fff; border-radius:16px; padding:18px 20px 16px; width:min(380px,92vw); box-shadow:0 12px 40px rgba(0,0,0,.3); }
+    .cal-popup-title { font-size:15px; font-weight:800; color:#1d1d1f; margin-bottom:10px; text-align:center; }
+    .cal-popup-ta { width:100%; min-height:110px; border:2px solid #e0e0e6; border-radius:12px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; outline:none; box-sizing:border-box; }
+    .cal-popup-ta:focus { border-color:#007aff; }
+    .cal-popup-btns { display:flex; gap:8px; margin-top:12px; justify-content:flex-end; }
+    .cal-tip { position:fixed; transform:translate(-50%,-100%); background:#1d1d1f; color:#fff; font-size:12px; padding:7px 11px; border-radius:8px; max-width:220px; z-index:99999999; pointer-events:none; box-shadow:0 6px 20px rgba(0,0,0,.3); white-space:pre-wrap; line-height:1.3; }
+    .cal-tip::after { content:''; position:absolute; left:50%; top:100%; transform:translateX(-50%); border:6px solid transparent; border-top-color:#1d1d1f; }
+
     .grattis-widget .widget-inner { background: linear-gradient(135deg, #fff0f5 0%, #f0f8ff 100%); border: 2px solid #dcb3ff; }
     .grattis-widget .widget-header { background-color: #a64dff !important; border-bottom: none; }
     .grattis-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; position: relative; padding: 20px; overflow: hidden; }
@@ -774,7 +813,8 @@
             gotdLists:  localStorage.getItem('savedGOTDLists_') || '',
             wordLists:  localStorage.getItem('savedWordLists_') || '',
             templates:  localStorage.getItem('mintavla_templates_' + currentUser) || '',
-            links:      localStorage.getItem('mintavla_links_' + currentUser) || ''
+            links:      localStorage.getItem('mintavla_links_' + currentUser) || '',
+            calNotes:   localStorage.getItem('mintavla_calNotes_' + currentUser) || ''
         };
     }
 
@@ -787,6 +827,7 @@
         if (typeof d.wordLists === 'string' && d.wordLists) localStorage.setItem('savedWordLists_', d.wordLists);
         if (typeof d.templates === 'string') localStorage.setItem('mintavla_templates_' + currentUser, d.templates);
         if (typeof d.links === 'string') localStorage.setItem('mintavla_links_' + currentUser, d.links);
+        if (typeof d.calNotes === 'string' && d.calNotes) localStorage.setItem('mintavla_calNotes_' + currentUser, d.calNotes);
     }
 
     // Gör om e-post till en säker dokument-nyckel (Firestore tillåter inte vissa tecken)
@@ -1102,6 +1143,7 @@
             else if (w.type === 'SLUMPA-HJUL') createWheel(w);
             else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
             else if (w.type === 'GREJ OF THE DAY') createGOTD(w);
+            else if (w.type === 'KALENDER') createCalendarWidget(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -2443,6 +2485,92 @@
         // Vissa webbläsare laddar röster asynkront – trigga en laddning
         try { if('speechSynthesis' in window) window.speechSynthesis.getVoices(); } catch(e){}
     }
+
+    const NAMEDAYS={"01-01":"","01-02":"Svea","01-03":"Alfred, Alfrida","01-04":"Rut","01-05":"Hanna, Hannele","01-06":"Kasper, Melker, Baltsar","01-07":"August, Augusta","01-08":"Erland","01-09":"Gunnar, Gunder","01-10":"Sigurd, Sigbritt","01-11":"Jan, Jannike","01-12":"Frideborg, Fridolf","01-13":"Knut","01-14":"Felix, Felicia","01-15":"Laura, Lorentz","01-16":"Hjalmar, Helmer","01-17":"Anton, Tony","01-18":"Hilda, Hildur","01-19":"Henrik","01-20":"Fabian, Sebastian","01-21":"Agnes, Agneta","01-22":"Vincent, Viktor","01-23":"Frej, Freja","01-24":"Erika","01-25":"Paul, Pål","01-26":"Bodil, Boel","01-27":"Göte, Göta","01-28":"Karl, Karla","01-29":"Diana","01-30":"Gunilla, Gunhild","01-31":"Ivar, Joar","02-01":"Max, Maximilian","02-02":"","02-03":"Disa, Hjördis","02-04":"Ansgar, Anselm","02-05":"Agata, Agda","02-06":"Dorotea, Doris","02-07":"Rikard, Dick","02-08":"Berta, Bert","02-09":"Fanny, Franciska","02-10":"Iris","02-11":"Yngve, Inge","02-12":"Evelina, Evy","02-13":"Agne, Ove","02-14":"Valentin","02-15":"Sigfrid","02-16":"Julia, Julius","02-17":"Alexandra, Sandra","02-18":"Frida, Fritiof","02-19":"Gabriella, Ella","02-20":"Vivianne","02-21":"Hilding","02-22":"Pia","02-23":"Torsten, Torun","02-24":"Mattias, Mats","02-25":"Sigvard, Sivert","02-26":"Torgny, Torkel","02-27":"Lage","02-28":"Maria","02-29":"","03-01":"Albin, Elvira","03-02":"Ernst, Erna","03-03":"Gunborg, Gunvor","03-04":"Adrian, Adriana","03-05":"Tora, Tove","03-06":"Ebba, Ebbe","03-07":"Camilla","03-08":"Siv","03-09":"Torbjörn, Torleif","03-10":"Edla, Ada","03-11":"Edvin, Egon","03-12":"Viktoria","03-13":"Greger","03-14":"Matilda, Maud","03-15":"Kristoffer, Christel","03-16":"Herbert, Gilbert","03-17":"Gertrud","03-18":"Edvard, Edmund","03-19":"Josef, Josefina","03-20":"Joakim, Kim","03-21":"Bengt","03-22":"Kennet, Kent","03-23":"Gerda, Gerd","03-24":"Gabriel, Rafael","03-25":"Marie bebådelsedag","03-26":"Emanuel","03-27":"Rudolf, Ralf","03-28":"Malkolm, Morgan","03-29":"Jonas, Jens","03-30":"Holger, Holmfrid","03-31":"Ester","04-01":"Harald, Hervor","04-02":"Gudmund, Ingemund","04-03":"Ferdinand, Nanna","04-04":"Marianne, Marlene","04-05":"Irene, Irja","04-06":"Vilhelm, William","04-07":"Irma, Irmelin","04-08":"Nadja, Tanja","04-09":"Otto, Ottilia","04-10":"Ingvar, Ingvor","04-11":"Ulf, Ylva","04-12":"Liv","04-13":"Artur, Douglas","04-14":"Tiburtius","04-15":"Olivia, Oliver","04-16":"Patrik, Patricia","04-17":"Elias, Elis","04-18":"Valdemar, Volmar","04-19":"Olaus, Ola","04-20":"Amalia, Amelie","04-21":"Anneli, Annika","04-22":"Allan, Glenn","04-23":"Georg, Göran","04-24":"Vega","04-25":"Markus","04-26":"Teresia, Terese","04-27":"Engelbrekt","04-28":"Ture, Tyra","04-29":"Tyko","04-30":"Mariana","05-01":"Valborg","05-02":"Filip, Filippa","05-03":"John, Jane","05-04":"Monika, Mona","05-05":"Gotthard, Erhard","05-06":"Marit, Rita","05-07":"Carina, Carita","05-08":"Åke","05-09":"Reidar, Reidun","05-10":"Esbjörn, Styrbjörn","05-11":"Märta, Märit","05-12":"Charlotta, Lotta","05-13":"Linnea, Linn","05-14":"Halvard, Halvar","05-15":"Sofia, Sonja","05-16":"Ronald, Ronny","05-17":"Rebecka, Ruben","05-18":"Erik","05-19":"Maj, Majken","05-20":"Karolina, Carola","05-21":"Konstantin, Conny","05-22":"Hemming, Henning","05-23":"Desideria, Desirée","05-24":"Ivan, Vanja","05-25":"Urban","05-26":"Vilhelmina, Vilma","05-27":"Beda, Blenda","05-28":"Ingeborg, Borghild","05-29":"Yvonne, Jeanette","05-30":"Vera, Veronika","05-31":"Petronella, Pernilla","06-01":"Gun, Gunnel","06-02":"Rutger, Roger","06-03":"Ingemar, Gudmar","06-04":"Solbritt, Solveig","06-05":"Bo","06-06":"Gustav, Gösta","06-07":"Robert, Robin","06-08":"Eivor, Majvor","06-09":"Börje, Birger","06-10":"Svante, Boris","06-11":"Bertil, Berthold","06-12":"Eskil","06-13":"Aina, Aino","06-14":"Håkan, Hakon","06-15":"Margit, Margot","06-16":"Axel, Axelina","06-17":"Torborg, Torvald","06-18":"Björn, Bjarne","06-19":"Germund, Görel","06-20":"Linda","06-21":"Alf, Alvar","06-22":"Paulina, Paula","06-23":"Adolf, Alice","06-24":"Johannes Döparens dag","06-25":"David, Salomon","06-26":"Rakel, Lea","06-27":"Selma, Fingal","06-28":"Leo","06-29":"Peter, Petra","06-30":"Elof, Leif","07-01":"Aron, Mirjam","07-02":"Rosa, Rosita","07-03":"Aurora","07-04":"Ulrika, Ulla","07-05":"Laila, Ritva","07-06":"Esaias, Jessika","07-07":"Klas","07-08":"Kjell","07-09":"Jörgen, Örjan","07-10":"André, Andrea","07-11":"Eleonora, Ellinor","07-12":"Herman, Hermine","07-13":"Joel, Judit","07-14":"Folke","07-15":"Ragnhild, Ragnvald","07-16":"Reinhold, Reine","07-17":"Bruno","07-18":"Fredrik, Fritz","07-19":"Sara","07-20":"Margareta, Greta","07-21":"Johanna","07-22":"Magdalena, Madeleine","07-23":"Emma","07-24":"Kristina, Kerstin","07-25":"Jakob","07-26":"Jesper","07-27":"Marta","07-28":"Botvid, Seved","07-29":"Olof","07-30":"Algot","07-31":"Helena, Elin","08-01":"Per","08-02":"Karin, Kajsa","08-03":"Tage","08-04":"Arne, Arnold","08-05":"Ulrik, Alrik","08-06":"Alfons, Inez","08-07":"Dennis, Denise","08-08":"Silvia, Sylvia","08-09":"Roland","08-10":"Lars","08-11":"Susanna","08-12":"Klara","08-13":"Kaj","08-14":"Uno","08-15":"Stella, Estelle","08-16":"Brynolf","08-17":"Verner, Valter","08-18":"Ellen, Lena","08-19":"Magnus, Måns","08-20":"Bernhard, Bernt","08-21":"Jon, Jonna","08-22":"Henrietta, Henrika","08-23":"Signe, Signhild","08-24":"Bartolomeus","08-25":"Lovisa, Louise","08-26":"Östen","08-27":"Rolf, Raoul","08-28":"Fatima, Leila","08-29":"Hans, Hampus","08-30":"Albert, Albertina","08-31":"Arvid, Vidar","09-01":"Sam, Samuel","09-02":"Justus, Justina","09-03":"Alfhild, Alva","09-04":"Gisela","09-05":"Adela, Heidi","09-06":"Lilian, Lilly","09-07":"Kevin, Roy","09-08":"Alma, Hulda","09-09":"Anita, Annette","09-10":"Tord, Turid","09-11":"Dagny, Helny","09-12":"Åsa, Åslög","09-13":"Sture","09-14":"Ida","09-15":"Sigrid, Siri","09-16":"Dag, Daga","09-17":"Hildegard, Magnhild","09-18":"Orvar","09-19":"Fredrika","09-20":"Elise, Lisa","09-21":"Matteus","09-22":"Maurits, Moritz","09-23":"Tekla, Tea","09-24":"Gerhard, Gert","09-25":"Tryggve","09-26":"Enar, Einar","09-27":"Dagmar, Rigmor","09-28":"Lennart, Leonard","09-29":"Mikael, Mikaela","09-30":"Helge","10-01":"Ragnar, Ragna","10-02":"Ludvig, Love","10-03":"Evald, Osvald","10-04":"Frans, Frank","10-05":"Bror","10-06":"Jenny, Jennifer","10-07":"Birgitta, Britta","10-08":"Nils","10-09":"Ingrid, Inger","10-10":"Harry, Harriet","10-11":"Erling, Jarl","10-12":"Valfrid, Manfred","10-13":"Berit, Birgit","10-14":"Stellan","10-15":"Hedvig, Hillevi","10-16":"Finn","10-17":"Antonia, Toini","10-18":"Lukas","10-19":"Tore, Tor","10-20":"Sibylla","10-21":"Ursula, Yrsa","10-22":"Marika, Marita","10-23":"Severin, Sören","10-24":"Evert, Eilert","10-25":"Inga, Ingalill","10-26":"Amanda, Rasmus","10-27":"Sabina","10-28":"Simon, Simone","10-29":"Viola","10-30":"Elsa, Isabella","10-31":"Edit, Edgar","11-01":"","11-02":"Tobias","11-03":"Hubert, Hugo","11-04":"Sverker","11-05":"Eugen, Eugenia","11-06":"Gustav Adolf","11-07":"Ingegerd, Ingela","11-08":"Vendela","11-09":"Teodor, Teodora","11-10":"Martin, Martina","11-11":"Mårten","11-12":"Konrad, Kurt","11-13":"Kristian, Krister","11-14":"Emil, Emilia","11-15":"Leopold","11-16":"Vibeke, Viveka","11-17":"Naemi, Naima","11-18":"Lillemor, Moa","11-19":"Elisabet, Lisbet","11-20":"Pontus, Marina","11-21":"Helga, Olga","11-22":"Cecilia, Sissela","11-23":"Klemens","11-24":"Gudrun, Rune","11-25":"Katarina, Katja","11-26":"Linus","11-27":"Astrid, Asta","11-28":"Malte","11-29":"Sune","11-30":"Andreas, Anders","12-01":"Oskar, Ossian","12-02":"Beata, Beatrice","12-03":"Lydia","12-04":"Barbara, Barbro","12-05":"Sven","12-06":"Nikolaus, Niklas","12-07":"Angela, Angelika","12-08":"Virginia","12-09":"Anna","12-10":"Malin, Malena","12-11":"Daniel, Daniela","12-12":"Alexander, Alexis","12-13":"Lucia","12-14":"Sten, Sixten","12-15":"Gottfrid","12-16":"Assar","12-17":"Stig","12-18":"Abraham","12-19":"Isak","12-20":"Israel, Moses","12-21":"Tomas","12-22":"Natanael, Jonatan","12-23":"Adam","12-24":"Eva","12-25":"","12-26":"Stefan, Staffan","12-27":"Johannes, Johan","12-28":"Benjamin","12-29":"Natalia, Natalie","12-30":"Abel, Set","12-31":"Sylvester"};
+
+    // ---- KALENDER (per-användare-noteringar, namnsdagar, veckonummer) ----
+    function calNotesKey(){ return 'mintavla_calNotes_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
+    function loadCalNotes(){ try { return JSON.parse(localStorage.getItem(calNotesKey()) || '{}'); } catch(e){ return {}; } }
+    function saveCalNotes(obj){ try { localStorage.setItem(calNotesKey(), JSON.stringify(obj)); } catch(e){} if(typeof syncToCloud==='function') syncToCloud(); }
+    function calIsoWeek(date){ const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())); const dayNum=(d.getUTCDay()+6)%7; d.setUTCDate(d.getUTCDate()-dayNum+3); const firstThu=new Date(Date.UTC(d.getUTCFullYear(),0,4)); const fdn=(firstThu.getUTCDay()+6)%7; firstThu.setUTCDate(firstThu.getUTCDate()-fdn+3); return 1+Math.round((d-firstThu)/(7*86400000)); }
+
+    let _calTip=null;
+    function showCalTip(cell, text){ hideCalTip(); const tip=document.createElement('div'); tip.className='cal-tip'; tip.textContent=text; (document.getElementById('cb-app-wrapper')||document.body).appendChild(tip); const r=cell.getBoundingClientRect(); tip.style.left=(r.left+r.width/2)+'px'; tip.style.top=(r.top-6)+'px'; _calTip=tip; }
+    function hideCalTip(){ if(_calTip&&_calTip.parentNode) _calTip.parentNode.removeChild(_calTip); _calTip=null; }
+
+    function openCalDayPopup(dateKey, label, onSaved){
+        const notes=loadCalNotes(); const existing=notes[dateKey]||'';
+        const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+        const box=document.createElement('div'); box.className='cal-popup';
+        box.innerHTML="<div class='cal-popup-title'></div><textarea class='cal-popup-ta' placeholder='Skriv vad du ska göra eller komma ihåg...'></textarea><div class='cal-popup-btns'></div>";
+        box.querySelector('.cal-popup-title').textContent=label;
+        const ta=box.querySelector('.cal-popup-ta'); ta.value=existing;
+        const btns=box.querySelector('.cal-popup-btns');
+        const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        const save=document.createElement('button'); save.className='btn btn-primary'; save.innerText='Spara';
+        save.onclick=()=>{ const v=ta.value.trim(); const n=loadCalNotes(); if(v) n[dateKey]=v; else delete n[dateKey]; saveCalNotes(n); close(); if(onSaved) onSaved(); };
+        const del=document.createElement('button'); del.className='btn'; del.innerText='Ta bort'; del.style.color='#ff3b30'; if(!existing) del.style.display='none';
+        del.onclick=()=>{ const n=loadCalNotes(); delete n[dateKey]; saveCalNotes(n); close(); if(onSaved) onSaved(); };
+        const cancel=document.createElement('button'); cancel.className='btn'; cancel.innerText='Avbryt'; cancel.onclick=close;
+        btns.appendChild(save); btns.appendChild(del); btns.appendChild(cancel);
+        ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        setTimeout(()=>ta.focus(),50);
+    }
+
+    function createCalendarWidget(config){
+        if(config===undefined) config=null;
+        const body=createWidget('KALENDER', 360, 'calendar-widget', config);
+        const MONTHS=['Januari','Februari','Mars','April','Maj','Juni','Juli','Augusti','September','Oktober','November','December'];
+        const WD=['v.','Mån','Tis','Ons','Tor','Fre','Lör','Sön'];
+        const today=new Date();
+        let viewY = today.getFullYear(), viewM = today.getMonth();
+        body.innerHTML="<div class='cal-wrap'><div class='cal-head'><button class='cal-nav cal-prev' title='Föregående månad'>‹</button><div class='cal-titlebox'><div class='cal-month'></div><button class='cal-today-btn'>Idag</button></div><button class='cal-nav cal-next' title='Nästa månad'>›</button></div><div class='cal-grid-head'></div><div class='cal-grid'></div></div>";
+        const monthEl=body.querySelector('.cal-month'), gridHead=body.querySelector('.cal-grid-head'), grid=body.querySelector('.cal-grid');
+        gridHead.innerHTML=WD.map((d,i)=>"<div class='cal-wd"+(i===0?' cal-wk':'')+(i>=6?' cal-we':'')+"'>"+d+"</div>").join('');
+        const pad=(n)=>(n<10?'0':'')+n;
+        function render(){
+            monthEl.textContent=MONTHS[viewM]+' '+viewY;
+            grid.innerHTML='';
+            const first=new Date(viewY,viewM,1);
+            const startDow=(first.getDay()+6)%7;            // Måndag = 0
+            const daysInMonth=new Date(viewY,viewM+1,0).getDate();
+            const rows=Math.ceil((startDow+daysInMonth)/7);
+            const notes=loadCalNotes();
+            let dayPtr=1-startDow;
+            for(let row=0; row<rows; row++){
+                const rowMonday=new Date(viewY,viewM,dayPtr);
+                const wkCell=document.createElement('div'); wkCell.className='cal-cell cal-wknum'; wkCell.textContent=calIsoWeek(rowMonday); grid.appendChild(wkCell);
+                for(let col=0; col<7; col++){
+                    const cell=document.createElement('div'); cell.className='cal-cell cal-day';
+                    if(dayPtr<1 || dayPtr>daysInMonth){ cell.classList.add('cal-empty'); }
+                    else {
+                        const dnum=dayPtr;
+                        const key=viewY+'-'+pad(viewM+1)+'-'+pad(dnum);
+                        const mmdd=pad(viewM+1)+'-'+pad(dnum);
+                        const nd=NAMEDAYS[mmdd]||'';
+                        if(col>=5) cell.classList.add('cal-weekend');
+                        if(today.getFullYear()===viewY && today.getMonth()===viewM && today.getDate()===dnum) cell.classList.add('cal-today');
+                        const dn=document.createElement('span'); dn.className='cal-dnum'; dn.textContent=dnum; cell.appendChild(dn);
+                        const ndEl=document.createElement('span'); ndEl.className='cal-nd'; ndEl.textContent=nd; cell.appendChild(ndEl);
+                        const note=notes[key];
+                        if(note){ cell.classList.add('cal-hasnote'); cell.title=note; const dot=document.createElement('span'); dot.className='cal-note-dot'; cell.appendChild(dot); }
+                        else if(nd){ cell.title=nd; }
+                        const label=dnum+' '+MONTHS[viewM]+' '+viewY+(nd?(' · '+nd):'');
+                        cell.onclick=()=>openCalDayPopup(key, label, render);
+                        if(note){ cell.addEventListener('mouseenter',()=>showCalTip(cell, note)); cell.addEventListener('mouseleave',hideCalTip); }
+                    }
+                    grid.appendChild(cell);
+                    dayPtr++;
+                }
+            }
+        }
+        body.querySelector('.cal-prev').onclick=()=>{ viewM--; if(viewM<0){ viewM=11; viewY--; } hideCalTip(); render(); };
+        body.querySelector('.cal-next').onclick=()=>{ viewM++; if(viewM>11){ viewM=0; viewY++; } hideCalTip(); render(); };
+        body.querySelector('.cal-today-btn').onclick=()=>{ const t=new Date(); viewY=t.getFullYear(); viewM=t.getMonth(); hideCalTip(); render(); };
+        render();
+    }
+
 
     // ---- YouTube bakgrundsljud (laddas en gång, delas av alla widgetar) ----
     const GR_PLAY_SVG = "<svg viewBox='0 0 24 24' fill='currentColor'><path d='M8 5v14l11-7z'/></svg>";
