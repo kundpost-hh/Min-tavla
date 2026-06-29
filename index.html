@@ -139,6 +139,7 @@
             <button class="tool-btn" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
             <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
+            <button class="tool-btn" onclick="createPracticeClock()"><div class="icon">🕐</div><div class="label">Övningsklocka</div></button>
 
             <div style="width: 1px; background: #ddd; margin: 0 4px;"></div>
             <button class="tool-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
@@ -348,6 +349,26 @@
     .clock-widget .widget-resizer::after { border-color: #999; }
     .clock-widget .time-display { text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
     .clock-widget .date-display { text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
+    /* ÖVNINGSKLOCKA */
+    .practice-clock-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
+    .practice-clock-widget .widget-resizer::after { border-color: #999; }
+    .practice-clock-widget .widget-body { align-items: center; justify-content: center; overflow: hidden; }
+    .pclock-fit { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .pclock-inner { display: flex; flex-direction: column; align-items: center; gap: 8px; transform-origin: center center; }
+    .pclock-digital { font-size: 34px; font-weight: 900; color: #007aff; font-family: monospace; text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
+    .pclock-face { cursor: grab; touch-action: none; margin: 0 !important; }
+    .pclock-face:active { cursor: grabbing; }
+    .pclock-face .hand { cursor: grab; }
+    /* Integrerade övningsklockor i lektionsschemat */
+    .lesson-clock { position: absolute; z-index: 30; width: 92px; height: 110px; display: flex; align-items: flex-start; justify-content: center; }
+    .lesson-clock .pclock-inner { transform: scale(0.46); transform-origin: top center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .lesson-clock .pclock-digital { font-size: 30px; font-weight: 900; color: #007aff; font-family: monospace; text-shadow: 0 1px 3px rgba(255,255,255,0.95); }
+    .lesson-clock-1 { top: -50px; left: 33%; margin-left: -46px; }
+    .lesson-clock-2 { top: -50px; left: 66%; margin-left: -46px; }
+    /* Vita pelare som klockorna vilar på (bred upptill, smal över röda remsan, bred nedtill) */
+    .lesson-pillar { position: absolute; z-index: 20; width: 86px; height: 64px; top: 2px; background: #fff; pointer-events: none; clip-path: polygon(0% 0%, 100% 0%, 100% 14%, 64% 21%, 64% 88%, 100% 95%, 100% 100%, 0% 100%, 0% 95%, 36% 88%, 36% 21%, 0% 14%); }
+    .lesson-pillar-1 { left: 33%; margin-left: -43px; }
+    .lesson-pillar-2 { left: 66%; margin-left: -43px; }
     .clock-tick { position: absolute; left: 50%; top: 7px; transform-origin: 50% 68px; pointer-events: none; }
     .clock-tick.minor { width: 1px; height: 5px; margin-left: -0.5px; background: #c7c7cc; }
     .clock-tick.major { width: 3px; height: 9px; margin-left: -1.5px; background: #555; border-radius: 1px; }
@@ -415,8 +436,19 @@
     .schedule-row { display: flex; gap: 6px; align-items: center; width: 100%; background: #f9f9fb; padding: 6px; border-radius: 8px; border: 1px solid #e5e5ea; margin-bottom: 6px; }
     .schedule-color-strip { width: 10px; border-radius: 4px; cursor: pointer; flex-shrink: 0; transition: background-color 0.2s; background-color: #e5e5ea; align-self: stretch; min-height: 32px; }
     .schedule-time-input { width: 65px; font-weight: bold; font-size: 13px; padding: 6px 4px; border: 1px solid #d1d1d6; border-radius: 6px; text-align: center; outline: none; flex-shrink: 0; }
-    .schedule-icon-select { width: 48px; font-size: 24px; padding: 2px; border: 1px solid transparent; border-radius: 6px; outline: none; background: transparent; cursor: pointer; text-align: center; text-align-last: center; flex-shrink: 0; appearance: none; -webkit-appearance: none; -moz-appearance: none; transition: background 0.2s, border-color 0.2s; }
-    .schedule-row:hover .schedule-icon-select, .schedule-icon-select:focus { background: white; border-color: #d1d1d6; appearance: auto; -webkit-appearance: menulist; -moz-appearance: menulist; }
+    .schedule-icon-select { width: 42px; height: 42px; padding: 4px; border: 1px solid transparent; border-radius: 8px; outline: none; background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.2s, border-color 0.2s; }
+    .schedule-icon-select svg { width: 100%; height: 100%; display: block; }
+    .schedule-row:hover .schedule-icon-select, .schedule-icon-select:focus { background: #fff; border-color: #d1d1d6; }
+    .schedule-icon-select:hover { background: #fff; border-color: #4dabf7; }
+    .sched-icon-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 99999999; display: flex; align-items: center; justify-content: center; }
+    .sched-icon-modal { background: #fff; border-radius: 16px; padding: 18px 20px 20px; width: min(520px, 92vw); max-height: 86vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.3); text-align: center; }
+    .sched-icon-title { font-size: 17px; font-weight: 700; color: #333; margin-bottom: 14px; }
+    .sched-icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
+    .sched-icon-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; border: 2px solid #eee; border-radius: 12px; background: #fafafa; cursor: pointer; transition: all 0.15s; }
+    .sched-icon-cell:hover { border-color: #4dabf7; background: #fff; transform: translateY(-2px); }
+    .sched-icon-cell.sel { border-color: #4dabf7; background: #e7f5ff; }
+    .sched-icon-cell svg { width: 40px; height: 40px; }
+    .sched-icon-lbl { font-size: 10px; color: #555; line-height: 1.1; }
     .schedule-task-input { flex-grow: 1; min-width: 60px; font-size: 14px; font-weight: bold; padding: 6px 8px; border: 1px solid #d1d1d6; border-radius: 6px; outline: none; user-select: text; }
     .row-del-btn { background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 16px; font-weight: bold; padding: 2px; flex-shrink: 0; }
     
@@ -561,6 +593,11 @@
     .fw-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: hidden; }
     .fw-rocket { position: absolute; top: 0; width: 4px; height: 4px; border-radius: 50%; }
     .fw-particle { position: absolute; width: 5px; height: 5px; border-radius: 50%; }
+    .grattis-music-btn { width: 46px; height: 46px; margin-top: 12px; border-radius: 50%; border: none; background: #34c759; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(52,199,89,0.45); transition: transform 0.15s ease, background 0.2s ease; z-index: 3; position: relative; flex-shrink: 0; }
+    .grattis-music-btn:hover { transform: scale(1.08); }
+    .grattis-music-btn.playing { background: #ff3b30; box-shadow: 0 3px 8px rgba(255,59,48,0.45); }
+    .grattis-music-btn.loading { background: #8e8e93; box-shadow: none; }
+    .grattis-music-btn svg { width: 22px; height: 22px; display: block; }
     @keyframes grattisFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
     /* NY STIL FÖR POPUP-VINNARE (SLUMPA NAMN) */
@@ -994,8 +1031,8 @@
 
                 if (type === 'KLISTERLAPP') { state.data.title = w.querySelector('.sticky-title-input')?.value || ''; state.data.text = w.querySelector('.sticky-textarea')?.value || ''; }
                 else if (type === 'TEXTEDITOR') { state.data.html = w.querySelector('.editor-content')?.innerHTML || ''; }
-                else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.value || '📝', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea' }); }); }
-                else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; }
+                else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.dataset.icon || 'skriv', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea' }); }); }
+                else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; const clk = w.querySelectorAll('.lesson-clock .pclock-digital'); const pT=(el)=>{ const t=(el?.textContent||'08:00').split(':'); let dh=parseInt(t[0])||12; return {h:dh%12, m:parseInt(t[1])||0}; }; if(clk[0]) state.data.clock1=pT(clk[0]); if(clk[1]) state.data.clock2=pT(clk[1]); }
                 else if (type === 'SKAPA GRUPPER' || type === 'SLUMPA NAMN' || type === 'DAGENS ORD') { state.data.list = w.querySelector('select')?.value || ''; state.data.text = w.querySelector('.name-input')?.value || ''; if(type === 'SKAPA GRUPPER') { state.data.count = w.querySelector('input[type="number"]')?.value || '4'; state.data.result = w.querySelector('.group-result')?.innerHTML || ''; } if(type === 'SLUMPA NAMN') { state.data.removeCb = w.querySelector('input[type="checkbox"]')?.checked || false; } if(type === 'DAGENS ORD') { state.data.result = w.querySelector('.name-result')?.innerHTML || ''; } }
                 else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
@@ -1007,6 +1044,7 @@
                 else if (type === 'GRATTIS') { state.data.name = w.querySelector('.grattis-name-input')?.value || ''; }
                 else if (type === 'NÄRVARO') { state.data.text = w.querySelector('.att-names')?.value || ''; state.data.list = w.querySelector('.att-sel')?.value || ''; state.data.absent = [...w.querySelectorAll('.att-name.absent')].map(b=>b.textContent); }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
+                else if (type === 'ÖVNINGSKLOCKA') { const t=(w.querySelector('.pclock-digital')?.textContent||'03:00').split(':'); let dh=parseInt(t[0])||12; state.data.h = (dh%12); state.data.m = parseInt(t[1])||0; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VECKOSCHEMA') { state.data.days = []; w.querySelectorAll('.week-cell').forEach(c=> state.data.days.push(c.innerHTML)); }
@@ -1056,6 +1094,7 @@
             else if (w.type === 'KLASSPOÄNG') createClassReward(w);
             else if (w.type === 'KAMERA') createCamera(w);
             else if (w.type === 'STOPPUR') createStopwatch(w);
+            else if (w.type === 'ÖVNINGSKLOCKA') createPracticeClock(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
             else if (w.type === 'BILD') createImageWidget(w);
             else if (w.type === 'VECKOSCHEMA') createWeekSchedule(w);
@@ -1408,7 +1447,7 @@
         topStrip.querySelector('.sch-close').onclick = (e) => { e.stopPropagation(); customConfirm("Vill du stänga rutan?", () => { widgetEl.remove(); saveBoardState(); }); };
         topStrip.querySelector('.sch-min').onclick = (e) => { e.stopPropagation(); const hidden = schContent.style.display === 'none'; schContent.style.display = hidden ? '' : 'none'; widgetEl.dataset.minimized = hidden ? 'false' : 'true'; widgetEl.classList.toggle('minimized', !hidden); saveBoardState(); };
 
-        const hr = document.createElement('div'); hr.style = 'display:flex;padding:8px 10px;background:#f2f2f7;border-bottom:1px solid #d1d1d6;font-weight:bold;font-size:12px;color:#333;'; hr.innerHTML = "<div style='width:10px;'></div><div style='width:65px;text-align:center;'>Tid</div><div style='width:45px;text-align:center;'>Bild</div><div style='flex-grow:1;padding-left:5px;'>Aktivitet</div><div style='width:24px;'></div>"; schContent.appendChild(hr);
+        const hr = document.createElement('div'); hr.style = 'display:flex;gap:6px;padding:8px 17px;background:#f2f2f7;border-bottom:1px solid #d1d1d6;font-weight:bold;font-size:12px;color:#333;'; hr.innerHTML = "<div style='width:10px;flex-shrink:0;'></div><div style='width:65px;flex-shrink:0;text-align:center;'>Tid</div><div style='width:42px;flex-shrink:0;'></div><div style='flex-grow:1;padding-left:8px;'>Aktivitet</div><div style='width:20px;flex-shrink:0;'></div>"; schContent.appendChild(hr);
         const cont = document.createElement('div'); cont.style.padding='10px'; schContent.appendChild(cont);
         
         function addRow(ti, ta, ic, co){
@@ -1416,23 +1455,104 @@
             const cs = document.createElement('div'); cs.className='schedule-color-strip'; cs.dataset.color=co; cs.style.backgroundColor=co;
             cs.onclick=()=>{ const cl=['#e5e5ea','#ff3b30','#ff9500','#ffcc00','#4cd964','#5ac8fa','#007aff','#5856d6','#ff2d55']; let idx=(cl.indexOf(cs.dataset.color)+1)%cl.length; cs.dataset.color=cl[idx]; cs.style.backgroundColor=cl[idx]; saveBoardState(); };
             const tin = document.createElement('input'); tin.className='schedule-time-input'; tin.value=ti;
-            const sel = document.createElement('select'); sel.className='schedule-icon-select'; const ics = ['📝','🔤','📚','🧮','➕','🇬🇧','💬','🌍','🔬','⚽','🎨','🎵','🔨','🧵','💻','🍽️','🥪','🏃','🚌','🤫','🎉']; ics.forEach(i=>{ let o=document.createElement('option'); o.value=i; o.innerText=i; sel.appendChild(o); }); sel.value=ic;
+            const sel = document.createElement('button'); sel.type='button'; sel.className='schedule-icon-select schedule-icon-btn';
+            sel.dataset.icon = (ic && SCHEDULE_ICONS[ic]) ? ic : ((ic && ic.length) ? ic : 'skriv'); renderSchedIcon(sel);
+            sel.onclick=()=>{ openSchedIconPicker(sel.dataset.icon, (k)=>{ sel.dataset.icon=k; renderSchedIcon(sel); saveBoardState(); }); };
             const tain = document.createElement('input'); tain.className='schedule-task-input'; tain.value=ta;
             const d = document.createElement('button'); d.className='row-del-btn row-hover-menu'; d.innerText='✕'; d.onclick=()=>{r.remove();saveBoardState();};
             r.appendChild(cs); r.appendChild(tin); r.appendChild(sel); r.appendChild(tain); r.appendChild(d); cont.appendChild(r);
         }
-        if(config && config.data && config.data.rows) config.data.rows.forEach(r => addRow(r.time, r.task, r.icon||'📝', r.color));
-        else { addRow('08:15','Morgonsamling','💬','#e5e5ea'); addRow('09:00','Matematik','🧮','#e5e5ea'); addRow('10:30','Svenska','🔤','#e5e5ea'); }
-        const act = document.createElement('div'); act.className='hover-menu'; act.style.padding='10px'; const ab=document.createElement('button'); ab.className='btn btn-primary'; ab.innerText='+ Rad'; ab.onclick=()=>{addRow('08:30','Lektion','📝','#e5e5ea');saveBoardState();}; act.appendChild(ab); schContent.appendChild(act);
+        if(config && config.data && config.data.rows) config.data.rows.forEach(r => addRow(r.time, r.task, r.icon||'skriv', r.color));
+        else { addRow('08:15','Morgonsamling','samling','#e5e5ea'); addRow('09:00','Matematik','matte','#e5e5ea'); addRow('10:30','Svenska','abc','#e5e5ea'); }
+        const act = document.createElement('div'); act.className='hover-menu'; act.style.padding='10px'; const ab=document.createElement('button'); ab.className='btn btn-primary'; ab.innerText='+ Rad'; ab.onclick=()=>{addRow('08:30','Lektion','skriv','#e5e5ea');saveBoardState();}; act.appendChild(ab); schContent.appendChild(act);
         body.appendChild(schContent);
         if(config && config.minimized){ body.style.display=''; schContent.style.display='none'; widgetEl.classList.add('minimized'); }
+    }
+
+
+    // === EGNA piktogram för Dagens schema (original, ej kopierade från Widgit) ===
+    const SCHEDULE_ICONS = {
+      skriv:    {l:'Skriva',   s:"<svg viewBox='0 0 48 48'><path d='M12 36l3-9 16-16 6 6-16 16-9 3z' fill='#ffd24d' stroke='#6b4e17' stroke-width='2' stroke-linejoin='round'/><path d='M31 11l6 6 3-3a2 2 0 0 0 0-3l-3-3a2 2 0 0 0-3 0z' fill='#ff9f43' stroke='#6b4e17' stroke-width='2' stroke-linejoin='round'/><path d='M12 36l4-4 5 5z' fill='#5a4a2a'/></svg>"},
+      abc:      {l:'Bokstäver',s:"<svg viewBox='0 0 48 48'><rect x='4' y='14' width='13' height='20' rx='3' fill='#ff6b6b'/><rect x='17.5' y='14' width='13' height='20' rx='3' fill='#4dabf7'/><rect x='31' y='14' width='13' height='20' rx='3' fill='#51cf66'/><text x='10.5' y='30' font-family='Arial' font-size='14' font-weight='bold' fill='#fff' text-anchor='middle'>A</text><text x='24' y='30' font-family='Arial' font-size='14' font-weight='bold' fill='#fff' text-anchor='middle'>B</text><text x='37.5' y='30' font-family='Arial' font-size='14' font-weight='bold' fill='#fff' text-anchor='middle'>C</text></svg>"},
+      bok:      {l:'Läsa/Bok', s:"<svg viewBox='0 0 48 48'><path d='M24 12c-5-3-12-3-16-1v26c4-2 11-2 16 1z' fill='#ff8787' stroke='#a83232' stroke-width='2' stroke-linejoin='round'/><path d='M24 12c5-3 12-3 16-1v26c-4-2-11-2-16 1z' fill='#74c0fc' stroke='#1864ab' stroke-width='2' stroke-linejoin='round'/><path d='M24 12v26' stroke='#555' stroke-width='2'/></svg>"},
+      matte:    {l:'Matematik',s:"<svg viewBox='0 0 48 48'><rect x='8' y='6' width='32' height='36' rx='4' fill='#495057'/><rect x='12' y='10' width='24' height='8' rx='2' fill='#b2f2bb'/><g fill='#ced4da'><rect x='12' y='22' width='6' height='6' rx='1'/><rect x='21' y='22' width='6' height='6' rx='1'/><rect x='30' y='22' width='6' height='6' rx='1'/><rect x='12' y='31' width='6' height='6' rx='1'/><rect x='21' y='31' width='6' height='6' rx='1'/></g><rect x='30' y='31' width='6' height='6' rx='1' fill='#ffa94d'/></svg>"},
+      plus:     {l:'Räkna',    s:"<svg viewBox='0 0 48 48'><circle cx='15' cy='15' r='11' fill='#51cf66'/><path d='M15 9v12M9 15h12' stroke='#fff' stroke-width='3' stroke-linecap='round'/><circle cx='33' cy='33' r='11' fill='#ff6b6b'/><path d='M27 33h12' stroke='#fff' stroke-width='3' stroke-linecap='round'/></svg>"},
+      engelska: {l:'Engelska', s:"<svg viewBox='0 0 48 48'><circle cx='24' cy='24' r='20' fill='#4dabf7'/><path d='M4 24h40M24 4v40M9 13c8 4 22 4 30 0M9 35c8-4 22-4 30 0' fill='none' stroke='#fff' stroke-width='2'/><ellipse cx='24' cy='24' rx='9' ry='20' fill='none' stroke='#fff' stroke-width='2'/></svg>"},
+      samling:  {l:'Samling',  s:"<svg viewBox='0 0 48 48'><circle cx='14' cy='17' r='6' fill='#ffa94d'/><circle cx='34' cy='17' r='6' fill='#ff8787'/><circle cx='24' cy='31' r='6' fill='#74c0fc'/><path d='M14 23v6M34 23v6M24 37v3' stroke='#555' stroke-width='2' stroke-linecap='round'/></svg>"},
+      so:       {l:'SO/Världen',s:"<svg viewBox='0 0 48 48'><circle cx='24' cy='24' r='19' fill='#51cf66'/><path d='M10 18c5 2 6-2 11 0s8-3 13 1M8 30c6-1 9 3 14 1s9 2 13-2' fill='#2f9e44'/><circle cx='24' cy='24' r='19' fill='none' stroke='#1864ab' stroke-width='2'/></svg>"},
+      no:       {l:'NO/Experiment',s:"<svg viewBox='0 0 48 48'><path d='M20 6h8v12l9 18a4 4 0 0 1-3.6 6H14.6A4 4 0 0 1 11 36l9-18z' fill='#a5d8ff' stroke='#1864ab' stroke-width='2' stroke-linejoin='round'/><path d='M15 30h18l3 6a4 4 0 0 1-3.6 6H15.6A4 4 0 0 1 12 36z' fill='#69db7c'/><rect x='18' y='4' width='12' height='4' rx='2' fill='#495057'/></svg>"},
+      idrott:   {l:'Idrott',   s:"<svg viewBox='0 0 48 48'><circle cx='30' cy='10' r='5' fill='#ffa94d'/><path d='M30 16l-7 6 5 5 2 9M23 22l-8 2M28 27l8 4M23 22l-6 12' fill='none' stroke='#e8590c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>"},
+      fotboll:  {l:'Fotboll',  s:"<svg viewBox='0 0 48 48'><circle cx='24' cy='24' r='18' fill='#fff' stroke='#333' stroke-width='2'/><path d='M24 14l8 6-3 9h-10l-3-9z' fill='#333'/><path d='M24 6v8M9 19l8 6M39 19l-8 6M16 38l3-8M32 38l-3-8' stroke='#333' stroke-width='2'/></svg>"},
+      basket:   {l:'Basket',   s:"<svg viewBox='0 0 48 48'><circle cx='24' cy='24' r='18' fill='#ff922b' stroke='#a8480a' stroke-width='2'/><path d='M24 6v36M6 24h36M11 11c8 5 18 5 26 13M37 11c-8 5-18 5-26 13' fill='none' stroke='#a8480a' stroke-width='2'/></svg>"},
+      bandy:    {l:'Bandy',    s:"<svg viewBox='0 0 48 48'><path d='M14 6v22a10 10 0 0 0 10 10h10' fill='none' stroke='#e8590c' stroke-width='5' stroke-linecap='round'/><circle cx='38' cy='38' r='5' fill='#ff6b6b'/></svg>"},
+      hopprep:  {l:'Hopprep',  s:"<svg viewBox='0 0 48 48'><path d='M12 8v6M36 8v6' stroke='#495057' stroke-width='4' stroke-linecap='round'/><path d='M12 14C2 24 4 44 24 44s22-20 12-30' fill='none' stroke='#ff6b6b' stroke-width='3' stroke-linecap='round'/><circle cx='12' cy='8' r='3' fill='#ffa94d'/><circle cx='36' cy='8' r='3' fill='#ffa94d'/></svg>"},
+      hage:     {l:'Hoppa hage',s:"<svg viewBox='0 0 48 48'><g fill='none' stroke='#1864ab' stroke-width='2'><rect x='18' y='6' width='12' height='10'/><rect x='18' y='16' width='12' height='10'/><rect x='8' y='26' width='12' height='10'/><rect x='28' y='26' width='12' height='10'/><rect x='18' y='36' width='12' height='8'/></g><text x='24' y='14' font-family='Arial' font-size='8' fill='#1864ab' text-anchor='middle'>1</text><text x='24' y='24' font-family='Arial' font-size='8' fill='#1864ab' text-anchor='middle'>2</text><circle cx='24' cy='31' r='4' fill='#ff6b6b'/></svg>"},
+      gunga:    {l:'Gunga',    s:"<svg viewBox='0 0 48 48'><path d='M6 8h36M14 8l8 24M34 8l-8 24' fill='none' stroke='#7a5b1e' stroke-width='3' stroke-linecap='round'/><rect x='18' y='32' width='12' height='4' rx='2' fill='#ffa94d'/></svg>"},
+      sandlada: {l:'Sandlåda', s:"<svg viewBox='0 0 48 48'><path d='M8 22h32l-3 18H11z' fill='#ffe066' stroke='#b08900' stroke-width='2' stroke-linejoin='round'/><path d='M30 22l4-12 6 2-6 12z' fill='#ff6b6b' stroke='#a83232' stroke-width='2' stroke-linejoin='round'/><circle cx='34' cy='9' r='3' fill='#c92a2a'/></svg>"},
+      bild:     {l:'Bild/Skapa',s:"<svg viewBox='0 0 48 48'><path d='M24 6C13 6 5 14 5 24s7 13 11 13c3 0 3-2 3-4s2-3 4-3h5c6 0 11-4 11-10C39 12 33 6 24 6z' fill='#fff' stroke='#868e96' stroke-width='2'/><circle cx='14' cy='20' r='3' fill='#ff6b6b'/><circle cx='22' cy='13' r='3' fill='#ffd43b'/><circle cx='32' cy='15' r='3' fill='#4dabf7'/><circle cx='34' cy='25' r='3' fill='#51cf66'/></svg>"},
+      musik:    {l:'Musik',    s:"<svg viewBox='0 0 48 48'><path d='M20 34V12l16-4v18' fill='none' stroke='#7048e8' stroke-width='3' stroke-linejoin='round'/><circle cx='15' cy='34' r='6' fill='#7048e8'/><circle cx='31' cy='30' r='6' fill='#7048e8'/></svg>"},
+      slojd:    {l:'Slöjd',    s:"<svg viewBox='0 0 48 48'><rect x='6' y='28' width='28' height='7' rx='2' transform='rotate(-30 20 31)' fill='#c79a4b' stroke='#6b4e17' stroke-width='2'/><path d='M30 8l10 10-6 6-10-10z' fill='#adb5bd' stroke='#495057' stroke-width='2' stroke-linejoin='round'/></svg>"},
+      textil:   {l:'Textil/Sömnad',s:"<svg viewBox='0 0 48 48'><path d='M38 8L14 32' stroke='#868e96' stroke-width='3' stroke-linecap='round'/><circle cx='38' cy='8' r='3' fill='none' stroke='#868e96' stroke-width='2'/><path d='M14 32c-6 2-8 8-8 8s6-2 8-8z' fill='#ff8787'/><path d='M37 9C26 6 18 14 21 25' fill='none' stroke='#ff6b6b' stroke-width='2'/></svg>"},
+      dator:    {l:'Dator',    s:"<svg viewBox='0 0 48 48'><rect x='7' y='9' width='34' height='24' rx='3' fill='#495057'/><rect x='10' y='12' width='28' height='18' rx='1' fill='#74c0fc'/><path d='M4 37h40l-3 4H7z' fill='#adb5bd'/></svg>"},
+      lunch:    {l:'Lunch',    s:"<svg viewBox='0 0 48 48'><circle cx='26' cy='26' r='15' fill='#fff' stroke='#adb5bd' stroke-width='2'/><circle cx='26' cy='26' r='8' fill='#ffe066'/><path d='M9 8v14a3 3 0 0 0 6 0V8M12 8v34' stroke='#868e96' stroke-width='2' stroke-linecap='round' fill='none'/></svg>"},
+      mellis:   {l:'Mellanmål',s:"<svg viewBox='0 0 48 48'><path d='M24 8c-7 0-12 5-12 13 0 12 8 19 12 19s12-7 12-19c0-8-5-13-12-13z' fill='#ff8787' stroke='#a83232' stroke-width='2'/><path d='M24 8c1-3 4-4 6-4' fill='none' stroke='#2f9e44' stroke-width='3' stroke-linecap='round'/><circle cx='19' cy='22' r='2' fill='#fff' opacity='.6'/></svg>"},
+      buss:     {l:'Buss',     s:"<svg viewBox='0 0 48 48'><rect x='5' y='12' width='38' height='22' rx='4' fill='#ffd43b' stroke='#b08900' stroke-width='2'/><rect x='9' y='16' width='8' height='8' rx='1' fill='#a5d8ff'/><rect x='20' y='16' width='8' height='8' rx='1' fill='#a5d8ff'/><rect x='31' y='16' width='8' height='8' rx='1' fill='#a5d8ff'/><circle cx='15' cy='36' r='4' fill='#343a40'/><circle cx='33' cy='36' r='4' fill='#343a40'/></svg>"},
+      tyst:     {l:'Tyst',     s:"<svg viewBox='0 0 48 48'><circle cx='24' cy='24' r='19' fill='#a5d8ff' stroke='#1864ab' stroke-width='2'/><path d='M24 12v10c0 3 3 4 3 7s-3 3-3 3' fill='none' stroke='#1864ab' stroke-width='3' stroke-linecap='round'/><circle cx='24' cy='34' r='2' fill='#1864ab'/></svg>"},
+      fest:     {l:'Fest',     s:"<svg viewBox='0 0 48 48'><path d='M10 40l8-22 14 14z' fill='#ffd43b' stroke='#b08900' stroke-width='2' stroke-linejoin='round'/><path d='M22 16C22 10 28 8 28 4M30 18c6 0 10-4 14-4M26 26c4 2 8 2 12 6' fill='none' stroke='#ff6b6b' stroke-width='2' stroke-linecap='round'/><circle cx='34' cy='10' r='2' fill='#4dabf7'/><circle cx='40' cy='22' r='2' fill='#51cf66'/></svg>"},
+      rast:     {l:'Rast',     s:"<svg viewBox='0 0 48 48'><circle cx='24' cy='24' r='9' fill='#ffd43b'/><g stroke='#ffa94d' stroke-width='3' stroke-linecap='round'><path d='M24 5v5M24 38v5M5 24h5M38 24h5M11 11l3 3M34 34l3 3M37 11l-3 3M14 34l-3 3'/></g></svg>"},
+      film:     {l:'Film',     s:"<svg viewBox='0 0 48 48'><rect x='6' y='12' width='36' height='24' rx='3' fill='#343a40'/><path d='M20 18l11 6-11 6z' fill='#fff'/></svg>"},
+      klar:     {l:'Klar',     s:"<svg viewBox='0 0 48 48'><circle cx='24' cy='24' r='19' fill='#51cf66'/><path d='M14 25l7 7 14-15' fill='none' stroke='#fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/></svg>"}
+    };
+    function schedIconSvg(key){ var o=SCHEDULE_ICONS[key]; if(o) return o.s; return null; }
+    function renderSchedIcon(btn){
+      var key=btn.dataset.icon||'skriv'; var svg=schedIconSvg(key);
+      if(svg){ btn.innerHTML=svg; }
+      else { btn.innerHTML="<span style='font-size:24px;line-height:1'>"+ (key||'📝') +"</span>"; } // bakåtkompatibel: gamla emoji-scheman
+    }
+    function openSchedIconPicker(currentKey, onPick){
+      var ov=document.createElement('div'); ov.className='sched-icon-overlay';
+      var box=document.createElement('div'); box.className='sched-icon-modal';
+      var h=document.createElement('div'); h.className='sched-icon-title'; h.innerText='Välj en bild'; box.appendChild(h);
+      var grid=document.createElement('div'); grid.className='sched-icon-grid';
+      Object.keys(SCHEDULE_ICONS).forEach(function(k){
+        var cell=document.createElement('button'); cell.className='sched-icon-cell'+(k===currentKey?' sel':'');
+        cell.innerHTML=SCHEDULE_ICONS[k].s+"<span class='sched-icon-lbl'>"+SCHEDULE_ICONS[k].l+"</span>";
+        cell.title=SCHEDULE_ICONS[k].l;
+        cell.onclick=function(){ onPick(k); ov.remove(); };
+        grid.appendChild(cell);
+      });
+      box.appendChild(grid);
+      var close=document.createElement('button'); close.className='btn'; close.innerText='Avbryt'; close.style.marginTop='12px';
+      close.onclick=function(){ ov.remove(); };
+      box.appendChild(close);
+      ov.appendChild(box);
+      ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
+      (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+    }
+
+    // Liten vridbar övningsklocka (används integrerat i lektionsschemat)
+    function buildMiniPracticeClock(h0, m0, onChange){
+        const wrap = document.createElement('div'); wrap.className='lesson-clock';
+        wrap.innerHTML = `<div class='pclock-inner'><div class='pclock-digital'>03:00</div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div>`;
+        const cf=wrap.querySelector('.pclock-face'), hh=wrap.querySelector('.pclock-hh'), mh=wrap.querySelector('.pclock-mh'), dig=wrap.querySelector('.pclock-digital');
+        for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
+        let hourVal=h0||0, minuteVal=m0||0;
+        const render=()=>{ mh.style.transform=`rotate(${minuteVal*6}deg)`; hh.style.transform=`rotate(${((hourVal%12)+minuteVal/60)*30}deg)`; const dh=(hourVal%12)===0?12:(hourVal%12); dig.textContent=String(dh).padStart(2,'0')+':'+String(minuteVal).padStart(2,'0'); };
+        render();
+        let prevMin=minuteVal;
+        const angleAt=(e)=>{ const r=cf.getBoundingClientRect(); const a=Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))*180/Math.PI+90; return a<0?a+360:a; };
+        const startDrag=(hand)=>(e)=>{ e.preventDefault(); e.stopPropagation(); try{cf.setPointerCapture(e.pointerId);}catch(_){}; prevMin=minuteVal; const move=(ev)=>{ ev.preventDefault(); const a=angleAt(ev); if(hand==='minute'){ const nm=Math.round(a/6)%60; if(prevMin>=45&&nm<=15)hourVal=(hourVal+1)%12; else if(prevMin<=15&&nm>=45)hourVal=(hourVal+11)%12; minuteVal=nm; prevMin=nm; } else { hourVal=Math.round(a/30)%12; } render(); }; const up=()=>{ cf.removeEventListener('pointermove',move); cf.removeEventListener('pointerup',up); cf.removeEventListener('pointercancel',up); if(onChange)onChange(); }; cf.addEventListener('pointermove',move); cf.addEventListener('pointerup',up); cf.addEventListener('pointercancel',up); };
+        hh.addEventListener('pointerdown', startDrag('hour'));
+        mh.addEventListener('pointerdown', startDrag('minute'));
+        cf.addEventListener('pointerdown',(e)=>{ if(e.target===hh||e.target===mh)return; startDrag('minute')(e); });
+        return wrap;
     }
 
     function createLessonPlan(config) {
         const body = createWidget('LEKTIONSSCHEMA', 700, 'lesson-widget', config); const tr = document.createElement('div'); tr.className='lesson-top-row';
         const sVal=config&&config.data?config.data.subj:'Svenska', cVal=config&&config.data?config.data.cls:'4B';
         let dt = new Date().toLocaleDateString('sv-SE', {weekday:'long', day:'numeric', month:'long'}); dt = dt.charAt(0).toUpperCase() + dt.slice(1); const dVal=config&&config.data?config.data.date:dt;
-        tr.innerHTML = `<input type='text' class='lesson-header-input' value='${sVal}' placeholder='Ämne'><span class='lesson-header-sep'>|</span><input type='text' class='lesson-header-input' value='${cVal}' placeholder='Klass'><span class='lesson-header-sep'>|</span><input type='text' class='lesson-header-input lesson-date' value='${dVal}' placeholder='Datum'>`;
+        tr.innerHTML = `<input type='text' class='lesson-header-input' value='${sVal}' placeholder='Ämne'><span class='lesson-header-sep'></span><input type='text' class='lesson-header-input' value='${cVal}' placeholder='Klass'><span class='lesson-header-sep'></span><input type='text' class='lesson-header-input lesson-date' value='${dVal}' placeholder='Datum'>`;
         const gr = document.createElement('div'); gr.className='lesson-goal-row'; gr.innerHTML=`<span class='lesson-goal-label'>Mål: </span><input type='text' class='lesson-goal-input' placeholder='Skriv lektionens mål...' value='${config&&config.data?config.data.goal:""}'>`;
         const cr = document.createElement('div'); cr.className='lesson-cols-row';
         function makeCard(t,h){ const cd=document.createElement('div'); cd.className='lesson-card'; cd.innerHTML=`<input type='text' class='lesson-card-title' value='${t}'><div class='lesson-card-content' contenteditable='true'>${h}</div>`; cr.appendChild(cd); }
@@ -1453,6 +1573,16 @@
                 lT=setInterval(()=>{ lLeft--; if(lLeft<=0){ clearInterval(lT); lT=null; pf.style.transform='scaleX(0)'; pt.innerText='00:00'; playTimerSound(); setTimeout(()=>customAlert('Lektionstiden är slut! ⏰','⏰'),100); tb.innerText='Ny'; } else { upd(); } },1000); tb.dataset.intervalId=lT;
             } saveBoardState();
         };
+        // Två integrerade övningsklockor som sticker upp ovanför rubrikremsan, på vita pelare
+        const widgetEl = body.parentElement.parentElement;
+        const pillar1=document.createElement('div'); pillar1.className='lesson-pillar lesson-pillar-1';
+        const pillar2=document.createElement('div'); pillar2.className='lesson-pillar lesson-pillar-2';
+        widgetEl.appendChild(pillar1); widgetEl.appendChild(pillar2);
+        const c1=(config&&config.data&&config.data.clock1)||{h:8,m:0};
+        const c2=(config&&config.data&&config.data.clock2)||{h:8,m:45};
+        const clock1=buildMiniPracticeClock(c1.h, c1.m, saveBoardState); clock1.classList.add('lesson-clock-1');
+        const clock2=buildMiniPracticeClock(c2.h, c2.m, saveBoardState); clock2.classList.add('lesson-clock-2');
+        widgetEl.appendChild(clock1); widgetEl.appendChild(clock2);
     }
 
     function createTextEditor(config) {
@@ -2030,6 +2160,56 @@
         setInterval(()=>{ const now=new Date(); td.innerText=now.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'}); dd.innerText=now.toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'}); sh.style.transform=`rotate(${(now.getSeconds()/60)*360}deg)`; mh.style.transform=`rotate(${(now.getMinutes()/60)*360}deg)`; hh.style.transform=`rotate(${(now.getHours()%12/12)*360}deg)`; },100);
     }
 
+    // ---- ÖVNINGSKLOCKA (vrid visarna, digital tid följer med) – PNG + skalbar ----
+    function createPracticeClock(config){
+        if(config===undefined)config=null;
+        const body = createWidget('ÖVNINGSKLOCKA', 210, 'practice-clock-widget', config);
+        const widgetEl = body.parentElement.parentElement;
+        if(!config){ widgetEl.style.width='210px'; widgetEl.style.height='280px'; }
+        body.innerHTML = `<div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital'>03:00</div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
+        const inner=body.querySelector('.pclock-inner'), cf=body.querySelector('.pclock-face'), hh=body.querySelector('.pclock-hh'), mh=body.querySelector('.pclock-mh'), dig=body.querySelector('.pclock-digital');
+        for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
+        let hourVal = 3, minuteVal = 0;
+        if(config && config.data){ if(typeof config.data.h==='number') hourVal=config.data.h; if(typeof config.data.m==='number') minuteVal=config.data.m; }
+        const render = ()=>{
+            mh.style.transform = `rotate(${minuteVal*6}deg)`;
+            hh.style.transform = `rotate(${((hourVal%12)+minuteVal/60)*30}deg)`;
+            const dh = (hourVal%12)===0 ? 12 : (hourVal%12);
+            dig.textContent = String(dh).padStart(2,'0')+':'+String(minuteVal).padStart(2,'0');
+        };
+        render();
+        let prevMin = minuteVal;
+        const angleAt = (e)=>{ const r=cf.getBoundingClientRect(); const a=Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))*180/Math.PI + 90; return (a<0)?a+360:a; };
+        const startDrag = (hand)=> (e)=>{
+            e.preventDefault(); e.stopPropagation();
+            try{ cf.setPointerCapture(e.pointerId); }catch(_){}
+            prevMin = minuteVal;
+            const move=(ev)=>{
+                ev.preventDefault();
+                const a = angleAt(ev);
+                if(hand==='minute'){
+                    const nm = Math.round(a/6)%60;
+                    if(prevMin>=45 && nm<=15) hourVal=(hourVal+1)%12;       // passerade 12 medurs → +1 tim
+                    else if(prevMin<=15 && nm>=45) hourVal=(hourVal+11)%12;  // moturs → -1 tim
+                    minuteVal = nm; prevMin = nm;
+                } else {
+                    hourVal = Math.round(a/30)%12;
+                }
+                render();
+            };
+            const up=()=>{ cf.removeEventListener('pointermove',move); cf.removeEventListener('pointerup',up); cf.removeEventListener('pointercancel',up); saveBoardState(); };
+            cf.addEventListener('pointermove',move); cf.addEventListener('pointerup',up); cf.addEventListener('pointercancel',up);
+        };
+        hh.addEventListener('pointerdown', startDrag('hour'));
+        mh.addEventListener('pointerdown', startDrag('minute'));
+        cf.addEventListener('pointerdown', (e)=>{ if(e.target===hh||e.target===mh) return; startDrag('minute')(e); });
+        // Skala hela klockan efter widgetens storlek (PNG-stil, behåller form)
+        const baseW=176, baseH=224;
+        const fitScale=()=>{ const aw=body.clientWidth, ah=body.clientHeight; if(!aw||!ah)return; const s=Math.max(0.3, Math.min(aw/baseW, ah/baseH)); inner.style.transform='scale('+s+')'; };
+        if(window.ResizeObserver){ const ro=new ResizeObserver(fitScale); ro.observe(body); }
+        setTimeout(fitScale, 60);
+    }
+
     function createFractionVisualizer(config){
         const body=createWidget('BRÅK / TID',220,'',config); body.innerHTML=`<div style='display:flex;gap:10px;justify-content:center;margin-bottom:15px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' class='d-i' style='width:50px;text-align:center;'></div><div class='fraction-circle' style='position:relative;'></div>`; const ni=body.querySelector('.n-i'), di=body.querySelector('.d-i'), circ=body.lastChild;
         const upd=()=>{ let n=parseInt(ni.value)||0, d=parseInt(di.value)||1; n=Math.max(0,Math.min(n,d)); circ.style.background=`conic-gradient(#007aff ${(n/d)*360}deg, #f2f2f7 ${(n/d)*360}deg)`; circ.innerHTML=''; if(d>1&&d<=20){ for(let i=0;i<d;i++){ let l=document.createElement('div'); l.style=`position:absolute;top:0;left:50%;width:1px;height:50%;background:#333;transform-origin:bottom center;transform:rotate(${i*360/d}deg);`; circ.appendChild(l); } } saveBoardState(); }; ni.onchange=upd; di.onchange=upd; upd();
@@ -2234,6 +2414,24 @@
         try { if('speechSynthesis' in window) window.speechSynthesis.getVoices(); } catch(e){}
     }
 
+    // ---- YouTube bakgrundsljud (laddas en gång, delas av alla widgetar) ----
+    const GR_PLAY_SVG = "<svg viewBox='0 0 24 24' fill='currentColor'><path d='M8 5v14l11-7z'/></svg>";
+    const GR_PAUSE_SVG = "<svg viewBox='0 0 24 24' fill='currentColor'><rect x='6' y='5' width='4' height='14' rx='1'/><rect x='14' y='5' width='4' height='14' rx='1'/></svg>";
+    let _ytApiState = 0; // 0=ej laddad, 1=laddar, 2=klar
+    const _ytReadyCbs = [];
+    function ensureYouTubeAPI(cb){
+        if(_ytApiState === 2 && window.YT && window.YT.Player){ cb(); return; }
+        _ytReadyCbs.push(cb);
+        if(_ytApiState === 0){
+            _ytApiState = 1;
+            const prev = window.onYouTubeIframeAPIReady;
+            window.onYouTubeIframeAPIReady = function(){ if(typeof prev==='function') try{prev();}catch(e){} _ytApiState = 2; const cbs=_ytReadyCbs.splice(0); cbs.forEach(f=>{ try{f();}catch(e){} }); };
+            const tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api';
+            document.head.appendChild(tag);
+        }
+    }
+    let _grPlayerSeq = 0;
+
     // ---- GRATTIS / FÖDELSEDAG ----
     function createBirthdayWidget(config){
         if(config===undefined)config=null;
@@ -2244,7 +2442,31 @@
         const inp = body.querySelector('.grattis-name-input');
         const cc = body.querySelector('.confetti-container');
         const fw = body.querySelector('.fw-layer');
+        const container = body.querySelector('.grattis-container');
         inp.oninput = saveBoardState;
+
+        // Bakgrundsmusik (YouTube – endast ljud, spelaren är dold)
+        const musicBtn = document.createElement('button'); musicBtn.type='button'; musicBtn.className='grattis-music-btn'; musicBtn.title='Spela bakgrundsmusik'; musicBtn.innerHTML = GR_PLAY_SVG;
+        inp.insertAdjacentElement('afterend', musicBtn);
+        const ytHost = document.createElement('div'); ytHost.id = 'gr-yt-' + (++_grPlayerSeq); ytHost.style.cssText = 'position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;pointer-events:none;'; container.appendChild(ytHost);
+        let ytPlayer = null, ytPlaying = false, ytCreating = false;
+        const setMusicState = (s)=>{ ytPlaying = (s==='play'); musicBtn.classList.toggle('playing', s==='play'); musicBtn.classList.toggle('loading', s==='load'); musicBtn.innerHTML = (s==='play') ? GR_PAUSE_SVG : GR_PLAY_SVG; musicBtn.title = (s==='play') ? 'Pausa musiken' : 'Spela bakgrundsmusik'; };
+        musicBtn.onclick = ()=>{
+            if(ytPlayer){ if(ytPlaying){ try{ytPlayer.pauseVideo();}catch(e){} setMusicState('pause'); } else { try{ytPlayer.playVideo();}catch(e){} setMusicState('play'); } return; }
+            if(ytCreating) return; ytCreating = true; setMusicState('load');
+            const loadGuard = setTimeout(()=>{ if(!ytPlayer){ ytCreating=false; setMusicState('pause'); } }, 9000);
+            ensureYouTubeAPI(()=>{
+                if(!document.body.contains(body)){ clearTimeout(loadGuard); return; }
+                ytPlayer = new YT.Player(ytHost.id, { height:'1', width:'1', videoId:'xw5TP7HpCx0',
+                    playerVars:{ autoplay:1, controls:0, disablekb:1, fs:0, modestbranding:1, rel:0, playsinline:1 },
+                    events:{
+                        'onReady':(e)=>{ clearTimeout(loadGuard); ytCreating=false; try{ e.target.setVolume(70); e.target.playVideo(); }catch(err){} setMusicState('play'); },
+                        'onStateChange':(e)=>{ if(e.data===YT.PlayerState.ENDED){ try{ e.target.seekTo(0); e.target.playVideo(); }catch(err){} } else if(e.data===YT.PlayerState.PLAYING){ setMusicState('play'); } else if(e.data===YT.PlayerState.PAUSED){ setMusicState('pause'); } },
+                        'onError':()=>{ clearTimeout(loadGuard); ytCreating=false; setMusicState('pause'); }
+                    }
+                });
+            });
+        };
         if(config && config.data && config.data.name) inp.value = config.data.name;
         const colors=['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5856d6','#ff2d55','#a64dff'];
         // Kontinuerligt glitterregn (CSS-animationen loopar oändligt – spruta ut bitarna en gång)
