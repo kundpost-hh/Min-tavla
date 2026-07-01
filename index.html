@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Min Tavla (offline-test)</title>
+    <title>Min Tavla</title>
 </head>
 <body>
 
@@ -126,6 +126,7 @@
             <button class="tool-btn" onclick="createTextEditor()"><div class="icon">📝</div><div class="label">Text</div></button>
             <button class="tool-btn" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
             <button class="tool-btn" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
+            <button class="tool-btn" onclick="createWordSearch()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2' y='2' width='15' height='15' rx='1.5' fill='none' stroke='#3a3a3c' stroke-width='1.4'/><line x1='2' y1='6.75' x2='17' y2='6.75' stroke='#3a3a3c' stroke-width='0.8'/><line x1='2' y1='11.5' x2='17' y2='11.5' stroke='#3a3a3c' stroke-width='0.8'/><line x1='6.75' y1='2' x2='6.75' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><line x1='11.5' y1='2' x2='11.5' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><circle cx='17.3' cy='17.3' r='4.3' fill='#fff' stroke='#3a3a3c' stroke-width='1.6'/><line x1='20.4' y1='20.4' x2='23' y2='23' stroke='#3a3a3c' stroke-width='1.8' stroke-linecap='round'/></svg></div><div class="label">Ordgömma</div></button>
             <button class="tool-btn" onclick="createWhiteboard()"><div class="icon">🖍️</div><div class="label">Rita</div></button>
             <button class="tool-btn" onclick="createWorkSymbols()"><div class="icon">🤫</div><div class="label">Arbetssätt</div></button>
             <button class="tool-btn" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
@@ -688,6 +689,22 @@
     .kw-clue-col ol { margin:0; padding:0; list-style:none; font-size:12px; }
     .kw-clue-col li { margin-bottom:4px; line-height:1.35; color:#333; }
     .kw-clue-col li b { color:#1d1d1f; }
+    .ordgomma-widget .widget-inner { background:#fff; }
+    .og-root { display:flex; flex-direction:column; width:100%; font-size:13px; --og-cell:32px; }
+    .og-edit-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+    .og-word-only { flex:1; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; outline:none; font-family:inherit; background:#fff; text-transform:uppercase; font-weight:700; letter-spacing:1px; }
+    .og-word-only:focus { border-color:#007aff; }
+    .og-gridwrap { width:100%; overflow:auto; margin-bottom:10px; }
+    .og-grid { display:grid; gap:2px; justify-content:center; margin:0 auto; user-select:none; -webkit-user-select:none; touch-action:none; }
+    .og-cell { width:var(--og-cell); height:var(--og-cell); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:calc(var(--og-cell)*0.5); background:#fff; border:1.5px solid #e2e2e7; border-radius:4px; color:#1d1d1f; cursor:pointer; }
+    .og-cell.og-selecting { background:#cfe4ff; border-color:#007aff; }
+    .og-cell.og-found { background:#d2f8dc; border-color:#34c759; color:#1c7a34; }
+    .og-cell.og-facit { background:#fff3cd; border-color:#e0b400; }
+    .og-wordlist { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:4px 0 12px; }
+    .og-word-chip { font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; background:#f0f0f5; color:#333; }
+    .og-word-chip.og-found { background:#d2f8dc; color:#1c7a34; text-decoration:line-through; }
+    .og-diag-toggle { display:flex; align-items:center; gap:6px; justify-content:center; font-size:12px; color:#555; margin:0 0 10px; cursor:pointer; }
+    .og-diag-toggle input { width:15px; height:15px; cursor:pointer; }
 
     /* ---- LUNCH (matmeny via meny.mateo.se) ---- */
     .lunch-widget .widget-inner { background:#fff; }
@@ -1241,6 +1258,7 @@
                 else if (type === 'NÄRVARO') { state.data.text = w.querySelector('.att-names')?.value || ''; state.data.list = w.querySelector('.att-sel')?.value || ''; state.data.absent = [...w.querySelectorAll('.att-name.absent')].map(b=>b.textContent); }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ÖVNINGSKLOCKA') { const t=(w.querySelector('.pclock-digital')?.textContent||'03:00').split(':'); state.data.h = (parseInt(t[0])||0)%24; state.data.m = parseInt(t[1])||0; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
@@ -1302,6 +1320,7 @@
             else if (w.type === 'KALENDER') createCalendarWidget(w);
             else if (w.type === 'LUNCH') createLunchWidget(w);
             else if (w.type === 'KORSORD') createCrossword(w);
+            else if (w.type === 'ORDGÖMMA') createWordSearch(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -2779,14 +2798,23 @@
         let cells='';
         for(let r=0;r<lay.rows;r++){ for(let c=0;c<lay.cols;c++){ const k=r+','+c; if(letterAt[k]){ cells+="<div class='pc'>"+(numAt[k]?"<span>"+numAt[k]+"</span>":"")+(withFacit?"<b>"+kwEsc(letterAt[k])+"</b>":"")+"</div>"; } else { cells+="<div class='pb'></div>"; } } }
         const mk=(dir)=>lay.placed.filter(p=>p.dir===dir).sort((a,b)=>a.num-b.num).map(p=>"<li><b>"+p.num+".</b> "+kwEsc(p.clue||'—')+"</li>").join('');
+        // Rutstorleken skalas till att fylla hela sidans utskriftsbara yta (A4 - marginaler), oavsett korsordets storlek
+        const maxWidthMM = 180, maxHeightMM = 150;
+        let cellMM = Math.min(maxWidthMM / lay.cols, maxHeightMM / lay.rows, 14);
+        cellMM = Math.max(cellMM, 5);
+        const fontMM = Math.max(2.6, cellMM * 0.5);
+        const numMM = Math.max(1.6, cellMM * 0.22);
         const html="<!doctype html><html lang='sv'><head><meta charset='utf-8'><title>"+kwEsc(title||'Korsord')+"</title><style>"
-            +"body{font-family:Arial,Helvetica,sans-serif;margin:26px;color:#111;}"
-            +"h1{text-align:center;font-size:22px;margin:0 0 20px;}"
-            +".grid{display:grid;grid-template-columns:repeat("+lay.cols+",34px);gap:0;justify-content:center;margin:0 auto 26px;}"
-            +".pc{width:34px;height:34px;border:1.4px solid #111;box-sizing:border-box;position:relative;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;}"
-            +".pc span{position:absolute;top:1px;left:2px;font-size:9px;font-weight:400;}"
-            +".pb{width:34px;height:34px;}"
-            +".clues{display:flex;gap:44px;max-width:700px;margin:0 auto;}"
+            +"@page{size:A4;margin:14mm;}"
+            +"*{box-sizing:border-box;}"
+            +"html,body{height:100%;margin:0;}"
+            +"body{font-family:Arial,Helvetica,sans-serif;color:#111;display:flex;flex-direction:column;align-items:center;padding:6mm 0;}"
+            +"h1{text-align:center;font-size:22px;margin:0 0 10mm;}"
+            +".grid{display:grid;grid-template-columns:repeat("+lay.cols+","+cellMM+"mm);gap:0;justify-content:center;margin:0 auto 12mm;page-break-inside:avoid;}"
+            +".pc{width:"+cellMM+"mm;height:"+cellMM+"mm;border:0.4mm solid #111;box-sizing:border-box;position:relative;display:flex;align-items:center;justify-content:center;font-size:"+fontMM+"mm;font-weight:700;}"
+            +".pc span{position:absolute;top:0.3mm;left:0.5mm;font-size:"+numMM+"mm;font-weight:400;}"
+            +".pb{width:"+cellMM+"mm;height:"+cellMM+"mm;}"
+            +".clues{display:flex;gap:12mm;width:180mm;margin:0 auto;page-break-inside:avoid;}"
             +".clues>div{flex:1;}.clues h2{font-size:15px;margin:0 0 6px;color:#c0392b;}"
             +".clues ol{list-style:none;padding:0;margin:0;font-size:13px;line-height:1.55;}"
             +"</style></head><body>"
@@ -3003,6 +3031,277 @@
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
             setTimeout(()=>ta.focus(),60);
         }
+        function render(){ stamp(); if(state.mode==='play' && state.layout) renderPlay(); else renderEdit(); }
+        render();
+    }
+
+    // ---- ORDGÖMMA (word search) ----
+    function buildWordSearch(wordsInput, allowDiagonal){
+        if(allowDiagonal===undefined) allowDiagonal=true;
+        const clean = (Array.isArray(wordsInput)?wordsInput:[])
+            .map(w=> typeof w==='string' ? w : (w && w.word))
+            .map(w=> String(w||'').toUpperCase().replace(/[^A-ZÅÄÖ]/g,''))
+            .filter(w=> w.length>=2 && w.length<=18);
+        const uniq = Array.from(new Set(clean)).sort((a,b)=> b.length-a.length);
+        if(!uniq.length) return null;
+        const dirs = allowDiagonal
+            ? [[0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0],[-1,-1],[-1,1]]
+            : [[0,1],[1,0],[0,-1],[-1,0]];
+        const longest = uniq[0].length;
+        const totalLetters = uniq.reduce((s,w)=> s+w.length, 0);
+        let size = Math.max(longest, Math.ceil(Math.sqrt(totalLetters*2.4)), 8);
+        size = Math.min(size, 20);
+        function tryPlace(words, sz, lenient){
+            for(let attempt=0; attempt<25; attempt++){
+                const grid = Array.from({length:sz}, ()=> Array(sz).fill(null));
+                const placements = []; let ok = true;
+                for(const word of words){
+                    let placed=false;
+                    for(let t=0; t<220 && !placed; t++){
+                        const dir = dirs[Math.floor(Math.random()*dirs.length)];
+                        const r0 = Math.floor(Math.random()*sz), c0 = Math.floor(Math.random()*sz);
+                        const r1 = r0+dir[0]*(word.length-1), c1 = c0+dir[1]*(word.length-1);
+                        if(r1<0||r1>=sz||c1<0||c1>=sz) continue;
+                        let fits=true;
+                        for(let i=0;i<word.length;i++){ const rr=r0+dir[0]*i, cc=c0+dir[1]*i; const ex=grid[rr][cc]; if(ex && ex!==word[i]){ fits=false; break; } }
+                        if(!fits) continue;
+                        for(let i=0;i<word.length;i++){ const rr=r0+dir[0]*i, cc=c0+dir[1]*i; grid[rr][cc]=word[i]; }
+                        placements.push({ word:word, cells: Array.from({length:word.length},(_,i)=>({r:r0+dir[0]*i, c:c0+dir[1]*i})) });
+                        placed=true;
+                    }
+                    if(!placed){ if(!lenient){ ok=false; break; } }
+                }
+                if(ok || (lenient && placements.length)){
+                    const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ';
+                    for(let r=0;r<sz;r++) for(let c=0;c<sz;c++) if(!grid[r][c]) grid[r][c]=letters[Math.floor(Math.random()*letters.length)];
+                    return { size:sz, grid:grid, placements:placements };
+                }
+            }
+            return null;
+        }
+        let result=null, tries=0;
+        while(!result && tries<3){ result = tryPlace(uniq, size, false); if(!result){ size+=2; tries++; } }
+        if(!result){ result = tryPlace(uniq, size+3, true); }
+        return result;
+    }
+
+    function printWordSearch(lay, title){
+        if(!lay) return;
+        let cells='';
+        for(let r=0;r<lay.size;r++){ for(let c=0;c<lay.size;c++){ cells+="<div class='pc'>"+kwEsc(lay.grid[r][c])+"</div>"; } }
+        const wordsList = lay.placements.map(p=>"<li>"+kwEsc(p.word)+"</li>").join('');
+        // Rutnätet skalas till att fylla hela sidans utskriftsbara bredd (A4 - marginaler), oavsett storlek på ordgömman
+        const gridMM = 170; // ungefärlig utskriftsbar bredd i mm (A4 210mm - 2x15mm marginal + lite luft)
+        const cellMM = gridMM / lay.size;
+        const fontMM = Math.max(2.6, Math.min(cellMM * 0.55, 8));
+        const html="<!doctype html><html lang='sv'><head><meta charset='utf-8'><title>"+kwEsc(title||'Ordgömma')+"</title><style>"
+            +"@page{size:A4;margin:14mm;}"
+            +"*{box-sizing:border-box;}"
+            +"html,body{height:100%;margin:0;}"
+            +"body{font-family:Arial,Helvetica,sans-serif;color:#111;display:flex;flex-direction:column;align-items:center;padding:6mm 0;}"
+            +"h1{text-align:center;font-size:22px;margin:0 0 12mm;}"
+            +".grid{display:grid;grid-template-columns:repeat("+lay.size+",1fr);width:"+gridMM+"mm;aspect-ratio:1/1;gap:0;margin:0 auto 12mm;border-left:1px solid #ccc;border-top:1px solid #ccc;}"
+            +".pc{border-right:1px solid #ccc;border-bottom:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:"+fontMM+"mm;font-weight:700;}"
+            +".words{width:"+gridMM+"mm;margin:0 auto;columns:3;font-size:14px;line-height:1.9;}"
+            +".words ul{list-style:none;padding:0;margin:0;}"
+            +"@media print{ .grid{ page-break-inside:avoid; } .words{ page-break-inside:avoid; } }"
+            +"</style></head><body>"
+            +"<h1>"+kwEsc(title||'Ordgömma')+"</h1>"
+            +"<div class='grid'>"+cells+"</div>"
+            +"<div class='words'><ul>"+wordsList+"</ul></div>"
+            +"<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body></html>";
+        const w=window.open('','ogprint'+Date.now(),'width=820,height=920');
+        if(!w){ customAlert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.','🖨️'); return; }
+        w.document.open(); w.document.write(html); w.document.close();
+    }
+
+    function buildOgChatPrompt(desc){
+        return desc.trim() + "\n\nSvara ENDAST med orden till ordgömman, ett ord per rad, i exakt formatet:\nORD\n\nRegler: varje ORD är ett enda ord utan mellanslag, bindestreck eller siffror, på svenska och med VERSALER. Skriv ingen rubrik, ingen numrering och ingen annan text än orden.";
+    }
+
+    function createWordSearch(config){
+        if(config===undefined) config=null;
+        const body=createWidget('ORDGÖMMA', 460, 'ordgomma-widget', config);
+        const root=document.createElement('div'); root.className='og-root'; body.appendChild(root);
+        let state={ title:'', entries:[], mode:'edit', layout:null, found:{}, diag:true };
+        if(config && config.data){ try{ Object.assign(state, config.data); }catch(e){} }
+        if(!Array.isArray(state.entries) || !state.entries.length){
+            state.entries=['KATT','HUND','FISK','HÄST','FÅGEL','KANIN'];
+        }
+        if(!state.found) state.found={};
+        if(state.diag===undefined) state.diag=true;
+        let saveTimer=null;
+        const stamp=()=>{ root.dataset.og=JSON.stringify(state); };
+        const persist=()=>{ stamp(); saveBoardState(); };
+        const persistSoon=()=>{ stamp(); clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveBoardState(),700); };
+
+        function readEditRows(){
+            const rows=[...root.querySelectorAll('.og-edit-row')];
+            state.entries = rows.map(r=> r.querySelector('.og-word-only').value.toUpperCase().trim()).filter(w=>w);
+            const t=root.querySelector('.kw-title-in'); if(t) state.title=t.value;
+        }
+
+        function makeFromWords(words, status, close){
+            const wordStrs = (words||[]).map(w=> typeof w==='string' ? w : w.word).filter(w=>w);
+            const lay=buildWordSearch(wordStrs, state.diag!==false);
+            if(!lay){ if(status) status.textContent='⚠️ Hittade inga användbara ord.'; return false; }
+            state.entries=wordStrs; state.layout=lay; state.found={}; state.mode='play';
+            if(close) close(); render(); persist(); return true;
+        }
+
+        function renderEdit(){
+            root.innerHTML='';
+            const wEl0=body.closest('.widget'); if(wEl0){ body.style.maxHeight=''; body.style.overflowY=''; body.style.overflowX=''; const a0=wEl0.querySelector('.og-scroll-arrow'); if(a0) a0.style.display='none'; }
+            const t=document.createElement('input'); t.className='kw-title-in'; t.placeholder='Rubrik (t.ex. Djurordgömma)'; t.value=state.title||''; t.oninput=()=>{ state.title=t.value; persistSoon(); }; root.appendChild(t);
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Skriv orden som ska gömmas bland bokstäverna.'; root.appendChild(hint);
+            const diagRow=document.createElement('label'); diagRow.className='og-diag-toggle';
+            const diagCb=document.createElement('input'); diagCb.type='checkbox'; diagCb.checked = state.diag!==false;
+            diagCb.onchange=()=>{ state.diag = diagCb.checked; persist(); };
+            diagRow.appendChild(diagCb);
+            const diagTxt=document.createElement('span'); diagTxt.textContent='Tillåt diagonala ord (annars bara vågrätt/lodrätt)'; diagRow.appendChild(diagTxt);
+            root.appendChild(diagRow);
+            const list=document.createElement('div'); root.appendChild(list);
+            const addRow=(word)=>{
+                const row=document.createElement('div'); row.className='og-edit-row';
+                const wi=document.createElement('input'); wi.className='og-word-only'; wi.placeholder='ORD'; wi.value=word||''; wi.oninput=()=>{ wi.value=wi.value.toUpperCase(); persistSoon(); };
+                const del=document.createElement('button'); del.className='kw-del'; del.innerHTML='✕'; del.onclick=()=>{ row.remove(); readEditRows(); persist(); };
+                row.appendChild(wi); row.appendChild(del); list.appendChild(row);
+            };
+            state.entries.forEach(w=>addRow(w));
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const addBtn=document.createElement('button'); addBtn.className='kw-btn kw-btn-ghost'; addBtn.textContent='+ Ord'; addBtn.onclick=()=>{ readEditRows(); addRow(''); persist(); };
+            const makeBtn=document.createElement('button'); makeBtn.className='kw-btn kw-btn-primary'; makeBtn.textContent='Skapa ordgömma';
+            makeBtn.onclick=()=>{ readEditRows(); const lay=buildWordSearch(state.entries, state.diag!==false); if(!lay){ customAlert('Lägg till minst ett ord med två eller fler bokstäver.','✏️'); return; } state.layout=lay; state.found={}; state.mode='play'; render(); persist(); };
+            const aiBtn=document.createElement('button'); aiBtn.className='kw-btn kw-btn-ai'; aiBtn.textContent='✨ Skapa med AI'; aiBtn.onclick=openOgAiDialog;
+            btns.appendChild(addBtn); btns.appendChild(aiBtn); btns.appendChild(makeBtn); root.appendChild(btns);
+        }
+
+        function renderPlay(){
+            root.innerHTML='';
+            const lay=state.layout; if(!lay){ state.mode='edit'; renderEdit(); return; }
+            if(state.title){ const h=document.createElement('div'); h.className='kw-title'; h.textContent=state.title; root.appendChild(h); }
+            const wrap=document.createElement('div'); wrap.className='kw-gridwrap';
+            const g=document.createElement('div'); g.className='og-grid'; g.style.gridTemplateColumns='repeat('+lay.size+', var(--og-cell))';
+            const cellEls={};
+            for(let r=0;r<lay.size;r++){ for(let c=0;c<lay.size;c++){
+                const k=r+','+c; const cell=document.createElement('div'); cell.className='og-cell'; cell.textContent=lay.grid[r][c]; cell.dataset.k=k;
+                g.appendChild(cell); cellEls[k]=cell;
+            }}
+            wrap.appendChild(g); root.appendChild(wrap);
+            lay.placements.forEach(p=>{ if(state.found[p.word]){ p.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-found'); }); } });
+
+            const wl=document.createElement('div'); wl.className='og-wordlist';
+            const chipEls={};
+            lay.placements.forEach(p=>{ const chip=document.createElement('div'); chip.className='og-word-chip'+(state.found[p.word]?' og-found':''); chip.textContent=p.word; wl.appendChild(chip); chipEls[p.word]=chip; });
+            root.appendChild(wl);
+
+            let startCell=null, dragging=false;
+            const clearSel=()=> g.querySelectorAll('.og-cell.og-selecting').forEach(el=>el.classList.remove('og-selecting'));
+            const cellsBetween=(r1,c1,r2,c2)=>{ const dr=r2-r1, dc=c2-c1; const steps=Math.max(Math.abs(dr),Math.abs(dc)); if(steps===0) return [{r:r1,c:c1}]; if(dr!==0 && dc!==0 && Math.abs(dr)!==Math.abs(dc)) return null; const sr=dr===0?0:dr/Math.abs(dr), sc=dc===0?0:dc/Math.abs(dc); const cells=[]; for(let i=0;i<=steps;i++) cells.push({r:r1+sr*i,c:c1+sc*i}); return cells; };
+            const cellAt=(clientX,clientY)=>{ const el=document.elementFromPoint(clientX,clientY); if(!el) return null; const c=el.closest && el.closest('.og-cell'); if(!c || !g.contains(c)) return null; const p=c.dataset.k.split(',').map(Number); return {r:p[0], c:p[1]}; };
+            const finishSelection=(endCell)=>{
+                clearSel();
+                if(!startCell || !endCell){ startCell=null; return; }
+                const cells=cellsBetween(startCell.r,startCell.c,endCell.r,endCell.c);
+                startCell=null;
+                if(!cells) return;
+                const word = cells.map(cc=> lay.grid[cc.r][cc.c]).join('');
+                const rev = word.split('').reverse().join('');
+                const match = lay.placements.find(p=> !state.found[p.word] && (p.word===word || p.word===rev));
+                if(match){
+                    state.found[match.word]=true;
+                    match.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-found'); });
+                    const chip=chipEls[match.word]; if(chip) chip.classList.add('og-found');
+                    persist();
+                    if(lay.placements.every(p=>state.found[p.word])){ setTimeout(()=>customAlert('Bra jobbat! Du hittade alla orden! 🎉','🏆'),150); }
+                }
+            };
+            g.addEventListener('pointerdown',(ev)=>{ const cell=cellAt(ev.clientX,ev.clientY); if(!cell) return; startCell=cell; dragging=true; const el=cellEls[cell.r+','+cell.c]; if(el) el.classList.add('og-selecting'); try{ g.setPointerCapture(ev.pointerId); }catch(e){} ev.preventDefault(); });
+            g.addEventListener('pointermove',(ev)=>{ if(!dragging||!startCell) return; const cur=cellAt(ev.clientX,ev.clientY); if(!cur) return; const cells=cellsBetween(startCell.r,startCell.c,cur.r,cur.c); clearSel(); if(cells) cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-selecting'); }); });
+            g.addEventListener('pointerup',(ev)=>{ if(!dragging) return; dragging=false; const cur=cellAt(ev.clientX,ev.clientY); finishSelection(cur); });
+            g.addEventListener('pointercancel',()=>{ dragging=false; clearSel(); startCell=null; });
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
+            const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut ordgömman'; prnt.onclick=()=>printWordSearch(state.layout, state.title);
+            const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
+            let showing=false;
+            facit.onclick=()=>{ showing=!showing; if(showing){ lay.placements.forEach(p=>p.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-facit'); })); } else { g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-facit')); } facit.textContent=showing?'Dölj facit':'Visa facit'; };
+            const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.found={}; g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-found','og-facit')); wl.querySelectorAll('.og-word-chip').forEach(ch=>ch.classList.remove('og-found')); showing=false; facit.textContent='Visa facit'; persist(); };
+            const shuffle=document.createElement('button'); shuffle.className='kw-btn kw-btn-ghost'; shuffle.textContent='🔀 Nytt utseende'; shuffle.onclick=()=>{ const words=lay.placements.map(p=>p.word); const lay2=buildWordSearch(words, state.diag!==false); if(lay2){ state.layout=lay2; state.found={}; render(); persist(); } };
+            const aiBtn2=document.createElement('button'); aiBtn2.className='kw-btn kw-btn-ai'; aiBtn2.textContent='✨ AI'; aiBtn2.title='Skapa ny ordgömma med AI'; aiBtn2.onclick=openOgAiDialog;
+            btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
+
+            const widgetEl = body.closest('.widget');
+            if(widgetEl){
+                const cellPx = 34;
+                let wpx = lay.size*cellPx + 48;
+                const maxW = Math.max(340, Math.floor((window.innerWidth||1000) - 32));
+                wpx = Math.max(320, Math.min(wpx, maxW));
+                widgetEl.style.width = wpx + 'px';
+                widgetEl.style.height = 'auto';
+                const bodyMax = Math.max(260, Math.floor((window.innerHeight||800) - 96));
+                body.style.maxHeight = bodyMax + 'px'; body.style.overflowY = 'auto'; body.style.overflowX = 'hidden';
+                let arrow = widgetEl.querySelector('.og-scroll-arrow');
+                if(!arrow){ arrow=document.createElement('button'); arrow.className='kw-scroll-arrow og-scroll-arrow'; widgetEl.appendChild(arrow); }
+                const updateArrow=()=>{ const canScroll = body.scrollHeight > body.clientHeight + 6; if(!canScroll){ arrow.style.display='none'; return; } arrow.style.display='flex'; const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 8; arrow.innerHTML = atBottom ? '▲' : '▼'; arrow.title = atBottom ? 'Till toppen' : 'Visa mer nedåt'; };
+                arrow.onclick=()=>{ const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 8; body.scrollTo({ top: atBottom ? 0 : body.scrollTop + Math.floor(body.clientHeight*0.8), behavior:'smooth' }); setTimeout(updateArrow, 420); };
+                if(body.__ogScroll) body.removeEventListener('scroll', body.__ogScroll);
+                body.__ogScroll = updateArrow; body.addEventListener('scroll', updateArrow);
+                setTimeout(updateArrow, 60);
+            }
+        }
+
+        function openOgAiDialog(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa ordgömma med AI'; box.appendChild(title);
+            const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv ordgömman, t.ex.:\nSkapa en ordgömma på 15 ord i ämnet biologi, åk 4, om djur i skogen.'; box.appendChild(ta);
+            const status=document.createElement('div'); status.className='kw-ai-status';
+
+            const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
+            const row1=document.createElement('div'); row1.className='kw-btnrow'; row1.style.margin='0 0 8px'; row1.style.justifyContent='flex-start';
+            const copyBtn=document.createElement('button'); copyBtn.className='kw-btn kw-btn-ai'; copyBtn.textContent='📋 Kopiera fråga & öppna Gemini';
+            copyBtn.onclick=()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; ta.focus(); return; } const full=buildOgChatPrompt(d);
+                const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
+                try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
+                catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
+                window.open('https://gemini.google.com/app','_blank','noopener'); };
+            row1.appendChild(copyBtn); box.appendChild(row1);
+            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – ordgömman skapas automatiskt...'; box.appendChild(pasteTa);
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=1){ makeFromWords(words, status, close); } },60); });
+            const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
+            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Skapa ordgömma från svaret';
+            makePasteBtn.onclick=()=>{ const words=parseWordList(pasteTa.value); if(words.length<1){ status.textContent='⚠️ Hittade inga ord i svaret. Kolla att det står ett ord per rad.'; return; } makeFromWords(words, status, close); };
+            row1b.appendChild(makePasteBtn); box.appendChild(row1b);
+
+            const orEl=document.createElement('div'); orEl.className='kw-ai-or'; orEl.textContent='— ELLER —'; box.appendChild(orEl);
+            const advBtn=document.createElement('button'); advBtn.className='kw-ai-adv'; advBtn.textContent='Alternativ 2 – ett klick varje gång (engångsnyckel, ~30 sek) ▾'; box.appendChild(advBtn);
+            const adv=document.createElement('div'); adv.style.display='none'; box.appendChild(adv);
+            advBtn.onclick=()=>{ adv.style.display = adv.style.display==='none'?'block':'none'; };
+            const keyWrap=document.createElement('div'); adv.appendChild(keyWrap);
+            const keyInp=document.createElement('input'); keyInp.className='kw-ai-key'; keyInp.type='password'; keyInp.placeholder='Klistra in din Google AI (Gemini) API-nyckel';
+            const help=document.createElement('div'); help.className='kw-ai-help'; help.innerHTML="Hämta en gratis nyckel på <a href='https://aistudio.google.com/app/apikey' target='_blank' rel='noopener'>aistudio.google.com</a>. Nyckeln sparas bara på den här enheten.";
+            const showKeyField=()=>{ keyWrap.innerHTML=''; keyWrap.appendChild(keyInp); keyWrap.appendChild(help); };
+            if(aiKeyGet()){ const note=document.createElement('div'); note.className='kw-ai-help'; note.innerHTML="🔑 API-nyckel sparad. <a href='#' class='kw-ai-change'>Byt nyckel</a>"; keyWrap.appendChild(note); note.querySelector('.kw-ai-change').onclick=(e)=>{ e.preventDefault(); showKeyField(); }; }
+            else { showKeyField(); }
+            const row2=document.createElement('div'); row2.className='kw-btnrow'; row2.style.margin='8px 0 0'; row2.style.justifyContent='flex-start';
+            const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.title='Öppnar Google AI Studio – du är redan inloggad'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); status.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
+            const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='Skapa automatiskt (ett klick)';
+            autoBtn.onclick=async ()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; return; } let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } } if(!key){ status.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
+                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar ordgömman..."; try{ const words=await aiGenerateCrossword(d, key); makeFromWords(words, status, close); }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
+            row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
+
+            box.appendChild(status);
+            const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
+            const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Stäng'; cancel.onclick=close; foot.appendChild(cancel); box.appendChild(foot);
+
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            setTimeout(()=>ta.focus(),60);
+        }
+
         function render(){ stamp(); if(state.mode==='play' && state.layout) renderPlay(); else renderEdit(); }
         render();
     }
