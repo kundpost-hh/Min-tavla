@@ -162,8 +162,9 @@
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
             <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
             <button class="tool-btn" onclick="createPracticeClock()"><div class="icon">🕐</div><div class="label">Övningsklocka</div></button>
-            <button class="tool-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
+            <button class="tool-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
             <button class="tool-btn" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
+            <button class="tool-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
             <button class="tool-btn" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
         </div>
     </div>
@@ -233,7 +234,7 @@
     #cb-app-wrapper.theme-blank .canvas-page { background-color: #ffffff; background-image: none; }
     #cb-app-wrapper.no-watermark #watermark { display: none !important; }
     
-    #fullscreen-btn { position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); cursor: pointer; font-size: 18px; color: #333; transition: opacity 0.25s ease, background-color 0.2s, transform 0.2s; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; font-weight: bold; opacity: 0; }
+    #fullscreen-btn { position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); cursor: pointer; font-size: 18px; color: #333; transition: opacity 0.25s ease, background-color 0.2s, transform 0.2s; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; font-weight: bold; opacity: 0.3; }
     #fullscreen-btn:hover { background-color: #e5e5ea; transform: scale(1.05); opacity: 1; }
 
     #menu-hover-zone { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 9998; }
@@ -1157,6 +1158,23 @@
         inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); doConfirm(); } else if (e.key === 'Escape') { cleanup(); } };
     }
 
+    function showAboutApp(){
+        const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+        const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(380px,92vw)'; box.style.textAlign='center';
+        box.innerHTML = "<div style='font-size:42px;line-height:1;margin-bottom:8px;'>📋</div>"
+            + "<div class='cal-popup-title' style='margin-bottom:2px;'>Min tavla</div>"
+            + "<div style='font-size:13px;color:#8e8e93;margin-bottom:16px;'>Version 1.0</div>"
+            + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;'>Ett lärarverktyg utvecklat av <b>Hussein Hirori</b>.</div>"
+            + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;margin-top:14px;'>För synpunkter och förslag:</div>"
+            + "<a href='mailto:kundbox@gmail.com' style='display:inline-block;font-size:14px;color:#007aff;font-weight:700;text-decoration:none;margin-top:2px;'>kundbox@gmail.com</a>";
+        const btnWrap=document.createElement('div'); btnWrap.style.marginTop='18px';
+        const close=document.createElement('button'); close.textContent='Stäng'; close.style.cssText='border:none;background:#007aff;color:#fff;font-weight:700;font-size:14px;padding:8px 24px;border-radius:20px;cursor:pointer;';
+        const closeFn=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        close.onclick=closeFn; btnWrap.appendChild(close); box.appendChild(btnWrap);
+        ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) closeFn(); };
+        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+    }
+
     function toggleFullScreen() {
         const appWrapper = document.getElementById('cb-app-wrapper');
         if (!document.fullscreenElement) { appWrapper.requestFullscreen().catch(err => { customAlert('Kunde inte starta helskärmsläge: ' + err.message, '⚠️'); }); }
@@ -1304,7 +1322,7 @@
         if(!customClass) customClass = ''; widgetCount++;
         const widget = document.createElement('div'); widget.className = 'widget ' + customClass; widget.dataset.widgetType = title;
         if (config) { widget.style.width = config.w + 'px'; if (config.h) widget.style.height = config.h + 'px'; widget.style.top = Math.max(40, config.y) + 'px'; widget.style.left = config.x + 'px'; if(config.locked) widget.classList.add('locked'); }
-        else { widget.style.width = width + 'px'; widget.style.top = (60 + (widgetCount * 20) % 200) + 'px'; widget.style.left = (50 + (widgetCount * 20) % 350) + 'px'; }
+        else { widget.style.width = width + 'px'; const vw = window.innerWidth || 1200; let baseLeft = Math.round((vw - width) / 2); baseLeft = Math.max(320, baseLeft); baseLeft = Math.min(baseLeft, Math.max(320, vw - width - 24)); widget.style.left = (baseLeft + (widgetCount * 26) % 150) + 'px'; widget.style.top = (70 + (widgetCount * 24) % 180) + 'px'; }
         
         const body = document.createElement('div'); body.className = 'widget-body';
         const inner = document.createElement('div'); inner.className = 'widget-inner';
@@ -1639,8 +1657,7 @@
     function togglePresentationLock(){
         presentationLocked = !presentationLocked;
         document.querySelectorAll('.widget').forEach(w => w.classList.toggle('locked', presentationLocked));
-        const btn = document.getElementById('lock-board-btn');
-        if(btn){ btn.querySelector('.icon').innerText = presentationLocked ? '🔒' : '🔓'; btn.querySelector('.label').innerText = presentationLocked ? 'Lås upp' : 'Lås tavla'; }
+        document.querySelectorAll('.lock-toggle-btn').forEach(btn => { const ic=btn.querySelector('.icon'), lb=btn.querySelector('.label'); if(ic) ic.innerText = presentationLocked ? '🔒' : '🔓'; if(lb) lb.innerText = presentationLocked ? 'Lås upp' : 'Lås tavla'; });
         document.getElementById('cb-app-wrapper').classList.toggle('board-locked', presentationLocked);
     }
 
