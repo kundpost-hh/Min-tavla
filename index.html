@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Min Tavla</title>
+    <title>Min Tavla (offline-test)</title>
 </head>
 <body>
 
@@ -102,7 +102,16 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- VÄNSTER SIDOFICKA: verktyg (test – speglar den högra fickan) -->
+    <div id="tool-pocket-zone">
+        <div id="tool-pocket-tab">❯</div>
+        <div id="tool-pocket-panel">
+            <div class="tool-pocket-title">Verktyg</div>
+            <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
+        </div>
+    </div>
+
     <div id="menu-hover-zone"></div>
 
     <div id="toolbar-container">
@@ -114,7 +123,7 @@
             <button class="tool-btn" onclick="createLunchWidget()"><div class="icon">🍽️</div><div class="label">Lunch</div></button>
             <button class="tool-btn" onclick="createTextEditor()"><div class="icon">📝</div><div class="label">Text</div></button>
             <button class="tool-btn" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
-            <button class="tool-btn" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='24' height='24' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
+            <button class="tool-btn" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
             <button class="tool-btn" onclick="createWhiteboard()"><div class="icon">🖍️</div><div class="label">Rita</div></button>
             <button class="tool-btn" onclick="createWorkSymbols()"><div class="icon">🤫</div><div class="label">Arbetssätt</div></button>
             <button class="tool-btn" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
@@ -132,7 +141,7 @@
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
-            <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="26" height="26" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
+            <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="21" height="21" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
         </div>
 
         <!-- Bred pil: dra fram fler widgetar (visas vid hover) -->
@@ -245,7 +254,8 @@
     .tool-btn.tool-dragging { cursor: grabbing; background: #e7f0ff; box-shadow: 0 6px 16px rgba(0,0,0,0.18); transform: scale(1.12); opacity: 0.95; }
     .tool-btn:hover { background-color: #f2f2f7; transform: translateY(-3px); }
     .tool-btn:active { transform: translateY(0); }
-    .tool-btn .icon { font-size: 22px; margin-bottom: 2px; }
+    .tool-btn .icon { font-size: 22px; margin-bottom: 2px; height: 26px; display: flex; align-items: center; justify-content: center; }
+    .tool-btn .icon svg { display: block; }
     .tool-btn .label { font-size: 10px; font-weight: 600; color: #3a3a3c; text-align: center; }
 
     #side-pocket-zone { position: fixed; top: 50%; right: 0; transform: translateY(-50%); z-index: 10500; width: 0; height: 64px; }
@@ -262,6 +272,20 @@
     .side-pocket-item .icon { font-size: 24px; font-weight: 800; color: #444; margin-bottom: 4px; pointer-events: none; }
     .side-pocket-name { width: 100%; text-align: center; font-size: 10px; font-weight: 600; color: #3a3a3c; background: transparent; border: none; border-bottom: 1px solid transparent; outline: none; font-family: inherit; padding: 2px 0; cursor: text; }
     .side-pocket-name:hover, .side-pocket-name:focus { border-bottom-color: #007aff; }
+
+    /* VÄNSTER SIDOFICKA – verktyg (test) */
+    #tool-pocket-zone { position: fixed; top: 50%; left: 0; transform: translateY(-50%); z-index: 10500; width: 0; height: 64px; }
+    #tool-pocket-tab { position: absolute; top: 0; left: 0; width: 26px; height: 64px; background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); border-left: none; border-radius: 0 14px 14px 0; box-shadow: 4px 4px 16px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: #888; transition: all 0.25s ease; }
+    #tool-pocket-zone.open #tool-pocket-tab { width: 18px; color: #555; background: rgba(255,255,255,0.98); }
+    #tool-pocket-panel { position: absolute; top: 50%; left: 0; transform: translateY(-50%) translateX(-100%); width: 256px; max-height: 90vh; overflow-y: auto; background: rgba(255,255,255,0.97); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid rgba(0,0,0,0.08); padding: 14px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+    #tool-pocket-zone.open #tool-pocket-panel { opacity: 1; visibility: visible; transform: translateY(-50%) translateX(26px); pointer-events: auto; }
+    .tool-pocket-title { font-size: 12px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-bottom: 10px; }
+    .tool-pocket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .tool-pocket-grid .tool-btn { background: #f7f7f9; border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 8px 4px 6px; min-width: 0; cursor: pointer; touch-action: auto; }
+    .tool-pocket-grid .tool-btn:hover { background: #eef3ff; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+
+    /* Dölj den nedre verktygsraden medan vi testar vänsterfickan */
+    #toolbar-container, #menu-hover-zone { display: none !important; }
     .sp-section { margin-bottom: 14px; }
     .sp-head { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
     .sp-add-btn { width: 100%; padding: 7px; background: #007aff; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 4px; }
@@ -877,12 +901,12 @@
        Lämnar du värdena som de är fungerar appen lokalt (sparar bara på datorn).
        ===================================================================== */
     const firebaseConfig = {
-        apiKey:            "AIzaSyDrb-6YOpIgfRT5TYQ9w9htT5_W-DY3EsM",
-        authDomain:        "min-tavla-ec027.firebaseapp.com",
-        projectId:         "min-tavla-ec027",
-        storageBucket:     "min-tavla-ec027.firebasestorage.app",
-        messagingSenderId: "384942566077",
-        appId:             "1:384942566077:web:b2807f75002846340ae5d4"
+        apiKey: "",
+        authDomain: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: ""
     };
     // E-postadresser som ska ha admin-rättigheter (se/ta bort användare)
     const ADMIN_EMAILS = ["hussein.hirori@utb.linkoping.se"];
@@ -3334,6 +3358,29 @@
         panel.addEventListener('mouseleave', closeP);
         // klick kvar för touch-tavlor (ingen hover där)
         tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); if(zone.classList.contains('open') && typeof markFeedSeen==='function') markFeedSeen(); };
+    })();
+
+    // ---- VÄNSTER SIDOFICKA: verktyg (test) ----
+    (function(){
+        const zone = document.getElementById('tool-pocket-zone');
+        const tab = document.getElementById('tool-pocket-tab');
+        const panel = document.getElementById('tool-pocket-panel');
+        const grid = document.getElementById('tool-pocket-grid');
+        if(!zone || !grid) return;
+        function build(){ grid.innerHTML=''; document.querySelectorAll('#toolbar-container .tool-btn').forEach(btn=>{ const c=btn.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); grid.appendChild(c); }); }
+        build();
+        // bygg om när verktygsordningen återställts (per användare)
+        setTimeout(build, 1500);
+        const setIcon = ()=>{ tab.textContent = zone.classList.contains('open') ? '❮' : '❯'; };
+        setIcon();
+        let t = null;
+        const openP = ()=>{ clearTimeout(t); zone.classList.add('open'); setIcon(); };
+        const closeP = ()=>{ clearTimeout(t); t = setTimeout(()=>{ zone.classList.remove('open'); setIcon(); }, 350); };
+        tab.addEventListener('mouseenter', openP);
+        tab.addEventListener('mouseleave', closeP);
+        panel.addEventListener('mouseenter', openP);
+        panel.addEventListener('mouseleave', closeP);
+        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); };
     })();
 
     // ---- HÅLL SKÄRMEN VAKEN (skjut upp datorns viloläge medan appen visas) ----
