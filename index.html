@@ -634,6 +634,8 @@
     .kw-btn-ghost { background:#f0f0f5; color:#333; }
     .kw-btn-warn { background:#fff0f0; color:#ff3b30; }
     .kw-btn-ai { background:linear-gradient(135deg,#7048e8,#9775fa); color:#fff; }
+    .kw-scroll-arrow { position:absolute; left:50%; transform:translateX(-50%); bottom:10px; width:44px; height:44px; border:none; border-radius:50%; background:#007aff; color:#fff; font-size:20px; line-height:1; cursor:pointer; display:none; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.28); z-index:25; }
+    .kw-scroll-arrow:hover { background:#0062cc; }
     .kw-ai-ta { width:100%; min-height:92px; border:2px solid #e0e0e6; border-radius:12px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; outline:none; box-sizing:border-box; white-space:pre-wrap; }
     .kw-ai-ta:focus { border-color:#7048e8; }
     .kw-ai-key { width:100%; border:1.5px solid #e0e0e6; border-radius:10px; padding:8px 10px; font-size:13px; outline:none; box-sizing:border-box; margin-top:8px; font-family:monospace; }
@@ -710,8 +712,8 @@
     .cal-day.cal-hasnote:hover { background:#ffeeb0; }
     .cal-note-dot { position:absolute; top:4px; right:4px; width:7px; height:7px; border-radius:50%; background:#ff9500; box-shadow:0 0 0 2px #fff; }
     .cal-day.cal-today .cal-note-dot { box-shadow:0 0 0 2px #007aff; }
-    .cal-popup-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:99999999; display:flex; align-items:center; justify-content:center; }
-    .cal-popup { background:#fff; border-radius:16px; padding:18px 20px 16px; width:min(380px,92vw); box-shadow:0 12px 40px rgba(0,0,0,.3); }
+    .cal-popup-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:99999999; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; padding:4vh 12px; box-sizing:border-box; }
+    .cal-popup { background:#fff; border-radius:16px; padding:18px 20px 16px; width:min(380px,92vw); box-shadow:0 12px 40px rgba(0,0,0,.3); margin:auto; }
     .cal-popup-title { font-size:15px; font-weight:800; color:#1d1d1f; margin-bottom:10px; text-align:center; }
     .cal-popup-ta { width:100%; min-height:110px; border:2px solid #e0e0e6; border-radius:12px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; outline:none; box-sizing:border-box; }
     .cal-popup-ta:focus { border-color:#007aff; }
@@ -2822,6 +2824,8 @@
 
         function renderEdit(){
             root.innerHTML='';
+            // återställ scroll-läget från spelläget
+            const wEl0=body.closest('.widget'); if(wEl0){ body.style.maxHeight=''; body.style.overflowY=''; body.style.overflowX=''; const a0=wEl0.querySelector('.kw-scroll-arrow'); if(a0) a0.style.display='none'; }
             const t=document.createElement('input'); t.className='kw-title-in'; t.placeholder='Rubrik (t.ex. Djurkorsord)'; t.value=state.title||''; t.oninput=()=>{ state.title=t.value; persistSoon(); }; root.appendChild(t);
             const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Skriv ord och ledtrådar – korsordet byggs automatiskt.'; root.appendChild(hint);
             const list=document.createElement('div'); root.appendChild(list);
@@ -2877,6 +2881,26 @@
             const shuffle=document.createElement('button'); shuffle.className='kw-btn kw-btn-ghost'; shuffle.textContent='🔀 Nytt utseende'; shuffle.onclick=()=>{ const arr=state.entries.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp; } const lay2=buildCrossword(arr); if(lay2){ state.layout=lay2; state.answers={}; render(); persist(); } };
             const aiBtn2=document.createElement('button'); aiBtn2.className='kw-btn kw-btn-ai'; aiBtn2.textContent='✨ AI'; aiBtn2.title='Skapa nytt korsord med AI'; aiBtn2.onclick=openAiDialog;
             btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
+            // Anpassa widgetens storlek efter korsordet (bredd + höjd), så inget klipps av
+            const widgetEl = body.closest('.widget');
+            if(widgetEl){
+                const cellPx = 34; // 32px ruta + 2px mellanrum
+                let wpx = lay.cols*cellPx + 48; // marginal för kant/padding (även vid hover)
+                const maxW = Math.max(340, Math.floor((window.innerWidth||1000) - 32));
+                wpx = Math.max(320, Math.min(wpx, maxW));
+                widgetEl.style.width = wpx + 'px';
+                widgetEl.style.height = 'auto';
+                // Gör innehållet scrollbart om korsordet är högre än skärmen, så knapparna alltid går att nå
+                const bodyMax = Math.max(260, Math.floor((window.innerHeight||800) - 96));
+                body.style.maxHeight = bodyMax + 'px'; body.style.overflowY = 'auto'; body.style.overflowX = 'hidden';
+                let arrow = widgetEl.querySelector('.kw-scroll-arrow');
+                if(!arrow){ arrow=document.createElement('button'); arrow.className='kw-scroll-arrow'; widgetEl.appendChild(arrow); }
+                const updateArrow=()=>{ const canScroll = body.scrollHeight > body.clientHeight + 6; if(!canScroll){ arrow.style.display='none'; return; } arrow.style.display='flex'; const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 8; arrow.innerHTML = atBottom ? '▲' : '▼'; arrow.title = atBottom ? 'Till toppen' : 'Visa mer nedåt'; };
+                arrow.onclick=()=>{ const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 8; body.scrollTo({ top: atBottom ? 0 : body.scrollTop + Math.floor(body.clientHeight*0.8), behavior:'smooth' }); setTimeout(updateArrow, 420); };
+                if(body.__kwScroll) body.removeEventListener('scroll', body.__kwScroll);
+                body.__kwScroll = updateArrow; body.addEventListener('scroll', updateArrow);
+                setTimeout(updateArrow, 60);
+            }
         }
 
         function makeFromWords(words, status, close){
@@ -2886,7 +2910,7 @@
         }
         function openAiDialog(){
             const ov=document.createElement('div'); ov.className='cal-popup-overlay';
-            const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(480px,94vw)'; box.style.maxHeight='88vh'; box.style.overflowY='auto';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
             const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
             const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa korsord med AI'; box.appendChild(title);
             const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv korsordet, t.ex.:\nSkapa ett korsord på 20 ord i ämnet fysik, åk 4, om vattnets kretslopp.'; box.appendChild(ta);
