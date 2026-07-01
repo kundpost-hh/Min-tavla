@@ -106,13 +106,15 @@
     <div id="menu-hover-zone"></div>
 
     <div id="toolbar-container">
-        <div class="tool-group">
+        <!-- RAD 1: favoriter (alltid synliga) -->
+        <div class="tool-group tool-fav">
             <button class="tool-btn" onclick="createLessonPlan()"><div class="icon">📋</div><div class="label">Lektion</div></button>
             <button class="tool-btn" onclick="createDailySchedule()"><div class="icon">📆</div><div class="label">Schema</div></button>
             <button class="tool-btn" onclick="createCalendarWidget()"><div class="icon">📅</div><div class="label">Kalender</div></button>
             <button class="tool-btn" onclick="createLunchWidget()"><div class="icon">🍽️</div><div class="label">Lunch</div></button>
             <button class="tool-btn" onclick="createTextEditor()"><div class="icon">📝</div><div class="label">Text</div></button>
             <button class="tool-btn" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
+            <button class="tool-btn" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='24' height='24' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
             <button class="tool-btn" onclick="createWhiteboard()"><div class="icon">🖍️</div><div class="label">Rita</div></button>
             <button class="tool-btn" onclick="createWorkSymbols()"><div class="icon">🤫</div><div class="label">Arbetssätt</div></button>
             <button class="tool-btn" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
@@ -131,6 +133,15 @@
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="26" height="26" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
+        </div>
+
+        <!-- Bred pil: dra fram fler widgetar (visas vid hover) -->
+        <div class="toolbar-tab" id="toolbar-tab" title="Fler widgetar">
+            <svg viewBox="0 0 40 12" width="34" height="11"><path d="M4 3l16 7 16-7" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <!-- RAD 2: övriga widgetar (dolda tills man hovrar pilen) -->
+        <div class="tool-group tool-extra" id="tool-extra">
             <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
             <button class="tool-btn" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
             <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
@@ -142,13 +153,26 @@
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
             <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
             <button class="tool-btn" onclick="createPracticeClock()"><div class="icon">🕐</div><div class="label">Övningsklocka</div></button>
-
-            <div style="width: 1px; background: #ddd; margin: 0 4px;"></div>
             <button class="tool-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
             <button class="tool-btn" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
             <button class="tool-btn" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
         </div>
     </div>
+    <script>
+        (function(){
+            function initToolbarTab(){
+                var tc=document.getElementById('toolbar-container');
+                var tab=document.getElementById('toolbar-tab');
+                if(!tc||!tab) return;
+                tab.addEventListener('mouseenter', function(){ tc.classList.add('show-extra'); });
+                tab.addEventListener('click', function(){ tc.classList.toggle('show-extra'); }); // pekskärm
+                tc.addEventListener('mouseleave', function(){ if(tc.classList.contains('tb-reordering')) return; tc.classList.remove('show-extra'); });
+                if(typeof window.initToolbarSortable === 'function') window.initToolbarSortable();
+            }
+            if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initToolbarTab);
+            else initToolbarTab();
+        })();
+    </script>
 </div>
 
 <style>
@@ -204,11 +228,21 @@
     #fullscreen-btn:hover { background-color: #e5e5ea; transform: scale(1.05); opacity: 1; }
 
     #menu-hover-zone { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 9998; }
-    #toolbar-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(50px); width: 95%; max-width: 1400px; background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 0, 0, 0.08); padding: 8px 15px; z-index: 9999; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    #toolbar-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(50px); width: 95%; max-width: 1400px; background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 0, 0, 0.08); padding: 8px 15px; z-index: 9999; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     #menu-hover-zone:hover + #toolbar-container, #toolbar-container:hover { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
     
     .tool-group { display: flex; gap: 2px; justify-content: center; width: 100%; flex-wrap: wrap; }
-    .tool-btn { display: flex; flex-direction: column; align-items: center; background: none; border: none; cursor: pointer; transition: all 0.2s; padding: 4px 6px; border-radius: 10px; min-width: 50px; }
+    /* Bred pil-flik som visar den dolda raden */
+    .toolbar-tab { display: flex; align-items: center; justify-content: center; width: 76px; height: 16px; border-radius: 9px; background: #eef0f4; color: #9a9aa2; cursor: pointer; flex-shrink: 0; transition: background 0.2s ease, color 0.2s ease; }
+    .toolbar-tab:hover { background: #007aff; color: #fff; }
+    .toolbar-tab svg { display: block; transition: transform 0.35s ease; }
+    #toolbar-container.show-extra .toolbar-tab { background: #007aff; color: #fff; }
+    #toolbar-container.show-extra .toolbar-tab svg { transform: rotate(180deg); }
+    /* Andra raden - dold tills man hovrar pilen */
+    .tool-extra { max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; margin-top: -3px; transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.35s ease; }
+    #toolbar-container.show-extra .tool-extra { max-height: 220px; opacity: 1; pointer-events: auto; margin-top: 2px; }
+    .tool-btn { display: flex; flex-direction: column; align-items: center; background: none; border: none; cursor: grab; transition: transform 0.12s, background 0.2s; padding: 4px 6px; border-radius: 10px; min-width: 50px; touch-action: none; }
+    .tool-btn.tool-dragging { cursor: grabbing; background: #e7f0ff; box-shadow: 0 6px 16px rgba(0,0,0,0.18); transform: scale(1.12); opacity: 0.95; }
     .tool-btn:hover { background-color: #f2f2f7; transform: translateY(-3px); }
     .tool-btn:active { transform: translateY(0); }
     .tool-btn .icon { font-size: 22px; margin-bottom: 2px; }
@@ -304,6 +338,8 @@
     .widget.locked .widget-resizer { display: none !important; }
 
     .widget-inner { background: white; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid #e5e5ea; overflow: hidden; display: flex; flex-direction: column; width: 100%; height: 100%; transition: all 0.3s ease-in-out; position: relative; z-index: 2; }
+    .widget:not(.locked) .widget-inner { cursor: move; }
+    .widget.locked .widget-inner { cursor: default; }
     
     .widget:not(.schedule-widget) .widget-inner { padding: 0px !important; }
     .widget:not(.schedule-widget) .widget-header { opacity: 0 !important; transform: translateY(10px) !important; pointer-events: none !important; }
@@ -516,6 +552,7 @@
 
     .lesson-timer-wrap { display: flex; gap: 8px; align-items: center; }
     .lesson-timer-input { width: 50px; background: white; border: 1px solid #d1d1d6; border-radius: 4px; color: #333; padding: 4px; text-align: center; font-size: 14px; font-weight: bold; outline: none; }
+    .lesson-nowclock { flex-shrink: 0; font-family: monospace; font-size: 20px; font-weight: 900; color: #007aff; letter-spacing: 1px; padding: 3px 14px; background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; white-space: nowrap; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
     .lesson-timer-btn { background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 4px 12px; font-weight: bold; font-size: 13px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
     .lesson-timer-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
 
@@ -575,6 +612,53 @@
     .alpha-letter { font-family: 'Comic Sans MS', 'Segoe UI', sans-serif; font-size: 40px; font-weight: bold; line-height: 1; padding: 6px 8px; border-radius: 14px; transition: transform 0.2s ease, background 0.2s ease; cursor: pointer; flex: 0 0 auto; user-select: none; }
     .alpha-letter:hover { animation: alpha-dance 0.6s ease-in-out infinite; background: rgba(255,45,85,0.08); }
     @keyframes alpha-dance { 0% { transform: scale(1.5) rotate(0deg); } 25% { transform: scale(1.55) rotate(-13deg); } 50% { transform: scale(1.65) rotate(0deg); } 75% { transform: scale(1.55) rotate(13deg); } 100% { transform: scale(1.5) rotate(0deg); } }
+
+    /* ---- KORSORD ---- */
+    .korsord-widget .widget-inner { background:#fff; }
+    .korsord-root { --kw-cell:32px; display:flex; flex-direction:column; width:100%; font-size:13px; }
+    .kw-title-in { font-size:16px; font-weight:800; color:#1d1d1f; text-align:center; border:none; outline:none; width:100%; margin-bottom:8px; background:transparent; }
+    .kw-title-in::placeholder { color:#c7c7cc; font-weight:700; }
+    .kw-title { font-size:17px; font-weight:800; color:#1d1d1f; text-align:center; margin-bottom:8px; }
+    .kw-edit-hint { font-size:11px; color:#8e8e93; text-align:center; margin-bottom:8px; }
+    .kw-edit-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+    .kw-word, .kw-clue { border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; outline:none; font-family:inherit; background:#fff; }
+    .kw-word { width:120px; flex-shrink:0; text-transform:uppercase; font-weight:700; letter-spacing:1px; }
+    .kw-clue { flex-grow:1; min-width:60px; }
+    .kw-word:focus, .kw-clue:focus { border-color:#007aff; }
+    .kw-del { background:none; border:none; color:#ff3b30; cursor:pointer; font-size:15px; flex-shrink:0; padding:2px 4px; }
+    .kw-btnrow { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; justify-content:center; }
+    .kw-btn { border:none; border-radius:9px; padding:8px 14px; font-weight:700; font-size:13px; cursor:pointer; transition:filter .15s; }
+    .kw-btn:hover { filter:brightness(0.95); }
+    .kw-btn-primary { background:#007aff; color:#fff; }
+    .kw-btn-green { background:#34c759; color:#fff; }
+    .kw-btn-ghost { background:#f0f0f5; color:#333; }
+    .kw-btn-warn { background:#fff0f0; color:#ff3b30; }
+    .kw-btn-ai { background:linear-gradient(135deg,#7048e8,#9775fa); color:#fff; }
+    .kw-ai-ta { width:100%; min-height:92px; border:2px solid #e0e0e6; border-radius:12px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; outline:none; box-sizing:border-box; white-space:pre-wrap; }
+    .kw-ai-ta:focus { border-color:#7048e8; }
+    .kw-ai-key { width:100%; border:1.5px solid #e0e0e6; border-radius:10px; padding:8px 10px; font-size:13px; outline:none; box-sizing:border-box; margin-top:8px; font-family:monospace; }
+    .kw-ai-key:focus { border-color:#7048e8; }
+    .kw-ai-help { font-size:11px; color:#8e8e93; margin-top:6px; line-height:1.45; }
+    .kw-ai-help a { color:#007aff; }
+    .kw-ai-status { font-size:13px; color:#7048e8; text-align:center; margin-top:10px; min-height:18px; }
+    .kw-ai-spin { display:inline-block; width:15px; height:15px; border:2px solid #e0d6fb; border-top-color:#7048e8; border-radius:50%; animation:lunchspin .8s linear infinite; vertical-align:middle; margin-right:6px; }
+    .kw-ai-sec { font-size:12px; font-weight:800; color:#333; margin:14px 0 7px; }
+    .kw-ai-or { text-align:center; color:#c7c7cc; font-size:11px; font-weight:700; letter-spacing:1px; margin:16px 0 2px; }
+    .kw-ai-adv { border:none; background:none; color:#8e8e93; font-size:12px; cursor:pointer; text-decoration:underline; padding:4px; margin:6px auto 0; display:block; }
+    .kw-gridwrap { width:100%; overflow:auto; margin-bottom:10px; }
+    .kw-grid { display:grid; gap:2px; justify-content:center; margin:0 auto; }
+    .kw-cell { width:var(--kw-cell); height:var(--kw-cell); position:relative; background:#fff; border:1.5px solid #9aa0aa; box-sizing:border-box; border-radius:3px; }
+    .kw-cell.kw-blank { background:transparent; border:none; }
+    .kw-input { width:100%; height:100%; border:none; text-align:center; font-size:calc(var(--kw-cell)*0.56); font-weight:800; text-transform:uppercase; outline:none; background:transparent; padding:0; color:#1d1d1f; caret-color:#007aff; }
+    .kw-input:focus { background:#e7f0ff; }
+    .kw-num { position:absolute; top:1px; left:2px; font-size:9px; font-weight:700; color:#8e8e93; line-height:1; pointer-events:none; }
+    .kw-cell.kw-facit .kw-input { color:#007aff; }
+    .kw-clues { display:flex; gap:18px; flex-wrap:wrap; }
+    .kw-clue-col { flex:1; min-width:130px; }
+    .kw-clue-col h4 { margin:0 0 5px; font-size:13px; color:#ff3b30; font-weight:800; }
+    .kw-clue-col ol { margin:0; padding:0; list-style:none; font-size:12px; }
+    .kw-clue-col li { margin-bottom:4px; line-height:1.35; color:#333; }
+    .kw-clue-col li b { color:#1d1d1f; }
 
     /* ---- LUNCH (matmeny via meny.mateo.se) ---- */
     .lunch-widget .widget-inner { background:#fff; }
@@ -836,7 +920,8 @@
             wordLists:  localStorage.getItem('savedWordLists_') || '',
             templates:  localStorage.getItem('mintavla_templates_' + currentUser) || '',
             links:      localStorage.getItem('mintavla_links_' + currentUser) || '',
-            calNotes:   localStorage.getItem('mintavla_calNotes_' + currentUser) || ''
+            calNotes:   localStorage.getItem('mintavla_calNotes_' + currentUser) || '',
+            toolbarOrder: localStorage.getItem('mintavla_toolbarOrder_' + currentUser) || ''
         };
     }
 
@@ -850,6 +935,7 @@
         if (typeof d.templates === 'string') localStorage.setItem('mintavla_templates_' + currentUser, d.templates);
         if (typeof d.links === 'string') localStorage.setItem('mintavla_links_' + currentUser, d.links);
         if (typeof d.calNotes === 'string' && d.calNotes) localStorage.setItem('mintavla_calNotes_' + currentUser, d.calNotes);
+        if (typeof d.toolbarOrder === 'string' && d.toolbarOrder) localStorage.setItem('mintavla_toolbarOrder_' + currentUser, d.toolbarOrder);
     }
 
     // Gör om e-post till en säker dokument-nyckel (Firestore tillåter inte vissa tecken)
@@ -1095,7 +1181,7 @@
                 if (type === 'KLISTERLAPP') { state.data.title = w.querySelector('.sticky-title-input')?.value || ''; state.data.text = w.querySelector('.sticky-textarea')?.value || ''; }
                 else if (type === 'TEXTEDITOR') { state.data.html = w.querySelector('.editor-content')?.innerHTML || ''; }
                 else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.dataset.icon || 'skriv', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea' }); }); }
-                else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; const clk = w.querySelectorAll('.lesson-clock .pclock-digital'); const pT=(el)=>{ const t=(el?.textContent||'08:00').split(':'); let dh=parseInt(t[0])||12; return {h:dh%12, m:parseInt(t[1])||0}; }; if(clk[0]) state.data.clock1=pT(clk[0]); if(clk[1]) state.data.clock2=pT(clk[1]); }
+                else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; const clk = w.querySelectorAll('.lesson-clock .pclock-digital'); const pT=(el)=>{ const t=(el?.textContent||'08:00').split(':'); return {h:(parseInt(t[0])||0)%24, m:parseInt(t[1])||0}; }; if(clk[0]) state.data.clock1=pT(clk[0]); if(clk[1]) state.data.clock2=pT(clk[1]); }
                 else if (type === 'SKAPA GRUPPER' || type === 'SLUMPA NAMN' || type === 'DAGENS ORD') { state.data.list = w.querySelector('select')?.value || ''; state.data.text = w.querySelector('.name-input')?.value || ''; if(type === 'SKAPA GRUPPER') { state.data.count = w.querySelector('input[type="number"]')?.value || '4'; state.data.result = w.querySelector('.group-result')?.innerHTML || ''; } if(type === 'SLUMPA NAMN') { state.data.removeCb = w.querySelector('input[type="checkbox"]')?.checked || false; } if(type === 'DAGENS ORD') { state.data.result = w.querySelector('.name-result')?.innerHTML || ''; } }
                 else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
@@ -1107,7 +1193,8 @@
                 else if (type === 'GRATTIS') { state.data.name = w.querySelector('.grattis-name-input')?.value || ''; }
                 else if (type === 'NÄRVARO') { state.data.text = w.querySelector('.att-names')?.value || ''; state.data.list = w.querySelector('.att-sel')?.value || ''; state.data.absent = [...w.querySelectorAll('.att-name.absent')].map(b=>b.textContent); }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
-                else if (type === 'ÖVNINGSKLOCKA') { const t=(w.querySelector('.pclock-digital')?.textContent||'03:00').split(':'); let dh=parseInt(t[0])||12; state.data.h = (dh%12); state.data.m = parseInt(t[1])||0; }
+                else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'ÖVNINGSKLOCKA') { const t=(w.querySelector('.pclock-digital')?.textContent||'03:00').split(':'); state.data.h = (parseInt(t[0])||0)%24; state.data.m = parseInt(t[1])||0; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VECKOSCHEMA') { state.data.days = []; w.querySelectorAll('.week-cell').forEach(c=> state.data.days.push(c.innerHTML)); }
@@ -1167,6 +1254,7 @@
             else if (w.type === 'GREJ OF THE DAY') createGOTD(w);
             else if (w.type === 'KALENDER') createCalendarWidget(w);
             else if (w.type === 'LUNCH') createLunchWidget(w);
+            else if (w.type === 'KORSORD') createCrossword(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -1201,7 +1289,7 @@
         
         inner.appendChild(body); widget.appendChild(header); widget.appendChild(inner);
         const resizer = document.createElement('div'); resizer.className = 'widget-resizer'; widget.appendChild(resizer);
-        getActiveCanvasV6().appendChild(widget); makeDraggable(widget, header); makeResizable(widget, resizer);
+        getActiveCanvasV6().appendChild(widget); makeDraggable(widget, header); makeBodyDraggable(widget, inner); makeResizable(widget, resizer);
         
         header.querySelector('.widget-close-icon').onclick = (e) => { e.stopPropagation(); customConfirm("Vill du stänga rutan?", () => { widget.remove(); saveBoardState(); }); };
         header.querySelector('.btn-min').onclick = (e) => { e.stopPropagation(); const m = body.style.display === 'none'; body.style.display = m ? 'flex' : 'none'; widget.dataset.minimized = m ? 'false' : 'true'; saveBoardState(); };
@@ -1223,6 +1311,42 @@
             const move = (ev) => { ev.preventDefault(); p1=p3-ev.clientX; p2=p4-ev.clientY; p3=ev.clientX; p4=ev.clientY; el.style.top = Math.max(40, el.offsetTop-p2)+"px"; el.style.left = (el.offsetLeft-p1)+"px"; };
             const up = () => { h.removeEventListener('pointermove',move); h.removeEventListener('pointerup',up); h.removeEventListener('pointercancel',up); saveBoardState(); };
             h.addEventListener('pointermove',move); h.addEventListener('pointerup',up); h.addEventListener('pointercancel',up);
+        });
+    }
+
+    // Gör hela widgeten flyttbar: dra från valfri tom yta på widgeten (inte på knappar/fält/klockvisare).
+    // En liten rörelsetröskel gör att vanliga klick fortfarande fungerar.
+    function makeBodyDraggable(el, inner){
+        inner.addEventListener('pointerdown', (e) => {
+            if(el.classList.contains('locked')) return;
+            if(typeof presentationLocked !== 'undefined' && presentationLocked) return;
+            if(e.button && e.button !== 0) return;
+            const t = e.target;
+            // Element med egen interaktion – starta INTE flytt där
+            if(t.closest && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], canvas, .pclock-face, .real-clock-face, .analog-clock-face, .hand, .schedule-color-strip, .widget-resizer, .widget-controls')) return;
+            const startX = e.clientX, startY = e.clientY;
+            const origLeft = el.offsetLeft, origTop = el.offsetTop;
+            let dragging = false;
+            const move = (ev) => {
+                const dx = ev.clientX - startX, dy = ev.clientY - startY;
+                if(!dragging){
+                    if(Math.abs(dx) + Math.abs(dy) < 5) return;   // tröskel: liten rörelse = klick
+                    dragging = true; el.style.zIndex = ++topZ;
+                    try { inner.setPointerCapture(e.pointerId); } catch(_){}
+                }
+                ev.preventDefault();
+                el.style.left = (origLeft + dx) + 'px';
+                el.style.top = Math.max(40, origTop + dy) + 'px';
+            };
+            const up = () => {
+                inner.removeEventListener('pointermove', move);
+                inner.removeEventListener('pointerup', up);
+                inner.removeEventListener('pointercancel', up);
+                if(dragging) saveBoardState();
+            };
+            inner.addEventListener('pointermove', move);
+            inner.addEventListener('pointerup', up);
+            inner.addEventListener('pointercancel', up);
         });
     }
     function makeResizable(el, r) {
@@ -1625,11 +1749,12 @@
         const cf=wrap.querySelector('.pclock-face'), hh=wrap.querySelector('.pclock-hh'), mh=wrap.querySelector('.pclock-mh'), dig=wrap.querySelector('.pclock-digital');
         for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
         let hourVal=h0||0, minuteVal=m0||0;
-        const render=()=>{ mh.style.transform=`rotate(${minuteVal*6}deg)`; hh.style.transform=`rotate(${((hourVal%12)+minuteVal/60)*30}deg)`; const dh=(hourVal%12)===0?12:(hourVal%12); dig.textContent=String(dh).padStart(2,'0')+':'+String(minuteVal).padStart(2,'0'); };
+        const render=()=>{ mh.style.transform=`rotate(${minuteVal*6}deg)`; hh.style.transform=`rotate(${((hourVal%12)+minuteVal/60)*30}deg)`; dig.textContent=String(hourVal%24).padStart(2,'0')+':'+String(minuteVal).padStart(2,'0'); };
+        dig.style.cursor='pointer'; dig.title='Klicka för fm/em (+12 tim)'; dig.addEventListener('click',(e)=>{ e.stopPropagation(); hourVal=(hourVal+12)%24; render(); if(onChange)onChange(); });
         render();
         let prevMin=minuteVal;
         const angleAt=(e)=>{ const r=cf.getBoundingClientRect(); const a=Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))*180/Math.PI+90; return a<0?a+360:a; };
-        const startDrag=(hand)=>(e)=>{ e.preventDefault(); e.stopPropagation(); try{cf.setPointerCapture(e.pointerId);}catch(_){}; prevMin=minuteVal; const move=(ev)=>{ ev.preventDefault(); const a=angleAt(ev); if(hand==='minute'){ const nm=Math.round(a/6)%60; if(prevMin>=45&&nm<=15)hourVal=(hourVal+1)%12; else if(prevMin<=15&&nm>=45)hourVal=(hourVal+11)%12; minuteVal=nm; prevMin=nm; } else { hourVal=Math.round(a/30)%12; } render(); }; const up=()=>{ cf.removeEventListener('pointermove',move); cf.removeEventListener('pointerup',up); cf.removeEventListener('pointercancel',up); if(onChange)onChange(); }; cf.addEventListener('pointermove',move); cf.addEventListener('pointerup',up); cf.addEventListener('pointercancel',up); };
+        const startDrag=(hand)=>(e)=>{ e.preventDefault(); e.stopPropagation(); try{cf.setPointerCapture(e.pointerId);}catch(_){}; prevMin=minuteVal; const move=(ev)=>{ ev.preventDefault(); const a=angleAt(ev); if(hand==='minute'){ const nm=Math.round(a/6)%60; if(prevMin>=45&&nm<=15)hourVal=(hourVal+1)%24; else if(prevMin<=15&&nm>=45)hourVal=(hourVal+23)%24; minuteVal=nm; prevMin=nm; } else { const half=(hourVal%24)>=12?12:0; hourVal=half+(Math.round(a/30)%12); } render(); }; const up=()=>{ cf.removeEventListener('pointermove',move); cf.removeEventListener('pointerup',up); cf.removeEventListener('pointercancel',up); if(onChange)onChange(); }; cf.addEventListener('pointermove',move); cf.addEventListener('pointerup',up); cf.addEventListener('pointercancel',up); };
         hh.addEventListener('pointerdown', startDrag('hour'));
         mh.addEventListener('pointerdown', startDrag('minute'));
         cf.addEventListener('pointerdown',(e)=>{ if(e.target===hh||e.target===mh)return; startDrag('minute')(e); });
@@ -1650,7 +1775,9 @@
         const fr = document.createElement('div'); fr.className='lesson-footer-row';
         const la = document.createElement('div'); la.className='lesson-link-area'; const li = document.createElement('input'); li.className='lesson-link-input'; li.placeholder='Klistra in länk...'; if(config&&config.data)li.value=config.data.url||''; const lb=document.createElement('button'); lb.className='lesson-link-btn'; lb.innerText='🔗 Öppna'; lb.onclick=()=>{let u=li.value.trim();if(u){if(!u.startsWith('http'))u='https://'+u;window.open(u,'LPopup','width=800,height=600,resizable=yes');}}; la.appendChild(li); la.appendChild(lb);
         const tw = document.createElement('div'); tw.className='lesson-timer-wrap'; const tin=document.createElement('input'); tin.type='number'; tin.className='lesson-timer-input'; tin.value=config&&config.data?config.data.tMin:'10'; const tb=document.createElement('button'); tb.className='lesson-timer-btn'; tb.innerText='Start';
-        const pb = document.createElement('div'); pb.className='lesson-timer-progress-bg'; pb.style.display='none'; const pf = document.createElement('div'); pf.className='lesson-timer-progress-fill'; const pt = document.createElement('div'); pt.className='lesson-timer-text'; pb.appendChild(pf); pb.appendChild(pt); tw.appendChild(tin); tw.appendChild(tb); tw.appendChild(pb); fr.appendChild(la); fr.appendChild(tw); body.appendChild(tr); body.appendChild(gr); body.appendChild(cr); body.appendChild(fr);
+        const pb = document.createElement('div'); pb.className='lesson-timer-progress-bg'; pb.style.display='none'; const pf = document.createElement('div'); pf.className='lesson-timer-progress-fill'; const pt = document.createElement('div'); pt.className='lesson-timer-text'; pb.appendChild(pf); pb.appendChild(pt); tw.appendChild(tin); tw.appendChild(tb); tw.appendChild(pb);
+        const nowClock=document.createElement('div'); nowClock.className='lesson-nowclock'; const updNow=()=>{ nowClock.textContent=new Date().toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',hour12:false}); }; updNow(); const nowTimer=setInterval(()=>{ if(!document.body.contains(nowClock)){ clearInterval(nowTimer); return; } updNow(); },1000);
+        fr.appendChild(la); fr.appendChild(nowClock); fr.appendChild(tw); body.appendChild(tr); body.appendChild(gr); body.appendChild(cr); body.appendChild(fr);
         let lT=null, lTot=0, lLeft=0;
         tb.onclick=()=>{
             if(lT){ clearInterval(lT); lT=null; tb.innerText='Start'; tin.style.display='block'; pb.style.display='none'; }
@@ -2245,7 +2372,7 @@
         const body=createWidget('KLOCKA & DATUM',220,'clock-widget',config); body.innerHTML=`<div class='time-display'>00:00</div><div class='real-clock-face'><div class='hand hour'></div><div class='hand minute'></div><div class='hand second'></div></div><div class='date-display'></div>`; const td=body.children[0], cf=body.children[1], dd=body.children[2], hh=cf.children[0], mh=cf.children[1], sh=cf.children[2];
         // Timstreck (12 grova) + minutstreck (60 tunna), 12/3/6/9 extra tydliga
         for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
-        setInterval(()=>{ const now=new Date(); td.innerText=now.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'}); dd.innerText=now.toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'}); sh.style.transform=`rotate(${(now.getSeconds()/60)*360}deg)`; mh.style.transform=`rotate(${(now.getMinutes()/60)*360}deg)`; hh.style.transform=`rotate(${(now.getHours()%12/12)*360}deg)`; },100);
+        setInterval(()=>{ const now=new Date(); td.innerText=now.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',hour12:false}); dd.innerText=now.toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'}); sh.style.transform=`rotate(${(now.getSeconds()/60)*360}deg)`; mh.style.transform=`rotate(${(now.getMinutes()/60)*360}deg)`; hh.style.transform=`rotate(${(now.getHours()%12/12)*360}deg)`; },100);
     }
 
     // ---- ÖVNINGSKLOCKA (vrid visarna, digital tid följer med) – PNG + skalbar ----
@@ -2262,10 +2389,11 @@
         const render = ()=>{
             mh.style.transform = `rotate(${minuteVal*6}deg)`;
             hh.style.transform = `rotate(${((hourVal%12)+minuteVal/60)*30}deg)`;
-            const dh = (hourVal%12)===0 ? 12 : (hourVal%12);
-            dig.textContent = String(dh).padStart(2,'0')+':'+String(minuteVal).padStart(2,'0');
+            dig.textContent = String(hourVal%24).padStart(2,'0')+':'+String(minuteVal).padStart(2,'0');   // 24-timmarsformat
         };
         render();
+        dig.style.cursor='pointer'; dig.title='Klicka för fm/em (+12 tim)';
+        dig.addEventListener('click',(e)=>{ e.stopPropagation(); hourVal=(hourVal+12)%24; render(); saveBoardState(); });
         let prevMin = minuteVal;
         const angleAt = (e)=>{ const r=cf.getBoundingClientRect(); const a=Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))*180/Math.PI + 90; return (a<0)?a+360:a; };
         const startDrag = (hand)=> (e)=>{
@@ -2277,11 +2405,12 @@
                 const a = angleAt(ev);
                 if(hand==='minute'){
                     const nm = Math.round(a/6)%60;
-                    if(prevMin>=45 && nm<=15) hourVal=(hourVal+1)%12;       // passerade 12 medurs → +1 tim
-                    else if(prevMin<=15 && nm>=45) hourVal=(hourVal+11)%12;  // moturs → -1 tim
+                    if(prevMin>=45 && nm<=15) hourVal=(hourVal+1)%24;       // passerade 12 medurs → +1 tim
+                    else if(prevMin<=15 && nm>=45) hourVal=(hourVal+23)%24;  // moturs → -1 tim
                     minuteVal = nm; prevMin = nm;
                 } else {
-                    hourVal = Math.round(a/30)%12;
+                    const half = (hourVal%24)>=12 ? 12 : 0;                 // behåll fm/em vid dragning av timvisaren
+                    hourVal = half + (Math.round(a/30)%12);
                 }
                 render();
             };
@@ -2338,6 +2467,14 @@
         const stars=(n,w,h,seed,color)=>{ const r=det(seed); let o=''; for(let i=0;i<n;i++){ o+=`<circle cx='${(r()*w)|0}' cy='${(r()*h)|0}' r='${(r()*1.8+0.5).toFixed(1)}' fill='${color}' opacity='${(r()*0.6+0.3).toFixed(2)}'/>`; } return o; };
         const trees=()=>{ let o=''; const xs=[120,300,520,760,980,1180,1420]; xs.forEach((x,i)=>{ const y=815-(i%2)*8; o+=`<rect x='${x-9}' y='${y}' width='18' height='42' fill='#9c6b3f'/><polygon points='${x},${y-118} ${x-46},${y} ${x+46},${y}' fill='#7bc47f'/><polygon points='${x},${y-150} ${x-36},${y-58} ${x+36},${y-58}' fill='#8fd093'/>`; }); return o; };
         const flakes=()=>{ const r=det(31); let o=''; for(let i=0;i<55;i++){ o+=`<text x='${(r()*1600)|0}' y='${(r()*640)|0}' font-size='${(r()*12+7)|0}' fill='#bcdcf5' opacity='${(r()*0.6+0.3).toFixed(2)}'>❄</text>`; } return o; };
+        const clouds=(seed)=>{ const r=det(seed); let o=''; for(let i=0;i<5;i++){ const x=(r()*1500)|0, y=(r()*200+40)|0, sc=(r()*0.6+0.7); o+=`<g transform='translate(${x},${y}) scale(${sc.toFixed(2)})' fill='#ffffff' opacity='0.85'><ellipse cx='0' cy='0' rx='55' ry='30'/><ellipse cx='45' cy='8' rx='45' ry='26'/><ellipse cx='-45' cy='8' rx='45' ry='24'/></g>`; } return o; };
+        const scatterFlowers=(seed,y0,y1,n)=>{ const r=det(seed); const cols=['#ff6b6b','#ffd43b','#ff8cc6','#7048e8','#ffffff','#ff922b']; let o=''; for(let i=0;i<n;i++){ const x=(r()*1600)|0, y=(y0+r()*(y1-y0))|0, c=cols[(r()*cols.length)|0], sc=(r()*0.5+0.6); o+=`<g transform='translate(${x},${y}) scale(${sc.toFixed(2)})'><rect x='-1.5' y='0' width='3' height='20' fill='#3a9d3a'/><g fill='${c}'><circle cx='0' cy='-4' r='5'/><circle cx='5' cy='0' r='5'/><circle cx='-5' cy='0' r='5'/><circle cx='0' cy='4' r='5'/></g><circle cx='0' cy='0' r='3' fill='#ffd43b'/></g>`; } return o; };
+        const leaves=(seed)=>{ const r=det(seed); const cols=['#e8590c','#f08c00','#c92a2a','#b8860b','#d9480f']; let o=''; for(let i=0;i<42;i++){ const x=(r()*1600)|0, y=(r()*840)|0, c=cols[(r()*cols.length)|0], sc=(r()*0.7+0.6), rot=(r()*360)|0; o+=`<g transform='translate(${x},${y}) scale(${sc.toFixed(2)}) rotate(${rot})'><path d='M0 -9 C 7 -6 7 6 0 9 C -7 6 -7 -6 0 -9 Z' fill='${c}'/><line x1='0' y1='-9' x2='0' y2='9' stroke='#7a3b12' stroke-width='1'/></g>`; } return o; };
+        const eggs=()=>{ const cols=['#ff8cc6','#74c0fc','#ffd43b','#63e6be','#b197fc','#ffa94d','#ff6b6b']; let o=''; const xs=[110,250,395,545,700,860,1020,1180,1340,1490]; xs.forEach((x,i)=>{ const c=cols[i%cols.length], y=805-((i%2)*10); o+=`<g transform='translate(${x},${y})'><ellipse cx='0' cy='0' rx='30' ry='40' fill='${c}'/><path d='M-30 -6 Q 0 -16 30 -6' stroke='#ffffff' stroke-width='5' fill='none' opacity='0.85'/><path d='M-30 12 Q 0 2 30 12' stroke='#ffffff' stroke-width='5' fill='none' opacity='0.85'/><circle cx='-11' cy='-18' r='4' fill='#ffffff' opacity='0.7'/></g>`; }); return o; };
+        const xmasTrees=()=>{ let o=''; const xs=[180,440,780,1080,1380]; xs.forEach((x,i)=>{ const y=770; o+=`<rect x='${x-10}' y='${y}' width='20' height='42' fill='#8a5a2b'/><polygon points='${x},${y-150} ${x-56},${y} ${x+56},${y}' fill='#2f9e44'/><polygon points='${x},${y-182} ${x-44},${y-72} ${x+44},${y-72}' fill='#40c057'/><circle cx='${x-22}' cy='${y-42}' r='7' fill='#ff6b6b'/><circle cx='${x+20}' cy='${y-74}' r='7' fill='#4dabf7'/><circle cx='${x+4}' cy='${y-112}' r='7' fill='#ffd43b'/><polygon points='${x},${y-200} ${x+5},${y-189} ${x+16},${y-188} ${x+8},${y-180} ${x+11},${y-169} ${x},${y-176} ${x-11},${y-169} ${x-8},${y-180} ${x-16},${y-188} ${x-5},${y-189}' fill='#ffe14d'/>`; }); return o; };
+        const pumpkins=()=>{ let o=''; const xs=[150,360,590,1010,1250,1460]; xs.forEach((x,i)=>{ const y=820, sc=(i%2?1.15:0.92); o+=`<g transform='translate(${x},${y}) scale(${sc})'><ellipse cx='0' cy='0' rx='48' ry='40' fill='#ff922b'/><ellipse cx='-24' cy='0' rx='18' ry='38' fill='#f76707' opacity='0.55'/><ellipse cx='24' cy='0' rx='18' ry='38' fill='#f76707' opacity='0.55'/><rect x='-5' y='-48' width='10' height='15' fill='#2f9e44'/><polygon points='-22,-8 -6,-8 -14,6' fill='#3a1d00'/><polygon points='22,-8 6,-8 14,6' fill='#3a1d00'/><path d='M-24 16 L -14 8 L -5 16 L 4 8 L 13 16 L 22 8 L 26 16' stroke='#3a1d00' stroke-width='5' fill='none'/></g>`; }); return o; };
+        const bats=(seed)=>{ const r=det(seed); let o=''; for(let i=0;i<11;i++){ const x=(r()*1400+90)|0, y=(r()*280+50)|0, sc=(r()*0.6+0.5); o+=`<g transform='translate(${x},${y}) scale(${sc.toFixed(2)})' fill='#1a1030'><path d='M0 0 C -10 -12 -22 -12 -30 -4 C -24 -6 -18 -2 -14 2 C -8 -4 -4 -2 0 3 C 4 -2 8 -4 14 2 C 18 -2 24 -6 30 -4 C 22 -12 10 -12 0 0 Z'/></g>`; } return o; };
+        const mtns=()=>{ let o=''; o+=`<polygon points='0,560 380,255 760,560' fill='#9db8cf'/><polygon points='520,560 980,220 1440,560' fill='#89a6c1'/><polygon points='1030,560 1400,300 1600,520 1600,560' fill='#a7c0d6'/>`; o+=`<polygon points='980,220 930,290 1030,290' fill='#ffffff'/><polygon points='380,255 338,315 422,315' fill='#ffffff'/>`; return o; };
         return [
             { cl:'theme-img-space', name:'🚀 Rymden',
               svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><radialGradient id='s' cx='28%' cy='24%' r='100%'><stop offset='0%' stop-color='#22335c'/><stop offset='60%' stop-color='#101a33'/><stop offset='100%' stop-color='#070b16'/></radialGradient></defs><rect width='1600' height='900' fill='url(#s)'/>${stars(150,1600,900,7,'#ffffff')}<circle cx='1285' cy='205' r='95' fill='#cdd6f4'/><circle cx='1258' cy='185' r='95' fill='#101a33' opacity='0.16'/><circle cx='1305' cy='235' r='13' fill='#9aa6d6' opacity='0.5'/><circle cx='1252' cy='232' r='8' fill='#9aa6d6' opacity='0.5'/></svg>` },
@@ -2348,7 +2485,25 @@
             { cl:'theme-img-winter', name:'❄️ Vinter',
               svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='w' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#dff1ff'/><stop offset='100%' stop-color='#f4fbff'/></linearGradient></defs><rect width='1600' height='900' fill='url(#w)'/>${flakes()}<path d='M0 710 Q 380 645 760 705 T 1600 695 V900 H0 Z' fill='#ffffff' opacity='0.9'/><path d='M0 805 Q 420 755 820 805 T 1600 795 V900 H0 Z' fill='#eaf6ff'/></svg>` },
             { cl:'theme-img-sunset', name:'🌅 Solnedgång',
-              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='su' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#ffd9a0'/><stop offset='45%' stop-color='#ff9e6d'/><stop offset='100%' stop-color='#e96a8b'/></linearGradient></defs><rect width='1600' height='900' fill='url(#su)'/><circle cx='800' cy='430' r='150' fill='#fff2c2' opacity='0.9'/><path d='M0 770 Q 400 720 800 760 T 1600 760 V900 H0 Z' fill='#7a3b5a' opacity='0.5'/><path d='M0 820 Q 400 790 800 815 T 1600 815 V900 H0 Z' fill='#54293f' opacity='0.55'/></svg>` }
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='su' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#ffd9a0'/><stop offset='45%' stop-color='#ff9e6d'/><stop offset='100%' stop-color='#e96a8b'/></linearGradient></defs><rect width='1600' height='900' fill='url(#su)'/><circle cx='800' cy='430' r='150' fill='#fff2c2' opacity='0.9'/><path d='M0 770 Q 400 720 800 760 T 1600 760 V900 H0 Z' fill='#7a3b5a' opacity='0.5'/><path d='M0 820 Q 400 790 800 815 T 1600 815 V900 H0 Z' fill='#54293f' opacity='0.55'/></svg>` },
+            { cl:'theme-img-spring', name:'\U0001F338 Vår',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='vr' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#d6f0ff'/><stop offset='55%' stop-color='#eefbef'/><stop offset='100%' stop-color='#cdeeb8'/></linearGradient></defs><rect width='1600' height='900' fill='url(#vr)'/><circle cx='235' cy='170' r='58' fill='#fff2b0' opacity='0.9'/>${clouds(11)}<path d='M0 720 Q 400 665 800 720 T 1600 715 V900 H0 Z' fill='#bfe6a0'/>${scatterFlowers(5,735,865,28)}</svg>` },
+            { cl:'theme-img-summer', name:'☀️ Sommar',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='sm' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#67bff0'/><stop offset='58%' stop-color='#bfe8ff'/><stop offset='100%' stop-color='#8fd35f'/></linearGradient></defs><rect width='1600' height='900' fill='url(#sm)'/><g stroke='#ffd43b' stroke-width='9' stroke-linecap='round'><line x1='1330' y1='60' x2='1330' y2='110'/><line x1='1330' y1='250' x2='1330' y2='300'/><line x1='1200' y1='180' x2='1250' y2='180'/><line x1='1410' y1='180' x2='1460' y2='180'/><line x1='1240' y1='90' x2='1275' y2='125'/><line x1='1385' y1='235' x2='1420' y2='270'/><line x1='1240' y1='270' x2='1275' y2='235'/><line x1='1385' y1='125' x2='1420' y2='90'/></g><circle cx='1330' cy='180' r='72' fill='#ffe14d'/>${clouds(17)}<path d='M0 745 Q 500 690 1000 745 T 1600 738 V900 H0 Z' fill='#83cf59'/></svg>` },
+            { cl:'theme-img-autumn', name:'\U0001F342 Höst',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='ht' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#ffe7c4'/><stop offset='55%' stop-color='#ffd9a0'/><stop offset='100%' stop-color='#e7ad6a'/></linearGradient></defs><rect width='1600' height='900' fill='url(#ht)'/><circle cx='300' cy='180' r='60' fill='#ffd98a' opacity='0.8'/><path d='M0 730 Q 420 675 840 730 T 1600 725 V900 H0 Z' fill='#cf9a52'/>${leaves(9)}</svg>` },
+            { cl:'theme-img-easter', name:'\U0001F423 Påsk',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='pk' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#fff8d9'/><stop offset='60%' stop-color='#eefae0'/><stop offset='100%' stop-color='#cdeab0'/></linearGradient></defs><rect width='1600' height='900' fill='url(#pk)'/><circle cx='250' cy='165' r='56' fill='#fff0a6' opacity='0.9'/>${clouds(29)}<path d='M0 740 Q 420 695 840 740 T 1600 735 V900 H0 Z' fill='#bfe08a'/>${eggs()}</svg>` },
+            { cl:'theme-img-christmas', name:'\U0001F384 Jul',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='jl' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bcdcff'/><stop offset='100%' stop-color='#eef6ff'/></linearGradient></defs><rect width='1600' height='900' fill='url(#jl)'/>${flakes()}<path d='M0 770 Q 400 720 800 770 T 1600 765 V900 H0 Z' fill='#ffffff'/><path d='M0 820 Q 420 780 820 820 T 1600 815 V900 H0 Z' fill='#eaf4ff'/>${xmasTrees()}</svg>` },
+            { cl:'theme-img-halloween', name:'\U0001F383 Halloween',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='hw' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#2c1b4d'/><stop offset='55%' stop-color='#5b3a8a'/><stop offset='100%' stop-color='#e07b2e'/></linearGradient></defs><rect width='1600' height='900' fill='url(#hw)'/><circle cx='1280' cy='190' r='90' fill='#ffe9a8'/><circle cx='1248' cy='170' r='90' fill='#5b3a8a' opacity='0.25'/>${stars(70,1600,500,13,'#fff4c2')}${bats(21)}<path d='M0 720 Q 400 670 800 715 T 1600 705 V900 H0 Z' fill='#241436'/>${pumpkins()}</svg>` },
+            { cl:'theme-img-midsummer', name:'\U0001F33C Midsommar',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='ms' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#a9def7'/><stop offset='55%' stop-color='#e2f4ff'/><stop offset='100%' stop-color='#a6dd6b'/></linearGradient></defs><rect width='1600' height='900' fill='url(#ms)'/><circle cx='250' cy='160' r='58' fill='#fff2b0' opacity='0.9'/>${clouds(37)}<path d='M0 700 Q 400 650 800 700 T 1600 695 V900 H0 Z' fill='#8fd35f'/><g><rect x='792' y='250' width='16' height='470' rx='6' fill='#3a9d3a'/><rect x='648' y='300' width='304' height='16' rx='8' fill='#3a9d3a'/><circle cx='700' cy='386' r='42' fill='none' stroke='#2f9e44' stroke-width='12'/><circle cx='900' cy='386' r='42' fill='none' stroke='#2f9e44' stroke-width='12'/><circle cx='800' cy='240' r='16' fill='#ffd43b'/><g fill='#ff6b6b'><circle cx='670' cy='300' r='7'/><circle cx='930' cy='300' r='7'/><circle cx='700' cy='344' r='6'/><circle cx='900' cy='344' r='6'/></g></g>${scatterFlowers(41,720,865,30)}</svg>` },
+            { cl:'theme-img-mountains', name:'⛰️ Berg',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='bgm' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe3ff'/><stop offset='100%' stop-color='#eaf6ff'/></linearGradient></defs><rect width='1600' height='900' fill='url(#bgm)'/><circle cx='1320' cy='165' r='60' fill='#fff2b8' opacity='0.9'/>${mtns()}<path d='M0 560 H1600 V900 H0 Z' fill='#dff0e4'/><path d='M0 560 Q 400 612 800 572 T 1600 578 V640 H0 Z' fill='#bfe0c6'/></svg>` },
+            { cl:'theme-img-meadow', name:'\U0001F337 Blomsteräng',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='mea' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe6ff'/><stop offset='52%' stop-color='#eafbe8'/><stop offset='100%' stop-color='#b6e389'/></linearGradient></defs><rect width='1600' height='900' fill='url(#mea)'/><circle cx='260' cy='160' r='58' fill='#fff2b0' opacity='0.9'/>${clouds(23)}<path d='M0 700 Q 480 650 980 700 T 1600 695 V900 H0 Z' fill='#9fd968'/>${scatterFlowers(13,700,875,44)}</svg>` }
         ];
     })();
     function injectBackgroundThemeCSS(){ if(document.getElementById('img-theme-style')) return; const st=document.createElement('style'); st.id='img-theme-style'; st.textContent = IMG_THEMES.map(t=>`#cb-app-wrapper.${t.cl} .canvas-page{background-image:url("data:image/svg+xml,${encodeURIComponent(t.svg)}") !important;background-size:cover !important;background-position:center !important;background-repeat:no-repeat !important;}`).join('\n'); document.head.appendChild(st); }
@@ -2511,6 +2666,278 @@
 
     const NAMEDAYS={"01-01":"","01-02":"Svea","01-03":"Alfred, Alfrida","01-04":"Rut","01-05":"Hanna, Hannele","01-06":"Kasper, Melker, Baltsar","01-07":"August, Augusta","01-08":"Erland","01-09":"Gunnar, Gunder","01-10":"Sigurd, Sigbritt","01-11":"Jan, Jannike","01-12":"Frideborg, Fridolf","01-13":"Knut","01-14":"Felix, Felicia","01-15":"Laura, Lorentz","01-16":"Hjalmar, Helmer","01-17":"Anton, Tony","01-18":"Hilda, Hildur","01-19":"Henrik","01-20":"Fabian, Sebastian","01-21":"Agnes, Agneta","01-22":"Vincent, Viktor","01-23":"Frej, Freja","01-24":"Erika","01-25":"Paul, Pål","01-26":"Bodil, Boel","01-27":"Göte, Göta","01-28":"Karl, Karla","01-29":"Diana","01-30":"Gunilla, Gunhild","01-31":"Ivar, Joar","02-01":"Max, Maximilian","02-02":"","02-03":"Disa, Hjördis","02-04":"Ansgar, Anselm","02-05":"Agata, Agda","02-06":"Dorotea, Doris","02-07":"Rikard, Dick","02-08":"Berta, Bert","02-09":"Fanny, Franciska","02-10":"Iris","02-11":"Yngve, Inge","02-12":"Evelina, Evy","02-13":"Agne, Ove","02-14":"Valentin","02-15":"Sigfrid","02-16":"Julia, Julius","02-17":"Alexandra, Sandra","02-18":"Frida, Fritiof","02-19":"Gabriella, Ella","02-20":"Vivianne","02-21":"Hilding","02-22":"Pia","02-23":"Torsten, Torun","02-24":"Mattias, Mats","02-25":"Sigvard, Sivert","02-26":"Torgny, Torkel","02-27":"Lage","02-28":"Maria","02-29":"","03-01":"Albin, Elvira","03-02":"Ernst, Erna","03-03":"Gunborg, Gunvor","03-04":"Adrian, Adriana","03-05":"Tora, Tove","03-06":"Ebba, Ebbe","03-07":"Camilla","03-08":"Siv","03-09":"Torbjörn, Torleif","03-10":"Edla, Ada","03-11":"Edvin, Egon","03-12":"Viktoria","03-13":"Greger","03-14":"Matilda, Maud","03-15":"Kristoffer, Christel","03-16":"Herbert, Gilbert","03-17":"Gertrud","03-18":"Edvard, Edmund","03-19":"Josef, Josefina","03-20":"Joakim, Kim","03-21":"Bengt","03-22":"Kennet, Kent","03-23":"Gerda, Gerd","03-24":"Gabriel, Rafael","03-25":"Marie bebådelsedag","03-26":"Emanuel","03-27":"Rudolf, Ralf","03-28":"Malkolm, Morgan","03-29":"Jonas, Jens","03-30":"Holger, Holmfrid","03-31":"Ester","04-01":"Harald, Hervor","04-02":"Gudmund, Ingemund","04-03":"Ferdinand, Nanna","04-04":"Marianne, Marlene","04-05":"Irene, Irja","04-06":"Vilhelm, William","04-07":"Irma, Irmelin","04-08":"Nadja, Tanja","04-09":"Otto, Ottilia","04-10":"Ingvar, Ingvor","04-11":"Ulf, Ylva","04-12":"Liv","04-13":"Artur, Douglas","04-14":"Tiburtius","04-15":"Olivia, Oliver","04-16":"Patrik, Patricia","04-17":"Elias, Elis","04-18":"Valdemar, Volmar","04-19":"Olaus, Ola","04-20":"Amalia, Amelie","04-21":"Anneli, Annika","04-22":"Allan, Glenn","04-23":"Georg, Göran","04-24":"Vega","04-25":"Markus","04-26":"Teresia, Terese","04-27":"Engelbrekt","04-28":"Ture, Tyra","04-29":"Tyko","04-30":"Mariana","05-01":"Valborg","05-02":"Filip, Filippa","05-03":"John, Jane","05-04":"Monika, Mona","05-05":"Gotthard, Erhard","05-06":"Marit, Rita","05-07":"Carina, Carita","05-08":"Åke","05-09":"Reidar, Reidun","05-10":"Esbjörn, Styrbjörn","05-11":"Märta, Märit","05-12":"Charlotta, Lotta","05-13":"Linnea, Linn","05-14":"Halvard, Halvar","05-15":"Sofia, Sonja","05-16":"Ronald, Ronny","05-17":"Rebecka, Ruben","05-18":"Erik","05-19":"Maj, Majken","05-20":"Karolina, Carola","05-21":"Konstantin, Conny","05-22":"Hemming, Henning","05-23":"Desideria, Desirée","05-24":"Ivan, Vanja","05-25":"Urban","05-26":"Vilhelmina, Vilma","05-27":"Beda, Blenda","05-28":"Ingeborg, Borghild","05-29":"Yvonne, Jeanette","05-30":"Vera, Veronika","05-31":"Petronella, Pernilla","06-01":"Gun, Gunnel","06-02":"Rutger, Roger","06-03":"Ingemar, Gudmar","06-04":"Solbritt, Solveig","06-05":"Bo","06-06":"Gustav, Gösta","06-07":"Robert, Robin","06-08":"Eivor, Majvor","06-09":"Börje, Birger","06-10":"Svante, Boris","06-11":"Bertil, Berthold","06-12":"Eskil","06-13":"Aina, Aino","06-14":"Håkan, Hakon","06-15":"Margit, Margot","06-16":"Axel, Axelina","06-17":"Torborg, Torvald","06-18":"Björn, Bjarne","06-19":"Germund, Görel","06-20":"Linda","06-21":"Alf, Alvar","06-22":"Paulina, Paula","06-23":"Adolf, Alice","06-24":"Johannes Döparens dag","06-25":"David, Salomon","06-26":"Rakel, Lea","06-27":"Selma, Fingal","06-28":"Leo","06-29":"Peter, Petra","06-30":"Elof, Leif","07-01":"Aron, Mirjam","07-02":"Rosa, Rosita","07-03":"Aurora","07-04":"Ulrika, Ulla","07-05":"Laila, Ritva","07-06":"Esaias, Jessika","07-07":"Klas","07-08":"Kjell","07-09":"Jörgen, Örjan","07-10":"André, Andrea","07-11":"Eleonora, Ellinor","07-12":"Herman, Hermine","07-13":"Joel, Judit","07-14":"Folke","07-15":"Ragnhild, Ragnvald","07-16":"Reinhold, Reine","07-17":"Bruno","07-18":"Fredrik, Fritz","07-19":"Sara","07-20":"Margareta, Greta","07-21":"Johanna","07-22":"Magdalena, Madeleine","07-23":"Emma","07-24":"Kristina, Kerstin","07-25":"Jakob","07-26":"Jesper","07-27":"Marta","07-28":"Botvid, Seved","07-29":"Olof","07-30":"Algot","07-31":"Helena, Elin","08-01":"Per","08-02":"Karin, Kajsa","08-03":"Tage","08-04":"Arne, Arnold","08-05":"Ulrik, Alrik","08-06":"Alfons, Inez","08-07":"Dennis, Denise","08-08":"Silvia, Sylvia","08-09":"Roland","08-10":"Lars","08-11":"Susanna","08-12":"Klara","08-13":"Kaj","08-14":"Uno","08-15":"Stella, Estelle","08-16":"Brynolf","08-17":"Verner, Valter","08-18":"Ellen, Lena","08-19":"Magnus, Måns","08-20":"Bernhard, Bernt","08-21":"Jon, Jonna","08-22":"Henrietta, Henrika","08-23":"Signe, Signhild","08-24":"Bartolomeus","08-25":"Lovisa, Louise","08-26":"Östen","08-27":"Rolf, Raoul","08-28":"Fatima, Leila","08-29":"Hans, Hampus","08-30":"Albert, Albertina","08-31":"Arvid, Vidar","09-01":"Sam, Samuel","09-02":"Justus, Justina","09-03":"Alfhild, Alva","09-04":"Gisela","09-05":"Adela, Heidi","09-06":"Lilian, Lilly","09-07":"Kevin, Roy","09-08":"Alma, Hulda","09-09":"Anita, Annette","09-10":"Tord, Turid","09-11":"Dagny, Helny","09-12":"Åsa, Åslög","09-13":"Sture","09-14":"Ida","09-15":"Sigrid, Siri","09-16":"Dag, Daga","09-17":"Hildegard, Magnhild","09-18":"Orvar","09-19":"Fredrika","09-20":"Elise, Lisa","09-21":"Matteus","09-22":"Maurits, Moritz","09-23":"Tekla, Tea","09-24":"Gerhard, Gert","09-25":"Tryggve","09-26":"Enar, Einar","09-27":"Dagmar, Rigmor","09-28":"Lennart, Leonard","09-29":"Mikael, Mikaela","09-30":"Helge","10-01":"Ragnar, Ragna","10-02":"Ludvig, Love","10-03":"Evald, Osvald","10-04":"Frans, Frank","10-05":"Bror","10-06":"Jenny, Jennifer","10-07":"Birgitta, Britta","10-08":"Nils","10-09":"Ingrid, Inger","10-10":"Harry, Harriet","10-11":"Erling, Jarl","10-12":"Valfrid, Manfred","10-13":"Berit, Birgit","10-14":"Stellan","10-15":"Hedvig, Hillevi","10-16":"Finn","10-17":"Antonia, Toini","10-18":"Lukas","10-19":"Tore, Tor","10-20":"Sibylla","10-21":"Ursula, Yrsa","10-22":"Marika, Marita","10-23":"Severin, Sören","10-24":"Evert, Eilert","10-25":"Inga, Ingalill","10-26":"Amanda, Rasmus","10-27":"Sabina","10-28":"Simon, Simone","10-29":"Viola","10-30":"Elsa, Isabella","10-31":"Edit, Edgar","11-01":"","11-02":"Tobias","11-03":"Hubert, Hugo","11-04":"Sverker","11-05":"Eugen, Eugenia","11-06":"Gustav Adolf","11-07":"Ingegerd, Ingela","11-08":"Vendela","11-09":"Teodor, Teodora","11-10":"Martin, Martina","11-11":"Mårten","11-12":"Konrad, Kurt","11-13":"Kristian, Krister","11-14":"Emil, Emilia","11-15":"Leopold","11-16":"Vibeke, Viveka","11-17":"Naemi, Naima","11-18":"Lillemor, Moa","11-19":"Elisabet, Lisbet","11-20":"Pontus, Marina","11-21":"Helga, Olga","11-22":"Cecilia, Sissela","11-23":"Klemens","11-24":"Gudrun, Rune","11-25":"Katarina, Katja","11-26":"Linus","11-27":"Astrid, Asta","11-28":"Malte","11-29":"Sune","11-30":"Andreas, Anders","12-01":"Oskar, Ossian","12-02":"Beata, Beatrice","12-03":"Lydia","12-04":"Barbara, Barbro","12-05":"Sven","12-06":"Nikolaus, Niklas","12-07":"Angela, Angelika","12-08":"Virginia","12-09":"Anna","12-10":"Malin, Malena","12-11":"Daniel, Daniela","12-12":"Alexander, Alexis","12-13":"Lucia","12-14":"Sten, Sixten","12-15":"Gottfrid","12-16":"Assar","12-17":"Stig","12-18":"Abraham","12-19":"Isak","12-20":"Israel, Moses","12-21":"Tomas","12-22":"Natanael, Jonatan","12-23":"Adam","12-24":"Eva","12-25":"","12-26":"Stefan, Staffan","12-27":"Johannes, Johan","12-28":"Benjamin","12-29":"Natalia, Natalie","12-30":"Abel, Set","12-31":"Sylvester"};
 
+
+
+    // ---- KORSORD: läraren matar in ord + ledtrådar, korsordet byggs automatiskt ----
+    function buildCrossword(entries){
+        const words = entries
+            .map(e=>({ word:(e.word||'').toUpperCase().replace(/[^A-ZÅÄÖ]/g,''), clue:(e.clue||'').trim() }))
+            .filter(e=>e.word.length>=2);
+        if(!words.length) return null;
+        words.sort((a,b)=>b.word.length-a.word.length);
+        const grid={}; const placed=[]; const key=(r,c)=>r+','+c;
+        function canPlace(word,r,c,dir){
+            for(let i=0;i<word.length;i++){
+                const rr=dir==='A'?r:r+i, cc=dir==='A'?c+i:c;
+                const cur=grid[key(rr,cc)];
+                if(cur){ if(cur!==word[i]) return false; }
+                else {
+                    if(dir==='A'){ if(grid[key(rr-1,cc)]||grid[key(rr+1,cc)]) return false; }
+                    else { if(grid[key(rr,cc-1)]||grid[key(rr,cc+1)]) return false; }
+                }
+            }
+            if(dir==='A'){ if(grid[key(r,c-1)]||grid[key(r,c+word.length)]) return false; }
+            else { if(grid[key(r-1,c)]||grid[key(r+word.length,c)]) return false; }
+            return true;
+        }
+        function countCross(word,r,c,dir){ let n=0; for(let i=0;i<word.length;i++){ const rr=dir==='A'?r:r+i, cc=dir==='A'?c+i:c; if(grid[key(rr,cc)]) n++; } return n; }
+        function place(o,r,c,dir){ for(let i=0;i<o.word.length;i++){ const rr=dir==='A'?r:r+i, cc=dir==='A'?c+i:c; grid[key(rr,cc)]=o.word[i]; } placed.push({word:o.word,clue:o.clue,r:r,c:c,dir:dir}); }
+        place(words[0],0,0,'A');
+        for(let w=1; w<words.length; w++){
+            const o=words[w]; let best=null, bestScore=-1;
+            for(const pl of placed){
+                for(let i=0;i<pl.word.length;i++){
+                    for(let j=0;j<o.word.length;j++){
+                        if(pl.word[i]!==o.word[j]) continue;
+                        const dir = pl.dir==='A'?'D':'A';
+                        let r,c;
+                        if(pl.dir==='A'){ r=pl.r-j; c=pl.c+i; } else { r=pl.r+i; c=pl.c-j; }
+                        if(canPlace(o.word,r,c,dir)){
+                            const sc=countCross(o.word,r,c,dir);
+                            if(sc>bestScore){ bestScore=sc; best={r:r,c:c,dir:dir}; }
+                        }
+                    }
+                }
+            }
+            if(best){ place(o,best.r,best.c,best.dir); }
+            else { let maxR=-1e9; Object.keys(grid).forEach(k=>{ const rr=+k.split(',')[0]; if(rr>maxR)maxR=rr; }); place(o,maxR+2,0,'A'); }
+        }
+        // normalisera till 0,0
+        let minR=1e9,minC=1e9,maxR=-1e9,maxC=-1e9;
+        Object.keys(grid).forEach(k=>{ const p=k.split(',').map(Number); if(p[0]<minR)minR=p[0]; if(p[1]<minC)minC=p[1]; if(p[0]>maxR)maxR=p[0]; if(p[1]>maxC)maxC=p[1]; });
+        placed.forEach(p=>{ p.r-=minR; p.c-=minC; });
+        const rows=maxR-minR+1, cols=maxC-minC+1;
+        // numrera startceller i läsordning
+        const startSet={}; placed.forEach(p=>{ startSet[p.r+','+p.c]=true; });
+        const ordered=Object.keys(startSet).map(k=>{ const p=k.split(',').map(Number); return {r:p[0],c:p[1]}; }).sort((a,b)=> a.r-b.r || a.c-b.c);
+        const numAt={}; ordered.forEach((s,idx)=>{ numAt[s.r+','+s.c]=idx+1; });
+        placed.forEach(p=>{ p.num=numAt[p.r+','+p.c]; });
+        return { placed:placed, rows:rows, cols:cols };
+    }
+
+    function kwEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function printCrossword(lay, title, withFacit){
+        if(!lay) return;
+        const letterAt={}, numAt={};
+        lay.placed.forEach(p=>{ for(let i=0;i<p.word.length;i++){ const r=p.dir==='A'?p.r:p.r+i, c=p.dir==='A'?p.c+i:p.c; letterAt[r+','+c]=p.word[i]; } numAt[p.r+','+p.c]=p.num; });
+        let cells='';
+        for(let r=0;r<lay.rows;r++){ for(let c=0;c<lay.cols;c++){ const k=r+','+c; if(letterAt[k]){ cells+="<div class='pc'>"+(numAt[k]?"<span>"+numAt[k]+"</span>":"")+(withFacit?"<b>"+kwEsc(letterAt[k])+"</b>":"")+"</div>"; } else { cells+="<div class='pb'></div>"; } } }
+        const mk=(dir)=>lay.placed.filter(p=>p.dir===dir).sort((a,b)=>a.num-b.num).map(p=>"<li><b>"+p.num+".</b> "+kwEsc(p.clue||'—')+"</li>").join('');
+        const html="<!doctype html><html lang='sv'><head><meta charset='utf-8'><title>"+kwEsc(title||'Korsord')+"</title><style>"
+            +"body{font-family:Arial,Helvetica,sans-serif;margin:26px;color:#111;}"
+            +"h1{text-align:center;font-size:22px;margin:0 0 20px;}"
+            +".grid{display:grid;grid-template-columns:repeat("+lay.cols+",34px);gap:0;justify-content:center;margin:0 auto 26px;}"
+            +".pc{width:34px;height:34px;border:1.4px solid #111;box-sizing:border-box;position:relative;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;}"
+            +".pc span{position:absolute;top:1px;left:2px;font-size:9px;font-weight:400;}"
+            +".pb{width:34px;height:34px;}"
+            +".clues{display:flex;gap:44px;max-width:700px;margin:0 auto;}"
+            +".clues>div{flex:1;}.clues h2{font-size:15px;margin:0 0 6px;color:#c0392b;}"
+            +".clues ol{list-style:none;padding:0;margin:0;font-size:13px;line-height:1.55;}"
+            +"</style></head><body>"
+            +"<h1>"+kwEsc(title||'Korsord')+(withFacit?' – facit':'')+"</h1>"
+            +"<div class='grid'>"+cells+"</div>"
+            +"<div class='clues'><div><h2>Vågrätt</h2><ol>"+mk('A')+"</ol></div><div><h2>Lodrätt</h2><ol>"+mk('D')+"</ol></div></div>"
+            +"<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body></html>";
+        const w=window.open('','kwprint'+Date.now(),'width=820,height=920');
+        if(!w){ customAlert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.','🖨️'); return; }
+        w.document.open(); w.document.write(html); w.document.close();
+    }
+    function aiKeyStoreName(){ return 'mintavla_aiKey_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
+    function aiKeyGet(){ try{ return localStorage.getItem(aiKeyStoreName()) || ''; }catch(e){ return ''; } }
+    function aiKeySet(k){ try{ localStorage.setItem(aiKeyStoreName(), k); }catch(e){} }
+    async function aiGenerateCrossword(userPrompt, apiKey){
+        const instruction = "Du är en lärarassistent som skapar korsordsord. Returnera ENDAST giltig JSON i formen {\"words\":[{\"word\":\"ORD\",\"clue\":\"kort ledtråd\"}]}. Regler: varje word är ETT enda ord utan mellanslag, bindestreck eller siffror, på svenska, versaler, 2-12 bokstäver. clue är en kort svensk ledtråd anpassad till angiven årskurs. Om ett antal ord anges, försök följa det. Ingen annan text, ingen markdown.";
+        const models = ["gemini-2.0-flash","gemini-1.5-flash-latest","gemini-1.5-flash"];
+        const bodyObj = { contents:[{ parts:[{ text: instruction + "\n\nUppgift: " + userPrompt }] }], generationConfig:{ temperature:0.8, responseMimeType:"application/json" } };
+        let lastErr='';
+        for(const m of models){
+            try{
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(apiKey);
+                const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(bodyObj) });
+                if(!r.ok){ const t=await r.text().catch(()=> ''); if(/API key not valid|API_KEY_INVALID|invalid.*key/i.test(t)) throw new Error('Ogiltig API-nyckel.'); lastErr='Servern svarade ' + r.status; continue; }
+                const data = await r.json();
+                const text = (((data.candidates||[])[0]||{}).content||{}).parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : '';
+                let obj=null; try{ obj=JSON.parse(text); }catch(e){ const mm=(text||'').match(/\{[\s\S]*\}/); if(mm){ try{ obj=JSON.parse(mm[0]); }catch(_){} } }
+                if(!obj){ lastErr='Kunde inte tolka AI-svaret.'; continue; }
+                const arr = obj.words || obj.ord || obj.korsord || [];
+                const words = arr.map(w=>({ word:String(w.word||w.ord||'').toUpperCase().replace(/[^A-ZÅÄÖ]/g,''), clue:String(w.clue||w.ledtrad||w['ledtråd']||'').trim() })).filter(w=>w.word.length>=2);
+                if(words.length) return words;
+                lastErr='AI gav inga användbara ord.';
+            }catch(e){ if(e && e.message==='Ogiltig API-nyckel.') throw e; lastErr=(e&&e.message)||'nätverksfel'; }
+        }
+        throw new Error(lastErr || 'Kunde inte kontakta AI-tjänsten.');
+    }
+    function buildChatPrompt(desc){
+        return desc.trim() + "\n\nSvara ENDAST med orden till korsordet, ett ord per rad, i exakt formatet:\nORD | ledtråd\n\nRegler: varje ORD är ett enda ord utan mellanslag, bindestreck eller siffror, på svenska och med VERSALER. Ledtråden är kort och passar årskursen. Skriv ingen rubrik, ingen numrering och ingen annan text än raderna.";
+    }
+    function parseWordList(text){
+        if(!text) return [];
+        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        if(obj){ const arr=obj.words||obj.ord||obj.korsord; if(Array.isArray(arr)){ const r=arr.map(w=>({ word:String(w.word||w.ord||'').toUpperCase().replace(/[^A-ZÅÄÖ]/g,''), clue:String(w.clue||w.ledtrad||w['ledtråd']||'').trim() })).filter(w=>w.word.length>=2); if(r.length) return r; } }
+        const seps=['|','\t',':','–','—',' - '];
+        const out=[];
+        text.split(/\r?\n/).forEach(raw=>{
+            let l=raw.trim(); if(!l || /^```/.test(l)) return;
+            l=l.replace(/^\s*\d+[\.\)]\s*/,'').replace(/^[-*•]\s*/,'').trim();
+            let idx=-1, used=null;
+            seps.forEach(s=>{ const i=l.indexOf(s); if(i>0 && (idx===-1||i<idx)){ idx=i; used=s; } });
+            let word, clue;
+            if(idx>-1){ word=l.slice(0,idx); clue=l.slice(idx+used.length).trim(); }
+            else { if(/\s/.test(l)) return; word=l; clue=''; }
+            word=word.toUpperCase().replace(/[^A-ZÅÄÖ]/g,'');
+            if(word.length>=2 && word.length<=15) out.push({ word:word, clue:clue });
+        });
+        return out;
+    }
+    function createCrossword(config){
+        if(config===undefined) config=null;
+        const body=createWidget('KORSORD', 460, 'korsord-widget', config);
+        const root=document.createElement('div'); root.className='korsord-root'; body.appendChild(root);
+        let state={ title:'', entries:[], mode:'edit', layout:null, answers:{} };
+        if(config && config.data){ try{ Object.assign(state, config.data); }catch(e){} }
+        if(!Array.isArray(state.entries) || !state.entries.length){
+            state.entries=[{word:'KATT',clue:'Ett djur som spinner'},{word:'HUND',clue:'Människans bästa vän'},{word:'FISK',clue:'Simmar i vattnet'},{word:'HÄST',clue:'Djur man kan rida på'}];
+        }
+        if(!state.answers) state.answers={};
+        let saveTimer=null;
+        const stamp=()=>{ root.dataset.kw=JSON.stringify(state); };
+        const persist=()=>{ stamp(); saveBoardState(); };
+        const persistSoon=()=>{ stamp(); clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveBoardState(),700); };
+
+        function readEditRows(){
+            const rows=[...root.querySelectorAll('.kw-edit-row')];
+            state.entries=rows.map(r=>({ word:r.querySelector('.kw-word').value, clue:r.querySelector('.kw-clue').value })).filter(e=>e.word.trim()||e.clue.trim());
+            const t=root.querySelector('.kw-title-in'); if(t) state.title=t.value;
+        }
+
+        function renderEdit(){
+            root.innerHTML='';
+            const t=document.createElement('input'); t.className='kw-title-in'; t.placeholder='Rubrik (t.ex. Djurkorsord)'; t.value=state.title||''; t.oninput=()=>{ state.title=t.value; persistSoon(); }; root.appendChild(t);
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Skriv ord och ledtrådar – korsordet byggs automatiskt.'; root.appendChild(hint);
+            const list=document.createElement('div'); root.appendChild(list);
+            const addRow=(word,clue)=>{
+                const row=document.createElement('div'); row.className='kw-edit-row';
+                const wi=document.createElement('input'); wi.className='kw-word'; wi.placeholder='ORD'; wi.value=word||''; wi.oninput=()=>{ wi.value=wi.value.toUpperCase(); persistSoon(); };
+                const ci=document.createElement('input'); ci.className='kw-clue'; ci.placeholder='Ledtråd...'; ci.value=clue||''; ci.oninput=persistSoon;
+                const del=document.createElement('button'); del.className='kw-del'; del.innerHTML='✕'; del.onclick=()=>{ row.remove(); readEditRows(); persist(); };
+                row.appendChild(wi); row.appendChild(ci); row.appendChild(del); list.appendChild(row);
+            };
+            state.entries.forEach(e=>addRow(e.word,e.clue));
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const addBtn=document.createElement('button'); addBtn.className='kw-btn kw-btn-ghost'; addBtn.textContent='+ Ord'; addBtn.onclick=()=>{ readEditRows(); addRow('',''); persist(); };
+            const makeBtn=document.createElement('button'); makeBtn.className='kw-btn kw-btn-primary'; makeBtn.textContent='Skapa korsord';
+            makeBtn.onclick=()=>{ readEditRows(); const lay=buildCrossword(state.entries); if(!lay){ customAlert('Lägg till minst ett ord med två eller fler bokstäver.','✏️'); return; } state.layout=lay; state.answers={}; state.mode='play'; render(); persist(); };
+            const aiBtn=document.createElement('button'); aiBtn.className='kw-btn kw-btn-ai'; aiBtn.textContent='✨ Skapa med AI'; aiBtn.onclick=openAiDialog;
+            btns.appendChild(addBtn); btns.appendChild(aiBtn); btns.appendChild(makeBtn); root.appendChild(btns);
+        }
+
+        function renderPlay(){
+            root.innerHTML='';
+            const lay=state.layout; if(!lay){ state.mode='edit'; renderEdit(); return; }
+            if(state.title){ const h=document.createElement('div'); h.className='kw-title'; h.textContent=state.title; root.appendChild(h); }
+            const letterAt={}, numAt={};
+            lay.placed.forEach(p=>{ for(let i=0;i<p.word.length;i++){ const r=p.dir==='A'?p.r:p.r+i, c=p.dir==='A'?p.c+i:p.c; letterAt[r+','+c]=p.word[i]; } numAt[p.r+','+p.c]=p.num; });
+            const wrap=document.createElement('div'); wrap.className='kw-gridwrap';
+            const g=document.createElement('div'); g.className='kw-grid'; g.style.gridTemplateColumns='repeat('+lay.cols+', var(--kw-cell))';
+            const focusCell=(r,c)=>{ const el=g.querySelector('.kw-input[data-k="'+r+','+c+'"]'); if(el){ el.focus(); el.select&&el.select(); return true; } return false; };
+            for(let r=0;r<lay.rows;r++){ for(let c=0;c<lay.cols;c++){
+                const k=r+','+c; const cell=document.createElement('div');
+                if(letterAt[k]){
+                    cell.className='kw-cell';
+                    if(numAt[k]){ const n=document.createElement('span'); n.className='kw-num'; n.textContent=numAt[k]; cell.appendChild(n); }
+                    const inp=document.createElement('input'); inp.className='kw-input'; inp.maxLength=1; inp.dataset.k=k; inp.dataset.ans=letterAt[k]; inp.value=state.answers[k]||'';
+                    inp.oninput=()=>{ inp.value=inp.value.toUpperCase().replace(/[^A-ZÅÄÖ]/g,''); state.answers[k]=inp.value; cell.classList.remove('kw-facit'); if(inp.value) focusCell(r,c+1); persistSoon(); };
+                    cell.appendChild(inp);
+                } else { cell.className='kw-cell kw-blank'; }
+                g.appendChild(cell);
+            }}
+            wrap.appendChild(g); root.appendChild(wrap);
+            // ledtrådar
+            const cl=document.createElement('div'); cl.className='kw-clues';
+            const mkCol=(title,dir)=>{ const col=document.createElement('div'); col.className='kw-clue-col'; const h=document.createElement('h4'); h.textContent=title; col.appendChild(h); const ol=document.createElement('ol'); lay.placed.filter(p=>p.dir===dir).sort((a,b)=>a.num-b.num).forEach(p=>{ const li=document.createElement('li'); li.innerHTML='<b>'+p.num+'.</b> '+(p.clue?p.clue:'—'); ol.appendChild(li); }); col.appendChild(ol); return col; };
+            cl.appendChild(mkCol('Vågrätt','A')); cl.appendChild(mkCol('Lodrätt','D')); root.appendChild(cl);
+            // knappar
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
+            const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut korsordet'; prnt.onclick=()=>printCrossword(state.layout, state.title, false);
+            const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
+            let showing=false;
+            facit.onclick=()=>{ showing=!showing; g.querySelectorAll('.kw-input').forEach(inp=>{ const cell=inp.parentElement; if(showing){ inp.value=inp.dataset.ans; cell.classList.add('kw-facit'); } else { inp.value=state.answers[inp.dataset.k]||''; cell.classList.remove('kw-facit'); } }); facit.textContent=showing?'Dölj facit':'Visa facit'; };
+            const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.answers={}; g.querySelectorAll('.kw-input').forEach(inp=>{ inp.value=''; inp.parentElement.classList.remove('kw-facit'); }); showing=false; facit.textContent='Visa facit'; persist(); };
+            const shuffle=document.createElement('button'); shuffle.className='kw-btn kw-btn-ghost'; shuffle.textContent='🔀 Nytt utseende'; shuffle.onclick=()=>{ const arr=state.entries.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp; } const lay2=buildCrossword(arr); if(lay2){ state.layout=lay2; state.answers={}; render(); persist(); } };
+            const aiBtn2=document.createElement('button'); aiBtn2.className='kw-btn kw-btn-ai'; aiBtn2.textContent='✨ AI'; aiBtn2.title='Skapa nytt korsord med AI'; aiBtn2.onclick=openAiDialog;
+            btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
+        }
+
+        function makeFromWords(words, status, close){
+            const lay=buildCrossword(words); if(!lay){ if(status) status.textContent='⚠️ Hittade inga användbara ord.'; return false; }
+            state.entries=words; state.layout=lay; state.answers={}; state.mode='play';
+            if(close) close(); render(); persist(); return true;
+        }
+        function openAiDialog(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(480px,94vw)'; box.style.maxHeight='88vh'; box.style.overflowY='auto';
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa korsord med AI'; box.appendChild(title);
+            const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv korsordet, t.ex.:\nSkapa ett korsord på 20 ord i ämnet fysik, åk 4, om vattnets kretslopp.'; box.appendChild(ta);
+            const status=document.createElement('div'); status.className='kw-ai-status';
+
+            // ---- Alternativ 1: via ChatGPT, ingen nyckel ----
+            const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
+            const row1=document.createElement('div'); row1.className='kw-btnrow'; row1.style.margin='0 0 8px'; row1.style.justifyContent='flex-start';
+            const copyBtn=document.createElement('button'); copyBtn.className='kw-btn kw-btn-ai'; copyBtn.textContent='📋 Kopiera fråga & öppna Gemini';
+            copyBtn.onclick=()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; ta.focus(); return; } const full=buildChatPrompt(d);
+                const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
+                try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
+                catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
+                window.open('https://gemini.google.com/app','_blank','noopener'); };
+            row1.appendChild(copyBtn); box.appendChild(row1);
+            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – korsordet skapas automatiskt...'; box.appendChild(pasteTa);
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=2){ makeFromWords(words, status, close); } },60); });
+            const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
+            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Skapa korsord från svaret';
+            makePasteBtn.onclick=()=>{ const words=parseWordList(pasteTa.value); if(words.length<1){ status.textContent='⚠️ Hittade inga ord i svaret. Kolla att det står ett ord + ledtråd per rad.'; return; } makeFromWords(words, status, close); };
+            row1b.appendChild(makePasteBtn); box.appendChild(row1b);
+
+            // ---- Alternativ 2: automatiskt med API-nyckel (valfritt) ----
+            const orEl=document.createElement('div'); orEl.className='kw-ai-or'; orEl.textContent='— ELLER —'; box.appendChild(orEl);
+            const advBtn=document.createElement('button'); advBtn.className='kw-ai-adv'; advBtn.textContent='Alternativ 2 – ett klick varje gång (engångsnyckel, ~30 sek) ▾'; box.appendChild(advBtn);
+            const adv=document.createElement('div'); adv.style.display='none'; box.appendChild(adv);
+            advBtn.onclick=()=>{ adv.style.display = adv.style.display==='none'?'block':'none'; };
+            const keyWrap=document.createElement('div'); adv.appendChild(keyWrap);
+            const keyInp=document.createElement('input'); keyInp.className='kw-ai-key'; keyInp.type='password'; keyInp.placeholder='Klistra in din Google AI (Gemini) API-nyckel';
+            const help=document.createElement('div'); help.className='kw-ai-help'; help.innerHTML="Hämta en gratis nyckel på <a href='https://aistudio.google.com/app/apikey' target='_blank' rel='noopener'>aistudio.google.com</a>. Nyckeln sparas bara på den här enheten.";
+            const showKeyField=()=>{ keyWrap.innerHTML=''; keyWrap.appendChild(keyInp); keyWrap.appendChild(help); };
+            if(aiKeyGet()){ const note=document.createElement('div'); note.className='kw-ai-help'; note.innerHTML="🔑 API-nyckel sparad. <a href='#' class='kw-ai-change'>Byt nyckel</a>"; keyWrap.appendChild(note); note.querySelector('.kw-ai-change').onclick=(e)=>{ e.preventDefault(); showKeyField(); }; }
+            else { showKeyField(); }
+            const row2=document.createElement('div'); row2.className='kw-btnrow'; row2.style.margin='8px 0 0'; row2.style.justifyContent='flex-start';
+            const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.title='Öppnar Google AI Studio – du är redan inloggad'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); status.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
+            const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='Skapa automatiskt (ett klick)';
+            autoBtn.onclick=async ()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; return; } let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } } if(!key){ status.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
+                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar korsordet..."; try{ const words=await aiGenerateCrossword(d, key); makeFromWords(words, status, close); }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
+            row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
+
+            box.appendChild(status);
+            const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
+            const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Stäng'; cancel.onclick=close; foot.appendChild(cancel); box.appendChild(foot);
+
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            setTimeout(()=>ta.focus(),60);
+        }
+        function render(){ stamp(); if(state.mode==='play' && state.layout) renderPlay(); else renderEdit(); }
+        render();
+    }
 
     // ---- LUNCH: matmeny för dagen från meny.mateo.se (enhet 61, Linköping) ----
     const LUNCH_UNIT_ID = '61';
@@ -2758,7 +3185,86 @@
     function createDice(config){ if(config===undefined)config=null; const body=createWidget('TÄRNING',160,'',config); body.innerHTML=`<div class='dice-box'>🎲</div>`; const d=body.querySelector('.dice-box'); const roll=()=>{ d.classList.add('rolling'); let n=0; const iv=setInterval(()=>{ d.innerText=['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)]; if(++n>8){ clearInterval(iv); d.classList.remove('rolling'); saveBoardState(); } },80); }; d.onclick=roll; }
 
     // INITIALISERING & BOOTSTRAP
+    // ---- FLYTTBAR VERKTYGSRAD: dra om knapparna, byt plats & flytta mellan raderna ----
+    function toolbarOrderKey(){ return 'mintavla_toolbarOrder_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
+    function toolBtnId(btn){ return (btn.getAttribute('onclick') || btn.id || (btn.querySelector('.label')?.textContent||'')).trim(); }
+    function saveToolbarOrder(){
+        const tc=document.getElementById('toolbar-container'); if(!tc) return;
+        const fav=[...tc.querySelectorAll('.tool-fav .tool-btn')].map(toolBtnId);
+        const extra=[...tc.querySelectorAll('.tool-extra .tool-btn')].map(toolBtnId);
+        try{ localStorage.setItem(toolbarOrderKey(), JSON.stringify({fav:fav, extra:extra})); }catch(e){}
+        if(typeof syncToCloud==='function') syncToCloud();
+    }
+    function restoreToolbarOrder(){
+        const tc=document.getElementById('toolbar-container'); if(!tc) return;
+        const favStrip=tc.querySelector('.tool-fav'), extraStrip=tc.querySelector('.tool-extra');
+        if(!favStrip||!extraStrip) return;
+        let saved=null; try{ saved=JSON.parse(localStorage.getItem(toolbarOrderKey())||'null'); }catch(e){}
+        if(!saved || !Array.isArray(saved.fav)) return;
+        const map={}; tc.querySelectorAll('.tool-btn').forEach(b=>{ map[toolBtnId(b)]=b; });
+        (saved.fav||[]).forEach(k=>{ if(map[k]){ favStrip.appendChild(map[k]); delete map[k]; } });
+        (saved.extra||[]).forEach(k=>{ if(map[k]){ extraStrip.appendChild(map[k]); delete map[k]; } });
+        // Nya knappar (tillagda i senare versioner) som inte finns i sparad ordning läggs sist bland favoriter
+        Object.keys(map).forEach(k=>{ if(map[k] && map[k].classList.contains('tool-btn')) favStrip.appendChild(map[k]); });
+    }
+    function initToolbarSortable(){
+        const tc=document.getElementById('toolbar-container'); if(!tc || tc.dataset.sortableInit) return;
+        tc.dataset.sortableInit='1';
+        // placera den dragna knappen på rätt plats utifrån muspekaren
+        function placeDragged(x, y, btn){
+            const el=document.elementFromPoint(x, y); if(!el) return;
+            const strip=el.closest('.tool-fav, .tool-extra'); if(!strip) return;
+            const over=el.closest('.tool-btn');
+            if(over && over!==btn){
+                const r=over.getBoundingClientRect();
+                const sameRow=Math.abs(y-(r.top+r.height/2)) < r.height*0.9;
+                const after = sameRow ? (x > r.left+r.width/2) : (y > r.top+r.height/2);
+                strip.insertBefore(btn, after ? over.nextSibling : over);
+            } else if(!over && !strip.contains(btn)){
+                strip.appendChild(btn);
+            }
+        }
+        tc.addEventListener('pointerdown', (e)=>{
+            const btn=e.target.closest('.tool-btn'); if(!btn) return;
+            if(e.button && e.button!==0) return;
+            const startX=e.clientX, startY=e.clientY;
+            let started=false;
+            const move=(ev)=>{
+                const dx=ev.clientX-startX, dy=ev.clientY-startY;
+                if(!started){
+                    if(Math.abs(dx)+Math.abs(dy) < 6) return;   // tröskel: liten rörelse = klick
+                    started=true;
+                    btn.classList.add('tool-dragging');
+                    btn.style.pointerEvents='none';
+                    tc.classList.add('show-extra','tb-reordering');
+                    try{ tc.setPointerCapture(ev.pointerId); }catch(_){}
+                }
+                ev.preventDefault();
+                placeDragged(ev.clientX, ev.clientY, btn);
+            };
+            const up=()=>{
+                tc.removeEventListener('pointermove',move);
+                tc.removeEventListener('pointerup',up);
+                tc.removeEventListener('pointercancel',up);
+                if(started){
+                    btn.classList.remove('tool-dragging');
+                    btn.style.pointerEvents='';
+                    tc.classList.remove('tb-reordering');
+                    saveToolbarOrder();
+                    btn._suppressClick=true; setTimeout(()=>{ btn._suppressClick=false; }, 60);
+                }
+            };
+            tc.addEventListener('pointermove',move);
+            tc.addEventListener('pointerup',up);
+            tc.addEventListener('pointercancel',up);
+        });
+        // hindra att en drag-släpp råkar skapa en widget
+        tc.addEventListener('click', (e)=>{ const btn=e.target.closest('.tool-btn'); if(btn && btn._suppressClick){ e.preventDefault(); e.stopPropagation(); } }, true);
+    }
+    window.initToolbarSortable = initToolbarSortable;
+
     function initBoard() {
+        restoreToolbarOrder();
         let savedData = localStorage.getItem('boardStateV6_' + currentUser);
         let newDays = 0;
         if (savedData) {
