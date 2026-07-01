@@ -1250,7 +1250,7 @@
                 else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
                 else if (type === 'DIGITAL TIMER' || type === 'BRÅK / TID') { const nIn = w.querySelectorAll('input[type="number"]'); if(nIn.length >= 2){ if(type === 'DIGITAL TIMER'){ state.data.min = nIn[0].value; state.data.sec = nIn[1].value; } else { state.data.num = nIn[0].value; state.data.den = nIn[1].value; } } }
-                else if (type === 'RITPLATTA') { state.data.img = w.querySelector('canvas')?.toDataURL() || ''; }
+                else if (type === 'RITPLATTA') { const cv=w.querySelector('canvas'); state.data.img = cv ? compressCanvasToDataURL(cv, 1000, 0.82) : ''; }
                 else if (type === 'QR-KOD') { state.data.url = w.querySelector('.list-name-input')?.value || ''; }
                 else if (type === 'ARBETSSÄTT') { state.data.icon = w.querySelector('.work-symbol.active')?.dataset.icon || ''; }
                 else if (type === 'BELÖNING') { state.data.points = w.querySelectorAll('.reward-star').length; }
@@ -2189,7 +2189,7 @@
         const setImg=(src)=>{ if(!src){ area.innerHTML=`<div class='img-placeholder'>🖼️<span>Klistra in en bildlänk eller ladda upp</span></div>`; widget.dataset.imgSrc=''; return; } const im=document.createElement('img'); im.className='img-el'; im.src=src; area.innerHTML=''; area.appendChild(im); widget.dataset.imgSrc=src; };
         useBtn.onclick=()=>{ let u=urlInp.value.trim(); if(!u) return; if(!/^(https?:|data:)/.test(u)) u='https://'+u; setImg(u); urlInp.value=''; saveBoardState(); };
         upBtn.onclick=()=> fileInp.click();
-        fileInp.onchange=()=>{ const f=fileInp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ setImg(r.result); saveBoardState(); }; r.readAsDataURL(f); };
+        fileInp.onchange=()=>{ const f=fileInp.files[0]; if(!f) return; upBtn.disabled=true; const origText=upBtn.textContent; upBtn.textContent='Bearbetar...'; compressImageFile(f, 1600, 0.85).then(dataUrl=>{ setImg(dataUrl); saveBoardState(); }).catch(()=>{ customAlert('Kunde inte bearbeta bilden. Försök med en annan fil.','⚠️'); }).finally(()=>{ upBtn.disabled=false; upBtn.textContent=origText; fileInp.value=''; }); };
         setImg((config && config.data && config.data.src) ? config.data.src : '');
     }
 
@@ -2790,6 +2790,67 @@
         return { placed:placed, rows:rows, cols:cols };
     }
 
+    // ---- BILDKOMPRIMERING (håller sparad data under Firestores 1 MB-gräns per lärare) ----
+    // Förminskar en canvas (t.ex. ritplattan) och komprimerar den till JPEG innan den sparas.
+    function compressCanvasToDataURL(srcCanvas, maxDim, quality){
+        try{
+            const w = srcCanvas.width, h = srcCanvas.height;
+            if(!w || !h) return srcCanvas.toDataURL();
+            const scale = Math.min(1, maxDim / Math.max(w, h));
+            const tw = Math.max(1, Math.round(w*scale)), th = Math.max(1, Math.round(h*scale));
+            const cvs = document.createElement('canvas'); cvs.width=tw; cvs.height=th;
+            const ctx = cvs.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,tw,th); // ritplattan är annars transparent
+            ctx.drawImage(srcCanvas, 0, 0, tw, th);
+            let q = quality, out = cvs.toDataURL('image/jpeg', q), tries=0;
+            while(out.length > 500000 && q > 0.3 && tries<6){ q -= 0.12; out = cvs.toDataURL('image/jpeg', q); tries++; }
+            return out;
+        } catch(e){ try{ return srcCanvas.toDataURL(); }catch(e2){ return ''; } }
+    }
+    // Läser en uppladdad bildfil, förminskar och komprimerar den innan den sparas.
+    function compressImageFile(file, maxDim, quality){
+        return new Promise((resolve, reject)=>{
+            const reader = new FileReader();
+            reader.onload = ()=>{
+                const img = new Image();
+                img.onload = ()=>{
+                    try{
+                        let w = img.naturalWidth||img.width, h = img.naturalHeight||img.height;
+                        if(!w || !h){ resolve(reader.result); return; }
+                        const scale = Math.min(1, maxDim / Math.max(w, h));
+                        const tw = Math.max(1, Math.round(w*scale)), th = Math.max(1, Math.round(h*scale));
+                        const cvs = document.createElement('canvas'); cvs.width=tw; cvs.height=th;
+                        const ctx = cvs.getContext('2d');
+                        const usePng = /png/i.test(file.type||'');
+                        if(!usePng){ ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,tw,th); }
+                        ctx.drawImage(img, 0, 0, tw, th);
+                        let out;
+                        if(usePng){ out = cvs.toDataURL('image/png'); }
+                        else { let q=quality, tries=0; out = cvs.toDataURL('image/jpeg', q); while(out.length > 700000 && q > 0.35 && tries<6){ q -= 0.12; out = cvs.toDataURL('image/jpeg', q); tries++; } }
+                        resolve(out);
+                    } catch(e){ resolve(reader.result); } // gick inte att bearbeta – använd originalet som reserv
+                };
+                img.onerror = ()=> resolve(reader.result); // t.ex. animerad GIF – behåll originalet
+                img.src = reader.result;
+            };
+            reader.onerror = ()=> reject(new Error('Kunde inte läsa filen.'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Laddar ner en canvas som en PNG-fil till datorn
+    function downloadCanvasPNG(canvas, filename){
+        try{
+            const url = canvas.toDataURL('image/png');
+            const a = document.createElement('a'); a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); a.remove();
+        } catch(e){ customAlert('Kunde inte spara bilden. Försök igen.', '⚠️'); }
+    }
+    function sanitizeFileName(name, fallback){
+        const n = String(name||'').trim().replace(/[^\wåäöÅÄÖ \-]+/g,'').trim();
+        return (n || fallback);
+    }
+
     function kwEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function printCrossword(lay, title, withFacit){
         if(!lay) return;
@@ -2825,6 +2886,49 @@
         const w=window.open('','kwprint'+Date.now(),'width=820,height=920');
         if(!w){ customAlert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.','🖨️'); return; }
         w.document.open(); w.document.write(html); w.document.close();
+    }
+
+    // Ritar korsordet (rutnät + ledtrådar) till en canvas och laddar ner det som en PNG-fil
+    function saveCrosswordAsImage(lay, title, withFacit){
+        if(!lay) return;
+        const letterAt={}, numAt={};
+        lay.placed.forEach(p=>{ for(let i=0;i<p.word.length;i++){ const r=p.dir==='A'?p.r:p.r+i, c=p.dir==='A'?p.c+i:p.c; letterAt[r+','+c]=p.word[i]; } numAt[p.r+','+p.c]=p.num; });
+        const cellPx = 44;
+        const pad = 36;
+        const gridW = lay.cols*cellPx, gridH = lay.rows*cellPx;
+        const titleH = 46;
+        const across = lay.placed.filter(p=>p.dir==='A').sort((a,b)=>a.num-b.num);
+        const down = lay.placed.filter(p=>p.dir==='D').sort((a,b)=>a.num-b.num);
+        const lineH = 22;
+        const cluesH = Math.max(across.length, down.length) * lineH + 40;
+        const canvasW = Math.max(gridW + pad*2, 620);
+        const canvasH = titleH + gridH + cluesH + pad*2;
+        const cvs = document.createElement('canvas'); cvs.width=canvasW; cvs.height=canvasH;
+        const ctx = cvs.getContext('2d');
+        ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvasW,canvasH);
+        let y = pad;
+        ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.font='bold 26px Arial';
+        ctx.fillText((title||'Korsord') + (withFacit?' – facit':''), canvasW/2, y+24);
+        y += titleH;
+        const gridX = (canvasW - gridW)/2;
+        for(let r=0;r<lay.rows;r++){ for(let c=0;c<lay.cols;c++){
+            const k=r+','+c, x=gridX+c*cellPx, yy=y+r*cellPx;
+            if(letterAt[k]){
+                ctx.fillStyle='#fff'; ctx.fillRect(x,yy,cellPx,cellPx);
+                ctx.strokeStyle='#111'; ctx.lineWidth=1.4; ctx.strokeRect(x,yy,cellPx,cellPx);
+                if(numAt[k]){ ctx.fillStyle='#8e8e93'; ctx.font='10px Arial'; ctx.textAlign='left'; ctx.fillText(numAt[k], x+3, yy+12); }
+                if(withFacit){ ctx.fillStyle='#111'; ctx.font='bold '+(cellPx*0.5)+'px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(letterAt[k], x+cellPx/2, yy+cellPx/2+2); ctx.textBaseline='alphabetic'; }
+            }
+        }}
+        y += gridH + 30;
+        const colW = canvasW/2;
+        ctx.textAlign='left'; ctx.font='bold 15px Arial'; ctx.fillStyle='#c0392b';
+        ctx.fillText('Vågrätt', pad, y);
+        ctx.fillText('Lodrätt', pad+colW, y);
+        ctx.font='13px Arial'; ctx.fillStyle='#333';
+        across.forEach((p,i)=>{ ctx.fillText(p.num+'. '+(p.clue||'—'), pad, y+24+i*lineH); });
+        down.forEach((p,i)=>{ ctx.fillText(p.num+'. '+(p.clue||'—'), pad+colW, y+24+i*lineH); });
+        downloadCanvasPNG(cvs, sanitizeFileName(title,'Korsord')+'.png');
     }
     function aiKeyStoreName(){ return 'mintavla_aiKey_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
     function aiKeyGet(){ try{ return localStorage.getItem(aiKeyStoreName()) || ''; }catch(e){ return ''; } }
@@ -2946,13 +3050,14 @@
             const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
             const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
             const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut korsordet'; prnt.onclick=()=>printCrossword(state.layout, state.title, false);
+            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara'; saveImg.title='Spara korsordet som bild på datorn'; saveImg.onclick=()=>saveCrosswordAsImage(state.layout, state.title, false);
             const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
             let showing=false;
             facit.onclick=()=>{ showing=!showing; g.querySelectorAll('.kw-input').forEach(inp=>{ const cell=inp.parentElement; if(showing){ inp.value=inp.dataset.ans; cell.classList.add('kw-facit'); } else { inp.value=state.answers[inp.dataset.k]||''; cell.classList.remove('kw-facit'); } }); facit.textContent=showing?'Dölj facit':'Visa facit'; };
             const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.answers={}; g.querySelectorAll('.kw-input').forEach(inp=>{ inp.value=''; inp.parentElement.classList.remove('kw-facit'); }); showing=false; facit.textContent='Visa facit'; persist(); };
             const shuffle=document.createElement('button'); shuffle.className='kw-btn kw-btn-ghost'; shuffle.textContent='🔀 Nytt utseende'; shuffle.onclick=()=>{ const arr=state.entries.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp; } const lay2=buildCrossword(arr); if(lay2){ state.layout=lay2; state.answers={}; render(); persist(); } };
             const aiBtn2=document.createElement('button'); aiBtn2.className='kw-btn kw-btn-ai'; aiBtn2.textContent='✨ AI'; aiBtn2.title='Skapa nytt korsord med AI'; aiBtn2.onclick=openAiDialog;
-            btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
+            btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(saveImg); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
             // Anpassa widgetens storlek efter korsordet (bredd + höjd), så inget klipps av
             const widgetEl = body.closest('.widget');
             if(widgetEl){
@@ -3115,6 +3220,39 @@
         w.document.open(); w.document.write(html); w.document.close();
     }
 
+    // Ritar ordgömman (rutnät + ordlista) till en canvas och laddar ner den som en PNG-fil
+    function saveWordSearchAsImage(lay, title){
+        if(!lay) return;
+        const cellPx = 40, pad = 36, titleH = 46;
+        const gridW = lay.size*cellPx, gridH = lay.size*cellPx;
+        const words = lay.placements.map(p=>p.word);
+        const cols = 3, rowsPerCol = Math.max(1, Math.ceil(words.length/cols));
+        const lineH = 24;
+        const wordsH = rowsPerCol*lineH + 30;
+        const canvasW = Math.max(gridW + pad*2, 640);
+        const canvasH = titleH + gridH + wordsH + pad*2;
+        const cvs = document.createElement('canvas'); cvs.width=canvasW; cvs.height=canvasH;
+        const ctx = cvs.getContext('2d');
+        ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvasW,canvasH);
+        let y = pad;
+        ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.font='bold 26px Arial';
+        ctx.fillText(title||'Ordgömma', canvasW/2, y+24);
+        y += titleH;
+        const gridX = (canvasW-gridW)/2;
+        ctx.font=(cellPx*0.5)+'px Arial'; ctx.textBaseline='middle';
+        for(let r=0;r<lay.size;r++){ for(let c=0;c<lay.size;c++){
+            const x=gridX+c*cellPx, yy=y+r*cellPx;
+            ctx.strokeStyle='#ccc'; ctx.lineWidth=1; ctx.strokeRect(x,yy,cellPx,cellPx);
+            ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.fillText(lay.grid[r][c], x+cellPx/2, yy+cellPx/2+1);
+        }}
+        ctx.textBaseline='alphabetic';
+        y += gridH + 30;
+        ctx.font='bold 15px Arial'; ctx.textAlign='left'; ctx.fillStyle='#333';
+        const colW = canvasW/cols;
+        words.forEach((wd,i)=>{ const col=Math.floor(i/rowsPerCol), row=i%rowsPerCol; ctx.fillText('• '+wd, pad+col*colW, y+row*lineH); });
+        downloadCanvasPNG(cvs, sanitizeFileName(title,'Ordgömma')+'.png');
+    }
+
     function buildOgChatPrompt(desc){
         return desc.trim() + "\n\nSvara ENDAST med orden till ordgömman, ett ord per rad, i exakt formatet:\nORD\n\nRegler: varje ORD är ett enda ord utan mellanslag, bindestreck eller siffror, på svenska och med VERSALER. Skriv ingen rubrik, ingen numrering och ingen annan text än orden.";
     }
@@ -3224,13 +3362,14 @@
             const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
             const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
             const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut ordgömman'; prnt.onclick=()=>printWordSearch(state.layout, state.title);
+            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara'; saveImg.title='Spara ordgömman som bild på datorn'; saveImg.onclick=()=>saveWordSearchAsImage(state.layout, state.title);
             const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
             let showing=false;
             facit.onclick=()=>{ showing=!showing; if(showing){ lay.placements.forEach(p=>p.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-facit'); })); } else { g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-facit')); } facit.textContent=showing?'Dölj facit':'Visa facit'; };
             const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.found={}; g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-found','og-facit')); wl.querySelectorAll('.og-word-chip').forEach(ch=>ch.classList.remove('og-found')); showing=false; facit.textContent='Visa facit'; persist(); };
             const shuffle=document.createElement('button'); shuffle.className='kw-btn kw-btn-ghost'; shuffle.textContent='🔀 Nytt utseende'; shuffle.onclick=()=>{ const words=lay.placements.map(p=>p.word); const lay2=buildWordSearch(words, state.diag!==false); if(lay2){ state.layout=lay2; state.found={}; render(); persist(); } };
             const aiBtn2=document.createElement('button'); aiBtn2.className='kw-btn kw-btn-ai'; aiBtn2.textContent='✨ AI'; aiBtn2.title='Skapa ny ordgömma med AI'; aiBtn2.onclick=openOgAiDialog;
-            btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
+            btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(saveImg); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
 
             const widgetEl = body.closest('.widget');
             if(widgetEl){
