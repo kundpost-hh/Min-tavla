@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Min Tavla</title>
+    <title>Min Tavla (offline-test)</title>
 </head>
 <body>
 
@@ -112,6 +112,7 @@
             <div id="tool-pocket-scroll">
                 <div class="tool-pocket-title">Verktyg</div>
                 <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
+                <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketDivider()" title="Lägg till en ny kedja som du kan dra dit du vill">🔗 Lägg till kedja</button>
             </div>
             <div class="sp-copyright" id="tool-pocket-copyright">© 2026 Hussein Hirori. Alla rättigheter förbehållna.</div>
         </div>
@@ -133,7 +134,7 @@
             <button class="tool-btn" onclick="createWhiteboard()"><div class="icon">🖍️</div><div class="label">Rita</div></button>
             <button class="tool-btn" onclick="createWorkSymbols()"><div class="icon">🤫</div><div class="label">Arbetssätt</div></button>
             <button class="tool-btn" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
-            <button class="tool-btn" onclick="createStickyNote()"><div class="icon">📌</div><div class="label">Lapp</div></button>
+            <button class="tool-btn" onclick="createStickyNote()"><div class="icon">🗒️</div><div class="label">Lapp</div></button>
             <button class="tool-btn" onclick="createGroupMaker()"><div class="icon">👥</div><div class="label">Grupper</div></button>
             <button class="tool-btn" onclick="createRandomName()"><div class="icon">🎲</div><div class="label">Slumpa</div></button>
             <button class="tool-btn" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
@@ -144,10 +145,13 @@
             <button class="tool-btn" onclick="createRealTimeClock()"><div class="icon">🕰️</div><div class="label">Klocka</div></button>
             <button class="tool-btn" onclick="createAnalogTimer()"><div class="icon">⏲️</div><div class="label">A. Timer</div></button>
             <button class="tool-btn" onclick="createTimer()"><div class="icon">⏱️</div><div class="label">D. Timer</div></button>
+            <button class="tool-btn" onclick="createReminderWidget()"><div class="icon">⏰</div><div class="label">Reminder</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
             <button class="tool-btn" onclick="createSeatingChart()"><div class="icon">🪑</div><div class="label">Bordsplacering</div></button>
+            <button class="tool-btn" onclick="createExitTicket()"><div class="icon">🎯</div><div class="label">Exit ticket</div></button>
+            <button class="tool-btn" onclick="createQuizPoll()"><div class="icon">🗳️</div><div class="label">Omröstning</div></button>
             <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="21" height="21" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
         </div>
@@ -162,6 +166,7 @@
             <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
             <button class="tool-btn" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
             <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
+            <button class="tool-btn" onclick="createVideoWidget()"><div class="icon">🎬</div><div class="label">Video</div></button>
             <button class="tool-btn" onclick="createWeekSchedule()"><div class="icon">🗓️</div><div class="label">Veckoschema</div></button>
             <button class="tool-btn" onclick="createChecklist()"><div class="icon">✅</div><div class="label">Checklista</div></button>
             <button class="tool-btn" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
@@ -372,12 +377,36 @@
     .widget-resizer { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: se-resize; z-index: 20; opacity: 0; transition: opacity 0.3s; }
     .widget:hover .widget-resizer, .widget:focus-within .widget-resizer { opacity: 1; }
     .widget.locked .widget-resizer { display: none !important; }
+    /* Endast adminen får flytta/låsa upp widgetar – för alla andra döljs lås-kontrollerna helt eftersom tavlan alltid är låst för dem. */
+    .viewer-mode .lock-toggle-btn { display: none !important; }
+    .viewer-mode .widget .btn-lck, .viewer-mode .sch-lock-icon { display: none !important; }
 
     .widget-inner { background: white; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid #e5e5ea; overflow: hidden; display: flex; flex-direction: column; width: 100%; height: 100%; transition: all 0.3s ease-in-out; position: relative; z-index: 2; }
     .widget:not(.locked) .widget-inner { cursor: move; }
     .widget.locked .widget-inner { cursor: default; }
     
     .widget:not(.schedule-widget) .widget-inner { padding: 0px !important; }
+
+    /* ---- KEDJA (basbild, används av avgränsarna i verktygsfickan) ---- */
+    :root { --chain-link-img: url("data:image/png;base64,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"); }
+    .chain-strip { width: 100%; height: 100%; min-height: 14px; background-image: var(--chain-link-img); background-repeat: repeat-x; background-position: center; background-size: auto 100%; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)); pointer-events: none; }
+
+    /* ---- Kedje-avgränsare MELLAN VERKTYGEN i vänstra verktygsfickan ---- */
+    .tool-pocket-grid { position: relative; }
+    .tool-pocket-divider { grid-column: 1 / -1; position: relative; height: 16px; min-height: 10px; max-height: 140px; display: flex; align-items: center; justify-content: center; margin: 3px 0; touch-action: none; cursor: grab; }
+    .tool-pocket-divider:active { cursor: grabbing; }
+    .tool-pocket-divider.tpd-moving { opacity: 0.45; }
+    .tool-pocket-divider .chain-strip { border-radius: 3px; }
+    .tool-pocket-divider .tpd-handle { position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); width: 36px; height: 12px; border-radius: 7px; background: #e2e2e6; border: 1px solid rgba(0,0,0,0.08); cursor: ns-resize; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease, background 0.2s ease; z-index: 6; touch-action: none; }
+    .tool-pocket-divider:hover .tpd-handle, .tool-pocket-divider.tpd-dragging .tpd-handle { opacity: 1; }
+    .tool-pocket-divider.tpd-dragging .tpd-handle { background: #cfd6ff; }
+    .tool-pocket-divider .tpd-handle::after { content: ''; width: 16px; height: 2px; background: #9a9a9e; border-radius: 1px; box-shadow: 0 3px 0 #9a9a9e, 0 -3px 0 #9a9a9e; }
+    .tool-pocket-divider .tpd-remove { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 1px solid rgba(0,0,0,0.1); color: #9a4a4a; font-size: 11px; line-height: 1; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease; z-index: 6; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    .tool-pocket-divider:hover .tpd-remove { opacity: 1; }
+    .tool-pocket-divider .tpd-remove:hover { background: #ffe4e4; color: #c22; }
+    .tool-pocket-add-chain { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 6px; padding: 7px 8px; border-radius: 10px; border: 1px dashed rgba(0,0,0,0.18); background: #fbfbfd; color: #6a6a6e; font-size: 12px; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+    .tool-pocket-add-chain:hover { background: #eef3ff; border-color: #9db4ff; color: #3a5bd9; }
+
     .widget:not(.schedule-widget) .widget-header { opacity: 0 !important; transform: translateY(10px) !important; pointer-events: none !important; }
     .widget:not(.schedule-widget):hover .widget-inner { padding: 10px !important; }
     .widget:not(.schedule-widget):hover .widget-header { opacity: 1 !important; transform: translateY(calc(-100% + 2px)) !important; pointer-events: auto !important; }
@@ -747,6 +776,36 @@
     .seat-students-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:8px; padding-top:8px; border-top:1px solid #eee; }
     .seat-list-select { font-size:12px; padding:5px 7px; border-radius:8px; border:1px solid #d1d1d6; background:#fff; font-family:inherit; color:#333; }
     .seat-name-label { position:absolute; background:#fff; border:1px solid rgba(0,0,0,0.1); border-radius:5px; font-size:8px; font-weight:700; color:#1d1d1f; padding:1px 4px; max-width:52px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 1px 2px rgba(0,0,0,0.15); pointer-events:none; }
+    .exit-widget .widget-inner { background:#fff; }
+    .exit-root { display:flex; flex-direction:column; align-items:center; width:100%; gap:10px; }
+    .exit-question { width:100%; text-align:center; font-size:14px; font-weight:700; border:none; border-bottom:1px solid #e5e5ea; padding:4px 0 8px; outline:none; background:transparent; font-family:inherit; color:#1d1d1f; }
+    .exit-question:focus { border-bottom-color:#007aff; }
+    .exit-options { display:flex; justify-content:center; gap:8px; width:100%; flex-wrap:wrap; }
+    .exit-opt { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; background:#f7f7f9; border:1px solid rgba(0,0,0,0.05); border-radius:12px; padding:8px 10px; font-family:inherit; transition:transform 0.12s ease, background 0.12s ease; }
+    .exit-opt:hover { background:#eef3ff; }
+    .exit-opt:active { transform:scale(0.94); }
+    .exit-emoji { font-size:32px; line-height:1; }
+    .exit-count { font-size:12px; font-weight:800; color:#555; }
+    .exit-bar-wrap { width:100%; margin-top:2px; }
+    .exit-bar-row { display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:5px; }
+    .exit-bar-emoji { width:20px; text-align:center; font-size:14px; }
+    .exit-bar-track { flex:1; height:11px; background:#f0f0f5; border-radius:6px; overflow:hidden; }
+    .exit-bar-fill { height:100%; background:#007aff; border-radius:6px; transition:width 0.35s ease; }
+    .exit-bar-num { width:20px; text-align:right; font-weight:800; color:#333; }
+    .exit-total { font-size:11px; color:#999; margin-top:2px; }
+    .exit-reset { margin-top:2px; font-size:11px; color:#999; text-decoration:underline; cursor:pointer; background:none; border:none; font-family:inherit; }
+    .exit-reset:hover { color:#ff3b30; }
+    .poll-widget .widget-inner { background:#fff; }
+    .poll-root { display:flex; flex-direction:column; width:100%; }
+    .poll-opt-input { flex:1; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; outline:none; font-family:inherit; background:#fff; }
+    .poll-opt-input:focus { border-color:#007aff; }
+    .poll-opt-btn { position:relative; width:100%; text-align:left; padding:10px 14px; border-radius:12px; border:1px solid #e0e0e5; background:#f7f7f9; margin-bottom:8px; cursor:pointer; overflow:hidden; font-size:14px; font-weight:700; color:#1d1d1f; font-family:inherit; transition:background 0.15s ease; }
+    .poll-opt-btn:hover { background:#eef3ff; }
+    .poll-opt-btn:active { transform:scale(0.98); }
+    .poll-opt-fill { position:absolute; top:0; left:0; bottom:0; background:#cfe4ff; width:0%; transition:width 0.35s ease; z-index:0; }
+    .poll-opt-content { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .poll-opt-correct { background:#d2f8dc !important; border-color:#34c759 !important; }
+    .poll-opt-pct { font-weight:800; color:#555; font-size:13px; flex-shrink:0; }
 
     /* ---- LUNCH (matmeny via meny.mateo.se) ---- */
     .lunch-widget .widget-inner { background:#fff; }
@@ -904,6 +963,13 @@
     .img-placeholder span { font-size:12px; font-weight:600; }
     .img-controls { margin-top:8px; }
 
+    .video-area { width:100%; min-height:160px; aspect-ratio:16/9; flex:1; display:flex; align-items:center; justify-content:center; background:#111114; border-radius:10px; overflow:hidden; }
+    .video-area iframe, .video-area video { width:100%; height:100%; display:block; border:0; background:#000; }
+    .video-placeholder { display:flex; flex-direction:column; align-items:center; gap:6px; color:#aaa; font-size:34px; text-align:center; padding:14px; }
+    .video-placeholder span { font-size:12px; font-weight:600; max-width:220px; line-height:1.4; }
+    .video-controls { margin-top:8px; }
+    .video-hint { font-size:10px; color:#b0b0b6; margin-top:5px; text-align:center; line-height:1.4; }
+
     /* VECKOSCHEMA */
     .week-widget { min-width:560px; }
     .week-grid { display:flex; gap:6px; width:100%; height:100%; }
@@ -922,6 +988,40 @@
     .check-item.done .check-text { text-decoration:line-through; color:#aaa; }
     .check-del { background:none; border:none; color:#f87171; cursor:pointer; font-size:13px; flex-shrink:0; }
     .check-del:hover { color:#dc2626; }
+
+    /* ---- REMINDER / PÅMINNELSER ---- */
+    .reminder-widget .rem-row { display:flex; gap:6px; margin-bottom:8px; }
+    .reminder-widget .rem-row input { flex:1; min-width:0; font-family:inherit; font-size:13px; font-weight:600; padding:7px 8px; border:1.5px solid #e5e5ea; border-radius:8px; background:#f9f9fb; color:#333; outline:none; }
+    .reminder-widget .rem-row input:focus { border-color:#007aff; background:#fff; }
+    .reminder-widget .rem-text { width:100%; min-height:52px; resize:vertical; border:1.5px solid #e5e5ea; border-radius:8px; background:#f9f9fb; font-family:inherit; font-size:13px; padding:8px; outline:none; margin-bottom:8px; box-sizing:border-box; }
+    .reminder-widget .rem-text:focus { border-color:#007aff; background:#fff; }
+    .rem-list { display:flex; flex-direction:column; gap:6px; margin-top:10px; max-height:220px; overflow-y:auto; }
+    .rem-empty { text-align:center; color:#b0b0b8; font-size:13px; font-weight:600; padding:8px 0; }
+    .rem-item { display:flex; align-items:center; gap:8px; background:#fff7e6; border:1px solid #ffe1a8; border-radius:10px; padding:7px 9px; }
+    .rem-item.fired { background:#f4f4f6; border-color:#e5e5ea; opacity:0.65; }
+    .rem-item-main { flex:1; min-width:0; }
+    .rem-item-when { font-size:12px; font-weight:800; color:#ff9500; }
+    .rem-item.fired .rem-item-when { color:#8e8e93; }
+    .rem-item-text { font-size:13px; color:#333; word-break:break-word; }
+    .rem-del { background:none; border:none; color:#f87171; cursor:pointer; font-size:13px; flex-shrink:0; }
+    .rem-del:hover { color:#dc2626; }
+
+    .reminder-popup-overlay { position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.55); backdrop-filter:blur(5px); z-index:99999999; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s ease; }
+    .reminder-popup-overlay.show { opacity:1; }
+    .reminder-popup-box { background:#fff; border-radius:22px; padding:34px 46px 28px; text-align:center; max-width:460px; width:90%; border:4px solid #ff3b30; transform:scale(0.6); transition:transform 0.45s cubic-bezier(0.175,0.885,0.32,1.275); animation:remBlink 1.1s ease-in-out infinite; }
+    .reminder-popup-overlay.show .reminder-popup-box { transform:scale(1); }
+    @keyframes remBlink { 0%,100% { box-shadow:0 0 0 0 rgba(255,59,48,0.65), 0 22px 55px rgba(0,0,0,0.35); border-color:#ff3b30; } 50% { box-shadow:0 0 0 22px rgba(255,59,48,0), 0 22px 55px rgba(0,0,0,0.35); border-color:#ffd60a; } }
+    .rem-pop-bell { font-size:58px; display:inline-block; animation:remRing 0.9s ease-in-out infinite; transform-origin:top center; }
+    @keyframes remRing { 0%,100% { transform:rotate(0deg); } 15% { transform:rotate(-18deg); } 30% { transform:rotate(14deg); } 45% { transform:rotate(-10deg); } 60% { transform:rotate(6deg); } 75% { transform:rotate(-3deg); } }
+    .rem-pop-title { font-size:26px; font-weight:900; color:#ff3b30; letter-spacing:1px; text-transform:uppercase; margin-top:6px; animation:remTitleBlink 1.1s step-end infinite; }
+    @keyframes remTitleBlink { 0%,100% { color:#ff3b30; } 50% { color:#ff9500; } }
+    .rem-pop-time { font-size:16px; font-weight:800; color:#8e8e93; margin-top:2px; }
+    .rem-pop-text { font-size:20px; font-weight:700; color:#333; margin-top:14px; word-break:break-word; background:#fff7e6; border:1px dashed #ffcc66; border-radius:12px; padding:12px 16px; }
+    .rem-pop-actions { display:flex; gap:10px; margin-top:22px; }
+    .rem-pop-btn { flex:1; padding:12px; border:none; border-radius:12px; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; transition:transform 0.15s, filter 0.15s; }
+    .rem-pop-btn:hover { transform:scale(1.03); filter:brightness(1.07); }
+    .rem-pop-snooze { background:#f2f2f7; color:#555; }
+    .rem-pop-ok { background:#ff3b30; color:#fff; }
 
     /* SLUMPA-HJUL */
     .wheel-wrap { position:relative; width:240px; margin:6px auto; }
@@ -964,13 +1064,12 @@
        Lämnar du värdena som de är fungerar appen lokalt (sparar bara på datorn).
        ===================================================================== */
     const firebaseConfig = {
-        apiKey: "AIzaSyDrb-6YOpIgfRT5TYQ9w9htT5_W-DY3EsM",
-        authDomain: "min-tavla-ec027.firebaseapp.com",
-        projectId: "min-tavla-ec027",
-        storageBucket: "min-tavla-ec027.firebasestorage.app",
-        messagingSenderId: "384942566077",
-        appId: "1:384942566077:web:b2807f75002846340ae5d4",
-        measurementId: "G-M15P5D4PEB"
+        apiKey: "",
+        authDomain: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: ""
     };
     // Admin-rättigheter (vilka som får se/ta bort användare) hämtas från Firestore vid inloggning,
     // så att ingen e-postadress behöver stå i klartext i koden. Se dokumentet config/admins i Firestore.
@@ -987,6 +1086,15 @@
     let fbAuth = null, fbDB = null, fbUser = null;
     function cloudConfigured(){ return firebaseConfig.projectId && firebaseConfig.projectId.indexOf('DITT_') !== 0; }
     function isAdminEmail(email){ return adminEmailsCache.map(e=>e.toLowerCase()).indexOf((email||'').toLowerCase()) !== -1; }
+    // I flerspelarläge (inloggning aktiverad) får bara adminen flytta/ändra storlek på widgetarna – övriga ser en låst tavla.
+    // I lokalt/offline-läge finns inget admin-koncept, då är tavlan öppen som vanligt.
+    function isBoardAdmin(){ return (!window.cloudReady) || isAdminEmail(currentUser); }
+    function applyAdminUIMode(){
+        const wrap = document.getElementById('cb-app-wrapper'); if(!wrap) return;
+        wrap.classList.toggle('viewer-mode', !isBoardAdmin());
+        document.querySelectorAll('.widget').forEach(w => { if(!isBoardAdmin()) w.classList.add('locked'); });
+    }
+    window.applyAdminUIMode = applyAdminUIMode;
 
     // ---- Avskräck (inte skydda) mot att casuellt titta i källkoden. Gäller INTE inloggad admin. ----
     (function setupSourceGuard(){
@@ -1120,6 +1228,7 @@
             } catch(e){ /* om kontrollen inte går, släpp ändå in */ }
             fbUser = user; currentUser = email; currentUserName = name || email;
             localStorage.setItem('classboardzUser', currentUser);
+            applyAdminUIMode();
             await registerUser(email, name);
             await syncFromCloud(email);
             document.getElementById('login-overlay').style.display = 'none';
@@ -1277,6 +1386,7 @@
             currentUser = localStorage.getItem('classboardzUser') || 'lokal';
             currentUserName = 'Du';
             localStorage.setItem('classboardzUser', currentUser);
+            applyAdminUIMode();
             document.getElementById('login-overlay').style.display = 'none';
             migrateOldLists(currentUser); initBoard();
             return;
@@ -1332,11 +1442,15 @@
                 else if (type === 'ÖVNINGSKLOCKA') { const t=(w.querySelector('.pclock-digital')?.textContent||'03:00').split(':'); state.data.h = (parseInt(t[0])||0)%24; state.data.m = parseInt(t[1])||0; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
+                else if (type === 'VIDEO') { state.data.kind = w.dataset.videoKind || ''; state.data.src = w.dataset.videoSrc || ''; }
                 else if (type === 'VECKOSCHEMA') { state.data.days = []; w.querySelectorAll('.week-cell').forEach(c=> state.data.days.push(c.innerHTML)); }
                 else if (type === 'CHECKLISTA') { state.data.title = w.querySelector('.check-title')?.value || ''; state.data.items = []; w.querySelectorAll('.check-item').forEach(r=> state.data.items.push({ text: r.querySelector('.check-text')?.value || '', done: r.querySelector('input[type=checkbox]')?.checked || false })); }
                 else if (type === 'SLUMPA-HJUL') { state.data.names = w.querySelector('.wheel-names')?.value || ''; }
                 else if (type === 'STICKER') { state.data.emoji = w.dataset.emoji || '⭐'; }
                 else if (type === 'BORDSPLACERING') { try{ state.data.items = JSON.parse(w.dataset.seating || '[]'); }catch(e){ state.data.items=[]; } }
+                else if (type === 'EXIT TICKET') { try{ state.data = JSON.parse(w.dataset.exitTicket || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'OMRÖSTNING') { try{ state.data = JSON.parse(w.dataset.poll || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'REMINDER') { try{ state.data.items = JSON.parse(w.dataset.reminders || '[]'); }catch(e){ state.data.items = []; } }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -1384,6 +1498,7 @@
             else if (w.type === 'ÖVNINGSKLOCKA') createPracticeClock(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
             else if (w.type === 'BILD') createImageWidget(w);
+            else if (w.type === 'VIDEO') createVideoWidget(w);
             else if (w.type === 'VECKOSCHEMA') createWeekSchedule(w);
             else if (w.type === 'CHECKLISTA') createChecklist(w);
             else if (w.type === 'SLUMPA-HJUL') createWheel(w);
@@ -1396,6 +1511,9 @@
             else if (w.type === 'KLISTERMÄRKEN') createStickerPicker(w);
             else if (w.type === 'STICKER') createStickerElement(w);
             else if (w.type === 'BORDSPLACERING') createSeatingChart(w);
+            else if (w.type === 'EXIT TICKET') createExitTicket(w);
+            else if (w.type === 'OMRÖSTNING') createQuizPoll(w);
+            else if (w.type === 'REMINDER') createReminderWidget(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -1437,6 +1555,9 @@
         lockIcon.onclick = (e) => { e.stopPropagation(); widget.classList.toggle('locked'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
         if(config && config.minimized) { body.style.display = 'none'; widget.dataset.minimized = 'true'; }
         if(typeof presentationLocked !== 'undefined' && presentationLocked) widget.classList.add('locked');
+        // Bara adminen får flytta/ändra storlek på widgetar – för alla andra är tavlan alltid låst,
+        // oavsett widgetens eget lås-läge eller det generella presentationsläget.
+        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) widget.classList.add('locked');
         widget.style.zIndex = ++topZ;
         return body;
     }
@@ -1446,6 +1567,7 @@
         h.addEventListener('pointerdown', (e) => {
             // Klick på rubriken/remsan tar fram just den widgeten överst
             const _w = el.closest && el.closest('.widget'); if(_w) _w.style.zIndex = ++topZ;
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
             if(el.classList.contains('locked') || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName) || e.target.hasAttribute('contenteditable') || e.target.classList.contains('schedule-color-strip') || (e.target.closest && e.target.closest('.widget-controls'))) return;
             e.preventDefault(); p3=e.clientX; p4=e.clientY;
             try { h.setPointerCapture(e.pointerId); } catch(_){}
@@ -1459,6 +1581,7 @@
     // En liten rörelsetröskel gör att vanliga klick fortfarande fungerar.
     function makeBodyDraggable(el, inner){
         inner.addEventListener('pointerdown', (e) => {
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
             if(el.classList.contains('locked')) return;
             if(typeof presentationLocked !== 'undefined' && presentationLocked) return;
             if(e.button && e.button !== 0) return;
@@ -1493,6 +1616,7 @@
     function makeResizable(el, r) {
         let sX, sY, sW, sH;
         r.addEventListener('pointerdown', (e) => {
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
             if(el.classList.contains('locked')) return; e.preventDefault(); e.stopPropagation(); sX=e.clientX; sY=e.clientY; sW=el.offsetWidth; sH=el.offsetHeight;
             try { r.setPointerCapture(e.pointerId); } catch(_){}
             const drag = (ev) => { el.style.width = (sW+ev.clientX-sX)+'px'; el.style.height = (sH+ev.clientY-sY)+'px'; };
@@ -2268,6 +2392,55 @@
         setImg((config && config.data && config.data.src) ? config.data.src : '');
     }
 
+    function parseVimeoId(url){
+        if(!url) return '';
+        const m = url.trim().match(/vimeo\.com\/(?:video\/)?(\d+)/);
+        return m ? m[1] : '';
+    }
+
+    function createVideoWidget(config){
+        const body = createWidget('VIDEO', 380, 'video-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `
+            <div class='video-area'></div>
+            <div class='video-controls hover-menu'>
+                <input type='text' class='video-url sp-input' placeholder='Klistra in länk (YouTube, Vimeo eller .mp4)...'>
+                <div class='sp-row'><button class='btn btn-primary video-use' style='flex:1;'>Visa video</button><button class='btn btn-secondary video-upload-btn' style='flex:1;'>Ladda upp</button></div>
+                <input type='file' accept='video/*' class='video-file' style='display:none;'>
+                <div class='video-hint'>Uppladdade filer visas bara under den här sessionen. Länkar sparas permanent.</div>
+            </div>`;
+        const area=body.querySelector('.video-area'), urlInp=body.querySelector('.video-url'), useBtn=body.querySelector('.video-use'), upBtn=body.querySelector('.video-upload-btn'), fileInp=body.querySelector('.video-file');
+        const showPlaceholder=(msg)=>{ area.innerHTML = `<div class='video-placeholder'>🎬<span>${msg || 'Klistra in en videolänk (YouTube, Vimeo eller .mp4) eller ladda upp en fil'}</span></div>`; };
+        const setVideo=(kind, value)=>{
+            if(!kind || !value){ widget.dataset.videoKind=''; widget.dataset.videoSrc=''; showPlaceholder(); return; }
+            widget.dataset.videoKind = kind; widget.dataset.videoSrc = value;
+            area.innerHTML = '';
+            if(kind === 'youtube'){
+                const f=document.createElement('iframe'); f.src=`https://www.youtube.com/embed/${value}?rel=0`; f.allow='autoplay; encrypted-media; fullscreen'; f.allowFullscreen=true; area.appendChild(f);
+            } else if(kind === 'vimeo'){
+                const f=document.createElement('iframe'); f.src=`https://player.vimeo.com/video/${value}`; f.allow='autoplay; fullscreen; picture-in-picture'; f.allowFullscreen=true; area.appendChild(f);
+            } else {
+                const v=document.createElement('video'); v.src=value; v.controls=true; v.playsInline=true;
+                v.onerror=()=>{ showPlaceholder('⚠️ Kunde inte spela upp videon. Kontrollera länken och försök igen.'); };
+                area.appendChild(v);
+            }
+        };
+        useBtn.onclick=()=>{
+            let u=urlInp.value.trim(); if(!u) return;
+            const yt=parseYouTubeId(u);
+            if(yt){ setVideo('youtube', yt); urlInp.value=''; saveBoardState(); return; }
+            const vm=parseVimeoId(u);
+            if(vm){ setVideo('vimeo', vm); urlInp.value=''; saveBoardState(); return; }
+            if(!/^(https?:|data:|blob:)/.test(u)) u='https://'+u;
+            setVideo('file', u); urlInp.value=''; saveBoardState();
+        };
+        upBtn.onclick=()=> fileInp.click();
+        fileInp.onchange=()=>{ const f=fileInp.files[0]; if(!f) return; const url=URL.createObjectURL(f); setVideo('upload', url); fileInp.value=''; saveBoardState(); };
+        if(config && config.data && config.data.kind === 'upload'){ showPlaceholder('🎬 Uppladdad video sparas inte permanent – ladda upp filen igen.'); }
+        else if(config && config.data && config.data.kind && config.data.src){ setVideo(config.data.kind, config.data.src); }
+        else showPlaceholder();
+    }
+
     function createWeekSchedule(config){
         const body = createWidget('VECKOSCHEMA', 640, 'week-widget', config);
         const days=['Måndag','Tisdag','Onsdag','Torsdag','Fredag'];
@@ -2292,6 +2465,101 @@
         title.oninput=saveBoardState;
         if(config && config.data){ title.value=config.data.title||''; (config.data.items||[]).forEach(it=> addItem(it.text, it.done)); }
         else { addItem('',false); addItem('',false); }
+    }
+
+    // ---- REMINDER / PÅMINNELSER ----
+    function createReminderWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('REMINDER', 300, 'reminder-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='rem-compose hover-menu'><div class='rem-row'><input type='date' class='rem-date' title='Datum'><input type='time' class='rem-time' title='Klockslag'></div><textarea class='rem-text' placeholder='Vad vill du bli påmind om?'></textarea><button class='btn btn-primary rem-add' style='width:100%;'>+ Lägg till påminnelse</button></div><div class='rem-list'></div>`;
+        const dIn=body.querySelector('.rem-date'), tIn=body.querySelector('.rem-time'), txt=body.querySelector('.rem-text'), addBtn=body.querySelector('.rem-add'), list=body.querySelector('.rem-list');
+
+        let items = (config && config.data && Array.isArray(config.data.items)) ? config.data.items : [];
+        const pad=n=>String(n).padStart(2,'0');
+        const save=()=>{ widget.dataset.reminders = JSON.stringify(items); saveBoardState(); };
+
+        // Förifyll dagens datum och nuvarande tid + 5 min
+        const now=new Date();
+        dIn.value = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+        const def=new Date(now.getTime()+5*60000);
+        tIn.value = pad(def.getHours())+':'+pad(def.getMinutes());
+
+        const fmtWhen=(iso)=>{
+            const d=new Date(iso); const today=new Date(); const tom=new Date(today.getTime()+86400000);
+            const t=pad(d.getHours())+':'+pad(d.getMinutes());
+            if(d.toDateString()===today.toDateString()) return 'Idag '+t;
+            if(d.toDateString()===tom.toDateString()) return 'Imorgon '+t;
+            return d.toLocaleDateString('sv-SE',{day:'numeric',month:'short'})+' '+t;
+        };
+
+        function render(){
+            list.innerHTML='';
+            const sorted=[...items].sort((a,b)=> new Date(a.when)-new Date(b.when));
+            if(sorted.length===0){ list.innerHTML=`<div class='rem-empty'>⏰ Inga påminnelser ännu</div>`; return; }
+            sorted.forEach(it=>{
+                const row=document.createElement('div'); row.className='rem-item'+(it.fired?' fired':'');
+                row.innerHTML=`<div class='rem-item-main'><div class='rem-item-when'>${it.fired?'✓ ':''}${fmtWhen(it.when)}</div><div class='rem-item-text'></div></div><button class='rem-del hover-menu' title='Ta bort'>✕</button>`;
+                row.querySelector('.rem-item-text').textContent = it.text || '(utan text)';
+                row.querySelector('.rem-del').onclick=()=>{ items=items.filter(x=>x.id!==it.id); render(); save(); };
+                list.appendChild(row);
+            });
+        }
+
+        addBtn.onclick=()=>{
+            if(!dIn.value || !tIn.value){ customAlert('Välj både datum och klockslag.', '⏰'); return; }
+            const when=new Date(dIn.value+'T'+tIn.value);
+            if(isNaN(when.getTime())){ customAlert('Ogiltigt datum eller klockslag.', '⏰'); return; }
+            items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: when.toISOString(), text: txt.value.trim(), fired:false });
+            txt.value=''; render(); save();
+        };
+
+        function check(){
+            const nowT=Date.now(); let changed=false;
+            items.forEach(it=>{
+                if(!it.fired && new Date(it.when).getTime()<=nowT){
+                    it.fired=true; changed=true;
+                    showReminderPopup(it, (mins)=>{
+                        items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: new Date(Date.now()+mins*60000).toISOString(), text: it.text, fired:false });
+                        render(); save();
+                    });
+                }
+            });
+            if(changed){ render(); save(); }
+        }
+        const tId=setInterval(check, 5000);
+        const obs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ clearInterval(tId); obs.disconnect(); } });
+        const cc=document.getElementById('canvas-container-v6'); if(cc) obs.observe(cc,{childList:true,subtree:true});
+
+        widget.dataset.reminders = JSON.stringify(items);
+        render();
+    }
+
+    // Fin, stilig och blinkande popup när en påminnelse går av
+    function showReminderPopup(item, onSnooze){
+        const wrapper=document.getElementById('cb-app-wrapper');
+        const overlay=document.createElement('div'); overlay.className='reminder-popup-overlay';
+        const d=new Date(item.when); const pad=n=>String(n).padStart(2,'0');
+        const box=document.createElement('div'); box.className='reminder-popup-box';
+        box.innerHTML=`<div class='rem-pop-bell'>⏰</div><div class='rem-pop-title'>Påminnelse!</div><div class='rem-pop-time'>${pad(d.getHours())}:${pad(d.getMinutes())}</div><div class='rem-pop-text'></div><div class='rem-pop-actions'><button class='rem-pop-btn rem-pop-snooze'>😴 +5 min</button><button class='rem-pop-btn rem-pop-ok'>✔ OK, jag fixar det!</button></div>`;
+        const textEl=box.querySelector('.rem-pop-text'); textEl.textContent = item.text || '';
+        if(!item.text) textEl.style.display='none';
+        overlay.appendChild(box); wrapper.appendChild(overlay);
+        requestAnimationFrame(()=>{ overlay.classList.add('show'); });
+        try{ remChime(); }catch(e){}
+        const close=()=>{ overlay.classList.remove('show'); setTimeout(()=>overlay.remove(),300); };
+        box.querySelector('.rem-pop-ok').onclick=close;
+        box.querySelector('.rem-pop-snooze').onclick=()=>{ if(typeof onSnooze==='function') onSnooze(5); close(); };
+    }
+
+    // Mjuk "pling-plong"-signal (spelas 3 gånger)
+    function remChime(){
+        const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+        if(!window._remAC) window._remAC=new AC();
+        const ctx=window._remAC; if(ctx.state==='suspended'){ ctx.resume().catch(()=>{}); }
+        const ding=(t0,f)=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.22,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.7); o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0+0.75); };
+        const t=ctx.currentTime;
+        for(let i=0;i<3;i++){ ding(t+i*0.9, 880); ding(t+i*0.9+0.15, 1174.66); }
     }
 
     function createWheel(config){
@@ -2629,6 +2897,184 @@
             });
         }
         renderTabs(); renderGrid();
+    }
+
+    // ---- OMRÖSTNING / QUIZ (fråga + alternativ, elever trycker, resultat live) ----
+    function createQuizPoll(config){
+        const body = createWidget('OMRÖSTNING', 340, 'poll-widget', config);
+        const widgetElRef = body.parentElement.parentElement;
+        if(!config){ widgetElRef.style.height = '340px'; }
+        const root=document.createElement('div'); root.className='poll-root'; body.appendChild(root);
+
+        let state = { question:'', options:[{text:'Alternativ A',votes:0},{text:'Alternativ B',votes:0}], correctIndex:-1, quizMode:false, mode:'edit', revealed:false };
+        if(config && config.data){ try{ Object.assign(state, config.data); }catch(e){} }
+        if(!Array.isArray(state.options) || state.options.length<2) state.options=[{text:'Alternativ A',votes:0},{text:'Alternativ B',votes:0}];
+
+        let saveTimer=null;
+        const stamp=()=>{ widgetElRef.dataset.poll = JSON.stringify(state); };
+        const persist=()=>{ stamp(); saveBoardState(); };
+        const persistSoon=()=>{ stamp(); clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveBoardState(),700); };
+
+        function renderEdit(){
+            root.innerHTML='';
+            const q=document.createElement('input'); q.className='kw-title-in'; q.placeholder='Skriv din fråga...'; q.value=state.question; q.oninput=()=>{ state.question=q.value; persistSoon(); }; root.appendChild(q);
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Lägg till svarsalternativ (2–6 st).'; root.appendChild(hint);
+
+            const quizToggle=document.createElement('label'); quizToggle.className='og-diag-toggle';
+            const qcb=document.createElement('input'); qcb.type='checkbox'; qcb.checked=state.quizMode;
+            qcb.onchange=()=>{ state.quizMode=qcb.checked; if(!state.quizMode) state.correctIndex=-1; renderEdit(); persist(); };
+            quizToggle.appendChild(qcb);
+            const qtxt=document.createElement('span'); qtxt.textContent='Quiz-läge (markera rätt svar)'; quizToggle.appendChild(qtxt);
+            root.appendChild(quizToggle);
+
+            const list=document.createElement('div'); root.appendChild(list);
+            state.options.forEach((opt,i)=>{
+                const row=document.createElement('div'); row.className='kw-edit-row';
+                if(state.quizMode){
+                    const radio=document.createElement('input'); radio.type='radio'; radio.name='poll-correct-'+widgetElRef.dataset.widgetType+Math.random(); radio.checked=state.correctIndex===i; radio.style.flexShrink='0';
+                    radio.onchange=()=>{ state.correctIndex=i; persist(); };
+                    row.appendChild(radio);
+                }
+                const inp=document.createElement('input'); inp.className='poll-opt-input'; inp.value=opt.text; inp.placeholder='Alternativ '+String.fromCharCode(65+i);
+                inp.oninput=()=>{ opt.text=inp.value; persistSoon(); };
+                row.appendChild(inp);
+                if(state.options.length>2){
+                    const del=document.createElement('button'); del.className='kw-del'; del.innerHTML='✕';
+                    del.onclick=()=>{ state.options.splice(i,1); if(state.correctIndex===i) state.correctIndex=-1; else if(state.correctIndex>i) state.correctIndex--; renderEdit(); persist(); };
+                    row.appendChild(del);
+                }
+                list.appendChild(row);
+            });
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const addBtn=document.createElement('button'); addBtn.className='kw-btn kw-btn-ghost'; addBtn.textContent='+ Alternativ';
+            addBtn.onclick=()=>{ if(state.options.length<6){ state.options.push({text:'',votes:0}); renderEdit(); persist(); } };
+            if(state.options.length>=6) addBtn.disabled=true;
+            const startBtn=document.createElement('button'); startBtn.className='kw-btn kw-btn-primary'; startBtn.textContent='🚀 Starta omröstning';
+            startBtn.onclick=()=>{
+                if(!state.question.trim()){ customAlert('Skriv en fråga först.', '✏️'); return; }
+                if(state.options.some(o=>!o.text.trim())){ customAlert('Fyll i text för alla alternativ.', '✏️'); return; }
+                if(state.quizMode && state.correctIndex<0){ customAlert('Markera vilket alternativ som är rätt svar (eller stäng av Quiz-läge).', '✏️'); return; }
+                state.options.forEach(o=>o.votes=0);
+                state.revealed=false;
+                state.mode='play';
+                render(); persist();
+            };
+            btns.appendChild(addBtn); btns.appendChild(startBtn); root.appendChild(btns);
+        }
+
+        function renderPlay(){
+            root.innerHTML='';
+            const qEl=document.createElement('div'); qEl.className='kw-title'; qEl.textContent=state.question; root.appendChild(qEl);
+
+            const total = state.options.reduce((s,o)=>s+(o.votes||0),0);
+            state.options.forEach((opt,i)=>{
+                const btn=document.createElement('button'); btn.type='button'; btn.className='poll-opt-btn';
+                if(state.revealed && state.quizMode && state.correctIndex===i) btn.classList.add('poll-opt-correct');
+                const fill=document.createElement('div'); fill.className='poll-opt-fill';
+                const pct = total>0 ? Math.round((opt.votes||0)/total*100) : 0;
+                fill.style.width = pct+'%';
+                btn.appendChild(fill);
+                const content=document.createElement('div'); content.className='poll-opt-content';
+                const label=document.createElement('span'); label.textContent = opt.text + (state.revealed && state.quizMode && state.correctIndex===i ? ' ✅' : '');
+                const stat=document.createElement('span'); stat.className='poll-opt-pct'; stat.textContent = (opt.votes||0) + ' (' + pct + '%)';
+                content.appendChild(label); content.appendChild(stat);
+                btn.appendChild(content);
+                btn.onclick=()=>{ opt.votes=(opt.votes||0)+1; renderPlay(); persist(); };
+                root.appendChild(btn);
+            });
+
+            const totalEl=document.createElement('div'); totalEl.className='exit-total'; totalEl.textContent = total===0 ? 'Inga röster än' : total + ' röster totalt'; root.appendChild(totalEl);
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const editBtn=document.createElement('button'); editBtn.className='kw-btn kw-btn-ghost'; editBtn.textContent='✏️ Redigera'; editBtn.onclick=()=>{ state.mode='edit'; render(); persist(); };
+            const resetBtn=document.createElement('button'); resetBtn.className='kw-btn kw-btn-warn'; resetBtn.textContent='🔄 Nollställ röster'; resetBtn.onclick=()=>{ state.options.forEach(o=>o.votes=0); state.revealed=false; renderPlay(); persist(); };
+            btns.appendChild(editBtn); btns.appendChild(resetBtn);
+            if(state.quizMode && !state.revealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='✅ Visa rätt svar';
+                revealBtn.onclick=()=>{ state.revealed=true; renderPlay(); persist(); };
+                btns.appendChild(revealBtn);
+            }
+            root.appendChild(btns);
+        }
+
+        function render(){ stamp(); if(state.mode==='play') renderPlay(); else renderEdit(); }
+        render();
+    }
+
+    // ---- EXIT TICKET (snabb koll: hur kändes lektionen?) ----
+    const EXIT_TICKET_DEFAULT_OPTIONS = [
+        { emoji:'😄', label:'Toppen' },
+        { emoji:'🙂', label:'Bra' },
+        { emoji:'😐', label:'Okej' },
+        { emoji:'🙁', label:'Svårt' },
+        { emoji:'😢', label:'Jobbigt' }
+    ];
+
+    function createExitTicket(config){
+        const body = createWidget('EXIT TICKET', 300, 'exit-widget', config);
+        const widgetEl = body.parentElement.parentElement;
+        if(!config){ widgetEl.style.height = '300px'; }
+        const options = EXIT_TICKET_DEFAULT_OPTIONS;
+        let question = 'Hur kändes lektionen idag?';
+        let counts = options.map(()=>0);
+        if(config && config.data){
+            if(typeof config.data.question === 'string') question = config.data.question;
+            if(Array.isArray(config.data.counts) && config.data.counts.length===options.length) counts = config.data.counts.map(n=>parseInt(n)||0);
+        }
+
+        const root=document.createElement('div'); root.className='exit-root'; body.appendChild(root);
+        const qInput=document.createElement('input'); qInput.type='text'; qInput.className='exit-question'; qInput.value=question; qInput.placeholder='Skriv din fråga...'; root.appendChild(qInput);
+
+        const optsRow=document.createElement('div'); optsRow.className='exit-options'; root.appendChild(optsRow);
+        const barsWrap=document.createElement('div'); barsWrap.className='exit-bar-wrap'; root.appendChild(barsWrap);
+        const totalEl=document.createElement('div'); totalEl.className='exit-total'; root.appendChild(totalEl);
+        const resetBtn=document.createElement('button'); resetBtn.className='exit-reset'; resetBtn.type='button'; resetBtn.textContent='Nollställ svar'; root.appendChild(resetBtn);
+
+        const widgetElRef = widgetEl;
+        const stamp=()=>{ widgetElRef.dataset.exitTicket = JSON.stringify({ question, counts }); };
+        const persist=()=>{ stamp(); saveBoardState(); };
+
+        function renderBars(){
+            barsWrap.innerHTML='';
+            const max = Math.max(1, ...counts);
+            options.forEach((opt,i)=>{
+                const row=document.createElement('div'); row.className='exit-bar-row';
+                const em=document.createElement('div'); em.className='exit-bar-emoji'; em.textContent=opt.emoji;
+                const track=document.createElement('div'); track.className='exit-bar-track';
+                const fill=document.createElement('div'); fill.className='exit-bar-fill'; fill.style.width=(counts[i]/max*100)+'%';
+                track.appendChild(fill);
+                const num=document.createElement('div'); num.className='exit-bar-num'; num.textContent=counts[i];
+                row.appendChild(em); row.appendChild(track); row.appendChild(num);
+                barsWrap.appendChild(row);
+            });
+            const total = counts.reduce((a,b)=>a+b,0);
+            totalEl.textContent = total===0 ? 'Inga svar än' : total + ' svar totalt';
+        }
+
+        options.forEach((opt,i)=>{
+            const btn=document.createElement('button'); btn.type='button'; btn.className='exit-opt';
+            btn.innerHTML = `<span class='exit-emoji'>${opt.emoji}</span><span class='exit-count'>${counts[i]}</span>`;
+            btn.title = opt.label;
+            btn.onclick=()=>{
+                counts[i]++;
+                btn.querySelector('.exit-count').textContent = counts[i];
+                renderBars(); persist();
+            };
+            optsRow.appendChild(btn);
+        });
+
+        qInput.oninput=()=>{ question = qInput.value; persist(); };
+        resetBtn.onclick=()=>{
+            customConfirm('Nollställ alla svar?', ()=>{
+                counts = options.map(()=>0);
+                [...optsRow.children].forEach((btn,i)=>{ btn.querySelector('.exit-count').textContent = 0; });
+                renderBars(); persist();
+            });
+        };
+
+        renderBars();
+        stamp();
     }
 
     // ---- BORDSPLACERING (möbelritning: dra ut bord, flytta fritt, spara layouten) ----
@@ -4079,6 +4525,172 @@
     }
     window.initToolbarSortable = initToolbarSortable;
 
+    // ---- FLYTTBAR VERKTYGSFICKA (vänster panel): dra om knapparna OCH kedjorna där ----
+    // Hela fickans layout (knappar + kedjor, i exakt ordning + kedjornas höjd) sparas som en enda lista
+    // per användare, så att kedjorna kan flyttas fritt upp/ner för att skapa utrymme åt fler widgetar,
+    // och layouten består även när nya verktyg läggs till senare.
+    function toolPocketLayoutKey(){ return 'mintavla_toolPocketLayout_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
+    function loadToolPocketLayout(){
+        try { const raw = localStorage.getItem(toolPocketLayoutKey()); if(raw){ const arr = JSON.parse(raw); if(Array.isArray(arr)) return arr; } } catch(e){}
+        return null;
+    }
+    function saveToolPocketLayout(){
+        const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
+        const layout = [...grid.children].map(el=>{
+            if(el.classList.contains('tool-pocket-divider')) return { type:'div', h: el.offsetHeight };
+            if(el.classList.contains('tool-btn')) return { type:'btn', id: toolBtnId(el) };
+            return null;
+        }).filter(Boolean);
+        try { localStorage.setItem(toolPocketLayoutKey(), JSON.stringify(layout)); } catch(e){}
+        if(typeof syncToCloud==='function') syncToCloud();
+    }
+    window.saveToolPocketLayout = saveToolPocketLayout;
+    function buildDefaultToolPocketLayout(btnIds){
+        const dividerCount = 5;
+        const groupSize = Math.max(1, Math.ceil(btnIds.length / (dividerCount + 1)));
+        const layout = []; let placed = 0;
+        btnIds.forEach((id, i) => {
+            layout.push({ type:'btn', id });
+            const isRowBreak = (i + 1) % groupSize === 0;
+            const isLast = (i + 1) >= btnIds.length;
+            if(placed < dividerCount && isRowBreak && !isLast){ layout.push({ type:'div', h:16 }); placed++; }
+        });
+        while(placed < dividerCount){ layout.push({ type:'div', h:16 }); placed++; }
+        return layout;
+    }
+    // Synkar bara knapparnas (inte kedjornas) ordning tillbaka till huvudverktygsraden
+    function syncToolbarButtonOrderFromGrid(grid){
+        const tc=document.getElementById('toolbar-container'); if(!tc||!grid) return;
+        const favStrip=tc.querySelector('.tool-fav'), extraStrip=tc.querySelector('.tool-extra');
+        if(!favStrip||!extraStrip) return;
+        const favCount=favStrip.querySelectorAll('.tool-btn').length;
+        const newOrderIds=[...grid.querySelectorAll('.tool-btn')].map(toolBtnId);
+        const map={}; tc.querySelectorAll('.tool-btn').forEach(b=>{ map[toolBtnId(b)]=b; });
+        newOrderIds.forEach((id,i)=>{ const real=map[id]; if(!real) return; (i<favCount ? favStrip : extraStrip).appendChild(real); });
+        saveToolbarOrder();
+    }
+    function makeChainDividerEl(h){
+        const div = document.createElement('div');
+        div.className = 'tool-pocket-divider';
+        div.style.height = (h || 16) + 'px';
+        div.innerHTML = `<div class="chain-strip"></div><div class="tpd-remove" title="Ta bort kedjan">✕</div><div class="tpd-handle" title="Dra upp/ner för att ändra kedjans höjd"></div>`;
+        const handle = div.querySelector('.tpd-handle');
+        handle.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const startY = e.clientY, startH = div.offsetHeight;
+            div.classList.add('tpd-dragging');
+            try { handle.setPointerCapture(e.pointerId); } catch(_){}
+            const move = (ev) => { ev.preventDefault(); const dy = ev.clientY - startY; const newH = Math.max(10, Math.min(140, startH + dy)); div.style.height = newH + 'px'; };
+            const up = () => {
+                handle.removeEventListener('pointermove', move);
+                handle.removeEventListener('pointerup', up);
+                handle.removeEventListener('pointercancel', up);
+                div.classList.remove('tpd-dragging');
+                saveToolPocketLayout();
+            };
+            handle.addEventListener('pointermove', move);
+            handle.addEventListener('pointerup', up);
+            handle.addEventListener('pointercancel', up);
+        });
+        const removeBtn = div.querySelector('.tpd-remove');
+        removeBtn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); e.stopPropagation(); });
+        removeBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); div.remove(); saveToolPocketLayout(); });
+        return div;
+    }
+    // Lägg till en ny kedja sist i verktygsfickan – dra den sedan dit du vill ha den
+    function addToolPocketDivider(){
+        const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
+        grid.appendChild(makeChainDividerEl(16));
+        saveToolPocketLayout();
+    }
+    window.addToolPocketDivider = addToolPocketDivider;
+    function rebuildToolPocketGrid(){
+        const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
+        grid.innerHTML='';
+        const btns = [...document.querySelectorAll('#toolbar-container .tool-btn')];
+        const btnMap = {}; btns.forEach(b=>{ btnMap[toolBtnId(b)] = b; });
+        let layout = loadToolPocketLayout();
+        if(!layout) layout = buildDefaultToolPocketLayout(btns.map(toolBtnId));
+        const used = new Set();
+        layout.forEach(entry=>{
+            if(!entry) return;
+            if(entry.type === 'btn'){
+                const real = btnMap[entry.id];
+                if(real && !used.has(entry.id)){
+                    const c = real.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); grid.appendChild(c);
+                    used.add(entry.id);
+                }
+            } else if(entry.type === 'div'){
+                grid.appendChild(makeChainDividerEl(entry.h));
+            }
+        });
+        // Nya verktyg som saknas i den sparade layouten läggs sist
+        btns.forEach(b=>{
+            const id = toolBtnId(b);
+            if(!used.has(id)){
+                const c = b.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); grid.appendChild(c);
+                used.add(id);
+            }
+        });
+        saveToolPocketLayout();
+    }
+    window.rebuildToolPocketGrid = rebuildToolPocketGrid;
+    function initToolPocketSortable(){
+        const grid=document.getElementById('tool-pocket-grid'); if(!grid || grid.dataset.sortableInit) return;
+        grid.dataset.sortableInit='1';
+        function placeDragged(x, y, item){
+            const el=document.elementFromPoint(x, y); if(!el) return;
+            if(!grid.contains(el) && el!==grid) return;
+            const over=el.closest('.tool-btn, .tool-pocket-divider');
+            if(over && over!==item){
+                const r=over.getBoundingClientRect();
+                const bothBtns = over.classList.contains('tool-btn') && item.classList.contains('tool-btn');
+                const sameRow = bothBtns && Math.abs(y-(r.top+r.height/2)) < r.height*0.9;
+                const after = sameRow ? (x > r.left+r.width/2) : (y > r.top+r.height/2);
+                grid.insertBefore(item, after ? over.nextSibling : over);
+            } else if(!over && !grid.contains(item)){
+                grid.appendChild(item);
+            }
+        }
+        grid.addEventListener('pointerdown', (e)=>{
+            if(e.target.closest('.tpd-handle, .tpd-remove')) return;
+            const item=e.target.closest('.tool-btn, .tool-pocket-divider'); if(!item) return;
+            if(e.button && e.button!==0) return;
+            const isChain = item.classList.contains('tool-pocket-divider');
+            const startX=e.clientX, startY=e.clientY;
+            let started=false;
+            const move=(ev)=>{
+                const dx=ev.clientX-startX, dy=ev.clientY-startY;
+                if(!started){
+                    if(Math.abs(dx)+Math.abs(dy) < 6) return;
+                    started=true;
+                    item.classList.add(isChain ? 'tpd-moving' : 'tool-dragging');
+                    item.style.pointerEvents='none';
+                    try{ grid.setPointerCapture(ev.pointerId); }catch(_){}
+                }
+                ev.preventDefault();
+                placeDragged(ev.clientX, ev.clientY, item);
+            };
+            const up=()=>{
+                grid.removeEventListener('pointermove',move);
+                grid.removeEventListener('pointerup',up);
+                grid.removeEventListener('pointercancel',up);
+                if(started){
+                    item.classList.remove('tool-dragging','tpd-moving');
+                    item.style.pointerEvents='';
+                    syncToolbarButtonOrderFromGrid(grid);
+                    saveToolPocketLayout();
+                    item._suppressClick=true; setTimeout(()=>{ item._suppressClick=false; }, 60);
+                }
+            };
+            grid.addEventListener('pointermove',move);
+            grid.addEventListener('pointerup',up);
+            grid.addEventListener('pointercancel',up);
+        });
+        grid.addEventListener('click', (e)=>{ const btn=e.target.closest('.tool-btn'); if(btn && btn._suppressClick){ e.preventDefault(); e.stopPropagation(); } }, true);
+    }
+    window.initToolPocketSortable = initToolPocketSortable;
+
     function initBoard() {
         restoreToolbarOrder();
         let savedData = localStorage.getItem('boardStateV6_' + currentUser);
@@ -4135,7 +4747,11 @@
         const panel = document.getElementById('tool-pocket-panel');
         const grid = document.getElementById('tool-pocket-grid');
         if(!zone || !grid) return;
-        function build(){ grid.innerHTML=''; document.querySelectorAll('#toolbar-container .tool-btn').forEach(btn=>{ const c=btn.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); grid.appendChild(c); }); }
+        function build(){
+            if(typeof window.rebuildToolPocketGrid === 'function') window.rebuildToolPocketGrid();
+            else { grid.innerHTML=''; document.querySelectorAll('#toolbar-container .tool-btn').forEach(btn=>{ const c=btn.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); grid.appendChild(c); }); }
+            if(typeof window.initToolPocketSortable === 'function') window.initToolPocketSortable();
+        }
         build();
         // bygg om när verktygsordningen återställts (per användare)
         setTimeout(build, 1500);
