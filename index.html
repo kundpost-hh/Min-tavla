@@ -897,6 +897,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
     let widgetCount = 0; let pagesListV6 = []; let currentPageIndexV6 = -1; let topZ = 100;
@@ -2838,6 +2839,22 @@
         });
     }
 
+    // Laddar ner en canvas som en PDF-fil till datorn (canvasen ritas in centrerad, anpassad till A4)
+    function downloadCanvasAsPDF(canvas, filename){
+        try{
+            if(typeof jspdf === 'undefined' || !jspdf.jsPDF){ customAlert('Kunde inte skapa PDF just nu. Kontrollera internetanslutningen och försök igen.', '⚠️'); return; }
+            const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+            const pdf = new jspdf.jsPDF({ orientation: orientation, unit:'pt', format:'a4' });
+            const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
+            const margin = 24;
+            const maxW = pageW - margin*2, maxH = pageH - margin*2;
+            const scale = Math.min(maxW/canvas.width, maxH/canvas.height);
+            const imgW = canvas.width*scale, imgH = canvas.height*scale;
+            const x = (pageW-imgW)/2, y = (pageH-imgH)/2;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgW, imgH);
+            pdf.save(filename);
+        } catch(e){ customAlert('Kunde inte spara PDF:en. Försök igen.', '⚠️'); }
+    }
     // Laddar ner en canvas som en PNG-fil till datorn
     function downloadCanvasPNG(canvas, filename){
         try{
@@ -2888,7 +2905,7 @@
         w.document.open(); w.document.write(html); w.document.close();
     }
 
-    // Ritar korsordet (rutnät + ledtrådar) till en canvas och laddar ner det som en PNG-fil
+    // Ritar korsordet (rutnät + ledtrådar) till en canvas och laddar ner det som en PDF-fil
     function saveCrosswordAsImage(lay, title, withFacit){
         if(!lay) return;
         const letterAt={}, numAt={};
@@ -2928,7 +2945,7 @@
         ctx.font='13px Arial'; ctx.fillStyle='#333';
         across.forEach((p,i)=>{ ctx.fillText(p.num+'. '+(p.clue||'—'), pad, y+24+i*lineH); });
         down.forEach((p,i)=>{ ctx.fillText(p.num+'. '+(p.clue||'—'), pad+colW, y+24+i*lineH); });
-        downloadCanvasPNG(cvs, sanitizeFileName(title,'Korsord')+'.png');
+        downloadCanvasAsPDF(cvs, sanitizeFileName(title,'Korsord')+'.pdf');
     }
     function aiKeyStoreName(){ return 'mintavla_aiKey_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
     function aiKeyGet(){ try{ return localStorage.getItem(aiKeyStoreName()) || ''; }catch(e){ return ''; } }
@@ -3050,7 +3067,7 @@
             const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
             const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
             const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut korsordet'; prnt.onclick=()=>printCrossword(state.layout, state.title, false);
-            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara'; saveImg.title='Spara korsordet som bild på datorn'; saveImg.onclick=()=>saveCrosswordAsImage(state.layout, state.title, false);
+            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara korsordet som PDF på datorn'; saveImg.onclick=()=>saveCrosswordAsImage(state.layout, state.title, false);
             const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
             let showing=false;
             facit.onclick=()=>{ showing=!showing; g.querySelectorAll('.kw-input').forEach(inp=>{ const cell=inp.parentElement; if(showing){ inp.value=inp.dataset.ans; cell.classList.add('kw-facit'); } else { inp.value=state.answers[inp.dataset.k]||''; cell.classList.remove('kw-facit'); } }); facit.textContent=showing?'Dölj facit':'Visa facit'; };
@@ -3220,7 +3237,7 @@
         w.document.open(); w.document.write(html); w.document.close();
     }
 
-    // Ritar ordgömman (rutnät + ordlista) till en canvas och laddar ner den som en PNG-fil
+    // Ritar ordgömman (rutnät + ordlista) till en canvas och laddar ner den som en PDF-fil
     function saveWordSearchAsImage(lay, title){
         if(!lay) return;
         const cellPx = 40, pad = 36, titleH = 46;
@@ -3250,7 +3267,7 @@
         ctx.font='bold 15px Arial'; ctx.textAlign='left'; ctx.fillStyle='#333';
         const colW = canvasW/cols;
         words.forEach((wd,i)=>{ const col=Math.floor(i/rowsPerCol), row=i%rowsPerCol; ctx.fillText('• '+wd, pad+col*colW, y+row*lineH); });
-        downloadCanvasPNG(cvs, sanitizeFileName(title,'Ordgömma')+'.png');
+        downloadCanvasAsPDF(cvs, sanitizeFileName(title,'Ordgömma')+'.pdf');
     }
 
     function buildOgChatPrompt(desc){
@@ -3362,7 +3379,7 @@
             const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
             const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
             const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut ordgömman'; prnt.onclick=()=>printWordSearch(state.layout, state.title);
-            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara'; saveImg.title='Spara ordgömman som bild på datorn'; saveImg.onclick=()=>saveWordSearchAsImage(state.layout, state.title);
+            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara ordgömman som PDF på datorn'; saveImg.onclick=()=>saveWordSearchAsImage(state.layout, state.title);
             const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
             let showing=false;
             facit.onclick=()=>{ showing=!showing; if(showing){ lay.placements.forEach(p=>p.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-facit'); })); } else { g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-facit')); } facit.textContent=showing?'Dölj facit':'Visa facit'; };
