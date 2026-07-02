@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -945,6 +944,24 @@
     let fbAuth = null, fbDB = null, fbUser = null;
     function cloudConfigured(){ return firebaseConfig.projectId && firebaseConfig.projectId.indexOf('DITT_') !== 0; }
     function isAdminEmail(email){ return adminEmailsCache.map(e=>e.toLowerCase()).indexOf((email||'').toLowerCase()) !== -1; }
+
+    // ---- Avskräck (inte skydda) mot att casuellt titta i källkoden. Gäller INTE inloggad admin. ----
+    (function setupSourceGuard(){
+        document.addEventListener('contextmenu', function(e){
+            if (isAdminEmail(currentUser)) return;
+            e.preventDefault();
+        });
+        document.addEventListener('keydown', function(e){
+            if (isAdminEmail(currentUser)) return;
+            const k = (e.key || '').toLowerCase();
+            const blockCombo =
+                k === 'f12' ||
+                ((e.ctrlKey || e.metaKey) && e.shiftKey && (k === 'i' || k === 'j' || k === 'c')) ||
+                ((e.ctrlKey || e.metaKey) && k === 'u') ||
+                (e.metaKey && e.altKey && (k === 'i' || k === 'j' || k === 'c' || k === 'u')); // Mac
+            if (blockCombo){ e.preventDefault(); e.stopPropagation(); }
+        });
+    })();
     (function initCloud(){
         try {
             if (!cloudConfigured()) { console.info('[MinTavla] Firebase ej konfigurerad – sparar lokalt. Fyll i firebaseConfig för att aktivera.'); return; }
