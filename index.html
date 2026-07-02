@@ -1,6 +1,8 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -1614,6 +1616,13 @@
     }
     function deleteLink(i){ spLinks.splice(i,1); spSavePersonal('links', spLinks); renderSidePocket(); }
     function openQuickLink(url){ const u=normalizeUrl(url); if(u) window.open(u, '_blank', 'noopener'); }
+    // Öppnar Gemini i ett litet, centrerat popup-fönster istället för en ny flik/sida.
+    function openGeminiPopup(){
+        const w=480, h=780;
+        const left=Math.max(0, Math.round(((window.screen.width||1280)-w)/2));
+        const top=Math.max(0, Math.round(((window.screen.height||800)-h)/2));
+        window.open('https://gemini.google.com/app', 'GeminiPopup', 'width='+w+',height='+h+',left='+left+',top='+top+',resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no');
+    }
 
     // ---- PERSONALFLÖDE (delad chatt i sidofickan) ----
     const FEED_MAX_AGE_DAYS = 30; // inlägg äldre än så här gallras bort automatiskt
@@ -3118,7 +3127,7 @@
                 const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
                 try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
                 catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
-                window.open('https://gemini.google.com/app','_blank','noopener'); };
+                openGeminiPopup(); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – korsordet skapas automatiskt...'; box.appendChild(pasteTa);
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=2){ makeFromWords(words, status, close); } },60); });
@@ -3423,7 +3432,7 @@
                 const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
                 try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
                 catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
-                window.open('https://gemini.google.com/app','_blank','noopener'); };
+                openGeminiPopup(); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – ordgömman skapas automatiskt...'; box.appendChild(pasteTa);
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=1){ makeFromWords(words, status, close); } },60); });
