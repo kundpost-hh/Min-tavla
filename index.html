@@ -101,6 +101,7 @@
                     <button class="sp-add-btn sp-add-mini" onclick="sendFeedMessage()">➤</button>
                 </div>
             </div>
+            <div class="sp-copyright">© 2026 Hussein Hirori. Alla rättigheter förbehållna.</div>
         </div>
     </div>
 
@@ -108,8 +109,11 @@
     <div id="tool-pocket-zone">
         <div id="tool-pocket-tab">❯</div>
         <div id="tool-pocket-panel">
-            <div class="tool-pocket-title">Verktyg</div>
-            <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
+            <div id="tool-pocket-scroll">
+                <div class="tool-pocket-title">Verktyg</div>
+                <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
+            </div>
+            <div class="sp-copyright" id="tool-pocket-copyright">© 2026 Hussein Hirori. Alla rättigheter förbehållna.</div>
         </div>
     </div>
 
@@ -142,6 +146,8 @@
             <button class="tool-btn" onclick="createTimer()"><div class="icon">⏱️</div><div class="label">D. Timer</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
+            <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
+            <button class="tool-btn" onclick="createSeatingChart()"><div class="icon">🪑</div><div class="label">Bordsplacering</div></button>
             <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="21" height="21" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
         </div>
@@ -270,6 +276,7 @@
     .side-pocket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .side-pocket-reset { text-align: center; font-size: 10px; color: #aaa; margin-top: 10px; cursor: pointer; text-decoration: underline; }
     .side-pocket-reset:hover { color: #007aff; }
+    .sp-copyright { text-align: center; font-size: 9px; color: #c7c7cc; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); line-height: 1.4; user-select: none; }
     .side-pocket-item { display: flex; flex-direction: column; align-items: center; background: #f7f7f9; border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 8px 4px 6px; cursor: pointer; transition: all 0.15s ease; }
     .side-pocket-item:hover { background: #eef3ff; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
     .side-pocket-item .icon { font-size: 24px; font-weight: 800; color: #444; margin-bottom: 4px; pointer-events: none; }
@@ -280,8 +287,10 @@
     #tool-pocket-zone { position: fixed; top: 50%; left: 0; transform: translateY(-50%); z-index: 10500; width: 0; height: 64px; }
     #tool-pocket-tab { position: absolute; top: 0; left: 0; width: 26px; height: 64px; background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); border-left: none; border-radius: 0 14px 14px 0; box-shadow: 4px 4px 16px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: #888; transition: all 0.25s ease; }
     #tool-pocket-zone.open #tool-pocket-tab { width: 18px; color: #555; background: rgba(255,255,255,0.98); }
-    #tool-pocket-panel { position: absolute; top: 50%; left: 0; transform: translateY(-50%) translateX(-100%); width: 256px; max-height: 90vh; overflow-y: auto; background: rgba(255,255,255,0.97); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid rgba(0,0,0,0.08); padding: 14px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+    #tool-pocket-panel { position: absolute; top: 50%; left: 0; transform: translateY(-50%) translateX(-100%); width: 256px; max-height: 90vh; display: flex; flex-direction: column; background: rgba(255,255,255,0.97); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid rgba(0,0,0,0.08); padding: 14px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
     #tool-pocket-zone.open #tool-pocket-panel { opacity: 1; visibility: visible; transform: translateY(-50%) translateX(26px); pointer-events: auto; }
+    #tool-pocket-scroll { overflow-y: auto; min-height: 0; flex: 1 1 auto; }
+    #tool-pocket-copyright { flex: 0 0 auto; }
     .tool-pocket-title { font-size: 12px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-bottom: 10px; }
     .tool-pocket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .tool-pocket-grid .tool-btn { background: #f7f7f9; border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 8px 4px 6px; min-width: 0; cursor: pointer; touch-action: auto; }
@@ -408,8 +417,8 @@
     .board-table td { border: 1px solid #d1d1d6; padding: 6px; min-width: 60px; height: 40px; outline: none; transition: background 0.2s; font-size: 14px; word-wrap: break-word; }
     .board-table td:focus { background: #f0f8ff; border-color: #007aff; }
 
-    .real-clock-face { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #ffffff 0%, #f4f4f7 100%); border: 5px solid #1f2937; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.12); margin: 0 auto 8px; align-self: center; }
-    .real-clock-face::after { content: ''; position: absolute; width: 12px; height: 12px; background: #1f2937; border: 2px solid #ff3b30; border-radius: 50%; z-index: 6; }
+    .real-clock-face { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #ffffff 0%, #f4f4f7 100%); border: 5px solid #607d8b; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.12); margin: 0 auto 8px; align-self: center; }
+    .real-clock-face::after { content: ''; position: absolute; width: 12px; height: 12px; background: #607d8b; border: 2px solid #ff3b30; border-radius: 50%; z-index: 6; }
     .clock-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
     .clock-widget .widget-resizer::after { border-color: #999; }
     .clock-widget .time-display { text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
@@ -437,8 +446,12 @@
     .clock-tick { position: absolute; left: 50%; top: 7px; transform-origin: 50% 68px; pointer-events: none; }
     .clock-tick.minor { width: 1px; height: 5px; margin-left: -0.5px; background: #c7c7cc; }
     .clock-tick.major { width: 3px; height: 9px; margin-left: -1.5px; background: #555; border-radius: 1px; }
-    .clock-tick.big { width: 3.5px; height: 13px; margin-left: -1.75px; background: #1f2937; border-radius: 1px; }
-    .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; background: #1f2937; border-radius: 6px; z-index: 3; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+    .clock-tick.big { width: 3.5px; height: 13px; margin-left: -1.75px; background: #607d8b; border-radius: 1px; }
+    .clock-num { position: absolute; left: 50%; top: 50%; pointer-events: none; text-align: center; font-family: Arial, Helvetica, sans-serif; line-height: 1; }
+    .clock-num-hour { font-size: 15px; font-weight: 800; color: #d32f2f; width: 20px; }
+    .clock-num-24 { font-size: 9px; font-weight: 700; color: #d32f2f; width: 16px; }
+    .clock-num-min { font-size: 8px; font-weight: 700; color: #1565c0; width: 16px; }
+    .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; background: #607d8b; border-radius: 6px; z-index: 3; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
     .hand.hour { width: 6px; height: 40px; margin-left: -3px; }
     .hand.minute { width: 4px; height: 58px; margin-left: -2px; }
     .hand.second { width: 2px; height: 66px; margin-left: -1px; background: #ff3b30; z-index: 4; box-shadow: none; }
@@ -704,6 +717,36 @@
     .og-word-chip.og-found { background:#d2f8dc; color:#1c7a34; text-decoration:line-through; }
     .og-diag-toggle { display:flex; align-items:center; gap:6px; justify-content:center; font-size:12px; color:#555; margin:0 0 10px; cursor:pointer; }
     .og-diag-toggle input { width:15px; height:15px; cursor:pointer; }
+    .sticker-picker-widget .widget-inner { background:#fff; }
+    .stk-root { display:flex; flex-direction:column; width:100%; }
+    .stk-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .stk-tab { border:1px solid #d1d1d6; background:#f7f7f9; border-radius:14px; padding:5px 10px; font-size:12px; font-weight:700; color:#555; cursor:pointer; font-family:inherit; }
+    .stk-tab.active { background:#007aff; border-color:#007aff; color:#fff; }
+    .stk-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:8px; }
+    .stk-item { font-size:30px; background:#f7f7f9; border:1px solid rgba(0,0,0,0.05); border-radius:12px; padding:8px 0; cursor:pointer; transition:transform 0.15s ease, background 0.15s ease; line-height:1; }
+    .stk-item:hover { background:#eef3ff; transform:translateY(-2px) scale(1.05); }
+    .stk-hint { font-size:11px; color:#999; text-align:center; margin-top:4px; }
+    .sticker-widget { min-width:60px; min-height:60px; }
+    .sticker-widget .widget-inner { background:transparent; box-shadow:none; border:none; }
+    .sticker-widget .widget-body { padding:0; display:flex; align-items:center; justify-content:center; }
+    .sticker-emoji { line-height:1; user-select:none; text-align:center; pointer-events:none; }
+    .seating-widget .widget-inner { background:#fff; }
+    .seat-root { display:flex; flex-direction:column; width:100%; height:100%; }
+    .seat-palette { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; align-items:center; }
+    .seat-palette-btn { font-size:11px; font-weight:700; padding:6px 8px; border-radius:10px; border:1px solid #d1d1d6; background:#f7f7f9; cursor:pointer; color:#444; font-family:inherit; white-space:nowrap; }
+    .seat-palette-btn:hover { background:#eef3ff; }
+    .seat-canvas-wrap { flex:1; min-height:220px; position:relative; overflow:auto; background:#fafafa; border:1px dashed #d1d1d6; border-radius:10px; }
+    .seat-canvas { position:relative; width:100%; height:100%; min-height:280px; }
+    .seat-item { position:absolute; cursor:grab; touch-action:none; }
+    .seat-item.dragging { cursor:grabbing; z-index:50; }
+    .seat-desk { background:#d9b382; border:2px solid #b5895a; border-radius:8px; position:relative; box-shadow:0 2px 4px rgba(0,0,0,0.15); box-sizing:border-box; }
+    .seat-round { background:#d9b382; border:2px solid #b5895a; border-radius:50%; position:relative; box-shadow:0 2px 4px rgba(0,0,0,0.15); box-sizing:border-box; }
+    .seat-bump { position:absolute; width:14px; height:9px; background:#8a97a8; border-radius:6px 6px 0 0; }
+    .seat-del { position:absolute; top:-9px; right:-9px; width:18px; height:18px; border-radius:50%; background:#ff3b30; color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .15s; box-shadow:0 1px 3px rgba(0,0,0,.3); z-index:5; }
+    .seat-item:hover .seat-del { opacity:1; }
+    .seat-students-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:8px; padding-top:8px; border-top:1px solid #eee; }
+    .seat-list-select { font-size:12px; padding:5px 7px; border-radius:8px; border:1px solid #d1d1d6; background:#fff; font-family:inherit; color:#333; }
+    .seat-name-label { position:absolute; background:#fff; border:1px solid rgba(0,0,0,0.1); border-radius:5px; font-size:8px; font-weight:700; color:#1d1d1f; padding:1px 4px; max-width:52px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 1px 2px rgba(0,0,0,0.15); pointer-events:none; }
 
     /* ---- LUNCH (matmeny via meny.mateo.se) ---- */
     .lunch-widget .widget-inner { background:#fff; }
@@ -1292,6 +1335,8 @@
                 else if (type === 'VECKOSCHEMA') { state.data.days = []; w.querySelectorAll('.week-cell').forEach(c=> state.data.days.push(c.innerHTML)); }
                 else if (type === 'CHECKLISTA') { state.data.title = w.querySelector('.check-title')?.value || ''; state.data.items = []; w.querySelectorAll('.check-item').forEach(r=> state.data.items.push({ text: r.querySelector('.check-text')?.value || '', done: r.querySelector('input[type=checkbox]')?.checked || false })); }
                 else if (type === 'SLUMPA-HJUL') { state.data.names = w.querySelector('.wheel-names')?.value || ''; }
+                else if (type === 'STICKER') { state.data.emoji = w.dataset.emoji || '⭐'; }
+                else if (type === 'BORDSPLACERING') { try{ state.data.items = JSON.parse(w.dataset.seating || '[]'); }catch(e){ state.data.items=[]; } }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -1348,6 +1393,9 @@
             else if (w.type === 'LUNCH') createLunchWidget(w);
             else if (w.type === 'KORSORD') createCrossword(w);
             else if (w.type === 'ORDGÖMMA') createWordSearch(w);
+            else if (w.type === 'KLISTERMÄRKEN') createStickerPicker(w);
+            else if (w.type === 'STICKER') createStickerElement(w);
+            else if (w.type === 'BORDSPLACERING') createSeatingChart(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -2476,6 +2524,15 @@
         body.innerHTML = `<div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital'>03:00</div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
         const inner=body.querySelector('.pclock-inner'), cf=body.querySelector('.pclock-face'), hh=body.querySelector('.pclock-hh'), mh=body.querySelector('.pclock-mh'), dig=body.querySelector('.pclock-digital');
         for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
+        // Siffror runt urtavlan: 12-timmarssiffror (röda, stora), 24-timmarssiffror (röda, små, innanför) och minutsiffror (blå, ytterst)
+        const rHour=47, r24=30, rMin=63;
+        for(let i=1;i<=12;i++){
+            const angle = i*30;
+            const place = (el, radius)=>{ el.style.transform = `translate(-50%,-50%) rotate(${angle}deg) translate(0, -${radius}px) rotate(${-angle}deg)`; };
+            const hourEl = document.createElement('div'); hourEl.className='clock-num clock-num-hour'; hourEl.textContent = i; place(hourEl, rHour); cf.appendChild(hourEl);
+            const h24El = document.createElement('div'); h24El.className='clock-num clock-num-24'; h24El.textContent = i+12; place(h24El, r24); cf.appendChild(h24El);
+            const minEl = document.createElement('div'); minEl.className='clock-num clock-num-min'; minEl.textContent = i*5; place(minEl, rMin); cf.appendChild(minEl);
+        }
         let hourVal = 3, minuteVal = 0;
         if(config && config.data){ if(typeof config.data.h==='number') hourVal=config.data.h; if(typeof config.data.m==='number') minuteVal=config.data.m; }
         const render = ()=>{
@@ -2517,6 +2574,216 @@
         const fitScale=()=>{ const aw=body.clientWidth, ah=body.clientHeight; if(!aw||!ah)return; const s=Math.max(0.3, Math.min(aw/baseW, ah/baseH)); inner.style.transform='scale('+s+')'; };
         if(window.ResizeObserver){ const ro=new ResizeObserver(fitScale); ro.observe(body); }
         setTimeout(fitScale, 60);
+    }
+
+    // ---- KLISTERMÄRKEN ----
+    const STICKER_CATEGORIES = [
+        { name:'Sommar', emojis:['☀️','🍋','🩴','🍉','🌊','😎','🏖️','🍦'] },
+        { name:'Peppande', emojis:['⭐','🌟','👍','💪','🥳','✨','🔥','😄'] },
+        { name:'Firande', emojis:['🎉','🎊','🎂','🎈','🍰','🎁','🥳','🪅'] },
+        { name:'Skolmaterial', emojis:['📓','✏️','🎒','🖍️','📐','📏','✂️','📚'] },
+        { name:'Planering', emojis:['📌','📍','🗓️','✅','📝','➡️','🎯','⏰'] },
+        { name:'Bra jobbat', emojis:['✅','👍','⭐','🏆','💯','👏','🥇','💖'] },
+        { name:'Blommor', emojis:['🌸','🌼','🌻','🌷','🌹','🥀','💐','🌺'] },
+        { name:'Frukt & Grönsaker', emojis:['🍎','🍌','🍇','🍓','🥕','🥦','🍍','🍑'] },
+        { name:'Djur', emojis:['🐶','🐱','🐰','🦊','🐻','🐸','🦁','🐘'] }
+    ];
+
+    function createStickerElement(config, newEmoji){
+        const emoji = (config && config.data && config.data.emoji) ? config.data.emoji : (newEmoji || '⭐');
+        const body = createWidget('STICKER', 120, 'sticker-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '120px'; }
+        widget.dataset.emoji = emoji;
+        body.innerHTML = `<div class='sticker-emoji'>${emoji}</div>`;
+        const emojiEl = body.querySelector('.sticker-emoji');
+        const fit = ()=>{ const s = Math.min(body.clientWidth, body.clientHeight); if(s>0) emojiEl.style.fontSize = Math.max(20, s*0.72)+'px'; };
+        if(window.ResizeObserver){ const ro = new ResizeObserver(fit); ro.observe(body); }
+        setTimeout(fit, 60);
+    }
+
+    function createStickerPicker(config){
+        const body = createWidget('KLISTERMÄRKEN', 300, 'sticker-picker-widget', config);
+        const widgetEl = body.parentElement.parentElement;
+        if(!config){ widgetEl.style.height = '340px'; }
+        let activeCat = 0;
+        const root = document.createElement('div'); root.className='stk-root'; body.appendChild(root);
+        const tabs = document.createElement('div'); tabs.className='stk-tabs'; root.appendChild(tabs);
+        const grid = document.createElement('div'); grid.className='stk-grid'; root.appendChild(grid);
+        const hint = document.createElement('div'); hint.className='stk-hint'; hint.textContent='Klicka på ett klistermärke för att lägga det på tavlan'; root.appendChild(hint);
+
+        function renderGrid(){
+            grid.innerHTML='';
+            STICKER_CATEGORIES[activeCat].emojis.forEach(em=>{
+                const btn=document.createElement('button'); btn.className='stk-item'; btn.type='button'; btn.textContent=em;
+                btn.onclick=()=>{ createStickerElement(null, em); saveBoardState(); };
+                grid.appendChild(btn);
+            });
+        }
+        function renderTabs(){
+            tabs.innerHTML='';
+            STICKER_CATEGORIES.forEach((cat,i)=>{
+                const t=document.createElement('button'); t.className='stk-tab'+(i===activeCat?' active':''); t.type='button'; t.textContent=cat.name;
+                t.onclick=()=>{ activeCat=i; renderTabs(); renderGrid(); };
+                tabs.appendChild(t);
+            });
+        }
+        renderTabs(); renderGrid();
+    }
+
+    // ---- BORDSPLACERING (möbelritning: dra ut bord, flytta fritt, spara layouten) ----
+    const FURNITURE_TYPES = {
+        single: { label:'Enkelbord', w:60, h:40, shape:'rect', seats:1 },
+        double: { label:'Dubbelbord', w:90, h:40, shape:'rect', seats:2 },
+        group4: { label:'Grupp 4', w:90, h:60, shape:'rect', seats:4 },
+        group6: { label:'Grupp 6', w:130, h:60, shape:'rect', seats:6 },
+        round4: { label:'Runt bord 4', w:70, h:70, shape:'round', seats:4 },
+        round6: { label:'Runt bord 6', w:90, h:90, shape:'round', seats:6 }
+    };
+
+    function getSeatSlots(cfg){
+        const slots = [];
+        if(cfg.shape==='rect'){
+            const topCount = Math.ceil(cfg.seats/2), bottomCount = cfg.seats - topCount;
+            for(let i=0;i<topCount;i++){ slots.push({ x: (cfg.w/(topCount+1))*(i+1), side:'top' }); }
+            for(let i=0;i<bottomCount;i++){ slots.push({ x: (cfg.w/(bottomCount+1))*(i+1), side:'bottom' }); }
+        } else {
+            for(let i=0;i<cfg.seats;i++){ slots.push({ angle: i*(360/cfg.seats), side:'round' }); }
+        }
+        return slots;
+    }
+
+    function buildFurnitureEl(type, names){
+        const cfg = FURNITURE_TYPES[type]; if(!cfg) return null;
+        const el = document.createElement('div'); el.className='seat-item';
+        el.style.width=cfg.w+'px'; el.style.height=cfg.h+'px';
+        const shape = document.createElement('div'); shape.className = cfg.shape==='round' ? 'seat-round' : 'seat-desk'; shape.style.width='100%'; shape.style.height='100%';
+        el.appendChild(shape);
+        const slots = getSeatSlots(cfg);
+        const roundRadiusBump = cfg.w/2 + 5, roundRadiusLabel = cfg.w/2 + 22;
+        slots.forEach((slot, i)=>{
+            const b=document.createElement('div'); b.className='seat-bump';
+            if(slot.side==='top'){ b.style.left=(slot.x-7)+'px'; b.style.top='-8px'; }
+            else if(slot.side==='bottom'){ b.style.left=(slot.x-7)+'px'; b.style.bottom='-8px'; b.style.borderRadius='0 0 6px 6px'; }
+            else { b.style.left='50%'; b.style.top='50%'; b.style.transform=`translate(-50%,-50%) rotate(${slot.angle}deg) translate(0, -${roundRadiusBump}px)`; }
+            shape.appendChild(b);
+            const nm = names && names[i] ? names[i] : '';
+            if(nm){
+                const lbl=document.createElement('div'); lbl.className='seat-name-label'; lbl.textContent=nm; lbl.title=nm;
+                if(slot.side==='top'){ lbl.style.left=slot.x+'px'; lbl.style.top='-24px'; lbl.style.transform='translateX(-50%)'; }
+                else if(slot.side==='bottom'){ lbl.style.left=slot.x+'px'; lbl.style.top=(cfg.h+12)+'px'; lbl.style.transform='translateX(-50%)'; }
+                else { lbl.style.left='50%'; lbl.style.top='50%'; lbl.style.transform=`translate(-50%,-50%) rotate(${slot.angle}deg) translate(0, -${roundRadiusLabel}px) rotate(${-slot.angle}deg)`; }
+                shape.appendChild(lbl);
+            }
+        });
+        const del = document.createElement('div'); del.className='seat-del'; del.textContent='✕';
+        el.appendChild(del);
+        return el;
+    }
+
+    function createSeatingChart(config){
+        const body = createWidget('BORDSPLACERING', 480, 'seating-widget', config);
+        const widgetEl = body.parentElement.parentElement;
+        if(!config){ widgetEl.style.height = '460px'; }
+        const root=document.createElement('div'); root.className='seat-root'; body.appendChild(root);
+        const palette=document.createElement('div'); palette.className='seat-palette'; root.appendChild(palette);
+        const studentsRow=document.createElement('div'); studentsRow.className='seat-students-row'; root.appendChild(studentsRow);
+        const canvasWrap=document.createElement('div'); canvasWrap.className='seat-canvas-wrap'; root.appendChild(canvasWrap);
+        const canvas=document.createElement('div'); canvas.className='seat-canvas'; canvasWrap.appendChild(canvas);
+
+        let items = [];
+        let idCounter = 0;
+        const stamp=()=>{ widgetEl.dataset.seating = JSON.stringify(items); };
+        const persist=()=>{ stamp(); saveBoardState(); };
+
+        function attachDrag(el, it){
+            const del = el.querySelector('.seat-del');
+            del.onclick=(e)=>{ e.stopPropagation(); items = items.filter(x=>x.id!==it.id); el.remove(); persist(); };
+            let startX=0, startY=0, origX=it.x, origY=it.y, dragging=false;
+            el.addEventListener('pointerdown',(e)=>{
+                if(e.target===del) return;
+                e.stopPropagation(); dragging=true; el.classList.add('dragging');
+                startX=e.clientX; startY=e.clientY;
+                const cur = items.find(x=>x.id===it.id); origX=cur.x; origY=cur.y;
+                try{ el.setPointerCapture(e.pointerId); }catch(_){}
+                const move=(ev)=>{
+                    if(!dragging) return;
+                    const dx=ev.clientX-startX, dy=ev.clientY-startY;
+                    let nx=origX+dx, ny=origY+dy;
+                    nx=Math.max(0, Math.min(nx, Math.max(0, canvas.clientWidth - el.offsetWidth)));
+                    ny=Math.max(0, Math.min(ny, Math.max(0, canvas.clientHeight - el.offsetHeight)));
+                    el.style.left=nx+'px'; el.style.top=ny+'px';
+                    const cur2=items.find(x=>x.id===it.id); if(cur2){ cur2.x=nx; cur2.y=ny; }
+                };
+                const up=()=>{ dragging=false; el.classList.remove('dragging'); el.removeEventListener('pointermove',move); el.removeEventListener('pointerup',up); el.removeEventListener('pointercancel',up); persist(); };
+                el.addEventListener('pointermove',move); el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
+            });
+        }
+
+        function renderItem(it){
+            const el = buildFurnitureEl(it.type, it.names); if(!el) return;
+            el.dataset.id = it.id;
+            el.style.left = it.x+'px'; el.style.top = it.y+'px';
+            canvas.appendChild(el);
+            attachDrag(el, it);
+        }
+
+        function renderAll(){ canvas.innerHTML=''; items.forEach(renderItem); }
+
+        function addFurniture(type){
+            const cfg=FURNITURE_TYPES[type]; if(!cfg) return;
+            const id = 'f'+(++idCounter)+'_'+Date.now();
+            const perRow = 3;
+            const col = items.length % perRow, row = Math.floor(items.length / perRow);
+            const px = 16 + col*115;
+            const py = 16 + row*95;
+            const it = { id, type, x:px, y:py, names:[] };
+            items.push(it); renderItem(it); persist();
+        }
+
+        Object.keys(FURNITURE_TYPES).forEach(key=>{
+            const btn=document.createElement('button'); btn.className='seat-palette-btn'; btn.type='button'; btn.textContent='+ '+FURNITURE_TYPES[key].label;
+            btn.onclick=()=> addFurniture(key);
+            palette.appendChild(btn);
+        });
+        const clearBtn=document.createElement('button'); clearBtn.className='seat-palette-btn'; clearBtn.type='button'; clearBtn.textContent='🗑️ Rensa allt'; clearBtn.style.marginLeft='auto';
+        clearBtn.onclick=()=>{ customConfirm('Rensa hela bordsplaceringen?', ()=>{ items=[]; canvas.innerHTML=''; persist(); }); };
+        palette.appendChild(clearBtn);
+
+        // Elever: koppla klasslista + slumpa ut namn på platserna
+        const listSel=document.createElement('select'); listSel.className='seat-list-select';
+        const loadLists=()=>{ listSel.innerHTML='<option value="">-- Välj klasslista --</option>'; const l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser)||'{}'); Object.keys(l).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=k; listSel.appendChild(o); }); };
+        loadLists();
+        const shuffleBtn=document.createElement('button'); shuffleBtn.className='seat-palette-btn'; shuffleBtn.type='button'; shuffleBtn.textContent='🔀 Slumpa elever på platser';
+        const clearNamesBtn=document.createElement('button'); clearNamesBtn.className='seat-palette-btn'; clearNamesBtn.type='button'; clearNamesBtn.textContent='🧹 Rensa namn';
+        studentsRow.appendChild(listSel); studentsRow.appendChild(shuffleBtn); studentsRow.appendChild(clearNamesBtn);
+
+        shuffleBtn.onclick=()=>{
+            if(!listSel.value){ customAlert('Välj en klasslista först.', '📋'); return; }
+            const l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser)||'{}');
+            let names = (l[listSel.value]||'').split('\n').map(n=>n.trim()).filter(n=>n);
+            if(!names.length){ customAlert('Den valda listan innehåller inga namn.', '📋'); return; }
+            if(!items.length){ customAlert('Lägg till minst ett bord först.', '🪑'); return; }
+            // Blanda namnen (Fisher-Yates)
+            for(let i=names.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [names[i],names[j]]=[names[j],names[i]]; }
+            const totalSeats = items.reduce((s,it)=> s + (FURNITURE_TYPES[it.type]?.seats||0), 0);
+            let idx=0;
+            items.forEach(it=>{
+                const seats = FURNITURE_TYPES[it.type]?.seats||0;
+                it.names = [];
+                for(let s=0;s<seats;s++){ it.names.push(idx<names.length ? names[idx] : ''); idx++; }
+            });
+            renderAll(); persist();
+            if(names.length > totalSeats) customAlert('Alla elever fick inte plats – lägg till fler bord (' + (names.length-totalSeats) + ' elever fick ingen plats).', '⚠️');
+            else if(names.length < totalSeats) customAlert('Alla elever placerades ut, men det finns tomma platser kvar.', '✅');
+        };
+        clearNamesBtn.onclick=()=>{ items.forEach(it=> it.names=[]); renderAll(); persist(); };
+
+        if(config && config.data && Array.isArray(config.data.items)){
+            items = config.data.items.map(x=>({ id:x.id||('f'+(++idCounter)+'_'+Date.now()), type:x.type, x:x.x||0, y:x.y||0, names:Array.isArray(x.names)?x.names:[] }));
+            items.forEach(it=> renderItem(it));
+        }
+        stamp();
     }
 
     function createFractionVisualizer(config){
@@ -3144,7 +3411,7 @@
                 const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
                 try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
                 catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
-                window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=720,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
+                window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – korsordet skapas automatiskt...'; box.appendChild(pasteTa);
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=2){ makeFromWords(words, status, close); } },60); });
@@ -3449,7 +3716,7 @@
                 const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
                 try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
                 catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
-                window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=720,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
+                window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – ordgömman skapas automatiskt...'; box.appendChild(pasteTa);
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=1){ makeFromWords(words, status, close); } },60); });
