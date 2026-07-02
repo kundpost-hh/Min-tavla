@@ -380,6 +380,10 @@
     /* Endast adminen får flytta/låsa upp widgetar – för alla andra döljs lås-kontrollerna helt eftersom tavlan alltid är låst för dem. */
     .viewer-mode .lock-toggle-btn { display: none !important; }
     .viewer-mode .widget .btn-lck, .viewer-mode .sch-lock-icon { display: none !important; }
+    /* Icke-admin (viewer) får aldrig se flytta/stäng/lås-reglage eller resize-handtag */
+    .viewer-mode .widget .widget-controls { display: none !important; }
+    .viewer-mode .widget .widget-resizer { display: none !important; }
+    .viewer-mode .widget .widget-header { cursor: default !important; }
 
     .widget-inner { background: white; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid #e5e5ea; overflow: hidden; display: flex; flex-direction: column; width: 100%; height: 100%; transition: all 0.3s ease-in-out; position: relative; z-index: 2; }
     .widget:not(.locked) .widget-inner { cursor: move; }
@@ -651,6 +655,11 @@
     .att-name { border: none; border-radius: 9px; padding: 6px 11px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
     .att-name.present { background: #34c759; color: #fff; }
     .att-name.absent { background: #e9e9ee; color: #aaa; text-decoration: line-through; box-shadow: none; }
+    .att-cell { display:flex; flex-direction:column; align-items:center; gap:3px; max-width:150px; }
+    .att-note-input { width:118px; font-size:11px; padding:4px 7px; border:1.5px solid #ffb84d; border-radius:7px; background:#fff7e6; font-family:inherit; outline:none; color:#8a5a00; font-weight:600; }
+    .att-note-input:focus { border-color:#ff9500; background:#fff; }
+    .att-note-label { max-width:130px; font-size:10.5px; color:#c77800; background:#fff7e6; border:1px solid #ffe1a8; border-radius:6px; padding:2px 7px; cursor:pointer; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .att-note-label:hover { background:#ffefd0; }
     /* KLASSPOÄNG (burk) */
     .classreward-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
     .classreward-widget .widget-resizer::after { border-color: #999; }
@@ -1435,7 +1444,7 @@
                 else if (type === 'ARBETSSÄTT') { state.data.icon = w.querySelector('.work-symbol.active')?.dataset.icon || ''; }
                 else if (type === 'BELÖNING') { state.data.points = w.querySelectorAll('.reward-star').length; }
                 else if (type === 'GRATTIS') { state.data.name = w.querySelector('.grattis-name-input')?.value || ''; }
-                else if (type === 'NÄRVARO') { state.data.text = w.querySelector('.att-names')?.value || ''; state.data.list = w.querySelector('.att-sel')?.value || ''; state.data.absent = [...w.querySelectorAll('.att-name.absent')].map(b=>b.textContent); }
+                else if (type === 'NÄRVARO') { state.data.text = w.querySelector('.att-names')?.value || ''; state.data.list = w.querySelector('.att-sel')?.value || ''; try{ state.data.absent = JSON.parse(w.dataset.attAbsent || '[]'); }catch(e){ state.data.absent = [...w.querySelectorAll('.att-name.absent')].map(b=>b.textContent); } }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
@@ -1450,7 +1459,7 @@
                 else if (type === 'BORDSPLACERING') { try{ state.data.items = JSON.parse(w.dataset.seating || '[]'); }catch(e){ state.data.items=[]; } }
                 else if (type === 'EXIT TICKET') { try{ state.data = JSON.parse(w.dataset.exitTicket || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'OMRÖSTNING') { try{ state.data = JSON.parse(w.dataset.poll || '{}'); }catch(e){ state.data={}; } }
-                else if (type === 'REMINDER') { try{ state.data.items = JSON.parse(w.dataset.reminders || '[]'); }catch(e){ state.data.items = []; } }
+                else if (type === 'REMINDER') { try{ state.data.items = (typeof remLoad==='function') ? remLoad() : JSON.parse(w.dataset.reminders || '[]'); }catch(e){ state.data.items = []; } }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -1550,9 +1559,9 @@
         const resizer = document.createElement('div'); resizer.className = 'widget-resizer'; widget.appendChild(resizer);
         getActiveCanvasV6().appendChild(widget); makeDraggable(widget, header); makeBodyDraggable(widget, inner); makeResizable(widget, resizer);
         
-        header.querySelector('.widget-close-icon').onclick = (e) => { e.stopPropagation(); customConfirm("Vill du stänga rutan?", () => { widget.remove(); saveBoardState(); }); };
-        header.querySelector('.btn-min').onclick = (e) => { e.stopPropagation(); const m = body.style.display === 'none'; body.style.display = m ? 'flex' : 'none'; widget.dataset.minimized = m ? 'false' : 'true'; saveBoardState(); };
-        lockIcon.onclick = (e) => { e.stopPropagation(); widget.classList.toggle('locked'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
+        header.querySelector('.widget-close-icon').onclick = (e) => { e.stopPropagation(); if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; customConfirm("Vill du stänga rutan?", () => { widget.remove(); saveBoardState(); }); };
+        header.querySelector('.btn-min').onclick = (e) => { e.stopPropagation(); if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; const m = body.style.display === 'none'; body.style.display = m ? 'flex' : 'none'; widget.dataset.minimized = m ? 'false' : 'true'; saveBoardState(); };
+        lockIcon.onclick = (e) => { e.stopPropagation(); if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; widget.classList.toggle('locked'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
         if(config && config.minimized) { body.style.display = 'none'; widget.dataset.minimized = 'true'; }
         if(typeof presentationLocked !== 'undefined' && presentationLocked) widget.classList.add('locked');
         // Bara adminen får flytta/ändra storlek på widgetar – för alla andra är tavlan alltid låst,
@@ -1570,9 +1579,14 @@
             if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
             if(el.classList.contains('locked') || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName) || e.target.hasAttribute('contenteditable') || e.target.classList.contains('schedule-color-strip') || (e.target.closest && e.target.closest('.widget-controls'))) return;
             e.preventDefault(); p3=e.clientX; p4=e.clientY;
+            const sX=e.clientX, sY=e.clientY; let started=false; // tröskel: skaky klick/tryck ska INTE flytta widgeten
             try { h.setPointerCapture(e.pointerId); } catch(_){}
-            const move = (ev) => { ev.preventDefault(); p1=p3-ev.clientX; p2=p4-ev.clientY; p3=ev.clientX; p4=ev.clientY; el.style.top = Math.max(40, el.offsetTop-p2)+"px"; el.style.left = (el.offsetLeft-p1)+"px"; };
-            const up = () => { h.removeEventListener('pointermove',move); h.removeEventListener('pointerup',up); h.removeEventListener('pointercancel',up); saveBoardState(); };
+            const move = (ev) => {
+                if(el.classList.contains('locked') || (typeof isBoardAdmin === 'function' && !isBoardAdmin())) return; // låstes mitt i? avbryt direkt
+                if(!started){ if(Math.abs(ev.clientX-sX)+Math.abs(ev.clientY-sY) < 6) return; started=true; p3=ev.clientX; p4=ev.clientY; return; }
+                ev.preventDefault(); p1=p3-ev.clientX; p2=p4-ev.clientY; p3=ev.clientX; p4=ev.clientY; el.style.top = Math.max(40, el.offsetTop-p2)+"px"; el.style.left = (el.offsetLeft-p1)+"px";
+            };
+            const up = () => { h.removeEventListener('pointermove',move); h.removeEventListener('pointerup',up); h.removeEventListener('pointercancel',up); if(started) saveBoardState(); };
             h.addEventListener('pointermove',move); h.addEventListener('pointerup',up); h.addEventListener('pointercancel',up);
         });
     }
@@ -1592,9 +1606,10 @@
             const origLeft = el.offsetLeft, origTop = el.offsetTop;
             let dragging = false;
             const move = (ev) => {
+                if(el.classList.contains('locked') || (typeof isBoardAdmin === 'function' && !isBoardAdmin())) return; // låstes mitt i? avbryt direkt
                 const dx = ev.clientX - startX, dy = ev.clientY - startY;
                 if(!dragging){
-                    if(Math.abs(dx) + Math.abs(dy) < 5) return;   // tröskel: liten rörelse = klick
+                    if(Math.abs(dx) + Math.abs(dy) < 10) return;   // högre tröskel: liten rörelse = klick, inte flytt
                     dragging = true; el.style.zIndex = ++topZ;
                     try { inner.setPointerCapture(e.pointerId); } catch(_){}
                 }
@@ -2468,16 +2483,54 @@
     }
 
     // ---- REMINDER / PÅMINNELSER ----
+    // Påminnelserna ligger i ett eget globalt minne (per användare) och bevakas
+    // av en central klocka – INTE av widget-rutan. De ringer därför alltid när
+    // tiden är inne, även om widgeten är minimerad, ligger i viloläge på en
+    // annan sida eller har stängts helt.
+    const remRenderHooks = [];
+    function remStoreKey(){ return 'reminderStoreV1_' + (currentUser || 'local'); }
+    function remLoad(){ try { return JSON.parse(localStorage.getItem(remStoreKey()) || '[]'); } catch(e){ return []; } }
+    function remSave(items){
+        try { localStorage.setItem(remStoreKey(), JSON.stringify(items)); } catch(e){}
+        remRenderHooks.forEach(fn=>{ try{ fn(); }catch(e){} }); // uppdatera alla öppna Reminder-rutor
+    }
+    function remMerge(list){
+        // Slå ihop widget-sparade påminnelser med det globala minnet (utan dubbletter)
+        if(!Array.isArray(list) || list.length===0) return;
+        const items=remLoad(); const known={}; items.forEach(it=>{ if(it && it.id) known[it.id]=true; });
+        let added=false;
+        list.forEach(it=>{ if(it && it.id && !known[it.id]){ items.push(it); known[it.id]=true; added=true; } });
+        if(added) remSave(items);
+    }
+    function remSnooze(text, mins){
+        const items=remLoad();
+        items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: new Date(Date.now()+mins*60000).toISOString(), text: text, fired:false });
+        remSave(items); saveBoardState();
+    }
+    function remCheckDue(){
+        if(!currentUser) return;
+        const items=remLoad(); const nowT=Date.now(); let changed=false;
+        items.forEach(it=>{
+            if(!it.fired && new Date(it.when).getTime()<=nowT){
+                it.fired=true; changed=true;
+                showReminderPopup(it, (mins)=>remSnooze(it.text, mins));
+            }
+        });
+        if(changed){ remSave(items); saveBoardState(); }
+    }
+    setInterval(remCheckDue, 5000);      // central bevakare – körs alltid, oavsett widgetar
+    setTimeout(remCheckDue, 2500);       // fångar direkt upp påminnelser som hann passera medan appen var stängd
+
     function createReminderWidget(config){
         if(config===undefined) config=null;
         const body = createWidget('REMINDER', 300, 'reminder-widget', config);
         const widget = body.parentElement.parentElement;
         body.innerHTML = `<div class='rem-compose hover-menu'><div class='rem-row'><input type='date' class='rem-date' title='Datum'><input type='time' class='rem-time' title='Klockslag'></div><textarea class='rem-text' placeholder='Vad vill du bli påmind om?'></textarea><button class='btn btn-primary rem-add' style='width:100%;'>+ Lägg till påminnelse</button></div><div class='rem-list'></div>`;
         const dIn=body.querySelector('.rem-date'), tIn=body.querySelector('.rem-time'), txt=body.querySelector('.rem-text'), addBtn=body.querySelector('.rem-add'), list=body.querySelector('.rem-list');
-
-        let items = (config && config.data && Array.isArray(config.data.items)) ? config.data.items : [];
         const pad=n=>String(n).padStart(2,'0');
-        const save=()=>{ widget.dataset.reminders = JSON.stringify(items); saveBoardState(); };
+
+        // Flytta ev. påminnelser som låg sparade i widgetens gamla data in i det globala minnet
+        if(config && config.data && Array.isArray(config.data.items)) remMerge(config.data.items);
 
         // Förifyll dagens datum och nuvarande tid + 5 min
         const now=new Date();
@@ -2494,6 +2547,8 @@
         };
 
         function render(){
+            const items=remLoad();
+            widget.dataset.reminders = JSON.stringify(items); // så att tavlans spara/moln-synk också får med dem
             list.innerHTML='';
             const sorted=[...items].sort((a,b)=> new Date(a.when)-new Date(b.when));
             if(sorted.length===0){ list.innerHTML=`<div class='rem-empty'>⏰ Inga påminnelser ännu</div>`; return; }
@@ -2501,37 +2556,26 @@
                 const row=document.createElement('div'); row.className='rem-item'+(it.fired?' fired':'');
                 row.innerHTML=`<div class='rem-item-main'><div class='rem-item-when'>${it.fired?'✓ ':''}${fmtWhen(it.when)}</div><div class='rem-item-text'></div></div><button class='rem-del hover-menu' title='Ta bort'>✕</button>`;
                 row.querySelector('.rem-item-text').textContent = it.text || '(utan text)';
-                row.querySelector('.rem-del').onclick=()=>{ items=items.filter(x=>x.id!==it.id); render(); save(); };
+                row.querySelector('.rem-del').onclick=()=>{ remSave(remLoad().filter(x=>x.id!==it.id)); saveBoardState(); };
                 list.appendChild(row);
             });
         }
+        remRenderHooks.push(render); // låt det globala minnet hålla rutan uppdaterad
 
         addBtn.onclick=()=>{
             if(!dIn.value || !tIn.value){ customAlert('Välj både datum och klockslag.', '⏰'); return; }
             const when=new Date(dIn.value+'T'+tIn.value);
             if(isNaN(when.getTime())){ customAlert('Ogiltigt datum eller klockslag.', '⏰'); return; }
+            const items=remLoad();
             items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: when.toISOString(), text: txt.value.trim(), fired:false });
-            txt.value=''; render(); save();
+            txt.value=''; remSave(items); saveBoardState();
         };
 
-        function check(){
-            const nowT=Date.now(); let changed=false;
-            items.forEach(it=>{
-                if(!it.fired && new Date(it.when).getTime()<=nowT){
-                    it.fired=true; changed=true;
-                    showReminderPopup(it, (mins)=>{
-                        items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: new Date(Date.now()+mins*60000).toISOString(), text: it.text, fired:false });
-                        render(); save();
-                    });
-                }
-            });
-            if(changed){ render(); save(); }
-        }
-        const tId=setInterval(check, 5000);
-        const obs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ clearInterval(tId); obs.disconnect(); } });
+        // Städa bara bort rutans render-koppling om rutan stängs – själva
+        // påminnelserna ligger kvar i det globala minnet och ringer ändå.
+        const obs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ const i=remRenderHooks.indexOf(render); if(i>=0) remRenderHooks.splice(i,1); obs.disconnect(); } });
         const cc=document.getElementById('canvas-container-v6'); if(cc) obs.observe(cc,{childList:true,subtree:true});
 
-        widget.dataset.reminders = JSON.stringify(items);
         render();
     }
 
@@ -2540,8 +2584,10 @@
         const wrapper=document.getElementById('cb-app-wrapper');
         const overlay=document.createElement('div'); overlay.className='reminder-popup-overlay';
         const d=new Date(item.when); const pad=n=>String(n).padStart(2,'0');
+        const missed = (Date.now() - d.getTime()) > 90000; // gick av medan appen var stängd
+        const whenStr = pad(d.getHours())+':'+pad(d.getMinutes()) + (missed && d.toDateString()!==new Date().toDateString() ? ' · '+d.toLocaleDateString('sv-SE',{day:'numeric',month:'short'}) : '');
         const box=document.createElement('div'); box.className='reminder-popup-box';
-        box.innerHTML=`<div class='rem-pop-bell'>⏰</div><div class='rem-pop-title'>Påminnelse!</div><div class='rem-pop-time'>${pad(d.getHours())}:${pad(d.getMinutes())}</div><div class='rem-pop-text'></div><div class='rem-pop-actions'><button class='rem-pop-btn rem-pop-snooze'>😴 +5 min</button><button class='rem-pop-btn rem-pop-ok'>✔ OK, jag fixar det!</button></div>`;
+        box.innerHTML=`<div class='rem-pop-bell'>⏰</div><div class='rem-pop-title'>${missed?'Missad påminnelse!':'Påminnelse!'}</div><div class='rem-pop-time'>${whenStr}</div><div class='rem-pop-text'></div><div class='rem-pop-actions'><button class='rem-pop-btn rem-pop-snooze'>😴 +5 min</button><button class='rem-pop-btn rem-pop-ok'>✔ OK, jag fixar det!</button></div>`;
         const textEl=box.querySelector('.rem-pop-text'); textEl.textContent = item.text || '';
         if(!item.text) textEl.style.display='none';
         overlay.appendChild(box); wrapper.appendChild(overlay);
@@ -2647,24 +2693,56 @@
     function createAttendance(config){
         if(config===undefined)config=null;
         const body = createWidget('NÄRVARO', 320, 'attend-widget', config);
+        const widget = body.parentElement.parentElement;
         body.innerHTML = `<div class='list-selector-area hover-menu'><select class='editor-select att-sel'></select></div><textarea class='name-input hover-menu att-names' placeholder='Ett namn per rad...'></textarea><div class='att-count'>0 / 0 här</div><div class='att-grid'></div><div class='hover-menu' style='margin-top:8px;'><button class='btn btn-secondary att-all' style='width:100%;'>Markera alla som här</button></div>`;
         const sel=body.querySelector('.att-sel'), txt=body.querySelector('.att-names'), grid=body.querySelector('.att-grid'), countEl=body.querySelector('.att-count');
-        let absent = new Set((config&&config.data&&config.data.absent)||[]);
+        // absent: namn -> { note, open }  (open = liten anteckningsruta visas just nu)
+        // Klickcykel på ett namn: 1:a klick = frånvarande, 2:a klick = anteckningsruta
+        // för orsaken, 3:e klick = närvarande igen (anteckningen rensas).
+        const absent = new Map();
+        ((config&&config.data&&config.data.absent)||[]).forEach(a=>{
+            if(typeof a === 'string') absent.set(a, { note:'', open:false });               // gammalt sparformat
+            else if(a && a.name) absent.set(a.name, { note:a.note||'', open:false });       // nytt format med anteckning
+        });
+        const syncData=()=>{ widget.dataset.attAbsent = JSON.stringify([...absent].map(([name,v])=>({ name:name, note:v.note||'' }))); };
+        syncData();
         const loadLists=()=>{ sel.innerHTML='<option value="">-- Välj klass --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;sel.appendChild(o);}); }; loadLists();
+        let focusName=null;
         const render=()=>{
             const names = txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0);
             grid.innerHTML=''; let present=0;
             names.forEach(nm=>{
-                const isAbs = absent.has(nm); if(!isAbs) present++;
-                const b=document.createElement('button'); b.className='att-name '+(isAbs?'absent':'present'); b.textContent=nm;
-                b.onclick=()=>{ if(absent.has(nm)) absent.delete(nm); else absent.add(nm); render(); saveBoardState(); };
-                grid.appendChild(b);
+                const entry = absent.get(nm); if(!entry) present++;
+                const cell=document.createElement('div'); cell.className='att-cell';
+                const b=document.createElement('button'); b.className='att-name '+(entry?'absent':'present'); b.textContent=nm;
+                if(entry && entry.note) b.title = entry.note;
+                b.onclick=()=>{
+                    const e2=absent.get(nm);
+                    if(!e2){ absent.set(nm, { note:'', open:false }); }        // 1:a klick: frånvarande
+                    else if(!e2.open){ e2.open=true; focusName=nm; }           // 2:a klick: öppna anteckningsruta
+                    else { absent.delete(nm); }                                // 3:e klick: närvarande igen
+                    syncData(); render(); saveBoardState();
+                };
+                cell.appendChild(b);
+                if(entry && entry.open){
+                    const inp=document.createElement('input'); inp.className='att-note-input'; inp.value=entry.note||''; inp.placeholder='Varför borta?'; inp.title='Skriv orsak. Enter sparar och stänger rutan. Klick på namnet = närvarande igen.';
+                    inp.onclick=(ev)=>ev.stopPropagation();
+                    inp.oninput=()=>{ entry.note=inp.value; syncData(); saveBoardState(); };
+                    inp.onkeydown=(ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); entry.open=false; syncData(); render(); saveBoardState(); } };
+                    cell.appendChild(inp);
+                    if(focusName===nm){ setTimeout(()=>{ try{ inp.focus(); inp.select(); }catch(e){} }, 0); focusName=null; }
+                } else if(entry && entry.note){
+                    const lbl=document.createElement('div'); lbl.className='att-note-label'; lbl.textContent='📝 '+entry.note; lbl.title=entry.note+' (klicka för att ändra)';
+                    lbl.onclick=()=>{ entry.open=true; focusName=nm; render(); };
+                    cell.appendChild(lbl);
+                }
+                grid.appendChild(cell);
             });
             countEl.textContent = present+' / '+names.length+' här';
         };
-        sel.onchange=()=>{ if(!sel.value)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txt.value=l[sel.value]||''; absent.clear(); render(); saveBoardState(); };
+        sel.onchange=()=>{ if(!sel.value)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txt.value=l[sel.value]||''; absent.clear(); syncData(); render(); saveBoardState(); };
         txt.oninput=()=>{ render(); saveBoardState(); };
-        body.querySelector('.att-all').onclick=()=>{ absent.clear(); render(); saveBoardState(); };
+        body.querySelector('.att-all').onclick=()=>{ absent.clear(); syncData(); render(); saveBoardState(); };
         if(config&&config.data){ if(config.data.text) txt.value=config.data.text; if(config.data.list) setTimeout(()=>{ sel.value=config.data.list; },50); }
         render();
     }
@@ -4487,6 +4565,7 @@
             }
         }
         tc.addEventListener('pointerdown', (e)=>{
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får möblera om verktygen
             const btn=e.target.closest('.tool-btn'); if(!btn) return;
             if(e.button && e.button!==0) return;
             const startX=e.clientX, startY=e.clientY;
@@ -4653,6 +4732,7 @@
             }
         }
         grid.addEventListener('pointerdown', (e)=>{
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får möblera om verktygslådan
             if(e.target.closest('.tpd-handle, .tpd-remove')) return;
             const item=e.target.closest('.tool-btn, .tool-pocket-divider'); if(!item) return;
             if(e.button && e.button!==0) return;
