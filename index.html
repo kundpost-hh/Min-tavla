@@ -3144,7 +3144,7 @@
                 const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
                 try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
                 catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
-                window.open('https://gemini.google.com/app','_blank','noopener'); };
+                window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=720,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – korsordet skapas automatiskt...'; box.appendChild(pasteTa);
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=2){ makeFromWords(words, status, close); } },60); });
@@ -3449,7 +3449,7 @@
                 const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
                 try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
                 catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
-                window.open('https://gemini.google.com/app','_blank','noopener'); };
+                window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=720,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – ordgömman skapas automatiskt...'; box.appendChild(pasteTa);
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=1){ makeFromWords(words, status, close); } },60); });
