@@ -151,6 +151,7 @@
             <button class="tool-btn" onclick="createMoneyWidget()"><div class="icon">💰</div><div class="label">Pengar</div></button>
             <button class="tool-btn" onclick="createGeometryWidget()"><div class="icon">📐</div><div class="label">Geometri</div></button>
             <button class="tool-btn" onclick="createUnitConverter()"><div class="icon">⚖️</div><div class="label">Enheter</div></button>
+            <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
@@ -392,6 +393,10 @@
     .viewer-mode .widget .widget-controls { display: none !important; }
     .viewer-mode .widget .widget-resizer { display: none !important; }
     .viewer-mode .widget .widget-header { cursor: default !important; }
+    /* Verktygslådans kedje-funktioner är adminens möblering – göms för övriga */
+    .viewer-mode .tool-pocket-add-chain { display: none !important; }
+    .viewer-mode .tool-pocket-divider .tpd-handle, .viewer-mode .tool-pocket-divider .tpd-remove { display: none !important; }
+    .viewer-mode .tool-pocket-divider { cursor: default !important; }
 
     .widget-inner { background: white; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid #e5e5ea; overflow: hidden; display: flex; flex-direction: column; width: 100%; height: 100%; transition: all 0.3s ease-in-out; position: relative; z-index: 2; }
     .widget:not(.locked) .widget-inner { cursor: move; }
@@ -790,9 +795,24 @@
     .seat-bump { position:absolute; width:14px; height:9px; background:#8a97a8; border-radius:6px 6px 0 0; }
     .seat-del { position:absolute; top:-9px; right:-9px; width:18px; height:18px; border-radius:50%; background:#ff3b30; color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .15s; box-shadow:0 1px 3px rgba(0,0,0,.3); z-index:5; }
     .seat-item:hover .seat-del { opacity:1; }
+    .seat-rot { position:absolute; top:-9px; left:-9px; width:18px; height:18px; border-radius:50%; background:#007aff; color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .15s; box-shadow:0 1px 3px rgba(0,0,0,.3); z-index:5; user-select:none; }
+    .seat-item:hover .seat-rot { opacity:1; }
+    .seat-rot:hover { background:#0a5bd3; }
     .seat-students-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:8px; padding-top:8px; border-top:1px solid #eee; }
     .seat-list-select { font-size:12px; padding:5px 7px; border-radius:8px; border:1px solid #d1d1d6; background:#fff; font-family:inherit; color:#333; }
-    .seat-name-label { position:absolute; background:#fff; border:1px solid rgba(0,0,0,0.1); border-radius:5px; font-size:8px; font-weight:700; color:#1d1d1f; padding:1px 4px; max-width:52px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 1px 2px rgba(0,0,0,0.15); pointer-events:none; }
+    .seat-name-label { position:absolute; background:rgba(255,255,255,0.92); border:1px solid rgba(0,0,0,0.12); border-radius:5px; font-size:8px; font-weight:700; color:#1d1d1f; padding:1px 4px; max-width:52px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 1px 2px rgba(0,0,0,0.15); pointer-events:none; z-index:2; }
+    .seat-name-label.tom { opacity:0; }
+    /* Välj namn-läge: platserna blir klickbara mål */
+    .seat-canvas.valj .seat-name-label { pointer-events:auto; cursor:pointer; }
+    .seat-canvas.valj .seat-name-label.tom { opacity:1; background:#e8f2ff; border:1.5px dashed #007aff; color:#007aff; min-width:16px; text-align:center; }
+    .seat-canvas.valj .seat-name-label:hover { background:#d5e8ff; }
+    .seat-namn-panel { display:none; flex-wrap:wrap; gap:5px; margin-bottom:8px; padding:8px; background:#eef6ff; border:1.5px dashed #9cc7f5; border-radius:10px; align-items:center; }
+    .seat-namn-panel.visas { display:flex; }
+    .seat-panel-info { width:100%; font-size:11px; font-weight:700; color:#3d7dc4; }
+    .seat-chip { font-size:11.5px; font-weight:800; padding:4px 9px; border-radius:999px; background:#fff; border:1.5px solid #b9d7f5; color:#2b6cb0; cursor:pointer; user-select:none; }
+    .seat-chip:hover { background:#e2efff; }
+    .seat-chip.vald { background:#007aff; border-color:#007aff; color:#fff; }
+    .seat-chip.anvand { opacity:0.35; text-decoration:line-through; cursor:default; }
     .exit-widget .widget-inner { background:#fff; }
     .exit-root { display:flex; flex-direction:column; align-items:center; width:100%; gap:10px; }
     .exit-question { width:100%; text-align:center; font-size:14px; font-weight:700; border:none; border-bottom:1px solid #e5e5ea; padding:4px 0 8px; outline:none; background:transparent; font-family:inherit; color:#1d1d1f; }
@@ -1144,6 +1164,36 @@
     .enh-row.aktiv .enh-varde { color:#007aff; }
     .enh-uppgift { margin-top:10px; background:#fff7e6; border:1.5px dashed #ffcc66; border-radius:12px; padding:10px 12px; font-size:16px; font-weight:800; color:#333; text-align:center; }
     .enh-uppgift .rakna-ans { display:inline-block; font-size:16px; margin-left:6px; }
+
+    /* ---- MATTEKAMP ---- */
+    .mk-ctrl { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+    .mk-ctrl select { flex:1; min-width:88px; }
+    .mk-lag-rad { display:flex; gap:6px; margin-bottom:8px; align-items:stretch; }
+    .mk-lag { flex:1; min-width:0; background:#f7f7fa; border-radius:11px; padding:7px 6px; text-align:center; border:2.5px solid transparent; transition:border-color 0.2s, background 0.2s; }
+    .mk-lag.aktiv { border-color:#007aff; background:#e8f2ff; }
+    .mk-lag input { width:100%; border:none; background:transparent; text-align:center; font-family:inherit; font-weight:800; font-size:12.5px; color:#555; outline:none; }
+    .mk-lag .mk-poang { font-size:24px; font-weight:900; color:#333; line-height:1.1; }
+    .mk-lag.aktiv .mk-poang { color:#007aff; }
+    .mk-lagknappar { display:flex; flex-direction:column; gap:4px; justify-content:center; }
+    .mk-lagknappar button { width:26px; height:26px; border:none; border-radius:7px; background:#f2f2f7; font-weight:900; cursor:pointer; color:#555; font-size:14px; line-height:1; }
+    .mk-lagknappar button:hover { background:#e2e2ea; }
+    .mk-tur { text-align:center; font-size:13px; font-weight:800; color:#007aff; margin-bottom:4px; }
+    .mk-task { text-align:center; font-size:34px; font-weight:800; color:#333; padding:16px 6px; background:#f7f7fa; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
+    .mk-doma { display:flex; gap:8px; margin-top:10px; }
+    .mk-doma button { flex:1; padding:12px; border:none; border-radius:12px; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; transition:transform 0.12s, filter 0.12s; }
+    .mk-doma button:hover { transform:scale(1.03); filter:brightness(1.06); }
+    .mk-ratt { background:#34c759; color:#fff; }
+    .mk-fel { background:#ff3b30; color:#fff; }
+    .mk-ny { width:100%; margin-top:8px; }
+    .mk-info { text-align:center; font-size:11px; color:#b0b0b8; font-weight:600; margin-top:6px; }
+    .mk-vinstbox { border-color:#f2b234 !important; animation:mkBlink 1.1s ease-in-out infinite !important; }
+    @keyframes mkBlink { 0%,100% { box-shadow:0 0 0 0 rgba(242,178,52,0.7), 0 22px 55px rgba(0,0,0,0.35); border-color:#f2b234; } 50% { box-shadow:0 0 0 22px rgba(242,178,52,0), 0 22px 55px rgba(0,0,0,0.35); border-color:#34c759; } }
+    .mk-vinstbox .rem-pop-title { animation:none !important; color:#e0a020 !important; }
+    .mk-timer { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .mk-timer-spar { flex:1; height:10px; background:#eef0f5; border-radius:6px; overflow:hidden; }
+    .mk-timer-bar { height:100%; width:100%; background:#34c759; border-radius:6px; transition:width 0.1s linear; }
+    .mk-timer-bar.rott { background:#ff3b30; }
+    .mk-timer-text { font-size:15px; font-weight:900; color:#333; min-width:24px; text-align:right; }
 
     /* SLUMPA-HJUL */
     .wheel-wrap { position:relative; width:240px; margin:6px auto; }
@@ -1602,6 +1652,7 @@
                 else if (type === 'PENGAR') { try{ state.data = JSON.parse(w.dataset.pengar || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'GEOMETRI') { try{ state.data = JSON.parse(w.dataset.geo || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ENHETER') { try{ state.data = JSON.parse(w.dataset.enheter || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'MATTEKAMP') { try{ state.data = JSON.parse(w.dataset.mattekamp || '{}'); }catch(e){ state.data={}; } }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -1672,6 +1723,7 @@
             else if (w.type === 'PENGAR') createMoneyWidget(w);
             else if (w.type === 'GEOMETRI') createGeometryWidget(w);
             else if (w.type === 'ENHETER') createUnitConverter(w);
+            else if (w.type === 'MATTEKAMP') createMathBattle(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -3205,6 +3257,127 @@
         render();
     }
 
+    // ---- MATTEKAMP ----
+    // Lagtävling: lagen turas om att få uppgifter. Rätt svar ger poäng – fel
+    // svar skickar SAMMA uppgift vidare till nästa lag (stöld!) om svaret inte
+    // hunnit avslöjas. Först till målet vinner, med blinkande vinnarpopup.
+    function createMathBattle(config){
+        if(config===undefined) config=null;
+        const body = createWidget('MATTEKAMP', 360, 'mk-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu mk-ctrl'><select class='editor-select mk-op'><option value='add'>Addition +</option><option value='sub'>Subtraktion −</option><option value='mul'>Multiplikation ×</option><option value='div'>Division ÷</option><option value='mix'>Blandat</option></select><select class='editor-select mk-lvl'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><select class='editor-select mk-mal'><option value='5'>Först till 5</option><option value='10'>Först till 10</option><option value='15'>Först till 15</option><option value='20'>Först till 20</option></select><select class='editor-select mk-tid'><option value='av'>⏱ Ingen timer</option><option value='5'>⏱ 5 sek</option><option value='10'>⏱ 10 sek</option><option value='15'>⏱ 15 sek</option><option value='20'>⏱ 20 sek</option></select></div><div class='mk-lag-rad'></div><div class='mk-tur'></div><div class='mk-timer' style='display:none;'><div class='mk-timer-spar'><div class='mk-timer-bar'></div></div><span class='mk-timer-text'></span></div><div class='mk-task'></div><div class='mk-doma'><button class='mk-ratt'>✔ Rätt (+1)</button><button class='mk-fel'>✘ Fel</button></div><div class='hover-menu'><button class='btn btn-secondary mk-ny'>Ny omgång (nollställ poäng)</button></div><div class='mk-info'>Fel svar = samma uppgift går vidare till nästa lag</div>`;
+        const opSel=body.querySelector('.mk-op'), lvlSel=body.querySelector('.mk-lvl'), malSel=body.querySelector('.mk-mal'), tidSel=body.querySelector('.mk-tid'), lagRad=body.querySelector('.mk-lag-rad'), turEl=body.querySelector('.mk-tur'), taskEl=body.querySelector('.mk-task'), timerEl=body.querySelector('.mk-timer'), barEl=body.querySelector('.mk-timer-bar'), timerTxt=body.querySelector('.mk-timer-text');
+        let tickId=null, deadline=0, timeoutLage=false;
+        let teams=[{name:'Lag 1',p:0},{name:'Lag 2',p:0}], turn=0, uppgift=null, avslojad=false;
+        if(config && config.data){
+            if(Array.isArray(config.data.teams) && config.data.teams.length>=2) teams=config.data.teams;
+            if(config.data.op) opSel.value=config.data.op;
+            if(config.data.lvl) lvlSel.value=config.data.lvl;
+            if(config.data.mal) malSel.value=config.data.mal;
+            if(config.data.tid) tidSel.value=config.data.tid;
+            if(typeof config.data.turn==='number') turn=Math.min(config.data.turn, teams.length-1);
+        }
+        const syncData=()=>{ widget.dataset.mattekamp = JSON.stringify({ teams:teams, op:opSel.value, lvl:lvlSel.value, mal:malSel.value, tid:tidSel.value, turn:turn }); };
+        const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
+        function gen(){
+            let op=opSel.value; if(op==='mix') op=['add','sub','mul','div'][ri(0,3)];
+            const lvl=lvlSel.value;
+            const addMax = lvl==='latt'?10 : lvl==='medel'?20 : 100;
+            const tabMax = lvl==='latt'?5  : lvl==='medel'?10 : 12;
+            if(op==='add'){ const a=ri(0,addMax), b=ri(0,addMax-a>0?addMax-a:0); return {t:a+' + '+b+' =', s:a+b}; }
+            if(op==='sub'){ const a=ri(0,addMax), b=ri(0,a); return {t:a+' − '+b+' =', s:a-b}; }
+            if(op==='mul'){ const a=ri(1,tabMax), b=ri(1,tabMax); return {t:a+' × '+b+' =', s:a*b}; }
+            const b=ri(1,tabMax), q=ri(1,tabMax); return {t:(b*q)+' ÷ '+b+' =', s:q};
+        }
+        function renderLag(){
+            syncData();
+            lagRad.innerHTML='';
+            teams.forEach((lag,i)=>{
+                const d=document.createElement('div'); d.className='mk-lag'+(i===turn?' aktiv':'');
+                const inp=document.createElement('input'); inp.value=lag.name; inp.title='Klicka för att byta lagnamn';
+                inp.oninput=()=>{ lag.name=inp.value; syncData(); }; inp.onchange=()=>{ renderLag(); saveBoardState(); };
+                const p=document.createElement('div'); p.className='mk-poang'; p.textContent=lag.p;
+                d.appendChild(inp); d.appendChild(p); lagRad.appendChild(d);
+            });
+            const kn=document.createElement('div'); kn.className='mk-lagknappar';
+            const plus=document.createElement('button'); plus.textContent='+'; plus.title='Lägg till lag (max 4)';
+            plus.onclick=()=>{ if(teams.length<4){ teams.push({name:'Lag '+(teams.length+1), p:0}); renderLag(); saveBoardState(); } };
+            const minus=document.createElement('button'); minus.textContent='−'; minus.title='Ta bort sista laget (minst 2)';
+            minus.onclick=()=>{ if(teams.length>2){ teams.pop(); if(turn>=teams.length) turn=0; renderLag(); saveBoardState(); } };
+            kn.appendChild(plus); kn.appendChild(minus); lagRad.appendChild(kn);
+            turEl.textContent='Tur: '+(teams[turn].name||('Lag '+(turn+1)));
+        }
+        function renderTask(){
+            taskEl.innerHTML='';
+            const q=document.createElement('span'); q.textContent=uppgift.t;
+            const a=document.createElement('span'); a.className='rakna-ans';
+            if(avslojad){ a.textContent=uppgift.s; a.classList.add('revealed'); }
+            else { a.textContent='?'; a.title='Klicka för att visa svaret'; a.onclick=()=>{ avslojad=true; stoppaTimer(); timerEl.style.display='none'; renderTask(); }; }
+            taskEl.appendChild(q); taskEl.appendChild(a);
+        }
+        function nyUppgift(){ uppgift=gen(); avslojad=false; renderTask(); startaTimer(); }
+        function nastaLag(){ turn=(turn+1)%teams.length; renderLag(); }
+        function visaVinst(namn){
+            const wrapper=document.getElementById('cb-app-wrapper');
+            const overlay=document.createElement('div'); overlay.className='reminder-popup-overlay';
+            const box=document.createElement('div'); box.className='reminder-popup-box mk-vinstbox';
+            box.innerHTML=`<div class='rem-pop-bell'>🏆</div><div class='rem-pop-title'>Vi har en vinnare!</div><div class='rem-pop-text'></div><div class='rem-pop-actions'><button class='rem-pop-btn rem-pop-ok'>🎉 Grattis!</button></div>`;
+            box.querySelector('.rem-pop-text').textContent = namn + ' vann Mattekampen!';
+            overlay.appendChild(box); wrapper.appendChild(overlay);
+            requestAnimationFrame(()=>overlay.classList.add('show'));
+            try{ remChime(); }catch(e){}
+            box.querySelector('.rem-pop-ok').onclick=()=>{ overlay.classList.remove('show'); setTimeout(()=>overlay.remove(),300); };
+        }
+        // ---- TIMER: tiden ute utan svar = −1 poäng och turen går vidare ----
+        function stoppaTimer(){ if(tickId){ clearInterval(tickId); tickId=null; } }
+        function startaTimer(){
+            stoppaTimer();
+            if(tidSel.value==='av'){ timerEl.style.display='none'; return; }
+            const total=parseInt(tidSel.value)*1000; deadline=Date.now()+total;
+            timerEl.style.display='flex';
+            const uppdatera=()=>{
+                const kvar=deadline-Date.now();
+                timerTxt.textContent=Math.max(0,Math.ceil(kvar/1000));
+                barEl.style.width=Math.max(0,kvar/total*100)+'%';
+                barEl.classList.toggle('rott', kvar<=3000);
+                if(kvar<=0){ stoppaTimer(); tidenUte(); }
+            };
+            uppdatera(); tickId=setInterval(uppdatera,100);
+        }
+        function mkBuzz(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; if(!window._remAC) window._remAC=new AC(); const ctx=window._remAC; if(ctx.state==='suspended') ctx.resume().catch(()=>{}); const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=170; const t=ctx.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.55); }catch(e){} }
+        function tidenUte(){
+            timeoutLage=true;
+            teams[turn].p=Math.max(0, teams[turn].p-1); // poängen stannar på 0, aldrig minus
+            renderLag(); mkBuzz();
+            taskEl.innerHTML=''; const m=document.createElement('span'); m.textContent='⏰ Tiden är ute! −1 poäng'; m.style.color='#ff3b30'; taskEl.appendChild(m);
+            saveBoardState();
+            setTimeout(()=>{ timeoutLage=false; nastaLag(); nyUppgift(); saveBoardState(); }, 1500);
+        }
+        const mkObs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ stoppaTimer(); mkObs.disconnect(); } });
+        const mkCc=document.getElementById('canvas-container-v6'); if(mkCc) mkObs.observe(mkCc,{childList:true,subtree:true});
+
+        body.querySelector('.mk-ratt').onclick=()=>{
+            if(timeoutLage) return;
+            teams[turn].p++;
+            if(teams[turn].p >= parseInt(malSel.value)){ visaVinst(teams[turn].name||('Lag '+(turn+1))); }
+            nastaLag(); nyUppgift(); saveBoardState();
+        };
+        body.querySelector('.mk-fel').onclick=()=>{
+            if(timeoutLage) return;
+            const behall = !avslojad; // stöld: samma uppgift vidare om svaret inte visats
+            nastaLag();
+            if(behall){ renderTask(); startaTimer(); } // nästa lag får ny tid på samma uppgift
+            else nyUppgift();
+            saveBoardState();
+        };
+        body.querySelector('.mk-ny').onclick=()=>{ teams.forEach(l=>l.p=0); turn=0; renderLag(); nyUppgift(); saveBoardState(); };
+        opSel.onchange=()=>{ nyUppgift(); syncData(); saveBoardState(); };
+        lvlSel.onchange=()=>{ nyUppgift(); syncData(); saveBoardState(); };
+        malSel.onchange=()=>{ syncData(); saveBoardState(); };
+        tidSel.onchange=()=>{ syncData(); startaTimer(); saveBoardState(); };
+        renderLag(); nyUppgift();
+    }
+
     function createWheel(config){
         const body = createWidget('SLUMPA-HJUL', 320, '', config);
         body.innerHTML = `<textarea class='name-input hover-menu wheel-names' placeholder='Ett namn per rad...'></textarea><div class='wheel-wrap'><div class='wheel-pointer'>▼</div><canvas class='wheel-canvas' width='240' height='240'></canvas></div><button class='btn btn-primary wheel-spin' style='width:100%;'>🎡 Snurra!</button>`;
@@ -3755,7 +3928,7 @@
     // ---- BORDSPLACERING (möbelritning: dra ut bord, flytta fritt, spara layouten) ----
     const FURNITURE_TYPES = {
         single: { label:'Enkelbord', w:60, h:40, shape:'rect', seats:1 },
-        double: { label:'Dubbelbord', w:90, h:40, shape:'rect', seats:2 },
+        double: { label:'Dubbelbord', w:76, h:40, shape:'rect', seats:2 },
         group4: { label:'Grupp 4', w:90, h:60, shape:'rect', seats:4 },
         group6: { label:'Grupp 6', w:130, h:60, shape:'rect', seats:6 },
         round4: { label:'Runt bord 4', w:70, h:70, shape:'round', seats:4 },
@@ -3774,11 +3947,14 @@
         return slots;
     }
 
-    function buildFurnitureEl(type, names){
+    function buildFurnitureEl(type, names, rot){
         const cfg = FURNITURE_TYPES[type]; if(!cfg) return null;
+        rot = rot||0;
+        const motRot = rot ? ' rotate('+(-rot)+'deg)' : ''; // namnen motroteras så texten alltid är läsbar
         const el = document.createElement('div'); el.className='seat-item';
         el.style.width=cfg.w+'px'; el.style.height=cfg.h+'px';
         const shape = document.createElement('div'); shape.className = cfg.shape==='round' ? 'seat-round' : 'seat-desk'; shape.style.width='100%'; shape.style.height='100%';
+        if(rot) shape.style.transform='rotate('+rot+'deg)';
         el.appendChild(shape);
         const slots = getSeatSlots(cfg);
         const roundRadiusBump = cfg.w/2 + 5, roundRadiusLabel = cfg.w/2 + 22;
@@ -3788,17 +3964,19 @@
             else if(slot.side==='bottom'){ b.style.left=(slot.x-7)+'px'; b.style.bottom='-8px'; b.style.borderRadius='0 0 6px 6px'; }
             else { b.style.left='50%'; b.style.top='50%'; b.style.transform=`translate(-50%,-50%) rotate(${slot.angle}deg) translate(0, -${roundRadiusBump}px)`; }
             shape.appendChild(b);
+            b.dataset.slot=i;
             const nm = names && names[i] ? names[i] : '';
-            if(nm){
-                const lbl=document.createElement('div'); lbl.className='seat-name-label'; lbl.textContent=nm; lbl.title=nm;
-                if(slot.side==='top'){ lbl.style.left=slot.x+'px'; lbl.style.top='-24px'; lbl.style.transform='translateX(-50%)'; }
-                else if(slot.side==='bottom'){ lbl.style.left=slot.x+'px'; lbl.style.top=(cfg.h+12)+'px'; lbl.style.transform='translateX(-50%)'; }
-                else { lbl.style.left='50%'; lbl.style.top='50%'; lbl.style.transform=`translate(-50%,-50%) rotate(${slot.angle}deg) translate(0, -${roundRadiusLabel}px) rotate(${-slot.angle}deg)`; }
-                shape.appendChild(lbl);
-            }
+            // Namnet ligger PÅ bordsskivan, intill sin stol
+            const lbl=document.createElement('div'); lbl.className='seat-name-label'+(nm?'':' tom'); lbl.textContent=nm||'·'; lbl.title=nm; lbl.dataset.slot=i;
+            const perSida = slot.side==='top' ? Math.ceil(cfg.seats/2) : slot.side==='bottom' ? (cfg.seats - Math.ceil(cfg.seats/2)) : 1;
+            if(slot.side==='top'){ lbl.style.left=slot.x+'px'; lbl.style.top='3px'; lbl.style.transform='translateX(-50%)'+motRot; lbl.style.maxWidth=Math.max(26, Math.min(52, Math.floor(cfg.w/perSida)-6))+'px'; }
+            else if(slot.side==='bottom'){ lbl.style.left=slot.x+'px'; lbl.style.bottom='3px'; lbl.style.transform='translateX(-50%)'+motRot; lbl.style.maxWidth=Math.max(26, Math.min(52, Math.floor(cfg.w/perSida)-6))+'px'; }
+            else { lbl.style.left='50%'; lbl.style.top='50%'; lbl.style.transform=`translate(-50%,-50%) rotate(${slot.angle}deg) translate(0, -${cfg.w/2-14}px) rotate(${-slot.angle}deg)`+motRot; lbl.style.maxWidth='38px'; }
+            shape.appendChild(lbl);
         });
         const del = document.createElement('div'); del.className='seat-del'; del.textContent='✕';
         el.appendChild(del);
+        if(cfg.shape==='rect'){ const rb=document.createElement('div'); rb.className='seat-rot'; rb.textContent='↻'; rb.title='Snurra bordet 45°'; el.appendChild(rb); }
         return el;
     }
 
@@ -3820,9 +3998,11 @@
         function attachDrag(el, it){
             const del = el.querySelector('.seat-del');
             del.onclick=(e)=>{ e.stopPropagation(); items = items.filter(x=>x.id!==it.id); el.remove(); persist(); };
+            const rotBtn = el.querySelector('.seat-rot');
+            if(rotBtn) rotBtn.onclick=(e)=>{ e.stopPropagation(); const cur=items.find(x=>x.id===it.id); if(cur){ cur.rot=((cur.rot||0)+45)%360; renderAll(); persist(); } };
             let startX=0, startY=0, origX=it.x, origY=it.y, dragging=false;
             el.addEventListener('pointerdown',(e)=>{
-                if(e.target===del) return;
+                if(e.target===del || (e.target.classList && e.target.classList.contains('seat-rot'))) return;
                 e.stopPropagation(); dragging=true; el.classList.add('dragging');
                 startX=e.clientX; startY=e.clientY;
                 const cur = items.find(x=>x.id===it.id); origX=cur.x; origY=cur.y;
@@ -3842,11 +4022,16 @@
         }
 
         function renderItem(it){
-            const el = buildFurnitureEl(it.type, it.names); if(!el) return;
+            const el = buildFurnitureEl(it.type, it.names, it.rot||0); if(!el) return;
             el.dataset.id = it.id;
             el.style.left = it.x+'px'; el.style.top = it.y+'px';
             canvas.appendChild(el);
             attachDrag(el, it);
+            // klickbara platser i Välj namn-läget
+            el.querySelectorAll('.seat-name-label').forEach(lbl=>{
+                lbl.addEventListener('pointerdown', e=>{ if(valjLage) e.stopPropagation(); });
+                lbl.addEventListener('click', e=>{ if(!valjLage) return; e.stopPropagation(); platsKlick(it, parseInt(lbl.dataset.slot)); });
+            });
         }
 
         function renderAll(){ canvas.innerHTML=''; items.forEach(renderItem); }
@@ -3858,7 +4043,7 @@
             const col = items.length % perRow, row = Math.floor(items.length / perRow);
             const px = 16 + col*115;
             const py = 16 + row*95;
-            const it = { id, type, x:px, y:py, names:[] };
+            const it = { id, type, x:px, y:py, names:[], rot:0 };
             items.push(it); renderItem(it); persist();
         }
 
@@ -3876,8 +4061,56 @@
         const loadLists=()=>{ listSel.innerHTML='<option value="">-- Välj klasslista --</option>'; const l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser)||'{}'); Object.keys(l).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=k; listSel.appendChild(o); }); };
         loadLists();
         const shuffleBtn=document.createElement('button'); shuffleBtn.className='seat-palette-btn'; shuffleBtn.type='button'; shuffleBtn.textContent='🔀 Slumpa elever på platser';
+        const chooseBtn=document.createElement('button'); chooseBtn.className='seat-palette-btn'; chooseBtn.type='button'; chooseBtn.textContent='👆 Välj namn';
         const clearNamesBtn=document.createElement('button'); clearNamesBtn.className='seat-palette-btn'; clearNamesBtn.type='button'; clearNamesBtn.textContent='🧹 Rensa namn';
-        studentsRow.appendChild(listSel); studentsRow.appendChild(shuffleBtn); studentsRow.appendChild(clearNamesBtn);
+        const saveBtn=document.createElement('button'); saveBtn.className='seat-palette-btn'; saveBtn.type='button'; saveBtn.textContent='💾 Spara';
+        const openSel=document.createElement('select'); openSel.className='seat-list-select';
+        const printBtn=document.createElement('button'); printBtn.className='seat-palette-btn'; printBtn.type='button'; printBtn.textContent='🖨️ Skriv ut';
+        studentsRow.appendChild(listSel); studentsRow.appendChild(shuffleBtn); studentsRow.appendChild(chooseBtn); studentsRow.appendChild(clearNamesBtn); studentsRow.appendChild(saveBtn); studentsRow.appendChild(openSel); studentsRow.appendChild(printBtn);
+        const namnPanel=document.createElement('div'); namnPanel.className='seat-namn-panel'; root.insertBefore(namnPanel, canvasWrap);
+
+        // ---- VÄLJ NAMN-LÄGE ----
+        let valjLage=false, valtNamn=null;
+        const hamtaNamnlista=()=>{ const l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser)||'{}'); return (l[listSel.value]||'').split('\n').map(n=>n.trim()).filter(n=>n); };
+        function renderChips(){
+            const alla=hamtaNamnlista();
+            const placerade=new Set(); items.forEach(it=> (it.names||[]).forEach(n=>{ if(n) placerade.add(n); }));
+            namnPanel.innerHTML='';
+            const info=document.createElement('div'); info.className='seat-panel-info';
+            info.textContent = valtNamn ? ('Klicka på en plats för att sätta '+valtNamn+' där.') : 'Klicka på ett namn nedan, sedan på en plats på ett bord. Klick på plats utan valt namn tar bort namnet.';
+            namnPanel.appendChild(info);
+            alla.forEach(n=>{
+                const c=document.createElement('span'); c.className='seat-chip'+(placerade.has(n)?' anvand':'')+(n===valtNamn?' vald':''); c.textContent=n;
+                c.onclick=()=>{ if(placerade.has(n) && n!==valtNamn) return; valtNamn = (n===valtNamn? null : n); renderChips(); };
+                namnPanel.appendChild(c);
+            });
+            if(!alla.length){ const t=document.createElement('span'); t.className='seat-panel-info'; t.textContent='Välj en klasslista först.'; namnPanel.appendChild(t); }
+        }
+        function sattValjLage(pa){
+            valjLage=pa; valtNamn=null;
+            canvas.classList.toggle('valj', pa);
+            namnPanel.classList.toggle('visas', pa);
+            chooseBtn.textContent = pa ? '✔ Klar' : '👆 Välj namn';
+            chooseBtn.style.background = pa ? '#e2f6e6' : '';
+            if(pa) renderChips();
+        }
+        chooseBtn.onclick=()=>{
+            if(!valjLage && !listSel.value){ customAlert('Välj en klasslista först.', '📋'); return; }
+            sattValjLage(!valjLage);
+        };
+        function platsKlick(it, slotIdx){
+            if(!valjLage) return;
+            it.names = it.names || [];
+            if(valtNamn){
+                items.forEach(x=> x.names = (x.names||[]).map(n=> n===valtNamn ? '' : n)); // ingen sitter dubbelt
+                it.names[slotIdx]=valtNamn;
+                const alla=hamtaNamnlista(); const placerade=new Set(); items.forEach(x=>(x.names||[]).forEach(n=>{ if(n) placerade.add(n); }));
+                valtNamn = alla.find(n=>!placerade.has(n)) || null; // hoppa till nästa lediga namn
+            } else {
+                it.names[slotIdx]=''; // klick utan valt namn = ta bort
+            }
+            renderAll(); renderChips(); persist();
+        }
 
         shuffleBtn.onclick=()=>{
             if(!listSel.value){ customAlert('Välj en klasslista först.', '📋'); return; }
@@ -3898,10 +4131,61 @@
             if(names.length > totalSeats) customAlert('Alla elever fick inte plats – lägg till fler bord (' + (names.length-totalSeats) + ' elever fick ingen plats).', '⚠️');
             else if(names.length < totalSeats) customAlert('Alla elever placerades ut, men det finns tomma platser kvar.', '✅');
         };
-        clearNamesBtn.onclick=()=>{ items.forEach(it=> it.names=[]); renderAll(); persist(); };
+        clearNamesBtn.onclick=()=>{ items.forEach(it=> it.names=[]); renderAll(); if(valjLage) renderChips(); persist(); };
+
+        // ---- SPARA / ÖPPNA namngivna placeringar (per användare) ----
+        const seatStoreKey=()=>'savedSeatings_'+currentUser;
+        function laddaSparade(){
+            openSel.innerHTML='<option value="">📂 Öppna sparad…</option>';
+            const s=JSON.parse(localStorage.getItem(seatStoreKey())||'{}');
+            Object.keys(s).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=k; openSel.appendChild(o); });
+        }
+        laddaSparade();
+        saveBtn.onclick=()=>{
+            if(!items.length){ customAlert('Det finns inget att spara – lägg till bord först.', '🪑'); return; }
+            customPrompt('Namn på placeringen:', listSel.value || 'Min placering', (namn)=>{
+                if(!namn || !namn.trim()) return;
+                const s=JSON.parse(localStorage.getItem(seatStoreKey())||'{}');
+                s[namn.trim()] = JSON.parse(JSON.stringify(items));
+                localStorage.setItem(seatStoreKey(), JSON.stringify(s));
+                laddaSparade(); openSel.value=namn.trim();
+                customAlert('Placeringen ”'+namn.trim()+'” är sparad!', '💾');
+            });
+        };
+        openSel.onchange=()=>{
+            if(!openSel.value) return;
+            const s=JSON.parse(localStorage.getItem(seatStoreKey())||'{}');
+            const sparad=s[openSel.value]; if(!sparad) return;
+            customConfirm('Öppna ”'+openSel.value+'”? Nuvarande placering ersätts.', ()=>{
+                items = JSON.parse(JSON.stringify(sparad)).map(x=>({ id:x.id||('f'+(++idCounter)+'_'+Date.now()), type:x.type, x:x.x||0, y:x.y||0, names:Array.isArray(x.names)?x.names:[], rot:x.rot||0 }));
+                renderAll(); if(valjLage) renderChips(); persist();
+            });
+            openSel.value='';
+        };
+
+        // ---- SKRIV UT ----
+        printBtn.onclick=()=>{
+            if(!items.length){ customAlert('Det finns inget att skriva ut – lägg till bord först.', '🖨'); return; }
+            let maxX=0, maxY=0;
+            items.forEach(it=>{ const c=FURNITURE_TYPES[it.type]; if(c){ maxX=Math.max(maxX, it.x+c.w); maxY=Math.max(maxY, it.y+c.h); } });
+            const pw=window.open('','_blank');
+            if(!pw){ customAlert('Utskriftsfönstret blockerades – tillåt popup-fönster för sidan.', '⚠️'); return; }
+            const css="body{font-family:'Nunito',Arial,sans-serif;margin:24px;} h2{margin:0 0 2px;} .sub{color:#777;font-size:13px;margin-bottom:16px;}"+
+                ".seat-canvas{position:relative;} .seat-item{position:absolute;}"+
+                ".seat-desk{background:#efe0c8;border:2px solid #b5895a;border-radius:8px;position:relative;box-sizing:border-box;width:100%;height:100%;}"+
+                ".seat-round{background:#efe0c8;border:2px solid #b5895a;border-radius:50%;position:relative;box-sizing:border-box;width:100%;height:100%;}"+
+                ".seat-bump{position:absolute;width:14px;height:9px;background:#c3ccd8;border-radius:6px 6px 0 0;}"+
+                ".seat-name-label{position:absolute;background:#fff;border:1px solid #bbb;border-radius:5px;font-size:8px;font-weight:700;color:#000;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2;}"+
+                ".seat-name-label.tom{display:none;} .seat-del{display:none;} .seat-rot{display:none;}"+
+                "@media print { body{margin:8mm;} }";
+            const datum=new Date().toLocaleDateString('sv-SE',{year:'numeric',month:'long',day:'numeric'});
+            pw.document.write('<html><head><title>Bordsplacering</title><style>'+css+'</style></head><body><h2>Bordsplacering'+(listSel.value?(' – '+listSel.value):'')+'</h2><div class="sub">'+datum+'</div><div class="seat-canvas" style="width:'+(maxX+40)+'px;height:'+(maxY+40)+'px;">'+canvas.innerHTML+'</div></body></html>');
+            pw.document.close();
+            setTimeout(()=>{ try{ pw.focus(); pw.print(); }catch(e){} }, 500);
+        };
 
         if(config && config.data && Array.isArray(config.data.items)){
-            items = config.data.items.map(x=>({ id:x.id||('f'+(++idCounter)+'_'+Date.now()), type:x.type, x:x.x||0, y:x.y||0, names:Array.isArray(x.names)?x.names:[] }));
+            items = config.data.items.map(x=>({ id:x.id||('f'+(++idCounter)+'_'+Date.now()), type:x.type, x:x.x||0, y:x.y||0, names:Array.isArray(x.names)?x.names:[], rot:x.rot||0 }));
             items.forEach(it=> renderItem(it));
         }
         stamp();
@@ -5275,6 +5559,7 @@
     }
     // Lägg till en ny kedja sist i verktygsfickan – dra den sedan dit du vill ha den
     function addToolPocketDivider(){
+        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får lägga till kedjor
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
         grid.appendChild(makeChainDividerEl(16));
         saveToolPocketLayout();
