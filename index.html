@@ -154,6 +154,7 @@
             <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
             <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">💬</div><div class="label">Verb</div></button>
             <button class="tool-btn" onclick="createNounWidget()"><div class="icon">🅰️</div><div class="label">En/Ett</div></button>
+            <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
@@ -1214,6 +1215,11 @@
     .sub-artikel.en { background:#e8f2ff; color:#007aff; box-shadow:inset 0 0 0 2px #007aff; }
     .sub-artikel.ett { background:#fff3e0; color:#e07f00; box-shadow:inset 0 0 0 2px #ff9500; }
 
+    /* ---- LÄNDER ---- */
+    .land-forslag { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+    .land-chip { font-size:12px; font-weight:800; padding:4px 10px; border-radius:999px; background:#fff; border:1.5px solid #b9d7f5; color:#2b6cb0; cursor:pointer; user-select:none; }
+    .land-chip:hover { background:#e2efff; }
+
     /* SLUMPA-HJUL */
     .wheel-wrap { position:relative; width:240px; margin:6px auto; }
     .wheel-canvas { display:block; }
@@ -1680,6 +1686,7 @@
                 else if (type === 'MATTEKAMP') { try{ state.data = JSON.parse(w.dataset.mattekamp || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'VERB') { try{ state.data = JSON.parse(w.dataset.verb || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'EN / ETT') { try{ state.data = JSON.parse(w.dataset.substantiv || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'LÄNDER') { try{ state.data = JSON.parse(w.dataset.land || '{}'); }catch(e){ state.data={}; } }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -1753,6 +1760,7 @@
             else if (w.type === 'MATTEKAMP') createMathBattle(w);
             else if (w.type === 'VERB') createVerbWidget(w);
             else if (w.type === 'EN / ETT') createNounWidget(w);
+            else if (w.type === 'LÄNDER') createCountryWidget(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -3048,8 +3056,11 @@
         }
         svg.addEventListener('pointerdown',(e)=>{
             const from=getFrom(), to=getTo(); if(!isFinite(from)||!isFinite(to)||to<=from) return;
-            const r=svg.getBoundingClientRect();
-            const sx=(e.clientX-r.left)*(W/r.width);
+            // Exakt skärm→rityta-omvandling: tar höjd för kantlinjer, skalning
+            // och proportioner så markören hamnar precis där man klickar
+            let sx;
+            try{ const pt=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse()); sx=pt.x; }
+            catch(_){ const r=svg.getBoundingClientRect(); sx=(e.clientX-r.left)*(W/r.width); }
             let v=from+(sx-PAD)/(W-2*PAD)*(to-from);
             const range=to-from;
             const snap= range<=25 ? 0.5 : range<=250 ? 1 : niceStep(range)/2;
@@ -3205,8 +3216,9 @@
             e.stopPropagation(); e.preventDefault();
             try{ svg.setPointerCapture(e.pointerId); }catch(_){}
             const move=(ev)=>{
-                const R=svg.getBoundingClientRect();
-                const gx=(ev.clientX-R.left)*(360/R.width), gy=(ev.clientY-R.top)*(260/R.height);
+                let gx,gy; // exakt mappning – kompenserar bl.a. ramens 1,5 px
+                try{ const pt=new DOMPoint(ev.clientX,ev.clientY).matrixTransform(svg.getScreenCTM().inverse()); gx=pt.x; gy=pt.y; }
+                catch(_){ const R=svg.getBoundingClientRect(); gx=(ev.clientX-R.left)*(360/R.width); gy=(ev.clientY-R.top)*(260/R.height); }
                 t._drag(gx,gy); render();
             };
             const up=()=>{ svg.removeEventListener('pointermove',move); svg.removeEventListener('pointerup',up); svg.removeEventListener('pointercancel',up); saveBoardState(); };
@@ -3472,6 +3484,42 @@
         return p;
     }
 
+    // ---- LIVEUPPSLAG MOT SVENSKA WIKTIONARY (verb) ----
+    // Läser verbtabellen: Infinitiv/Presens/Preteritum/Supinum/Imperativ ur
+    // Aktiv-kolumnen, stannar före Particip-delen. Böjda former följs till
+    // grundordet, och alla svar cachas lokalt.
+    async function verbWiktionary(ord, djup){
+        djup = djup||0; if(djup>2) return null;
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('verbWikiCacheV1')||'{}'); }catch(e){}
+        if(cache[ord]!==undefined) return cache[ord]==='saknas' ? null : cache[ord];
+        const sparaCache=(v)=>{ try{ cache[ord]=v; localStorage.setItem('verbWikiCacheV1', JSON.stringify(cache)); }catch(e){} };
+        let j;
+        try{
+            const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(ord);
+            const r=await fetch(url); j=await r.json();
+        }catch(e){ return null; } // nätfel cachas inte
+        if(!j || !j.parse || !j.parse.text){ sparaCache('saknas'); return null; }
+        const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
+        const cellTxt=(td)=>{ if(!td) return ''; const d=td.cloneNode(true); d.querySelectorAll('sup,.reference').forEach(s=>s.remove()); const t=d.innerHTML.split(/<br/i)[0].replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim(); return t==='–'||t==='-'?'':t; };
+        const tab=[...doc.querySelectorAll('table')].find(t=>/template-sv-verb/.test(t.className||''));
+        if(tab){
+            const f={};
+            for(const tr of tab.querySelectorAll('tr')){
+                const lbl=(tr.cells && tr.cells[0]) ? tr.cells[0].textContent.trim() : '';
+                if(/particip/i.test(lbl)) break; // ta bara verbdelen, inte participen
+                const m=lbl.toLowerCase();
+                if(['infinitiv','presens','preteritum','supinum','imperativ'].includes(m) && f[m]===undefined) f[m]=cellTxt(tr.cells[1]);
+            }
+            if(f.infinitiv && f.presens && f.preteritum && f.supinum){
+                const p={ inf:f.infinitiv, pres:f.presens, pret:f.preteritum, sup:f.supinum, imp:f.imperativ||'', typ:'sv.wiktionary.org', träff:'wiki' };
+                sparaCache(p); return p;
+            }
+        }
+        const li=[...doc.querySelectorAll('li,dd,p')].find(el=>/böjningsform av/i.test(el.textContent||''));
+        if(li){ const a2=li.querySelector('a'); if(a2 && a2.textContent.trim() && a2.textContent.trim()!==ord){ const p=await verbWiktionary(a2.textContent.trim(), djup+1); if(p){ sparaCache(p); return p; } } }
+        sparaCache('saknas'); return null;
+    }
+
     function createVerbWidget(config){
         if(config===undefined) config=null;
         const body = createWidget('VERB', 320, 'verb-widget', config);
@@ -3492,11 +3540,27 @@
             } else { const f=document.createElement('span'); f.className='verb-form'; f.textContent=form; r.appendChild(f); }
             return r;
         }
+        let uppslagNr=0;
         function render(){
-            syncData(); rowsEl.innerHTML=''; typEl.textContent='';
+            syncData();
             const p=verbSlaUpp(inp.value);
-            if(!p){ typEl.textContent='Skriv ett verb ovan och tryck Böj'; return; }
-            typEl.textContent = p.typ + (p.träff==='regel' && p.typ.indexOf('okänt')<0 ? ' – automatiskt böjt' : '');
+            if(!p){ rowsEl.innerHTML=''; typEl.textContent='Skriv ett verb ovan och tryck Böj'; return; }
+            rita(p);
+            if(p.träff==='regel'){
+                const mittNr=++uppslagNr, ordDaa=inp.value;
+                typEl.textContent='Slår upp i ordboken…';
+                const raa=(inp.value||'').toLowerCase().trim().replace(/^att\s+/,'').replace(/!+$/,'').trim();
+                verbWiktionary(raa).then(w=> w || (raa!==p.inf ? verbWiktionary(p.inf) : null)).then(w=>{
+                    if(mittNr!==uppslagNr || inp.value!==ordDaa) return;
+                    if(w){ rita(w); }
+                    else { rita(p); typEl.textContent='⚠ hittades inte i ordboken – '+p.typ; }
+                    saveBoardState();
+                });
+            }
+        }
+        function rita(p){
+            rowsEl.innerHTML='';
+            typEl.textContent = p.typ + (p.träff==='regel' ? ' – automatiskt böjt' : '');
             const P=practiceCb.checked;
             rowsEl.appendChild(rad('Infinitiv','att',p.inf,true,false));
             rowsEl.appendChild(rad('Presens','idag:',p.pres,false,P));
@@ -3509,7 +3573,7 @@
         bojBtn.onclick=()=>{ render(); saveBoardState(); };
         inp.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); render(); saveBoardState(); } };
         practiceCb.onchange=()=>{ render(); saveBoardState(); };
-        if(inp.value) render(); else { typEl.textContent='Skriv ett verb ovan och tryck Böj – t.ex. ”gjorde”, ”springer” eller ”läsa”'; }
+        if(inp.value) render(); else { typEl.textContent='Skriv ett verb i valfri form – okända ord slås upp på sv.wiktionary.org'; }
     }
 
     // ---- EN/ETT: skriv ett substantiv och få artikel + alla former ----
@@ -3570,6 +3634,42 @@
         return { a:a, sg:w, pl:pl, sgB:subDefSg(a,w), plB:subDefPl(a,w,pl), typ: angiven ? 'gissad böjning (angiven artikel)' : 'gissning – ändelsebaserad' };
     }
 
+    // ---- LIVEUPPSLAG MOT SVENSKA WIKTIONARY (riktig ordbok) ----
+    // Okända ord slås upp på sv.wiktionary.org via deras öppna API. Vi läser
+    // böjningstabellen (genus ur tabellklassen, formerna ur Nominativ-raden)
+    // och cachar svaret lokalt. Böjda former följs till grundordet.
+    async function subWiktionary(ord, djup){
+        djup = djup||0; if(djup>2) return null;
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('subWikiCacheV1')||'{}'); }catch(e){}
+        if(cache[ord]!==undefined) return cache[ord]==='saknas' ? null : cache[ord];
+        const sparaCache=(v)=>{ try{ cache[ord]=v; localStorage.setItem('subWikiCacheV1', JSON.stringify(cache)); }catch(e){} };
+        let j;
+        try{
+            const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(ord);
+            const r=await fetch(url); j=await r.json();
+        }catch(e){ return null; } // nätfel: cacha INTE, kan funka nästa gång
+        if(!j || !j.parse || !j.parse.text){ sparaCache('saknas'); return null; }
+        const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
+        const cellTxt=(td)=>{ const d=td.cloneNode(true); d.querySelectorAll('sup,.reference').forEach(s=>s.remove()); return d.innerHTML.split(/<br/i)[0].replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim(); };
+        const tab=[...doc.querySelectorAll('table')].find(t=>/template-sv-subst/.test(t.className||''));
+        if(tab){
+            const a=/template-sv-subst-t/.test(tab.className) ? 't' : 'e';
+            const rows=[...tab.querySelectorAll('tr')];
+            const nom=rows.find(tr=>tr.cells && tr.cells[0] && /nominativ/i.test(tr.cells[0].textContent||''));
+            if(nom){
+                const c=[...nom.cells].map(cellTxt);
+                let p=null;
+                if(c.length>=5 && c[1]) p={ a:a, sg:c[1], sgB:c[2]||subDefSg(a,c[1]), pl:c[3]||'-', plB:c[4]||'-', typ:'sv.wiktionary.org' };
+                else if(c.length>=3 && c[1]) p={ a:a, sg:c[1], sgB:c[2]||subDefSg(a,c[1]), pl:'-', plB:'-', typ:'sv.wiktionary.org' };
+                if(p){ sparaCache(p); return p; }
+            }
+        }
+        // böjd form? följ "böjningsform av …" till grundordet
+        const li=[...doc.querySelectorAll('li,dd,p')].find(el=>/böjningsform av/i.test(el.textContent||''));
+        if(li){ const a2=li.querySelector('a'); if(a2 && a2.textContent.trim() && a2.textContent.trim()!==ord){ const p=await subWiktionary(a2.textContent.trim(), djup+1); if(p){ sparaCache(p); return p; } } }
+        sparaCache('saknas'); return null;
+    }
+
     function createNounWidget(config){
         if(config===undefined) config=null;
         const body = createWidget('EN / ETT', 320, 'sub-widget verb-widget', config);
@@ -3589,10 +3689,27 @@
             else { const f=document.createElement('span'); f.className='verb-form'; f.textContent=form; r.appendChild(f); }
             return r;
         }
+        let uppslagNr=0;
         function render(){
             syncData(); rowsEl.innerHTML=''; typEl.textContent='';
             const p=subSlaUpp(inp.value);
             if(!p){ typEl.textContent='Skriv ett substantiv ovan och tryck Böj'; return; }
+            rita(p);
+            // okänt ord? slå upp i riktiga ordboken (sv.wiktionary) och rita om
+            if(p.typ.indexOf('gissning')>=0 || p.typ.indexOf('angiven artikel')>=0){
+                const mittNr=++uppslagNr;
+                const ordDaa=inp.value;
+                typEl.textContent='Slår upp i ordboken…';
+                subWiktionary(p.sg).then(w=>{
+                    if(mittNr!==uppslagNr || inp.value!==ordDaa) return; // användaren hann skriva nytt
+                    if(w){ rita(w); }
+                    else { rita(p); typEl.textContent=(p.a==='e'?'EN-ord':'ETT-ord')+' · ⚠ hittades inte i ordboken – '+p.typ; }
+                    saveBoardState();
+                });
+            }
+        }
+        function rita(p){
+            rowsEl.innerHTML='';
             typEl.textContent=(p.a==='e'?'EN-ord':'ETT-ord')+' · '+p.typ;
             const P=practiceCb.checked;
             const art = p.a==='e' ? 'en' : 'ett';
@@ -3600,13 +3717,75 @@
             rowsEl.appendChild(rad('Artikel','',false,P,artHtml));
             rowsEl.appendChild(rad('Singular',art+' '+p.sg,true,false));
             rowsEl.appendChild(rad('Bestämd form',p.sgB,false,P));
-            rowsEl.appendChild(rad('Plural',p.pl==='-'?'– (saknar vanlig plural)':(p.a==='e'?'flera ':'flera ')+p.pl,false,P));
-            if(p.pl!=='-') rowsEl.appendChild(rad('Bestämd plural',p.plB,false,P));
+            rowsEl.appendChild(rad('Plural',p.pl==='-'?'– (saknar vanlig plural)':'flera '+p.pl,false,P));
+            if(p.pl!=='-' && p.plB && p.plB!=='-') rowsEl.appendChild(rad('Bestämd plural',p.plB,false,P));
         }
         bojBtn.onclick=()=>{ render(); saveBoardState(); };
         inp.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); render(); saveBoardState(); } };
         practiceCb.onchange=()=>{ render(); saveBoardState(); };
-        if(inp.value) render(); else { typEl.textContent='Skriv ett substantiv – t.ex. ”äpple”, ”bok” eller ”bilar”'; }
+        if(inp.value) render(); else { typEl.textContent='Skriv ett substantiv – okända ord slås upp på sv.wiktionary.org'; }
+    }
+
+    // ---- LÄNDER: land → invånarnamn, adjektiv och huvudstad ----
+    // Inbyggd lista med ~130 länder. Sökbar även baklänges (”norrman” → Norge)
+    // och med förslag medan man skriver.
+    function landBygdData(){
+        if(window._landData) return window._landData;
+        const RAD=('Sverige,svensk,svenskar,svensk,Stockholm|Norge,norrman,norrmän,norsk,Oslo|Danmark,dansk,danskar,dansk,Köpenhamn|Finland,finländare,finländare,finsk,Helsingfors|Island,islänning,islänningar,isländsk,Reykjavik|Tyskland,tysk,tyskar,tysk,Berlin|Frankrike,fransman,fransmän,fransk,Paris|Spanien,spanjor,spanjorer,spansk,Madrid|Portugal,portugis,portugiser,portugisisk,Lissabon|Italien,italienare,italienare,italiensk,Rom|Storbritannien,britt,britter,brittisk,London|England,engelsman,engelsmän,engelsk,London|Skottland,skotte,skottar,skotsk,Edinburgh|Wales,walesare,walesare,walesisk,Cardiff|Irland,irländare,irländare,irländsk,Dublin|Nederländerna,nederländare,nederländare,nederländsk,Amsterdam|Holland,holländare,holländare,holländsk,Amsterdam|Belgien,belgare,belgare,belgisk,Bryssel|Luxemburg,luxemburgare,luxemburgare,luxemburgsk,Luxemburg|Schweiz,schweizare,schweizare,schweizisk,Bern|Österrike,österrikare,österrikare,österrikisk,Wien|Polen,polack,polacker,polsk,Warszawa|Tjeckien,tjeck,tjecker,tjeckisk,Prag|Slovakien,slovak,slovaker,slovakisk,Bratislava|Ungern,ungrare,ungrare,ungersk,Budapest|Rumänien,rumän,rumäner,rumänsk,Bukarest|Bulgarien,bulgar,bulgarer,bulgarisk,Sofia|Grekland,grek,greker,grekisk,Aten|Turkiet,turk,turkar,turkisk,Ankara|Ryssland,ryss,ryssar,rysk,Moskva|Ukraina,ukrainare,ukrainare,ukrainsk,Kiev|Belarus,belarusier,belarusier,belarusisk,Minsk|Estland,est,ester,estnisk,Tallinn|Lettland,lett,letter,lettisk,Riga|Litauen,litauer,litauer,litauisk,Vilnius|Kroatien,kroat,kroater,kroatisk,Zagreb|Serbien,serb,serber,serbisk,Belgrad|Bosnien och Hercegovina,bosnier,bosnier,bosnisk,Sarajevo|Slovenien,sloven,slovener,slovensk,Ljubljana|Montenegro,montenegrin,montenegriner,montenegrinsk,Podgorica|Nordmakedonien,makedonier,makedonier,makedonsk,Skopje|Albanien,alban,albaner,albansk,Tirana|Kosovo,kosovar,kosovarer,kosovarisk,Pristina|Moldavien,moldav,moldaver,moldavisk,Chisinau|Malta,maltes,malteser,maltesisk,Valletta|Cypern,cypriot,cyprioter,cypriotisk,Nicosia|Grönland,grönländare,grönländare,grönländsk,Nuuk'+
+        '|USA,amerikan,amerikaner,amerikansk,Washington|Kanada,kanadensare,kanadensare,kanadensisk,Ottawa|Mexiko,mexikan,mexikaner,mexikansk,Mexico City|Kuba,kuban,kubaner,kubansk,Havanna|Jamaica,jamaican,jamaicaner,jamaicansk,Kingston|Haiti,haitier,haitier,haitisk,Port-au-Prince|Dominikanska republiken,dominikan,dominikaner,dominikansk,Santo Domingo|Guatemala,guatemalan,guatemalaner,guatemalansk,Guatemala City|Honduras,honduran,honduraner,honduransk,Tegucigalpa|Nicaragua,nicaraguan,nicaraguaner,nicaraguansk,Managua|Costa Rica,costarican,costaricaner,costaricansk,San José|Panama,panaman,panamaner,panamansk,Panama City|El Salvador,salvadoran,salvadoraner,salvadoransk,San Salvador|Brasilien,brasilianare,brasilianare,brasiliansk,Brasília|Argentina,argentinare,argentinare,argentinsk,Buenos Aires|Chile,chilenare,chilenare,chilensk,Santiago|Peru,peruan,peruaner,peruansk,Lima|Colombia,colombian,colombianer,colombiansk,Bogotá|Venezuela,venezuelan,venezuelaner,venezuelansk,Caracas|Bolivia,bolivian,bolivianer,boliviansk,La Paz|Ecuador,ecuadorian,ecuadorianer,ecuadoriansk,Quito|Paraguay,paraguayan,paraguayaner,paraguayansk,Asunción|Uruguay,uruguayan,uruguayaner,uruguayansk,Montevideo'+
+        '|Kina,kines,kineser,kinesisk,Peking|Japan,japan,japaner,japansk,Tokyo|Sydkorea,sydkorean,sydkoreaner,sydkoreansk,Seoul|Nordkorea,nordkorean,nordkoreaner,nordkoreansk,Pyongyang|Indien,indier,indier,indisk,New Delhi|Pakistan,pakistanier,pakistanier,pakistansk,Islamabad|Bangladesh,bangladeshier,bangladeshier,bangladeshisk,Dhaka|Sri Lanka,lankes,lankeser,lankesisk,Colombo|Nepal,nepales,nepaleser,nepalesisk,Katmandu|Indonesien,indones,indoneser,indonesisk,Jakarta|Malaysia,malaysier,malaysier,malaysisk,Kuala Lumpur|Thailand,thailändare,thailändare,thailändsk,Bangkok|Vietnam,vietnames,vietnameser,vietnamesisk,Hanoi|Kambodja,kambodjan,kambodjaner,kambodjansk,Phnom Penh|Laos,laotier,laotier,laotisk,Vientiane|Filippinerna,filippinier,filippinier,filippinsk,Manila|Myanmar,burmes,burmeser,burmesisk,Naypyidaw|Singapore,singaporier,singaporier,singaporiansk,Singapore|Mongoliet,mongol,mongoler,mongolisk,Ulaanbaatar|Kazakstan,kazak,kazaker,kazakisk,Astana|Uzbekistan,uzbek,uzbeker,uzbekisk,Tasjkent|Afghanistan,afghan,afghaner,afghansk,Kabul|Iran,iranier,iranier,iransk,Teheran|Irak,irakier,irakier,irakisk,Bagdad|Syrien,syrier,syrier,syrisk,Damaskus|Libanon,libanes,libaneser,libanesisk,Beirut|Jordanien,jordanier,jordanier,jordansk,Amman|Israel,israel,israeler,israelisk,Jerusalem|Palestina,palestinier,palestinier,palestinsk,Ramallah|Saudiarabien,saudier,saudier,saudisk,Riyadh|Jemen,jemenit,jemeniter,jemenitisk,Sanaa|Oman,omanier,omanier,omansk,Muskat|Förenade Arabemiraten,emiratier,emiratier,emiratisk,Abu Dhabi|Qatar,qatarier,qatarier,qatarisk,Doha|Kuwait,kuwaitier,kuwaitier,kuwaitisk,Kuwait City|Bahrain,bahrainier,bahrainier,bahrainsk,Manama|Georgien,georgier,georgier,georgisk,Tbilisi|Armenien,armenier,armenier,armenisk,Jerevan|Azerbajdzjan,azerier,azerier,azerisk,Baku|Turkmenistan,turkmen,turkmener,turkmensk,Asjchabad|Kirgizistan,kirgiz,kirgizer,kirgizisk,Bisjkek|Tadzjikistan,tadzjik,tadzjiker,tadzjikisk,Dusjanbe'+
+        '|Egypten,egyptier,egyptier,egyptisk,Kairo|Libyen,libyer,libyer,libysk,Tripoli|Tunisien,tunisier,tunisier,tunisisk,Tunis|Algeriet,algerier,algerier,algerisk,Alger|Marocko,marockan,marockaner,marockansk,Rabat|Sudan,sudanes,sudaneser,sudanesisk,Khartoum|Etiopien,etiopier,etiopier,etiopisk,Addis Abeba|Eritrea,eritrean,eritreaner,eritreansk,Asmara|Somalia,somalier,somalier,somalisk,Mogadishu|Kenya,kenyan,kenyaner,kenyansk,Nairobi|Tanzania,tanzanier,tanzanier,tanzanisk,Dodoma|Uganda,ugandier,ugandier,ugandisk,Kampala|Rwanda,rwandier,rwandier,rwandisk,Kigali|Nigeria,nigerian,nigerianer,nigeriansk,Abuja|Niger,nigerier,nigerier,nigerisk,Niamey|Ghana,ghanan,ghananer,ghanansk,Accra|Elfenbenskusten,ivorian,ivorianer,ivoriansk,Yamoussoukro|Senegal,senegales,senegaleser,senegalesisk,Dakar|Mali,malier,malier,malisk,Bamako|Kamerun,kamerunier,kamerunier,kamerunsk,Yaoundé|Kongo-Kinshasa,kongoles,kongoleser,kongolesisk,Kinshasa|Angola,angolan,angolaner,angolansk,Luanda|Zambia,zambier,zambier,zambisk,Lusaka|Zimbabwe,zimbabwier,zimbabwier,zimbabwisk,Harare|Moçambique,moçambikier,moçambikier,moçambikisk,Maputo|Namibia,namibier,namibier,namibisk,Windhoek|Botswana,botswanier,botswanier,botswansk,Gaborone|Sydafrika,sydafrikan,sydafrikaner,sydafrikansk,Pretoria|Madagaskar,madagass,madagasser,madagaskisk,Antananarivo'+
+        '|Australien,australier,australier,australisk,Canberra|Nya Zeeland,nyzeeländare,nyzeeländare,nyzeeländsk,Wellington|Fiji,fijian,fijianer,fijiansk,Suva').split('|').map(s=>s.split(','));
+        const lander=RAD.map(r=>({ land:r[0], sg:r[1], pl:r[2], adj:r[3], stad:r[4] }));
+        const idx={};
+        lander.forEach(L=>{ [L.land, L.sg, L.pl].forEach(k=>{ const n=k.toLowerCase(); if(!idx[n]) idx[n]=L; }); });
+        idx['förenta staterna']=idx['usa']; idx['amerika']=idx['usa'];
+        window._landData={ lander:lander, idx:idx }; return window._landData;
+    }
+
+    function createCountryWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('LÄNDER', 320, 'land-widget verb-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett land… t.ex. Sverige'><button class='btn btn-primary verb-boj'>Visa ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj svaren)</label><div class='verb-typ'></div><div class='land-forslag'></div><div class='verb-rows'></div>`;
+        const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), forslagEl=body.querySelector('.land-forslag'), rowsEl=body.querySelector('.verb-rows');
+        if(config && config.data){ if(config.data.word) inp.value=config.data.word; practiceCb.checked=!!config.data.practice; }
+        const syncData=()=>{ widget.dataset.land = JSON.stringify({ word: inp.value, practice: practiceCb.checked }); };
+        function rad(rubrik, form, huvud, dolj){
+            const r=document.createElement('div'); r.className='verb-row'+(huvud?' huvud':'');
+            const t=document.createElement('span'); t.className='verb-tempus'; t.textContent=rubrik; r.appendChild(t);
+            if(dolj){ const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa'; a.onclick=()=>{ a.textContent=form; a.classList.add('revealed'); a.onclick=null; }; r.appendChild(a); }
+            else { const f=document.createElement('span'); f.className='verb-form'; f.textContent=form; r.appendChild(f); }
+            return r;
+        }
+        function visaForslag(prefix){
+            forslagEl.innerHTML='';
+            if(!prefix || prefix.length<2) return;
+            const D=landBygdData();
+            D.lander.filter(L=>L.land.toLowerCase().startsWith(prefix)).slice(0,6).forEach(L=>{
+                const c=document.createElement('span'); c.className='land-chip'; c.textContent=L.land;
+                c.onclick=()=>{ inp.value=L.land; render(); saveBoardState(); };
+                forslagEl.appendChild(c);
+            });
+        }
+        function render(){
+            syncData(); rowsEl.innerHTML=''; typEl.textContent=''; forslagEl.innerHTML='';
+            const w=(inp.value||'').toLowerCase().trim();
+            if(!w){ typEl.textContent='Skriv ett land – eller ett folk (”norrman” hittar Norge)'; return; }
+            const D=landBygdData();
+            const L=D.idx[w];
+            if(!L){ typEl.textContent='⚠ Hittades inte – kontrollera stavningen'; visaForslag(w); return; }
+            const P=practiceCb.checked;
+            rowsEl.appendChild(rad('Land',L.land,true,false));
+            rowsEl.appendChild(rad('Invånare','en '+L.sg+', flera '+L.pl,false,P));
+            rowsEl.appendChild(rad('Adjektiv',L.adj+' (t.ex. ”'+L.adj+' mat”)',false,P));
+            rowsEl.appendChild(rad('Huvudstad',L.stad,false,P));
+        }
+        bojBtn.onclick=()=>{ render(); saveBoardState(); };
+        inp.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); render(); saveBoardState(); } };
+        inp.oninput=()=>{ visaForslag((inp.value||'').toLowerCase().trim()); };
+        practiceCb.onchange=()=>{ render(); saveBoardState(); };
+        if(inp.value) render(); else { typEl.textContent='Skriv ett land – eller ett folk (”norrman” hittar Norge)'; }
     }
 
     function createWheel(config){
