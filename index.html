@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Min Tavla (offline-test)</title>
+    <title>Min Tavla</title>
 </head>
 <body>
 
@@ -379,6 +379,9 @@
     .widget.locked .widget-resizer { display: none !important; }
     /* Endast adminen får flytta/låsa upp widgetar – för alla andra döljs lås-kontrollerna helt eftersom tavlan alltid är låst för dem. */
     .viewer-mode .lock-toggle-btn { display: none !important; }
+    /* Tydlig markering på låsknappen (både verktygsfält och verktygslåda) när tavlan är låst */
+    .board-locked .lock-toggle-btn { background: #ffecec !important; box-shadow: inset 0 0 0 2px #ff3b30 !important; border-radius: 10px; }
+    .board-locked .lock-toggle-btn .label { color: #ff3b30 !important; font-weight: 800; }
     .viewer-mode .widget .btn-lck, .viewer-mode .sch-lock-icon { display: none !important; }
     /* Icke-admin (viewer) får aldrig se flytta/stäng/lås-reglage eller resize-handtag */
     .viewer-mode .widget .widget-controls { display: none !important; }
@@ -1073,12 +1076,13 @@
        Lämnar du värdena som de är fungerar appen lokalt (sparar bara på datorn).
        ===================================================================== */
     const firebaseConfig = {
-        apiKey: "",
-        authDomain: "",
-        projectId: "",
-        storageBucket: "",
-        messagingSenderId: "",
-        appId: ""
+        apiKey: "AIzaSyDrb-6YOpIgfRT5TYQ9w9htT5_W-DY3EsM",
+        authDomain: "min-tavla-ec027.firebaseapp.com",
+        projectId: "min-tavla-ec027",
+        storageBucket: "min-tavla-ec027.firebasestorage.app",
+        messagingSenderId: "384942566077",
+        appId: "1:384942566077:web:b2807f75002846340ae5d4",
+        measurementId: "G-M15P5D4PEB"
     };
     // Admin-rättigheter (vilka som får se/ta bort användare) hämtas från Firestore vid inloggning,
     // så att ingen e-postadress behöver stå i klartext i koden. Se dokumentet config/admins i Firestore.
@@ -1209,7 +1213,7 @@
 
     // Logga in med Google (öppet för alla). Resten sköts av onAuthStateChanged.
     async function signInWithGoogle(){
-        if (!window.cloudReady){ customAlert('Inloggning är inte konfigurerad ännu (firebaseConfig saknas).', '⚠️'); return; }
+        if (!window.cloudReady){ customAlert('Det här är offline-versionen – Google-inloggning kräver att firebaseConfig fylls i (se instruktionen högst upp i filens kod). Använd "Fortsätt lokalt" nedan så länge.', '⚠️'); return; }
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             await fbAuth.signInWithPopup(provider);
@@ -1389,15 +1393,36 @@
         else { document.exitFullscreen(); }
     }
 
+    // Lokalt läge (offline-versionen): används både vid start och när man
+    // loggat ut och vill in igen. Utan firebaseConfig finns ingen Google-inloggning,
+    // så inloggningsrutan måste erbjuda en väg tillbaka in i appen.
+    function enterLocalMode(){
+        currentUser = localStorage.getItem('classboardzUser') || 'lokal';
+        currentUserName = 'Du';
+        localStorage.setItem('classboardzUser', currentUser);
+        applyAdminUIMode();
+        document.getElementById('login-overlay').style.display = 'none';
+        migrateOldLists(currentUser); initBoard();
+    }
+    function showLocalLoginOption(){
+        const note = document.getElementById('login-local-note');
+        if(!note || window.cloudReady) return;
+        note.innerHTML = '';
+        const info = document.createElement('div');
+        info.textContent = 'Det här är offline-versionen: Google-inloggning är inte konfigurerad (firebaseConfig är tom), så allt sparas bara på den här datorn.';
+        info.style.cssText = 'margin-bottom:12px;line-height:1.5;text-align:center;';
+        const btn = document.createElement('button');
+        btn.className = 'login-btn';
+        btn.style.width = '100%';
+        btn.textContent = '▶ Fortsätt lokalt (utan konto)';
+        btn.onclick = enterLocalMode;
+        note.appendChild(info); note.appendChild(btn);
+    }
     function checkLogin() {
         if (!window.cloudReady) {
             // Firebase ej konfigurerad -> kör lokalt så att appen går att använda/förhandsvisa
-            currentUser = localStorage.getItem('classboardzUser') || 'lokal';
-            currentUserName = 'Du';
-            localStorage.setItem('classboardzUser', currentUser);
-            applyAdminUIMode();
-            document.getElementById('login-overlay').style.display = 'none';
-            migrateOldLists(currentUser); initBoard();
+            showLocalLoginOption();
+            enterLocalMode();
             return;
         }
         // Firebase: lyssna på inloggningsstatus – återställer sessionen automatiskt vid omladdning
@@ -1421,7 +1446,7 @@
             document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
             updateAdminButton();
             if (window.cloudReady && fbAuth){ fbAuth.signOut().catch(()=>{}); }
-            else { document.getElementById('login-overlay').style.display = 'flex'; }
+            else { showLocalLoginOption(); document.getElementById('login-overlay').style.display = 'flex'; }
         });
     }
 
@@ -1567,6 +1592,7 @@
         // Bara adminen får flytta/ändra storlek på widgetar – för alla andra är tavlan alltid låst,
         // oavsett widgetens eget lås-läge eller det generella presentationsläget.
         if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) widget.classList.add('locked');
+        lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; // ikonen ska spegla slutgiltigt låsläge
         widget.style.zIndex = ++topZ;
         return body;
     }
@@ -1890,11 +1916,22 @@
 
     // ---- PRESENTATIONSLÄGE: lås hela tavlan ----
     let presentationLocked = false;
-    function togglePresentationLock(){
-        presentationLocked = !presentationLocked;
+    function setPresentationLock(state, persist){
+        presentationLocked = !!state;
         document.querySelectorAll('.widget').forEach(w => w.classList.toggle('locked', presentationLocked));
+        // synka även varje widgets eget hänglås i rubriken så allt visar samma sak
+        document.querySelectorAll('.widget .btn-lck').forEach(ic => { const w=ic.closest('.widget'); if(w) ic.innerHTML = w.classList.contains('locked') ? '🔒' : '🔓'; });
         document.querySelectorAll('.lock-toggle-btn').forEach(btn => { const ic=btn.querySelector('.icon'), lb=btn.querySelector('.label'); if(ic) ic.innerText = presentationLocked ? '🔒' : '🔓'; if(lb) lb.innerText = presentationLocked ? 'Lås upp' : 'Lås tavla'; });
         document.getElementById('cb-app-wrapper').classList.toggle('board-locked', presentationLocked);
+        // kom ihåg låsläget mellan omladdningar – annars hamnar knappen ur synk
+        if(persist!==false){ try{ localStorage.setItem('presentationLockV1_'+(currentUser||'lokal'), presentationLocked?'1':'0'); }catch(e){} }
+    }
+    function restorePresentationLock(){
+        try { if(localStorage.getItem('presentationLockV1_'+(currentUser||'lokal'))==='1') setPresentationLock(true, false); } catch(e){}
+    }
+    function togglePresentationLock(){
+        setPresentationLock(!presentationLocked);
+        saveBoardState();
     }
 
     function getActiveCanvasV6() { let canvas = document.querySelector('.canvas-page.active'); if (!canvas) { createPageV6(true); canvas = document.querySelector('.canvas-page.active'); } return canvas; }
@@ -4798,6 +4835,7 @@
             } catch(e) { document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
         } else { document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
         window.isLoadingBoard = false;
+        restorePresentationLock(); // om tavlan var låst före omladdning: lås igen och visa rätt ikon/etikett
         refreshPocketData();
         if(newDays > 0) saveBoardState();
     }
