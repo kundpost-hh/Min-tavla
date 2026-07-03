@@ -152,6 +152,8 @@
             <button class="tool-btn" onclick="createGeometryWidget()"><div class="icon">📐</div><div class="label">Geometri</div></button>
             <button class="tool-btn" onclick="createUnitConverter()"><div class="icon">⚖️</div><div class="label">Enheter</div></button>
             <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
+            <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">💬</div><div class="label">Verb</div></button>
+            <button class="tool-btn" onclick="createNounWidget()"><div class="icon">🅰️</div><div class="label">En/Ett</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
@@ -394,9 +396,10 @@
     .viewer-mode .widget .widget-resizer { display: none !important; }
     .viewer-mode .widget .widget-header { cursor: default !important; }
     /* Verktygslådans kedje-funktioner är adminens möblering – göms för övriga */
-    .viewer-mode .tool-pocket-add-chain { display: none !important; }
+    .ej-admin .tool-pocket-add-chain, .viewer-mode .tool-pocket-add-chain { display: none !important; }
+    .ej-admin .tool-pocket-divider .tpd-handle, .ej-admin .tool-pocket-divider .tpd-remove,
     .viewer-mode .tool-pocket-divider .tpd-handle, .viewer-mode .tool-pocket-divider .tpd-remove { display: none !important; }
-    .viewer-mode .tool-pocket-divider { cursor: default !important; }
+    .ej-admin .tool-pocket-divider, .viewer-mode .tool-pocket-divider { cursor: default !important; }
 
     .widget-inner { background: white; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid #e5e5ea; overflow: hidden; display: flex; flex-direction: column; width: 100%; height: 100%; transition: all 0.3s ease-in-out; position: relative; z-index: 2; }
     .widget:not(.locked) .widget-inner { cursor: move; }
@@ -414,10 +417,7 @@
     .tool-pocket-divider:active { cursor: grabbing; }
     .tool-pocket-divider.tpd-moving { opacity: 0.45; }
     .tool-pocket-divider .chain-strip { border-radius: 3px; }
-    .tool-pocket-divider .tpd-handle { position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); width: 36px; height: 12px; border-radius: 7px; background: #e2e2e6; border: 1px solid rgba(0,0,0,0.08); cursor: ns-resize; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease, background 0.2s ease; z-index: 6; touch-action: none; }
-    .tool-pocket-divider:hover .tpd-handle, .tool-pocket-divider.tpd-dragging .tpd-handle { opacity: 1; }
-    .tool-pocket-divider.tpd-dragging .tpd-handle { background: #cfd6ff; }
-    .tool-pocket-divider .tpd-handle::after { content: ''; width: 16px; height: 2px; background: #9a9a9e; border-radius: 1px; box-shadow: 0 3px 0 #9a9a9e, 0 -3px 0 #9a9a9e; }
+    /* tpd-handle borttaget: kedjans storlek är fast för alla */
     .tool-pocket-divider .tpd-remove { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 1px solid rgba(0,0,0,0.1); color: #9a4a4a; font-size: 11px; line-height: 1; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease; z-index: 6; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
     .tool-pocket-divider:hover .tpd-remove { opacity: 1; }
     .tool-pocket-divider .tpd-remove:hover { background: #ffe4e4; color: #c22; }
@@ -1195,6 +1195,25 @@
     .mk-timer-bar.rott { background:#ff3b30; }
     .mk-timer-text { font-size:15px; font-weight:900; color:#333; min-width:24px; text-align:right; }
 
+    /* ---- VERB (tempusböjning) ---- */
+    .verb-ctrl { display:flex; gap:6px; margin-bottom:8px; }
+    .verb-ctrl input[type=text] { flex:1; min-width:0; padding:9px 11px; border:1.5px solid #e5e5ea; border-radius:9px; font-family:inherit; font-weight:800; font-size:16px; outline:none; }
+    .verb-ctrl input[type=text]:focus { border-color:#007aff; }
+    .verb-typ { text-align:center; font-size:11.5px; font-weight:800; color:#8e8e93; margin-bottom:8px; min-height:14px; }
+    .verb-rows { display:flex; flex-direction:column; gap:5px; }
+    .verb-row { display:flex; align-items:center; background:#f7f7fa; border-radius:10px; padding:8px 12px; gap:8px; }
+    .verb-row.huvud { background:#e8f2ff; }
+    .verb-tempus { width:86px; font-size:11.5px; font-weight:800; color:#8e8e93; text-transform:uppercase; letter-spacing:0.3px; flex-shrink:0; }
+    .verb-hint { color:#b0b0b8; font-weight:700; font-size:15px; }
+    .verb-form { font-size:18px; font-weight:900; color:#333; word-break:break-word; }
+    .verb-row.huvud .verb-form { color:#007aff; }
+    .verb-row .rakna-ans { font-size:16px; }
+
+    /* ---- EN/ETT (substantiv) ---- */
+    .sub-artikel { display:inline-block; padding:3px 14px; border-radius:999px; font-size:18px; font-weight:900; letter-spacing:1px; }
+    .sub-artikel.en { background:#e8f2ff; color:#007aff; box-shadow:inset 0 0 0 2px #007aff; }
+    .sub-artikel.ett { background:#fff3e0; color:#e07f00; box-shadow:inset 0 0 0 2px #ff9500; }
+
     /* SLUMPA-HJUL */
     .wheel-wrap { position:relative; width:240px; margin:6px auto; }
     .wheel-canvas { display:block; }
@@ -1262,10 +1281,16 @@
     // I flerspelarläge (inloggning aktiverad) får bara adminen flytta/ändra storlek på widgetarna – övriga ser en låst tavla.
     // I lokalt/offline-läge finns inget admin-koncept, då är tavlan öppen som vanligt.
     function isBoardAdmin(){ return (!window.cloudReady) || isAdminEmail(currentUser); }
+    // Varje användare har sin EGEN tavla i molnet – alla inloggade får därför
+    // flytta/redigera sina egna widgets. Adminlistan styr bara admin-funktioner
+    // (användarhantering, kedjor i verktygslådan). Skyddet mot elevfingrar på
+    // den delade skärmen är "Lås tavla"-knappen.
+    function canEditBoard(){ return (!window.cloudReady) || !!currentUser; }
     function applyAdminUIMode(){
         const wrap = document.getElementById('cb-app-wrapper'); if(!wrap) return;
-        wrap.classList.toggle('viewer-mode', !isBoardAdmin());
-        document.querySelectorAll('.widget').forEach(w => { if(!isBoardAdmin()) w.classList.add('locked'); });
+        wrap.classList.toggle('viewer-mode', !canEditBoard());
+        wrap.classList.toggle('ej-admin', !isBoardAdmin()); // döljer admin-enbart-funktioner (kedjor)
+        document.querySelectorAll('.widget').forEach(w => { if(!canEditBoard()) w.classList.add('locked'); });
     }
     window.applyAdminUIMode = applyAdminUIMode;
 
@@ -1653,6 +1678,8 @@
                 else if (type === 'GEOMETRI') { try{ state.data = JSON.parse(w.dataset.geo || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ENHETER') { try{ state.data = JSON.parse(w.dataset.enheter || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'MATTEKAMP') { try{ state.data = JSON.parse(w.dataset.mattekamp || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'VERB') { try{ state.data = JSON.parse(w.dataset.verb || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'EN / ETT') { try{ state.data = JSON.parse(w.dataset.substantiv || '{}'); }catch(e){ state.data={}; } }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -1724,6 +1751,8 @@
             else if (w.type === 'GEOMETRI') createGeometryWidget(w);
             else if (w.type === 'ENHETER') createUnitConverter(w);
             else if (w.type === 'MATTEKAMP') createMathBattle(w);
+            else if (w.type === 'VERB') createVerbWidget(w);
+            else if (w.type === 'EN / ETT') createNounWidget(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -1760,14 +1789,14 @@
         const resizer = document.createElement('div'); resizer.className = 'widget-resizer'; widget.appendChild(resizer);
         getActiveCanvasV6().appendChild(widget); makeDraggable(widget, header); makeBodyDraggable(widget, inner); makeResizable(widget, resizer);
         
-        header.querySelector('.widget-close-icon').onclick = (e) => { e.stopPropagation(); if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; customConfirm("Vill du stänga rutan?", () => { widget.remove(); saveBoardState(); }); };
-        header.querySelector('.btn-min').onclick = (e) => { e.stopPropagation(); if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; const m = body.style.display === 'none'; body.style.display = m ? 'flex' : 'none'; widget.dataset.minimized = m ? 'false' : 'true'; saveBoardState(); };
-        lockIcon.onclick = (e) => { e.stopPropagation(); if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; widget.classList.toggle('locked'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
+        header.querySelector('.widget-close-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; customConfirm("Vill du stänga rutan?", () => { widget.remove(); saveBoardState(); }); };
+        header.querySelector('.btn-min').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; const m = body.style.display === 'none'; body.style.display = m ? 'flex' : 'none'; widget.dataset.minimized = m ? 'false' : 'true'; saveBoardState(); };
+        lockIcon.onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; widget.classList.toggle('locked'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
         if(config && config.minimized) { body.style.display = 'none'; widget.dataset.minimized = 'true'; }
         if(typeof presentationLocked !== 'undefined' && presentationLocked) widget.classList.add('locked');
         // Bara adminen får flytta/ändra storlek på widgetar – för alla andra är tavlan alltid låst,
         // oavsett widgetens eget lås-läge eller det generella presentationsläget.
-        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) widget.classList.add('locked');
+        if(typeof canEditBoard === 'function' && !canEditBoard()) widget.classList.add('locked');
         lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; // ikonen ska spegla slutgiltigt låsläge
         widget.style.zIndex = ++topZ;
         return body;
@@ -1778,13 +1807,13 @@
         h.addEventListener('pointerdown', (e) => {
             // Klick på rubriken/remsan tar fram just den widgeten överst
             const _w = el.closest && el.closest('.widget'); if(_w) _w.style.zIndex = ++topZ;
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return;
             if(el.classList.contains('locked') || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName) || e.target.hasAttribute('contenteditable') || e.target.classList.contains('schedule-color-strip') || (e.target.closest && e.target.closest('.widget-controls'))) return;
             e.preventDefault(); p3=e.clientX; p4=e.clientY;
             const sX=e.clientX, sY=e.clientY; let started=false; // tröskel: skaky klick/tryck ska INTE flytta widgeten
             try { h.setPointerCapture(e.pointerId); } catch(_){}
             const move = (ev) => {
-                if(el.classList.contains('locked') || (typeof isBoardAdmin === 'function' && !isBoardAdmin())) return; // låstes mitt i? avbryt direkt
+                if(el.classList.contains('locked') || (typeof canEditBoard === 'function' && !canEditBoard())) return; // låstes mitt i? avbryt direkt
                 if(!started){ if(Math.abs(ev.clientX-sX)+Math.abs(ev.clientY-sY) < 6) return; started=true; p3=ev.clientX; p4=ev.clientY; return; }
                 ev.preventDefault(); p1=p3-ev.clientX; p2=p4-ev.clientY; p3=ev.clientX; p4=ev.clientY; el.style.top = Math.max(40, el.offsetTop-p2)+"px"; el.style.left = (el.offsetLeft-p1)+"px";
             };
@@ -1797,7 +1826,7 @@
     // En liten rörelsetröskel gör att vanliga klick fortfarande fungerar.
     function makeBodyDraggable(el, inner){
         inner.addEventListener('pointerdown', (e) => {
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return;
             if(el.classList.contains('locked')) return;
             if(typeof presentationLocked !== 'undefined' && presentationLocked) return;
             if(e.button && e.button !== 0) return;
@@ -1808,7 +1837,7 @@
             const origLeft = el.offsetLeft, origTop = el.offsetTop;
             let dragging = false;
             const move = (ev) => {
-                if(el.classList.contains('locked') || (typeof isBoardAdmin === 'function' && !isBoardAdmin())) return; // låstes mitt i? avbryt direkt
+                if(el.classList.contains('locked') || (typeof canEditBoard === 'function' && !canEditBoard())) return; // låstes mitt i? avbryt direkt
                 const dx = ev.clientX - startX, dy = ev.clientY - startY;
                 if(!dragging){
                     if(Math.abs(dx) + Math.abs(dy) < 10) return;   // högre tröskel: liten rörelse = klick, inte flytt
@@ -1833,7 +1862,7 @@
     function makeResizable(el, r) {
         let sX, sY, sW, sH;
         r.addEventListener('pointerdown', (e) => {
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return;
             if(el.classList.contains('locked')) return; e.preventDefault(); e.stopPropagation(); sX=e.clientX; sY=e.clientY; sW=el.offsetWidth; sH=el.offsetHeight;
             try { r.setPointerCapture(e.pointerId); } catch(_){}
             const drag = (ev) => { el.style.width = (sW+ev.clientX-sX)+'px'; el.style.height = (sH+ev.clientY-sY)+'px'; };
@@ -3376,6 +3405,208 @@
         malSel.onchange=()=>{ syncData(); saveBoardState(); };
         tidSel.onchange=()=>{ syncData(); startaTimer(); saveBoardState(); };
         renderLag(); nyUppgift();
+    }
+
+    // ---- VERB: skriv ett svenskt verb i VALFRI form och få alla tempus ----
+    // Inbyggd ordbok med ~115 starka/oregelbundna verb + regelmotor för de
+    // regelbundna grupperna (1: talar/talade, 2a: stänger/stängde,
+    // 2b: läser/läste, 3: bor/bodde). Alla böjda former är sökbara.
+    function verbBygdMap(){
+        if(window._verbMap) return window._verbMap;
+        const LEX=('vara,är,var,varit,var|ha,har,hade,haft,ha|bli,blir,blev,blivit,bli|göra,gör,gjorde,gjort,gör|gå,går,gick,gått,gå|stå,står,stod,stått,stå|få,får,fick,fått,få|ge,ger,gav,gett,ge|se,ser,såg,sett,se|säga,säger,sa,sagt,säg|komma,kommer,kom,kommit,kom|ta,tar,tog,tagit,ta|veta,vet,visste,vetat,vet|vilja,vill,ville,velat,|kunna,kan,kunde,kunnat,|skola,ska,skulle,skolat,|måste,måste,måste,måst,|böra,bör,borde,bort,|ligga,ligger,låg,legat,ligg|lägga,lägger,la,lagt,lägg|sitta,sitter,satt,suttit,sitt|sätta,sätter,satte,satt,sätt|äta,äter,åt,ätit,ät|dricka,dricker,drack,druckit,drick|springa,springer,sprang,sprungit,spring|sjunga,sjunger,sjöng,sjungit,sjung|sjunka,sjunker,sjönk,sjunkit,sjunk|skriva,skriver,skrev,skrivit,skriv|sova,sover,sov,sovit,sov|finnas,finns,fanns,funnits,|finna,finner,fann,funnit,finn|försvinna,försvinner,försvann,försvunnit,försvinn|vinna,vinner,vann,vunnit,vinn|hinna,hinner,hann,hunnit,hinn|rinna,rinner,rann,runnit,|brinna,brinner,brann,brunnit,|binda,binder,band,bundit,bind|bita,biter,bet,bitit,bit|bjuda,bjuder,bjöd,bjudit,bjud|bryta,bryter,bröt,brutit,bryt|bära,bär,bar,burit,bär|dra,drar,drog,dragit,dra|driva,driver,drev,drivit,driv|falla,faller,föll,fallit,fall|fara,far,for,farit,far|flyga,flyger,flög,flugit,flyg|flyta,flyter,flöt,flutit,|frysa,fryser,frös,frusit,frys|gråta,gråter,grät,gråtit,gråt|gripa,griper,grep,gripit,grip|heta,heter,hette,hetat,|hugga,hugger,högg,huggit,hugg|hålla,håller,höll,hållit,håll|kliva,kliver,klev,klivit,kliv|knyta,knyter,knöt,knutit,knyt|krypa,kryper,kröp,krupit,kryp|le,ler,log,lett,le|lida,lider,led,lidit,|ljuga,ljuger,ljög,ljugit,ljug|låta,låter,lät,låtit,låt|njuta,njuter,njöt,njutit,njut|rida,rider,red,ridit,rid|riva,river,rev,rivit,riv|ryta,ryter,röt,rutit,|skina,skiner,sken,skinit,|skjuta,skjuter,sköt,skjutit,skjut|skrika,skriker,skrek,skrikit,skrik|skryta,skryter,skröt,skrutit,|skära,skär,skar,skurit,skär|slippa,slipper,slapp,sluppit,|slita,sliter,slet,slitit,slit|slå,slår,slog,slagit,slå|smyga,smyger,smög,smugit,smyg|snyta,snyter,snöt,snutit,|spricka,spricker,sprack,spruckit,|sprida,sprider,spred,spridit,sprid|sticka,sticker,stack,stuckit,stick|stiga,stiger,steg,stigit,stig|stjäla,stjäl,stal,stulit,stjäl|stryka,stryker,strök,strukit,stryk|suga,suger,sög,sugit,sug|svika,sviker,svek,svikit,svik|svälta,svälter,svalt,svultit,|svära,svär,svor,svurit,svär|svälja,sväljer,svalde,svalt,svälj|sälja,säljer,sålde,sålt,sälj|tiga,tiger,teg,tigit,tig|vika,viker,vek,vikit,vik|vrida,vrider,vred,vridit,vrid|välja,väljer,valde,valt,välj|vänja,vänjer,vande,vant,vänj|växa,växer,växte,vuxit,väx|dö,dör,dog,dött,dö|duga,duger,dög,dugit,|gnida,gnider,gned,gnidit,|niga,niger,neg,nigit,|pipa,piper,pep,pipit,|tjuta,tjuter,tjöt,tjutit,|klyva,klyver,klöv,kluvit,|gjuta,gjuter,göt,gjutit,|brista,brister,brast,brustit,|svida,svider,sved,svidit,|glida,glider,gled,glidit,glid|leda,leder,ledde,lett,led|stödja,stödjer,stödde,stött,stöd|förstå,förstår,förstod,förstått,förstå|bestå,består,bestod,bestått,|begå,begår,begick,begått,|anta,antar,antog,antagit,anta|slåss,slåss,slogs,slagits,|minnas,minns,mindes,mints,|lyckas,lyckas,lyckades,lyckats,|hoppas,hoppas,hoppades,hoppats,|andas,andas,andades,andats,').split('|').map(s=>s.split(','));
+        const G2A='stänga,hänga,bygga,böja,följa,glömma,gömma,hyra,hälla,känna,köra,leva,lära,ringa,röra,ställa,tända,vända,tömma,äga,väga,höra,sända,använda,betyda,behöva,döma,drömma,bränna,spänna,fylla,gnälla,skälla,tåla,föda,kräva'.split(',');
+        const G2B='byta,hjälpa,köpa,leka,läsa,lysa,låsa,lösa,möta,resa,röka,släcka,släppa,söka,tycka,tänka,väcka,åka,blåsa,gifta,lyfta,mista,trycka,mäta,sköta,räcka,knäcka,klippa,steka'.split(',');
+        const map={};
+        const satt=(p)=>{ [p.inf,p.pres,p.pret,p.sup,p.imp].forEach(f=>{ if(f && !map[f]) map[f]=p; }); };
+        LEX.forEach(e=>{ const imp=e[4]||''; satt({ inf:e[0], pres:e[1], pret:e[2], sup:e[3], imp:imp, typ:'oregelbundet (starkt) verb' }); });
+        G2A.forEach(v=>{ const p=verbConj2(v.slice(0,-1),'a'); p.typ='grupp 2a (regelbundet)'; satt(p); });
+        G2B.forEach(v=>{ const p=verbConj2(v.slice(0,-1),'b'); p.typ='grupp 2b (regelbundet)'; satt(p); });
+        window._verbMap=map; return map;
+    }
+    function verbConj2(stem, typ){
+        const V='aeiouyåäö';
+        const pres = /r$/.test(stem) ? stem : stem+'er';
+        const ds = stem.replace(/mm$/,'m').replace(/nn$/,'n');
+        let pret, sup;
+        if(typ==='a'){
+            if(/d$/.test(stem)){
+                const vokal = V.includes(stem[stem.length-2]||'');
+                pret = vokal ? stem+'de' : stem+'e';
+                sup  = vokal ? stem.slice(0,-1)+'tt' : stem.slice(0,-1)+'t';
+            } else { pret=ds+'de'; sup=ds+'t'; }
+        } else {
+            if(/t$/.test(stem)){
+                const vokal = V.includes(stem[stem.length-2]||'');
+                pret = vokal ? stem+'te' : stem+'e';
+                sup  = vokal ? stem+'t' : stem;
+            } else { pret=ds+'te'; sup=ds+'t'; }
+        }
+        return { inf:stem+'a', pres:pres, pret:pret, sup:sup, imp:stem.replace(/mm$/,'m') };
+    }
+    function verbConj1(inf){ return { inf:inf, pres:inf+'r', pret:inf+'de', sup:inf+'t', imp:inf }; }
+    function verbConj3(kort){ return { inf:kort, pres:kort+'r', pret:kort+'dde', sup:kort+'tt', imp:kort }; }
+    function verbSlaUpp(ord){
+        const V='aeiouyåäö';
+        let w=(ord||'').toLowerCase().trim().replace(/^att\s+/,'').replace(/!+$/,'').trim();
+        if(!w) return null;
+        const map=verbBygdMap();
+        if(map[w]) return Object.assign({träff:'ordbok'}, map[w]);
+        // regelbunden gissning utifrån formen
+        let p=null, typ='';
+        if(/ade$/.test(w) && w.length>4){ p=verbConj1(w.slice(0,-2)); typ='grupp 1 (regelbundet)'; }
+        else if(/at$/.test(w) && w.length>3){ p=verbConj1(w.slice(0,-1)); typ='grupp 1 (regelbundet)'; }
+        else if(/ar$/.test(w) && w.length>3){ p=verbConj1(w.slice(0,-1)); typ='grupp 1 (regelbundet)'; }
+        else if(/dde$/.test(w)){ p=verbConj3(w.slice(0,-3)); typ='grupp 3 (regelbundet)'; }
+        else if(/er$/.test(w) && w.length>3){ const st=w.slice(0,-2); const b='kptsx'.includes(st[st.length-1]); p=verbConj2(st, b?'b':'a'); typ='grupp 2 (regelbundet)'; }
+        else if(/te$/.test(w) && w.length>3){ p=verbConj2(w.slice(0,-2),'b'); typ='grupp 2b (regelbundet)'; }
+        else if(/de$/.test(w) && w.length>3){ p=verbConj2(w.slice(0,-2),'a'); typ='grupp 2a (regelbundet)'; }
+        else if(/tt$/.test(w) && w.length>3){ p=verbConj3(w.slice(0,-2)); typ='grupp 3 (regelbundet)'; }
+        else if(/t$/.test(w) && w.length>3){ p=verbConj2(w.slice(0,-1),'b'); typ='grupp 2b (regelbundet)'; }
+        else if(/a$/.test(w) && w.length>2){ p=verbConj1(w); typ='grupp 1 (regelbundet)'; }
+        else if(/r$/.test(w) && w.length>2 && V.includes(w[w.length-2])){ p=verbConj3(w.slice(0,-1)); typ='grupp 3 (regelbundet)'; }
+        else if(V.includes(w[w.length-1])){ p=verbConj3(w); typ='grupp 3 (regelbundet)'; }
+        else { p=verbConj1(w+'a'); typ='okänt ord – gissning som grupp 1'; }
+        // om gissningens grundform finns i ordboken: använd den rätta böjningen
+        if(map[p.inf]) return Object.assign({träff:'ordbok'}, map[p.inf]);
+        p.typ=typ; p.träff='regel';
+        return p;
+    }
+
+    function createVerbWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('VERB', 320, 'verb-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett verb i valfri form…'><button class='btn btn-primary verb-boj'>Böj ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj formerna)</label><div class='verb-typ'></div><div class='verb-rows'></div>`;
+        const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), rowsEl=body.querySelector('.verb-rows');
+        if(config && config.data){ if(config.data.word) inp.value=config.data.word; practiceCb.checked=!!config.data.practice; }
+        const syncData=()=>{ widget.dataset.verb = JSON.stringify({ word: inp.value, practice: practiceCb.checked }); };
+        function rad(tempus, hint, form, huvud, dolj){
+            const r=document.createElement('div'); r.className='verb-row'+(huvud?' huvud':'');
+            const t=document.createElement('span'); t.className='verb-tempus'; t.textContent=tempus;
+            r.appendChild(t);
+            if(hint){ const h=document.createElement('span'); h.className='verb-hint'; h.textContent=hint; r.appendChild(h); }
+            if(dolj){
+                const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa';
+                a.onclick=()=>{ a.textContent=form; a.classList.add('revealed'); a.onclick=null; };
+                r.appendChild(a);
+            } else { const f=document.createElement('span'); f.className='verb-form'; f.textContent=form; r.appendChild(f); }
+            return r;
+        }
+        function render(){
+            syncData(); rowsEl.innerHTML=''; typEl.textContent='';
+            const p=verbSlaUpp(inp.value);
+            if(!p){ typEl.textContent='Skriv ett verb ovan och tryck Böj'; return; }
+            typEl.textContent = p.typ + (p.träff==='regel' && p.typ.indexOf('okänt')<0 ? ' – automatiskt böjt' : '');
+            const P=practiceCb.checked;
+            rowsEl.appendChild(rad('Infinitiv','att',p.inf,true,false));
+            rowsEl.appendChild(rad('Presens','idag:',p.pres,false,P));
+            rowsEl.appendChild(rad('Preteritum','igår:',p.pret,false,P));
+            rowsEl.appendChild(rad('Perfekt','har',p.sup,false,P));
+            rowsEl.appendChild(rad('Pluskvamperf.','hade',p.sup,false,P));
+            if(p.imp) rowsEl.appendChild(rad('Imperativ','',p.imp+'!',false,P));
+            rowsEl.appendChild(rad('Futurum','ska',p.inf,false,P));
+        }
+        bojBtn.onclick=()=>{ render(); saveBoardState(); };
+        inp.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); render(); saveBoardState(); } };
+        practiceCb.onchange=()=>{ render(); saveBoardState(); };
+        if(inp.value) render(); else { typEl.textContent='Skriv ett verb ovan och tryck Böj – t.ex. ”gjorde”, ”springer” eller ”läsa”'; }
+    }
+
+    // ---- EN/ETT: skriv ett substantiv och få artikel + alla former ----
+    // Ordbok med ~170 vanliga ord (inkl. oregelbundna som man–män, bok–böcker,
+    // öga–ögon) + regelmotor för okända ord. Format: en bil – bilen – bilar – bilarna.
+    function subBygdMap(){
+        if(window._subMap) return window._subMap;
+        // a,sg,pl[,sgBest][,plBest]  (a: e=en, t=ett; pl '-' = saknar vanlig plural)
+        const LEX=('e,flicka,flickor|e,pojke,pojkar|e,bil,bilar|e,hund,hundar|e,katt,katter|e,häst,hästar|e,fisk,fiskar|e,fågel,fåglar|e,bok,böcker|e,hand,händer|e,fot,fötter|e,tand,tänder|e,natt,nätter|e,stad,städer|e,man,män,mannen,männen|e,kvinna,kvinnor|e,mor,mödrar,modern|e,far,fäder,fadern|e,bror,bröder,brodern|e,dotter,döttrar|e,son,söner|e,syster,systrar|e,mormor,mormödrar|e,farfar,farfäder|e,vinter,vintrar|e,sommar,somrar|e,höst,höstar|e,vår,vårar|e,cykel,cyklar|e,nyckel,nycklar|e,spegel,speglar|e,gaffel,gafflar|e,stövel,stövlar|e,teater,teatrar|e,mus,möss,musen,mössen|e,gås,gäss,gåsen,gässen|e,lus,löss,lusen,lössen|e,and,änder|e,strand,stränder|e,rand,ränder|e,tå,tår|e,sko,skor|e,ko,kor|e,bonde,bönder|e,vän,vänner,vännen|e,mun,munnar,munnen|e,penna,pennor|e,lampa,lampor|e,gata,gator|e,skola,skolor|e,klocka,klockor|e,blomma,blommor|e,krona,kronor|e,vecka,veckor|e,månad,månader|e,dag,dagar|e,timme,timmar|e,minut,minuter|e,sekund,sekunder|e,lärare,lärare|e,elev,elever|e,pappa,pappor|e,mamma,mammor|e,bulle,bullar|e,boll,bollar|e,stol,stolar|e,dörr,dörrar|e,vägg,väggar|e,säng,sängar|e,matta,mattor|e,soffa,soffor|e,tröja,tröjor|e,sak,saker|e,färg,färger|e,park,parker|e,familj,familjer|e,maskin,maskiner|e,telefon,telefoner|e,station,stationer|e,lektion,lektioner|e,nyhet,nyheter|e,hemlighet,hemligheter|e,rörelse,rörelser|e,händelse,händelser|e,doktor,doktorer,doktorn|e,motor,motorer,motorn|e,traktor,traktorer,traktorn|e,professor,professorer,professorn|e,väska,väskor|e,flaska,flaskor|e,kompis,kompisar|e,buss,bussar|e,tavla,tavlor|e,siffra,siffror|e,bokstav,bokstäver|e,fru,fruar|e,by,byar|e,ö,öar|e,å,åar|e,sjö,sjöar|e,väg,vägar|e,pengar? nej'+
+        '|t,barn,barn|t,hus,hus|t,bord,bord|t,golv,golv|t,tak,tak|t,rum,rum,rummet,rummen|t,ägg,ägg|t,träd,träd|t,djur,djur|t,berg,berg|t,hav,hav|t,ben,ben|t,bröd,bröd|t,glas,glas|t,brev,brev|t,år,år|t,namn,namn|t,ord,ord|t,krig,krig|t,fönster,fönster,fönstret,fönstren|t,vatten,-,vattnet|t,väder,-,vädret|t,äpple,äpplen|t,päron,päron|t,frimärke,frimärken|t,hjärta,hjärtan|t,öga,ögon,ögat,ögonen|t,öra,öron,örat,öronen|t,huvud,huvuden,huvudet,huvudena|t,finger,fingrar,fingret,fingrarna|t,foto,foton|t,konto,konton|t,piano,pianon|t,kilo,kilon|t,tema,teman|t,schema,scheman|t,problem,problem|t,program,program,programmet,programmen|t,system,system|t,bibliotek,bibliotek|t,apotek,apotek|t,kök,kök|t,tåg,tåg|t,flygplan,flygplan|t,lejon,lejon|t,får,får|t,moln,moln|t,ljus,ljus|t,ljud,ljud|t,spel,spel|t,jobb,jobb|t,land,länder|t,folk,folk|t,språk,språk|t,tal,tal|t,svar,svar|t,prov,prov|t,papper,papper,pappret,pappren|t,nummer,nummer,numret,numren|t,mönster,mönster,mönstret,mönstren|t,leende,leenden|t,meddelande,meddelanden|t,exempel,exempel,exemplet,exemplen|t,kapitel,kapitel,kapitlet,kapitlen|t,museum,museer,museet,museerna|t,hjärna? nej').split('|').filter(s=>s.indexOf('?')<0).map(s=>s.split(','));
+        const map={};
+        LEX.forEach(e=>{
+            const p={ a:e[0], sg:e[1], pl:e[2], sgB:e[3]||subDefSg(e[0],e[1]), plB:e[4]||subDefPl(e[0],e[1],e[2]), typ:'ur ordboken' };
+            [p.sg,p.pl,p.sgB,p.plB].forEach(f=>{ if(f && f!=='-' && !map[f]) map[f]=p; });
+        });
+        window._subMap=map; return map;
+    }
+    function subDefSg(a, sg){
+        const V='aeiouyåäö';
+        if(a==='e'){
+            if(/(el|er)$/.test(sg)) return sg+'n'; // fågeln, systern, vintern
+            return sg + (V.includes(sg[sg.length-1]) ? 'n' : 'en');
+        }
+        if(/[ié]$/.test(sg)) return sg+'et'; // bageriet, kaféet
+        return sg + (V.includes(sg[sg.length-1]) ? 't' : 'et');
+    }
+    function subDefPl(a, sg, pl){
+        if(pl==='-') return '-';
+        if(/(or|ar|er)$/.test(pl) && pl!==sg) return pl+'na';
+        if(pl===sg){ if(/are$/.test(sg)) return sg.slice(0,-1)+'na'; return pl+'en'; }
+        if(/n$/.test(pl) && a==='t') return pl+'a';
+        return pl+'na';
+    }
+    function subGissaPlural(a, sg){
+        const V='aeiouyåäö';
+        if(a==='t'){
+            if(/eri$/.test(sg)) return sg+'er';   // bagerier, konditorier
+            return V.includes(sg[sg.length-1]) ? sg+'n' : sg;
+        }
+        if(/a$/.test(sg)) return sg.slice(0,-1)+'or';
+        if(/are$/.test(sg)) return sg;
+        if(/e$/.test(sg)) return sg.slice(0,-1)+'ar';
+        if(/(ion|het|else|nad|ör|ist)$/.test(sg)) return sg+'er';
+        if(/(el|er)$/.test(sg) && sg.length>=5) return sg.slice(0,-2)+sg[sg.length-1]+'ar'; // fågel→fåglar (bara flerstaviga)
+        return sg+'ar';
+    }
+    function subSlaUpp(ord){
+        let w=(ord||'').toLowerCase().trim();
+        let angiven=null;
+        if(/^en\s+/.test(w)){ angiven='e'; w=w.replace(/^en\s+/,''); }
+        else if(/^ett\s+/.test(w)){ angiven='t'; w=w.replace(/^ett\s+/,''); }
+        w=w.trim(); if(!w) return null;
+        const map=subBygdMap();
+        if(map[w]) return map[w];
+        // gissning för okänt ord (skriven artikel litar vi på)
+        const a = angiven || (/(um|eri|ande|ende|em|gram|tek)$/.test(w) ? 't' : 'e');
+        const pl = subGissaPlural(a, w);
+        return { a:a, sg:w, pl:pl, sgB:subDefSg(a,w), plB:subDefPl(a,w,pl), typ: angiven ? 'gissad böjning (angiven artikel)' : 'gissning – ändelsebaserad' };
+    }
+
+    function createNounWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('EN / ETT', 320, 'sub-widget verb-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett substantiv… t.ex. äpple'><button class='btn btn-primary verb-boj'>Böj ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj formerna)</label><div class='verb-typ'></div><div class='verb-rows'></div>`;
+        const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), rowsEl=body.querySelector('.verb-rows');
+        if(config && config.data){ if(config.data.word) inp.value=config.data.word; practiceCb.checked=!!config.data.practice; }
+        const syncData=()=>{ widget.dataset.substantiv = JSON.stringify({ word: inp.value, practice: practiceCb.checked }); };
+        function rad(tempus, form, huvud, dolj, htmlForm){
+            const r=document.createElement('div'); r.className='verb-row'+(huvud?' huvud':'');
+            const t=document.createElement('span'); t.className='verb-tempus'; t.textContent=tempus; r.appendChild(t);
+            if(dolj){
+                const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa';
+                a.onclick=()=>{ if(htmlForm){ a.outerHTML=htmlForm; } else { a.textContent=form; a.classList.add('revealed'); a.onclick=null; } };
+                r.appendChild(a);
+            } else if(htmlForm){ r.insertAdjacentHTML('beforeend', htmlForm); }
+            else { const f=document.createElement('span'); f.className='verb-form'; f.textContent=form; r.appendChild(f); }
+            return r;
+        }
+        function render(){
+            syncData(); rowsEl.innerHTML=''; typEl.textContent='';
+            const p=subSlaUpp(inp.value);
+            if(!p){ typEl.textContent='Skriv ett substantiv ovan och tryck Böj'; return; }
+            typEl.textContent=(p.a==='e'?'EN-ord':'ETT-ord')+' · '+p.typ;
+            const P=practiceCb.checked;
+            const art = p.a==='e' ? 'en' : 'ett';
+            const artHtml = `<span class='sub-artikel ${p.a==='e'?'en':'ett'}'>${art.toUpperCase()}</span>`;
+            rowsEl.appendChild(rad('Artikel','',false,P,artHtml));
+            rowsEl.appendChild(rad('Singular',art+' '+p.sg,true,false));
+            rowsEl.appendChild(rad('Bestämd form',p.sgB,false,P));
+            rowsEl.appendChild(rad('Plural',p.pl==='-'?'– (saknar vanlig plural)':(p.a==='e'?'flera ':'flera ')+p.pl,false,P));
+            if(p.pl!=='-') rowsEl.appendChild(rad('Bestämd plural',p.plB,false,P));
+        }
+        bojBtn.onclick=()=>{ render(); saveBoardState(); };
+        inp.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); render(); saveBoardState(); } };
+        practiceCb.onchange=()=>{ render(); saveBoardState(); };
+        if(inp.value) render(); else { typEl.textContent='Skriv ett substantiv – t.ex. ”äpple”, ”bok” eller ”bilar”'; }
     }
 
     function createWheel(config){
@@ -5446,7 +5677,7 @@
             }
         }
         tc.addEventListener('pointerdown', (e)=>{
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får möblera om verktygen
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return; // verktygsordningen sparas per användare – kräver inloggning
             const btn=e.target.closest('.tool-btn'); if(!btn) return;
             if(e.button && e.button!==0) return;
             const startX=e.clientX, startY=e.clientY;
@@ -5533,25 +5764,8 @@
         const div = document.createElement('div');
         div.className = 'tool-pocket-divider';
         div.style.height = (h || 16) + 'px';
-        div.innerHTML = `<div class="chain-strip"></div><div class="tpd-remove" title="Ta bort kedjan">✕</div><div class="tpd-handle" title="Dra upp/ner för att ändra kedjans höjd"></div>`;
-        const handle = div.querySelector('.tpd-handle');
-        handle.addEventListener('pointerdown', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            const startY = e.clientY, startH = div.offsetHeight;
-            div.classList.add('tpd-dragging');
-            try { handle.setPointerCapture(e.pointerId); } catch(_){}
-            const move = (ev) => { ev.preventDefault(); const dy = ev.clientY - startY; const newH = Math.max(10, Math.min(140, startH + dy)); div.style.height = newH + 'px'; };
-            const up = () => {
-                handle.removeEventListener('pointermove', move);
-                handle.removeEventListener('pointerup', up);
-                handle.removeEventListener('pointercancel', up);
-                div.classList.remove('tpd-dragging');
-                saveToolPocketLayout();
-            };
-            handle.addEventListener('pointermove', move);
-            handle.addEventListener('pointerup', up);
-            handle.addEventListener('pointercancel', up);
-        });
+        // Kedjans storlek är fast – storleksändring borttagen för ALLA (även admin)
+        div.innerHTML = `<div class="chain-strip"></div><div class="tpd-remove" title="Ta bort kedjan">✕</div>`;
         const removeBtn = div.querySelector('.tpd-remove');
         removeBtn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); e.stopPropagation(); });
         removeBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); div.remove(); saveToolPocketLayout(); });
@@ -5614,7 +5828,7 @@
             }
         }
         grid.addEventListener('pointerdown', (e)=>{
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får möblera om verktygslådan
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return; // verktygslådan sparas per användare – kräver inloggning
             if(e.target.closest('.tpd-handle, .tpd-remove')) return;
             const item=e.target.closest('.tool-btn, .tool-pocket-divider'); if(!item) return;
             if(e.button && e.button!==0) return;
