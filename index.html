@@ -154,7 +154,10 @@
             <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
             <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">💬</div><div class="label">Verb</div></button>
             <button class="tool-btn" onclick="createNounWidget()"><div class="icon">🅰️</div><div class="label">En/Ett</div></button>
-            <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder</div></button>
+            <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Medborgare</div></button>
+            <button class="tool-btn" onclick="createWordClassWidget()"><div class="icon">📚</div><div class="label">Ordklasser</div></button>
+            <button class="tool-btn" onclick="createSynonymWidget()"><div class="icon">🔎</div><div class="label">Synonymer</div></button>
+            <button class="tool-btn" onclick="createSpellingBattle()"><div class="icon">🔤</div><div class="label">Stavningskamp</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
@@ -1220,6 +1223,56 @@
     .land-chip { font-size:12px; font-weight:800; padding:4px 10px; border-radius:999px; background:#fff; border:1.5px solid #b9d7f5; color:#2b6cb0; cursor:pointer; user-select:none; }
     .land-chip:hover { background:#e2efff; }
 
+    /* ---- ORDKLASSER ---- */
+    .ok-palette { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; justify-content:center; }
+    .ok-pal { display:flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; font-size:12.5px; font-weight:800; cursor:pointer; border:2.5px solid transparent; background:#f2f2f7; color:#555; user-select:none; }
+    .ok-pal .prick { width:13px; height:13px; border-radius:50%; }
+    .ok-pal.s .prick { background:#34c759; } .ok-pal.v .prick { background:#ff3b30; } .ok-pal.a .prick { background:#007aff; }
+    .ok-pal.vald { border-color:#333; background:#fff; transform:scale(1.05); }
+    .ok-mening { display:flex; flex-wrap:wrap; gap:6px 5px; background:#f7f7fa; border-radius:14px; padding:14px 12px; justify-content:center; align-items:center; min-height:52px; }
+    .ok-ord { font-size:19px; font-weight:800; color:#333; padding:3px 8px; border-radius:9px; cursor:pointer; border:2.5px solid transparent; user-select:none; line-height:1.25; }
+    .ok-ord:hover { background:#ececf1; }
+    .ok-ord.m-s { background:#d9f2df; color:#1f7a37; } .ok-ord.m-v { background:#ffe0de; color:#c2261c; } .ok-ord.m-a { background:#dcebff; color:#0a5bd3; }
+    .ok-ord.ratt { border-color:#34c759; }
+    .ok-ord.fel { border-color:#ff3b30; animation:okSkak 0.4s ease; }
+    @keyframes okSkak { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+    .ok-knappar { display:flex; gap:6px; margin-top:10px; }
+    .ok-knappar .btn { flex:1; padding:9px 6px; font-size:13px; }
+    .ok-resultat { text-align:center; font-size:15px; font-weight:900; margin-top:8px; min-height:18px; }
+    .ok-egen { display:flex; gap:6px; margin-top:8px; }
+    .ok-egen input { flex:1; min-width:0; padding:8px 10px; border:1.5px solid #e5e5ea; border-radius:9px; font-family:inherit; font-weight:700; font-size:13px; outline:none; }
+    .ok-egen input:focus { border-color:#007aff; }
+
+    /* ---- SYNONYMJAKTEN ---- */
+    .syn-ctrl { display:flex; gap:6px; margin-bottom:8px; }
+    .syn-ctrl select { width:96px; }
+    .syn-ctrl .btn { flex:1; }
+    .syn-karta { background:#f7f7fa; border-radius:14px; padding:16px 10px; display:flex; flex-direction:column; align-items:center; gap:12px; min-height:120px; }
+    .syn-center { font-size:26px; font-weight:900; color:#fff; background:linear-gradient(135deg,#7b5be6,#4a90e2); padding:10px 26px; border-radius:999px; box-shadow:0 4px 12px rgba(74,110,226,0.35); }
+    .syn-moln { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; }
+    .syn-chip { font-size:15px; font-weight:800; padding:6px 13px; border-radius:999px; color:#fff; cursor:pointer; user-select:none; transition:transform 0.12s; }
+    .syn-chip:hover { transform:scale(1.07); }
+    .syn-chip.c0{background:#34c759} .syn-chip.c1{background:#ff9500} .syn-chip.c2{background:#007aff} .syn-chip.c3{background:#ff2d55} .syn-chip.c4{background:#5ac8fa} .syn-chip.c5{background:#af52de}
+    .syn-chip.forslag { background:#fff; color:#8e8e93; border:2px dashed #c8c8cf; cursor:default; }
+    .syn-chip.forslag:hover { transform:none; }
+    .syn-tom { color:#b0b0b8; font-size:13px; font-weight:700; }
+    .syn-antal { text-align:center; font-size:13px; font-weight:900; color:#7b5be6; margin-top:8px; min-height:16px; }
+    .syn-in-rad { display:flex; gap:6px; margin-top:8px; }
+    .syn-in-rad input { flex:1; min-width:0; padding:9px 11px; border:1.5px solid #e5e5ea; border-radius:9px; font-family:inherit; font-weight:700; font-size:14px; outline:none; }
+    .syn-in-rad input:focus { border-color:#7b5be6; }
+    .syn-in-rad input.dubblett { border-color:#ff3b30; animation:okSkak 0.4s ease; }
+    .syn-egen-rad { display:flex; gap:6px; margin-top:6px; }
+    .syn-egen-rad input { flex:1; min-width:0; padding:7px 10px; border:1.5px solid #e5e5ea; border-radius:9px; font-family:inherit; font-weight:700; font-size:12.5px; outline:none; }
+
+    /* ---- STAVNINGSKAMPEN ---- */
+    .sk-ord { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; align-items:center; background:#f7f7fa; border-radius:14px; padding:16px 10px; min-height:64px; cursor:pointer; }
+    .sk-bokstav { width:30px; height:38px; border-radius:8px; background:#fff; border:2px solid #d8d8de; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:900; color:#333; text-transform:lowercase; }
+    .sk-bokstav.dold { background:#eef0f5; border-style:dashed; color:transparent; }
+    .sk-bokstav.nyss { background:#d9f2df; border-color:#34c759; color:#1f7a37; animation:okSkak 0.3s ease; }
+    .sk-mellanrum { width:14px; }
+    .sk-hint { text-align:center; font-size:11px; color:#b0b0b8; font-weight:700; margin-top:4px; }
+    .sk-lasupp { white-space:nowrap; }
+
     /* SLUMPA-HJUL */
     .wheel-wrap { position:relative; width:240px; margin:6px auto; }
     .wheel-canvas { display:block; }
@@ -1349,7 +1402,8 @@
             templates:  localStorage.getItem('mintavla_templates_' + currentUser) || '',
             links:      localStorage.getItem('mintavla_links_' + currentUser) || '',
             calNotes:   localStorage.getItem('mintavla_calNotes_' + currentUser) || '',
-            toolbarOrder: localStorage.getItem('mintavla_toolbarOrder_' + currentUser) || ''
+            toolbarOrder: localStorage.getItem('mintavla_toolbarOrder_' + currentUser) || '',
+            toolPocketLayout: localStorage.getItem('mintavla_toolPocketLayout_' + currentUser) || ''
         };
     }
 
@@ -1364,6 +1418,7 @@
         if (typeof d.links === 'string') localStorage.setItem('mintavla_links_' + currentUser, d.links);
         if (typeof d.calNotes === 'string' && d.calNotes) localStorage.setItem('mintavla_calNotes_' + currentUser, d.calNotes);
         if (typeof d.toolbarOrder === 'string' && d.toolbarOrder) localStorage.setItem('mintavla_toolbarOrder_' + currentUser, d.toolbarOrder);
+        if (typeof d.toolPocketLayout === 'string' && d.toolPocketLayout) localStorage.setItem('mintavla_toolPocketLayout_' + currentUser, d.toolPocketLayout);
     }
 
     // Gör om e-post till en säker dokument-nyckel (Firestore tillåter inte vissa tecken)
@@ -1421,6 +1476,7 @@
         try {
             const email = user.email; const name = user.displayName || '';
             await loadAdminEmails();
+            if(typeof applyAdminUIMode === 'function') applyAdminUIMode(); // rätt ej-admin/viewer-klasser så fort listan finns
             // Borttagen/blockerad av admin?
             try {
                 const usnap = await fbDB.collection('users').doc(emailKey(email)).get();
@@ -1686,7 +1742,10 @@
                 else if (type === 'MATTEKAMP') { try{ state.data = JSON.parse(w.dataset.mattekamp || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'VERB') { try{ state.data = JSON.parse(w.dataset.verb || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'EN / ETT') { try{ state.data = JSON.parse(w.dataset.substantiv || '{}'); }catch(e){ state.data={}; } }
-                else if (type === 'LÄNDER') { try{ state.data = JSON.parse(w.dataset.land || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'LÄNDER' || type === 'MEDBORGARE') { try{ state.data = JSON.parse(w.dataset.land || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'ORDKLASSER') { try{ state.data = JSON.parse(w.dataset.ordklass || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'SYNONYMJAKTEN') { try{ state.data = JSON.parse(w.dataset.synonym || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'STAVNINGSKAMPEN') { try{ state.data = JSON.parse(w.dataset.stavning || '{}'); }catch(e){ state.data={}; } }
                 
                 // DATA-MINNE FÖR GREJ OF THE DAY WIDGET SÄKRAD
                 else if (type === 'GREJ OF THE DAY') {
@@ -1760,7 +1819,10 @@
             else if (w.type === 'MATTEKAMP') createMathBattle(w);
             else if (w.type === 'VERB') createVerbWidget(w);
             else if (w.type === 'EN / ETT') createNounWidget(w);
-            else if (w.type === 'LÄNDER') createCountryWidget(w);
+            else if (w.type === 'LÄNDER' || w.type === 'MEDBORGARE') createCountryWidget(w);
+            else if (w.type === 'ORDKLASSER') createWordClassWidget(w);
+            else if (w.type === 'SYNONYMJAKTEN') createSynonymWidget(w);
+            else if (w.type === 'STAVNINGSKAMPEN') createSpellingBattle(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -3745,9 +3807,9 @@
 
     function createCountryWidget(config){
         if(config===undefined) config=null;
-        const body = createWidget('LÄNDER', 320, 'land-widget verb-widget', config);
+        const body = createWidget('MEDBORGARE', 320, 'land-widget verb-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett land… t.ex. Sverige'><button class='btn btn-primary verb-boj'>Visa ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj svaren)</label><div class='verb-typ'></div><div class='land-forslag'></div><div class='verb-rows'></div>`;
+        body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett land… t.ex. Egypten'><button class='btn btn-primary verb-boj'>Visa ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj svaren)</label><div class='verb-typ'></div><div class='land-forslag'></div><div class='verb-rows'></div>`;
         const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), forslagEl=body.querySelector('.land-forslag'), rowsEl=body.querySelector('.verb-rows');
         if(config && config.data){ if(config.data.word) inp.value=config.data.word; practiceCb.checked=!!config.data.practice; }
         const syncData=()=>{ widget.dataset.land = JSON.stringify({ word: inp.value, practice: practiceCb.checked }); };
@@ -3783,9 +3845,312 @@
         }
         bojBtn.onclick=()=>{ render(); saveBoardState(); };
         inp.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); render(); saveBoardState(); } };
-        inp.oninput=()=>{ visaForslag((inp.value||'').toLowerCase().trim()); };
+        // Autofyllning: skriv början av ett land så fylls resten i, markerad –
+        // fortsätt skriva för att ändra, eller tryck Enter för att bekräfta.
+        // Backsteg/Delete stänger av återfyllningen så det går att sudda fritt.
+        let suddade=false;
+        inp.addEventListener('keydown', (e)=>{ if(e.key!=='Enter') suddade = (e.key==='Backspace' || e.key==='Delete'); });
+        inp.oninput=()=>{
+            const skrivet=inp.value;
+            visaForslag(skrivet.toLowerCase().trim());
+            if(suddade || skrivet.trim().length<2) return; // fyll inte i när man suddar
+            const pre=skrivet.toLowerCase();
+            const D=landBygdData();
+            const traff=D.lander.find(L=>L.land.toLowerCase().startsWith(pre));
+            if(traff && traff.land.length>skrivet.length){
+                inp.value = skrivet + traff.land.slice(skrivet.length);
+                try{ inp.setSelectionRange(skrivet.length, inp.value.length); }catch(e){}
+            }
+        };
         practiceCb.onchange=()=>{ render(); saveBoardState(); };
         if(inp.value) render(); else { typEl.textContent='Skriv ett land – eller ett folk (”norrman” hittar Norge)'; }
+    }
+
+    // ---- ORDKLASSER: klicka på orden och färgmarkera dem ----
+    // Klassiska skolfärgerna: substantiv = grönt, verb = rött, adjektiv = blått.
+    // Meningsbanken har inbyggt facit (s/v/a/o där o = övriga ord) så att
+    // Rätta-knappen kan rätta på riktigt. Egna meningar = fri markering.
+    function ordklassBank(){
+        // format: ord/klass, klass: s v a o
+        const M=('Den/o snabba/a hunden/s jagar/v en/o liten/a katt/s|Min/o bästa/a kompis/s äter/v ett/o rött/a äpple/s|Solen/s lyser/v över/o det/o blåa/a havet/s|Farmor/s bakar/v goda/a bullar/s i/o köket/s|Den/o trötta/a läraren/s dricker/v varmt/a kaffe/s|Barnen/s leker/v glatt/o på/o den/o stora/a gården/s|En/o gammal/a gubbe/s målar/v sitt/o gula/a hus/s|Katten/s sover/v djupt/o i/o den/o mjuka/a soffan/s|Vi/o läser/v spännande/a böcker/s varje/o dag/s|Den/o modiga/a riddaren/s red/v genom/o den/o mörka/a skogen/s|Flickan/s sjunger/v en/o vacker/a sång/s|Regnet/s faller/v mot/o det/o kalla/a fönstret/s|Pappa/s lagar/v god/a mat/s till/o hungriga/a barn/s|Eleverna/s skriver/v långa/a berättelser/s i/o skolan/s|En/o rolig/a clown/s gör/v konstiga/a trick/s|Hästen/s hoppar/v över/o det/o höga/a hindret/s').split('|');
+        return M.map(m=>m.split(' ').map(t=>{ const i=t.lastIndexOf('/'); return { w:t.slice(0,i), k:t.slice(i+1) }; }));
+    }
+    function createWordClassWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('ORDKLASSER', 380, 'ok-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu ok-palette'><span class='ok-pal s'><span class='prick'></span>Substantiv</span><span class='ok-pal v'><span class='prick'></span>Verb</span><span class='ok-pal a'><span class='prick'></span>Adjektiv</span><span class='ok-pal sudd'>🧽 Sudd</span></div><div class='ok-mening'></div><div class='ok-resultat'></div><div class='hover-menu ok-knappar'><button class='btn btn-primary ok-ny'>Ny mening ▶</button><button class='btn btn-secondary ok-ratta'>✔ Rätta</button><button class='btn btn-secondary ok-facit'>Visa facit</button><button class='btn btn-secondary ok-rensa'>Rensa</button></div><div class='hover-menu ok-egen'><input type='text' class='ok-egen-in' placeholder='Skriv en egen mening…'><button class='btn btn-secondary ok-anvand'>Använd</button></div>`;
+        const meningEl=body.querySelector('.ok-mening'), resEl=body.querySelector('.ok-resultat'), rattaBtn=body.querySelector('.ok-ratta'), facitBtn=body.querySelector('.ok-facit'), egenIn=body.querySelector('.ok-egen-in');
+        let mening=[], marks=[], egen=false, kls='s';
+        if(config && config.data && Array.isArray(config.data.mening) && config.data.mening.length){
+            mening=config.data.mening; marks=config.data.marks||[]; egen=!!config.data.egen;
+        } else { mening=ordklassBank()[Math.floor(Math.random()*16)]; marks=[]; }
+        const syncData=()=>{ widget.dataset.ordklass = JSON.stringify({ mening:mening, marks:marks, egen:egen }); };
+        // palett
+        body.querySelectorAll('.ok-pal').forEach(p=>{
+            p.onclick=()=>{ kls = p.classList.contains('sudd') ? 'sudd' : (p.classList.contains('s')?'s':p.classList.contains('v')?'v':'a'); body.querySelectorAll('.ok-pal').forEach(x=>x.classList.toggle('vald', x===p)); };
+        });
+        body.querySelector('.ok-pal.s').classList.add('vald');
+        function render(feedback){
+            syncData();
+            rattaBtn.style.display = egen ? 'none' : '';
+            facitBtn.style.display = egen ? 'none' : '';
+            meningEl.innerHTML='';
+            mening.forEach((t,i)=>{
+                const o=document.createElement('span'); o.className='ok-ord'+(marks[i]?' m-'+marks[i]:'');
+                if(feedback && feedback[i]) o.classList.add(feedback[i]);
+                o.textContent=t.w;
+                o.onclick=()=>{
+                    if(kls==='sudd'){ marks[i]=null; }
+                    else if(marks[i]===kls){ marks[i]=null; }
+                    else { marks[i]=kls; }
+                    resEl.textContent=''; render(); saveBoardState();
+                };
+                meningEl.appendChild(o);
+            });
+            const punkt=document.createElement('span'); punkt.className='ok-ord'; punkt.style.cursor='default'; punkt.style.pointerEvents='none'; punkt.textContent='.'; meningEl.appendChild(punkt);
+        }
+        body.querySelector('.ok-ny').onclick=()=>{
+            const bank=ordklassBank(); let ny;
+            do { ny=bank[Math.floor(Math.random()*bank.length)]; } while(bank.length>1 && ny.map(t=>t.w).join(' ')===mening.map(t=>t.w).join(' '));
+            mening=ny; marks=[]; egen=false; resEl.textContent=''; egenIn.value='';
+            render(); saveBoardState();
+        };
+        rattaBtn.onclick=()=>{
+            const fb=[]; let ratt=0, ska=0;
+            mening.forEach((t,i)=>{
+                if('sva'.includes(t.k)){ ska++; if(marks[i]===t.k){ ratt++; fb[i]='ratt'; } else fb[i]='fel'; }
+                else if(marks[i]) fb[i]='fel'; // övrigt ord som markerats
+            });
+            const felOvriga = mening.filter((t,i)=>!'sva'.includes(t.k) && marks[i]).length;
+            resEl.textContent = ratt+' av '+ska+' rätt'+(felOvriga? ' – '+felOvriga+' ord är inte substantiv/verb/adjektiv' : '')+(ratt===ska && !felOvriga ? ' 🎉' : '');
+            resEl.style.color = (ratt===ska && !felOvriga) ? '#1f7a37' : '#c2261c';
+            render(fb);
+        };
+        facitBtn.onclick=()=>{
+            marks = mening.map(t=>'sva'.includes(t.k) ? t.k : null);
+            resEl.textContent='Facit visas'; resEl.style.color='#8e8e93';
+            render(); saveBoardState();
+        };
+        body.querySelector('.ok-rensa').onclick=()=>{ marks=[]; resEl.textContent=''; render(); saveBoardState(); };
+        const anvandEgen=()=>{
+            const txt=(egenIn.value||'').trim(); if(!txt) return;
+            mening = txt.split(/\s+/).map(w=>({ w:w.replace(/^[.,!?”“"']+|[.,!?”“"']+$/g,''), k:'o' })).filter(t=>t.w);
+            marks=[]; egen=true; resEl.textContent='Egen mening – fri markering (inget facit)'; resEl.style.color='#8e8e93';
+            render(); saveBoardState();
+        };
+        body.querySelector('.ok-anvand').onclick=anvandEgen;
+        egenIn.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); anvandEgen(); } };
+        render();
+    }
+
+    // ---- SYNONYMJAKTEN: ett ord i mitten, klassen jagar synonymer ----
+    // Utmaningsord i tre nivåer med inbyggda facit-synonymer. Läraren fyller
+    // på klassens förslag runt ordet; ”Visa förslag” avslöjar de som saknas.
+    function synonymBank(){
+        if(window._synBank) return window._synBank;
+        const rad=s=>{ const [ord,syn]=s.split(':'); return { ord:ord, syn:syn.split(',') }; };
+        window._synBank={
+            latt:  'glad:lycklig,nöjd,munter,upprymd|stor:enorm,jättelik,väldig,gigantisk|snabb:kvick,rapp,hastig,flink|fin:vacker,snygg,söt,stilig|rolig:kul,skojig,festlig,lustig|arg:sur,ilsken,förbannad,rasande|rädd:skraj,ängslig,skrämd,förskräckt|trött:sömnig,utmattad,sliten,dåsig|prata:tala,snacka,samtala,babbla|springa:löpa,rusa,spurta,kuta'.split('|').map(rad),
+            medel: 'vacker:skön,tjusig,bedårande,ståtlig|smart:klok,intelligent,begåvad,fiffig|börja:starta,inleda,påbörja,sätta igång|sluta:avsluta,upphöra,avbryta,lägga av|hjälpa:bistå,assistera,stötta,undsätta|viktig:betydelsefull,väsentlig,central,avgörande|konstig:märklig,underlig,besynnerlig,egendomlig|gammal:åldrig,antik,ålderstigen,uråldrig|titta:kika,glo,betrakta,blicka|äta:förtära,spisa,mumsa,inmundiga'.split('|').map(rad),
+            svar:  'modig:tapper,orädd,djärv,oförskräckt|noggrann:petig,omsorgsfull,minutiös,grundlig|lat:loj,bekväm,maklig,håglös|generös:givmild,frikostig,storsint|envis:ihärdig,egensinnig,enveten,halsstarrig|tydlig:klar,distinkt,uppenbar,entydig|ledsen:sorgsen,bedrövad,nedstämd,dyster|vanlig:ordinär,alldaglig,gängse,sedvanlig|snäll:vänlig,godhjärtad,hygglig,välvillig|lugn:stilla,rofylld,fridfull,sansad'.split('|').map(rad)
+        };
+        return window._synBank;
+    }
+    function createSynonymWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('SYNONYMJAKTEN', 360, 'syn-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu syn-ctrl'><select class='editor-select syn-niva'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><button class='btn btn-primary syn-ny'>Nytt ord ▶</button><button class='btn btn-secondary syn-forslag'>💡 Visa förslag</button></div><div class='syn-karta'><div class='syn-center'></div><div class='syn-moln'></div></div><div class='syn-antal'></div><div class='syn-in-rad'><input type='text' class='syn-in' placeholder='Skriv en synonym som klassen hittat…'><button class='btn btn-primary syn-lagg'>+ Lägg till</button></div><div class='hover-menu syn-egen-rad'><input type='text' class='syn-egen' placeholder='…eller välj eget mittenord'><button class='btn btn-secondary syn-egen-btn'>Använd</button></div>`;
+        const nivaSel=body.querySelector('.syn-niva'), forslagBtn=body.querySelector('.syn-forslag'), centerEl=body.querySelector('.syn-center'), molnEl=body.querySelector('.syn-moln'), antalEl=body.querySelector('.syn-antal'), inEl=body.querySelector('.syn-in'), egenEl=body.querySelector('.syn-egen');
+        let ord='', facit=[], syns=[], egen=false, visaForslag=false;
+        const norm=s=>(s||'').toLowerCase().trim();
+        function slumpaOrd(){
+            const bank=synonymBank()[nivaSel.value];
+            let ny; do { ny=bank[Math.floor(Math.random()*bank.length)]; } while(bank.length>1 && ny.ord===ord);
+            ord=ny.ord; facit=ny.syn.slice(); syns=[]; egen=false; visaForslag=false;
+        }
+        if(config && config.data && config.data.word){
+            ord=config.data.word; facit=config.data.facit||[]; syns=config.data.syns||[]; egen=!!config.data.egen;
+            if(config.data.level) nivaSel.value=config.data.level;
+        } else slumpaOrd();
+        const syncData=()=>{ widget.dataset.synonym = JSON.stringify({ word:ord, facit:facit, syns:syns, egen:egen, level:nivaSel.value }); };
+        function render(){
+            syncData();
+            forslagBtn.style.display = egen ? 'none' : '';
+            centerEl.textContent=ord;
+            molnEl.innerHTML='';
+            syns.forEach((s,i)=>{
+                const c=document.createElement('span'); c.className='syn-chip c'+(i%6); c.title='Klicka för att ta bort';
+                const arFacit = facit.some(f=>norm(f)===norm(s));
+                c.textContent = s + (visaForslag && arFacit ? ' ⭐' : '');
+                c.onclick=()=>{ syns.splice(i,1); render(); saveBoardState(); };
+                molnEl.appendChild(c);
+            });
+            if(visaForslag){
+                facit.filter(f=>!syns.some(s=>norm(s)===norm(f))).forEach(f=>{
+                    const c=document.createElement('span'); c.className='syn-chip forslag'; c.textContent=f; c.title='Förslag ur ordbanken';
+                    molnEl.appendChild(c);
+                });
+            }
+            if(!molnEl.children.length){ const t=document.createElement('span'); t.className='syn-tom'; t.textContent='Vilka synonymer hittar klassen?'; molnEl.appendChild(t); }
+            antalEl.textContent = syns.length ? (syns.length+' synonym'+(syns.length>1?'er':'')+' hittade!') : '';
+        }
+        function laggTill(){
+            const s=inEl.value.trim();
+            if(!s) return;
+            if(syns.some(x=>norm(x)===norm(s)) || norm(s)===norm(ord)){
+                inEl.classList.remove('dubblett'); void inEl.offsetWidth; inEl.classList.add('dubblett'); return;
+            }
+            inEl.classList.remove('dubblett');
+            syns.push(s); inEl.value=''; render(); saveBoardState(); inEl.focus();
+        }
+        body.querySelector('.syn-lagg').onclick=laggTill;
+        inEl.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); laggTill(); } };
+        body.querySelector('.syn-ny').onclick=()=>{ slumpaOrd(); inEl.value=''; render(); saveBoardState(); };
+        nivaSel.onchange=()=>{ slumpaOrd(); render(); saveBoardState(); };
+        forslagBtn.onclick=()=>{ visaForslag=!visaForslag; forslagBtn.textContent = visaForslag ? 'Dölj förslag' : '💡 Visa förslag'; render(); };
+        const anvandEgen=()=>{ const t=egenEl.value.trim(); if(!t) return; ord=t; facit=[]; syns=[]; egen=true; visaForslag=false; egenEl.value=''; render(); saveBoardState(); };
+        body.querySelector('.syn-egen-btn').onclick=anvandEgen;
+        egenEl.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); anvandEgen(); } };
+        render();
+    }
+
+    // ---- STAVNINGSKAMPEN: lagtävling i stavning ----
+    // Samma tävlingsmotor som Mattekampen: lag, poängmål, timer med −1 vid
+    // tidsslut och stöld-regel. Ordet visas som dolda bokstavsrutor (längden
+    // är ledtråden) – läs upp det med 🔊-knappen (talsyntes) eller högt själv,
+    // och klicka på ordet för att avslöja rätt stavning bokstav för bokstav.
+    // Ordkällor: tre inbyggda nivåer + dina sparade ordlistor (veckans ord).
+    function stavningsBank(){
+        return {
+            latt:  'hjärta,känsla,skjorta,choklad,mycket,gärna,ljus,kjol,tjock,stjärna,äpple,fågel,björn,sjunga,hjälpa,skog,människa? nej'.split(',').filter(w=>w.indexOf('?')<0),
+            medel: 'berättelse,tillsammans,egentligen,människa,ordentlig,spännande,järnväg,skylt,gymnastik,hjälte,sköldpadda,tjugo,stjälk,skjuts,ljudlös'.split(','),
+            svar:  'aggressiv,terrass,parallell,restaurang,professionell,intervju,karriär,definitivt,originell,kommitté,abonnemang,chaufför,konferens,prioritera,asymmetrisk'.split(',')
+        };
+    }
+    function createSpellingBattle(config){
+        if(config===undefined) config=null;
+        const body = createWidget('STAVNINGSKAMPEN', 380, 'sk-widget mk-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu mk-ctrl'><select class='editor-select sk-lista'></select><select class='editor-select sk-mal'><option value='5'>Först till 5</option><option value='10'>Först till 10</option><option value='15'>Först till 15</option><option value='20'>Först till 20</option></select><select class='editor-select sk-tid'><option value='av'>⏱ Ingen timer</option><option value='10'>⏱ 10 sek</option><option value='20'>⏱ 20 sek</option><option value='30'>⏱ 30 sek</option><option value='60'>⏱ 60 sek</option></select></div><div class='mk-lag-rad'></div><div class='mk-tur'></div><div class='mk-timer' style='display:none;'><div class='mk-timer-spar'><div class='mk-timer-bar'></div></div><span class='mk-timer-text'></span></div><div class='sk-ord' title='Klicka för att avslöja nästa bokstav'></div><div class='sk-hint'>Klicka på ordet = nästa bokstav avslöjas</div><div class='mk-doma'><button class='btn btn-secondary sk-lasupp'>🔊 Läs upp</button><button class='mk-ratt'>✔ Rätt (+1)</button><button class='mk-fel'>✘ Fel</button></div><div class='hover-menu' style='display:flex; gap:6px; margin-top:8px;'><button class='btn btn-secondary sk-visa' style='flex:1;'>Visa hela ordet</button><button class='btn btn-secondary sk-ny-omgang' style='flex:1;'>Ny omgång</button></div><div class='mk-info'>Fel svar (utan avslöjat ord) = samma ord går vidare till nästa lag</div>`;
+        const listaSel=body.querySelector('.sk-lista'), malSel=body.querySelector('.sk-mal'), tidSel=body.querySelector('.sk-tid'), lagRad=body.querySelector('.mk-lag-rad'), turEl=body.querySelector('.mk-tur'), ordEl=body.querySelector('.sk-ord'), timerEl=body.querySelector('.mk-timer'), barEl=body.querySelector('.mk-timer-bar'), timerTxt=body.querySelector('.mk-timer-text');
+        let teams=[{name:'Lag 1',p:0},{name:'Lag 2',p:0}], turn=0, ord='', avslojade=0, ko=[], tickId=null, deadline=0, timeoutLage=false;
+        function fyllListor(){
+            listaSel.innerHTML=`<option value='latt'>Stavning – Lätt</option><option value='medel'>Stavning – Medel</option><option value='svar'>Stavning – Svår</option>`;
+            try{ const l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; Object.keys(l).forEach(k=>{ const o=document.createElement('option'); o.value='egen:'+k; o.textContent='📄 '+k; listaSel.appendChild(o); }); }catch(e){}
+        }
+        fyllListor();
+        if(config && config.data){
+            if(Array.isArray(config.data.teams) && config.data.teams.length>=2) teams=config.data.teams;
+            if(config.data.lista && [...listaSel.options].some(o=>o.value===config.data.lista)) listaSel.value=config.data.lista;
+            if(config.data.mal) malSel.value=config.data.mal;
+            if(config.data.tid) tidSel.value=config.data.tid;
+            if(typeof config.data.turn==='number') turn=Math.min(config.data.turn, teams.length-1);
+        }
+        const syncData=()=>{ widget.dataset.stavning = JSON.stringify({ teams:teams, lista:listaSel.value, mal:malSel.value, tid:tidSel.value, turn:turn }); };
+        function hamtaOrd(){
+            const v=listaSel.value;
+            if(v.startsWith('egen:')){
+                try{ const l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; return (l[v.slice(5)]||'').split(/[\n,]/).map(w=>w.trim()).filter(w=>w); }catch(e){ return []; }
+            }
+            return stavningsBank()[v]||[];
+        }
+        function nastaOrd(){
+            if(!ko.length){ ko=hamtaOrd().slice(); for(let i=ko.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ko[i],ko[j]]=[ko[j],ko[i]]; } }
+            ord = ko.pop() || ''; avslojade=0;
+            renderOrd(); startaTimer();
+        }
+        function renderOrd(nyssIdx){
+            ordEl.innerHTML='';
+            if(!ord){ const t=document.createElement('span'); t.className='sk-hint'; t.textContent='Ordlistan är tom – välj en annan lista'; ordEl.appendChild(t); return; }
+            [...ord].forEach((b,i)=>{
+                if(b===' '){ const m=document.createElement('span'); m.className='sk-mellanrum'; ordEl.appendChild(m); return; }
+                const r=document.createElement('span'); r.className='sk-bokstav'+(i<avslojade?'':' dold')+(i===nyssIdx?' nyss':'');
+                r.textContent=b; ordEl.appendChild(r);
+            });
+        }
+        ordEl.onclick=()=>{ if(avslojade<ord.length){ avslojade++; while(ord[avslojade-1]===' ' && avslojade<ord.length) avslojade++; renderOrd(avslojade-1); if(heltAvslojat()){ stoppaTimer(); timerEl.style.display='none'; } } };
+        body.querySelector('.sk-visa').onclick=()=>{ avslojade=ord.length; renderOrd(); stoppaTimer(); timerEl.style.display='none'; };
+        const heltAvslojat=()=> avslojade>=ord.length;
+        body.querySelector('.sk-lasupp').onclick=()=>{
+            try{ const u=new SpeechSynthesisUtterance(ord); u.lang='sv-SE'; u.rate=0.8; speechSynthesis.cancel(); speechSynthesis.speak(u); }
+            catch(e){ customAlert('Talsyntes stöds inte i den här webbläsaren.', '🔊'); }
+        };
+        function renderLag(){
+            syncData(); lagRad.innerHTML='';
+            teams.forEach((lag,i)=>{
+                const d=document.createElement('div'); d.className='mk-lag'+(i===turn?' aktiv':'');
+                const inp=document.createElement('input'); inp.value=lag.name; inp.title='Klicka för att byta lagnamn';
+                inp.oninput=()=>{ lag.name=inp.value; syncData(); }; inp.onchange=()=>{ renderLag(); saveBoardState(); };
+                const p=document.createElement('div'); p.className='mk-poang'; p.textContent=lag.p;
+                d.appendChild(inp); d.appendChild(p); lagRad.appendChild(d);
+            });
+            const kn=document.createElement('div'); kn.className='mk-lagknappar';
+            const plus=document.createElement('button'); plus.textContent='+'; plus.title='Lägg till lag (max 4)';
+            plus.onclick=()=>{ if(teams.length<4){ teams.push({name:'Lag '+(teams.length+1), p:0}); renderLag(); saveBoardState(); } };
+            const minus=document.createElement('button'); minus.textContent='−'; minus.title='Ta bort sista laget (minst 2)';
+            minus.onclick=()=>{ if(teams.length>2){ teams.pop(); if(turn>=teams.length) turn=0; renderLag(); saveBoardState(); } };
+            kn.appendChild(plus); kn.appendChild(minus); lagRad.appendChild(kn);
+            turEl.textContent='Tur: '+(teams[turn].name||('Lag '+(turn+1)));
+        }
+        function nastaLag(){ turn=(turn+1)%teams.length; renderLag(); }
+        function stoppaTimer(){ if(tickId){ clearInterval(tickId); tickId=null; } }
+        function startaTimer(){
+            stoppaTimer();
+            if(tidSel.value==='av'){ timerEl.style.display='none'; return; }
+            const total=parseInt(tidSel.value)*1000; deadline=Date.now()+total;
+            timerEl.style.display='flex';
+            const uppdatera=()=>{
+                const kvar=deadline-Date.now();
+                timerTxt.textContent=Math.max(0,Math.ceil(kvar/1000));
+                barEl.style.width=Math.max(0,kvar/total*100)+'%';
+                barEl.classList.toggle('rott', kvar<=3000);
+                if(kvar<=0){ stoppaTimer(); tidenUte(); }
+            };
+            uppdatera(); tickId=setInterval(uppdatera,100);
+        }
+        function tidenUte(){
+            timeoutLage=true;
+            teams[turn].p=Math.max(0, teams[turn].p-1);
+            renderLag();
+            try{ const AC=window.AudioContext||window.webkitAudioContext; if(AC){ if(!window._remAC) window._remAC=new AC(); const ctx=window._remAC; if(ctx.state==='suspended') ctx.resume().catch(()=>{}); const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=170; const t=ctx.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.55); } }catch(e){}
+            ordEl.innerHTML=''; const m=document.createElement('span'); m.style.cssText='font-size:20px;font-weight:900;color:#ff3b30;'; m.textContent='⏰ Tiden är ute! −1 poäng'; ordEl.appendChild(m);
+            saveBoardState();
+            setTimeout(()=>{ timeoutLage=false; nastaLag(); nastaOrd(); saveBoardState(); }, 1500);
+        }
+        function visaVinst(namn){
+            const wrapper=document.getElementById('cb-app-wrapper');
+            const overlay=document.createElement('div'); overlay.className='reminder-popup-overlay';
+            const box=document.createElement('div'); box.className='reminder-popup-box mk-vinstbox';
+            box.innerHTML=`<div class='rem-pop-bell'>🏆</div><div class='rem-pop-title'>Vi har en vinnare!</div><div class='rem-pop-text'></div><div class='rem-pop-actions'><button class='rem-pop-btn rem-pop-ok'>🎉 Grattis!</button></div>`;
+            box.querySelector('.rem-pop-text').textContent = namn + ' vann Stavningskampen!';
+            overlay.appendChild(box); wrapper.appendChild(overlay);
+            requestAnimationFrame(()=>overlay.classList.add('show'));
+            try{ remChime(); }catch(e){}
+            box.querySelector('.rem-pop-ok').onclick=()=>{ overlay.classList.remove('show'); setTimeout(()=>overlay.remove(),300); };
+        }
+        const mkObs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ stoppaTimer(); mkObs.disconnect(); } });
+        const mkCc=document.getElementById('canvas-container-v6'); if(mkCc) mkObs.observe(mkCc,{childList:true,subtree:true});
+        body.querySelector('.mk-ratt').onclick=()=>{
+            if(timeoutLage) return;
+            teams[turn].p++;
+            if(teams[turn].p >= parseInt(malSel.value)){ visaVinst(teams[turn].name||('Lag '+(turn+1))); }
+            nastaLag(); nastaOrd(); saveBoardState();
+        };
+        body.querySelector('.mk-fel').onclick=()=>{
+            if(timeoutLage) return;
+            const behall = !heltAvslojat(); // stöld: samma ord vidare om stavningen inte visats helt
+            nastaLag();
+            if(behall){ renderOrd(); startaTimer(); }
+            else nastaOrd();
+            saveBoardState();
+        };
+        body.querySelector('.sk-ny-omgang').onclick=()=>{ teams.forEach(l=>l.p=0); turn=0; ko=[]; renderLag(); nastaOrd(); saveBoardState(); };
+        listaSel.onchange=()=>{ ko=[]; syncData(); nastaOrd(); saveBoardState(); };
+        malSel.onchange=()=>{ syncData(); saveBoardState(); };
+        tidSel.onchange=()=>{ syncData(); startaTimer(); saveBoardState(); };
+        renderLag(); nastaOrd();
     }
 
     function createWheel(config){
@@ -5856,7 +6221,7 @@
             }
         }
         tc.addEventListener('pointerdown', (e)=>{
-            if(typeof canEditBoard === 'function' && !canEditBoard()) return; // verktygsordningen sparas per användare – kräver inloggning
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får ändra i verktygslådan
             const btn=e.target.closest('.tool-btn'); if(!btn) return;
             if(e.button && e.button!==0) return;
             const startX=e.clientX, startY=e.clientY;
@@ -5946,8 +6311,13 @@
         // Kedjans storlek är fast – storleksändring borttagen för ALLA (även admin)
         div.innerHTML = `<div class="chain-strip"></div><div class="tpd-remove" title="Ta bort kedjan">✕</div>`;
         const removeBtn = div.querySelector('.tpd-remove');
+        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) removeBtn.style.display='none'; // icke-admin ska aldrig se X:et
         removeBtn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); e.stopPropagation(); });
-        removeBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); div.remove(); saveToolPocketLayout(); });
+        removeBtn.addEventListener('click', (e)=>{
+            e.preventDefault(); e.stopPropagation();
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // dubbel säkring i logiken
+            div.remove(); saveToolPocketLayout();
+        });
         return div;
     }
     // Lägg till en ny kedja sist i verktygsfickan – dra den sedan dit du vill ha den
@@ -6007,7 +6377,7 @@
             }
         }
         grid.addEventListener('pointerdown', (e)=>{
-            if(typeof canEditBoard === 'function' && !canEditBoard()) return; // verktygslådan sparas per användare – kräver inloggning
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får ändra i verktygslådan (fickan)
             if(e.target.closest('.tpd-handle, .tpd-remove')) return;
             const item=e.target.closest('.tool-btn, .tool-pocket-divider'); if(!item) return;
             if(e.button && e.button!==0) return;
@@ -6048,6 +6418,9 @@
 
     function initBoard() {
         restoreToolbarOrder();
+        // Bygg om verktygsfickan nu när rätt användare är inloggad – före
+        // inloggningen byggdes den med fel lagringsnyckel och visade standardordningen
+        if(typeof rebuildToolPocketGrid === 'function') rebuildToolPocketGrid();
         let savedData = localStorage.getItem('boardStateV6_' + currentUser);
         let newDays = 0;
         if (savedData) {
