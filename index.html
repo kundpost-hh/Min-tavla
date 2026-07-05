@@ -118,6 +118,7 @@
     </div>
 
     <div id="menu-hover-zone"></div>
+    <button id="mobile-tool-toggle" onclick="toggleMobileToolbar()" title="Verktyg" aria-label="Öppna verktyg">☰</button>
 
     <div id="toolbar-container">
         <!-- RAD 1: favoriter (alltid synliga) -->
@@ -1420,6 +1421,124 @@
     .gotd-clue-box { background: rgba(124, 58, 237, 0.08); border: 1.5px solid rgba(124, 58, 237, 0.2); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; font-size: 15px; color: #333; line-height: 1.4; text-align: center; width: 100%; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
     .gotd-facts-box { display: flex; flex-direction: column; gap: 4px; width: 100%; margin-bottom: 4px; animation: popIn 0.2s ease-out; }
     .gotd-fact-item { background: #fdfafe; border: 1px dashed rgba(168, 85, 247, 0.4); border-radius: 6px; padding: 6px 10px; font-size: 13.5px; color: #444; line-height: 1.4; text-align: left; }
+
+    /* ============================================================
+       RESPONSIV ANPASSNING – MOBIL & IPAD (tillagd modul)
+       Mål: hela appen ska gå att använda som en vanlig webbsida på
+       touch-enheter, utan att verktygsfält, widget-kontroller eller
+       paneler "gömmer sig" bakom mus-hover.
+       ============================================================ */
+
+    /* iOS/Android: säkerställ att appen fyller skärmen inkl. "hak"/safe-area */
+    :root { --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px); --safe-right: env(safe-area-inset-right, 0px); }
+
+    /* Flytande knapp som öppnar verktygsfältet på touch (ersätter hover) */
+    #mobile-tool-toggle {
+        position: fixed; z-index: 10001; bottom: calc(16px + var(--safe-bottom)); left: 50%;
+        transform: translateX(-50%);
+        width: 56px; height: 56px; border-radius: 50%; border: none;
+        background: #007aff; color: #fff; font-size: 24px; line-height: 1;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.28); cursor: pointer; display: none;
+        align-items: center; justify-content: center;
+    }
+    #mobile-tool-toggle:active { transform: translateX(-50%) scale(0.94); }
+
+    /* -------- TOUCH-LÄGE: aktiveras via klassen .is-touch på wrappern -------- */
+
+    /* 1) Verktygsfältet: styrs av knapp istället för hover i touch-läge. */
+    #cb-app-wrapper.is-touch #menu-hover-zone { display: none !important; }
+    #cb-app-wrapper.is-touch #toolbar-container {
+        /* dölj som standard; visas när body har .mtoolbar-open */
+        transition: opacity .25s ease, visibility .25s, transform .25s ease;
+    }
+    #cb-app-wrapper.is-touch.mtoolbar-open #toolbar-container {
+        opacity: 1 !important; visibility: visible !important;
+        transform: translateX(-50%) translateY(0) !important;
+    }
+    #cb-app-wrapper.is-touch #mobile-tool-toggle { display: flex; }
+
+    /* 2) Widget-kontroller ska ALLTID synas på touch (ingen hover finns). */
+    #cb-app-wrapper.is-touch .widget .hover-menu,
+    #cb-app-wrapper.is-touch .widget .widget-resizer,
+    #cb-app-wrapper.is-touch .schedule-row .row-hover-menu {
+        opacity: 1 !important; pointer-events: auto !important;
+    }
+    #cb-app-wrapper.is-touch .widget .widget-header {
+        transform: translateY(calc(-100% + 2px)) !important;
+        opacity: 1 !important; pointer-events: auto !important;
+    }
+    #cb-app-wrapper.is-touch .widget:not(.schedule-widget) .widget-inner {
+        border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;
+    }
+    /* Tabell-widgetens sidoknappar: visa alltid på touch */
+    #cb-app-wrapper.is-touch .table-widget .tbl-side {
+        max-width: 60px !important; max-height: 240px !important;
+    }
+
+    /* 3) Större touch-ytor på knappar/ikoner i touch-läge */
+    #cb-app-wrapper.is-touch .tool-btn { min-width: 60px; }
+    #cb-app-wrapper.is-touch .widget-ctrl-icon,
+    #cb-app-wrapper.is-touch .sp-icon-btn { opacity: 1; }
+
+    /* -------- SURFPLATTA / IPAD (≤ 1024px) -------- */
+    @media (max-width: 1024px) {
+        #toolbar-container { width: 96%; max-width: 100%; }
+        /* Verktygsfältets knapprader ska kunna scrolla i sidled vid behov */
+        .tool-fav, .tool-extra { flex-wrap: wrap; justify-content: center; }
+        #side-pocket-panel { width: 300px; max-height: 80vh; }
+        #tool-pocket-panel { width: 300px; max-height: 82vh; }
+    }
+
+    /* -------- MOBIL (≤ 760px) -------- */
+    @media (max-width: 760px) {
+        /* Verktygsfältet: full bredd nära nederkant, horisontellt scrollbart. */
+        #toolbar-container {
+            bottom: calc(84px + var(--safe-bottom)); width: 94%; max-width: 94%;
+            padding: 8px 10px; max-height: 46vh; overflow-y: auto;
+        }
+        .tool-fav, .tool-extra {
+            flex-wrap: wrap; justify-content: flex-start; gap: 6px;
+            max-height: none; overflow: visible;
+        }
+        /* Extra-raden alltid utfälld på mobil så inga verktyg göms */
+        #toolbar-container .tool-extra {
+            max-height: none !important; opacity: 1 !important; pointer-events: auto !important;
+            margin-top: 6px !important;
+        }
+        #toolbar-container .toolbar-tab { display: none !important; }
+        .tool-btn { min-width: 64px; padding: 8px 6px; }
+        .tool-btn .icon { font-size: 22px; }
+        .tool-btn .label { font-size: 10px; }
+
+        /* Sido- & verktygsficka: nästan full bredd men lämna en kant, scrollbar. */
+        #side-pocket-panel {
+            width: 86vw !important; max-width: 340px; max-height: 78vh;
+            right: 0; padding: 14px;
+        }
+        #tool-pocket-panel {
+            width: 86vw !important; max-width: 340px; max-height: 82vh;
+        }
+        /* Öppningsflikarna större och lättare att träffa */
+        #side-pocket-tab, #tool-pocket-tab { height: 74px !important; width: 26px !important; font-size: 16px; }
+
+        /* Helskärmsknappen ur vägen för mobil-verktygsknappen */
+        #fullscreen-btn { top: calc(10px + var(--safe-top)); right: calc(10px + var(--safe-right)); }
+
+        /* Sidnavigering nedtill får inte krocka med verktygsknappen */
+        #pages-nav-v6 { bottom: calc(150px + var(--safe-bottom)) !important; }
+
+        /* Dialoger/paneler håller sig inom skärmen */
+        .admin-panel-box, .login-box, .custom-alert-box, .custom-confirm-box { width: 92vw; }
+    }
+
+    /* -------- LITEN MOBIL (≤ 430px) -------- */
+    @media (max-width: 430px) {
+        .tool-btn { min-width: 58px; }
+        #mobile-tool-toggle { width: 52px; height: 52px; font-size: 22px; }
+        #side-pocket-panel, #tool-pocket-panel { width: 90vw !important; }
+    }
+
 </style>
 
 <!-- Firebase (central inloggning + lagring så att admin kan se och hantera användare) -->
@@ -1988,7 +2107,30 @@
     function createWidget(title, width, customClass, config) {
         if(!customClass) customClass = ''; widgetCount++;
         const widget = document.createElement('div'); widget.className = 'widget ' + customClass; widget.dataset.widgetType = title;
-        if (config) { widget.style.width = config.w + 'px'; if (config.h) widget.style.height = config.h + 'px'; widget.style.top = Math.max(40, config.y) + 'px'; widget.style.left = config.x + 'px'; if(config.locked) widget.classList.add('locked'); }
+        const _vw = window.innerWidth || 1200;
+        const _smallScreen = _vw <= 1024;
+        if (config) {
+            widget.style.width = config.w + 'px'; if (config.h) widget.style.height = config.h + 'px';
+            let _cx = config.x, _cy = Math.max(40, config.y);
+            if (_smallScreen) {
+                // Håll inladdade widgetar inom synligt område på små skärmar.
+                const _wWidth = Math.min(config.w, _vw - 16);
+                widget.style.width = _wWidth + 'px';
+                _cx = Math.max(8, Math.min(config.x, _vw - _wWidth - 8));
+                _cy = Math.max(40, config.y);
+            }
+            widget.style.top = _cy + 'px'; widget.style.left = _cx + 'px';
+            if(config.locked) widget.classList.add('locked');
+        }
+        else if (_smallScreen) {
+            // Nya widgetar: centrera och begränsa bredden så inget hamnar utanför skärmen.
+            const _wWidth = Math.min(width, _vw - 16);
+            widget.style.width = _wWidth + 'px';
+            let _left = Math.round((_vw - _wWidth) / 2);
+            _left = Math.max(8, Math.min(_left, _vw - _wWidth - 8));
+            widget.style.left = (_left + (widgetCount * 12) % 40) + 'px';
+            widget.style.top = (56 + (widgetCount * 20) % 140) + 'px';
+        }
         else { widget.style.width = width + 'px'; const vw = window.innerWidth || 1200; let baseLeft = Math.round((vw - width) / 2); baseLeft = Math.max(320, baseLeft); baseLeft = Math.min(baseLeft, Math.max(320, vw - width - 24)); widget.style.left = (baseLeft + (widgetCount * 26) % 150) + 'px'; widget.style.top = (70 + (widgetCount * 24) % 180) + 'px'; }
         
         const body = document.createElement('div'); body.className = 'widget-body';
@@ -7655,6 +7797,81 @@
         requestLock();
         window.addEventListener('click', function once(){ if(!wakeLock) requestLock(); }, { once:false });
     })();
+
+    /* ============================================================
+       RESPONSIV JS – TOUCH/MOBIL (tillagd modul)
+       ============================================================ */
+    (function initResponsiveMode(){
+        var wrapper = document.getElementById('cb-app-wrapper');
+        if(!wrapper) return;
+
+        // Touch-läge om enheten saknar finpekare (mus) eller har touch och liten/medium skärm.
+        function detectTouch(){
+            var coarse = false;
+            try { coarse = window.matchMedia('(pointer: coarse)').matches; } catch(e) {}
+            var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            var smallish = window.innerWidth <= 1024;
+            // Touch-läge när det är en touch-enhet med grov pekare, eller när skärmen är liten.
+            return (hasTouch && coarse) || (hasTouch && smallish);
+        }
+        function applyTouchClass(){
+            if(detectTouch()) wrapper.classList.add('is-touch');
+            else { wrapper.classList.remove('is-touch'); wrapper.classList.remove('mtoolbar-open'); }
+        }
+        applyTouchClass();
+        window.addEventListener('resize', applyTouchClass);
+        window.addEventListener('orientationchange', function(){ setTimeout(applyTouchClass, 200); });
+
+        // Toggle av verktygsfältet på touch-enheter.
+        window.toggleMobileToolbar = function(){
+            wrapper.classList.toggle('mtoolbar-open');
+        };
+
+        // Dra in widgetar som hamnat (delvis) utanför skärmen på små skärmar.
+        window.keepWidgetsInView = function(){
+            var vw = window.innerWidth || 1200;
+            if(vw > 1024) return; // bara på surfplatta/mobil
+            var widgets = document.querySelectorAll('.canvas-page.active .widget, #canvas-container-v6 .widget');
+            widgets.forEach(function(w){
+                var rectW = w.offsetWidth;
+                // Begränsa bredden till skärmen om widgeten är bredare.
+                if(rectW > vw - 12){ w.style.width = (vw - 12) + 'px'; rectW = vw - 12; }
+                var left = parseInt(w.style.left) || 0;
+                var top = parseInt(w.style.top) || 0;
+                var maxLeft = Math.max(4, vw - rectW - 4);
+                if(left < 4) left = 4;
+                if(left > maxLeft) left = maxLeft;
+                if(top < 40) top = 40;
+                w.style.left = left + 'px';
+                w.style.top = top + 'px';
+            });
+        };
+        var _kwivT;
+        function scheduleKeepInView(){ clearTimeout(_kwivT); _kwivT = setTimeout(function(){ try{ window.keepWidgetsInView(); }catch(e){} }, 250); }
+        window.addEventListener('resize', scheduleKeepInView);
+        window.addEventListener('orientationchange', function(){ setTimeout(scheduleKeepInView, 300); });
+        // Kör en gång strax efter inladdning ifall en sparad tavla öppnas på mobil.
+        setTimeout(function(){ try{ window.keepWidgetsInView(); }catch(e){} }, 1200);
+
+        // Stäng verktygsfältet när man trycker/­klickar utanför det (och inte på knappen).
+        document.addEventListener('pointerdown', function(ev){
+            if(!wrapper.classList.contains('mtoolbar-open')) return;
+            var tc = document.getElementById('toolbar-container');
+            var btn = document.getElementById('mobile-tool-toggle');
+            if(tc && (tc.contains(ev.target))) return;
+            if(btn && (btn === ev.target || btn.contains(ev.target))) return;
+            wrapper.classList.remove('mtoolbar-open');
+        }, true);
+
+        // När man valt ett verktyg (klick på .tool-btn) stängs fältet så canvasen syns.
+        document.addEventListener('click', function(ev){
+            var tb = ev.target.closest && ev.target.closest('#toolbar-container .tool-btn');
+            if(tb && wrapper.classList.contains('is-touch')){
+                setTimeout(function(){ wrapper.classList.remove('mtoolbar-open'); }, 60);
+            }
+        });
+    })();
+
 </script>
 </body>
 </html>
