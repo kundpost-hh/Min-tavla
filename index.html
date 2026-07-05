@@ -158,7 +158,7 @@
             <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Medborgare</div></button>
             <button class="tool-btn" onclick="createWordClassWidget()"><div class="icon">📚</div><div class="label">Ordklasser</div></button>
             <button class="tool-btn" onclick="createSynonymWidget()"><div class="icon">🔎</div><div class="label">Synonymer</div></button>
-            <button class="tool-btn" onclick="createSpellingBattle()"><div class="icon">🔤</div><div class="label">Stavningskamp</div></button>
+            <button class="tool-btn" onclick="createSpellingBattle()"><div class="icon">✏️</div><div class="label">Stavningskamp</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
@@ -188,6 +188,9 @@
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
             <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
             <button class="tool-btn" onclick="createPracticeClock()"><div class="icon">🕐</div><div class="label">Övningsklocka</div></button>
+            <button class="tool-btn" onclick="createBiologiWidget()"><div class="icon">🧬</div><div class="label">Biologi</div></button>
+            <button class="tool-btn" onclick="createKemiWidget()"><div class="icon">⚗️</div><div class="label">Kemi</div></button>
+            <button class="tool-btn" onclick="createFysikWidget()"><div class="icon">🔭</div><div class="label">Fysik</div></button>
             <button class="tool-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
             <button class="tool-btn" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
             <button class="tool-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
@@ -707,6 +710,139 @@
     .alphabet-container { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 6px; padding: 14px 8px; overflow: hidden; }
     .alpha-letter { font-family: 'Comic Sans MS', 'Segoe UI', sans-serif; font-size: 40px; font-weight: bold; line-height: 1; padding: 6px 8px; border-radius: 14px; transition: transform 0.2s ease, background 0.2s ease; cursor: pointer; flex: 0 0 auto; user-select: none; }
     .alpha-letter:hover { animation: alpha-dance 0.6s ease-in-out infinite; background: rgba(255,45,85,0.08); }
+
+    /* ---- BIOLOGI ÅK 4 ---- */
+    .bio-widget .widget-header{ background:linear-gradient(135deg,#3cb45f,#2f9e51) !important; }
+    .bio-body{ padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+    .bio-tabs{ display:flex; flex-wrap:wrap; gap:8px; }
+    .bio-tab{ border:1px solid #e2e4e2; background:#f4f5f4; color:#26322b; padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s ease; white-space:nowrap; font-family:inherit; }
+    .bio-tab:hover{ border-color:#3cb45f; }
+    .bio-tab.active{ background:#3cb45f; border-color:#3cb45f; color:#fff; box-shadow:0 6px 14px -6px rgba(60,180,95,.6); }
+    .bio-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:7px; }
+    .bio-tile{ background:#f4f5f4; border:1px solid #e2e4e2; border-radius:13px; aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease; padding:3px; text-align:center; }
+    .bio-tile:hover{ transform:translateY(-2px); border-color:#3cb45f; box-shadow:0 10px 20px -12px rgba(60,180,95,.5); }
+    .bio-tile .bio-emoji{ font-size:23px; }
+    .bio-tile .bio-lbl{ font-size:9px; font-weight:700; color:#5a6660; line-height:1.15; }
+    .bio-footnote{ text-align:center; color:#8a938d; font-size:12.5px; font-style:italic; }
+    .bio-detail{ background:#fff; border:1px solid #e2e4e2; border-radius:16px; padding:16px; position:relative; }
+    .bio-detail .bio-back{ border:none; background:#f4f5f4; color:#26322b; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .bio-detail .bio-detail-emoji{ font-size:36px; display:block; margin-bottom:4px; }
+    .bio-detail .bio-tag{ display:inline-block; background:#e8f7ec; color:#2f9e51; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+    .bio-detail h3{ margin:0 0 8px; color:#2f9e51; font-size:17px; }
+    .bio-detail p{ margin:0; color:#3c463f; font-size:14px; line-height:1.5; }
+    @media (max-width:480px){ .bio-grid{ grid-template-columns:repeat(3, 1fr); } }
+    .bio-begrepp-search{ width:100%; box-sizing:border-box; border:1px solid #e2e4e2; border-radius:12px; padding:9px 12px; font-size:13px; font-family:inherit; margin-bottom:10px; outline:none; }
+    .bio-begrepp-search:focus{ border-color:#3cb45f; }
+    .bio-begrepp-list{ display:flex; flex-direction:column; gap:6px; max-height:340px; overflow:auto; }
+    .bio-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f4f5f4; border:1px solid #e2e4e2; border-left:4px solid #3cb45f; border-radius:12px; padding:9px 12px; }
+    .bio-begrepp-ord{ font-weight:800; color:#2f9e51; font-size:14px; }
+    .bio-begrepp-def{ color:#3c463f; font-size:13px; line-height:1.45; }
+
+    /* ---- KEMI ÅK 4 ---- */
+    .kemi-widget .widget-header{ background:linear-gradient(135deg,#8b5cf6,#6d3fd4) !important; }
+    .kemi-body{ padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+    .kemi-tabs{ display:flex; flex-wrap:wrap; gap:8px; }
+    .kemi-tab{ border:1px solid #e4e2ea; background:#f5f4f7; color:#2a2632; padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s ease; white-space:nowrap; font-family:inherit; }
+    .kemi-tab:hover{ border-color:#8b5cf6; }
+    .kemi-tab.active{ background:#8b5cf6; border-color:#8b5cf6; color:#fff; box-shadow:0 6px 14px -6px rgba(139,92,246,.6); }
+    .kemi-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:7px; }
+    .kemi-tile{ background:#f5f4f7; border:1px solid #e4e2ea; border-radius:13px; aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease; padding:3px; text-align:center; }
+    .kemi-tile:hover{ transform:translateY(-2px); border-color:#8b5cf6; box-shadow:0 10px 20px -12px rgba(139,92,246,.5); }
+    .kemi-tile .kemi-emoji{ font-size:23px; }
+    .kemi-tile .kemi-lbl{ font-size:9px; font-weight:700; color:#615a66; line-height:1.15; }
+    .kemi-footnote{ text-align:center; color:#938d99; font-size:12.5px; font-style:italic; }
+    .kemi-detail{ background:#fff; border:1px solid #e4e2ea; border-radius:16px; padding:16px; position:relative; }
+    .kemi-detail .kemi-back{ border:none; background:#f5f4f7; color:#2a2632; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .kemi-detail .kemi-detail-emoji{ font-size:36px; display:block; margin-bottom:4px; }
+    .kemi-detail .kemi-tag{ display:inline-block; background:#efe9fb; color:#6d3fd4; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+    .kemi-detail h3{ margin:0 0 8px; color:#6d3fd4; font-size:17px; }
+    .kemi-detail p{ margin:0; color:#3c3646; font-size:14px; line-height:1.5; }
+    @media (max-width:480px){ .kemi-grid{ grid-template-columns:repeat(3, 1fr); } }
+    .kemi-begrepp-search{ width:100%; box-sizing:border-box; border:1px solid #e4e2ea; border-radius:12px; padding:9px 12px; font-size:13px; font-family:inherit; margin-bottom:10px; outline:none; }
+    .kemi-begrepp-search:focus{ border-color:#8b5cf6; }
+    .kemi-begrepp-list{ display:flex; flex-direction:column; gap:6px; max-height:340px; overflow:auto; }
+    .kemi-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f5f4f7; border:1px solid #e4e2ea; border-left:4px solid #8b5cf6; border-radius:12px; padding:9px 12px; }
+    .kemi-begrepp-ord{ font-weight:800; color:#6d3fd4; font-size:14px; }
+    .kemi-begrepp-def{ color:#3c3646; font-size:13px; line-height:1.45; }
+
+    /* ---- FYSIK ÅK 4 ---- */
+    .fysik-widget .widget-header{ background:linear-gradient(135deg,#1e6fd4,#0d4fa8) !important; }
+    .fysik-body{ padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+    .fysik-tabs{ display:flex; flex-wrap:wrap; gap:8px; }
+    .fysik-tab{ border:1px solid #dde3ec; background:#f3f5f9; color:#232a33; padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s ease; white-space:nowrap; font-family:inherit; }
+    .fysik-tab:hover{ border-color:#1e6fd4; }
+    .fysik-tab.active{ background:#1e6fd4; border-color:#1e6fd4; color:#fff; box-shadow:0 6px 14px -6px rgba(30,111,212,.6); }
+    .fysik-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:7px; }
+    .fysik-tile{ background:#f3f5f9; border:1px solid #dde3ec; border-radius:13px; aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease; padding:3px; text-align:center; }
+    .fysik-tile:hover{ transform:translateY(-2px); border-color:#1e6fd4; box-shadow:0 10px 20px -12px rgba(30,111,212,.5); }
+    .fysik-tile .fysik-emoji{ font-size:23px; }
+    .fysik-tile .fysik-lbl{ font-size:9px; font-weight:700; color:#5a626b; line-height:1.15; }
+    .fysik-footnote{ text-align:center; color:#8b929b; font-size:12.5px; font-style:italic; }
+    .fysik-detail{ background:#fff; border:1px solid #dde3ec; border-radius:16px; padding:16px; position:relative; }
+    .fysik-detail .fysik-back{ border:none; background:#f3f5f9; color:#232a33; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .fysik-detail .fysik-detail-emoji{ font-size:36px; display:block; margin-bottom:4px; }
+    .fysik-detail .fysik-tag{ display:inline-block; background:#e4eefb; color:#0d4fa8; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+    .fysik-detail h3{ margin:0 0 8px; color:#0d4fa8; font-size:17px; }
+    .fysik-detail p{ margin:0; color:#333b44; font-size:14px; line-height:1.5; }
+    @media (max-width:480px){ .fysik-grid{ grid-template-columns:repeat(3, 1fr); } }
+    .fysik-begrepp-search{ width:100%; box-sizing:border-box; border:1px solid #dde3ec; border-radius:12px; padding:9px 12px; font-size:13px; font-family:inherit; margin-bottom:10px; outline:none; }
+    .fysik-begrepp-search:focus{ border-color:#1e6fd4; }
+    .fysik-begrepp-list{ display:flex; flex-direction:column; gap:6px; max-height:340px; overflow:auto; }
+    .fysik-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f3f5f9; border:1px solid #dde3ec; border-left:4px solid #1e6fd4; border-radius:12px; padding:9px 12px; }
+    .fysik-begrepp-ord{ font-weight:800; color:#0d4fa8; font-size:14px; }
+    .fysik-begrepp-def{ color:#333b44; font-size:13px; line-height:1.45; }
+    /* Quiz-ruta + quiz-vy */
+    .fysik-tile.fysik-quiz-tile{ background:linear-gradient(135deg,#1e6fd4,#0d4fa8); border-color:#1e6fd4; }
+    .fysik-tile.fysik-quiz-tile .fysik-lbl{ color:#eaf2ff; }
+    .fysik-tile.fysik-quiz-tile:hover{ box-shadow:0 10px 20px -10px rgba(30,111,212,.7); }
+    .fysik-quiz{ background:#fff; border:1px solid #dde3ec; border-radius:16px; padding:16px; }
+    .fysik-quiz .fq-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+    .fysik-quiz .fysik-back{ border:none; background:#f3f5f9; color:#232a33; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; }
+    .fysik-quiz .fq-progress{ font-size:12px; font-weight:700; color:#0d4fa8; background:#e4eefb; padding:4px 10px; border-radius:999px; }
+    .fysik-quiz .fq-tag{ display:inline-block; background:#e4eefb; color:#0d4fa8; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:10px; }
+    .fysik-quiz .fq-question{ font-size:15px; color:#232a33; line-height:1.5; margin:0 0 14px; font-weight:600; }
+    .fysik-quiz .fq-options{ display:flex; flex-direction:column; gap:8px; }
+    .fysik-quiz .fq-opt{ text-align:left; border:1.5px solid #dde3ec; background:#f7f9fc; color:#232a33; padding:11px 14px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .12s ease; }
+    .fysik-quiz .fq-opt:hover:not(:disabled){ border-color:#1e6fd4; background:#eef4fd; }
+    .fysik-quiz .fq-opt.correct{ border-color:#2f9e51; background:#e8f7ec; color:#1c7a3a; }
+    .fysik-quiz .fq-opt.wrong{ border-color:#d64545; background:#fbe9e9; color:#a62b2b; }
+    .fysik-quiz .fq-opt:disabled{ cursor:default; }
+    .fysik-quiz .fq-feedback{ margin-top:12px; font-size:13.5px; font-weight:700; min-height:20px; }
+    .fysik-quiz .fq-feedback.ok{ color:#2f9e51; }
+    .fysik-quiz .fq-feedback.no{ color:#d64545; }
+    .fysik-quiz .fq-next{ margin-top:12px; border:none; background:#1e6fd4; color:#fff; font-weight:700; font-size:14px; padding:10px 18px; border-radius:12px; cursor:pointer; font-family:inherit; }
+    .fysik-quiz .fq-next:hover{ background:#0d4fa8; }
+    .fysik-quiz .fq-result{ text-align:center; padding:10px 0; }
+    .fysik-quiz .fq-result .fq-score{ font-size:34px; font-weight:800; color:#0d4fa8; margin:6px 0; }
+    .fysik-quiz .fq-result .fq-msg{ font-size:15px; color:#333b44; margin-bottom:16px; }
+    .fysik-quiz .fq-result .fq-again{ border:none; background:#1e6fd4; color:#fff; font-weight:700; font-size:14px; padding:10px 20px; border-radius:12px; cursor:pointer; font-family:inherit; }
+    .fysik-quiz .fq-result .fq-again:hover{ background:#0d4fa8; }
+
+    /* Gemensam quiz-vy (Biologi/Kemi) – tema via --q-main / --q-dark / --q-soft */
+    .subj-quiz-tile{ background:linear-gradient(135deg,var(--q-main),var(--q-dark)) !important; border-color:var(--q-main) !important; }
+    .subj-quiz-tile .bio-lbl, .subj-quiz-tile .kemi-lbl{ color:#fff !important; }
+    .subj-quiz{ background:#fff; border:1px solid #e2e4e2; border-radius:16px; padding:16px; }
+    .subj-quiz .fq-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+    .subj-quiz .sq-back{ border:none; background:#f2f2f4; color:#26262b; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; font-family:inherit; }
+    .subj-quiz .fq-progress{ font-size:12px; font-weight:700; color:var(--q-dark); background:var(--q-soft); padding:4px 10px; border-radius:999px; }
+    .subj-quiz .fq-tag{ display:inline-block; background:var(--q-soft); color:var(--q-dark); font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:10px; }
+    .subj-quiz .fq-question{ font-size:15px; color:#26262b; line-height:1.5; margin:0 0 14px; font-weight:600; }
+    .subj-quiz .fq-options{ display:flex; flex-direction:column; gap:8px; }
+    .subj-quiz .fq-opt{ text-align:left; border:1.5px solid #e2e4e2; background:#f8f8f9; color:#26262b; padding:11px 14px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .12s ease; }
+    .subj-quiz .fq-opt:hover:not(:disabled){ border-color:var(--q-main); }
+    .subj-quiz .fq-opt.correct{ border-color:#2f9e51; background:#e8f7ec; color:#1c7a3a; }
+    .subj-quiz .fq-opt.wrong{ border-color:#d64545; background:#fbe9e9; color:#a62b2b; }
+    .subj-quiz .fq-opt:disabled{ cursor:default; }
+    .subj-quiz .fq-feedback{ margin-top:12px; font-size:13.5px; font-weight:700; min-height:20px; }
+    .subj-quiz .fq-feedback.ok{ color:#2f9e51; }
+    .subj-quiz .fq-feedback.no{ color:#d64545; }
+    .subj-quiz .fq-next{ margin-top:12px; border:none; background:var(--q-main); color:#fff; font-weight:700; font-size:14px; padding:10px 18px; border-radius:12px; cursor:pointer; font-family:inherit; }
+    .subj-quiz .fq-next:hover{ background:var(--q-dark); }
+    .subj-quiz .fq-result{ text-align:center; padding:10px 0; }
+    .subj-quiz .fq-result .fq-score{ font-size:34px; font-weight:800; color:var(--q-dark); margin:6px 0; }
+    .subj-quiz .fq-result .fq-msg{ font-size:15px; color:#3c3c44; margin-bottom:16px; }
+    .subj-quiz .fq-result .fq-again{ border:none; background:var(--q-main); color:#fff; font-weight:700; font-size:14px; padding:10px 20px; border-radius:12px; cursor:pointer; font-family:inherit; }
+    .subj-quiz .fq-result .fq-again:hover{ background:var(--q-dark); }
     @keyframes alpha-dance { 0% { transform: scale(1.5) rotate(0deg); } 25% { transform: scale(1.55) rotate(-13deg); } 50% { transform: scale(1.65) rotate(0deg); } 75% { transform: scale(1.55) rotate(13deg); } 100% { transform: scale(1.5) rotate(0deg); } }
 
     /* ---- KORSORD ---- */
@@ -1742,6 +1878,9 @@
                 else if (type === 'ENHETER') { try{ state.data = JSON.parse(w.dataset.enheter || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'MATTEKAMP') { try{ state.data = JSON.parse(w.dataset.mattekamp || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'VERB') { try{ state.data = JSON.parse(w.dataset.verb || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'BIOLOGI ÅK 4') { state.data.cat = w.dataset.bioCat || 'Djur & växter'; }
+                else if (type === 'KEMI ÅK 4') { state.data.cat = w.dataset.kemiCat || 'Materia & material'; }
+                else if (type === 'FYSIK ÅK 4') { state.data.cat = w.dataset.fysikCat || 'Ljus & syn'; }
                 else if (type === 'EN / ETT') { try{ state.data = JSON.parse(w.dataset.substantiv || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'LÄNDER' || type === 'MEDBORGARE') { try{ state.data = JSON.parse(w.dataset.land || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDKLASSER') { try{ state.data = JSON.parse(w.dataset.ordklass || '{}'); }catch(e){ state.data={}; } }
@@ -1824,6 +1963,9 @@
             else if (w.type === 'ORDKLASSER') createWordClassWidget(w);
             else if (w.type === 'SYNONYMJAKTEN') createSynonymWidget(w);
             else if (w.type === 'STAVNINGSKAMPEN') createSpellingBattle(w);
+            else if (w.type === 'BIOLOGI ÅK 4') createBiologiWidget(w);
+            else if (w.type === 'KEMI ÅK 4') createKemiWidget(w);
+            else if (w.type === 'FYSIK ÅK 4') createFysikWidget(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -3945,6 +4087,989 @@
         render();
     }
 
+    // ---- BIOLOGI ÅK 4: ämnesflikar + ikonrutnät + faktapanel ----
+    function biologiBank(){
+        if(window._bioBank) return window._bioBank;
+        window._bioBank = {
+            "Djur & växter": [
+                {e:"🌳", t:"Träd", txt:"Träd är stora, fleråriga växter med en stam av trä. De tar upp vatten genom rötterna och gör syre med hjälp av solljus. I Sverige finns till exempel ek, gran, tall och björk."},
+                {e:"🦌", t:"Djur i naturen", txt:"Djur delas ofta in i grupper: däggdjur, fåglar, fiskar, kräldjur, groddjur och insekter. Alla djur behöver mat, vatten, syre och en plats att bo på för att leva och må bra."},
+                {e:"🌿", t:"Växter", txt:"Växter har rötter, stjälk, blad och ofta blommor. De gör sin egen mat genom fotosyntes och är basen för nästan alla näringskedjor på jorden."},
+                {e:"🐝", t:"Insekter", txt:"Insekter som bin och fjärilar hjälper växter genom att pollinera blommor. Utan pollinering skulle många växter inte kunna bilda frön och frukter."},
+                {e:"🍄", t:"Svampar", txt:"Svampar är inte växter eller djur, utan en egen grupp. De bryter ner döda växter och djur och gör näringen tillgänglig för nya växter igen."}
+            ],
+            "Människokroppen": [
+                {e:"🫁", t:"Lungorna", txt:"Lungorna tar in luft när vi andas in. Syret från luften går över till blodet, och koldioxid följer med ut när vi andas ut."},
+                {e:"❤️", t:"Hjärtat", txt:"Hjärtat pumpar blod runt i hela kroppen genom blodkärlen. Blodet för med sig syre och näring till alla kroppens delar."},
+                {e:"🦴", t:"Skelettet", txt:"Skelettet ger kroppen dess form och skyddar viktiga organ, till exempel skyddar skallen hjärnan. Vuxna människor har 206 ben i skelettet."},
+                {e:"🧠", t:"Hjärnan", txt:"Hjärnan styr allt vi gör: rör oss, tänker, känner och minns. Den tar emot signaler från hela kroppen genom nerverna."},
+                {e:"🦷", t:"Tänderna", txt:"Tänderna används för att bita och tugga sönder mat så att den blir lättare att svälja och smälta. Mjölktänderna byts ut mot permanenta tänder under uppväxten."}
+            ],
+            "Sinnen": [
+                {e:"👁️", t:"Synen", txt:"Ögonen tar in ljus och skickar bilder till hjärnan genom synnerven. Det är så vi ser färger, former och rörelser omkring oss."},
+                {e:"👂", t:"Hörseln", txt:"Öronen fångar ljudvågor och omvandlar dem till signaler som hjärnan tolkar som ljud. Innerörat hjälper oss även att hålla balansen."},
+                {e:"👃", t:"Luktsinnet", txt:"Näsan kan känna igen tusentals olika dofter. Luktsinnet hänger ihop med smaksinnet, vilket är en anledning till att mat smakar mindre när man är förkyld."},
+                {e:"👅", t:"Smaksinnet", txt:"Tungan har smaklökar som känner sött, salt, surt, beskt och umami. Smak och doft samarbetar för att vi ska uppleva hur mat smakar."},
+                {e:"✋", t:"Känseln", txt:"Huden är kroppens största sinnesorgan. Den känner beröring, tryck, värme, kyla och smärta och skickar signaler till hjärnan."}
+            ],
+            "Ekosystem": [
+                {e:"🌲", t:"Skogen", txt:"Skogen är ett ekosystem där träd, buskar, djur, insekter och svampar lever tillsammans och påverkar varandra."},
+                {e:"🏞️", t:"Sjön", txt:"En sjö är också ett ekosystem, med växter, fiskar, insekter och mikroorganismer som är beroende av varandra och av vattnets kvalitet."},
+                {e:"🕸️", t:"Näringsväv", txt:"I ett ekosystem är många näringskedjor sammankopplade till en näringsväv, eftersom de flesta djur äter mer än en sorts föda."},
+                {e:"♻️", t:"Nedbrytare", txt:"Nedbrytare, som svampar, maskar och bakterier, bryter ner döda växter och djur. Då frigörs näring som nya växter kan använda."},
+                {e:"🏡", t:"Habitat", txt:"Ett habitat är den plats där en djur- eller växtart normalt lever, till exempel en skog, en äng eller ett vattendrag."}
+            ],
+            "Näringskedjor": [
+                {e:"☀️", t:"Solen som energikälla", txt:"Nästan all energi i en näringskedja kommer ursprungligen från solen, som växterna fångar upp och omvandlar genom fotosyntes."},
+                {e:"🌾", t:"Producenter", txt:"Växter kallas producenter eftersom de själva gör sin näring med hjälp av solljus, vatten och koldioxid."},
+                {e:"🐇", t:"Växtätare", txt:"Djur som äter växter kallas växtätare eller förstahandskonsumenter, till exempel kaniner, kor och många insekter."},
+                {e:"🦊", t:"Rovdjur", txt:"Djur som äter andra djur kallas köttätare eller rovdjur. De är ofta längre fram i näringskedjan än växtätarna."},
+                {e:"🪱", t:"Nedbrytare i kedjan", txt:"Nedbrytarna avslutar näringskedjan genom att bryta ner döda djur och växter, så att näringen kan användas av nya växter igen."}
+            ],
+            "Årstider": [
+                {e:"🌸", t:"Vår", txt:"På våren blir det varmare och ljusare. Växter börjar knoppas och blomma, och många djur får sina ungar."},
+                {e:"☀️", t:"Sommar", txt:"Sommaren är den varmaste årstiden med långa, ljusa dagar. Växterna växer som mest och många djur är extra aktiva."},
+                {e:"🍂", t:"Höst", txt:"På hösten blir dagarna kortare och kallare. Löven ändrar färg och faller av träden, och många djur förbereder sig för vintern."},
+                {e:"❄️", t:"Vinter", txt:"Vintern är den kallaste årstiden. Vissa djur går i vinterdvala eller flyttar till varmare platser, och många växter vilar."},
+                {e:"🌍", t:"Varför årstider finns", txt:"Årstiderna beror på att jorden är lutad när den snurrar runt solen. Olika delar av jorden får då mer eller mindre solljus under året."}
+            ],
+            "Livscykler": [
+                {e:"🥚", t:"Fjärilens liv", txt:"En fjäril börjar som ett ägg, blir en larv (fjärilslarv), förpuppar sig och kommer sedan ut som en fullvuxen fjäril. Det kallas metamorfos."},
+                {e:"🐸", t:"Grodans liv", txt:"En groda börjar som ägg i vatten, blir en yngel med gälar och svans, och utvecklas sedan till en vuxen groda som kan leva på land."},
+                {e:"🌱", t:"Från frö till planta", txt:"Ett frö gror när det får vatten, värme och syre. Det blir en liten planta som växer, blommar och kan bilda nya frön."},
+                {e:"🐣", t:"Fågelns liv", txt:"En fågel lägger ägg i ett bo. Ur ägget kommer en fågelunge som föräldrarna matar tills den kan flyga och klara sig själv."},
+                {e:"🐟", t:"Fiskens liv", txt:"De flesta fiskar lägger många ägg i vatten. Ur äggen kommer små fiskyngel som växer upp till fullvuxna fiskar."}
+            ],
+            "Växter": [
+                {e:"🌱", t:"Rot", txt:"Rötterna suger upp vatten och näring ur marken och håller samtidigt fast växten i jorden."},
+                {e:"🌿", t:"Stjälk", txt:"Stjälken bär upp växten och transporterar vatten och näring mellan rötterna och bladen."},
+                {e:"🍃", t:"Blad", txt:"Bladen fångar upp solljus och gör om det till energi genom fotosyntes. De tar också in koldioxid från luften."},
+                {e:"🌼", t:"Blomma", txt:"Blomman lockar till sig insekter med färg och doft, för att hjälpa växten att pollineras och bilda frön."},
+                {e:"🌰", t:"Frö", txt:"Fröet innehåller allt en ny växt behöver för att börja gro, om den får vatten, värme och syre."}
+            ],
+            "Djurens livsmiljöer": [
+                {e:"🌳", t:"Skogen", txt:"I skogen lever djur som älg, rådjur, ekorrar och fåglar. Träden ger både mat och skydd."},
+                {e:"🏔️", t:"Fjället", txt:"På fjället är det kallt och blåsigt. Djur som fjällräv och ripa är anpassade för att klara det tuffa klimatet."},
+                {e:"🌊", t:"Havet", txt:"Havet är hem för fiskar, sälar och en mängd andra djur, från de minsta planktonen till stora valar."},
+                {e:"🏜️", t:"Öknen", txt:"I öknen finns lite vatten och det är ofta väldigt varmt. Djur där är anpassade för att klara torka och hetta."},
+                {e:"❄️", t:"Polarområdet", txt:"Vid polerna är det extremt kallt. Djur som isbjörnar och pingviner har tjock päls eller fett som håller dem varma."}
+            ],
+            "Fotosyntes": [
+                {e:"☀️", t:"Ljus", txt:"Solljus ger den energi som växten behöver för att kunna genomföra fotosyntesen."},
+                {e:"💧", t:"Vatten", txt:"Växten tar upp vatten genom rötterna. Vattnet behövs som en av byggstenarna i fotosyntesen."},
+                {e:"🌬️", t:"Koldioxid", txt:"Växten tar in koldioxid från luften genom små öppningar i bladen, kallade klyvöppningar."},
+                {e:"🍃", t:"Klorofyll", txt:"Klorofyllet i bladen är det gröna ämnet som fångar upp solljuset och gör fotosyntesen möjlig."},
+                {e:"🌳", t:"Syre bildas", txt:"Som en biprodukt av fotosyntesen bildas syre, som växten släpper ut i luften och som vi behöver för att andas."}
+            ],
+            "Vatten & kretslopp": [
+                {e:"💧", t:"Avdunstning", txt:"Solen värmer vatten i sjöar och hav så att det avdunstar och blir till vattenånga som stiger upp i luften."},
+                {e:"☁️", t:"Kondensation", txt:"Högt upp i luften kyls vattenångan ner och bildar små droppar som klumpar ihop sig till moln."},
+                {e:"🌧️", t:"Nedbör", txt:"När molnens droppar blir tunga nog faller de ner som nedbör, till exempel regn, snö eller hagel."},
+                {e:"🏞️", t:"Avrinning", txt:"Nedbörens vatten rinner via bäckar och floder tillbaka till sjöar och hav, eller sjunker ner i marken."},
+                {e:"🔄", t:"Hela kretsloppet", txt:"Vattnets kretslopp upprepas hela tiden: avdunstning, kondensation och nedbör hänger ihop i ett ständigt kretslopp."}
+            ],
+            "Naturen": [
+                {e:"🌍", t:"Naturen och miljön", txt:"Naturen är allt levande och icke-levande omkring oss, som växter, djur, luft, vatten och jord. Det är viktigt att ta hand om naturen så att den mår bra."},
+                {e:"🔍", t:"Naturvetenskap", txt:"I naturvetenskap undersöker man naturen genom att titta noga, ställa frågor, göra experiment och dra slutsatser av det man ser."},
+                {e:"♻️", t:"Återvinning", txt:"Genom att återvinna papper, plast, glas och metall sparar vi naturens resurser och minskar mängden avfall."},
+                {e:"🌳", t:"Naturvård", txt:"Naturvård handlar om att skydda djur, växter och naturmiljöer, till exempel genom naturreservat och nationalparker."},
+                {e:"🐾", t:"Biologisk mångfald", txt:"Biologisk mångfald betyder att det finns många olika arter av växter och djur. En stor mångfald gör naturen starkare och mer motståndskraftig."}
+            ]
+        };
+        return window._bioBank;
+    }
+    // Nyckelbegrepp/ordlista för biologi åk 4 – de viktigaste orden att kunna
+    function biologiBegrepp(){
+        if(window._bioBegrepp) return window._bioBegrepp;
+        window._bioBegrepp = [
+            {ord:"Art", def:"En grupp levande varelser som liknar varandra och kan få ungar tillsammans."},
+            {ord:"Biologi", def:"Läran om allt levande – växter, djur, svampar och människor."},
+            {ord:"Biologisk mångfald", def:"Att det finns många olika arter av växter och djur i naturen."},
+            {ord:"Blomma", def:"Växtens del som hjälper den att pollineras och bilda frön."},
+            {ord:"Däggdjur", def:"Djur som föder levande ungar och ger dem mjölk, till exempel katt, ko och människa."},
+            {ord:"Ekosystem", def:"Ett område där växter, djur och miljö samspelar och påverkar varandra, till exempel en skog eller en sjö."},
+            {ord:"Fotosyntes", def:"När växter använder solljus, vatten och koldioxid för att göra näring och syre."},
+            {ord:"Frö", def:"Det en ny växt växer ur när det får vatten, värme och syre."},
+            {ord:"Groddjur", def:"Djur som lever både i vatten och på land, till exempel grodor och paddor."},
+            {ord:"Habitat", def:"Den plats där en växt eller ett djur normalt lever."},
+            {ord:"Klorofyll", def:"Det gröna ämnet i blad som fångar upp solljus vid fotosyntesen."},
+            {ord:"Klyvöppning", def:"Små öppningar i bladen där växten tar in koldioxid och släpper ut syre."},
+            {ord:"Koldioxid", def:"En gas i luften som växter tar upp och använder vid fotosyntesen."},
+            {ord:"Konsument", def:"Ett djur som äter växter eller andra djur för att få energi."},
+            {ord:"Kretslopp", def:"När något återkommer om och om igen i naturen, till exempel vattnets kretslopp."},
+            {ord:"Larv", def:"Ett tidigt stadium i vissa djurs liv, till exempel en fjärilslarv."},
+            {ord:"Livscykel", def:"De olika stadier en växt eller ett djur går igenom under sitt liv."},
+            {ord:"Nedbrytare", def:"Svampar, maskar och bakterier som bryter ner döda växter och djur."},
+            {ord:"Näringskedja", def:"Hur energi förs vidare när växter äts av djur som i sin tur äts av andra djur."},
+            {ord:"Näringsväv", def:"Många näringskedjor som hänger ihop med varandra."},
+            {ord:"Organ", def:"En kroppsdel med en särskild uppgift, till exempel hjärtat eller lungorna."},
+            {ord:"Pollinering", def:"När pollen förs mellan blommor så att växten kan bilda frön, ofta med hjälp av insekter."},
+            {ord:"Producent", def:"En växt som gör sin egen näring med hjälp av solljus."},
+            {ord:"Rot", def:"Växtens del som tar upp vatten och näring och håller fast växten i marken."},
+            {ord:"Rovdjur", def:"Ett djur som jagar och äter andra djur."},
+            {ord:"Sinne", def:"Syn, hörsel, lukt, smak och känsel – hur vi uppfattar omvärlden."},
+            {ord:"Skelett", def:"Kroppens ben som ger form och skyddar organen."},
+            {ord:"Stjälk", def:"Växtens del som bär upp den och transporterar vatten och näring."},
+            {ord:"Syre", def:"Gasen som djur och människor behöver för att andas; bildas vid fotosyntes."},
+            {ord:"Vinterdvala", def:"När vissa djur sover och sparar energi under den kalla vintern."},
+            {ord:"Växtätare", def:"Ett djur som bara äter växter, till exempel en kanin eller ett rådjur."},
+            {ord:"Årstider", def:"Vår, sommar, höst och vinter – som beror på jordens lutning runt solen."}
+        ];
+        return window._bioBegrepp;
+    }
+    // Gemensam quiz-hjälp: maskerar svarsordet (och ordstammar) i frågetexten så svaret inte avslöjas.
+    // Egna distraktorer (rimliga men fel begrepp inom samma ämne) så att svaren inte kan gissas
+    // fram genom uteslutning av de fem rubrikerna. Nyckel = rätt rubrik, värde = lista med fel val.
+    function quizDistractors(subject){
+        window._quizDist = window._quizDist || {};
+        if(window._quizDist[subject]) return window._quizDist[subject];
+        const D = {};
+        if(subject === 'bio'){
+            Object.assign(D, {
+                "Träd":["Buske","Gräs","Mossa"], "Djur i naturen":["Växtriket","Mikrober","Alger"],
+                "Växter":["Svampar","Lavar","Bakterier"], "Insekter":["Spindlar","Maskar","Snäckor"],
+                "Svampar":["Mossor","Ormbunkar","Alger"],
+                "Lungorna":["Levern","Njurarna","Magsäcken"], "Hjärtat":["Lungorna","Njuren","Mjälten"],
+                "Skelettet":["Musklerna","Senorna","Huden"], "Hjärnan":["Ryggmärgen","Hjärtat","Levern"],
+                "Tänderna":["Tungan","Läpparna","Magen"],
+                "Synen":["Balanssinnet","Temperatursinnet","Talet"], "Hörseln":["Synen","Smaken","Doften"],
+                "Luktsinnet":["Hörseln","Synen","Balansen"], "Smaksinnet":["Känseln","Hörseln","Synen"],
+                "Känseln":["Luktsinnet","Smaksinnet","Hörseln"],
+                "Skogen":["Öknen","Tundran","Korallrevet"], "Sjön":["Havet","Myren","Fjället"],
+                "Näringsväv":["Näringskedja","Livscykel","Kretslopp"], "Nedbrytare":["Rovdjur","Växtätare","Producenter"],
+                "Habitat":["Population","Art","Revir"],
+                "Solen som energikälla":["Vinden","Vattnet","Marken"], "Producenter":["Konsumenter","Nedbrytare","Rovdjur"],
+                "Växtätare":["Rovdjur","Allätare","Nedbrytare"], "Rovdjur":["Växtätare","Producenter","Nedbrytare"],
+                "Nedbrytare i kedjan":["Producenter","Toppredatorer","Växtätare"],
+                "Vår":["Sommar","Höst","Vinter"], "Sommar":["Vår","Höst","Vinter"],
+                "Höst":["Vår","Sommar","Vinter"], "Vinter":["Vår","Sommar","Höst"],
+                "Varför årstider finns":["Månens faser","Solfläckar","Jordens rotation kring sin axel"],
+                "Fjärilens liv":["Grodans liv","Fågelns liv","Fiskens liv"], "Grodans liv":["Fjärilens liv","Ödlans liv","Fiskens liv"],
+                "Från frö till planta":["Från ägg till larv","Fotosyntesen","Pollineringen"], "Fågelns liv":["Fjärilens liv","Grodans liv","Fiskens liv"],
+                "Fiskens liv":["Grodans liv","Fågelns liv","Fjärilens liv"],
+                "Rot":["Stjälk","Blad","Blomma"], "Stjälk":["Rot","Blad","Frö"],
+                "Blad":["Rot","Stjälk","Frö"], "Blomma":["Blad","Rot","Frö"], "Frö":["Blomma","Rot","Blad"],
+                "Fjället":["Regnskogen","Öknen","Havet"], "Havet":["Sjön","Fjället","Skogen"],
+                "Öknen":["Fjället","Skogen","Havet"], "Polarområdet":["Öknen","Regnskogen","Savannen"],
+                "Ljus":["Vatten","Koldioxid","Klorofyll"], "Vatten":["Ljus","Koldioxid","Syre"],
+                "Koldioxid":["Syre","Kväve","Vatten"], "Klorofyll":["Cellkärna","Rot","Pollen"], "Syre bildas":["Koldioxid bildas","Vatten bildas","Socker försvinner"],
+                "Avdunstning":["Kondensation","Nedbör","Avrinning"], "Kondensation":["Avdunstning","Nedbör","Avrinning"],
+                "Nedbör":["Avdunstning","Kondensation","Avrinning"], "Avrinning":["Avdunstning","Kondensation","Nedbör"],
+                "Hela kretsloppet":["Näringskedjan","Fotosyntesen","Livscykeln"],
+                "Naturen och miljön":["Rymden","Stadslivet","Tekniken"], "Naturvetenskap":["Historia","Konst","Matematik"],
+                "Återvinning":["Nedskräpning","Förbränning","Förbrukning"], "Naturvård":["Skogsavverkning","Jakt","Fiske"],
+                "Biologisk mångfald":["Enfald","Population","Utrotning"]
+            });
+        } else if(subject === 'kemi'){
+            Object.assign(D, {
+                "Materia":["Energi","Rörelse","Kraft"], "Material":["Ämne","Blandning","Lösning"],
+                "Egenskaper":["Reaktioner","Partiklar","Faser"], "Atomer":["Molekyler","Celler","Kristaller"],
+                "Magnetiskt":["Elektriskt","Brännbart","Frätande"],
+                "Fast form":["Flytande form","Gasform","Plasma"], "Flytande form":["Fast form","Gasform","Ånga"],
+                "Gasform":["Fast form","Flytande form","Is"], "Smälta & stelna":["Koka & kondensera","Avdunsta","Frysa & tina"],
+                "Koka & kondensera":["Smälta & stelna","Filtrera","Lösa upp"],
+                "Blandning":["Ren substans","Grundämne","Molekyl"], "Slamning":["Lösning","Emulsion","Ren substans"],
+                "Lösning":["Slamning","Emulsion","Blandning"], "Emulsion":["Lösning","Slamning","Ren substans"],
+                "Ren substans":["Blandning","Slamning","Emulsion"],
+                "Lösa upp":["Filtrera","Avdunsta","Smälta"], "Lösningsmedel":["Filter","Indikator","Bottensats"],
+                "Värme hjälper":["Kyla hjälper","Ljus hjälper","Tryck hjälper"], "Mättad lösning":["Utspädd lösning","Ren substans","Emulsion"],
+                "Avdunstning":["Kondensation","Filtrering","Dekantering"],
+                "Vattnets former":["Luftens former","Eldens former","Jordens former"], "Vattnets kretslopp":["Kolets kretslopp","Näringskedjan","Energiflödet"],
+                "Is flyter":["Is sjunker","Vatten kokar","Salt löser sig"], "Fryser & kokar":["Smälter & stelnar","Löser & filtrerar","Kondenserar"],
+                "Lösningsmedel ":["Filter","Indikator","Slamning"],
+                "Luft är materia":["Luft är tomrum","Luft är energi","Luft är vätska"], "Gasblandning":["Ren gas","Vätska","Fast ämne"],
+                "Syre":["Koldioxid","Kväve","Väte"], "Koldioxid":["Syre","Kväve","Helium"], "Luft tar plats":["Luft väger inget","Luft är fast","Luft är osynlig energi"],
+                "Fysikalisk ändring":["Kemisk ändring","Förbränning","Rostning"], "Kemisk ändring":["Fysikalisk ändring","Smältning","Avdunstning"],
+                "Ej återvändbart":["Återvändbart","Fysikalisk ändring","Smältning"], "Återvändbart":["Ej återvändbart","Kemisk ändring","Förbränning"],
+                "Rostning & mörknande":["Smältning & frysning","Kokning","Avdunstning"],
+                "Förbränning":["Avdunstning","Filtrering","Kondensation"], "Gasbildning":["Färgändring","Fällning","Smältning"],
+                "Färgändring":["Gasbildning","Avdunstning","Filtrering"], "Jäsning":["Rostning","Smältning","Kondensation"],
+                "Rost":["Mögel","Sot","Kalk"],
+                "Syror":["Baser","Salter","Neutrala ämnen"], "Baser":["Syror","Salter","Metaller"],
+                "Neutralt":["Surt","Basiskt","Frätande"], "Indikator":["Katalysator","Lösningsmedel","Filter"],
+                "Syra i vardagen":["Bas i vardagen","Salt i vardagen","Metall i vardagen"],
+                "Vad som löser sig":["Vad som smälter","Vad som brinner","Vad som rostar"], "Temperaturen":["Färgen","Doften","Vikten"],
+                "Röra om":["Stå stilla","Kyla ner","Sila"], "Kornstorlek":["Färg","Doft","Temperatur"],
+                "Få tillbaka ämnet":["Förstöra ämnet","Späda ämnet","Bränna ämnet"],
+                "Filtrering":["Avdunstning","Blandning","Upplösning"], "Filter":["Magnet","Termometer","Våg"],
+                "Dekantering":["Filtrering","Avdunstning","Omrörning"], "Sortera med magnet":["Sortera med filter","Sortera med värme","Sortera med vatten"],
+                "Tvål & rengöring":["Matlagning","Batterier","Tandkräm"], "Matlagning":["Tvätt","Städning","Målning"],
+                "Batterier":["Glödlampor","Magneter","Speglar"], "Tandkräm":["Tvål","Schampo","Diskmedel"],
+                "Farliga kemikalier":["Ofarliga ämnen","Naturliga ämnen","Rena ämnen"],
+                "Skyddsglasögon":["Solglasögon","Läsglasögon","Kikare"], "Handskar":["Vantar","Sockor","Förkläde"],
+                "Varningssymboler":["Trafikskyltar","Väderprognoser","Prislappar"], "Elden & värme":["Kylan","Vattnet","Ljuset"],
+                "Fråga läraren":["Gör själv","Chansa","Skynda dig"],
+                "Observera":["Gissa","Glömma","Skynda"], "Ställa frågor":["Ge svar direkt","Låta bli","Avbryta"],
+                "Experiment":["Föreläsning","Läxa","Prov"], "Dra slutsats":["Ställa hypotes","Observera","Mäta"],
+                "Dokumentera":["Radera","Memorera","Ignorera"]
+            });
+        } else if(subject === 'fysik'){
+            Object.assign(D, {
+                "Ljuskällor":["Skuggor","Speglar","Linser"], "Ljus färdas rakt":["Ljus böjer sig","Ljus stannar","Ljus försvinner"],
+                "Skuggor":["Reflektioner","Speglingar","Regnbågar"], "Spegling":["Skugga","Brytning","Absorption"],
+                "Så ser vi":["Så hör vi","Så känner vi","Så luktar vi"],
+                "Ljud är vibrationer":["Ljud är ljus","Ljud är värme","Ljud är tryck"], "Ljudvågor":["Ljusstrålar","Vattenvågor","Radiovågor"],
+                "Hörseln":["Synen","Känseln","Smaken"], "Starkt & svagt":["Ljust & mörkt","Snabbt & långsamt","Varmt & kallt"],
+                "Ljust & mörkt":["Starkt & svagt","Hårt & mjukt","Tungt & lätt"],
+                "Kraft":["Energi","Fart","Massa"], "Tyngdkraft":["Friktion","Magnetism","Luftmotstånd"],
+                "Friktion":["Tyngdkraft","Lufttryck","Magnetism"], "Balans":["Rörelse","Fart","Acceleration"],
+                "Drag & tryck":["Ljus & mörker","Varmt & kallt","Surt & sött"],
+                "Magneter":["Batterier","Linser","Speglar"], "Nord- och sydpol":["Öst- och västpol","Plus- och minuspol","Varm och kall sida"],
+                "Dra & stöta bort":["Smälta & frysa","Lysa & slockna","Koka & kyla"], "Kompass":["Termometer","Barometer","Linjal"],
+                "Magnetfält":["Kraftfält utan magnet","Ljusstråle","Ljudvåg"],
+                "Batteri":["Magnet","Termometer","Lins"], "Strömkrets":["Ljusstråle","Ljudvåg","Vattenledning"],
+                "Ledare":["Isolator","Magnet","Lins"], "Isolatorer":["Ledare","Batterier","Magneter"],
+                "El kan vara farligt":["El är alltid ofarligt","El är magnetiskt","El är ljus"],
+                "Temperatur":["Massa","Volym","Fart"], "Värme sprids":["Ljud sprids","Ljus sprids","Kyla sugs in"],
+                "Utvidgning":["Krympning vid värme","Smältning","Avdunstning"], "Isolering":["Ledning","Uppvärmning","Nedkylning"],
+                "Fryser & smälter":["Kokar & kondenserar","Löser & filtrerar","Lyser & slocknar"],
+                "Enkla maskiner":["Elektriska motorer","Datorer","Robotar"], "Lutande plan":["Hävstång","Hjul","Talja"],
+                "Hävstång":["Lutande plan","Hjul","Kugghjul"], "Hjul":["Hävstång","Lutande plan","Kil"],
+                "Talja & block":["Lutande plan","Hävstång","Skruv"],
+                "Olika material":["Olika krafter","Olika energiformer","Olika färger"], "Hårt & mjukt":["Ljust & mörkt","Varmt & kallt","Surt & sött"],
+                "Magnetiskt":["Elektriskt","Genomskinligt","Brännbart"], "Leder ström & värme":["Isolerar helt","Väger mycket","Är magnetiskt"],
+                "Flyter & sjunker":["Smälter & fryser","Lyser & slocknar","Kokar & kyls"],
+                "Luft finns":["Luft är tomrum","Luft är vätska","Luft är energi"], "Lufttryck":["Vattentryck","Ljudtryck","Blodtryck"],
+                "Luftmotstånd":["Friktion mot marken","Tyngdkraft","Magnetism"], "Komprimera luft":["Späda ut luft","Värma vatten","Kyla metall"],
+                "Varm luft stiger":["Varm luft sjunker","Kall luft stiger","Luft står stilla"],
+                "Rörelse":["Vila","Kraft","Massa"], "Fart":["Massa","Vikt","Temperatur"],
+                "Snabbare & långsammare":["Ljusare & mörkare","Varmare & kallare","Tyngre & lättare"], "Ändra riktning":["Ändra färg","Ändra vikt","Ändra temperatur"],
+                "Stanna":["Starta av sig själv","Öka farten","Byta färg"],
+                "Energi":["Kraft","Massa","Fart"], "Olika energiformer":["Olika krafter","Olika material","Olika färger"],
+                "Energi byter form":["Energi försvinner","Energi skapas ur inget","Energi väger mer"], "Solen":["Månen","Vinden","Havet"],
+                "Energi i mat":["Energi i sten","Energi i luft","Energi i vatten"],
+                "Vind":["Regn","Åska","Dimma"], "Temperatur ":["Vindstyrka","Lufttryck","Nederbörd"],
+                "Nederbörd":["Vind","Åska","Dimma"], "Moln":["Dimma vid marken","Rök","Damm"], "Regnbåge":["Norrsken","Blixt","Halofenomen"],
+                "Rörligt vatten":["Stillastående vatten","Ånga","Is"], "Vattenhjul":["Väderkvarn","Solpanel","Ångmaskin"],
+                "Elektricitet":["Värme","Ljud","Ljus"], "Dammar":["Broar","Tunnlar","Fyrar"],
+                "Förnybar energi":["Fossil energi","Kärnkraft","Kol"],
+                "Observera":["Gissa","Glömma","Skynda"], "Ställa frågor":["Ge svar direkt","Avbryta","Låta bli"],
+                "Experiment":["Föreläsning","Prov","Läxa"], "Dra slutsats":["Ställa hypotes","Mäta","Observera"],
+                "Dokumentera":["Radera","Memorera","Ignorera"]
+            });
+        }
+        window._quizDist[subject] = D;
+        return D;
+    }
+    function maskQuizText(text, answer){
+        // Bygg sökord av svaret: hela svaret + varje delord längre än 3 tecken.
+        const words = [];
+        const full = answer.toLowerCase().replace(/[^a-zåäö0-9 ]/gi,'').trim();
+        if(full) words.push(full);
+        full.split(/\s+/).forEach(w=>{ if(w.length > 3) words.push(w); });
+        // Ta även ordstam (första 5 tecknen) för att fånga böjningar, t.ex. skugga/skuggor.
+        full.split(/\s+/).forEach(w=>{ if(w.length >= 5) words.push(w.slice(0,5)); });
+        const uniq = [...new Set(words)].sort((a,b)=>b.length-a.length);
+        let masked = text;
+        uniq.forEach(w=>{
+            // Ersätt hela ord som börjar med sökordet (böjningar), skiftlägesokänsligt.
+            const re = new RegExp('\\b'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[a-zåäö]*', 'gi');
+            masked = masked.replace(re, '_____');
+        });
+        return masked;
+    }
+    function buildQuizQuestions(items, shuffle, subject){
+        const dist = subject ? quizDistractors(subject) : {};
+        return shuffle(items).map(correct=>{
+            // Egna distraktorer för just detta begrepp först, blanda och ta tre.
+            let wrong = shuffle((dist[correct.t] || []).slice());
+            // Fyll på med andra rubriker i området om det behövs för att nå tre.
+            if(wrong.length < 3){
+                const extra = shuffle(items.filter(i=>i.t !== correct.t).map(i=>i.t))
+                    .filter(t => wrong.indexOf(t) === -1);
+                wrong = wrong.concat(extra);
+            }
+            wrong = wrong.slice(0,3);
+            const options = shuffle([correct.t].concat(wrong));
+            return { text: maskQuizText(correct.txt, correct.t), answer: correct.t, options: options };
+        });
+    }
+    // Gemensam quiz-vy för Biologi/Kemi. opts: {container, tileGridClass, cat, items, theme:{main,dark,soft}, onBack}
+    function renderSubjectQuiz(opts){
+        const { container, tileGridClass, cat, items, theme, onBack, subject } = opts;
+        const shuffle = arr => { const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+        const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const styleVars = `--q-main:${theme.main};--q-dark:${theme.dark};--q-soft:${theme.soft};`;
+        const questions = buildQuizQuestions(items, shuffle, subject);
+        let idx = 0, score = 0, answered = false;
+        container.className = tileGridClass; container.style.display = 'block';
+
+        function drawQuestion(){
+            answered = false;
+            const q = questions[idx];
+            container.innerHTML = `<div class="subj-quiz" style="${styleVars}">
+                <div class="fq-top">
+                    <button class="sq-back" type="button">← Tillbaka</button>
+                    <span class="fq-progress">Fråga ${idx+1} / ${questions.length}</span>
+                </div>
+                <div class="fq-tag">${esc(cat)} · Quiz</div>
+                <p class="fq-question">Vilket begrepp beskrivs här?<br>”${esc(q.text)}”</p>
+                <div class="fq-options"></div>
+                <div class="fq-feedback"></div>
+            </div>`;
+            container.querySelector('.sq-back').onclick = onBack;
+            const optWrap = container.querySelector('.fq-options');
+            const feedback = container.querySelector('.fq-feedback');
+            q.options.forEach(opt=>{
+                const btn = document.createElement('button');
+                btn.className='fq-opt'; btn.type='button'; btn.textContent=opt;
+                btn.onclick = ()=>{
+                    if(answered) return;
+                    answered = true;
+                    optWrap.querySelectorAll('.fq-opt').forEach(b=>{ b.disabled=true; if(b.textContent===q.answer) b.classList.add('correct'); });
+                    if(opt === q.answer){ score++; feedback.textContent='✅ Rätt!'; feedback.className='fq-feedback ok'; }
+                    else { btn.classList.add('wrong'); feedback.textContent='❌ Fel – rätt svar är markerat i grönt.'; feedback.className='fq-feedback no'; }
+                    const nextBtn = document.createElement('button');
+                    nextBtn.className='fq-next'; nextBtn.type='button';
+                    nextBtn.textContent = (idx < questions.length-1) ? 'Nästa fråga ▶' : 'Visa resultat ▶';
+                    nextBtn.onclick = ()=>{ if(idx < questions.length-1){ idx++; drawQuestion(); } else { drawResult(); } };
+                    container.querySelector('.subj-quiz').appendChild(nextBtn);
+                };
+                optWrap.appendChild(btn);
+            });
+        }
+        function drawResult(){
+            const pct = Math.round(score/questions.length*100);
+            let msg;
+            if(pct === 100) msg = 'Fantastiskt! Du kan hela området. 🌟';
+            else if(pct >= 60) msg = 'Bra jobbat! Repetera det som var klurigt.';
+            else msg = 'Bra försök – läs faktan igen och prova en gång till!';
+            container.innerHTML = `<div class="subj-quiz" style="${styleVars}"><div class="fq-result">
+                <div class="fq-tag">${esc(cat)} · Resultat</div>
+                <div class="fq-score">${score} / ${questions.length}</div>
+                <div class="fq-msg">${msg}</div>
+                <button class="fq-again" type="button">↻ Gör om quizet</button>
+                <div style="margin-top:10px;"><button class="sq-back" type="button">← Tillbaka till området</button></div>
+            </div></div>`;
+            container.querySelector('.fq-again').onclick = ()=> { idx=0; score=0; renderSubjectQuiz(opts); };
+            container.querySelector('.sq-back').onclick = onBack;
+        }
+        drawQuestion();
+    }
+    function createBiologiWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('BIOLOGI ÅK 4', 560, 'bio-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.classList.add('bio-body');
+        const bank = biologiBank();
+        const BEGREPP = 'Begrepp';
+        const cats = Object.keys(bank).concat([BEGREPP]);
+        let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
+        widget.dataset.bioCat = currentCat;
+
+        const tabsEl = document.createElement('div'); tabsEl.className = 'bio-tabs';
+        const gridEl = document.createElement('div'); gridEl.className = 'bio-grid';
+        const footEl = document.createElement('div'); footEl.className = 'bio-footnote';
+        body.appendChild(tabsEl); body.appendChild(gridEl); body.appendChild(footEl);
+
+        function renderTabs(){
+            tabsEl.innerHTML = '';
+            cats.forEach(cat=>{
+                const b = document.createElement('button');
+                b.className = 'bio-tab' + (cat===currentCat ? ' active' : '');
+                b.textContent = cat; b.type = 'button';
+                b.onclick = ()=>{ currentCat = cat; widget.dataset.bioCat = cat; renderTabs(); renderView(); saveBoardState(); };
+                tabsEl.appendChild(b);
+            });
+        }
+        function renderView(){
+            if(currentCat === BEGREPP) renderBegrepp();
+            else renderGrid();
+        }
+        function renderGrid(){
+            tabsEl.style.display='flex';
+            gridEl.className='bio-grid'; gridEl.style.display='grid';
+            footEl.style.display='block'; footEl.textContent='Klicka på ett ämne för att öppna faktan';
+            gridEl.innerHTML = '';
+            bank[currentCat].forEach(item=>{
+                const tile = document.createElement('div'); tile.className='bio-tile';
+                tile.innerHTML = `<span class="bio-emoji">${item.e}</span><span class="bio-lbl">${item.t}</span>`;
+                tile.onclick = ()=> renderDetail(item);
+                gridEl.appendChild(tile);
+            });
+            const quizTile = document.createElement('div');
+            quizTile.className = 'bio-tile subj-quiz-tile';
+            quizTile.style.cssText = '--q-main:#3cb45f;--q-dark:#2f9e51;';
+            quizTile.innerHTML = `<span class="bio-emoji">📝</span><span class="bio-lbl">Quiz</span>`;
+            quizTile.onclick = ()=> renderQuiz();
+            gridEl.appendChild(quizTile);
+        }
+        function renderQuiz(){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            renderSubjectQuiz({
+                container: gridEl, tileGridClass: 'bio-grid', cat: currentCat, items: bank[currentCat], subject: 'bio',
+                theme: { main:'#3cb45f', dark:'#2f9e51', soft:'#e8f7ec' },
+                onBack: ()=>{ tabsEl.style.display='flex'; footEl.style.display='block'; renderGrid(); }
+            });
+        }
+        function renderDetail(item){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            gridEl.className='bio-grid'; gridEl.style.display='block';
+            gridEl.innerHTML = `<div class="bio-detail">
+                <button class="bio-back" type="button">← Tillbaka</button>
+                <span class="bio-detail-emoji">${item.e}</span>
+                <div class="bio-tag">${currentCat}</div>
+                <h3>${item.t}</h3>
+                <p>${item.txt}</p>
+            </div>`;
+            gridEl.querySelector('.bio-back').onclick = ()=>{ renderGrid(); };
+        }
+        function renderBegrepp(){
+            tabsEl.style.display='flex';
+            gridEl.className='bio-begrepp'; gridEl.style.display='block';
+            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen i biologi åk 4';
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let html = '<input type="text" class="bio-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            html += '<div class="bio-begrepp-list">';
+            biologiBegrepp().forEach(b=>{
+                html += `<div class="bio-begrepp-item"><span class="bio-begrepp-ord">${esc(b.ord)}</span><span class="bio-begrepp-def">${esc(b.def)}</span></div>`;
+            });
+            html += '</div>';
+            gridEl.innerHTML = html;
+            const search = gridEl.querySelector('.bio-begrepp-search');
+            const items = gridEl.querySelectorAll('.bio-begrepp-item');
+            search.oninput = ()=>{
+                const q = search.value.trim().toLowerCase();
+                items.forEach(it=>{
+                    const txt = it.textContent.toLowerCase();
+                    it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
+                });
+            };
+        }
+        renderTabs(); renderView();
+    }
+
+    // ---- KEMI ÅK 4: ämnesflikar + ikonrutnät + faktapanel + begrepp ----
+    function kemiBank(){
+        if(window._kemiBank) return window._kemiBank;
+        window._kemiBank = {
+            "Materia & material": [
+                {e:"🧊", t:"Materia", txt:"Materia är allt som har massa och tar plats. Allt omkring oss – luft, vatten, stenar och vi själva – består av materia."},
+                {e:"🥤", t:"Material", txt:"Material är det som saker är gjorda av, till exempel trä, plast, metall, glas och tyg. Olika material har olika egenskaper."},
+                {e:"☁️", t:"Egenskaper", txt:"Egenskaper beskriver hur ett material är, till exempel hårt eller mjukt, tungt eller lätt, och om det leder värme eller ström."},
+                {e:"⚗️", t:"Atomer", txt:"Allt är uppbyggt av pyttesmå byggstenar som kallas atomer. De är så små att vi inte kan se dem, inte ens i ett vanligt mikroskop."},
+                {e:"🧲", t:"Magnetiskt", txt:"Vissa material, som järn, dras till en magnet. Andra material, som trä och plast, är inte magnetiska."}
+            ],
+            "Stater & faser": [
+                {e:"🧊", t:"Fast form", txt:"I fast form sitter partiklarna tätt och stilla. Ett fast ämne har en egen form, till exempel is eller en sten."},
+                {e:"💧", t:"Flytande form", txt:"I flytande form kan partiklarna glida runt. En vätska rinner och tar formen av det kärl den hälls i, till exempel vatten."},
+                {e:"💨", t:"Gasform", txt:"I gasform rör sig partiklarna fritt och sprider ut sig. En gas fyller hela utrymmet, till exempel vattenånga eller luft."},
+                {e:"🔥", t:"Smälta & stelna", txt:"När ett fast ämne värms kan det smälta och bli flytande. När det kyls igen kan det stelna och bli fast."},
+                {e:"♨️", t:"Koka & kondensera", txt:"När en vätska värms nog kokar den och blir gas. När gasen kyls kondenserar den och blir vätska igen."}
+            ],
+            "Blandningar": [
+                {e:"🥗", t:"Blandning", txt:"En blandning är när två eller flera ämnen blandas men inte reagerar med varandra, till exempel en fruktsallad."},
+                {e:"🌫️", t:"Slamning", txt:"En slamning är en grumlig blandning där små fasta partiklar svävar i en vätska, till exempel lera i vatten. Partiklarna kan sjunka till botten."},
+                {e:"🧂", t:"Lösning", txt:"En lösning är en klar blandning där ett ämne har löst sig helt i ett annat, till exempel salt eller socker i vatten."},
+                {e:"🫗", t:"Emulsion", txt:"En emulsion är en blandning av vätskor som egentligen inte vill blandas, till exempel olja och vatten som skakas ihop."},
+                {e:"⚗️", t:"Ren substans", txt:"En ren substans består bara av ett enda ämne, utan något annat inblandat, till exempel rent vatten eller rent guld."}
+            ],
+            "Lösningar": [
+                {e:"🧂", t:"Lösa upp", txt:"När ett ämne löser sig sprids dess små partiklar jämnt i vätskan så att man inte längre ser dem, till exempel salt i vatten."},
+                {e:"🥄", t:"Lösningsmedel", txt:"Lösningsmedlet är vätskan som löser upp ett annat ämne. Vatten är det vanligaste lösningsmedlet."},
+                {e:"🌡️", t:"Värme hjälper", txt:"I varmt vatten löser sig många ämnen snabbare och mer, till exempel socker som löser sig lättare i varmt än i kallt vatten."},
+                {e:"🧪", t:"Mättad lösning", txt:"En lösning är mättad när vätskan inte kan lösa upp mer av ämnet. Då lägger sig resten på botten."},
+                {e:"💎", t:"Avdunstning", txt:"Om vattnet i en saltlösning avdunstar blir saltet kvar. Så kan man få tillbaka det upplösta ämnet."}
+            ],
+            "Vatten": [
+                {e:"💧", t:"Vattnets former", txt:"Vatten kan vara fast (is), flytande (vatten) och gas (vattenånga). Det är samma ämne fast i olika former."},
+                {e:"🔄", t:"Vattnets kretslopp", txt:"Vatten avdunstar, bildar moln, faller som regn eller snö och rinner tillbaka till sjöar och hav – om och om igen."},
+                {e:"🧊", t:"Is flyter", txt:"En ovanlig egenskap hos vatten är att is flyter på vatten, eftersom is väger mindre än lika mycket flytande vatten."},
+                {e:"🌡️", t:"Fryser & kokar", txt:"Vatten fryser till is vid 0 grader och kokar och blir ånga vid 100 grader."},
+                {e:"🌊", t:"Lösningsmedel", txt:"Vatten kan lösa upp många ämnen, därför kallas det ofta för naturens lösningsmedel."}
+            ],
+            "Luft": [
+                {e:"💨", t:"Luft är materia", txt:"Luft syns inte men den finns och tar plats. Man märker den till exempel när det blåser eller när man blåser upp en ballong."},
+                {e:"🫧", t:"Gasblandning", txt:"Luft är en blandning av flera gaser, mest kväve och syre, men också lite koldioxid och andra gaser."},
+                {e:"🫁", t:"Syre", txt:"Syre är den gas i luften som djur och människor behöver för att kunna andas och leva."},
+                {e:"🌬️", t:"Koldioxid", txt:"Koldioxid är en gas som vi andas ut och som växterna behöver för sin fotosyntes."},
+                {e:"🎈", t:"Luft tar plats", txt:"Luft kan tryckas ihop och den tar plats, vilket man känner när man pumpar en cykel eller blåser upp en ballong."}
+            ],
+            "Ändringar i material": [
+                {e:"🧊", t:"Fysikalisk ändring", txt:"Vid en fysikalisk ändring byter ämnet form men är fortfarande samma ämne, till exempel när is smälter till vatten."},
+                {e:"🔥", t:"Kemisk ändring", txt:"Vid en kemisk ändring bildas ett helt nytt ämne, till exempel när ved brinner och blir aska och rök."},
+                {e:"🍞", t:"Ej återvändbart", txt:"En del ändringar går inte att göra ogjorda. Bränt bröd kan inte bli otostat igen – det har skett en kemisk förändring."},
+                {e:"💧", t:"Återvändbart", txt:"En del ändringar går att vända. Vatten som frusit till is kan smälta och bli vatten igen."},
+                {e:"🍎", t:"Rostning & mörknande", txt:"När järn rostar eller ett äpple mörknar i luften sker kemiska förändringar med hjälp av syre."}
+            ],
+            "Enkla reaktioner": [
+                {e:"🔥", t:"Förbränning", txt:"Vid förbränning reagerar ett ämne med syre och det bildas värme och ljus, till exempel när ett stearinljus brinner."},
+                {e:"🫧", t:"Gasbildning", txt:"Vid vissa reaktioner bildas gas som bubblor, till exempel när bakpulver och ättika blandas."},
+                {e:"🌈", t:"Färgändring", txt:"Att ett ämne byter färg kan vara ett tecken på att en kemisk reaktion har skett."},
+                {e:"🍞", t:"Jäsning", txt:"När deg jäser bildar jästen koldioxid som gör att degen växer. Det är en kemisk process."},
+                {e:"🦀", t:"Rost", txt:"När järn får vara i luft och vatten reagerar det med syre och bildar rost, ett nytt rödbrunt ämne."}
+            ],
+            "Syra & bas": [
+                {e:"🍋", t:"Syror", txt:"Syror smakar surt. Citron, ättika och äpple innehåller syror. Starka syror kan vara frätande."},
+                {e:"🧼", t:"Baser", txt:"Baser känns ofta hala och används i till exempel tvål och rengöringsmedel. Starka baser kan också vara frätande."},
+                {e:"⚖️", t:"Neutralt", txt:"Något som varken är surt eller basiskt kallas neutralt. Rent vatten är ett exempel på ett neutralt ämne."},
+                {e:"🧪", t:"Indikator", txt:"En indikator är ett ämne som byter färg och visar om något är surt eller basiskt, till exempel rödkålssaft."},
+                {e:"🦷", t:"Syra i vardagen", txt:"Syror finns i mycket vi äter. Sur mat och dryck kan påverka tänderna, därför är det bra att borsta tänderna."}
+            ],
+            "Upplösning": [
+                {e:"🧂", t:"Vad som löser sig", txt:"Salt och socker löser sig lätt i vatten, medan sand och olja inte gör det."},
+                {e:"🌡️", t:"Temperaturen", txt:"Ju varmare vattnet är, desto snabbare och mer brukar ett ämne kunna lösa sig."},
+                {e:"🥄", t:"Röra om", txt:"Om man rör om löser sig ämnet snabbare, eftersom partiklarna sprids ut fortare."},
+                {e:"🧪", t:"Kornstorlek", txt:"Finmalet socker löser sig snabbare än stora sockerbitar, eftersom vattnet når fler partiklar samtidigt."},
+                {e:"💎", t:"Få tillbaka ämnet", txt:"Genom att låta vattnet avdunsta kan man få tillbaka det upplösta ämnet, till exempel saltkristaller."}
+            ],
+            "Filtrering": [
+                {e:"⏳", t:"Filtrering", txt:"Filtrering används för att skilja fasta partiklar från en vätska, till exempel att sila bort sand ur vatten."},
+                {e:"📄", t:"Filter", txt:"Ett filter, som ett kaffefilter, har små hål. Vätskan rinner igenom medan de fasta bitarna fastnar."},
+                {e:"🫗", t:"Dekantering", txt:"Dekantering betyder att försiktigt hälla av den klara vätskan så att bottensatsen blir kvar i kärlet."},
+                {e:"🧲", t:"Sortera med magnet", txt:"Man kan skilja ut järn ur en blandning med hjälp av en magnet, eftersom bara järnet dras till magneten."},
+                {e:"💨", t:"Avdunstning", txt:"Genom att låta vätskan avdunsta kan man skilja ett upplöst ämne från vattnet, till exempel salt ur saltvatten."}
+            ],
+            "Vardagskemi": [
+                {e:"🧼", t:"Tvål & rengöring", txt:"Tvål och rengöringsmedel hjälper till att lösa upp fett och smuts så att det kan sköljas bort med vatten."},
+                {e:"🍞", t:"Matlagning", txt:"I köket sker massor av kemi, till exempel när deg jäser, mat steks eller vatten kokar."},
+                {e:"🔋", t:"Batterier", txt:"I ett batteri sker kemiska reaktioner som gör att det bildas elektrisk energi."},
+                {e:"🦷", t:"Tandkräm", txt:"Tandkräm innehåller ämnen som skyddar tänderna mot syror och hjälper till att hålla dem rena."},
+                {e:"🧴", t:"Farliga kemikalier", txt:"Vissa vardagskemikalier, som rengöringsmedel, kan vara farliga och ska hanteras försiktigt och förvaras rätt."}
+            ],
+            "Säkerhet": [
+                {e:"🥽", t:"Skyddsglasögon", txt:"Skyddsglasögon skyddar ögonen mot stänk när man gör experiment i kemin."},
+                {e:"🧤", t:"Handskar", txt:"Handskar skyddar händerna mot ämnen som kan vara frätande eller irriterande."},
+                {e:"⚠️", t:"Varningssymboler", txt:"På farliga ämnen finns varningssymboler som visar om något är till exempel frätande, giftigt eller brandfarligt."},
+                {e:"🔥", t:"Elden & värme", txt:"Var alltid försiktig med lågor och het utrustning. Håll långt hår och löst tyg borta från elden."},
+                {e:"👩‍🏫", t:"Fråga läraren", txt:"Gör aldrig egna experiment utan lov. Fråga alltid en vuxen eller läraren först och följ instruktionerna."}
+            ],
+            "Undersök & upptäck": [
+                {e:"🔍", t:"Observera", txt:"Att observera betyder att titta noga och lägga märke till vad som händer under ett experiment."},
+                {e:"❓", t:"Ställa frågor", txt:"En undersökning börjar ofta med en fråga, till exempel: Vad händer om jag blandar de här ämnena?"},
+                {e:"🧪", t:"Experiment", txt:"I ett experiment provar man något på ett bestämt sätt för att ta reda på hur det fungerar."},
+                {e:"📊", t:"Dra slutsats", txt:"Efter experimentet tänker man efter vad resultatet betyder och drar en slutsats av det man sett."},
+                {e:"📓", t:"Dokumentera", txt:"Att dokumentera betyder att skriva ner eller rita vad man gjorde och vad som hände, så man kommer ihåg det."}
+            ]
+        };
+        return window._kemiBank;
+    }
+    // Nyckelbegrepp/ordlista för kemi åk 4 – de viktigaste orden att kunna
+    function kemiBegrepp(){
+        if(window._kemiBegrepp) return window._kemiBegrepp;
+        window._kemiBegrepp = [
+            {ord:"Atom", def:"Den minsta byggstenen som allt omkring oss är uppbyggt av. Så liten att den inte går att se."},
+            {ord:"Avdunstning", def:"När en vätska långsamt blir gas, till exempel när vatten torkar bort i luften."},
+            {ord:"Bas", def:"Ett ämne som är motsatsen till en syra. Baser känns ofta hala och finns i tvål och rengöringsmedel."},
+            {ord:"Blandning", def:"När två eller flera ämnen blandas utan att bli ett nytt ämne, till exempel en fruktsallad."},
+            {ord:"Dekantering", def:"Att försiktigt hälla av den klara vätskan så att bottensatsen blir kvar."},
+            {ord:"Egenskap", def:"Något som beskriver ett material, till exempel hårt, mjukt, tungt eller magnetiskt."},
+            {ord:"Fast form", def:"Ett ämne med egen form där partiklarna sitter tätt, till exempel is eller sten."},
+            {ord:"Filtrering", def:"Att skilja fasta partiklar från en vätska med hjälp av ett filter."},
+            {ord:"Flytande form", def:"Ett ämne som rinner och tar formen av kärlet, till exempel vatten."},
+            {ord:"Förbränning", def:"När ett ämne reagerar med syre så att det bildas värme och ljus, som när något brinner."},
+            {ord:"Gas", def:"Ett ämne som sprider ut sig och fyller hela utrymmet, till exempel luft eller vattenånga."},
+            {ord:"Indikator", def:"Ett ämne som byter färg och visar om något är surt eller basiskt."},
+            {ord:"Kemisk reaktion", def:"När ämnen reagerar och det bildas ett eller flera nya ämnen."},
+            {ord:"Koka", def:"När en vätska värms så mycket att den snabbt blir gas; vatten kokar vid 100 grader."},
+            {ord:"Koldioxid", def:"En gas som vi andas ut och som växterna använder vid fotosyntesen."},
+            {ord:"Kondensera", def:"När en gas kyls och blir vätska igen, till exempel imma på ett fönster."},
+            {ord:"Lösning", def:"En klar blandning där ett ämne har löst sig helt i en vätska, till exempel salt i vatten."},
+            {ord:"Lösningsmedel", def:"Vätskan som löser upp ett annat ämne. Vatten är det vanligaste lösningsmedlet."},
+            {ord:"Materia", def:"Allt som har massa och tar plats. Allt omkring oss består av materia."},
+            {ord:"Material", def:"Det som saker är gjorda av, till exempel trä, plast, metall eller glas."},
+            {ord:"Mättad lösning", def:"En lösning som inte kan lösa upp mer av ämnet; resten lägger sig på botten."},
+            {ord:"Neutral", def:"Ett ämne som varken är surt eller basiskt, till exempel rent vatten."},
+            {ord:"Partikel", def:"En pytteliten del som ämnen är uppbyggda av; de rör sig olika i fast, flytande och gasform."},
+            {ord:"Ren substans", def:"Ett ämne som bara består av ett enda slags ämne, utan något inblandat."},
+            {ord:"Rost", def:"Ett nytt rödbrunt ämne som bildas när järn reagerar med syre och vatten."},
+            {ord:"Smälta", def:"När ett fast ämne värms och blir flytande, till exempel is som blir vatten."},
+            {ord:"Stelna", def:"När en vätska kyls och blir fast, till exempel vatten som fryser till is."},
+            {ord:"Syra", def:"Ett ämne som smakar surt, som finns i citron och ättika. Starka syror kan vara frätande."},
+            {ord:"Syre", def:"En gas i luften som djur och människor behöver för att andas och som behövs vid förbränning."},
+            {ord:"Vattnets kretslopp", def:"Hur vatten avdunstar, bildar moln, faller som nedbör och rinner tillbaka – om och om igen."}
+        ];
+        return window._kemiBegrepp;
+    }
+    function createKemiWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('KEMI ÅK 4', 560, 'kemi-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.classList.add('kemi-body');
+        const bank = kemiBank();
+        const BEGREPP = 'Begrepp';
+        const cats = Object.keys(bank).concat([BEGREPP]);
+        let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
+        widget.dataset.kemiCat = currentCat;
+
+        const tabsEl = document.createElement('div'); tabsEl.className = 'kemi-tabs';
+        const gridEl = document.createElement('div'); gridEl.className = 'kemi-grid';
+        const footEl = document.createElement('div'); footEl.className = 'kemi-footnote';
+        body.appendChild(tabsEl); body.appendChild(gridEl); body.appendChild(footEl);
+
+        function renderTabs(){
+            tabsEl.innerHTML = '';
+            cats.forEach(cat=>{
+                const b = document.createElement('button');
+                b.className = 'kemi-tab' + (cat===currentCat ? ' active' : '');
+                b.textContent = cat; b.type = 'button';
+                b.onclick = ()=>{ currentCat = cat; widget.dataset.kemiCat = cat; renderTabs(); renderView(); saveBoardState(); };
+                tabsEl.appendChild(b);
+            });
+        }
+        function renderView(){
+            if(currentCat === BEGREPP) renderBegrepp();
+            else renderGrid();
+        }
+        function renderGrid(){
+            tabsEl.style.display='flex';
+            gridEl.className='kemi-grid'; gridEl.style.display='grid';
+            footEl.style.display='block'; footEl.textContent='Klicka på ett ämne för att öppna faktan';
+            gridEl.innerHTML = '';
+            bank[currentCat].forEach(item=>{
+                const tile = document.createElement('div'); tile.className='kemi-tile';
+                tile.innerHTML = `<span class="kemi-emoji">${item.e}</span><span class="kemi-lbl">${item.t}</span>`;
+                tile.onclick = ()=> renderDetail(item);
+                gridEl.appendChild(tile);
+            });
+            const quizTile = document.createElement('div');
+            quizTile.className = 'kemi-tile subj-quiz-tile';
+            quizTile.style.cssText = '--q-main:#8b5cf6;--q-dark:#6d3fd4;';
+            quizTile.innerHTML = `<span class="kemi-emoji">📝</span><span class="kemi-lbl">Quiz</span>`;
+            quizTile.onclick = ()=> renderQuiz();
+            gridEl.appendChild(quizTile);
+        }
+        function renderQuiz(){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            renderSubjectQuiz({
+                container: gridEl, tileGridClass: 'kemi-grid', cat: currentCat, items: bank[currentCat], subject: 'kemi',
+                theme: { main:'#8b5cf6', dark:'#6d3fd4', soft:'#efe9fb' },
+                onBack: ()=>{ tabsEl.style.display='flex'; footEl.style.display='block'; renderGrid(); }
+            });
+        }
+        function renderDetail(item){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            gridEl.className='kemi-grid'; gridEl.style.display='block';
+            gridEl.innerHTML = `<div class="kemi-detail">
+                <button class="kemi-back" type="button">← Tillbaka</button>
+                <span class="kemi-detail-emoji">${item.e}</span>
+                <div class="kemi-tag">${currentCat}</div>
+                <h3>${item.t}</h3>
+                <p>${item.txt}</p>
+            </div>`;
+            gridEl.querySelector('.kemi-back').onclick = ()=>{ renderGrid(); };
+        }
+        function renderBegrepp(){
+            tabsEl.style.display='flex';
+            gridEl.className='kemi-begrepp'; gridEl.style.display='block';
+            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen i kemi åk 4';
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let html = '<input type="text" class="kemi-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            html += '<div class="kemi-begrepp-list">';
+            kemiBegrepp().forEach(b=>{
+                html += `<div class="kemi-begrepp-item"><span class="kemi-begrepp-ord">${esc(b.ord)}</span><span class="kemi-begrepp-def">${esc(b.def)}</span></div>`;
+            });
+            html += '</div>';
+            gridEl.innerHTML = html;
+            const search = gridEl.querySelector('.kemi-begrepp-search');
+            const items = gridEl.querySelectorAll('.kemi-begrepp-item');
+            search.oninput = ()=>{
+                const q = search.value.trim().toLowerCase();
+                items.forEach(it=>{
+                    const txt = it.textContent.toLowerCase();
+                    it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
+                });
+            };
+        }
+        renderTabs(); renderView();
+    }
+
+    // ---- FYSIK ÅK 4: ämnesflikar + begreppsbanner + ikonrutnät + faktapanel ----
+    function fysikBank(){
+        if(window._fysikBank) return window._fysikBank;
+        window._fysikBank = {
+            "Ljus & syn": [
+                {e:"💡", t:"Ljuskällor", txt:"En ljuskälla är något som skickar ut eget ljus, till exempel solen, en lampa eller en brasa. Månen är ingen ljuskälla – den speglar bara solljus."},
+                {e:"➡️", t:"Ljus färdas rakt", txt:"Ljus rör sig i raka linjer, väldigt snabbt. Det är därför en sak kan kasta en skarp skugga."},
+                {e:"🌑", t:"Skuggor", txt:"En skugga bildas när ett föremål är i vägen för ljuset så att ljuset inte kommer fram bakom det."},
+                {e:"🪞", t:"Spegling", txt:"När ljus träffar en spegel eller en blank yta studsar det tillbaka. Det kallas att ljuset speglas eller reflekteras."},
+                {e:"👁️", t:"Så ser vi", txt:"Vi ser saker när ljus studsar från dem och in i våra ögon. I mörker, utan ljus, kan vi inte se."}
+            ],
+            "Ljud & hörsel": [
+                {e:"🔊", t:"Ljud är vibrationer", txt:"Ljud uppstår när något skakar eller vibrerar, till exempel ett gitarrsträng eller våra stämband."},
+                {e:"〰️", t:"Ljudvågor", txt:"Ljudet färdas som vågor genom luften från det som låter till våra öron."},
+                {e:"👂", t:"Hörseln", txt:"Örat fångar upp ljudvågorna och skickar signaler till hjärnan, som tolkar dem som ljud."},
+                {e:"📢", t:"Starkt & svagt", txt:"Kraftiga vibrationer ger starka ljud, medan små vibrationer ger svaga ljud."},
+                {e:"🎵", t:"Ljust & mörkt", txt:"Snabba vibrationer ger ljusa, höga toner. Långsamma vibrationer ger mörka, låga toner."}
+            ],
+            "Krafter & rörelse": [
+                {e:"➡️", t:"Kraft", txt:"En kraft är ett drag eller en knuff som kan få saker att röra sig, stanna eller ändra riktning."},
+                {e:"🌍", t:"Tyngdkraft", txt:"Tyngdkraften drar allt nedåt mot jorden. Det är därför saker faller när du släpper dem."},
+                {e:"🛞", t:"Friktion", txt:"Friktion är en bromsande kraft som uppstår när två ytor gnids mot varandra. Den gör att saker saktar in."},
+                {e:"⚖️", t:"Balans", txt:"När krafterna på ett föremål är lika stora åt olika håll är det i balans och rör sig inte."},
+                {e:"🧲", t:"Drag & tryck", txt:"Man kan påverka en sak genom att dra i den eller trycka på den – båda är krafter."}
+            ],
+            "Magnetism": [
+                {e:"🧲", t:"Magneter", txt:"En magnet kan dra till sig vissa metaller, framför allt järn. Andra material påverkas inte."},
+                {e:"➕", t:"Nord- och sydpol", txt:"En magnet har två poler, en nordpol och en sydpol. Där är magnetens kraft som starkast."},
+                {e:"🤝", t:"Dra & stöta bort", txt:"Olika poler dras till varandra, men lika poler stöter bort varandra."},
+                {e:"🧭", t:"Kompass", txt:"En kompass har en liten magnet som pekar mot norr, så att man kan hitta rätt."},
+                {e:"🔗", t:"Magnetfält", txt:"Runt en magnet finns ett osynligt magnetfält där magnetens kraft verkar."}
+            ],
+            "Elektricitet": [
+                {e:"🔋", t:"Batteri", txt:"Ett batteri lagrar energi och kan driva till exempel en lampa eller en leksak."},
+                {e:"🔌", t:"Strömkrets", txt:"För att el ska flöda måste den gå runt i en sluten bana, en strömkrets, från batteriet och tillbaka."},
+                {e:"💡", t:"Ledare", txt:"Material som el lätt kan gå igenom, till exempel metall, kallas ledare."},
+                {e:"🧴", t:"Isolatorer", txt:"Material som el inte går igenom, till exempel plast och gummi, kallas isolatorer och skyddar oss."},
+                {e:"⚠️", t:"El kan vara farligt", txt:"El i vägguttag är stark och farlig. Man ska aldrig leka med eluttag eller sladdar."}
+            ],
+            "Värme & temperatur": [
+                {e:"🌡️", t:"Temperatur", txt:"Temperatur talar om hur varmt eller kallt något är. Vi mäter den med en termometer i grader."},
+                {e:"🔥", t:"Värme sprids", txt:"Värme flyttar sig alltid från något varmt till något kallare, tills de blir lika varma."},
+                {e:"📏", t:"Utvidgning", txt:"De flesta ämnen tar större plats när de värms och krymper när de kyls."},
+                {e:"🧥", t:"Isolering", txt:"Vissa material, som ull och luft, håller kvar värmen bra. Därför blir vi varma i en tjock tröja."},
+                {e:"🧊", t:"Fryser & smälter", txt:"När det blir kallt nog fryser vatten till is, och när det blir varmt smälter isen igen."}
+            ],
+            "Enkla maskiner": [
+                {e:"⚙️", t:"Enkla maskiner", txt:"Enkla maskiner är hjälpmedel som gör arbetet lättare, till exempel hävstång, hjul och lutande plan."},
+                {e:"🪜", t:"Lutande plan", txt:"En ramp eller ett lutande plan gör det lättare att flytta upp tunga saker än att lyfta dem rakt upp."},
+                {e:"🎋", t:"Hävstång", txt:"Med en hävstång, som en gungbräda eller ett spett, kan man lyfta tunga saker med mindre kraft."},
+                {e:"🛞", t:"Hjul", txt:"Hjul gör det lättare att flytta saker eftersom de rullar och minskar friktionen."},
+                {e:"🪝", t:"Talja & block", txt:"Med ett block och ett rep kan man lyfta tunga saker uppåt med mindre kraft."}
+            ],
+            "Material & egenskaper": [
+                {e:"🪵", t:"Olika material", txt:"Saker är gjorda av olika material, till exempel trä, metall, plast, glas och tyg."},
+                {e:"🪨", t:"Hårt & mjukt", txt:"En egenskap kan vara hur hårt eller mjukt ett material är, till exempel sten mot bomull."},
+                {e:"🧲", t:"Magnetiskt", txt:"En egenskap är om ett material dras till en magnet. Järn är magnetiskt, men trä är det inte."},
+                {e:"💡", t:"Leder ström & värme", txt:"Vissa material leder el och värme bra (metaller), andra dåligt (plast och trä)."},
+                {e:"🌊", t:"Flyter & sjunker", txt:"En del material flyter på vatten medan andra sjunker, beroende på materialet och formen."}
+            ],
+            "Luft & tryck": [
+                {e:"💨", t:"Luft finns", txt:"Luft syns inte men den finns och tar plats, vilket man märker när det blåser eller när man blåser upp en ballong."},
+                {e:"🎈", t:"Lufttryck", txt:"Luft trycker åt alla håll. Det kallas lufttryck och håller till exempel uppe en ballong."},
+                {e:"🪂", t:"Luftmotstånd", txt:"Luften bromsar saker som rör sig genom den. Det är därför en fallskärm faller långsamt."},
+                {e:"🌬️", t:"Komprimera luft", txt:"Luft går att trycka ihop, till exempel i en cykelpump eller ett cykeldäck."},
+                {e:"🎐", t:"Varm luft stiger", txt:"Varm luft är lättare än kall luft och stiger därför uppåt."}
+            ],
+            "Rörelse & fart": [
+                {e:"🏃", t:"Rörelse", txt:"Något rör sig när det byter plats. Vi kan beskriva åt vilket håll och hur snabbt det går."},
+                {e:"⚡", t:"Fart", txt:"Fart talar om hur snabbt något rör sig, till exempel hur långt en bil kör på en viss tid."},
+                {e:"🚀", t:"Snabbare & långsammare", txt:"Ett föremål kan öka farten (accelerera) eller minska farten (bromsa in)."},
+                {e:"↩️", t:"Ändra riktning", txt:"En kraft kan få något som rör sig att svänga och byta riktning."},
+                {e:"🛑", t:"Stanna", txt:"För att något ska stanna behövs en bromsande kraft, till exempel friktion."}
+            ],
+            "Energi": [
+                {e:"⚡", t:"Energi", txt:"Energi är det som behövs för att få saker att hända, till exempel att röra sig, lysa eller värma."},
+                {e:"🔋", t:"Olika energiformer", txt:"Energi finns i många former, till exempel rörelse, värme, ljus, ljud och el."},
+                {e:"🔄", t:"Energi byter form", txt:"Energi kan byta form men försvinner inte. I en lampa blir el till ljus och värme."},
+                {e:"☀️", t:"Solen", txt:"Solen är jordens viktigaste energikälla och ger oss ljus och värme."},
+                {e:"💪", t:"Energi i mat", txt:"Maten vi äter ger oss energi så att kroppen kan röra sig och hålla sig varm."}
+            ],
+            "Väder & vind": [
+                {e:"🌬️", t:"Vind", txt:"Vind är luft som rör sig. Den uppstår när luft flyttar sig från ett ställe till ett annat."},
+                {e:"🌡️", t:"Temperatur", txt:"Vädret handlar mycket om temperatur – om det är varmt eller kallt ute."},
+                {e:"🌧️", t:"Nederbörd", txt:"Regn, snö och hagel kallas nederbörd och faller ner från molnen."},
+                {e:"☁️", t:"Moln", txt:"Moln bildas av små vattendroppar högt upp i luften. Ur dem kan det komma regn eller snö."},
+                {e:"🌈", t:"Regnbåge", txt:"En regnbåge syns när solljus lyser genom regndroppar och delas upp i sina färger."}
+            ],
+            "Vattenkraft": [
+                {e:"💧", t:"Rörligt vatten", txt:"Strömmande och fallande vatten har rörelseenergi som kan användas för att utföra arbete."},
+                {e:"🎡", t:"Vattenhjul", txt:"Förr använde man vattenhjul, där strömmande vatten fick ett hjul att snurra och driva till exempel en kvarn."},
+                {e:"⚡", t:"Elektricitet", txt:"I ett vattenkraftverk får fallande vatten stora hjul (turbiner) att snurra, vilket bildar el."},
+                {e:"🏞️", t:"Dammar", txt:"En damm samlar upp vatten så att man kan styra hur mycket som rinner igenom och bildar el."},
+                {e:"♻️", t:"Förnybar energi", txt:"Vattenkraft är förnybar energi eftersom vattnets kretslopp fyller på vattnet igen och igen."}
+            ],
+            "Undersök & upptäck": [
+                {e:"🔍", t:"Observera", txt:"Att observera betyder att titta noga och lägga märke till vad som händer under en undersökning."},
+                {e:"❓", t:"Ställa frågor", txt:"En undersökning börjar ofta med en fråga, till exempel: Vad händer om jag gör så här?"},
+                {e:"🔬", t:"Experiment", txt:"I ett experiment provar man något på ett bestämt sätt för att ta reda på hur det fungerar."},
+                {e:"📊", t:"Dra slutsats", txt:"Efter experimentet tänker man efter vad resultatet betyder och drar en slutsats."},
+                {e:"📓", t:"Dokumentera", txt:"Att dokumentera betyder att skriva ner eller rita vad man gjorde och vad som hände."}
+            ]
+        };
+        return window._fysikBank;
+    }
+    // Nyckelbegrepp/ordlista för fysik åk 4 – de viktigaste orden att kunna
+    function fysikBegrepp(){
+        if(window._fysikBegrepp) return window._fysikBegrepp;
+        window._fysikBegrepp = [
+            {ord:"Balans", def:"När krafterna på ett föremål är lika stora åt olika håll, så att det inte rör sig."},
+            {ord:"Batteri", def:"En sak som lagrar energi och kan driva till exempel en lampa eller en leksak."},
+            {ord:"Elektricitet", def:"En energiform som kan få lampor att lysa och maskiner att fungera."},
+            {ord:"Energi", def:"Det som behövs för att få saker att hända, som att röra sig, lysa eller värma."},
+            {ord:"Friktion", def:"En bromsande kraft som uppstår när två ytor gnids mot varandra."},
+            {ord:"Fart", def:"Hur snabbt något rör sig, till exempel hur långt en bil kör på en viss tid."},
+            {ord:"Hävstång", def:"Ett hjälpmedel, som en gungbräda, som gör att man kan lyfta tungt med mindre kraft."},
+            {ord:"Isolator", def:"Ett material som el eller värme inte går igenom, till exempel plast eller gummi."},
+            {ord:"Kompass", def:"Ett verktyg med en liten magnet som pekar mot norr så att man hittar rätt."},
+            {ord:"Kraft", def:"Ett drag eller en knuff som kan få saker att röra sig, stanna eller byta riktning."},
+            {ord:"Ledare", def:"Ett material som el eller värme lätt går igenom, till exempel metall."},
+            {ord:"Ljudvåg", def:"Så färdas ljudet, som vågor genom luften från det som låter till örat."},
+            {ord:"Ljuskälla", def:"Något som skickar ut eget ljus, till exempel solen eller en lampa."},
+            {ord:"Lufttryck", def:"Att luften trycker åt alla håll, till exempel inuti en ballong."},
+            {ord:"Luftmotstånd", def:"Att luften bromsar saker som rör sig genom den, som en fallskärm."},
+            {ord:"Magnet", def:"En sak som kan dra till sig järn och som har en nordpol och en sydpol."},
+            {ord:"Magnetfält", def:"Det osynliga område runt en magnet där dess kraft verkar."},
+            {ord:"Nederbörd", def:"Regn, snö och hagel som faller ner från molnen."},
+            {ord:"Reflektion", def:"När ljus studsar tillbaka från en yta, till exempel en spegel."},
+            {ord:"Rörelse", def:"När något byter plats. Man kan beskriva åt vilket håll och hur snabbt."},
+            {ord:"Skugga", def:"Det mörka område som bildas när ett föremål är i vägen för ljuset."},
+            {ord:"Strömkrets", def:"Den slutna banan som elen går runt i, från batteriet och tillbaka."},
+            {ord:"Temperatur", def:"Hur varmt eller kallt något är, mätt med en termometer i grader."},
+            {ord:"Termometer", def:"Ett verktyg som mäter temperatur, alltså hur varmt eller kallt det är."},
+            {ord:"Turbin", def:"Ett stort hjul som snurrar av till exempel vatten och hjälper till att bilda el."},
+            {ord:"Tyngdkraft", def:"Kraften som drar allt nedåt mot jorden, så att saker faller."},
+            {ord:"Vibration", def:"När något skakar snabbt fram och tillbaka och kan skapa ljud."},
+            {ord:"Vattenkraft", def:"El som bildas av rörligt eller fallande vatten; en förnybar energikälla."},
+            {ord:"Vind", def:"Luft som rör sig från ett ställe till ett annat."},
+            {ord:"Energiform", def:"Ett sätt som energi finns i, till exempel ljus, värme, ljud, rörelse eller el."}
+        ];
+        return window._fysikBegrepp;
+    }
+    function createFysikWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('FYSIK ÅK 4', 560, 'fysik-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.classList.add('fysik-body');
+        const bank = fysikBank();
+        const BEGREPP = 'Begrepp';
+        const cats = Object.keys(bank).concat([BEGREPP]);
+        let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
+        widget.dataset.fysikCat = currentCat;
+
+        const tabsEl = document.createElement('div'); tabsEl.className = 'fysik-tabs';
+        const gridEl = document.createElement('div'); gridEl.className = 'fysik-grid';
+        const footEl = document.createElement('div'); footEl.className = 'fysik-footnote';
+        body.appendChild(tabsEl); body.appendChild(gridEl); body.appendChild(footEl);
+
+        function renderTabs(){
+            tabsEl.innerHTML = '';
+            cats.forEach(cat=>{
+                const b = document.createElement('button');
+                b.className = 'fysik-tab' + (cat===currentCat ? ' active' : '');
+                b.textContent = cat; b.type = 'button';
+                b.onclick = ()=>{ currentCat = cat; widget.dataset.fysikCat = cat; renderTabs(); renderView(); saveBoardState(); };
+                tabsEl.appendChild(b);
+            });
+        }
+        function renderView(){
+            if(currentCat === BEGREPP) renderBegrepp();
+            else renderGrid();
+        }
+        function renderGrid(){
+            tabsEl.style.display='flex';
+            gridEl.className='fysik-grid'; gridEl.style.display='grid';
+            footEl.style.display='block'; footEl.textContent='Klicka på ett ämne för att öppna faktan';
+            gridEl.innerHTML = '';
+            bank[currentCat].forEach(item=>{
+                const tile = document.createElement('div'); tile.className='fysik-tile';
+                tile.innerHTML = `<span class="fysik-emoji">${item.e}</span><span class="fysik-lbl">${item.t}</span>`;
+                tile.onclick = ()=> renderDetail(item);
+                gridEl.appendChild(tile);
+            });
+            // Sjätte ruta: Quiz för det aktiva området
+            const quizTile = document.createElement('div');
+            quizTile.className = 'fysik-tile fysik-quiz-tile';
+            quizTile.innerHTML = `<span class="fysik-emoji">📝</span><span class="fysik-lbl">Quiz</span>`;
+            quizTile.onclick = ()=> renderQuiz();
+            gridEl.appendChild(quizTile);
+        }
+        function renderDetail(item){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            gridEl.className='fysik-grid'; gridEl.style.display='block';
+            gridEl.innerHTML = `<div class="fysik-detail">
+                <button class="fysik-back" type="button">← Tillbaka</button>
+                <span class="fysik-detail-emoji">${item.e}</span>
+                <div class="fysik-tag">${currentCat}</div>
+                <h3>${item.t}</h3>
+                <p>${item.txt}</p>
+            </div>`;
+            gridEl.querySelector('.fysik-back').onclick = ()=>{ renderGrid(); };
+        }
+        function renderQuiz(){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            gridEl.className='fysik-grid'; gridEl.style.display='block';
+            const shuffle = arr => { const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const items = bank[currentCat];
+            const questions = buildQuizQuestions(items, shuffle, 'fysik');
+            let idx = 0, score = 0, answered = false;
+
+            function drawQuestion(){
+                answered = false;
+                const q = questions[idx];
+                gridEl.innerHTML = `<div class="fysik-quiz">
+                    <div class="fq-top">
+                        <button class="fysik-back" type="button">← Tillbaka</button>
+                        <span class="fq-progress">Fråga ${idx+1} / ${questions.length}</span>
+                    </div>
+                    <div class="fq-tag">${esc(currentCat)} · Quiz</div>
+                    <p class="fq-question">Vilket begrepp beskrivs här?<br>”${esc(q.text)}”</p>
+                    <div class="fq-options"></div>
+                    <div class="fq-feedback"></div>
+                </div>`;
+                gridEl.querySelector('.fysik-back').onclick = ()=>{ renderGrid(); };
+                const optWrap = gridEl.querySelector('.fq-options');
+                const feedback = gridEl.querySelector('.fq-feedback');
+                q.options.forEach(opt=>{
+                    const btn = document.createElement('button');
+                    btn.className='fq-opt'; btn.type='button'; btn.textContent=opt;
+                    btn.onclick = ()=>{
+                        if(answered) return;
+                        answered = true;
+                        const allBtns = optWrap.querySelectorAll('.fq-opt');
+                        allBtns.forEach(b=>{ b.disabled=true; if(b.textContent===q.answer) b.classList.add('correct'); });
+                        if(opt === q.answer){
+                            score++;
+                            feedback.textContent = '✅ Rätt!';
+                            feedback.className = 'fq-feedback ok';
+                        } else {
+                            btn.classList.add('wrong');
+                            feedback.textContent = '❌ Fel – rätt svar är markerat i grönt.';
+                            feedback.className = 'fq-feedback no';
+                        }
+                        const nextBtn = document.createElement('button');
+                        nextBtn.className='fq-next'; nextBtn.type='button';
+                        nextBtn.textContent = (idx < questions.length-1) ? 'Nästa fråga ▶' : 'Visa resultat ▶';
+                        nextBtn.onclick = ()=>{ if(idx < questions.length-1){ idx++; drawQuestion(); } else { drawResult(); } };
+                        gridEl.querySelector('.fysik-quiz').appendChild(nextBtn);
+                    };
+                    optWrap.appendChild(btn);
+                });
+            }
+            function drawResult(){
+                const pct = Math.round(score/questions.length*100);
+                let msg;
+                if(pct === 100) msg = 'Fantastiskt! Du kan hela området. 🌟';
+                else if(pct >= 60) msg = 'Bra jobbat! Repetera det som var klurigt.';
+                else msg = 'Bra försök – läs faktan igen och prova en gång till!';
+                gridEl.innerHTML = `<div class="fysik-quiz"><div class="fq-result">
+                    <div class="fq-tag">${esc(currentCat)} · Resultat</div>
+                    <div class="fq-score">${score} / ${questions.length}</div>
+                    <div class="fq-msg">${msg}</div>
+                    <button class="fq-again" type="button">↻ Gör om quizet</button>
+                    <div style="margin-top:10px;"><button class="fysik-back" type="button">← Tillbaka till området</button></div>
+                </div></div>`;
+                gridEl.querySelector('.fq-again').onclick = ()=> renderQuiz();
+                gridEl.querySelector('.fysik-back').onclick = ()=>{ renderGrid(); };
+            }
+            drawQuestion();
+        }
+        function renderBegrepp(){
+            tabsEl.style.display='flex';
+            gridEl.className='fysik-begrepp'; gridEl.style.display='block';
+            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen i fysik åk 4';
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let html = '<input type="text" class="fysik-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            html += '<div class="fysik-begrepp-list">';
+            fysikBegrepp().forEach(b=>{
+                html += `<div class="fysik-begrepp-item"><span class="fysik-begrepp-ord">${esc(b.ord)}</span><span class="fysik-begrepp-def">${esc(b.def)}</span></div>`;
+            });
+            html += '</div>';
+            gridEl.innerHTML = html;
+            const search = gridEl.querySelector('.fysik-begrepp-search');
+            const items = gridEl.querySelectorAll('.fysik-begrepp-item');
+            search.oninput = ()=>{
+                const q = search.value.trim().toLowerCase();
+                items.forEach(it=>{
+                    const txt = it.textContent.toLowerCase();
+                    it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
+                });
+            };
+        }
+        renderTabs(); renderView();
+    }
+
     // ---- SYNONYMJAKTEN: ett ord i mitten, klassen jagar synonymer ----
     // Utmaningsord i tre nivåer med inbyggda facit-synonymer. Läraren fyller
     // på klassens förslag runt ordet; ”Visa förslag” avslöjar de som saknas.
@@ -4034,9 +5159,9 @@
         if(config===undefined) config=null;
         const body = createWidget('STAVNINGSKAMPEN', 380, 'sk-widget mk-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu mk-ctrl'><select class='editor-select sk-lista'></select><select class='editor-select sk-mal'><option value='5'>Först till 5</option><option value='10'>Först till 10</option><option value='15'>Först till 15</option><option value='20'>Först till 20</option></select><select class='editor-select sk-tid'><option value='av'>⏱ Ingen timer</option><option value='10'>⏱ 10 sek</option><option value='20'>⏱ 20 sek</option><option value='30'>⏱ 30 sek</option><option value='60'>⏱ 60 sek</option></select></div><div class='mk-lag-rad'></div><div class='mk-tur'></div><div class='mk-timer' style='display:none;'><div class='mk-timer-spar'><div class='mk-timer-bar'></div></div><span class='mk-timer-text'></span></div><div class='sk-ord' title='Klicka för att avslöja nästa bokstav'></div><div class='sk-hint'>Klicka på ordet = nästa bokstav avslöjas</div><div class='mk-doma'><button class='btn btn-secondary sk-lasupp'>🔊 Läs upp</button><button class='mk-ratt'>✔ Rätt (+1)</button><button class='mk-fel'>✘ Fel</button></div><div class='hover-menu' style='display:flex; gap:6px; margin-top:8px;'><button class='btn btn-secondary sk-visa' style='flex:1;'>Visa hela ordet</button><button class='btn btn-secondary sk-ny-omgang' style='flex:1;'>Ny omgång</button></div><div class='mk-info'>Fel svar (utan avslöjat ord) = samma ord går vidare till nästa lag</div>`;
+        body.innerHTML = `<div class='hover-menu mk-ctrl'><select class='editor-select sk-lista'></select><select class='editor-select sk-mal'><option value='5'>Först till 5</option><option value='10'>Först till 10</option><option value='15'>Först till 15</option><option value='20'>Först till 20</option></select><select class='editor-select sk-tid'><option value='av'>⏱ Ingen timer</option><option value='10'>⏱ 10 sek</option><option value='20'>⏱ 20 sek</option><option value='30'>⏱ 30 sek</option><option value='60'>⏱ 60 sek</option></select></div><div class='mk-lag-rad'></div><div class='mk-tur'></div><div class='mk-timer' style='display:none;'><div class='mk-timer-spar'><div class='mk-timer-bar'></div></div><span class='mk-timer-text'></span></div><div class='sk-ord' title='Klicka för att avslöja nästa bokstav'></div><div class='sk-hint'>🔊 Läs upp startar klockan · klick på ordet avslöjar nästa bokstav</div><div class='mk-doma'><button class='btn btn-secondary sk-lasupp'>🔊 Läs upp</button><button class='mk-ratt'>✔ Rätt (+1)</button><button class='mk-fel'>✘ Fel</button></div><div class='hover-menu' style='display:flex; gap:6px; margin-top:8px;'><button class='btn btn-secondary sk-visa' style='flex:1;'>Visa hela ordet</button><button class='btn btn-secondary sk-ny-omgang' style='flex:1;'>Ny omgång</button></div><div class='mk-info'>Fel svar (utan avslöjat ord) = samma ord går vidare till nästa lag</div>`;
         const listaSel=body.querySelector('.sk-lista'), malSel=body.querySelector('.sk-mal'), tidSel=body.querySelector('.sk-tid'), lagRad=body.querySelector('.mk-lag-rad'), turEl=body.querySelector('.mk-tur'), ordEl=body.querySelector('.sk-ord'), timerEl=body.querySelector('.mk-timer'), barEl=body.querySelector('.mk-timer-bar'), timerTxt=body.querySelector('.mk-timer-text');
-        let teams=[{name:'Lag 1',p:0},{name:'Lag 2',p:0}], turn=0, ord='', avslojade=0, ko=[], tickId=null, deadline=0, timeoutLage=false;
+        let teams=[{name:'Lag 1',p:0},{name:'Lag 2',p:0}], turn=0, ord='', avslojade=0, ko=[], tickId=null, deadline=0, timeoutLage=false, harLastsUpp=false;
         function fyllListor(){
             listaSel.innerHTML=`<option value='latt'>Stavning – Lätt</option><option value='medel'>Stavning – Medel</option><option value='svar'>Stavning – Svår</option>`;
             try{ const l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; Object.keys(l).forEach(k=>{ const o=document.createElement('option'); o.value='egen:'+k; o.textContent='📄 '+k; listaSel.appendChild(o); }); }catch(e){}
@@ -4059,8 +5184,18 @@
         }
         function nastaOrd(){
             if(!ko.length){ ko=hamtaOrd().slice(); for(let i=ko.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ko[i],ko[j]]=[ko[j],ko[i]]; } }
-            ord = ko.pop() || ''; avslojade=0;
-            renderOrd(); startaTimer();
+            ord = ko.pop() || ''; avslojade=0; harLastsUpp=false;
+            renderOrd();
+            uppdateraVisaKnapp();
+            stoppaTimer(); timerEl.style.display='none'; // klockan startar först när ordet läses upp
+        }
+        function uppdateraVisaKnapp(){
+            const visaBtn = body.querySelector('.sk-visa');
+            if(!visaBtn) return;
+            visaBtn.disabled = !harLastsUpp;
+            visaBtn.style.opacity = harLastsUpp ? '1' : '0.45';
+            visaBtn.style.cursor = harLastsUpp ? 'pointer' : 'not-allowed';
+            visaBtn.title = harLastsUpp ? '' : 'Läs upp ordet först innan du visar hela stavningen';
         }
         function renderOrd(nyssIdx){
             ordEl.innerHTML='';
@@ -4072,11 +5207,17 @@
             });
         }
         ordEl.onclick=()=>{ if(avslojade<ord.length){ avslojade++; while(ord[avslojade-1]===' ' && avslojade<ord.length) avslojade++; renderOrd(avslojade-1); if(heltAvslojat()){ stoppaTimer(); timerEl.style.display='none'; } } };
-        body.querySelector('.sk-visa').onclick=()=>{ avslojade=ord.length; renderOrd(); stoppaTimer(); timerEl.style.display='none'; };
+        body.querySelector('.sk-visa').onclick=()=>{
+            if(!harLastsUpp) return; // visar bara det ord som faktiskt lästs upp – aldrig ett kommande, oläst ord
+            avslojade=ord.length; renderOrd(); stoppaTimer(); timerEl.style.display='none';
+        };
         const heltAvslojat=()=> avslojade>=ord.length;
         body.querySelector('.sk-lasupp').onclick=()=>{
             try{ const u=new SpeechSynthesisUtterance(ord); u.lang='sv-SE'; u.rate=0.8; speechSynthesis.cancel(); speechSynthesis.speak(u); }
             catch(e){ customAlert('Talsyntes stöds inte i den här webbläsaren.', '🔊'); }
+            harLastsUpp=true; uppdateraVisaKnapp();
+            // Nedräkningen startar NÄR ordet läses upp – men en omlyssning nollställer inte klockan
+            if(!tickId && !heltAvslojat() && !timeoutLage) startaTimer();
         };
         function renderLag(){
             syncData(); lagRad.innerHTML='';
@@ -4143,14 +5284,14 @@
             if(timeoutLage) return;
             const behall = !heltAvslojat(); // stöld: samma ord vidare om stavningen inte visats helt
             nastaLag();
-            if(behall){ renderOrd(); startaTimer(); }
+            if(behall){ renderOrd(); stoppaTimer(); timerEl.style.display='none'; } // ny tid först vid nästa Läs upp
             else nastaOrd();
             saveBoardState();
         };
         body.querySelector('.sk-ny-omgang').onclick=()=>{ teams.forEach(l=>l.p=0); turn=0; ko=[]; renderLag(); nastaOrd(); saveBoardState(); };
         listaSel.onchange=()=>{ ko=[]; syncData(); nastaOrd(); saveBoardState(); };
         malSel.onchange=()=>{ syncData(); saveBoardState(); };
-        tidSel.onchange=()=>{ syncData(); startaTimer(); saveBoardState(); };
+        tidSel.onchange=()=>{ syncData(); if(tickId){ startaTimer(); } else { stoppaTimer(); timerEl.style.display='none'; } saveBoardState(); };
         renderLag(); nastaOrd();
     }
 
