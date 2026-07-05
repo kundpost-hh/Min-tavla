@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -190,8 +191,10 @@
             <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
             <button class="tool-btn" onclick="createPracticeClock()"><div class="icon">🕐</div><div class="label">Övningsklocka</div></button>
             <button class="tool-btn" onclick="createBiologiWidget()"><div class="icon">🧬</div><div class="label">Biologi</div></button>
+            <button class="tool-btn" onclick="createFroWidget()"><div class="icon">🌱</div><div class="label">Frö till frö</div></button>
             <button class="tool-btn" onclick="createKemiWidget()"><div class="icon">⚗️</div><div class="label">Kemi</div></button>
             <button class="tool-btn" onclick="createFysikWidget()"><div class="icon">🔭</div><div class="label">Fysik</div></button>
+            <button class="tool-btn" onclick="createTeknikWidget()"><div class="icon">⚙️</div><div class="label">Teknik</div></button>
             <button class="tool-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
             <button class="tool-btn" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
             <button class="tool-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
@@ -739,6 +742,43 @@
     .bio-begrepp-ord{ font-weight:800; color:#2f9e51; font-size:14px; }
     .bio-begrepp-def{ color:#3c463f; font-size:13px; line-height:1.45; }
 
+    /* ---- FRÅN FRÖ TILL FRÖ ---- */
+    .fro-widget .widget-header{ background:linear-gradient(135deg,#5bb36a,#3e8e4f) !important; }
+    .fro-body{ padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+    .fro-tabs{ display:flex; flex-wrap:wrap; gap:8px; }
+    .fro-tab{ border:1px solid #dce7d6; background:#f3f8f0; color:#2c3a2a; padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s ease; white-space:nowrap; font-family:inherit; }
+    .fro-tab:hover{ border-color:#5bb36a; }
+    .fro-tab.active{ background:#5bb36a; border-color:#5bb36a; color:#fff; box-shadow:0 6px 14px -6px rgba(91,179,106,.6); }
+    .fro-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:7px; }
+    .fro-tile{ background:#f3f8f0; border:1px solid #dce7d6; border-radius:13px; aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease; padding:3px; text-align:center; }
+    .fro-tile:hover{ transform:translateY(-2px); border-color:#5bb36a; box-shadow:0 10px 20px -12px rgba(91,179,106,.5); }
+    .fro-tile .fro-emoji{ font-size:23px; }
+    .fro-tile .fro-lbl{ font-size:9px; font-weight:700; color:#5a6b56; line-height:1.15; }
+    .fro-footnote{ text-align:center; color:#8a9a86; font-size:12.5px; font-style:italic; }
+    .fro-detail{ background:#fff; border:1px solid #dce7d6; border-radius:16px; padding:16px; position:relative; }
+    .fro-detail .fro-back{ border:none; background:#f3f8f0; color:#2c3a2a; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .fro-detail .fro-detail-emoji{ font-size:36px; display:block; margin-bottom:4px; }
+    .fro-detail .fro-tag{ display:inline-block; background:#e6f4e2; color:#3e8e4f; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+    .fro-detail h3{ margin:0 0 8px; color:#3e8e4f; font-size:17px; }
+    .fro-detail p{ margin:0; color:#38402f; font-size:14px; line-height:1.5; }
+    @media (max-width:480px){ .fro-grid{ grid-template-columns:repeat(3, 1fr); } }
+    .fro-begrepp-search{ width:100%; box-sizing:border-box; border:1px solid #dce7d6; border-radius:12px; padding:9px 12px; font-size:13px; font-family:inherit; margin-bottom:10px; outline:none; }
+    .fro-begrepp-search:focus{ border-color:#5bb36a; }
+    .fro-begrepp-list{ display:flex; flex-direction:column; gap:6px; max-height:340px; overflow:auto; }
+    .fro-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f3f8f0; border:1px solid #dce7d6; border-left:4px solid #5bb36a; border-radius:12px; padding:9px 12px; }
+    .fro-begrepp-ord{ font-weight:800; color:#3e8e4f; font-size:14px; }
+    .fro-begrepp-def{ color:#38402f; font-size:13px; line-height:1.45; }
+    /* Livscykel-vy */
+    .fro-cycle{ background:#fff; border:1px solid #dce7d6; border-radius:16px; padding:18px 16px; }
+    .fro-cycle h3{ margin:0 0 14px; color:#3e8e4f; font-size:16px; text-align:center; }
+    .fro-cycle-flow{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px; }
+    .fro-cycle-step{ display:flex; flex-direction:column; align-items:center; gap:4px; background:#f3f8f0; border:1px solid #dce7d6; border-radius:12px; padding:10px 12px; min-width:78px; }
+    .fro-cycle-step .fcs-emoji{ font-size:24px; }
+    .fro-cycle-step .fcs-lbl{ font-size:11px; font-weight:800; color:#3e8e4f; text-align:center; }
+    .fro-cycle-arrow{ color:#8fbf86; font-size:18px; font-weight:800; }
+    .fro-quiz-tile{ background:linear-gradient(135deg,#5bb36a,#3e8e4f) !important; border-color:#5bb36a !important; }
+    .fro-quiz-tile .fro-lbl{ color:#fff !important; }
+
     /* ---- KEMI ÅK 4 ---- */
     .kemi-widget .widget-header{ background:linear-gradient(135deg,#8b5cf6,#6d3fd4) !important; }
     .kemi-body{ padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
@@ -844,6 +884,34 @@
     .subj-quiz .fq-result .fq-msg{ font-size:15px; color:#3c3c44; margin-bottom:16px; }
     .subj-quiz .fq-result .fq-again{ border:none; background:var(--q-main); color:#fff; font-weight:700; font-size:14px; padding:10px 20px; border-radius:12px; cursor:pointer; font-family:inherit; }
     .subj-quiz .fq-result .fq-again:hover{ background:var(--q-dark); }
+    .subj-quiz-tile .teknik-lbl{ color:#fff !important; }
+
+    /* ---- TEKNIK ÅK 4 ---- */
+    .teknik-widget .widget-header{ background:linear-gradient(135deg,#f59e0b,#d97706) !important; }
+    .teknik-body{ padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+    .teknik-tabs{ display:flex; flex-wrap:wrap; gap:8px; }
+    .teknik-tab{ border:1px solid #ece3d3; background:#faf6ef; color:#3a3226; padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s ease; white-space:nowrap; font-family:inherit; }
+    .teknik-tab:hover{ border-color:#f59e0b; }
+    .teknik-tab.active{ background:#f59e0b; border-color:#f59e0b; color:#fff; box-shadow:0 6px 14px -6px rgba(245,158,11,.6); }
+    .teknik-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:7px; }
+    .teknik-tile{ background:#faf6ef; border:1px solid #ece3d3; border-radius:13px; aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease; padding:3px; text-align:center; }
+    .teknik-tile:hover{ transform:translateY(-2px); border-color:#f59e0b; box-shadow:0 10px 20px -12px rgba(245,158,11,.5); }
+    .teknik-tile .teknik-emoji{ font-size:23px; }
+    .teknik-tile .teknik-lbl{ font-size:9px; font-weight:700; color:#6b5f4a; line-height:1.15; }
+    .teknik-footnote{ text-align:center; color:#9a8e78; font-size:12.5px; font-style:italic; }
+    .teknik-detail{ background:#fff; border:1px solid #ece3d3; border-radius:16px; padding:16px; position:relative; }
+    .teknik-detail .teknik-back{ border:none; background:#faf6ef; color:#3a3226; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .teknik-detail .teknik-detail-emoji{ font-size:36px; display:block; margin-bottom:4px; }
+    .teknik-detail .teknik-tag{ display:inline-block; background:#fdf0d9; color:#b45309; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+    .teknik-detail h3{ margin:0 0 8px; color:#b45309; font-size:17px; }
+    .teknik-detail p{ margin:0; color:#3f382c; font-size:14px; line-height:1.5; }
+    @media (max-width:480px){ .teknik-grid{ grid-template-columns:repeat(3, 1fr); } }
+    .teknik-begrepp-search{ width:100%; box-sizing:border-box; border:1px solid #ece3d3; border-radius:12px; padding:9px 12px; font-size:13px; font-family:inherit; margin-bottom:10px; outline:none; }
+    .teknik-begrepp-search:focus{ border-color:#f59e0b; }
+    .teknik-begrepp-list{ display:flex; flex-direction:column; gap:6px; max-height:340px; overflow:auto; }
+    .teknik-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#faf6ef; border:1px solid #ece3d3; border-left:4px solid #f59e0b; border-radius:12px; padding:9px 12px; }
+    .teknik-begrepp-ord{ font-weight:800; color:#b45309; font-size:14px; }
+    .teknik-begrepp-def{ color:#3f382c; font-size:13px; line-height:1.45; }
     @keyframes alpha-dance { 0% { transform: scale(1.5) rotate(0deg); } 25% { transform: scale(1.55) rotate(-13deg); } 50% { transform: scale(1.65) rotate(0deg); } 75% { transform: scale(1.55) rotate(13deg); } 100% { transform: scale(1.5) rotate(0deg); } }
 
     /* ---- KORSORD ---- */
@@ -1243,6 +1311,7 @@
     .rakna-ans { min-width:64px; padding:2px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; cursor:pointer; user-select:none; }
     .rakna-ans:hover { background:#ffd98f; }
     .rakna-ans.revealed { background:#d9f2df; color:#1f7a37; cursor:default; }
+    .rakna-ans .enh-mal { color:#c98a2e; font-weight:800; margin-left:2px; }
     .rakna-next { width:100%; margin-top:10px; }
     .rakna-count { text-align:center; font-size:12px; font-weight:700; color:#b0b0b8; margin-top:8px; }
 
@@ -1276,6 +1345,11 @@
     .pengar-knappar .btn { flex:1; }
     .pengar-vaxel { margin-top:10px; background:#fff7e6; border:1.5px dashed #ffcc66; border-radius:12px; padding:10px 12px; font-size:15px; font-weight:700; color:#333; text-align:center; }
     .pengar-vaxel .rakna-ans { display:inline-block; font-size:17px; margin-left:6px; }
+    .pengar-upg-ctrl { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+    .pengar-upg-ctrl select { flex:1; min-width:120px; }
+    .pengar-vaxel .pengar-fraga { display:block; margin-bottom:8px; line-height:1.45; }
+    .pengar-vaxel .pengar-ny { margin-top:10px; border:none; background:#f2b234; color:#7a5200; font-weight:800; font-size:13px; padding:7px 14px; border-radius:10px; cursor:pointer; font-family:inherit; }
+    .pengar-vaxel .pengar-ny:hover { background:#e0a020; }
     .pengar-tips { font-size:11px; color:#b0b0b8; font-weight:600; text-align:center; margin-top:4px; }
 
     /* ---- GEOMETRI ---- */
@@ -1289,6 +1363,13 @@
     .geo-fact .rakna-ans { font-size:14px; padding:0 10px; }
     .geo-formel { font-size:10.5px; color:#b0b0b8; font-weight:600; }
     .geo-fact .rakna-ans.geo-utrakning { font-size:12.5px; padding:2px 8px; line-height:1.35; display:inline-block; }
+    .geo-formler { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+    .geo-formel-kort { display:flex; align-items:baseline; gap:8px; background:#eef4ff; border-left:4px solid #007aff; border-radius:10px; padding:8px 12px; }
+    .geo-formel-kort.area { background:#eaf7ee; border-left-color:#34c759; }
+    .geo-formel-kort .gf-namn { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#5a6b86; min-width:66px; }
+    .geo-formel-kort.area .gf-namn { color:#3e7d52; }
+    .geo-formel-kort .gf-formel { font-size:15px; font-weight:800; color:#1a1a1f; }
+    .geo-formel-kort .gf-insatt { font-size:12.5px; font-weight:700; color:#8e8e93; margin-left:auto; white-space:nowrap; }
 
     /* ---- ENHETSOMVANDLARE ---- */
     .enh-ctrl { display:flex; gap:6px; margin-bottom:8px; }
@@ -1998,8 +2079,10 @@
                 else if (type === 'MATTEKAMP') { try{ state.data = JSON.parse(w.dataset.mattekamp || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'VERB') { try{ state.data = JSON.parse(w.dataset.verb || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BIOLOGI ÅK 4') { state.data.cat = w.dataset.bioCat || 'Djur & växter'; }
+                else if (type === 'FRÅN FRÖ TILL FRÖ') { state.data.cat = w.dataset.froCat || 'Fröet'; }
                 else if (type === 'KEMI ÅK 4') { state.data.cat = w.dataset.kemiCat || 'Materia & material'; }
                 else if (type === 'FYSIK ÅK 4') { state.data.cat = w.dataset.fysikCat || 'Ljus & syn'; }
+                else if (type === 'TEKNIK ÅK 4') { state.data.cat = w.dataset.teknikCat || 'Tekniska lösningar'; }
                 else if (type === 'EN / ETT') { try{ state.data = JSON.parse(w.dataset.substantiv || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'LÄNDER' || type === 'MEDBORGARE') { try{ state.data = JSON.parse(w.dataset.land || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDKLASSER') { try{ state.data = JSON.parse(w.dataset.ordklass || '{}'); }catch(e){ state.data={}; } }
@@ -2083,8 +2166,10 @@
             else if (w.type === 'SYNONYMJAKTEN') createSynonymWidget(w);
             else if (w.type === 'STAVNINGSKAMPEN') createSpellingBattle(w);
             else if (w.type === 'BIOLOGI ÅK 4') createBiologiWidget(w);
+            else if (w.type === 'FRÅN FRÖ TILL FRÖ') createFroWidget(w);
             else if (w.type === 'KEMI ÅK 4') createKemiWidget(w);
             else if (w.type === 'FYSIK ÅK 4') createFysikWidget(w);
+            else if (w.type === 'TEKNIK ÅK 4') createTeknikWidget(w);
         } catch(err){ console.warn(err); }
     }
 
@@ -3443,48 +3528,101 @@
             {v:200,typ:'sedel', cls:'pengar-s200', txt:'200 kr'},
             {v:500,typ:'sedel', cls:'pengar-s500', txt:'500 kr'}
         ];
-        body.innerHTML = `<div class='hover-menu pengar-bank'></div><div class='pengar-yta'></div><div class='pengar-summa'></div><div class='hover-menu pengar-knappar'><button class='btn btn-secondary pengar-rensa'>Rensa</button><button class='btn btn-primary pengar-uppgift'>Växeluppgift ▶</button></div><div class='pengar-vaxel' style='display:none;'></div><div class='pengar-tips'>Klicka på pengarna högst upp för att lägga ut dem – klicka på ytan för att ta bort</div>`;
-        const bank=body.querySelector('.pengar-bank'), yta=body.querySelector('.pengar-yta'), summaEl=body.querySelector('.pengar-summa'), vaxelEl=body.querySelector('.pengar-vaxel');
+        body.innerHTML = `<div class='hover-menu pengar-bank'></div><div class='pengar-yta'></div><div class='pengar-summa' style='display:none;'></div><div class='hover-menu pengar-upg-ctrl'><select class='editor-select pengar-op'><option value='vaxel'>💵 Växel (−)</option><option value='summa'>➕ Summa (+)</option><option value='flera'>✖️ Flera varor (×)</option><option value='dela'>➗ Dela lika (÷)</option><option value='mix'>🎲 Blandat</option></select><select class='editor-select pengar-niva'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select></div><div class='hover-menu pengar-knappar'><button class='btn btn-secondary pengar-rensa'>Rensa</button><button class='btn btn-secondary pengar-visa'>Visa summa</button><button class='btn btn-primary pengar-uppgift'>Ny uppgift ▶</button></div><div class='pengar-vaxel' style='display:none;'></div><div class='pengar-tips'>Klicka på pengarna högst upp för att lägga ut dem – klicka på ytan för att ta bort</div>`;
+        const bank=body.querySelector('.pengar-bank'), yta=body.querySelector('.pengar-yta'), summaEl=body.querySelector('.pengar-summa'), vaxelEl=body.querySelector('.pengar-vaxel'), opSel=body.querySelector('.pengar-op'), nivaSel=body.querySelector('.pengar-niva');
+        if(config && config.data){ if(config.data.op) opSel.value=config.data.op; if(config.data.niva) nivaSel.value=config.data.niva; }
         let counts={}; // valör -> antal
         if(config && config.data && config.data.counts) counts = config.data.counts;
-        const syncData=()=>{ widget.dataset.pengar = JSON.stringify({ counts: counts }); };
+        const syncData=()=>{ widget.dataset.pengar = JSON.stringify({ counts: counts, op: opSel.value, niva: nivaSel.value }); };
         function makePeng(V){
             const d=document.createElement('div');
             d.className = V.typ==='mynt' ? 'pengar-mynt '+V.cls : 'pengar-sedel '+V.cls;
             d.textContent=V.txt;
             return d;
         }
+        let summaVisas=false; // summan visas bara efter tryck på "Visa summa"
+        function beraknaSumma(){ let s=0; VALORER.forEach(V=>{ s+=(counts[V.v]||0)*V.v; }); return s; }
         function render(){
             syncData();
-            yta.innerHTML=''; let summa=0, antal=0;
+            yta.innerHTML=''; let antal=0;
             VALORER.slice().reverse().forEach(V=>{ // störst först på ytan
-                const n=counts[V.v]||0; summa+=n*V.v; antal+=n;
+                const n=counts[V.v]||0; antal+=n;
                 for(let i=0;i<n;i++){
                     const p=makePeng(V); p.title='Klicka för att ta bort';
-                    p.onclick=()=>{ counts[V.v]--; if(counts[V.v]<=0) delete counts[V.v]; render(); saveBoardState(); };
+                    p.onclick=()=>{ counts[V.v]--; if(counts[V.v]<=0) delete counts[V.v]; summaVisas=false; render(); saveBoardState(); };
                     yta.appendChild(p);
                 }
             });
             if(antal===0) yta.innerHTML=`<div class='pengar-tom'>Ytan är tom – klicka på pengarna ovanför</div>`;
-            summaEl.textContent='Summa: '+summa+' kr';
+            // Summan visas bara om man tryckt på "Visa summa" och inte ändrat pengarna sedan dess.
+            if(summaVisas){ summaEl.style.display='block'; summaEl.textContent='Summa: '+beraknaSumma()+' kr'; }
+            else { summaEl.style.display='none'; summaEl.textContent=''; }
         }
         VALORER.forEach(V=>{
             const wrap=document.createElement('div'); wrap.className='pengar-bank-item'; wrap.title='Lägg till '+V.txt;
             wrap.appendChild(makePeng(V));
-            wrap.onclick=()=>{ counts[V.v]=(counts[V.v]||0)+1; render(); saveBoardState(); };
+            wrap.onclick=()=>{ counts[V.v]=(counts[V.v]||0)+1; summaVisas=false; render(); saveBoardState(); };
             bank.appendChild(wrap);
         });
-        body.querySelector('.pengar-rensa').onclick=()=>{ counts={}; render(); saveBoardState(); };
+        body.querySelector('.pengar-rensa').onclick=()=>{ counts={}; summaVisas=false; render(); saveBoardState(); };
+        body.querySelector('.pengar-visa').onclick=()=>{ summaVisas=true; render(); };
         const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
-        body.querySelector('.pengar-uppgift').onclick=()=>{
-            const pris=ri(3,97);
-            const sedlar=[20,50,100,200]; let betal=sedlar.find(s=>s>=pris+1) || 100; if(pris>=100) betal=200;
+        const varor = ['ett äpple','en glass','en penna','ett suddgummi','en bok','en leksaksbil','en juice','en smörgås','en banan','ett vykort','en tidning','en läsk','en klistermärke','en frukt','en muffins'];
+        const varor_fl = ['äpplen','glassar','pennor','suddgummin','böcker','leksaksbilar','juicer','smörgåsar','bananer','vykort','klistermärken','muffins','ballonger','pins'];
+        const val = a => a[ri(0,a.length-1)];
+        // Slumpar en betalsedel som räcker till priset
+        function betalSedel(pris){
+            const sedlar=[10,20,50,100,200,500];
+            const möjliga = sedlar.filter(s=>s>=pris);
+            return möjliga.length ? möjliga[0] : 500;
+        }
+        // Genererar en uppgift utifrån räknesätt (op) och nivå.
+        function genUppgift(op, niva){
+            if(op==='mix') op = ['vaxel','summa','flera','dela'][ri(0,3)];
+            let pris, betal, fraga, svar;
+            if(op==='vaxel'){
+                if(niva==='latt'){ pris=ri(1,9); betal=10; }
+                else if(niva==='medel'){ pris=ri(11,49); betal=betalSedel(pris); }
+                else { pris=ri(51,189); betal=betalSedel(pris); }
+                fraga = `Du köper ${val(varor)} för <b>${pris} kr</b> och betalar med <b>${betal} kr</b>. Hur mycket får du tillbaka?`;
+                svar = (betal-pris)+' kr';
+            } else if(op==='summa'){
+                let a,b,c;
+                if(niva==='latt'){ a=ri(1,9); b=ri(1,9); fraga=`Du köper två saker som kostar <b>${a} kr</b> och <b>${b} kr</b>. Hur mycket kostar de tillsammans?`; svar=(a+b)+' kr'; }
+                else if(niva==='medel'){ a=ri(5,40); b=ri(5,40); fraga=`Du handlar för <b>${a} kr</b> och <b>${b} kr</b>. Hur mycket blir det tillsammans?`; svar=(a+b)+' kr'; }
+                else { a=ri(15,120); b=ri(15,120); c=ri(15,120); fraga=`Du köper tre saker: <b>${a} kr</b>, <b>${b} kr</b> och <b>${c} kr</b>. Hur mycket kostar allt tillsammans?`; svar=(a+b+c)+' kr'; }
+            } else if(op==='flera'){
+                let antal, styck;
+                if(niva==='latt'){ antal=ri(2,5); styck=ri(2,5); }
+                else if(niva==='medel'){ antal=ri(2,6); styck=ri(4,12); }
+                else { antal=ri(3,8); styck=ri(8,25); }
+                fraga = `Du köper <b>${antal} ${val(varor_fl)}</b> som kostar <b>${styck} kr</b> styck. Hur mycket kostar de tillsammans?`;
+                svar = (antal*styck)+' kr';
+            } else { // dela
+                let antal, styck, total;
+                if(niva==='latt'){ antal=ri(2,4); styck=ri(2,5); }
+                else if(niva==='medel'){ antal=ri(2,5); styck=ri(3,10); }
+                else { antal=ri(3,6); styck=ri(6,20); }
+                total = antal*styck;
+                fraga = `Ni är <b>${antal}</b> kompisar som ska dela <b>${total} kr</b> lika. Hur mycket får var och en?`;
+                svar = styck+' kr';
+            }
+            return { fraga, svar };
+        }
+        function visaUppgift(){
+            const { fraga, svar } = genUppgift(opSel.value, nivaSel.value);
             vaxelEl.style.display='block'; vaxelEl.innerHTML='';
-            const q=document.createElement('span'); q.textContent='Du handlar för '+pris+' kr och betalar med '+betal+' kr. Hur mycket får du tillbaka?';
+            const q=document.createElement('span'); q.className='pengar-fraga'; q.innerHTML=fraga;
             const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
-            a.onclick=()=>{ a.textContent=(betal-pris)+' kr'; a.classList.add('revealed'); a.onclick=null; };
-            vaxelEl.appendChild(q); vaxelEl.appendChild(a);
-        };
+            a.onclick=()=>{ a.textContent=svar; a.classList.add('revealed'); a.onclick=null; };
+            const wrap=document.createElement('div'); wrap.innerHTML='Svar: '; wrap.appendChild(a);
+            const ny=document.createElement('button'); ny.className='pengar-ny'; ny.type='button'; ny.textContent='🎲 Ny uppgift';
+            ny.onclick=()=> visaUppgift();
+            vaxelEl.appendChild(q); vaxelEl.appendChild(wrap); vaxelEl.appendChild(ny);
+        }
+        opSel.onchange=()=>{ saveBoardState(); if(vaxelEl.style.display!=='none') visaUppgift(); };
+        nivaSel.onchange=()=>{ saveBoardState(); if(vaxelEl.style.display!=='none') visaUppgift(); };
+        body.querySelector('.pengar-uppgift').onclick=()=> visaUppgift();
         render();
     }
 
@@ -3496,8 +3634,8 @@
         if(config===undefined) config=null;
         const body = createWidget('GEOMETRI', 380, 'geo-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu geo-ctrl'><select class='editor-select geo-shape'><option value='kvadrat'>Kvadrat</option><option value='rektangel'>Rektangel</option><option value='triangel'>Triangel (rätvinklig)</option><option value='cirkel'>Cirkel</option></select><label class='tal-hopp-lbl'><input type='checkbox' class='geo-practice'> Öva-läge</label></div><svg class='geo-svg' viewBox='0 0 360 260' xmlns='http://www.w3.org/2000/svg'></svg><div class='geo-facts'></div><div class='pengar-tips'>Dra i de orangea punkterna för att ändra storlek – 1 ruta = 1 cm</div>`;
-        const shapeSel=body.querySelector('.geo-shape'), practiceCb=body.querySelector('.geo-practice'), svg=body.querySelector('.geo-svg'), facts=body.querySelector('.geo-facts');
+        body.innerHTML = `<div class='hover-menu geo-ctrl'><select class='editor-select geo-shape'><option value='kvadrat'>Kvadrat</option><option value='rektangel'>Rektangel</option><option value='triangel'>Triangel (rätvinklig)</option><option value='cirkel'>Cirkel</option></select><label class='tal-hopp-lbl'><input type='checkbox' class='geo-practice'> Öva-läge</label></div><svg class='geo-svg' viewBox='0 0 360 260' xmlns='http://www.w3.org/2000/svg'></svg><div class='geo-formler'></div><div class='geo-facts'></div><div class='pengar-tips'>Dra i de orangea punkterna för att ändra storlek – 1 ruta = 1 cm</div>`;
+        const shapeSel=body.querySelector('.geo-shape'), practiceCb=body.querySelector('.geo-practice'), svg=body.querySelector('.geo-svg'), facts=body.querySelector('.geo-facts'), formler=body.querySelector('.geo-formler');
         const NS='http://www.w3.org/2000/svg', U=20, X0=58, Y0=230; // bred vänstermarginal så höjdetiketten (t.ex. ”10 cm”) ryms helt
         let dims = { a:5, w:8, h:4, b:8, th:5, r:3 };
         if(config && config.data){ if(config.data.shape) shapeSel.value=config.data.shape; if(config.data.dims) dims=Object.assign(dims, config.data.dims); practiceCb.checked=!!config.data.practice; }
@@ -3513,6 +3651,24 @@
             if(dolj){ const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa'; a.title='Klicka för att visa uträkningen'; a.onclick=()=>{ a.textContent = formel ? (formel+' = '+varde) : varde; a.classList.add('revealed','geo-utrakning'); a.onclick=null; }; b.appendChild(a); }
             else b.textContent=varde;
             d.appendChild(b); return d;
+        }
+        // Allmänna formler (med ord) per form – visas tydligt när formen valts
+        const GEO_FORMLER = {
+            kvadrat:   { o:'4 · sida',                a:'sida · sida' },
+            rektangel: { o:'2 · (bas + höjd)',        a:'bas · höjd' },
+            triangel:  { o:'bas + höjd + hypotenusa', a:'(bas · höjd) / 2' },
+            cirkel:    { o:'2 · π · radie',           a:'π · radie²' }
+        };
+        function renderFormler(s, oInsatt, aInsatt){
+            formler.innerHTML='';
+            const f = GEO_FORMLER[s]; if(!f) return;
+            const kort=(kls,namn,formel,insatt)=>{
+                const d=document.createElement('div'); d.className='geo-formel-kort'+(kls?' '+kls:'');
+                d.innerHTML=`<span class='gf-namn'>${namn}</span><span class='gf-formel'>${formel}</span>`+(insatt?`<span class='gf-insatt'>= ${insatt}</span>`:'');
+                return d;
+            };
+            formler.appendChild(kort('', 'Omkrets', f.o, oInsatt));
+            formler.appendChild(kort('area', 'Area', f.a, aInsatt));
         }
         function render(){
             syncData(); svg.innerHTML=''; facts.innerHTML='';
@@ -3542,6 +3698,14 @@
                 svg.appendChild(handle(X0+pb, Y0, (gx,gy)=>{ dims.b=Math.max(1,Math.min(15,Math.round((gx-X0)/U))); }));
                 svg.appendChild(handle(X0, Y0-pt, (gx,gy)=>{ dims.th=Math.max(1,Math.min(10,Math.round((Y0-gy)/U))); }));
                 const hyp=Math.sqrt(b*b+t*t);
+                // Hypotenusans värde placeras längs den lutande sidan, förskjuten utåt så den inte täcker linjen
+                const hmx=X0+pb/2, hmy=Y0-pt/2;                       // mittpunkt på hypotenusan
+                const hlen=Math.sqrt(pb*pb+pt*pt) || 1;
+                const offx=(pt/hlen)*14, offy=(pb/hlen)*14;           // normal utåt (uppåt-höger) från hypotenusan
+                const hlbl=label(hmx+offx, hmy-offy+4, fmt(hyp)+' cm');
+                const ang=Math.atan2(-pt, pb)*180/Math.PI;           // rotera etiketten längs sidan
+                hlbl.setAttribute('transform', `rotate(${ang} ${hmx+offx} ${hmy-offy+4})`);
+                svg.appendChild(hlbl);
                 hörn=3; sidor=3; omkrets=b+t+hyp; area=b*t/2; oFormel=b+' + '+t+' + '+fmt(hyp); aFormel='('+b+' · '+t+') / 2';
             } else {
                 const r=dims.r, cx=180, cy=125, pr=r*U;
@@ -3556,6 +3720,8 @@
             facts.appendChild(factCard('Sidor','',sidor,false));
             facts.appendChild(factCard('Omkrets',oFormel,fmt(omkrets)+' cm',P));
             facts.appendChild(factCard('Area',aFormel,fmt(area)+' cm²',P));
+            // Tydlig formelvisning: allmän formel alltid, insatt uträkning bara utanför öva-läge
+            renderFormler(s, P ? '' : oFormel, P ? '' : aFormel);
         }
         // dragning av handtag – stopPropagation så widgeten inte flyttas samtidigt
         svg.addEventListener('pointerdown',(e)=>{
@@ -3638,7 +3804,7 @@
             const svar = v*enheter[i][1]/enheter[j][1];
             uppgEl.style.display='block'; uppgEl.innerHTML='';
             const q=document.createElement('span'); q.textContent=v+' '+enheter[i][0]+' = ';
-            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.innerHTML='? <span class="enh-mal">'+enheter[j][0]+'</span>'; a.title='Klicka för att visa svaret';
             a.onclick=()=>{ a.textContent=fmtNum(svar)+' '+enheter[j][0]; a.classList.add('revealed'); a.onclick=null; };
             uppgEl.appendChild(q); uppgEl.appendChild(a);
         };
@@ -4402,6 +4568,31 @@
                 "Återvinning":["Nedskräpning","Förbränning","Förbrukning"], "Naturvård":["Skogsavverkning","Jakt","Fiske"],
                 "Biologisk mångfald":["Enfald","Population","Utrotning"]
             });
+        } else if(subject === 'fro'){
+            Object.assign(D, {
+                "Vad är ett frö?":["En blomma","En rot","Ett blad"], "Fröets delar":["Blommans delar","Rotens delar","Stammens delar"],
+                "Fröets uppgift":["Bladets uppgift","Blommans uppgift","Rotens uppgift"],
+                "Vatten":["Mörker","Kyla","Torka"], "Värme":["Kyla","Mörker","Frost"],
+                "Luft":["Vatten","Jord","Ljus"], "Groning":["Vissnande","Blomning","Fröspridning"],
+                "Roten växer först":["Bladen växer först","Blomman växer först","Frukten växer först"],
+                "Skottet växer uppåt":["Roten växer uppåt","Skottet växer nedåt","Bladen växer nedåt"],
+                "De första bladen":["De första blommorna","De första frukterna","De första rötterna"],
+                "Rötter":["Blad","Blommor","Frukt"], "Stam":["Rot","Blomma","Frö"],
+                "Blad":["Rot","Stam","Frö"], "Solljus":["Måljus","Skugga","Mörker"],
+                "Näring":["Ljud","Färg","Doft"],
+                "Blommans delar":["Rotens delar","Stammens delar","Fröets delar"], "Pistill":["Ståndare","Kronblad","Foderblad"],
+                "Ståndare":["Pistill","Kronblad","Foderblad"], "Kronblad":["Foderblad","Pistill","Ståndare"],
+                "Foderblad":["Kronblad","Pistill","Ståndare"],
+                "Vad är pollinering?":["Vad är groning?","Vad är fotosyntes?","Vad är fröspridning?"], "Bin":["Myror","Sniglar","Maskar"],
+                "Humlor":["Flugor","Myror","Spindlar"], "Fjärilar":["Skalbaggar","Maskar","Sniglar"],
+                "Vindpollinering":["Vattenpollinering","Djurpollinering","Självpollinering"],
+                "Frukt bildas":["Rot bildas","Blad bildas","Blomma bildas"], "Nya frön":["Nya blad","Nya rötter","Nya blommor"],
+                "Fröspridning":["Pollinering","Groning","Fotosyntes"],
+                "Vind":["Eld","Jord","Ljud"], "Djur":["Stenar","Moln","Maskiner"],
+                "Människan":["Vinden","Solen","Regnet"],
+                "Odla ett eget frö.":["Rita en blomma","Läsa om frön","Titta på bilder"], "Jämför olika frön.":["Måla olika frön","Räkna blommor","Väga vatten"],
+                "Följ en växts utveckling.":["Klippa av växten","Flytta växten bort","Gömma växten"], "Mäta hur mycket den växer.":["Gissa storleken","Ignorera växten","Måla växten"]
+            });
         } else if(subject === 'kemi'){
             Object.assign(D, {
                 "Materia":["Energi","Rörelse","Kraft"], "Material":["Ämne","Blandning","Lösning"],
@@ -4443,7 +4634,10 @@
                 "Fråga läraren":["Gör själv","Chansa","Skynda dig"],
                 "Observera":["Gissa","Glömma","Skynda"], "Ställa frågor":["Ge svar direkt","Låta bli","Avbryta"],
                 "Experiment":["Föreläsning","Läxa","Prov"], "Dra slutsats":["Ställa hypotes","Observera","Mäta"],
-                "Dokumentera":["Radera","Memorera","Ignorera"]
+                "Dokumentera":["Radera","Memorera","Ignorera"],
+                "Återvinning":["Nedskräpning","Förbränning","Förbrukning"], "Källsortering":["Blanda allt","Slänga allt","Bränna allt"],
+                "Materialåtervinning":["Nedskräpning","Deponi","Förbränning"], "Matavfall & kompost":["Farligt avfall","Metallåtervinning","Glasåtervinning"],
+                "Farligt avfall":["Matavfall","Pappersavfall","Glasavfall"]
             });
         } else if(subject === 'fysik'){
             Object.assign(D, {
@@ -4487,6 +4681,45 @@
                 "Förnybar energi":["Fossil energi","Kärnkraft","Kol"],
                 "Observera":["Gissa","Glömma","Skynda"], "Ställa frågor":["Ge svar direkt","Avbryta","Låta bli"],
                 "Experiment":["Föreläsning","Prov","Läxa"], "Dra slutsats":["Ställa hypotes","Mäta","Observera"],
+                "Dokumentera":["Radera","Memorera","Ignorera"]
+            });
+        } else if(subject === 'teknik'){
+            Object.assign(D, {
+                "Teknisk lösning":["Naturföreteelse","Konstverk","Slumphändelse"], "Verktyg":["Leksak","Prydnad","Möbel"],
+                "Maskin":["Handverktyg","Byggnad","Fordon utan motor"], "System":["Enstaka del","Råmaterial","Skiss"],
+                "Behov löses":["Problem skapas","Naturen förstörs","Slumpen avgör"],
+                "Sax":["Hammare","Skruvmejsel","Tång"], "Cykel":["Bil","Buss","Tåg"],
+                "Diskmaskin":["Kylskåp","Spis","Mikrovågsugn"], "Dörrhandtag":["Fönsterkarm","Golvbräda","Takbjälke"],
+                "Blixtlås":["Knapp","Kardborre","Snöre"],
+                "Bärande konstruktion":["Lös hög","Enskild sten","Ritning"], "Triangel":["Cirkel","Fyrkant","Oval"],
+                "Balk":["Rep","Tyg","Sand"], "Valv":["Platt tak","Rak vägg","Trappa"],
+                "Stabilitet":["Instabilitet","Rörlighet","Vikt"],
+                "Trä":["Plast","Metall","Glas"], "Metall":["Trä","Tyg","Papper"],
+                "Plast":["Trä","Sten","Glas"], "Glas":["Gummi","Tyg","Trä"],
+                "Välja rätt material":["Välja slumpmässigt","Ignorera egenskaper","Alltid välja billigast"],
+                "Hjul":["Hävstång","Kil","Skruv"], "Axel":["Rep","Fjäder","Spik"],
+                "Kugghjul":["Slätt hjul","Platta","Kloss"], "Rullager":["Bromskloss","Fast tapp","Spik"],
+                "Minskar friktion":["Ökar friktionen","Ökar vikten","Ändrar färg"],
+                "Hävstång":["Hjul","Kil","Skruv"], "Stödjepunkt":["Handtaget","Lasten","Repet"],
+                "Gungbräda":["Rutschkana","Klätterställning","Sandlåda"], "Spett":["Rep","Kil","Skruv"],
+                "Kraft förstärks":["Kraft försvinner","Vikten ökar","Farten minskar"],
+                "Planera":["Chansa","Börja direkt","Hoppa över"], "Bygga":["Rita av","Titta på","Beskriva"],
+                "Sammanfoga":["Ta isär","Måla","Mäta"], "Testa":["Gissa resultatet","Slänga bort","Gömma undan"],
+                "Förbättra":["Lämna som det är","Förstöra","Glömma bort"],
+                "Ritning":["Modell","Fotografi","Målning"], "Skiss":["Färdig ritning","Modell","Foto"],
+                "Modell":["Ritning","Skiss","Text"], "Symbol":["Fotografi","Målning","Text"],
+                "Skala":["Färg","Material","Vikt"],
+                "Vitvaror":["Möbler","Prydnader","Leksaker"], "Belysning":["Uppvärmning","Ventilation","Vattenledning"],
+                "Vatten & avlopp":["Elnätet","Bredband","Uppvärmning"], "Uppvärmning":["Belysning","Avlopp","Ventilation"],
+                "Elektricitet i hemmet":["Gas i hemmet","Vatten i hemmet","Ljud i hemmet"],
+                "Broar":["Tunnlar","Hus","Master"], "Vägar & järnväg":["Flygplatser","Hamnar","Broar"],
+                "Elnät":["Vattennät","Vägnät","Telenät"], "Kommunikation":["Transport","Uppvärmning","Belysning"],
+                "Vattenrening":["Luftrening","Sopsortering","Återvinning"],
+                "Uppfinning":["Upptäckt","Naturlag","Slump"], "Patent":["Recept","Ritning","Diplom"],
+                "Historiska uppfinningar":["Framtida idéer","Naturfenomen","Konstverk"], "Förändrar samhället":["Påverkar ingenting","Förstör alltid","Är osynligt"],
+                "Idé blir verklighet":["Verklighet blir idé","Slumpen avgör","Inget händer"],
+                "Observera":["Gissa","Glömma","Skynda"], "Ställa frågor":["Ge svar direkt","Avbryta","Låta bli"],
+                "Testa idéer":["Slänga idéer","Gömma idéer","Kopiera rakt av"], "Utvärdera":["Strunta i resultatet","Gissa","Skynda vidare"],
                 "Dokumentera":["Radera","Memorera","Ignorera"]
             });
         }
@@ -4681,6 +4914,204 @@
         renderTabs(); renderView();
     }
 
+    // ---- FRÅN FRÖ TILL FRÖ: en växts livscykel, samma mönster som Biologi ----
+    function froBank(){
+        if(window._froBank) return window._froBank;
+        window._froBank = {
+            "🌾 Fröet": [
+                {e:"🌾", t:"Vad är ett frö?", txt:"Ett frö är början på en ny växt. Inuti fröet finns en pytteliten växt som väntar och lite näring att börja växa av."},
+                {e:"🧩", t:"Fröets delar", txt:"Ett frö har ett skal som skyddar, ett litet groddämne som blir den nya växten, och ett näringsförråd som ger energi i början."},
+                {e:"🎯", t:"Fröets uppgift", txt:"Fröets uppgift är att skydda den lilla växten tills den får rätt förhållanden, och sedan låta den gro och bli en ny planta."}
+            ],
+            "💧 Fröet vaknar": [
+                {e:"💧", t:"Vatten", txt:"Fröet behöver vatten för att vakna. Vattnet gör att skalet sväller och den lilla växten inuti kan börja växa."},
+                {e:"🌡️", t:"Värme", txt:"Fröet behöver värme för att gro. Är det för kallt vaknar fröet inte, utan väntar tills det blir varmare."},
+                {e:"🌬️", t:"Luft", txt:"Fröet behöver luft, särskilt syre, för att kunna få energi och börja växa."},
+                {e:"🌱", t:"Groning", txt:"När fröet fått vatten, värme och luft börjar det gro. Det betyder att den lilla växten spricker ut ur fröskalet."}
+            ],
+            "🌱 Grodden": [
+                {e:"⬇️", t:"Roten växer först", txt:"Först växer en liten rot nedåt i jorden. Roten suger upp vatten och håller fast plantan."},
+                {e:"⬆️", t:"Skottet växer uppåt", txt:"Sedan växer ett litet skott uppåt mot ljuset, upp genom jorden mot solen."},
+                {e:"🌿", t:"De första bladen", txt:"När skottet når upp i ljuset öppnar sig de första små bladen, som kan börja fånga solljus."}
+            ],
+            "☀️ Växten växer": [
+                {e:"🥕", t:"Rötter", txt:"Rötterna växer ner i jorden, suger upp vatten och näring och håller växten stadigt på plats."},
+                {e:"🌿", t:"Stam", txt:"Stammen bär upp växten och transporterar vatten och näring mellan rötterna och bladen."},
+                {e:"🍃", t:"Blad", txt:"Bladen fångar solljus och gör om det till energi genom fotosyntes. De tar också in luft."},
+                {e:"☀️", t:"Solljus", txt:"Solljuset ger växten energin den behöver för att kunna göra sin egen näring."},
+                {e:"💧", t:"Vatten", txt:"Växten tar upp vatten genom rötterna. Vattnet behövs för att växa och för fotosyntesen."},
+                {e:"🍽️", t:"Näring", txt:"Näring från jorden och energi från solen gör att växten kan växa sig stor och stark."}
+            ],
+            "🌼 Blomman": [
+                {e:"🌼", t:"Blommans delar", txt:"En blomma har flera delar som samarbetar för att växten ska kunna bilda nya frön."},
+                {e:"🎗️", t:"Pistill", txt:"Pistillen sitter i mitten av blomman. Det är blommans honliga del, där nya frön kan bildas."},
+                {e:"🌾", t:"Ståndare", txt:"Ståndarna sitter runt pistillen. De är blommans hanliga delar och bär pollen."},
+                {e:"🌸", t:"Kronblad", txt:"Kronbladen är de färgglada bladen som lockar till sig insekter med sin färg och doft."},
+                {e:"🍵", t:"Foderblad", txt:"Foderbladen är de gröna bladen ytterst som skyddade blomman medan den var en knopp."}
+            ],
+            "🐝 Pollinering": [
+                {e:"🐝", t:"Vad är pollinering?", txt:"Pollinering är när pollen förs från ståndarna till pistillen, så att blomman kan bilda frön."},
+                {e:"🐝", t:"Bin", txt:"Bin flyger mellan blommor för att hämta nektar och tar då med sig pollen från blomma till blomma."},
+                {e:"🐝", t:"Humlor", txt:"Humlor är också viktiga pollinerare. De är stora och luddiga, så mycket pollen fastnar på dem."},
+                {e:"🦋", t:"Fjärilar", txt:"Fjärilar besöker blommor för nektar och hjälper också till att flytta pollen mellan blommor."},
+                {e:"🌬️", t:"Vindpollinering", txt:"Vissa växter pollineras av vinden, som blåser pollen från en blomma till en annan utan djurens hjälp."}
+            ],
+            "🌰 Frukt och frön": [
+                {e:"🍎", t:"Frukt bildas", txt:"Efter pollineringen växer en frukt fram ur blomman. Frukten skyddar de nya fröna inuti."},
+                {e:"🌰", t:"Nya frön", txt:"Inuti frukten bildas nya frön. Varje frö kan bli en helt ny växt."},
+                {e:"🍃", t:"Fröspridning", txt:"För att fröna ska få plats att växa måste de spridas till nya platser, bort från moderväxten."}
+            ],
+            "🍃 Fröspridning": [
+                {e:"🌬️", t:"Vind", txt:"Vissa frön är lätta eller har vingar och fjun, så att vinden kan bära dem långt bort, till exempel maskrosfrön."},
+                {e:"💧", t:"Vatten", txt:"En del frön kan flyta och sprids med vatten i bäckar, floder och hav till nya platser."},
+                {e:"🦔", t:"Djur", txt:"Djur sprider frön genom att äta frukter eller genom att frön fastnar i pälsen och följer med."},
+                {e:"👩‍🌾", t:"Människan", txt:"Människor sprider frön genom att så och plantera dem, till exempel i trädgårdar och på åkrar."}
+            ],
+            "🔄 Växtens livscykel": [
+                {e:"🔄", t:"Hela kretsloppet", txt:"En växts liv går runt i ett kretslopp: Frö → Grodd → Växt → Blomma → Pollinering → Frukt → Nya frön → och så börjar det om igen från fröet."}
+            ],
+            "🔍 Undersök & upptäck": [
+                {e:"🪴", t:"Odla ett eget frö.", txt:"Så ett frö i lite jord, ge det vatten, värme och ljus, och följ hur det gror och växer."},
+                {e:"⚖️", t:"Jämför olika frön.", txt:"Titta på olika sorters frön. Hur skiljer de sig i storlek, form och färg? Vilken växt blir det?"},
+                {e:"📈", t:"Följ en växts utveckling.", txt:"Titta på din växt varje dag och lägg märke till hur den förändras från frö till planta."},
+                {e:"📏", t:"Mäta hur mycket den växer.", txt:"Använd en linjal och mät växten med några dagars mellanrum. Rita gärna en tabell över hur den växer."}
+            ]
+        };
+        return window._froBank;
+    }
+    function froBegrepp(){
+        if(window._froBegrepp) return window._froBegrepp;
+        window._froBegrepp = [
+            {ord:"Frö", def:"Början på en ny växt. Inuti finns en liten växt och näring att växa av."},
+            {ord:"Gro", def:"När ett frö vaknar och den lilla växten börjar spricka ut ur fröskalet."},
+            {ord:"Grodd", def:"Den lilla nya växten som just kommit ut ur fröet, med rot och skott."},
+            {ord:"Rot", def:"Växtens del som suger upp vatten och näring och håller fast växten i jorden."},
+            {ord:"Stam", def:"Växtens del som bär upp den och transporterar vatten och näring."},
+            {ord:"Blad", def:"Växtens del som fångar solljus och gör näring genom fotosyntes."},
+            {ord:"Blomma", def:"Växtens del som hjälper den att pollineras och bilda nya frön."},
+            {ord:"Pistill", def:"Blommans honliga del i mitten, där nya frön bildas."},
+            {ord:"Ståndare", def:"Blommans hanliga delar som bär pollen."},
+            {ord:"Pollinering", def:"När pollen förs från ståndare till pistill så att frön kan bildas."},
+            {ord:"Nektar", def:"En söt vätska i blomman som lockar till sig bin, humlor och fjärilar."},
+            {ord:"Frukt", def:"Det som bildas ur blomman efter pollinering och som skyddar fröna."},
+            {ord:"Fröspridning", def:"När frön sprids till nya platser med vind, vatten, djur eller människor."},
+            {ord:"Livscykel", def:"Hela kretsloppet från frö till ny växt och nya frön, om och om igen."},
+            {ord:"Fotosyntes", def:"När växten använder solljus, vatten och luft för att göra sin egen näring."}
+        ];
+        return window._froBegrepp;
+    }
+    function createFroWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('FRÅN FRÖ TILL FRÖ', 560, 'fro-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.classList.add('fro-body');
+        const bank = froBank();
+        const CYCLE = '🔄 Växtens livscykel';
+        const BEGREPP = 'Begrepp';
+        const cats = Object.keys(bank).concat([BEGREPP]);
+        let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
+        widget.dataset.froCat = currentCat;
+
+        const tabsEl = document.createElement('div'); tabsEl.className = 'fro-tabs';
+        const gridEl = document.createElement('div'); gridEl.className = 'fro-grid';
+        const footEl = document.createElement('div'); footEl.className = 'fro-footnote';
+        body.appendChild(tabsEl); body.appendChild(gridEl); body.appendChild(footEl);
+
+        function renderTabs(){
+            tabsEl.innerHTML = '';
+            cats.forEach(cat=>{
+                const b = document.createElement('button');
+                b.className = 'fro-tab' + (cat===currentCat ? ' active' : '');
+                // Visa flikens namn (behåll emoji som redan finns i kategorinamnet)
+                b.textContent = cat; b.type = 'button';
+                b.onclick = ()=>{ currentCat = cat; widget.dataset.froCat = cat; renderTabs(); renderView(); saveBoardState(); };
+                tabsEl.appendChild(b);
+            });
+        }
+        function renderView(){
+            if(currentCat === BEGREPP) renderBegrepp();
+            else if(currentCat === CYCLE) renderCycle();
+            else renderGrid();
+        }
+        function renderGrid(){
+            tabsEl.style.display='flex';
+            gridEl.className='fro-grid'; gridEl.style.display='grid';
+            footEl.style.display='block'; footEl.textContent='Klicka på ett ämne för att öppna faktan';
+            gridEl.innerHTML = '';
+            bank[currentCat].forEach(item=>{
+                const tile = document.createElement('div'); tile.className='fro-tile';
+                tile.innerHTML = `<span class="fro-emoji">${item.e}</span><span class="fro-lbl">${item.t}</span>`;
+                tile.onclick = ()=> renderDetail(item);
+                gridEl.appendChild(tile);
+            });
+            const quizTile = document.createElement('div');
+            quizTile.className = 'fro-tile fro-quiz-tile';
+            quizTile.innerHTML = `<span class="fro-emoji">📝</span><span class="fro-lbl">Quiz</span>`;
+            quizTile.onclick = ()=> renderQuiz();
+            gridEl.appendChild(quizTile);
+        }
+        function renderQuiz(){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            renderSubjectQuiz({
+                container: gridEl, tileGridClass: 'fro-grid', cat: currentCat, items: bank[currentCat], subject: 'fro',
+                theme: { main:'#5bb36a', dark:'#3e8e4f', soft:'#e6f4e2' },
+                onBack: ()=>{ tabsEl.style.display='flex'; footEl.style.display='block'; renderGrid(); }
+            });
+        }
+        function renderDetail(item){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            gridEl.className='fro-grid'; gridEl.style.display='block';
+            gridEl.innerHTML = `<div class="fro-detail">
+                <button class="fro-back" type="button">← Tillbaka</button>
+                <span class="fro-detail-emoji">${item.e}</span>
+                <div class="fro-tag">${currentCat}</div>
+                <h3>${item.t}</h3>
+                <p>${item.txt}</p>
+            </div>`;
+            gridEl.querySelector('.fro-back').onclick = ()=>{ renderGrid(); };
+        }
+        function renderCycle(){
+            tabsEl.style.display='flex';
+            gridEl.className='fro-cycle-wrap'; gridEl.style.display='block';
+            footEl.style.display='block'; footEl.textContent='Så går växtens liv runt i ett kretslopp';
+            const steps = [
+                {e:'🌰', l:'Frö'}, {e:'🌱', l:'Grodd'}, {e:'☀️', l:'Växt'}, {e:'🌼', l:'Blomma'},
+                {e:'🐝', l:'Pollinering'}, {e:'🍎', l:'Frukt'}, {e:'🌰', l:'Nya frön'}
+            ];
+            let flow = '';
+            steps.forEach((s,idx)=>{
+                flow += `<div class="fro-cycle-step"><span class="fcs-emoji">${s.e}</span><span class="fcs-lbl">${s.l}</span></div>`;
+                if(idx < steps.length-1) flow += `<span class="fro-cycle-arrow">→</span>`;
+            });
+            // sluter cirkeln tillbaka till Frö
+            flow += `<span class="fro-cycle-arrow">↩︎</span><div class="fro-cycle-step"><span class="fcs-emoji">🌰</span><span class="fcs-lbl">Frö igen</span></div>`;
+            gridEl.innerHTML = `<div class="fro-cycle"><h3>🔄 Växtens livscykel</h3><div class="fro-cycle-flow">${flow}</div></div>`;
+        }
+        function renderBegrepp(){
+            tabsEl.style.display='flex';
+            gridEl.className='fro-begrepp'; gridEl.style.display='block';
+            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen';
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let html = '<input type="text" class="fro-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            html += '<div class="fro-begrepp-list">';
+            froBegrepp().forEach(b=>{
+                html += `<div class="fro-begrepp-item"><span class="fro-begrepp-ord">${esc(b.ord)}</span><span class="fro-begrepp-def">${esc(b.def)}</span></div>`;
+            });
+            html += '</div>';
+            gridEl.innerHTML = html;
+            const search = gridEl.querySelector('.fro-begrepp-search');
+            const items = gridEl.querySelectorAll('.fro-begrepp-item');
+            search.oninput = ()=>{
+                const q = search.value.trim().toLowerCase();
+                items.forEach(it=>{
+                    const txt = it.textContent.toLowerCase();
+                    it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
+                });
+            };
+        }
+        renderTabs(); renderView();
+    }
+
     // ---- KEMI ÅK 4: ämnesflikar + ikonrutnät + faktapanel + begrepp ----
     function kemiBank(){
         if(window._kemiBank) return window._kemiBank;
@@ -4782,6 +5213,13 @@
                 {e:"🧪", t:"Experiment", txt:"I ett experiment provar man något på ett bestämt sätt för att ta reda på hur det fungerar."},
                 {e:"📊", t:"Dra slutsats", txt:"Efter experimentet tänker man efter vad resultatet betyder och drar en slutsats av det man sett."},
                 {e:"📓", t:"Dokumentera", txt:"Att dokumentera betyder att skriva ner eller rita vad man gjorde och vad som hände, så man kommer ihåg det."}
+            ],
+            "Återvinning": [
+                {e:"♻️", t:"Återvinning", txt:"Återvinning betyder att vi tar tillvara på gamla material och gör nya saker av dem, i stället för att slänga dem. Då sparar vi naturens resurser och energi."},
+                {e:"🗑️", t:"Källsortering", txt:"Källsortering betyder att vi sorterar soporna i olika högar – papper, plast, glas, metall och matavfall – så att varje material kan återvinnas för sig."},
+                {e:"🫙", t:"Materialåtervinning", txt:"Papper, glas, metall och plast kan smältas om eller göras om till nya produkter. Glas och metall kan återvinnas hur många gånger som helst."},
+                {e:"🍎", t:"Matavfall & kompost", txt:"Matrester är biologiskt avfall som kan bli jord (kompost) eller biogas som driver bussar och bilar."},
+                {e:"🔋", t:"Farligt avfall", txt:"Batterier, elektronik och färg innehåller giftiga ämnen. De ska lämnas på återvinningscentralen och aldrig slängas i vanliga soppåsen."}
             ]
         };
         return window._kemiBank;
@@ -5212,6 +5650,227 @@
         renderTabs(); renderView();
     }
 
+    // ---- TEKNIK ÅK 4: ämnesflikar + ikonrutnät + faktapanel + begrepp + quiz ----
+    function teknikBank(){
+        if(window._teknikBank) return window._teknikBank;
+        window._teknikBank = {
+            "Tekniska lösningar": [
+                {e:"💡", t:"Teknisk lösning", txt:"En teknisk lösning är något människan har byggt eller uppfunnit för att lösa ett problem eller göra livet lättare, till exempel en sax eller en cykel."},
+                {e:"🔧", t:"Verktyg", txt:"Ett verktyg är en enkel teknisk lösning som hjälper oss att utföra ett arbete, till exempel en hammare, en sax eller en skruvmejsel."},
+                {e:"⚙️", t:"Maskin", txt:"En maskin är byggd av flera delar som samarbetar för att göra ett arbete, ofta med hjälp av energi, till exempel en tvättmaskin."},
+                {e:"🔗", t:"System", txt:"Ett tekniskt system består av flera delar som hänger ihop och samarbetar, till exempel elnätet eller vatten och avlopp i ett hus."},
+                {e:"🎯", t:"Behov löses", txt:"Teknik uppstår ofta ur ett behov. När människor behöver lösa ett problem uppfinner de en teknisk lösning för just det."}
+            ],
+            "Vardagsteknik": [
+                {e:"✂️", t:"Sax", txt:"En sax bygger på två hävstänger och eggar som möts. Den hjälper oss att klippa material som papper och tyg."},
+                {e:"🚲", t:"Cykel", txt:"En cykel använder hjul, axlar och kugghjul för att omvandla trampandet till rörelse framåt."},
+                {e:"🍽️", t:"Diskmaskin", txt:"En diskmaskin är en maskin som använder vatten, el och rörliga delar för att diska åt oss."},
+                {e:"🚪", t:"Dörrhandtag", txt:"Ett dörrhandtag är en enkel teknisk lösning, ofta med en hävstång, som gör att vi lätt kan öppna en dörr."},
+                {e:"🤐", t:"Blixtlås", txt:"Ett blixtlås har små tänder som hakar i varandra och håller ihop till exempel en jacka. Det är en smart vardagsteknik."}
+            ],
+            "Konstruktioner": [
+                {e:"🏗️", t:"Bärande konstruktion", txt:"En bärande konstruktion är byggd för att hålla uppe tyngd utan att rasa, till exempel stommen i ett hus eller en bro."},
+                {e:"📐", t:"Triangel", txt:"Triangeln är en mycket stabil form. Därför används den ofta i broar, tak och byggnadsställningar."},
+                {e:"➖", t:"Balk", txt:"En balk är en stark, rak del som bär upp tyngd, till exempel över ett fönster eller mellan två väggar."},
+                {e:"🌉", t:"Valv", txt:"Ett valv är en bågformad konstruktion som är stark och fördelar tyngden. Det används i broar och portar."},
+                {e:"⚖️", t:"Stabilitet", txt:"Stabilitet betyder att en konstruktion står stadigt och inte välter eller rasar. Bred bas och rätt form ökar stabiliteten."}
+            ],
+            "Material": [
+                {e:"🪵", t:"Trä", txt:"Trä är ett naturligt material som är lätt att bearbeta. Det är starkt men kan ruttna om det blir blött länge."},
+                {e:"🔩", t:"Metall", txt:"Metall är starkt och håller länge. Det leder ström och värme och används i verktyg, maskiner och byggnader."},
+                {e:"🧴", t:"Plast", txt:"Plast är lätt, billigt och kan formas till nästan vad som helst. Det leder inte ström och rostar inte."},
+                {e:"🪟", t:"Glas", txt:"Glas är genomskinligt och släpper in ljus, men det är skört och kan gå sönder lätt."},
+                {e:"✅", t:"Välja rätt material", txt:"När man bygger något väljer man material efter dess egenskaper, till exempel starkt, lätt, vattentåligt eller genomskinligt."}
+            ],
+            "Hjul & axlar": [
+                {e:"🛞", t:"Hjul", txt:"Ett hjul rullar och gör det mycket lättare att flytta tunga saker än att släpa dem."},
+                {e:"➖", t:"Axel", txt:"En axel är en stång som hjulet sitter fast på och snurrar kring. Hjul och axel samarbetar."},
+                {e:"⚙️", t:"Kugghjul", txt:"Kugghjul har tänder som griper i varandra och för rörelse vidare, till exempel i en cykel eller en klocka."},
+                {e:"🔵", t:"Rullager", txt:"Ett rullager har små kulor eller rullar som gör att ett hjul kan snurra lätt med mindre friktion."},
+                {e:"🛢️", t:"Minskar friktion", txt:"Hjul och axlar minskar friktionen mot marken, så att saker kan rulla i stället för att släpas."}
+            ],
+            "Hävstänger": [
+                {e:"🎋", t:"Hävstång", txt:"En hävstång är en stång som vilar på en stödjepunkt och gör att man kan lyfta tungt med mindre kraft."},
+                {e:"📍", t:"Stödjepunkt", txt:"Stödjepunkten är den punkt som hävstången vilar och vrider sig kring. Var den sitter avgör hur lätt det blir att lyfta."},
+                {e:"🛝", t:"Gungbräda", txt:"En gungbräda är en hävstång med stödjepunkten i mitten. Sitter man olika långt ut väger olika tungt."},
+                {e:"🔨", t:"Spett", txt:"Ett spett eller en kofot är en hävstång som används för att bända loss eller lyfta tunga saker."},
+                {e:"💪", t:"Kraft förstärks", txt:"Med en hävstång förstärks kraften, så att en liten kraft kan lyfta något mycket tungt."}
+            ],
+            "Bygga & konstruera": [
+                {e:"📝", t:"Planera", txt:"Innan man bygger är det bra att planera: tänka ut vad man vill göra och hur, gärna med en skiss."},
+                {e:"🔨", t:"Bygga", txt:"Att bygga betyder att sätta ihop delar till något som håller och fungerar som det ska."},
+                {e:"🧩", t:"Sammanfoga", txt:"Delar kan sättas ihop på olika sätt: limmas, spikas, skruvas, knytas eller hakas i varandra."},
+                {e:"🧪", t:"Testa", txt:"När man byggt något testar man om det fungerar och håller, till exempel om en bro bär en vikt."},
+                {e:"⬆️", t:"Förbättra", txt:"Om något inte fungerar bra ändrar man och förbättrar sin lösning, och testar igen."}
+            ],
+            "Ritningar & modeller": [
+                {e:"📄", t:"Ritning", txt:"En ritning visar hur något ska byggas, ofta sett rakt framifrån eller ovanifrån, med mått."},
+                {e:"✏️", t:"Skiss", txt:"En skiss är en enkel, snabb teckning av en idé, innan man gör en noggrann ritning."},
+                {e:"🏠", t:"Modell", txt:"En modell är en liten kopia av något större, som man kan bygga för att testa hur det fungerar."},
+                {e:"🔣", t:"Symbol", txt:"På ritningar används symboler som betyder olika saker, till exempel en symbol för ett fönster eller en dörr."},
+                {e:"📏", t:"Skala", txt:"Skala visar hur mycket mindre ritningen är än verkligheten, så att stora saker får plats på papperet."}
+            ],
+            "Teknik i hemmet": [
+                {e:"🧺", t:"Vitvaror", txt:"Vitvaror är stora maskiner i hemmet, till exempel kylskåp, spis, tvättmaskin och diskmaskin."},
+                {e:"💡", t:"Belysning", txt:"Belysning är lampor som drivs av el och ger oss ljus när det är mörkt."},
+                {e:"🚰", t:"Vatten & avlopp", txt:"I hemmet finns rör som leder in rent vatten och leder bort smutsigt vatten genom avloppet."},
+                {e:"🔥", t:"Uppvärmning", txt:"Element och värmesystem håller huset varmt, ofta med hjälp av el, fjärrvärme eller en värmepump."},
+                {e:"🔌", t:"Elektricitet i hemmet", txt:"El kommer in i huset genom ledningar och driver lampor, maskiner och apparater via eluttagen."}
+            ],
+            "Teknik i samhället": [
+                {e:"🌉", t:"Broar", txt:"Broar är konstruktioner som gör att vägar och järnvägar kan ta sig över vatten och dalar."},
+                {e:"🛣️", t:"Vägar & järnväg", txt:"Vägar och järnvägar är system som gör att människor och varor kan transporteras mellan platser."},
+                {e:"⚡", t:"Elnät", txt:"Elnätet är ett stort system som leder el från kraftverk hem till hus, skolor och företag."},
+                {e:"📡", t:"Kommunikation", txt:"Telefoner, internet och radio är teknik som gör att vi kan prata och skicka information över långa avstånd."},
+                {e:"💧", t:"Vattenrening", txt:"I reningsverk renas smutsigt vatten så att det blir rent igen innan det släpps ut eller används på nytt."}
+            ],
+            "Uppfinnare": [
+                {e:"💡", t:"Uppfinning", txt:"En uppfinning är något helt nytt som någon hittat på för att lösa ett problem, till exempel glödlampan."},
+                {e:"📜", t:"Patent", txt:"Ett patent ger uppfinnaren ensamrätt att bestämma över sin uppfinning under en tid, så att ingen annan får kopiera den."},
+                {e:"🕰️", t:"Historiska uppfinningar", txt:"Uppfinningar som hjulet, boktryckarkonsten och elektriciteten har förändrat hur människor lever."},
+                {e:"🌍", t:"Förändrar samhället", txt:"Nya uppfinningar kan förändra hela samhället, till exempel hur vi reser, arbetar och pratar med varandra."},
+                {e:"✨", t:"Idé blir verklighet", txt:"En uppfinnare börjar med en idé, gör skisser och modeller, testar och förbättrar tills idén blir verklighet."}
+            ],
+            "Undersök & upptäck": [
+                {e:"🔍", t:"Observera", txt:"Att observera betyder att titta noga på hur en teknisk sak är byggd och hur den fungerar."},
+                {e:"❓", t:"Ställa frågor", txt:"En undersökning börjar ofta med en fråga, till exempel: Hur håller den här bron uppe tyngden?"},
+                {e:"🧪", t:"Testa idéer", txt:"Man provar sina idéer genom att bygga och testa, för att se om de fungerar i verkligheten."},
+                {e:"📊", t:"Utvärdera", txt:"Att utvärdera betyder att bedöma hur bra lösningen blev och vad som kan göras bättre."},
+                {e:"📓", t:"Dokumentera", txt:"Att dokumentera betyder att rita och skriva ner vad man gjort och kommit fram till."}
+            ]
+        };
+        return window._teknikBank;
+    }
+    // Nyckelbegrepp/ordlista för teknik åk 4
+    function teknikBegrepp(){
+        if(window._teknikBegrepp) return window._teknikBegrepp;
+        window._teknikBegrepp = [
+            {ord:"Axel", def:"En stång som ett hjul sitter fast på och snurrar kring."},
+            {ord:"Balk", def:"En stark, rak byggdel som bär upp tyngd, till exempel över ett fönster."},
+            {ord:"Bärande konstruktion", def:"En konstruktion byggd för att hålla uppe tyngd utan att rasa."},
+            {ord:"Hjul", def:"En rund del som rullar och gör det lättare att flytta tunga saker."},
+            {ord:"Hävstång", def:"En stång som vilar på en stödjepunkt och gör att man kan lyfta tungt med liten kraft."},
+            {ord:"Konstruktion", def:"Något som är byggt av flera delar för att hålla och fungera, till exempel en bro."},
+            {ord:"Kugghjul", def:"Ett hjul med tänder som griper i varandra och för rörelse vidare."},
+            {ord:"Maskin", def:"Något byggt av flera delar som samarbetar för att göra ett arbete, ofta med energi."},
+            {ord:"Material", def:"Det som saker är gjorda av, till exempel trä, metall, plast eller glas."},
+            {ord:"Modell", def:"En mindre kopia av något större som man bygger för att testa en idé."},
+            {ord:"Mekanism", def:"Rörliga delar som samarbetar för att något ska fungera, till exempel i ett lås."},
+            {ord:"Patent", def:"Ensamrätt som en uppfinnare får till sin uppfinning under en viss tid."},
+            {ord:"Ritning", def:"En teckning som visar hur något ska byggas, ofta med mått."},
+            {ord:"Rullager", def:"Små kulor eller rullar som gör att ett hjul kan snurra lätt med mindre friktion."},
+            {ord:"Skala", def:"Visar hur mycket mindre en ritning eller modell är än verkligheten."},
+            {ord:"Skiss", def:"En enkel, snabb teckning av en idé innan man gör en noggrann ritning."},
+            {ord:"Stabilitet", def:"Att en konstruktion står stadigt och inte välter eller rasar."},
+            {ord:"Stödjepunkt", def:"Den punkt som en hävstång vilar och vrider sig kring."},
+            {ord:"Symbol", def:"Ett tecken på en ritning som betyder något, till exempel en dörr eller ett fönster."},
+            {ord:"System", def:"Flera delar som hänger ihop och samarbetar, till exempel elnätet."},
+            {ord:"Teknik", def:"Allt som människan bygger och uppfinner för att lösa problem och underlätta livet."},
+            {ord:"Teknisk lösning", def:"Något människan byggt för att lösa ett problem, till exempel en sax eller en cykel."},
+            {ord:"Triangel", def:"En mycket stabil form som ofta används i broar, tak och ställningar."},
+            {ord:"Uppfinning", def:"Något helt nytt som någon hittat på för att lösa ett problem."},
+            {ord:"Uppfinnare", def:"En person som hittar på och skapar nya tekniska lösningar."},
+            {ord:"Valv", def:"En bågformad konstruktion som är stark och fördelar tyngden."},
+            {ord:"Verktyg", def:"En enkel teknisk lösning som hjälper oss att göra ett arbete, till exempel en hammare."},
+            {ord:"Vitvaror", def:"Stora maskiner i hemmet, som kylskåp, spis och tvättmaskin."},
+            {ord:"Friktion", def:"En bromsande kraft mellan ytor; hjul och lager minskar friktionen."},
+            {ord:"Elnät", def:"Ett stort system som leder el från kraftverk hem till hus och skolor."}
+        ];
+        return window._teknikBegrepp;
+    }
+    function createTeknikWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('TEKNIK ÅK 4', 560, 'teknik-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.classList.add('teknik-body');
+        const bank = teknikBank();
+        const BEGREPP = 'Begrepp';
+        const cats = Object.keys(bank).concat([BEGREPP]);
+        let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
+        widget.dataset.teknikCat = currentCat;
+
+        const tabsEl = document.createElement('div'); tabsEl.className = 'teknik-tabs';
+        const gridEl = document.createElement('div'); gridEl.className = 'teknik-grid';
+        const footEl = document.createElement('div'); footEl.className = 'teknik-footnote';
+        body.appendChild(tabsEl); body.appendChild(gridEl); body.appendChild(footEl);
+
+        function renderTabs(){
+            tabsEl.innerHTML = '';
+            cats.forEach(cat=>{
+                const b = document.createElement('button');
+                b.className = 'teknik-tab' + (cat===currentCat ? ' active' : '');
+                b.textContent = cat; b.type = 'button';
+                b.onclick = ()=>{ currentCat = cat; widget.dataset.teknikCat = cat; renderTabs(); renderView(); saveBoardState(); };
+                tabsEl.appendChild(b);
+            });
+        }
+        function renderView(){
+            if(currentCat === BEGREPP) renderBegrepp();
+            else renderGrid();
+        }
+        function renderGrid(){
+            tabsEl.style.display='flex';
+            gridEl.className='teknik-grid'; gridEl.style.display='grid';
+            footEl.style.display='block'; footEl.textContent='Klicka på ett ämne för att öppna faktan';
+            gridEl.innerHTML = '';
+            bank[currentCat].forEach(item=>{
+                const tile = document.createElement('div'); tile.className='teknik-tile';
+                tile.innerHTML = `<span class="teknik-emoji">${item.e}</span><span class="teknik-lbl">${item.t}</span>`;
+                tile.onclick = ()=> renderDetail(item);
+                gridEl.appendChild(tile);
+            });
+            const quizTile = document.createElement('div');
+            quizTile.className = 'teknik-tile subj-quiz-tile';
+            quizTile.style.cssText = '--q-main:#f59e0b;--q-dark:#d97706;';
+            quizTile.innerHTML = `<span class="teknik-emoji">📝</span><span class="teknik-lbl">Quiz</span>`;
+            quizTile.onclick = ()=> renderQuiz();
+            gridEl.appendChild(quizTile);
+        }
+        function renderQuiz(){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            renderSubjectQuiz({
+                container: gridEl, tileGridClass: 'teknik-grid', cat: currentCat, items: bank[currentCat], subject: 'teknik',
+                theme: { main:'#f59e0b', dark:'#d97706', soft:'#fdf0d9' },
+                onBack: ()=>{ tabsEl.style.display='flex'; footEl.style.display='block'; renderGrid(); }
+            });
+        }
+        function renderDetail(item){
+            tabsEl.style.display='none'; footEl.style.display='none';
+            gridEl.className='teknik-grid'; gridEl.style.display='block';
+            gridEl.innerHTML = `<div class="teknik-detail">
+                <button class="teknik-back" type="button">← Tillbaka</button>
+                <span class="teknik-detail-emoji">${item.e}</span>
+                <div class="teknik-tag">${currentCat}</div>
+                <h3>${item.t}</h3>
+                <p>${item.txt}</p>
+            </div>`;
+            gridEl.querySelector('.teknik-back').onclick = ()=>{ renderGrid(); };
+        }
+        function renderBegrepp(){
+            tabsEl.style.display='flex';
+            gridEl.className='teknik-begrepp'; gridEl.style.display='block';
+            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen i teknik åk 4';
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let html = '<input type="text" class="teknik-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            html += '<div class="teknik-begrepp-list">';
+            teknikBegrepp().forEach(b=>{
+                html += `<div class="teknik-begrepp-item"><span class="teknik-begrepp-ord">${esc(b.ord)}</span><span class="teknik-begrepp-def">${esc(b.def)}</span></div>`;
+            });
+            html += '</div>';
+            gridEl.innerHTML = html;
+            const search = gridEl.querySelector('.teknik-begrepp-search');
+            const items = gridEl.querySelectorAll('.teknik-begrepp-item');
+            search.oninput = ()=>{
+                const q = search.value.trim().toLowerCase();
+                items.forEach(it=>{
+                    const txt = it.textContent.toLowerCase();
+                    it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
+                });
+            };
+        }
+        renderTabs(); renderView();
+    }
+
     // ---- SYNONYMJAKTEN: ett ord i mitten, klassen jagar synonymer ----
     // Utmaningsord i tre nivåer med inbyggda facit-synonymer. Läraren fyller
     // på klassens förslag runt ordet; ”Visa förslag” avslöjar de som saknas.
@@ -5303,7 +5962,7 @@
         const widget = body.parentElement.parentElement;
         body.innerHTML = `<div class='hover-menu mk-ctrl'><select class='editor-select sk-lista'></select><select class='editor-select sk-mal'><option value='5'>Först till 5</option><option value='10'>Först till 10</option><option value='15'>Först till 15</option><option value='20'>Först till 20</option></select><select class='editor-select sk-tid'><option value='av'>⏱ Ingen timer</option><option value='10'>⏱ 10 sek</option><option value='20'>⏱ 20 sek</option><option value='30'>⏱ 30 sek</option><option value='60'>⏱ 60 sek</option></select></div><div class='mk-lag-rad'></div><div class='mk-tur'></div><div class='mk-timer' style='display:none;'><div class='mk-timer-spar'><div class='mk-timer-bar'></div></div><span class='mk-timer-text'></span></div><div class='sk-ord' title='Klicka för att avslöja nästa bokstav'></div><div class='sk-hint'>🔊 Läs upp startar klockan · klick på ordet avslöjar nästa bokstav</div><div class='mk-doma'><button class='btn btn-secondary sk-lasupp'>🔊 Läs upp</button><button class='mk-ratt'>✔ Rätt (+1)</button><button class='mk-fel'>✘ Fel</button></div><div class='hover-menu' style='display:flex; gap:6px; margin-top:8px;'><button class='btn btn-secondary sk-visa' style='flex:1;'>Visa hela ordet</button><button class='btn btn-secondary sk-ny-omgang' style='flex:1;'>Ny omgång</button></div><div class='mk-info'>Fel svar (utan avslöjat ord) = samma ord går vidare till nästa lag</div>`;
         const listaSel=body.querySelector('.sk-lista'), malSel=body.querySelector('.sk-mal'), tidSel=body.querySelector('.sk-tid'), lagRad=body.querySelector('.mk-lag-rad'), turEl=body.querySelector('.mk-tur'), ordEl=body.querySelector('.sk-ord'), timerEl=body.querySelector('.mk-timer'), barEl=body.querySelector('.mk-timer-bar'), timerTxt=body.querySelector('.mk-timer-text');
-        let teams=[{name:'Lag 1',p:0},{name:'Lag 2',p:0}], turn=0, ord='', avslojade=0, ko=[], tickId=null, deadline=0, timeoutLage=false, harLastsUpp=false;
+        let teams=[{name:'Lag 1',p:0},{name:'Lag 2',p:0}], turn=0, ord='', avslojade=0, ko=[], tickId=null, deadline=0, timeoutLage=false, harLastsUpp=false, klarForNyttOrd=false;
         function fyllListor(){
             listaSel.innerHTML=`<option value='latt'>Stavning – Lätt</option><option value='medel'>Stavning – Medel</option><option value='svar'>Stavning – Svår</option>`;
             try{ const l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; Object.keys(l).forEach(k=>{ const o=document.createElement('option'); o.value='egen:'+k; o.textContent='📄 '+k; listaSel.appendChild(o); }); }catch(e){}
@@ -5326,7 +5985,7 @@
         }
         function nastaOrd(){
             if(!ko.length){ ko=hamtaOrd().slice(); for(let i=ko.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ko[i],ko[j]]=[ko[j],ko[i]]; } }
-            ord = ko.pop() || ''; avslojade=0; harLastsUpp=false;
+            ord = ko.pop() || ''; avslojade=0; harLastsUpp=false; klarForNyttOrd=false;
             renderOrd();
             uppdateraVisaKnapp();
             stoppaTimer(); timerEl.style.display='none'; // klockan startar först när ordet läses upp
@@ -5348,13 +6007,15 @@
                 r.textContent=b; ordEl.appendChild(r);
             });
         }
-        ordEl.onclick=()=>{ if(avslojade<ord.length){ avslojade++; while(ord[avslojade-1]===' ' && avslojade<ord.length) avslojade++; renderOrd(avslojade-1); if(heltAvslojat()){ stoppaTimer(); timerEl.style.display='none'; } } };
+        ordEl.onclick=()=>{ if(avslojade<ord.length){ avslojade++; while(ord[avslojade-1]===' ' && avslojade<ord.length) avslojade++; renderOrd(avslojade-1); if(heltAvslojat()){ stoppaTimer(); timerEl.style.display='none'; klarForNyttOrd=true; } } };
         body.querySelector('.sk-visa').onclick=()=>{
             if(!harLastsUpp) return; // visar bara det ord som faktiskt lästs upp – aldrig ett kommande, oläst ord
-            avslojade=ord.length; renderOrd(); stoppaTimer(); timerEl.style.display='none';
+            avslojade=ord.length; renderOrd(); stoppaTimer(); timerEl.style.display='none'; klarForNyttOrd=true;
         };
         const heltAvslojat=()=> avslojade>=ord.length;
         body.querySelector('.sk-lasupp').onclick=()=>{
+            // Om det förra ordet redan visats/avslöjats helt: ladda ett nytt ord innan uppläsning
+            if(klarForNyttOrd || heltAvslojat()){ nastaOrd(); }
             try{ const u=new SpeechSynthesisUtterance(ord); u.lang='sv-SE'; u.rate=0.8; speechSynthesis.cancel(); speechSynthesis.speak(u); }
             catch(e){ customAlert('Talsyntes stöds inte i den här webbläsaren.', '🔊'); }
             harLastsUpp=true; uppdateraVisaKnapp();
@@ -6251,8 +6912,11 @@
     }
 
     function createFractionVisualizer(config){
-        const body=createWidget('BRÅK / TID',220,'',config); body.innerHTML=`<div style='display:flex;gap:10px;justify-content:center;margin-bottom:15px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' class='d-i' style='width:50px;text-align:center;'></div><div class='fraction-circle' style='position:relative;'></div>`; const ni=body.querySelector('.n-i'), di=body.querySelector('.d-i'), circ=body.lastChild;
-        const upd=()=>{ let n=parseInt(ni.value)||0, d=parseInt(di.value)||1; n=Math.max(0,Math.min(n,d)); circ.style.background=`conic-gradient(#007aff ${(n/d)*360}deg, #f2f2f7 ${(n/d)*360}deg)`; circ.innerHTML=''; if(d>1&&d<=20){ for(let i=0;i<d;i++){ let l=document.createElement('div'); l.style=`position:absolute;top:0;left:50%;width:1px;height:50%;background:#333;transform-origin:bottom center;transform:rotate(${i*360/d}deg);`; circ.appendChild(l); } } saveBoardState(); }; ni.onchange=upd; di.onchange=upd; upd();
+        const body=createWidget('BRÅK / TID',220,'',config); body.innerHTML=`<div style='display:flex;gap:10px;justify-content:center;margin-bottom:15px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' class='d-i' style='width:50px;text-align:center;'></div><div class='fraction-circle' style='position:relative;'></div><div class='frac-values' style='display:flex;justify-content:center;gap:8px;margin-top:12px;'><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Procent</div><div class='frac-pct' style='font-size:15px;font-weight:800;color:#007aff;'>25 %</div></div><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Decimal</div><div class='frac-dec' style='font-size:15px;font-weight:800;color:#007aff;'>0,25</div></div></div>`;
+        const ni=body.querySelector('.n-i'), di=body.querySelector('.d-i'), circ=body.querySelector('.fraction-circle'), pctEl=body.querySelector('.frac-pct'), decEl=body.querySelector('.frac-dec');
+        const fmtDec=(x)=>{ let s=parseFloat(x.toFixed(4)).toString(); return s.replace('.',','); };
+        const fmtPct=(x)=>{ let s=parseFloat(x.toFixed(2)).toString(); return s.replace('.',','); };
+        const upd=()=>{ let n=parseInt(ni.value)||0, d=parseInt(di.value)||1; n=Math.max(0,Math.min(n,d)); circ.style.background=`conic-gradient(#007aff ${(n/d)*360}deg, #f2f2f7 ${(n/d)*360}deg)`; circ.innerHTML=''; if(d>1&&d<=20){ for(let i=0;i<d;i++){ let l=document.createElement('div'); l.style=`position:absolute;top:0;left:50%;width:1px;height:50%;background:#333;transform-origin:bottom center;transform:rotate(${i*360/d}deg);`; circ.appendChild(l); } } const andel=d>0?n/d:0; if(pctEl) pctEl.textContent=fmtPct(andel*100)+' %'; if(decEl) decEl.textContent=fmtDec(andel); saveBoardState(); }; ni.onchange=upd; ni.oninput=upd; di.onchange=upd; di.oninput=upd; upd();
     }
 
     function createTableWidget(config) {
