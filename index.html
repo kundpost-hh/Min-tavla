@@ -141,7 +141,7 @@
             <button class="tool-btn" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
             <button class="tool-btn" onclick="createGOTD()"><div class="icon">🧠</div><div class="label">Grej of the day</div></button>
             <button class="tool-btn" onclick="createCalculator()"><div class="icon">🧮</div><div class="label">Räknare</div></button>
-            <button class="tool-btn" onclick="createFractionVisualizer()"><div class="icon">🍕</div><div class="label">Bråk</div></button>
+            <button class="tool-btn" onclick="createFractionVisualizer()"><div class="icon">🔢</div><div class="label">Talformer</div></button>
             <button class="tool-btn" onclick="createTableWidget()"><div class="icon">📊</div><div class="label">Tabell</div></button>
             <button class="tool-btn" onclick="createRealTimeClock()"><div class="icon">🕰️</div><div class="label">Klocka</div></button>
             <button class="tool-btn" onclick="createAnalogTimer()"><div class="icon">⏲️</div><div class="label">A. Timer</div></button>
@@ -1863,11 +1863,16 @@
         overlay.style.display = 'flex';
         listEl.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Hämtar användare…</div>';
         try {
-            const snap = await fbDB.collection('users').orderBy('lastSeen', 'desc').get();
+            // Hämta ALLA användardokument. Vi sorterar i minnet i stället för med
+            // Firestore .orderBy('lastSeen') – annars utesluts användare som saknar
+            // fältet lastSeen helt ur resultatet, och då gick de inte att ta bort.
+            const snap = await fbDB.collection('users').get();
             if (snap.empty){ listEl.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Inga användare ännu.</div>'; return; }
+            const users = [];
+            snap.forEach(doc => { const d = doc.data() || {}; users.push(d); });
+            users.sort((a,b)=> (b.lastSeen||0) - (a.lastSeen||0));
             listEl.innerHTML = '';
-            snap.forEach(doc => {
-                const u = doc.data();
+            users.forEach(u => {
                 const row = document.createElement('div'); row.className = 'admin-user-row';
                 const blocked = !!u.blocked;
                 const last = u.lastSeen ? new Date(u.lastSeen).toLocaleString('sv-SE') : '–';
@@ -1899,8 +1904,14 @@
         customConfirm(msg, async () => {
             try {
                 await fbDB.collection('users').doc(emailKey(email)).set({ blocked: block }, { merge:true });
-                openAdminPanel();
-            } catch(err){ console.warn(err); customAlert('Kunde inte uppdatera. Försök igen.', '⚠️'); }
+                await openAdminPanel();
+                customAlert(block ? (email + ' har tagits bort och kan inte längre logga in.') : (email + ' har fått tillbaka åtkomsten.'), block ? '🔒' : '✅');
+            } catch(err){
+                console.warn(err);
+                // Vanligaste orsaken är att den inloggade inte står i config/admins i Firestore,
+                // så säkerhetsreglerna nekar skrivningen.
+                customAlert('Kunde inte uppdatera åtkomsten.\n\nTroligen saknar ditt konto admin-behörighet i databasen (dokumentet config/admins), eller så nekade databasens säkerhetsregler skrivningen.', '⚠️');
+            }
         });
     }
     function closeAdminPanel(){ document.getElementById('admin-panel-overlay').style.display = 'none'; }
@@ -2047,7 +2058,7 @@
                 else if (type === 'SKAPA GRUPPER' || type === 'SLUMPA NAMN' || type === 'DAGENS ORD') { state.data.list = w.querySelector('select')?.value || ''; state.data.text = w.querySelector('.name-input')?.value || ''; if(type === 'SKAPA GRUPPER') { state.data.count = w.querySelector('input[type="number"]')?.value || '4'; state.data.result = w.querySelector('.group-result')?.innerHTML || ''; } if(type === 'SLUMPA NAMN') { state.data.removeCb = w.querySelector('input[type="checkbox"]')?.checked || false; } if(type === 'DAGENS ORD') { state.data.result = w.querySelector('.name-result')?.innerHTML || ''; } }
                 else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
-                else if (type === 'DIGITAL TIMER' || type === 'BRÅK / TID') { const nIn = w.querySelectorAll('input[type="number"]'); if(nIn.length >= 2){ if(type === 'DIGITAL TIMER'){ state.data.min = nIn[0].value; state.data.sec = nIn[1].value; } else { state.data.num = nIn[0].value; state.data.den = nIn[1].value; } } }
+                else if (type === 'DIGITAL TIMER' || type === 'BRÅK / TID' || type === 'TALFORMER') { const nIn = w.querySelectorAll('input[type="number"]'); if(nIn.length >= 2){ if(type === 'DIGITAL TIMER'){ state.data.min = nIn[0].value; state.data.sec = nIn[1].value; } else { state.data.num = nIn[0].value; state.data.den = nIn[1].value; } } }
                 else if (type === 'RITPLATTA') { const cv=w.querySelector('canvas'); state.data.img = cv ? compressCanvasToDataURL(cv, 1000, 0.82) : ''; }
                 else if (type === 'QR-KOD') { state.data.url = w.querySelector('.list-name-input')?.value || ''; }
                 else if (type === 'ARBETSSÄTT') { state.data.icon = w.querySelector('.work-symbol.active')?.dataset.icon || ''; }
@@ -2125,7 +2136,7 @@
             else if (w.type === 'ARBETSSÄTT') createWorkSymbols(w);
             else if (w.type === 'BELÖNING') createRewardSystem(w);
             else if (w.type === 'MINIRÄKNARE') createCalculator(w);
-            else if (w.type === 'BRÅK / TID') createFractionVisualizer(w);
+            else if (w.type === 'BRÅK / TID' || w.type === 'TALFORMER') createFractionVisualizer(w);
             else if (w.type === 'SVENSKA ALFABETET') createAlphabetWidget(w);
             else if (w.type === 'GRATTIS') createBirthdayWidget(w);
             else if (w.type === 'NÄRVARO') createAttendance(w);
@@ -2415,7 +2426,11 @@
         // VECKODAGSTAVLOR (fasta) – chip-rad överst
         pagesEl.innerHTML = '';
         const dayRow = document.createElement('div'); dayRow.className='sp-day-row';
-        const today = todayDayIndex();
+        // Stjärnan ska markera dagens faktiska veckodag (mån–fre). På lördag/söndag
+        // finns ingen schemadag, så då visas ingen stjärna (i stället för att den
+        // felaktigt hamnar på måndag).
+        const _dow = new Date().getDay();               // 0=sön, 1=mån … 6=lör
+        const today = (_dow>=1 && _dow<=5) ? _dow-1 : -1; // vardag -> 0..4, helg -> -1 (ingen)
         pagesListV6.forEach((pg, i)=>{
             if(pg.day===undefined || pg.day===null) return;
             const d = DAY_DEFS[pg.day]; if(!d) return;
@@ -2793,12 +2808,49 @@
 
     function createWordOfTheDay(config){
         const body=createWidget('DAGENS ORD', 320, 'word-widget', config);
-        body.innerHTML = `<div class='list-selector-area hover-menu'><select class='editor-select'></select><button class='btn btn-danger btn-del'>Ta bort</button></div><div class='save-list-area hover-menu'><input type='text' class='list-name-input' placeholder='Namn på ordlista...'><button class='btn btn-secondary btn-save'>Spara</button></div><textarea class='name-input hover-menu' placeholder='Ett ord per rad...'></textarea><button class='btn btn-primary hover-menu btn-roll' style='width:100%'>Slumpa ord!</button><div class='name-result' style='min-height:60px;display:flex;align-items:center;justify-content:center;'></div>`;
+        body.innerHTML = `<div class='list-selector-area hover-menu'><select class='editor-select'></select><button class='btn btn-danger btn-del'>Ta bort</button></div><div class='save-list-area hover-menu'><input type='text' class='list-name-input' placeholder='Namn på ordlista...'><button class='btn btn-secondary btn-save'>Spara</button></div><button class='btn btn-secondary btn-toggle-list' style='width:100%;margin-bottom:6px;'>👁️ Visa ordlista</button><textarea class='name-input hover-menu' placeholder='Ett ord per rad...' style='display:none;'></textarea><button class='btn btn-primary hover-menu btn-roll' style='width:100%'>Slumpa ord!</button><div class='name-result' style='min-height:60px;display:flex;align-items:center;justify-content:center;'></div>`;
         const sel=body.querySelector('select'), txt=body.querySelector('textarea'), res=body.querySelector('.name-result'), ni=body.querySelector('.list-name-input');
-        const loadW = ()=>{ sel.innerHTML='<option value="">-- Välj ordlista --</option>'; let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;sel.appendChild(o);}); }; loadW();
-        sel.onchange=()=>{ if(!sel.value)return; let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; txt.value=l[sel.value]||''; res.innerHTML=''; };
+        const toggleBtn=body.querySelector('.btn-toggle-list');
+        let listaSynlig=false;
+        function uppdateraListVy(){
+            txt.style.display = listaSynlig ? '' : 'none';
+            toggleBtn.textContent = listaSynlig ? '🙈 Dölj ordlista' : '👁️ Visa ordlista';
+        }
+        toggleBtn.onclick=()=>{ listaSynlig=!listaSynlig; uppdateraListVy(); };
+        uppdateraListVy();
+        // Inbyggda exempellistor så att en ny användare snabbt kan testa hur widgeten fungerar
+        const EXEMPEL_LISTOR = {
+            'Fysik (exempel)': 'kraft\nrörelse\nhastighet\nacceleration\ntyngdkraft\nfriktion\nenergi\nmagnet',
+            'Djur (exempel)': 'hund\nkatt\nhäst\nelefant\ngiraff\nlejon\npingvin\nfjäril\nigelkott\ndelfin',
+            'Frukt & grönt (exempel)': 'äpple\nbanan\napelsin\njordgubbe\nmorot\ngurka\ntomat\npotatis\npäron\nvindruvor',
+            'Veckodagar (exempel)': 'måndag\ntisdag\nonsdag\ntorsdag\nfredag\nlördag\nsöndag',
+            'Färger (exempel)': 'röd\nblå\ngul\ngrön\norange\nlila\nrosa\nbrun\nsvart\nvit',
+            'Sverige – städer (exempel)': 'Stockholm\nGöteborg\nMalmö\nUppsala\nLinköping\nÖrebro\nVästerås\nHelsingborg'
+        };
+        const loadW = ()=>{
+            sel.innerHTML='<option value="">-- Välj ordlista --</option>';
+            // Egna sparade listor först (om det finns några)
+            let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{};
+            const egnaNycklar=Object.keys(l);
+            if(egnaNycklarFinns(egnaNycklar)){
+                const og=document.createElement('optgroup'); og.label='Mina listor';
+                egnaNycklar.forEach(k=>{ let o=document.createElement('option'); o.value=k; o.innerText=k; og.appendChild(o); });
+                sel.appendChild(og);
+            }
+            // Inbyggda exempellistor
+            const oge=document.createElement('optgroup'); oge.label='Exempellistor';
+            Object.keys(EXEMPEL_LISTOR).forEach(k=>{ let o=document.createElement('option'); o.value='exempel:'+k; o.innerText='✨ '+k; oge.appendChild(o); });
+            sel.appendChild(oge);
+        };
+        function egnaNycklarFinns(arr){ return arr && arr.length>0; }
+        loadW();
+        sel.onchange=()=>{
+            if(!sel.value){ return; }
+            if(sel.value.startsWith('exempel:')){ txt.value = EXEMPEL_LISTOR[sel.value.slice(8)]||''; res.innerHTML=''; saveBoardState(); return; }
+            let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; txt.value=l[sel.value]||''; res.innerHTML='';
+        };
         body.querySelector('.btn-save').onclick=()=>{ let t=ni.value.trim(), cn=txt.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; l[t]=cn; localStorage.setItem('savedWordLists_',JSON.stringify(l)); ni.value=''; loadW(); sel.value=t; saveBoardState(); };
-        body.querySelector('.btn-del').onclick=()=>{ if(!sel.value)return; customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; delete l[sel.value]; localStorage.setItem('savedWordLists_',JSON.stringify(l)); txt.value=''; res.innerHTML=''; loadW(); saveBoardState(); }); };
+        body.querySelector('.btn-del').onclick=()=>{ if(!sel.value)return; if(sel.value.startsWith('exempel:')){ customAlert('Exempellistor kan inte raderas. Du kan spara en egen lista i stället.', 'ℹ️'); return; } customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; delete l[sel.value]; localStorage.setItem('savedWordLists_',JSON.stringify(l)); txt.value=''; res.innerHTML=''; loadW(); saveBoardState(); }); };
         if(config&&config.data){ if(config.data.list) setTimeout(()=>sel.value=config.data.list, 100); if(config.data.text) txt.value=config.data.text; if(config.data.result) res.innerHTML=config.data.result; }
         body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerHTML='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let w=n[Math.floor(Math.random()*n.length)]; res.innerHTML=`<span style='color:#ff3b30;font-size:36px;font-weight:900;'>${w}</span>`; saveBoardState(); showWinnerPopup(w); } },80); };
     }
@@ -6912,11 +6964,89 @@
     }
 
     function createFractionVisualizer(config){
-        const body=createWidget('BRÅK / TID',220,'',config); body.innerHTML=`<div style='display:flex;gap:10px;justify-content:center;margin-bottom:15px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' class='d-i' style='width:50px;text-align:center;'></div><div class='fraction-circle' style='position:relative;'></div><div class='frac-values' style='display:flex;justify-content:center;gap:8px;margin-top:12px;'><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Procent</div><div class='frac-pct' style='font-size:15px;font-weight:800;color:#007aff;'>25 %</div></div><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Decimal</div><div class='frac-dec' style='font-size:15px;font-weight:800;color:#007aff;'>0,25</div></div></div>`;
-        const ni=body.querySelector('.n-i'), di=body.querySelector('.d-i'), circ=body.querySelector('.fraction-circle'), pctEl=body.querySelector('.frac-pct'), decEl=body.querySelector('.frac-dec');
+        const body=createWidget('TALFORMER',340,'',config); body.innerHTML=`<div style='display:flex;gap:10px;justify-content:center;margin-bottom:15px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' class='d-i' style='width:50px;text-align:center;'></div><div class='fraction-circle' style='position:relative;'></div><div class='frac-values' style='display:flex;justify-content:center;gap:8px;margin-top:12px;'><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Procent</div><div class='frac-pct' style='font-size:15px;font-weight:800;color:#007aff;'>25 %</div></div><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Decimal</div><div class='frac-dec' style='font-size:15px;font-weight:800;color:#007aff;'>0,25</div></div></div><div class='hover-menu tf-ovn-ctrl' style='display:flex;gap:6px;margin-top:14px;'><select class='editor-select tf-niva' style='flex:1;'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><button class='btn btn-primary tf-uppgift' style='flex:1;'>Övningsuppgift ▶</button></div><div class='tf-uppg' style='display:none;'></div>`;
+        const ni=body.querySelector('.n-i'), di=body.querySelector('.d-i'), circ=body.querySelector('.fraction-circle'), pctEl=body.querySelector('.frac-pct'), decEl=body.querySelector('.frac-dec'), nivaSel=body.querySelector('.tf-niva'), uppgEl=body.querySelector('.tf-uppg');
+        if(config && config.data && config.data.niva) nivaSel.value=config.data.niva;
         const fmtDec=(x)=>{ let s=parseFloat(x.toFixed(4)).toString(); return s.replace('.',','); };
         const fmtPct=(x)=>{ let s=parseFloat(x.toFixed(2)).toString(); return s.replace('.',','); };
         const upd=()=>{ let n=parseInt(ni.value)||0, d=parseInt(di.value)||1; n=Math.max(0,Math.min(n,d)); circ.style.background=`conic-gradient(#007aff ${(n/d)*360}deg, #f2f2f7 ${(n/d)*360}deg)`; circ.innerHTML=''; if(d>1&&d<=20){ for(let i=0;i<d;i++){ let l=document.createElement('div'); l.style=`position:absolute;top:0;left:50%;width:1px;height:50%;background:#333;transform-origin:bottom center;transform:rotate(${i*360/d}deg);`; circ.appendChild(l); } } const andel=d>0?n/d:0; if(pctEl) pctEl.textContent=fmtPct(andel*100)+' %'; if(decEl) decEl.textContent=fmtDec(andel); saveBoardState(); }; ni.onchange=upd; ni.oninput=upd; di.onchange=upd; di.oninput=upd; upd();
+
+        // --- ÖVNINGSUPPGIFTER: omvandling mellan bråk, procent och decimal ---
+        const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
+        const val=a=>a[ri(0,a.length-1)];
+        // Tal-set per svårighetsgrad: {t:'täljare/nämnare', p:procent, d:decimal-sträng}
+        const SET = {
+            latt: [
+                {t:'1/2', p:50, d:'0,5'}, {t:'1/4', p:25, d:'0,25'}, {t:'3/4', p:75, d:'0,75'},
+                {t:'1/10', p:10, d:'0,1'}, {t:'1/5', p:20, d:'0,2'}, {t:'1/1', p:100, d:'1'},
+                {t:'2/4', p:50, d:'0,5'}
+            ],
+            medel: [
+                {t:'1/2', p:50, d:'0,5'}, {t:'1/4', p:25, d:'0,25'}, {t:'3/4', p:75, d:'0,75'},
+                {t:'1/5', p:20, d:'0,2'}, {t:'2/5', p:40, d:'0,4'}, {t:'3/5', p:60, d:'0,6'}, {t:'4/5', p:80, d:'0,8'},
+                {t:'1/10', p:10, d:'0,1'}, {t:'3/10', p:30, d:'0,3'}, {t:'7/10', p:70, d:'0,7'}, {t:'9/10', p:90, d:'0,9'},
+                {t:'1/1', p:100, d:'1'}
+            ],
+            svar: [
+                {t:'1/8', p:12.5, d:'0,125'}, {t:'3/8', p:37.5, d:'0,375'}, {t:'5/8', p:62.5, d:'0,625'}, {t:'7/8', p:87.5, d:'0,875'},
+                {t:'1/20', p:5, d:'0,05'}, {t:'3/20', p:15, d:'0,15'}, {t:'1/25', p:4, d:'0,04'}, {t:'1/50', p:2, d:'0,02'},
+                {t:'3/4', p:75, d:'0,75'}, {t:'2/5', p:40, d:'0,4'}, {t:'7/10', p:70, d:'0,7'}, {t:'1/4', p:25, d:'0,25'},
+                {t:'9/10', p:90, d:'0,9'}, {t:'1/100', p:1, d:'0,01'}
+            ]
+        };
+        const kontext = [
+            (x)=>`I klassen är ${x} av eleverna borta idag.`,
+            (x)=>`${x} av en pizza är uppäten.`,
+            (x)=>`${x} av vattnet i flaskan är kvar.`,
+            (x)=>`${x} av matchen har spelats.`,
+            (x)=>`${x} av boken är utläst.`,
+            (x)=>`${x} av tårtan är kvar.`,
+            (x)=>`${x} av sträckan är avklarad.`,
+            (x)=>`${x} av pengarna är sparade.`
+        ];
+        function braktext(t){ const [a,b]=t.split('/'); return a+'/'+b; }
+        // Genererar en uppgift som ber eleven omvandla mellan formerna
+        function genUppgift(niva){
+            const s = val(SET[niva]);
+            const typ = ri(0,3); // 0: bråk->%  1: bråk->dec  2: %->bråk/dec  3: dec->%/bråk
+            let fraga, svar;
+            const brak = braktext(s.t);
+            const pStr = fmtPct(s.p)+' %';
+            if(typ===0){
+                fraga = `Skriv <b>${brak}</b> i procentform.`;
+                svar = pStr;
+            } else if(typ===1){
+                fraga = `Skriv <b>${brak}</b> i decimalform.`;
+                svar = s.d;
+            } else if(typ===2){
+                fraga = `Skriv <b>${pStr}</b> som bråk och som decimaltal.`;
+                svar = `${brak}  och  ${s.d}`;
+            } else {
+                fraga = `Skriv decimaltalet <b>${s.d}</b> i procentform.`;
+                svar = pStr;
+            }
+            // Ibland: en liten vardagskontext för variation (på lätt/medel oftare enkel form)
+            if(niva!=='latt' && ri(0,2)===0){
+                fraga = kontext[ri(0,kontext.length-1)](brak) + ' Hur mycket är det i procent?';
+                svar = pStr;
+            }
+            return { fraga, svar };
+        }
+        function visaUppgift(){
+            const { fraga, svar } = genUppgift(nivaSel.value);
+            uppgEl.style.display='block'; uppgEl.innerHTML='';
+            const q=document.createElement('div'); q.className='tf-fraga'; q.innerHTML=fraga; q.style.marginBottom='8px'; q.style.lineHeight='1.45';
+            const rad=document.createElement('div'); rad.innerHTML='Svar: ';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
+            a.onclick=()=>{ a.innerHTML=svar; a.classList.add('revealed'); a.onclick=null; };
+            rad.appendChild(a);
+            const ny=document.createElement('button'); ny.className='tf-ny'; ny.type='button'; ny.textContent='🎲 Ny uppgift';
+            ny.style.cssText='margin-top:10px;border:none;background:#007aff;color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:10px;cursor:pointer;font-family:inherit;';
+            ny.onclick=()=> visaUppgift();
+            uppgEl.appendChild(q); uppgEl.appendChild(rad); uppgEl.appendChild(ny);
+        }
+        nivaSel.onchange=()=>{ saveBoardState(); if(uppgEl.style.display!=='none') visaUppgift(); };
+        body.querySelector('.tf-uppgift').onclick=()=> visaUppgift();
     }
 
     function createTableWidget(config) {
@@ -7035,7 +7165,7 @@
     function createQRCode(config){if(config===undefined)config=null;const body=createWidget('QR-KOD',220,'',config);const input=document.createElement('input');input.type='text';input.className='list-name-input hover-menu';input.placeholder='Klistra in länk här...';input.style.marginBottom='10px';const hint=document.createElement('div');hint.innerHTML='📱<div style="font-size:12px;font-weight:600;color:#c7c7cc;margin-top:6px;">Klistra in en länk:<br>och tryck på Enter</div>';hint.style.cssText='text-align:center;font-size:40px;opacity:0.5;padding:14px 0;';const img=document.createElement('img');img.style.width='100%';img.style.display='none';img.style.borderRadius='8px';const refresh=()=>{if(input.value){img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(input.value)}`;img.style.display='block';hint.style.display='none';}else{img.style.display='none';hint.style.display='block';}};input.onchange=()=>{refresh();saveBoardState();};input.onkeydown=(e)=>{if(e.key==='Enter'){e.preventDefault();refresh();saveBoardState();}};if(config&&config.data&&config.data.url){input.value=config.data.url;}refresh();body.appendChild(input);body.appendChild(hint);body.appendChild(img);}
     
     // ARBETSSÄTT WIDGET ÅTERSTÄLLD TILL DET URSPRUNGLIGA GÖMMA-BETEENDET
-    function createWorkSymbols(config) {if(config === undefined) config = null;const body = createWidget('ARBETSSÄTT', 350, '', config);const widget = body.parentElement.parentElement;const container = document.createElement('div');container.style.display = 'flex';container.style.justifyContent = 'center';container.style.gap = '20px';container.style.alignItems = 'center';container.style.padding = '15px 10px';container.style.flexWrap = 'wrap';const symbols = [ { icon: '🤫', name: 'Tyst' }, { icon: '🗣️', name: 'Viskton' }, { icon: '👥', name: 'Samarbete' }, { icon: '🙋', name: 'Räck upp hand' } ];for(let i=0; i<symbols.length; i++) {const s = symbols[i];const wrap = document.createElement('div'); wrap.style.textAlign = 'center'; wrap.className = 'work-symbol-wrap';const el = document.createElement('div'); el.className = 'work-symbol'; el.innerHTML = s.icon; el.dataset.icon = s.icon;const label = document.createElement('div'); label.innerText = s.name; label.style.fontSize = '13px'; label.style.fontWeight = 'bold'; label.style.marginTop = '10px';if(config && config.data && config.data.icon === s.icon) el.classList.add('active');el.onclick = () => {const isActive = el.classList.contains('active');const wraps = container.querySelectorAll('.work-symbol-wrap');for(let j=0; j<wraps.length; j++) wraps[j].style.display = 'block';const syms = container.querySelectorAll('.work-symbol');for(let j=0; j<syms.length; j++) syms[j].classList.remove('active');if(!isActive) {el.classList.add('active');for(let j=0; j<syms.length; j++) { if(syms[j] !== el) syms[j].parentElement.style.display = 'none'; }widget.style.width = '160px'; widget.style.height = 'auto';} else {widget.style.width = '350px';}saveBoardState();};wrap.appendChild(el); wrap.appendChild(label); container.appendChild(wrap);}const activeEl = container.querySelector('.work-symbol.active');if(activeEl) {const syms = container.querySelectorAll('.work-symbol');for(let j=0; j<syms.length; j++) { if(syms[j] !== activeEl) syms[j].parentElement.style.display = 'none'; }widget.style.width = '160px'; widget.style.height = 'auto';}body.appendChild(container);}
+    function createWorkSymbols(config) {if(config === undefined) config = null;const body = createWidget('ARBETSSÄTT', 430, '', config);const widget = body.parentElement.parentElement;const container = document.createElement('div');container.style.display = 'flex';container.style.justifyContent = 'center';container.style.gap = '20px';container.style.alignItems = 'center';container.style.padding = '15px 10px';container.style.flexWrap = 'wrap';const symbols = [ { icon: '🤫', name: 'Arbeta tyst' }, { icon: '🤝', name: 'Samarbeta' }, { icon: '🤏🗣️', name: 'Prata tyst' }, { icon: '🙋', name: 'Räck upp handen' }, { icon: '👥', name: 'Arbeta i par' }, { icon: '👨‍👩‍👧‍👦', name: 'Arbeta i grupp' } ];for(let i=0; i<symbols.length; i++) {const s = symbols[i];const wrap = document.createElement('div'); wrap.style.textAlign = 'center'; wrap.className = 'work-symbol-wrap';const el = document.createElement('div'); el.className = 'work-symbol'; el.innerHTML = s.icon; el.dataset.icon = s.icon;const label = document.createElement('div'); label.innerText = s.name; label.style.fontSize = '13px'; label.style.fontWeight = 'bold'; label.style.marginTop = '10px';if(config && config.data && config.data.icon === s.icon) el.classList.add('active');el.onclick = () => {const isActive = el.classList.contains('active');const wraps = container.querySelectorAll('.work-symbol-wrap');for(let j=0; j<wraps.length; j++) wraps[j].style.display = 'block';const syms = container.querySelectorAll('.work-symbol');for(let j=0; j<syms.length; j++) syms[j].classList.remove('active');if(!isActive) {el.classList.add('active');for(let j=0; j<syms.length; j++) { if(syms[j] !== el) syms[j].parentElement.style.display = 'none'; }widget.style.width = '160px'; widget.style.height = 'auto';} else {widget.style.width = '430px';}saveBoardState();};wrap.appendChild(el); wrap.appendChild(label); container.appendChild(wrap);}const activeEl = container.querySelector('.work-symbol.active');if(activeEl) {const syms = container.querySelectorAll('.work-symbol');for(let j=0; j<syms.length; j++) { if(syms[j] !== activeEl) syms[j].parentElement.style.display = 'none'; }widget.style.width = '160px'; widget.style.height = 'auto';}body.appendChild(container);}
     
     function createImageViewer(config){}
 
