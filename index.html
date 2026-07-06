@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <div id="login-overlay">
+    <div id="login-overlay" style="display:none;">
         <div class="login-box" id="standard-login-view">
             <h1 class="login-title">Min Tavla 👋</h1>
             <p class="login-desc">Logga in med ditt Google-konto. Dina tavlor och listor sparas automatiskt och följer med till alla dina datorer.</p>
@@ -139,6 +139,11 @@
             <button class="tool-btn" onclick="createGroupMaker()"><div class="icon">👥</div><div class="label">Grupper</div></button>
             <button class="tool-btn" onclick="createRandomName()"><div class="icon">🎲</div><div class="label">Slumpa</div></button>
             <button class="tool-btn" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
+            <button class="tool-btn" onclick="createReadingSpeed()"><div class="icon">📖</div><div class="label">Läshastighet</div></button>
+            <button class="tool-btn" onclick="createTextGenres()"><div class="icon">📚</div><div class="label">Textgenrer</div></button>
+            <button class="tool-btn" onclick="createSpeakListen()"><div class="icon">🗣️</div><div class="label">Tal &amp; Lyssna</div></button>
+            <button class="tool-btn" onclick="createConversation()"><div class="icon">💬</div><div class="label">Samtala</div></button>
+            <button class="tool-btn" onclick="createPrata()"><div class="icon">🎤</div><div class="label">Prata</div></button>
             <button class="tool-btn" onclick="createGOTD()"><div class="icon">🧠</div><div class="label">Grej of the day</div></button>
             <button class="tool-btn" onclick="createCalculator()"><div class="icon">🧮</div><div class="label">Räknare</div></button>
             <button class="tool-btn" onclick="createFractionVisualizer()"><div class="icon">🔢</div><div class="label">Talformer</div></button>
@@ -150,6 +155,7 @@
             <button class="tool-btn" onclick="createMultiplicationTable()"><div class="icon">✖️</div><div class="label">Multiplikation</div></button>
             <button class="tool-btn" onclick="createHundredChart()"><div class="icon">💯</div><div class="label">Hundraruta</div></button>
             <button class="tool-btn" onclick="createMathChallenge()"><div class="icon">🔢</div><div class="label">Räkna</div></button>
+            <button class="tool-btn" onclick="createStartuppgift()"><div class="icon">🎯</div><div class="label">Startuppgift</div></button>
             <button class="tool-btn" onclick="createNumberLine()"><div class="icon">📏</div><div class="label">Tallinje</div></button>
             <button class="tool-btn" onclick="createMoneyWidget()"><div class="icon">💰</div><div class="label">Pengar</div></button>
             <button class="tool-btn" onclick="createGeometryWidget()"><div class="icon">📐</div><div class="label">Geometri</div></button>
@@ -948,7 +954,7 @@
     .kw-ai-sec { font-size:12px; font-weight:800; color:#333; margin:14px 0 7px; }
     .kw-ai-or { text-align:center; color:#c7c7cc; font-size:11px; font-weight:700; letter-spacing:1px; margin:16px 0 2px; }
     .kw-ai-adv { border:none; background:none; color:#8e8e93; font-size:12px; cursor:pointer; text-decoration:underline; padding:4px; margin:6px auto 0; display:block; }
-    .kw-gridwrap { width:100%; overflow:auto; margin-bottom:10px; }
+    .kw-gridwrap { width:100%; overflow-x:hidden; overflow-y:visible; margin-bottom:10px; display:flex; justify-content:center; }
     .kw-grid { display:grid; gap:2px; justify-content:center; margin:0 auto; }
     .kw-cell { width:var(--kw-cell); height:var(--kw-cell); position:relative; background:#fff; border:1.5px solid #9aa0aa; box-sizing:border-box; border-radius:3px; }
     .kw-cell.kw-blank { background:transparent; border:none; }
@@ -967,13 +973,16 @@
     .og-edit-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
     .og-word-only { flex:1; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; outline:none; font-family:inherit; background:#fff; text-transform:uppercase; font-weight:700; letter-spacing:1px; }
     .og-word-only:focus { border-color:#007aff; }
-    .og-gridwrap { width:100%; overflow:auto; margin-bottom:10px; }
+    .og-gridwrap { width:100%; overflow-x:hidden; overflow-y:visible; margin-bottom:10px; }
     .og-grid { display:grid; gap:2px; justify-content:center; margin:0 auto; user-select:none; -webkit-user-select:none; touch-action:none; }
     .og-cell { width:var(--og-cell); height:var(--og-cell); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:calc(var(--og-cell)*0.5); background:#fff; border:1.5px solid #e2e2e7; border-radius:4px; color:#1d1d1f; cursor:pointer; }
     .og-cell.og-selecting { background:#cfe4ff; border-color:#007aff; }
     .og-cell.og-found { background:#d2f8dc; border-color:#34c759; color:#1c7a34; }
     .og-cell.og-facit { background:#fff3cd; border-color:#e0b400; }
     .og-wordlist { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:4px 0 12px; }
+    .og-wordlist-head { text-align:center; font-size:12px; font-weight:800; color:#555; text-transform:uppercase; letter-spacing:.6px; margin:10px 0 6px; }
+    .og-dir-note { display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; color:#555; background:#f4f6fa; border:1px solid #e6e9f0; border-radius:20px; padding:5px 12px; margin:0 auto 12px; width:fit-content; max-width:100%; text-align:center; }
+    .og-dir-note b { color:#333; }
     .og-word-chip { font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; background:#f0f0f5; color:#333; }
     .og-word-chip.og-found { background:#d2f8dc; color:#1c7a34; text-decoration:line-through; }
     .og-diag-toggle { display:flex; align-items:center; gap:6px; justify-content:center; font-size:12px; color:#555; margin:0 0 10px; cursor:pointer; }
@@ -1315,6 +1324,21 @@
     .rakna-next { width:100%; margin-top:10px; }
     .rakna-count { text-align:center; font-size:12px; font-weight:700; color:#b0b0b8; margin-top:8px; }
 
+    /* ---- STARTUPPGIFT ---- */
+    .su-intro { font-size:12.5px; color:#8e8e93; margin-bottom:10px; line-height:1.4; text-align:center; }
+    .su-btn { font-size:15px; padding:11px; }
+    .su-lista { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+    .su-rad { background:#f7f7fa; border-radius:12px; padding:10px 12px; border:1.5px solid transparent; }
+    .su-rad.su-klurig { background:#fdf3ff; border-color:#e9c6f5; }
+    .su-tagg { display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:#7c3aed; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:6px; }
+    .su-klurig-lbl { color:#c026d3; text-transform:none; letter-spacing:0; margin-left:2px; }
+    .su-fraga-rad { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .su-fraga { font-size:15px; font-weight:700; color:#333; flex:1; min-width:0; }
+    .su-rad.su-klurig .su-fraga { font-size:14px; }
+    .su-svar { min-width:74px; text-align:center; padding:5px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; font-weight:800; font-size:13.5px; cursor:pointer; user-select:none; flex-shrink:0; }
+    .su-svar:hover { background:#ffd98f; }
+    .su-svar.revealed { background:#d9f2df; color:#1f7a37; cursor:default; }
+
     /* ---- TALLINJE ---- */
     .tal-ctrl { display:flex; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:wrap; font-size:12.5px; font-weight:700; color:#555; }
     .tal-ctrl input[type=number] { width:64px; padding:5px 6px; border:1.5px solid #e5e5ea; border-radius:7px; font-family:inherit; font-weight:700; font-size:13px; outline:none; }
@@ -1348,6 +1372,110 @@
     .pengar-upg-ctrl { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
     .pengar-upg-ctrl select { flex:1; min-width:120px; }
     .pengar-vaxel .pengar-fraga { display:block; margin-bottom:8px; line-height:1.45; }
+    .pengar-forklaring { margin-top:10px; background:#eef7ff; border-left:4px solid #007aff; border-radius:10px; padding:9px 12px; font-size:13px; line-height:1.5; color:#243b53; }
+
+    /* ---- TEXTGENRER ---- */
+    .genre-body { padding:14px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+    .genre-tabs { display:flex; flex-wrap:wrap; gap:7px; }
+    .genre-tab { border:1px solid #e4e2ee; background:#f7f6fb; color:#3a3350; padding:7px 13px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s ease; white-space:nowrap; font-family:inherit; display:flex; align-items:center; gap:5px; }
+    .genre-tab:hover { border-color:#8b5cf6; }
+    .genre-tab.active { background:#8b5cf6; border-color:#8b5cf6; color:#fff; box-shadow:0 6px 14px -6px rgba(139,92,246,.6); }
+    .genre-panel { display:flex; flex-direction:column; gap:12px; }
+    .genre-huvud { background:#fff; border:1px solid #ece9f4; border-radius:14px; padding:14px 16px; }
+    .genre-huvud h3 { margin:0 0 8px; color:#7c3aed; font-size:18px; display:flex; align-items:center; gap:8px; }
+    .genre-huvud p { margin:0; color:#3a3546; font-size:14px; line-height:1.55; }
+    .genre-sektion { border-radius:14px; padding:12px 14px; }
+    .genre-sektion h4 { margin:0 0 8px; font-size:13px; text-transform:uppercase; letter-spacing:.5px; }
+    .genre-sektion.kannetecken { background:#f3f0fb; border-left:4px solid #8b5cf6; }
+    .genre-sektion.kannetecken h4 { color:#6d28d9; }
+    .genre-sektion.ordfraser { background:#eef7f0; border-left:4px solid #34c759; }
+    .genre-sektion.ordfraser h4 { color:#248a45; }
+    .genre-sektion ul { margin:0; padding-left:18px; }
+    .genre-sektion li { font-size:13.5px; line-height:1.5; color:#33323c; margin-bottom:4px; }
+    .genre-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .genre-chip { background:#fff; border:1px solid #cfe6d6; color:#248a45; font-size:12.5px; font-weight:700; padding:4px 10px; border-radius:999px; }
+    .genre-sektion.exempel { background:#eef4ff; border-left:4px solid #007aff; }
+    .genre-sektion.exempel h4 { color:#0a5bd3; }
+    .genre-exempel-text { font-size:13.5px; line-height:1.6; color:#2b3a4d; font-style:italic; }
+
+    /* ---- TAL & LYSSNA ---- */
+    .tal-ctrl { display:flex; gap:6px; margin-bottom:12px; align-items:center; }
+    .tal-ctrl select { flex:1; }
+    .tal-fraga-ruta { background:linear-gradient(135deg,#eef4ff,#f4f0fb); border:1px solid #e2e4f0; border-radius:16px; padding:22px 18px; min-height:96px; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:14px; }
+    .tal-fraga-ruta .tal-fraga-txt { font-size:22px; font-weight:900; color:#2a2350; line-height:1.3; }
+    .tal-fraga-ruta .tal-placeholder { font-size:15px; color:#8a8aa0; font-weight:600; }
+    .tal-timer-wrap { margin-bottom:14px; }
+    .tal-timer-bar-bg { height:12px; background:#eceaf3; border-radius:999px; overflow:hidden; }
+    .tal-timer-bar { height:100%; width:100%; background:linear-gradient(90deg,#34c759,#30b350); border-radius:999px; transition:width .25s linear; }
+    .tal-timer-bar.varning { background:linear-gradient(90deg,#ff9500,#ff7a00); }
+    .tal-timer-bar.slut { background:linear-gradient(90deg,#ff3b30,#e0281e); }
+    .tal-timer-txt { text-align:center; font-size:30px; font-weight:900; color:#2a2350; margin-top:8px; font-variant-numeric:tabular-nums; }
+    .tal-timer-txt.slut { color:#ff3b30; }
+    .tal-knappar { display:flex; gap:8px; }
+    .tal-knappar .btn { flex:1; }
+
+    /* ---- SAMTALA ---- */
+    .sam-topp { display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:800; color:#2a7d5a; background:#e9f7ef; border-radius:999px; padding:7px 14px; margin-bottom:14px; }
+    .sam-fraga-ruta { background:linear-gradient(135deg,#e9f7ef,#eef4ff); border:1px solid #d9ecdf; border-radius:18px; padding:26px 20px; min-height:110px; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:16px; }
+    .sam-fraga-txt { font-size:23px; font-weight:900; color:#22303a; line-height:1.35; }
+    .sam-placeholder { font-size:15px; color:#8a9aa5; font-weight:600; }
+    .sam-knapp { width:100%; border:none; background:#34c759; color:#fff; font-weight:900; font-size:16px; padding:13px; border-radius:12px; cursor:pointer; font-family:inherit; box-shadow:0 6px 16px -6px rgba(52,199,89,.6); }
+    .sam-knapp:hover { background:#2fb350; }
+    .sam-knapp:active { transform:scale(.98); }
+    .sam-raknare { text-align:center; font-size:12px; color:#8a9aa5; margin-top:8px; }
+
+    /* ---- PRATA ---- */
+    .prata-typ { display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:800; color:#7a4fbf; background:#f2ecfb; border-radius:999px; padding:7px 14px; margin-bottom:14px; }
+    .prata-fraga-ruta { background:linear-gradient(135deg,#f4f0fb,#eef4ff); border:1px solid #e3dcf2; border-radius:18px; padding:26px 20px; min-height:120px; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:16px; }
+    .prata-fraga-txt { font-size:23px; font-weight:900; color:#2a2350; line-height:1.35; }
+    .prata-placeholder { font-size:15px; color:#9a92ad; font-weight:600; }
+    .prata-knapp { width:100%; border:none; background:#8b5cf6; color:#fff; font-weight:900; font-size:16px; padding:13px; border-radius:12px; cursor:pointer; font-family:inherit; box-shadow:0 6px 16px -6px rgba(139,92,246,.6); }
+    .prata-knapp:hover { background:#7c3aed; }
+    .prata-knapp:active { transform:scale(.98); }
+    .prata-raknare { text-align:center; font-size:12px; color:#9a92ad; margin-top:8px; }
+
+    /* Textgenrer – interaktiva övningar */
+    .genre-lagemeny { display:flex; gap:6px; margin-bottom:12px; background:#f2f0f8; padding:4px; border-radius:12px; }
+    .genre-lage-btn { flex:1; border:none; background:transparent; padding:8px 6px; border-radius:9px; font-weight:800; font-size:13px; color:#6d6488; cursor:pointer; font-family:inherit; }
+    .genre-lage-btn.active { background:#8b5cf6; color:#fff; box-shadow:0 4px 10px -4px rgba(139,92,246,.5); }
+    .genre-ov-val { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .genre-ov-kort { border:1px solid #ece9f4; background:#fff; border-radius:14px; padding:14px 12px; cursor:pointer; text-align:center; transition:transform .12s, box-shadow .12s, border-color .12s; }
+    .genre-ov-kort:hover { transform:translateY(-2px); border-color:#8b5cf6; box-shadow:0 10px 20px -12px rgba(139,92,246,.5); }
+    .genre-ov-kort .ov-emoji { font-size:30px; }
+    .genre-ov-kort .ov-namn { font-weight:800; font-size:14px; color:#3a3350; margin-top:6px; }
+    .genre-ov-kort .ov-desc { font-size:11.5px; color:#8a85a0; margin-top:3px; line-height:1.35; }
+    .genre-ov-panel { display:flex; flex-direction:column; gap:12px; }
+    .genre-ov-topp { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .genre-ov-topp h3 { margin:0; font-size:16px; color:#7c3aed; }
+    .genre-ov-tillbaka { border:none; background:#f2f0f8; color:#6d6488; font-weight:800; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; font-family:inherit; }
+    .genre-ov-text { background:#f7f6fb; border-radius:12px; padding:13px 15px; font-size:14px; line-height:1.55; color:#33313e; font-style:italic; }
+    .genre-ov-fraga { font-weight:800; color:#3a3350; font-size:14px; }
+    .genre-ov-svar { display:flex; flex-direction:column; gap:8px; }
+    .genre-svar-btn { border:1.5px solid #e4e2ee; background:#fff; color:#3a3350; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; text-align:left; font-family:inherit; transition:all .12s; }
+    .genre-svar-btn:hover { border-color:#8b5cf6; }
+    .genre-svar-btn.ratt { background:#e6f7ea; border-color:#34c759; color:#1f7a37; }
+    .genre-svar-btn.fel { background:#ffeceb; border-color:#ff3b30; color:#c2261c; }
+    .genre-svar-btn:disabled { cursor:default; }
+    .genre-ov-feedback { font-weight:800; font-size:14px; text-align:center; min-height:20px; }
+    .genre-ov-next { border:none; background:#8b5cf6; color:#fff; font-weight:800; font-size:14px; padding:10px; border-radius:10px; cursor:pointer; font-family:inherit; }
+    .genre-ov-next:hover { background:#7c3aed; }
+    .genre-skriv-amne { background:#f3f0fb; border-left:4px solid #8b5cf6; border-radius:10px; padding:12px 14px; }
+    .genre-skriv-amne .sk-genre { font-weight:900; color:#6d28d9; font-size:15px; }
+    .genre-skriv-amne .sk-amne { font-size:14px; color:#33313e; margin-top:4px; }
+    .genre-skriv-ta { width:100%; box-sizing:border-box; min-height:120px; border:1.5px solid #e4e2ee; border-radius:12px; padding:11px 13px; font-family:inherit; font-size:14px; line-height:1.5; resize:vertical; outline:none; }
+    .genre-skriv-ta:focus { border-color:#8b5cf6; }
+    .genre-skriv-hjalp { font-size:12.5px; color:#8a85a0; }
+    .genre-skriv-hjalp b { color:#6d28d9; }
+    .genre-para-wrap { display:flex; flex-direction:column; gap:8px; }
+    .genre-para-rad { display:flex; align-items:center; gap:8px; }
+    .genre-para-genre { flex:0 0 40%; background:#8b5cf6; color:#fff; font-weight:800; font-size:13px; padding:10px; border-radius:10px; text-align:center; }
+    .genre-para-drop { flex:1; min-height:44px; border:2px dashed #d4cfe6; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12.5px; color:#8a85a0; padding:6px 8px; text-align:center; }
+    .genre-para-drop.fylld { border-style:solid; border-color:#34c759; background:#f0faf2; color:#1f7a37; font-weight:700; }
+    .genre-para-bank { display:flex; flex-wrap:wrap; gap:7px; margin-top:4px; }
+    .genre-para-chip { background:#fff; border:1.5px solid #e4e2ee; border-radius:999px; padding:7px 12px; font-size:12.5px; font-weight:700; color:#3a3350; cursor:grab; }
+    .genre-para-chip.klar { opacity:.4; pointer-events:none; }
+    .genre-para-chip.vald { border-color:#8b5cf6; background:#f3f0fb; }
+    .pengar-forklaring b { color:#0057b7; }
     .pengar-vaxel .pengar-ny { margin-top:10px; border:none; background:#f2b234; color:#7a5200; font-weight:800; font-size:13px; padding:7px 14px; border-radius:10px; cursor:pointer; font-family:inherit; }
     .pengar-vaxel .pengar-ny:hover { background:#e0a020; }
     .pengar-tips { font-size:11px; color:#b0b0b8; font-weight:600; text-align:center; margin-top:4px; }
@@ -1355,6 +1483,33 @@
     /* ---- GEOMETRI ---- */
     .geo-ctrl { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
     .geo-ctrl select { flex:1; min-width:0; }
+    .geo-ctrl .geo-figurer { flex-shrink:0; padding:6px 10px; font-size:12px; white-space:nowrap; }
+
+    /* Figurutforskare (overlay) */
+    .figx-overlay { position:fixed; inset:0; background:rgba(20,22,30,0.55); z-index:100000; display:flex; align-items:center; justify-content:center; padding:18px; }
+    .figx-box { background:#fff; border-radius:18px; width:min(880px,96vw); max-height:92vh; overflow:auto; box-shadow:0 24px 60px -12px rgba(0,0,0,0.4); padding:20px; }
+    .figx-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .figx-head h2 { margin:0; font-size:19px; color:#1a1a2e; }
+    .figx-close { border:none; background:#f2f2f7; width:34px; height:34px; border-radius:50%; font-size:17px; cursor:pointer; color:#555; }
+    .figx-close:hover { background:#e5e5ea; }
+    .figx-sub { margin:0 0 14px; color:#7a7a86; font-size:13px; }
+    .figx-tabs { display:flex; gap:8px; margin-bottom:14px; }
+    .figx-tab { border:1px solid #e2e4ea; background:#f7f8fb; color:#333; padding:7px 16px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; }
+    .figx-tab.active { background:#007aff; border-color:#007aff; color:#fff; }
+    .figx-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+    .figx-card { border:1px solid #ecedf2; border-radius:14px; padding:12px; display:flex; flex-direction:column; align-items:center; gap:8px; background:#fff; }
+    .figx-fig { width:100%; height:96px; display:flex; align-items:center; justify-content:center; }
+    .figx-fig svg { max-width:100%; max-height:96px; }
+    .figx-reveal { width:100%; border:none; border-radius:10px; padding:10px 8px; cursor:pointer; font-family:inherit; text-align:center; background:linear-gradient(135deg,#ffd66b,#f2b234); color:#7a5200; font-weight:800; font-size:13px; box-shadow:0 4px 10px -4px rgba(242,178,52,.6); }
+    .figx-reveal:hover { filter:brightness(1.03); }
+    .figx-info { width:100%; display:none; background:#f7f8fb; border-radius:10px; padding:10px 12px; }
+    .figx-info.show { display:block; }
+    .figx-namn { font-size:15px; font-weight:800; color:#007aff; text-align:center; margin-bottom:6px; }
+    .figx-props { list-style:none; margin:0; padding:0; font-size:12.5px; color:#3a3a44; }
+    .figx-props li { display:flex; justify-content:space-between; gap:8px; padding:2px 0; border-bottom:1px dashed #e6e7ee; }
+    .figx-props li:last-child { border-bottom:none; }
+    .figx-props .pk { color:#8a8a95; font-weight:600; }
+    .figx-props .pv { font-weight:800; color:#222; }
     .geo-svg { width:100%; height:auto; display:block; background:#fdfdff; border:1.5px solid #eee; border-radius:12px; touch-action:none; }
     .geo-handle { cursor:grab; }
     .geo-facts { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
@@ -1446,12 +1601,12 @@
     .ok-palette { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; justify-content:center; }
     .ok-pal { display:flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; font-size:12.5px; font-weight:800; cursor:pointer; border:2.5px solid transparent; background:#f2f2f7; color:#555; user-select:none; }
     .ok-pal .prick { width:13px; height:13px; border-radius:50%; }
-    .ok-pal.s .prick { background:#34c759; } .ok-pal.v .prick { background:#ff3b30; } .ok-pal.a .prick { background:#007aff; }
+    .ok-pal.s .prick { background:#34c759; } .ok-pal.v .prick { background:#ff3b30; } .ok-pal.a .prick { background:#007aff; } .ok-pal.p .prick { background:#af52de; } .ok-pal.r .prick { background:#ff9500; }
     .ok-pal.vald { border-color:#333; background:#fff; transform:scale(1.05); }
     .ok-mening { display:flex; flex-wrap:wrap; gap:6px 5px; background:#f7f7fa; border-radius:14px; padding:14px 12px; justify-content:center; align-items:center; min-height:52px; }
     .ok-ord { font-size:19px; font-weight:800; color:#333; padding:3px 8px; border-radius:9px; cursor:pointer; border:2.5px solid transparent; user-select:none; line-height:1.25; }
     .ok-ord:hover { background:#ececf1; }
-    .ok-ord.m-s { background:#d9f2df; color:#1f7a37; } .ok-ord.m-v { background:#ffe0de; color:#c2261c; } .ok-ord.m-a { background:#dcebff; color:#0a5bd3; }
+    .ok-ord.m-s { background:#d9f2df; color:#1f7a37; } .ok-ord.m-v { background:#ffe0de; color:#c2261c; } .ok-ord.m-a { background:#dcebff; color:#0a5bd3; } .ok-ord.m-p { background:#f3e2fb; color:#8324c2; } .ok-ord.m-r { background:#ffedd4; color:#c56a00; }
     .ok-ord.ratt { border-color:#34c759; }
     .ok-ord.fel { border-color:#ff3b30; animation:okSkak 0.4s ease; }
     @keyframes okSkak { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
@@ -1618,6 +1773,21 @@
         .tool-btn { min-width: 58px; }
         #mobile-tool-toggle { width: 52px; height: 52px; font-size: 22px; }
         #side-pocket-panel, #tool-pocket-panel { width: 90vw !important; }
+    }
+
+    /* Röd "ny/uppdaterad"-prick på verktygsknappar */
+    .tool-btn { position: relative; }
+    .tool-btn.har-ny-badge::after {
+        content: ''; position: absolute; top: 5px; right: 6px;
+        width: 11px; height: 11px; border-radius: 50%;
+        background: #ff3b30; border: 2px solid #fff;
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+        animation: ny-badge-puls 1.6s ease-in-out infinite;
+        z-index: 2;
+    }
+    @keyframes ny-badge-puls {
+        0%,100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.25); opacity: 0.75; }
     }
 
 </style>
@@ -1796,7 +1966,7 @@
 
     // Logga in med Google (öppet för alla). Resten sköts av onAuthStateChanged.
     async function signInWithGoogle(){
-        if (!window.cloudReady){ customAlert('Det här är offline-versionen – Google-inloggning kräver att firebaseConfig fylls i (se instruktionen högst upp i filens kod). Använd "Fortsätt lokalt" nedan så länge.', '⚠️'); return; }
+        if (!window.cloudReady){ customAlert('Google-inloggning är inte tillgänglig just nu (molnet kunde inte kopplas upp). Använd "Fortsätt lokalt" nedan så länge.', '⚠️'); return; }
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             await fbAuth.signInWithPopup(provider);
@@ -2014,22 +2184,18 @@
         note.appendChild(info); note.appendChild(btn);
     }
     function checkLogin() {
-        if (!window.cloudReady) {
-            // Firebase ej konfigurerad -> kör lokalt så att appen går att använda/förhandsvisa
-            showLocalLoginOption();
+        // ONLINE-VERSION: om molnet (Firebase) är konfigurerat och redo, vänta på
+        // inloggningsstatus via onAuthStateChanged. Annars (t.ex. om SDK:n inte
+        // laddade pga nätverksproblem) faller vi tillbaka till lokalt läge.
+        if (window.cloudReady && fbAuth){
+            document.getElementById('login-overlay').style.display = 'flex';
+            fbAuth.onAuthStateChanged(user => {
+                if (user){ handleSignedIn(user); }
+                else { showLocalLoginOption(); document.getElementById('login-overlay').style.display = 'flex'; }
+            });
+        } else {
             enterLocalMode();
-            return;
         }
-        // Firebase: lyssna på inloggningsstatus – återställer sessionen automatiskt vid omladdning
-        fbAuth.onAuthStateChanged((user) => {
-            if (user){ handleSignedIn(user); }
-            else {
-                currentUser = null;
-                document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
-                document.getElementById('login-overlay').style.display = 'flex';
-                updateAdminButton();
-            }
-        });
     }
 
     function migrateOldLists(u){ const k='savedClassLists_'+u; if(!localStorage.getItem(k)) localStorage.setItem(k, JSON.stringify({'Klass 3A':'Kalle\nSara\nErik\nEmma\nLucas'})); }
@@ -2058,6 +2224,11 @@
                 else if (type === 'SKAPA GRUPPER' || type === 'SLUMPA NAMN' || type === 'DAGENS ORD') { state.data.list = w.querySelector('select')?.value || ''; state.data.text = w.querySelector('.name-input')?.value || ''; if(type === 'SKAPA GRUPPER') { state.data.count = w.querySelector('input[type="number"]')?.value || '4'; state.data.result = w.querySelector('.group-result')?.innerHTML || ''; } if(type === 'SLUMPA NAMN') { state.data.removeCb = w.querySelector('input[type="checkbox"]')?.checked || false; } if(type === 'DAGENS ORD') { state.data.result = w.querySelector('.name-result')?.innerHTML || ''; } }
                 else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
+                else if (type === 'LÄSHASTIGHET') { state.data.niva = w.dataset.lashNiva || 'latt'; state.data.ord = w.dataset.lashOrd || ''; }
+                else if (type === 'TEXTGENRER') { state.data.genre = w.dataset.genre || 'berattelse'; }
+                else if (type === 'TAL OCH LYSSNA') { state.data.fraga = w.dataset.talFraga || ''; state.data.tid = w.dataset.talTid || '60'; }
+                else if (type === 'SAMTALA') { state.data.fraga = w.dataset.samtalaFraga || ''; }
+                else if (type === 'PRATA') { state.data.fraga = w.dataset.prataFraga || ''; }
                 else if (type === 'DIGITAL TIMER' || type === 'BRÅK / TID' || type === 'TALFORMER') { const nIn = w.querySelectorAll('input[type="number"]'); if(nIn.length >= 2){ if(type === 'DIGITAL TIMER'){ state.data.min = nIn[0].value; state.data.sec = nIn[1].value; } else { state.data.num = nIn[0].value; state.data.den = nIn[1].value; } } }
                 else if (type === 'RITPLATTA') { const cv=w.querySelector('canvas'); state.data.img = cv ? compressCanvasToDataURL(cv, 1000, 0.82) : ''; }
                 else if (type === 'QR-KOD') { state.data.url = w.querySelector('.list-name-input')?.value || ''; }
@@ -2083,6 +2254,7 @@
                 else if (type === 'MULTIPLIKATION') { try{ state.data = JSON.parse(w.dataset.multi || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'HUNDRARUTA') { try{ state.data = JSON.parse(w.dataset.hundra || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'RÄKNA') { try{ state.data = JSON.parse(w.dataset.rakna || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'STARTUPPGIFT') { try{ state.data = JSON.parse(w.dataset.startuppgift || '[]'); }catch(e){ state.data=[]; } }
                 else if (type === 'TALLINJE') { try{ state.data = JSON.parse(w.dataset.tallinje || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'PENGAR') { try{ state.data = JSON.parse(w.dataset.pengar || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'GEOMETRI') { try{ state.data = JSON.parse(w.dataset.geo || '{}'); }catch(e){ state.data={}; } }
@@ -2151,6 +2323,11 @@
             else if (w.type === 'CHECKLISTA') createChecklist(w);
             else if (w.type === 'SLUMPA-HJUL') createWheel(w);
             else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
+            else if (w.type === 'LÄSHASTIGHET') createReadingSpeed(w);
+            else if (w.type === 'TEXTGENRER') createTextGenres(w);
+            else if (w.type === 'TAL OCH LYSSNA') createSpeakListen(w);
+            else if (w.type === 'SAMTALA') createConversation(w);
+            else if (w.type === 'PRATA') createPrata(w);
             else if (w.type === 'GREJ OF THE DAY') createGOTD(w);
             else if (w.type === 'KALENDER') createCalendarWidget(w);
             else if (w.type === 'LUNCH') createLunchWidget(w);
@@ -2165,6 +2342,7 @@
             else if (w.type === 'MULTIPLIKATION') createMultiplicationTable(w);
             else if (w.type === 'HUNDRARUTA') createHundredChart(w);
             else if (w.type === 'RÄKNA') createMathChallenge(w);
+            else if (w.type === 'STARTUPPGIFT') createStartuppgift(w);
             else if (w.type === 'TALLINJE') createNumberLine(w);
             else if (w.type === 'PENGAR') createMoneyWidget(w);
             else if (w.type === 'GEOMETRI') createGeometryWidget(w);
@@ -2195,7 +2373,8 @@
             pages.push(pageData);
         });
         const activeId = (pagesListV6[currentPageIndexV6] && pagesListV6[currentPageIndexV6].id) || '';
-        localStorage.setItem('boardStateV6_' + currentUser, JSON.stringify({ pages: pages, activePage: currentPageIndexV6, activePageId: activeId, bodyClass: document.getElementById('cb-app-wrapper').className }));
+        let nyaWK = []; try { nyaWK = JSON.parse(localStorage.getItem('nyaWidgetKnappar')) || []; } catch(e){ nyaWK = []; }
+        localStorage.setItem('boardStateV6_' + currentUser, JSON.stringify({ pages: pages, activePage: currentPageIndexV6, activePageId: activeId, bodyClass: document.getElementById('cb-app-wrapper').className, nyaWidgetKnappar: nyaWK }));
         syncToCloud();
     }
 
@@ -2855,6 +3034,801 @@
         body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerHTML='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let w=n[Math.floor(Math.random()*n.length)]; res.innerHTML=`<span style='color:#ff3b30;font-size:36px;font-weight:900;'>${w}</span>`; saveBoardState(); showWinnerPopup(w); } },80); };
     }
 
+    // ---- LÄSHASTIGHET ----
+    // Ordbank med långa och sammansatta ord i tre svårighetsgrader. Slumpar fram
+    // ett ord i taget och kan läsa upp det med talsyntes (styrt – startar aldrig
+    // automatiskt). Bra för lästräning och uttal.
+    function createReadingSpeed(config){
+        if(config===undefined) config=null;
+        const body = createWidget('LÄSHASTIGHET', 360, 'lash-widget', config);
+        const widget = body.parentElement.parentElement;
+        const ORDBANK = {
+            latt: ['solros','fotboll','skolväska','tandborste','regnbåge','mjölkpaket','vinterjacka','cykelhjälm','äppelträd','snögubbe','brevlåda','ryggsäck','handduk','glasstrut','sandlåda','trädgård','fönster','morgonmål','lekplats','saftflaska','badrock','tavelram','husvagn','skogsstig','vattenpöl'],
+            medel: ['sommarlovsdag','fotbollsträning','biblioteksbok','tandläkarbesök','choklad­bollar','klassrumstavla','skolmatsalen','simhallsbadet','pepparkaksgubbe','regnbågsfärger','födelsedagskalas','trädgårdsmästare','brandbilssiren','kaninbur','äventyrsbana','vinterolympiaden','morgontidningen','sjukhuspersonal','cykelreparation','naturvetenskap','kompishäng','solnedgången','frukostbordet','snökristaller','djurparksbesök'],
+            svar: ['naturvetenskapligt','sjukhuspersonalen','återvinningsstation','helikopterplatta','järnvägsövergång','sommarlovsaktivitet','trafiksäkerheten','väderobservation','flygplatsterminalen','befolkningsstatistik','klimatförändringar','yrkeshögskoleutbildning','samhällsinformation','miljövänligt','ansvarsfördelning','koncentrationsförmåga','överraskningsfest','ursäktande','trädgårdsredskapen','elektricitetsledning','ordbehandlingsprogram','undervisningsmaterial','laboratorieutrustning','kommunikationssystem','experimentverkstad']
+        };
+        body.innerHTML = `<div class='hover-menu' style='display:flex;gap:6px;margin-bottom:10px;'><select class='editor-select lash-niva' style='flex:1;'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select></div>`
+            + `<div class='lash-ord' style='min-height:80px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 10px;background:#f7f8fb;border-radius:14px;margin-bottom:12px;'><span style='color:#8a8a95;font-size:15px;'>Tryck på 🎲 för att få ett ord</span></div>`
+            + `<div style='display:flex;gap:8px;'><button class='btn btn-secondary lash-lasupp' style='flex:1;'>🔊 Läs upp</button><button class='btn btn-primary lash-slumpa' style='flex:1;'>🎲 Slumpa ord</button></div>`
+            + `<div class='pengar-tips'>Slumpa fram ett ord och tryck på 🔊 för att höra hur det uttalas.</div>`;
+        const nivaSel=body.querySelector('.lash-niva'), ordEl=body.querySelector('.lash-ord');
+        let aktuelltOrd = '';
+        if(config && config.data){
+            if(config.data.niva) nivaSel.value = config.data.niva;
+            if(config.data.ord){ aktuelltOrd = config.data.ord; visaOrd(aktuelltOrd); }
+        }
+        widget.dataset.lashNiva = nivaSel.value;
+        function syncData(){ widget.dataset.lashNiva = nivaSel.value; widget.dataset.lashOrd = aktuelltOrd; }
+        function visaOrd(ord){
+            ordEl.innerHTML = `<span style='color:#1a1a2e;font-weight:900;font-size:30px;line-height:1.2;word-break:break-word;'>${ord}</span>`;
+        }
+        function slumpaOrd(){
+            const lista = ORDBANK[nivaSel.value] || ORDBANK.latt;
+            // undvik att direkt upprepa samma ord
+            let ord = lista[Math.floor(Math.random()*lista.length)];
+            if(lista.length>1){ let f=0; while(ord===aktuelltOrd && f<8){ ord=lista[Math.floor(Math.random()*lista.length)]; f++; } }
+            aktuelltOrd = ord.replace(/\u00AD/g,''); // ta bort ev. mjuka bindestreck
+            visaOrd(aktuelltOrd); syncData(); saveBoardState();
+        }
+        function lasUpp(){
+            if(!aktuelltOrd){ slumpaOrd(); }
+            try{
+                const u=new SpeechSynthesisUtterance(aktuelltOrd);
+                u.lang='sv-SE'; u.rate=0.85;
+                speechSynthesis.cancel(); speechSynthesis.speak(u);
+            }catch(e){ customAlert('Talsyntes stöds inte i den här webbläsaren.', '🔊'); }
+        }
+        nivaSel.onchange=()=>{ syncData(); saveBoardState(); };
+        body.querySelector('.lash-slumpa').onclick=slumpaOrd;
+        body.querySelector('.lash-lasupp').onclick=lasUpp;
+    }
+
+    // ---- TAL & LYSSNA ----
+    // Slumpar fram en taluppgift och startar en nedräkning (standard 1 minut) när
+    // frågan visas. Eleven talar om ämnet medan tiden räknas ner. Ljudsignal när
+    // tiden är ute. Timern styrs (paus/starta om) men startar automatiskt vid ny fråga.
+    function createSpeakListen(config){
+        if(config===undefined) config=null;
+        const body = createWidget('TAL OCH LYSSNA', 360, 'tal-widget', config);
+        const widget = body.parentElement.parentElement;
+        const FRAGOR = [
+            'Min favoritplats','Ett djur jag gillar','Min hobby','Mitt drömyrke','Min bästa bok',
+            'Om jag fick flyga …','Min bästa vän','Mitt favoritmat','En rolig sak jag gjort','Om jag fick en önskan',
+            'Mitt favoritdjur','Min favoritårstid','Det bästa med skolan','En dröm jag har','Om jag var lärare för en dag',
+            'Min favoritfilm','Ett minne jag aldrig glömmer','Om jag fick resa vart som helst','Min favoritleksak när jag var liten','Något jag är bra på',
+            'Mitt favoritspel','En plats jag vill besöka','Om jag var osynlig en dag','Min favoritmusik','Det roligaste jag vet',
+            'Om jag hittade en skatt','Min favoritsemester','Ett husdjur jag skulle vilja ha','Om jag var superhjälte','Något jag vill lära mig',
+            'Min favoritårstid och varför','Om jag fick bestämma på skolan','En sak jag är stolt över','Min favoritsport','Om jag var vuxen för en dag',
+            'Det bästa med min familj','En uppfinning jag skulle vilja göra','Om jag fick träffa vem som helst','Min favoritgodis','En dag jag minns',
+            'Om jag bodde på en öde ö','Min favoritfärg och varför','Något som gör mig glad','Om jag kunde prata med djur','Min bästa födelsedag',
+            'Ett ställe jag känner mig trygg på','Om jag var djurskötare','Min favoritsaga','Det roligaste på rasten','Om jag fick ett rymdskepp'
+        ];
+        const TIDER = { '30':'30 sekunder', '60':'1 minut', '120':'2 minuter' };
+        body.innerHTML = `<div class='hover-menu tal-ctrl'><select class='editor-select tal-tid'><option value='30'>⏱ 30 sek</option><option value='60' selected>⏱ 1 minut</option><option value='120'>⏱ 2 minuter</option></select></div>`
+            + `<div class='tal-fraga-ruta'><span class='tal-placeholder'>Tryck på 🎲 för att få en fråga</span></div>`
+            + `<div class='tal-timer-wrap' style='display:none;'><div class='tal-timer-bar-bg'><div class='tal-timer-bar'></div></div><div class='tal-timer-txt'></div></div>`
+            + `<div class='hover-menu tal-knappar'><button class='btn btn-secondary tal-paus' style='display:none;'>⏸ Paus</button><button class='btn btn-primary tal-slumpa'>🎲 Ny fråga</button></div>`
+            + `<div class='pengar-tips'>Slumpa fram en fråga och prata om ämnet tills tiden tar slut.</div>`;
+        const tidSel=body.querySelector('.tal-tid'), fragaRuta=body.querySelector('.tal-fraga-ruta'), timerWrap=body.querySelector('.tal-timer-wrap'), barEl=body.querySelector('.tal-timer-bar'), txtEl=body.querySelector('.tal-timer-txt'), pausBtn=body.querySelector('.tal-paus');
+        let aktuellFraga='', tickId=null, deadline=0, kvarPaus=0, pausad=false, total=60000;
+        if(config && config.data){
+            if(config.data.tid) tidSel.value=config.data.tid;
+            if(config.data.fraga){ aktuellFraga=config.data.fraga; visaFraga(aktuellFraga, false); }
+        }
+        function syncData(){ widget.dataset.talFraga=aktuellFraga; widget.dataset.talTid=tidSel.value; }
+        function stoppaTimer(){ if(tickId){ clearInterval(tickId); tickId=null; } }
+        function fmtTid(ms){ const s=Math.max(0,Math.ceil(ms/1000)); const m=Math.floor(s/60), r=s%60; return m>0 ? (m+':'+String(r).padStart(2,'0')) : String(r); }
+        function uppdatera(){
+            const kvar = deadline - Date.now();
+            txtEl.textContent = fmtTid(kvar);
+            const andel = Math.max(0, Math.min(1, kvar/total));
+            barEl.style.width = (andel*100)+'%';
+            barEl.classList.toggle('varning', kvar<=total*0.34 && kvar>5000);
+            barEl.classList.toggle('slut', kvar<=5000);
+            txtEl.classList.toggle('slut', kvar<=5000);
+            if(kvar<=0){ stoppaTimer(); txtEl.textContent='Tiden är ute!'; barEl.style.width='0%'; pausBtn.style.display='none'; try{ talBuzz(); }catch(e){} }
+        }
+        function startaTimer(){
+            stoppaTimer(); pausad=false;
+            total = parseInt(tidSel.value)*1000;
+            deadline = Date.now()+total;
+            timerWrap.style.display='block';
+            pausBtn.style.display=''; pausBtn.textContent='⏸ Paus';
+            uppdatera(); tickId=setInterval(uppdatera, 200);
+        }
+        function visaFraga(fraga, startaOcksa){
+            fragaRuta.innerHTML = `<span class='tal-fraga-txt'>${fraga}</span>`;
+            if(startaOcksa) startaTimer();
+        }
+        function talBuzz(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; if(!window._remAC) window._remAC=new AC(); const ctx=window._remAC; if(ctx.state==='suspended') ctx.resume().catch(()=>{}); [0,0.18,0.36].forEach(d=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=660; const t=ctx.currentTime+d; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.16,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.15); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.16); }); }catch(e){} }
+        function slumpaFraga(){
+            let f; do { f=FRAGOR[Math.floor(Math.random()*FRAGOR.length)]; } while(FRAGOR.length>1 && f===aktuellFraga);
+            aktuellFraga=f; syncData(); saveBoardState();
+            visaFraga(f, true); // frågan visas OCH timern startar automatiskt
+        }
+        pausBtn.onclick=()=>{
+            if(!tickId && !pausad) return;
+            if(!pausad){ // pausa
+                kvarPaus = deadline - Date.now(); stoppaTimer(); pausad=true; pausBtn.textContent='▶ Fortsätt';
+            } else { // återuppta
+                deadline = Date.now()+kvarPaus; pausad=false; pausBtn.textContent='⏸ Paus'; uppdatera(); tickId=setInterval(uppdatera,200);
+            }
+        };
+        tidSel.onchange=()=>{ syncData(); saveBoardState(); if(aktuellFraga) startaTimer(); };
+        body.querySelector('.tal-slumpa').onclick=slumpaFraga;
+        // Städa timern om widgeten tas bort
+        const talObs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ stoppaTimer(); talObs.disconnect(); } });
+        const talCc=document.getElementById('canvas-container-v6'); if(talCc) talObs.observe(talCc,{childList:true,subtree:true});
+    }
+
+    // ---- SAMTALA ----
+    // Slumpar fram korta samtalsfrågor. Eleverna samtalar två och två om frågan.
+    // Knappen "🎲 Ny fråga" slumpar fram en ny fråga.
+    function createConversation(config){
+        if(config===undefined) config=null;
+        const body = createWidget('SAMTALA', 380, 'samtala-widget', config);
+        const widget = body.parentElement.parentElement;
+        const FRAGOR = [
+            'Vad tycker du om vintern?','Vilket djur skulle du vilja vara?','Är läxor bra?','Vad gör en bra kompis?',
+            'Vad är din favoritmat?','Vad gör dig glad?','Vilken är din favoritårstid?','Vad vill du bli när du blir stor?',
+            'Är det bättre att ha sommarlov eller jullov?','Vad skulle du göra om du vann en miljon?','Vilket är ditt favoritspel?','Vad är roligast i skolan?',
+            'Skulle du hellre kunna flyga eller bli osynlig?','Vad tycker du om att läsa böcker?','Vilken superkraft skulle du vilja ha?','Är det viktigt att vara snäll? Varför?',
+            'Vad gör du helst på rasten?','Vilken film eller serie gillar du?','Skulle du vilja bo i en annan stad?','Vad är det bästa med att vara barn?',
+            'Är det roligare att spela ute eller inne?','Vilket är ditt favoritdjur och varför?','Vad skulle du ta med till en öde ö?','Hur firar du helst din födelsedag?',
+            'Är det bra att ha mobil i skolan?','Vad tycker du om att sova borta?','Vilket land skulle du vilja besöka?','Vad gör en dag riktigt bra?',
+            'Är det viktigt att vinna? Varför/varför inte?','Vilken är din favoritfärg och varför?','Vad skulle du vilja uppfinna?','Hur är en bra lärare?',
+            'Skulle du hellre kunna prata med djur eller resa i tiden?','Vad tycker du om lagsporter?','Vilken årstid är finast ute?','Vad är du bra på?',
+            'Är det roligt att prova nya saker?','Vad gör du när du är arg?','Vilken maträtt skulle du laga till en kompis?','Vad tycker du om att campa?',
+            'Skulle du vilja vara känd? Varför/varför inte?','Vad är det roligaste du gjort i sommar?','Är det bra att hjälpa till hemma?','Vilken sång gillar du just nu?',
+            'Vad skulle du göra om du var lärare en dag?','Är det viktigt att alla får vara med? Varför?','Vad drömmer du om att göra?','Vilket är ditt bästa minne?',
+            'Skulle du hellre bo vid havet eller i skogen?','Vad tycker du om att rita och måla?','Vad gör en plats mysig?','Är det roligare att ge eller få presenter?'
+        ];
+        body.innerHTML = `<div class='sam-topp'>👥 Samtala två och två</div>`
+            + `<div class='sam-fraga-ruta'><span class='sam-placeholder'>Tryck på 🎲 för en fråga att samtala om</span></div>`
+            + `<button class='sam-knapp'>🎲 Ny fråga</button>`
+            + `<div class='sam-raknare'></div>`;
+        const fragaRuta=body.querySelector('.sam-fraga-ruta'), raknare=body.querySelector('.sam-raknare');
+        let aktuellFraga='';
+        if(config && config.data && config.data.fraga){ aktuellFraga=config.data.fraga; visaFraga(aktuellFraga); }
+        function syncData(){ widget.dataset.samtalaFraga = aktuellFraga; }
+        function visaFraga(f){ fragaRuta.innerHTML = `<span class='sam-fraga-txt'>${f}</span>`; }
+        function slumpaFraga(){
+            let f; do { f=FRAGOR[Math.floor(Math.random()*FRAGOR.length)]; } while(FRAGOR.length>1 && f===aktuellFraga);
+            aktuellFraga=f; visaFraga(f); syncData(); saveBoardState();
+            raknare.textContent = FRAGOR.length + ' frågor att välja mellan';
+        }
+        body.querySelector('.sam-knapp').onclick=slumpaFraga;
+        raknare.textContent = FRAGOR.length + ' frågor att välja mellan';
+    }
+
+    // ---- PRATA ----
+    // Slumpar fram muntliga uppgifter av olika slag (berätta, samtala, diskutera,
+    // intervjua, återberätta). Knappen slumpar fram en ny fråga.
+    function createPrata(config){
+        if(config===undefined) config=null;
+        const body = createWidget('PRATA', 390, 'prata-widget', config);
+        const widget = body.parentElement.parentElement;
+        // Varje uppgift: emoji + typ + text
+        const FRAGOR = [
+            {e:'🎤',t:'Berätta',f:'Berätta om en plats du tycker om.'},
+            {e:'💬',t:'Samtala',f:'Samtala om hur man är en bra kompis.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om skoluniform är en bra idé.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua din bänkkompis om en hobby.'},
+            {e:'📖',t:'Återberätta',f:'Återberätta en saga du har läst.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om en dag du minns extra bra.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om ditt favoritdjur.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om något du är stolt över.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om din favoritmat och hur den smakar.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om vad du gjorde i helgen.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om en person du ser upp till.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om ett roligt minne från förskolan.'},
+            {e:'💬',t:'Samtala',f:'Samtala om vad som gör en dag riktigt bra.'},
+            {e:'💬',t:'Samtala',f:'Samtala om hur man kan hjälpa varandra i klassen.'},
+            {e:'💬',t:'Samtala',f:'Samtala om vad man kan göra när någon är ledsen.'},
+            {e:'💬',t:'Samtala',f:'Samtala om vad rättvisa betyder för er.'},
+            {e:'💬',t:'Samtala',f:'Samtala om vad ni gillar att göra på rasten.'},
+            {e:'💬',t:'Samtala',f:'Samtala om hur man kan vara en bra lyssnare.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om läxor är bra eller dåligt.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om man borde få ha mobil i skolan.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om alla borde äta samma mat i skolan.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om djur borde få bo på skolan.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om raster borde vara längre.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om det är bättre med sommar eller vinter.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om man ska få välja sina egna läxor.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua din bänkkompis om favoritmaten.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua en kompis om drömresan.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua en kompis om vad hen vill bli.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua en kompis om en favoritbok.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua en kompis om ett husdjur hen önskar sig.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua en kompis om helgens planer.'},
+            {e:'📖',t:'Återberätta',f:'Återberätta en film du har sett.'},
+            {e:'📖',t:'Återberätta',f:'Återberätta en bok du gillar.'},
+            {e:'📖',t:'Återberätta',f:'Återberätta vad ni gjorde på senaste lektionen.'},
+            {e:'📖',t:'Återberätta',f:'Återberätta en rolig händelse.'},
+            {e:'📖',t:'Återberätta',f:'Återberätta reglerna till ett spel du kan.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om din drömdag.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om något du vill lära dig.'},
+            {e:'💬',t:'Samtala',f:'Samtala om vad som är viktigt för en bra vän.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om alla borde få vara med och bestämma i klassen.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua en kompis om hens favoritårstid.'},
+            {e:'📖',t:'Återberätta',f:'Återberätta en dröm du haft.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om ditt favoritställe hemma.'},
+            {e:'💬',t:'Samtala',f:'Samtala om hur man kan bli sams igen efter ett bråk.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om skärmtid borde vara begränsad.'},
+            {e:'🎙️',t:'Intervjua',f:'Intervjua en kompis om en talang hen har.'},
+            {e:'📖',t:'Återberätta',f:'Återberätta en saga med egna ord.'},
+            {e:'🎤',t:'Berätta',f:'Berätta om en gång du var riktigt modig.'},
+            {e:'💬',t:'Samtala',f:'Samtala om vad som gör er glada i skolan.'},
+            {e:'🗨️',t:'Diskutera',f:'Diskutera om det är bra att tävla i skolan.'}
+        ];
+        body.innerHTML = `<div class='prata-typ'>🎤 Muntlig uppgift</div>`
+            + `<div class='prata-fraga-ruta'><span class='prata-placeholder'>Tryck på 🎲 för en uppgift att prata om</span></div>`
+            + `<button class='prata-knapp'>🎲 Ny fråga</button>`
+            + `<div class='prata-raknare'></div>`;
+        const typEl=body.querySelector('.prata-typ'), fragaRuta=body.querySelector('.prata-fraga-ruta'), raknare=body.querySelector('.prata-raknare');
+        let idxAktuell=-1;
+        if(config && config.data && config.data.fraga){
+            const i=FRAGOR.findIndex(x=>x.f===config.data.fraga);
+            if(i>=0){ idxAktuell=i; visaFraga(FRAGOR[i]); }
+        }
+        function syncData(){ widget.dataset.prataFraga = (idxAktuell>=0? FRAGOR[idxAktuell].f : ''); }
+        function visaFraga(q){ typEl.textContent = q.e+' '+q.t; fragaRuta.innerHTML = `<span class='prata-fraga-txt'>${q.f}</span>`; }
+        function slumpaFraga(){
+            let i; do { i=Math.floor(Math.random()*FRAGOR.length); } while(FRAGOR.length>1 && i===idxAktuell);
+            idxAktuell=i; visaFraga(FRAGOR[i]); syncData(); saveBoardState();
+            raknare.textContent = FRAGOR.length + ' uppgifter att välja mellan';
+        }
+        body.querySelector('.prata-knapp').onclick=slumpaFraga;
+        raknare.textContent = FRAGOR.length + ' uppgifter att välja mellan';
+    }
+
+    // ---- TEXTGENRER ----
+    // Flikar för olika texttyper. För varje genre: en förklarande text om genren,
+    // dess kännetecken/egenskaper, samt typiska ord och fraser man använder.
+    function createTextGenres(config){
+        if(config===undefined) config=null;
+        const body = createWidget('TEXTGENRER', 520, 'genre-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.classList.add('genre-body');
+        const GENRER = {
+            berattelse: {
+                namn:'Berättelse', emoji:'📖',
+                om:'En berättelse (även kallad narrativ text) berättar om något som händer, på riktigt eller påhittat. Den har oftast en början, en handling med ett problem, och ett slut. Läsaren får följa med personerna genom det som händer.',
+                kannetecken:[
+                    'Har en tydlig början, mitt och slut (röd tråd).',
+                    'Innehåller personer (karaktärer) och en miljö där det utspelar sig.',
+                    'Bygger ofta på ett problem som löser sig mot slutet.',
+                    'Skrivs oftast i dåtid (preteritum).',
+                    'Har ofta dialog – personerna pratar med varandra.',
+                    'Läsaren ska bli nyfiken och känna spänning eller känslor.'
+                ],
+                ord:['det var en gång','plötsligt','efter en stund','till slut','helt plötsligt','längre fram','samtidigt','till sist','för länge sedan','sedan','strax därpå','och så levde de lyckliga'],
+                exempel:'Det var en gång en liten igelkott som hette Pigg. En kväll gick han vilse i den mörka skogen. Plötsligt hörde han ett ljud bakom en buske. Det var en räv! Pigg rullade snabbt ihop sig till en boll. Räven nosade lite och gick sedan sin väg. Till slut hittade Pigg hem igen, trött men glad.'
+            },
+            faktatext: {
+                namn:'Faktatext', emoji:'📚',
+                om:'En faktatext förklarar hur något är eller fungerar. Den bygger på sanna fakta och ska ge läsaren kunskap om ett ämne, till exempel djur, rymden eller kroppen. Texten är saklig och personlig tyckande hör inte hemma här.',
+                kannetecken:[
+                    'Bygger på fakta – sant och kontrollerbart, inte påhittat.',
+                    'Har ofta rubriker och underrubriker som delar upp texten.',
+                    'Skrivs oftast i presens (nutid): "Grodan lever…".',
+                    'Använder ämnesord (facktermer) som hör till ämnet.',
+                    'Kan ha bilder, faktarutor, punktlistor och bildtexter.',
+                    'Är saklig och opersonlig – inga egna åsikter.'
+                ],
+                ord:['består av','kallas för','till exempel','beror på','man kan se att','en anledning är','detta betyder att','ofta','vanligtvis','de flesta','forskare menar','därför'],
+                exempel:'Igelkotten är ett litet däggdjur som lever i Sverige. Den har taggar på ryggen som skyddar mot fiender. Igelkotten äter oftast insekter, maskar och snäckor. På vintern går den i ide, vilket betyder att den sover ända till våren. Igelkottar är mest aktiva på natten.'
+            },
+            brev: {
+                namn:'Brev', emoji:'✉️',
+                om:'Ett brev är en text som du skriver till någon särskild person, till exempel en kompis, mormor eller en myndighet. Brevet är riktat direkt till mottagaren och innehåller ofta en hälsning i början och en avslutning i slutet.',
+                kannetecken:[
+                    'Har en tydlig mottagare – du skriver till någon.',
+                    'Börjar med en hälsningsfras ("Hej …").',
+                    'Har ofta datum och ibland avsändarort högst upp.',
+                    'Skrivs i du-form och är personligt.',
+                    'Avslutas med en hälsning och ditt namn.',
+                    'Kan vara privat (till en kompis) eller formellt (till en myndighet).'
+                ],
+                ord:['hej','kära','tack för ditt brev','hur mår du?','jag hoppas att','vi hörs snart','många kramar','hälsningar','vänliga hälsningar','ha det så bra','puss och kram','från'],
+                exempel:'Hej mormor!\n\nTack för paketet du skickade till mig. Jag blev så glad för boken! Hur mår du? Här hemma är allt bra. I helgen ska vi åka och bada. Jag hoppas att vi ses snart igen.\n\nMånga kramar,\nElsa'
+            },
+            dagbok: {
+                namn:'Dagbok', emoji:'📔',
+                om:'En dagbok är en text där du skriver ner vad som hänt under dagen och hur du kände dig. Den är personlig och skrivs oftast bara för dig själv. Du berättar om dina upplevelser, tankar och känslor.',
+                kannetecken:[
+                    'Är personlig och handlar om dig själv ("jag").',
+                    'Börjar ofta med datum och tilltalar dagboken ("Kära dagbok").',
+                    'Berättar om något som redan hänt – oftast i dåtid.',
+                    'Innehåller mycket känslor och egna tankar.',
+                    'Skrivs i jag-form.',
+                    'Behöver inte vara "fin" – den är till för dig själv.'
+                ],
+                ord:['kära dagbok','idag','i morse','på kvällen','jag kände mig','det var så','jag tänkte att','äntligen','jag är trött på','jag längtar efter','godnatt','imorgon ska jag'],
+                exempel:'Kära dagbok,\n\nIdag var en ganska jobbig dag. På morgonen missade jag bussen och kom sent till skolan. Jag kände mig stressad och lite ledsen. Men på rasten spelade jag fotboll med Alva och då blev allt bättre. Imorgon hoppas jag att det blir en bättre dag. Godnatt!'
+            },
+            insandare: {
+                namn:'Insändare', emoji:'📢',
+                om:'En insändare är en text där du framför en åsikt om något du tycker är viktigt, till exempel i en tidning. Du vill övertyga läsaren och få andra att hålla med dig. Du använder argument för att förklara varför du tycker som du gör.',
+                kannetecken:[
+                    'Framför en tydlig åsikt om ett ämne.',
+                    'Innehåller argument som stöder åsikten.',
+                    'Vill påverka och övertyga läsaren.',
+                    'Har ofta en fångande rubrik.',
+                    'Avslutas med en uppmaning eller en tydlig slutsats.',
+                    'Kan avslutas med en signatur (t.ex. "Orolig elev").'
+                ],
+                ord:['jag tycker att','det är dags att','man borde','för det första','dessutom','tänk om','är det verkligen rätt att','därför anser jag','vi måste','det är orättvist att','håller du med?','sluta med'],
+                exempel:'Mer tid för läsning i skolan!\n\nJag tycker att vi borde ha mer läsning på schemat. För det första blir man bättre på att läsa om man övar mer. Dessutom är det lugnt och skönt att få läsa en stund varje dag. Därför anser jag att skolan ska ge oss mer lästid. Håller du med?\n\n/Bokälskande elev'
+            },
+            beskrivande: {
+                namn:'Beskrivande text', emoji:'🔍',
+                om:'En beskrivande text målar upp hur något ser ut, känns, låter eller luktar. Den hjälper läsaren att se saken framför sig, till exempel en plats, en person eller ett djur. Många beskrivande ord (adjektiv) används.',
+                kannetecken:[
+                    'Beskriver hur något ser ut, känns, luktar, låter eller smakar.',
+                    'Använder många adjektiv (beskrivande ord).',
+                    'Får läsaren att se bilden framför sig.',
+                    'Använder ofta jämförelser ("mjuk som bomull").',
+                    'Skrivs oftast i presens (nutid).',
+                    'Går från helhet till detaljer, ofta i en tydlig ordning.'
+                ],
+                ord:['den är','som ser ut som','liknar','till formen','färgen är','det känns som','man kan känna','längst fram','bredvid','runt omkring','till skillnad från','påminner om'],
+                exempel:'Det gamla huset låg längst in på gatan. Fasaden var ljusgul och lite flagnad. De stora fönstren glittrade i solen som blanka speglar. Runt omkring växte höga rosenbuskar som luktade sött. Trädgården kändes mjuk under fötterna och det prasslade svagt när vinden rörde löven.'
+            },
+            argumenterande: {
+                namn:'Argumenterande text', emoji:'⚖️',
+                om:'En argumenterande text vill övertyga läsaren om en åsikt. Du börjar med en tes (det du tycker) och stöttar den med flera argument och exempel. Ofta tar du också upp ett motargument och bemöter det. Till sist sammanfattar du med en slutsats. Texten är mer utförlig och strukturerad än en insändare.',
+                kannetecken:[
+                    'Börjar med en tydlig tes – det du vill övertyga om.',
+                    'Har flera argument som stöder tesen, ofta i egna stycken.',
+                    'Använder exempel och fakta för att stärka argumenten.',
+                    'Tar ofta upp ett motargument och bemöter det.',
+                    'Avslutas med en slutsats som knyter ihop åsikten.',
+                    'Är sakligt skriven och följer en tydlig ordning.'
+                ],
+                ord:['jag anser att','för det första','för det andra','ett viktigt argument är','till exempel','dessutom','å ena sidan','å andra sidan','vissa hävdar att','men','därför','sammanfattningsvis'],
+                exempel:'Skolan borde servera mer vegetarisk mat.\n\nFör det första är det bättre för miljön, eftersom det går åt mindre resurser att odla grönsaker än att föda upp djur. För det andra kan vegetarisk mat vara både god och nyttig, till exempel bönor, linser och grönsaker.\n\nVissa hävdar att elever inte blir mätta på grönsaker. Men om maten lagas väl och innehåller bönor och pasta blir man både mätt och pigg.\n\nSammanfattningsvis anser jag att mer vegetarisk mat i skolan är bra för både hälsan och miljön.'
+            },
+            aterberattande: {
+                namn:'Återberättande text', emoji:'🔁',
+                om:'En återberättande text berättar om något som verkligen har hänt, till exempel en utflykt, en händelse eller något du varit med om. Till skillnad från en berättelse är den inte påhittad – den handlar om verkliga händelser i den ordning de hände.',
+                kannetecken:[
+                    'Handlar om något som verkligen har hänt – inte påhittat.',
+                    'Berättar händelserna i den ordning de skedde (kronologisk ordning).',
+                    'Skrivs oftast i dåtid (preteritum).',
+                    'Har ofta en inledning som säger vad, var och när det hände.',
+                    'Använder tidsord för att visa ordningen mellan händelserna.',
+                    'Avslutas ofta med hur det kändes eller hur det gick.'
+                ],
+                ord:['först','sedan','därefter','efter det','till slut','när vi kom fram','på morgonen','klockan var','samma dag','vi bestämde oss för att','det roligaste var','slutligen'],
+                exempel:'I onsdags åkte vår klass på utflykt till skogen. Först samlades vi på skolgården och åkte buss till naturreservatet. Sedan vandrade vi längs en stig och letade efter spår från djur. Därefter åt vi matsäck vid en sjö. Till slut åkte vi tillbaka till skolan, trötta men glada över en fin dag.'
+            },
+            instruerande: {
+                namn:'Instruerande text', emoji:'🛠️',
+                om:'En instruerande text talar om hur man gör något, steg för steg. Den ska vara så tydlig att läsaren kan följa instruktionerna och lyckas, till exempel ett recept, en spelregel eller en bygginstruktion.',
+                kannetecken:[
+                    'Talar om hur man gör något, steg för steg.',
+                    'Har ofta en numrerad eller punktad lista med steg.',
+                    'Börjar ibland med en lista på det man behöver (material/ingredienser).',
+                    'Skrivs i imperativ (befallande form): "Blanda…", "Klipp…", "Ta…".',
+                    'Är tydlig och saklig – inga egna åsikter eller känslor.',
+                    'Följer alltid samma ordning som man ska göra sakerna i.'
+                ],
+                ord:['du behöver','först','sedan','därefter','blanda','ta','klipp','lägg','vänta i','till sist','se till att','nu är du klar'],
+                exempel:'Så gör du ett papperflygplan\n\nDu behöver: ett rektangulärt papper.\n\n1. Vik pappret på mitten längs den långa sidan och vik upp det igen.\n2. Vik de två övre hörnen in mot mittlinjen så att det bildas en spets.\n3. Vik spetsen nedåt en gång till.\n4. Vik hela planet på mitten.\n5. Vik ut vingarna på båda sidor.\n\nNu är ditt papperflygplan klart att flyga!'
+            }
+        };
+        const ordning = ['berattelse','faktatext','brev','dagbok','insandare','beskrivande','argumenterande','aterberattande','instruerande'];
+        let current = (config && config.data && GENRER[config.data.genre]) ? config.data.genre : 'berattelse';
+        widget.dataset.genre = current;
+
+        // Exempeltexter för "Gissa genren" (kort utdrag -> rätt genre)
+        const GISSA = [
+            { text:'Det var en gång en liten drake som bodde i en grotta. En dag bestämde han sig för att ge sig ut på ett äventyr.', ratt:'berattelse' },
+            { text:'Grodan är ett groddjur. Den lägger sina ägg i vatten. Ur äggen kommer små grodyngel som senare blir grodor.', ratt:'faktatext' },
+            { text:'Hej mormor! Tack för paketet du skickade. Jag hoppas att du mår bra. Vi hörs snart igen. Många kramar, Elsa.', ratt:'brev' },
+            { text:'Kära dagbok. Idag var en jobbig dag. Jag kände mig ledsen på rasten, men sedan blev allt bättre. Godnatt.', ratt:'dagbok' },
+            { text:'Jag tycker att vi borde ha längre raster på skolan. Dessutom mår man bättre av att vara ute. Håller du med?', ratt:'insandare' },
+            { text:'Huset var stort och gult. Fönstren glittrade i solen och trädgården luktade av nyklippt gräs och blommor.', ratt:'beskrivande' },
+            { text:'Plötsligt hörde Sara ett konstigt ljud från vinden. Hon tog ficklampan och började sakta gå uppför trappan.', ratt:'berattelse' },
+            { text:'Vatten kokar vid 100 grader. Då förvandlas vattnet till ånga. När ångan kyls ner blir det vatten igen.', ratt:'faktatext' },
+            { text:'Idag fyllde jag år! Jag är så glad. Jag fick en cykel av mamma och pappa. Bästa dagen på länge, tänkte jag.', ratt:'dagbok' },
+            { text:'Det är dags att vi tar hand om vår natur. Man borde inte skräpa ner. Vi måste hjälpas åt för miljöns skull.', ratt:'insandare' },
+            { text:'Skolan borde börja senare på morgonen. För det första behöver barn mer sömn. Dessutom lär man sig bättre utvilad. Sammanfattningsvis är senare skolstart bra för alla.', ratt:'argumenterande' },
+            { text:'Alla borde få en timmes rörelse varje dag. För det första mår kroppen bra av rörelse. För det andra blir man piggare i hjärnan. Därför anser jag att rörelse ska finnas varje dag.', ratt:'argumenterande' },
+            { text:'I går besökte vi ett museum. Först fick vi se dinosaurieskelett. Sedan tittade vi på en film om rymden. Till slut fick vi handla i museibutiken innan vi åkte hem.', ratt:'aterberattande' },
+            { text:'På lördagen hade vi klassfest. Vi samlades klockan tre, lekte spel och åt tårta. Efter det dansade vi en stund. Det var en riktigt rolig dag.', ratt:'aterberattande' },
+            { text:'Så bakar du enkla muffins: Blanda ägg, socker och smör. Rör i mjöl och bakpulver. Häll smeten i formar. Grädda i 20 minuter i 175 grader.', ratt:'instruerande' },
+            { text:'Så spelar du spelet: Först delar du ut kort till alla spelare. Sedan lägger den yngsta spelaren ett kort. Fortsätt medurs tills alla kort är slut.', ratt:'instruerande' }
+        ];
+        // Quiz-frågor om genrer
+        const QUIZ = [
+            { f:'Vilken genre berättar om något som händer, med början, mitt och slut?', alt:['Berättelse','Faktatext','Brev'], r:0 },
+            { f:'Vilken text bygger på sanna fakta och vill ge kunskap?', alt:['Dagbok','Faktatext','Insändare'], r:1 },
+            { f:'Vilken genre skriver du till en särskild mottagare och avslutar med en hälsning?', alt:['Brev','Beskrivande text','Berättelse'], r:0 },
+            { f:'"Kära dagbok, idag kände jag mig glad." Vilken genre är det?', alt:['Insändare','Dagbok','Faktatext'], r:1 },
+            { f:'I vilken genre framför du en åsikt och vill övertyga läsaren?', alt:['Faktatext','Berättelse','Insändare'], r:2 },
+            { f:'Vilken text målar upp hur något ser ut, känns och luktar med många adjektiv?', alt:['Beskrivande text','Brev','Faktatext'], r:0 },
+            { f:'Vilken genre skrivs oftast i dåtid och har ofta dialog?', alt:['Faktatext','Berättelse','Insändare'], r:1 },
+            { f:'Vilken text skrivs oftast i presens och kan ha faktarutor och rubriker?', alt:['Faktatext','Dagbok','Brev'], r:0 },
+            { f:'Var passar frasen "Jag tycker att man borde…" bäst?', alt:['Dagbok','Insändare','Beskrivande text'], r:1 },
+            { f:'Vilken genre är personlig och skrivs oftast bara för dig själv?', alt:['Dagbok','Brev','Faktatext'], r:0 },
+            { f:'Vilken text börjar med en tes och stöttar den med flera argument och en slutsats?', alt:['Argumenterande text','Berättelse','Faktatext'], r:0 },
+            { f:'Var passar orden "för det första… för det andra… sammanfattningsvis" bäst?', alt:['Dagbok','Argumenterande text','Beskrivande text'], r:1 },
+            { f:'Vilken genre berättar om något som verkligen har hänt, i den ordning det hände?', alt:['Återberättande text','Berättelse','Beskrivande text'], r:0 },
+            { f:'"Först åkte vi till skolan. Sedan hade vi utflykt. Till slut åkte vi hem." Vilken genre är det?', alt:['Instruerande text','Återberättande text','Insändare'], r:1 },
+            { f:'Vilken genre talar om hur man gör något, steg för steg?', alt:['Instruerande text','Dagbok','Faktatext'], r:0 },
+            { f:'Vilken genre skrivs oftast i imperativ, till exempel "Blanda…", "Klipp…", "Ta…"?', alt:['Beskrivande text','Instruerande text','Brev'], r:1 }
+        ];
+        // Ämnen för "Skriv i rätt genre"
+        const SKRIV = [
+            { genre:'Berättelse', amne:'Skriv en kort saga om en modig mus som räddar sina vänner.' },
+            { genre:'Faktatext', amne:'Skriv en faktatext om ditt favoritdjur. Beskriv hur det lever och vad det äter.' },
+            { genre:'Dagbok', amne:'Skriv en dagboksanteckning om din bästa dag i somras.' },
+            { genre:'Brev', amne:'Skriv ett brev till en kompis och berätta om något roligt du gjort.' },
+            { genre:'Insändare', amne:'Skriv en insändare om varför skolan borde ha mer tid för läsning.' },
+            { genre:'Beskrivande text', amne:'Beskriv ditt rum så noga att någon kan se det framför sig.' },
+            { genre:'Berättelse', amne:'Skriv en berättelse som börjar med: "Dörren öppnades långsamt…"' },
+            { genre:'Faktatext', amne:'Skriv en faktatext om vattnets kretslopp.' },
+            { genre:'Argumenterande text', amne:'Skriv en argumenterande text om varför alla borde få husdjur. Använd tes, argument och en slutsats.' },
+            { genre:'Argumenterande text', amne:'Övertyga läsaren om att skoldagen borde vara kortare. Ta med minst två argument och ett motargument.' },
+            { genre:'Återberättande text', amne:'Berätta om en utflykt eller ett besök du varit med om. Berätta det som hände i rätt ordning.' },
+            { genre:'Återberättande text', amne:'Berätta om vad du gjorde i helgen, från morgon till kväll.' },
+            { genre:'Instruerande text', amne:'Skriv en instruktion för hur man borstar tänderna, steg för steg.' },
+            { genre:'Instruerande text', amne:'Skriv ett enkelt recept, till exempel på en mellanmål eller en frukt-smoothie.' }
+        ];
+        const genreNamn = { berattelse:'Berättelse', faktatext:'Faktatext', brev:'Brev', dagbok:'Dagbok', insandare:'Insändare', beskrivande:'Beskrivande text', argumenterande:'Argumenterande text', aterberattande:'Återberättande text', instruerande:'Instruerande text' };
+
+        let lage = 'lar'; // 'lar' = Lär dig, 'ov' = Övningar, 'trana' = Träna genren
+        const lagemeny = document.createElement('div'); lagemeny.className='genre-lagemeny';
+        const larBtn = document.createElement('button'); larBtn.className='genre-lage-btn active'; larBtn.textContent='📚 Lär dig';
+        const ovBtn = document.createElement('button'); ovBtn.className='genre-lage-btn'; ovBtn.textContent='🎮 Övningar';
+        const tranaBtn = document.createElement('button'); tranaBtn.className='genre-lage-btn'; tranaBtn.textContent='✍️ Träna genren';
+        lagemeny.appendChild(larBtn); lagemeny.appendChild(ovBtn); lagemeny.appendChild(tranaBtn); body.appendChild(lagemeny);
+
+        const tabsEl = document.createElement('div'); tabsEl.className='genre-tabs';
+        const panelEl = document.createElement('div'); panelEl.className='genre-panel';
+        const ovEl = document.createElement('div'); ovEl.className='genre-ov'; ovEl.style.display='none';
+        const tranaEl = document.createElement('div'); tranaEl.className='genre-trana'; tranaEl.style.display='none';
+        body.appendChild(tabsEl); body.appendChild(panelEl); body.appendChild(ovEl); body.appendChild(tranaEl);
+
+        function visaLage(l){
+            lage=l;
+            larBtn.classList.toggle('active', l==='lar');
+            ovBtn.classList.toggle('active', l==='ov');
+            tranaBtn.classList.toggle('active', l==='trana');
+            tabsEl.style.display = (l==='lar') ? '' : 'none';
+            panelEl.style.display = (l==='lar') ? '' : 'none';
+            ovEl.style.display = (l==='ov') ? '' : 'none';
+            tranaEl.style.display = (l==='trana') ? '' : 'none';
+            if(l==='ov') renderOvMeny();
+            if(l==='trana') renderTrana();
+        }
+        larBtn.onclick=()=> visaLage('lar');
+        ovBtn.onclick=()=> visaLage('ov');
+        tranaBtn.onclick=()=> visaLage('trana');
+
+        function renderTabs(){
+            tabsEl.innerHTML='';
+            ordning.forEach(key=>{
+                const g=GENRER[key];
+                const b=document.createElement('button');
+                b.className='genre-tab'+(key===current?' active':'');
+                b.innerHTML=`<span>${g.emoji}</span>${g.namn}`;
+                b.onclick=()=>{ current=key; widget.dataset.genre=key; renderTabs(); renderPanel(); saveBoardState(); };
+                tabsEl.appendChild(b);
+            });
+        }
+        function renderPanel(){
+            const g=GENRER[current];
+            let html = `<div class='genre-huvud'><h3>${g.emoji} ${g.namn}</h3><p>${g.om}</p></div>`;
+            html += `<div class='genre-sektion kannetecken'><h4>✦ Kännetecken &amp; egenskaper</h4><ul>`;
+            g.kannetecken.forEach(k=>{ html += `<li>${k}</li>`; });
+            html += `</ul></div>`;
+            html += `<div class='genre-sektion ordfraser'><h4>✎ Typiska ord &amp; fraser</h4><div class='genre-chips'>`;
+            g.ord.forEach(o=>{ html += `<span class='genre-chip'>${o}</span>`; });
+            html += `</div></div>`;
+            if(g.exempel){
+                const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+                html += `<div class='genre-sektion exempel'><h4>📄 Exempeltext</h4><div class='genre-exempel-text'>${esc(g.exempel)}</div></div>`;
+            }
+            panelEl.innerHTML = html;
+        }
+
+        // ===== INTERAKTIVA ÖVNINGAR =====
+        function renderOvMeny(){
+            ovEl.innerHTML='';
+            const grid=document.createElement('div'); grid.className='genre-ov-val';
+            const övningar=[
+                { id:'gissa', emoji:'🎲', namn:'Gissa genren', desc:'Läs en text och välj rätt genre' },
+                { id:'skriv', emoji:'📝', namn:'Skriv i rätt genre', desc:'Få ett ämne och skriv själv' },
+                { id:'para', emoji:'🔗', namn:'Para ihop', desc:'Matcha genre med kännetecken' },
+                { id:'quiz', emoji:'❓', namn:'Quiz', desc:'Frågor om genrerna' }
+            ];
+            övningar.forEach(o=>{
+                const k=document.createElement('div'); k.className='genre-ov-kort';
+                k.innerHTML=`<div class='ov-emoji'>${o.emoji}</div><div class='ov-namn'>${o.namn}</div><div class='ov-desc'>${o.desc}</div>`;
+                k.onclick=()=>{ if(o.id==='gissa') startGissa(); else if(o.id==='skriv') startSkriv(); else if(o.id==='para') startPara(); else startQuiz(); };
+                grid.appendChild(k);
+            });
+            ovEl.appendChild(grid);
+        }
+        function ovTopp(titel){
+            const topp=document.createElement('div'); topp.className='genre-ov-topp';
+            const h=document.createElement('h3'); h.textContent=titel;
+            const bak=document.createElement('button'); bak.className='genre-ov-tillbaka'; bak.textContent='← Tillbaka'; bak.onclick=renderOvMeny;
+            topp.appendChild(h); topp.appendChild(bak); return topp;
+        }
+        function blanda(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+        // --- 🎲 Gissa genren ---
+        function startGissa(){
+            let poang=0, gjorda=0;
+            const frågor=blanda(GISSA);
+            function fråga(idx){
+                ovEl.innerHTML=''; ovEl.appendChild(ovTopp('🎲 Gissa genren'));
+                const panel=document.createElement('div'); panel.className='genre-ov-panel';
+                const q=frågor[idx];
+                const txt=document.createElement('div'); txt.className='genre-ov-text'; txt.textContent='"'+q.text+'"';
+                const fr=document.createElement('div'); fr.className='genre-ov-fraga'; fr.textContent='Vilken genre är detta?';
+                const svarWrap=document.createElement('div'); svarWrap.className='genre-ov-svar';
+                const fb=document.createElement('div'); fb.className='genre-ov-feedback';
+                const altKeys=blanda(ordning);
+                altKeys.forEach(key=>{
+                    const b=document.createElement('button'); b.className='genre-svar-btn'; b.textContent=genreNamn[key];
+                    b.onclick=()=>{
+                        svarWrap.querySelectorAll('.genre-svar-btn').forEach(x=>x.disabled=true);
+                        gjorda++;
+                        if(key===q.ratt){ b.classList.add('ratt'); poang++; fb.textContent='✔ Rätt!'; fb.style.color='#1f7a37'; }
+                        else { b.classList.add('fel'); fb.textContent='✘ Rätt svar: '+genreNamn[q.ratt]; fb.style.color='#c2261c';
+                            svarWrap.querySelectorAll('.genre-svar-btn').forEach(x=>{ if(x.textContent===genreNamn[q.ratt]) x.classList.add('ratt'); }); }
+                        const next=document.createElement('button'); next.className='genre-ov-next';
+                        next.textContent = idx+1<frågor.length ? 'Nästa ▶' : 'Klar – visa resultat';
+                        next.onclick=()=>{ idx+1<frågor.length ? fråga(idx+1) : resultat(); };
+                        panel.appendChild(next);
+                    };
+                    svarWrap.appendChild(b);
+                });
+                panel.appendChild(txt); panel.appendChild(fr); panel.appendChild(svarWrap); panel.appendChild(fb);
+                ovEl.appendChild(panel);
+            }
+            function resultat(){
+                ovEl.innerHTML=''; ovEl.appendChild(ovTopp('🎲 Gissa genren'));
+                const p=document.createElement('div'); p.className='genre-ov-panel'; p.style.textAlign='center';
+                p.innerHTML=`<div style='font-size:40px;'>${poang===frågor.length?'🏆':'👍'}</div><div style='font-size:18px;font-weight:900;color:#7c3aed;'>${poang} av ${frågor.length} rätt</div>`;
+                const om=document.createElement('button'); om.className='genre-ov-next'; om.textContent='🔁 Spela igen'; om.onclick=startGissa;
+                p.appendChild(om); ovEl.appendChild(p);
+            }
+            fråga(0);
+        }
+
+        // --- 📝 Skriv i rätt genre ---
+        function startSkriv(){
+            let aktuell = SKRIV[Math.floor(Math.random()*SKRIV.length)];
+            function visa(){
+                ovEl.innerHTML=''; ovEl.appendChild(ovTopp('📝 Skriv i rätt genre'));
+                const panel=document.createElement('div'); panel.className='genre-ov-panel';
+                const amne=document.createElement('div'); amne.className='genre-skriv-amne';
+                amne.innerHTML=`<div class='sk-genre'>${aktuell.genre}</div><div class='sk-amne'>${aktuell.amne}</div>`;
+                // hämta kännetecken för genren som stödtext
+                const nyckel=Object.keys(genreNamn).find(k=>genreNamn[k]===aktuell.genre);
+                const g=GENRER[nyckel];
+                const hjalp=document.createElement('div'); hjalp.className='genre-skriv-hjalp';
+                hjalp.innerHTML='<b>Tänk på:</b> '+(g?g.kannetecken.slice(0,3).join(' '):'');
+                const ta=document.createElement('textarea'); ta.className='genre-skriv-ta'; ta.placeholder='Skriv din text här…';
+                const rad=document.createElement('div'); rad.style.display='flex'; rad.style.gap='8px';
+                const ny=document.createElement('button'); ny.className='genre-ov-next'; ny.style.flex='1'; ny.textContent='🎲 Nytt ämne';
+                ny.onclick=()=>{ let n; do{ n=SKRIV[Math.floor(Math.random()*SKRIV.length)]; } while(SKRIV.length>1 && n===aktuell); aktuell=n; visa(); };
+                const rensa=document.createElement('button'); rensa.className='genre-ov-tillbaka'; rensa.style.flex='0 0 auto'; rensa.textContent='Rensa text'; rensa.onclick=()=>{ ta.value=''; ta.focus(); };
+                rad.appendChild(ny); rad.appendChild(rensa);
+                panel.appendChild(amne); panel.appendChild(hjalp); panel.appendChild(ta); panel.appendChild(rad);
+                ovEl.appendChild(panel);
+            }
+            visa();
+        }
+
+        // --- 🔗 Para ihop (genre <-> kännetecken) ---
+        function startPara(){
+            ovEl.innerHTML=''; ovEl.appendChild(ovTopp('🔗 Para ihop'));
+            const panel=document.createElement('div'); panel.className='genre-ov-panel';
+            const info=document.createElement('div'); info.className='genre-skriv-hjalp'; info.innerHTML='Välj ett kännetecken och klicka sedan på rätt genre.';
+            // ett tydligt kännetecken per genre
+            const PAR = {
+                berattelse:'Har början, mitt och slut – ofta med dialog',
+                faktatext:'Bygger på sanna fakta och vill ge kunskap',
+                brev:'Skrivs till en mottagare och avslutas med hälsning',
+                dagbok:'Personlig – "Kära dagbok, idag…"',
+                insandare:'Framför en åsikt och vill övertyga',
+                beskrivande:'Målar upp hur något ser ut och känns',
+                argumenterande:'Tes + argument + slutsats för att övertyga',
+                aterberattande:'Berättar om verkliga händelser i rätt ordning',
+                instruerande:'Talar om hur man gör något, steg för steg'
+            };
+            const wrap=document.createElement('div'); wrap.className='genre-para-wrap';
+            const drops={};
+            ordning.forEach(key=>{
+                const rad=document.createElement('div'); rad.className='genre-para-rad';
+                const gen=document.createElement('div'); gen.className='genre-para-genre'; gen.textContent=genreNamn[key];
+                const drop=document.createElement('div'); drop.className='genre-para-drop'; drop.textContent='Klicka hit ett kännetecken'; drop.dataset.key=key;
+                drop.onclick=()=>{ if(!valdChip) return; if(valdChip.dataset.key===key){ drop.textContent=PAR[key]; drop.classList.add('fylld'); valdChip.classList.add('klar'); valdChip.classList.remove('vald'); valdChip=null; kollaKlart(); } else { drop.animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:300}); } };
+                drops[key]=drop; rad.appendChild(gen); rad.appendChild(drop); wrap.appendChild(rad);
+            });
+            const bank=document.createElement('div'); bank.className='genre-para-bank';
+            let valdChip=null;
+            blanda(ordning).forEach(key=>{
+                const chip=document.createElement('div'); chip.className='genre-para-chip'; chip.textContent=PAR[key]; chip.dataset.key=key;
+                chip.onclick=()=>{ if(chip.classList.contains('klar')) return; bank.querySelectorAll('.genre-para-chip').forEach(c=>c.classList.remove('vald')); chip.classList.add('vald'); valdChip=chip; };
+                bank.appendChild(chip);
+            });
+            const fb=document.createElement('div'); fb.className='genre-ov-feedback';
+            function kollaKlart(){ const alla=Object.values(drops).every(d=>d.classList.contains('fylld')); if(alla){ fb.textContent='🏆 Alla rätt – snyggt jobbat!'; fb.style.color='#1f7a37'; } }
+            const om=document.createElement('button'); om.className='genre-ov-next'; om.textContent='🔁 Börja om'; om.onclick=startPara;
+            panel.appendChild(info); panel.appendChild(wrap); panel.appendChild(bank); panel.appendChild(fb); panel.appendChild(om);
+            ovEl.appendChild(panel);
+        }
+
+        // --- ❓ Quiz ---
+        function startQuiz(){
+            let poang=0; const frågor=blanda(QUIZ);
+            function fråga(idx){
+                ovEl.innerHTML=''; ovEl.appendChild(ovTopp('❓ Quiz om genrer'));
+                const panel=document.createElement('div'); panel.className='genre-ov-panel';
+                const q=frågor[idx];
+                const prog=document.createElement('div'); prog.className='genre-skriv-hjalp'; prog.textContent='Fråga '+(idx+1)+' av '+frågor.length;
+                const fr=document.createElement('div'); fr.className='genre-ov-fraga'; fr.textContent=q.f;
+                const svarWrap=document.createElement('div'); svarWrap.className='genre-ov-svar';
+                const fb=document.createElement('div'); fb.className='genre-ov-feedback';
+                q.alt.forEach((alt,ai)=>{
+                    const b=document.createElement('button'); b.className='genre-svar-btn'; b.textContent=alt;
+                    b.onclick=()=>{
+                        svarWrap.querySelectorAll('.genre-svar-btn').forEach(x=>x.disabled=true);
+                        if(ai===q.r){ b.classList.add('ratt'); poang++; fb.textContent='✔ Rätt!'; fb.style.color='#1f7a37'; }
+                        else { b.classList.add('fel'); fb.textContent='✘ Rätt svar: '+q.alt[q.r]; fb.style.color='#c2261c'; svarWrap.querySelectorAll('.genre-svar-btn')[q.r].classList.add('ratt'); }
+                        const next=document.createElement('button'); next.className='genre-ov-next'; next.textContent = idx+1<frågor.length ? 'Nästa ▶' : 'Klar – visa resultat';
+                        next.onclick=()=>{ idx+1<frågor.length ? fråga(idx+1) : resultat(); };
+                        panel.appendChild(next);
+                    };
+                    svarWrap.appendChild(b);
+                });
+                panel.appendChild(prog); panel.appendChild(fr); panel.appendChild(svarWrap); panel.appendChild(fb);
+                ovEl.appendChild(panel);
+            }
+            function resultat(){
+                ovEl.innerHTML=''; ovEl.appendChild(ovTopp('❓ Quiz om genrer'));
+                const p=document.createElement('div'); p.className='genre-ov-panel'; p.style.textAlign='center';
+                p.innerHTML=`<div style='font-size:40px;'>${poang===frågor.length?'🏆':(poang>=frågor.length/2?'👍':'💪')}</div><div style='font-size:18px;font-weight:900;color:#7c3aed;'>${poang} av ${frågor.length} rätt</div>`;
+                const om=document.createElement('button'); om.className='genre-ov-next'; om.textContent='🔁 Gör quizet igen'; om.onclick=startQuiz;
+                p.appendChild(om); ovEl.appendChild(p);
+            }
+            fråga(0);
+        }
+
+        // ===== ✍️ TRÄNA GENREN – specifika frågor + skrivuppgifter per genre =====
+        const TRANA = {
+            berattelse: {
+                fragor:['Vem är huvudpersonen i din berättelse?','Var och när utspelar sig berättelsen?','Vilket problem ska lösas?','Hur slutar berättelsen?','Vilka känslor känner huvudpersonen?'],
+                skriv:['Skriv en spännande första mening som gör läsaren nyfiken.','Skriv en kort dialog mellan två personer i berättelsen.','Beskriv problemet som uppstår i din berättelse.','Skriv ett slut där problemet löser sig.']
+            },
+            faktatext: {
+                fragor:['Vad handlar din faktatext om?','Vilka tre fakta är viktigast att ta med?','Vilka ämnesord (facktermer) behöver du förklara?','Vilken rubrik passar texten?','Var kan du hitta pålitlig fakta?'],
+                skriv:['Skriv en tydlig rubrik och en inledande mening om ämnet.','Skriv tre meningar med fakta om ditt ämne.','Förklara ett svårt ämnesord så att en kompis förstår.','Skriv en faktaruta med tre snabba fakta.']
+            },
+            brev: {
+                fragor:['Vem skriver du brevet till?','Varför skriver du brevet?','Hur inleder du brevet?','Vad vill du berätta?','Hur avslutar du och hälsar?'],
+                skriv:['Skriv en hälsningsfras och en inledning till din mottagare.','Berätta om något roligt du har varit med om.','Ställ en fråga till mottagaren i ditt brev.','Skriv en avslutning med hälsning och ditt namn.']
+            },
+            dagbok: {
+                fragor:['Vilken dag och tid skriver du om?','Vad hände under dagen?','Hur kände du dig?','Vad tänkte du på?','Vad hoppas du på imorgon?'],
+                skriv:['Börja med "Kära dagbok" och skriv om din dag.','Skriv om en känsla du hade idag och varför.','Beskriv det bästa som hände idag.','Skriv vad du ser fram emot imorgon.']
+            },
+            insandare: {
+                fragor:['Vilken åsikt vill du framföra?','Varför tycker du så?','Vilka argument har du?','Vem vill du övertyga?','Vilken rubrik fångar läsaren?'],
+                skriv:['Skriv en fångande rubrik till din insändare.','Skriv din åsikt i en tydlig mening.','Ge två argument som stöder din åsikt.','Avsluta med en uppmaning till läsaren.']
+            },
+            beskrivande: {
+                fragor:['Vad ska du beskriva?','Hur ser det ut (färg, form, storlek)?','Hur känns, luktar eller låter det?','Vilken jämförelse kan du använda?','I vilken ordning beskriver du?'],
+                skriv:['Beskriv något så att läsaren ser det framför sig.','Använd tre adjektiv för att beskriva en sak.','Skriv en jämförelse ("… som …").','Beskriv hur något känns eller luktar.']
+            },
+            argumenterande: {
+                fragor:['Vilken tes (åsikt) har du?','Vilka argument stöder tesen?','Vilket motargument finns – och hur bemöter du det?','Vilka exempel kan du ge?','Hur sammanfattar du din slutsats?'],
+                skriv:['Skriv din tes i en tydlig mening.','Skriv två argument som börjar med "För det första…" och "För det andra…".','Skriv ett motargument och bemöt det med "Men…".','Skriv en avslutande slutsats som börjar med "Sammanfattningsvis…".']
+            },
+            aterberattande: {
+                fragor:['Vad var det som hände?','Var och när hände det?','Vad hände först, sedan och till slut?','Vilka var med?','Hur kändes det – och hur gick det?'],
+                skriv:['Skriv en inledning som säger vad, var och när det hände.','Skriv vad som hände först, med ett tidsord i början.','Skriv vad som hände sedan och därefter, i rätt ordning.','Avsluta med hur det kändes eller hur det gick.']
+            },
+            instruerande: {
+                fragor:['Vad ska instruktionen lära ut?','Vad behöver man (material, ingredienser eller verktyg)?','Vilket är steg 1?','I vilken ordning kommer de andra stegen?','Hur vet man att man är klar?'],
+                skriv:['Skriv en lista med det man behöver innan man börjar.','Skriv steg 1 i imperativ, till exempel "Ta…" eller "Blanda…".','Skriv de nästa stegen i rätt ordning, ett i taget.','Skriv en sista mening som visar att man är klar.']
+            }
+        };
+        let tranaGenre = current; // startar på samma genre som är vald
+        function renderTrana(){
+            tranaEl.innerHTML='';
+            // Genreväljare (samma flikstil som Lär dig)
+            const tabs=document.createElement('div'); tabs.className='genre-tabs';
+            ordning.forEach(key=>{
+                const g=GENRER[key];
+                const b=document.createElement('button');
+                b.className='genre-tab'+(key===tranaGenre?' active':'');
+                b.innerHTML=`<span>${g.emoji}</span>${g.namn}`;
+                b.onclick=()=>{ tranaGenre=key; renderTrana(); };
+                tabs.appendChild(b);
+            });
+            tranaEl.appendChild(tabs);
+
+            const data=TRANA[tranaGenre]; const g=GENRER[tranaGenre];
+            const panel=document.createElement('div'); panel.className='genre-ov-panel';
+
+            // Rubrik
+            const rub=document.createElement('div'); rub.className='genre-huvud';
+            rub.innerHTML=`<h3>${g.emoji} Träna: ${g.namn}</h3><p>Fundera på frågorna och gör skrivuppgifterna för att öva på den här genren.</p>`;
+            panel.appendChild(rub);
+
+            // Reflektionsfrågor
+            const frSekt=document.createElement('div'); frSekt.className='genre-sektion kannetecken';
+            let frHtml='<h4>💬 Frågor att tänka på</h4><ul>';
+            data.fragor.forEach(f=>{ frHtml+=`<li>${f}</li>`; });
+            frHtml+='</ul>'; frSekt.innerHTML=frHtml;
+            panel.appendChild(frSekt);
+
+            // Slumpad skrivuppgift + skrivfält
+            const skSekt=document.createElement('div'); skSekt.className='genre-skriv-amne';
+            let aktuellSkriv = data.skriv[Math.floor(Math.random()*data.skriv.length)];
+            function ritaSkriv(){
+                skSekt.innerHTML=`<div class='sk-genre'>✍️ Skrivuppgift</div><div class='sk-amne'>${aktuellSkriv}</div>`;
+            }
+            ritaSkriv();
+            const ta=document.createElement('textarea'); ta.className='genre-skriv-ta'; ta.placeholder='Skriv ditt svar här…';
+            const rad=document.createElement('div'); rad.style.display='flex'; rad.style.gap='8px'; rad.style.marginTop='8px';
+            const ny=document.createElement('button'); ny.className='genre-ov-next'; ny.style.flex='1'; ny.textContent='🎲 Ny skrivuppgift';
+            ny.onclick=()=>{ let n; do{ n=data.skriv[Math.floor(Math.random()*data.skriv.length)]; } while(data.skriv.length>1 && n===aktuellSkriv); aktuellSkriv=n; ritaSkriv(); };
+            const rensa=document.createElement('button'); rensa.className='genre-ov-tillbaka'; rensa.style.flex='0 0 auto'; rensa.textContent='Rensa'; rensa.onclick=()=>{ ta.value=''; ta.focus(); };
+            rad.appendChild(ny); rad.appendChild(rensa);
+            panel.appendChild(skSekt); panel.appendChild(ta); panel.appendChild(rad);
+
+            tranaEl.appendChild(panel);
+        }
+
+        // Gör widgeten scrollbar i höjdled om innehållet är högre än skärmen,
+        // så inget hamnar bakom skärmens nederkant. En pil-knapp scrollar upp/ner.
+        function uppdateraScroll(){
+            const widgetEl = body.closest('.widget'); if(!widgetEl) return;
+            const bodyMax = Math.max(240, Math.floor((window.innerHeight||800) - 120));
+            body.style.maxHeight = bodyMax + 'px';
+            body.style.overflowY = 'auto';
+            body.style.overflowX = 'hidden';
+            let arrow = widgetEl.querySelector('.kw-scroll-arrow');
+            if(!arrow){ arrow=document.createElement('button'); arrow.className='kw-scroll-arrow'; widgetEl.appendChild(arrow); }
+            const updateArrow=()=>{
+                const canScroll = body.scrollHeight > body.clientHeight + 6;
+                if(!canScroll){ arrow.style.display='none'; return; }
+                arrow.style.display='flex';
+                const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 8;
+                arrow.innerHTML = atBottom ? '▲' : '▼';
+                arrow.title = atBottom ? 'Till toppen' : 'Visa mer nedåt';
+            };
+            arrow.onclick=()=>{ const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 8; body.scrollTo({ top: atBottom ? 0 : body.scrollTop + Math.floor(body.clientHeight*0.8), behavior:'smooth' }); setTimeout(updateArrow, 420); };
+            if(body.__genreScroll) body.removeEventListener('scroll', body.__genreScroll);
+            body.__genreScroll = updateArrow; body.addEventListener('scroll', updateArrow);
+            setTimeout(updateArrow, 60);
+        }
+        // Uppdatera pilen efter varje innehållsändring (lägesbyte, flikbyte, övningar)
+        const _origRenderPanel = renderPanel;
+        renderPanel = function(){ _origRenderPanel(); setTimeout(uppdateraScroll, 20); };
+        const _origRenderOvMeny = renderOvMeny;
+        renderOvMeny = function(){ _origRenderOvMeny(); setTimeout(uppdateraScroll, 20); };
+        const _origRenderTrana = renderTrana;
+        renderTrana = function(){ _origRenderTrana(); setTimeout(uppdateraScroll, 20); };
+        larBtn.addEventListener('click', ()=> setTimeout(uppdateraScroll, 20));
+        ovBtn.addEventListener('click', ()=> setTimeout(uppdateraScroll, 20));
+        tranaBtn.addEventListener('click', ()=> setTimeout(uppdateraScroll, 20));
+        window.addEventListener('resize', ()=> setTimeout(uppdateraScroll, 100));
+
+        renderTabs(); renderPanel();
+        setTimeout(uppdateraScroll, 100);
+    }
+
     // ---- POPUP-HJÄLPARE (konfetti + vinnarruta + Grej of the day-steg) ----
     function spawnPopupConfetti(container, amount){
         const colors = ['#ff3b30','#ff9500','#ffcc00','#4cd964','#5ac8fa','#007aff','#5856d6','#ff2d55','#7c3aed'];
@@ -3403,7 +4377,7 @@
         if(config===undefined) config=null;
         const body = createWidget('HUNDRARUTA', 340, 'hundra-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu hundra-ctrl'><div class='hundra-colors'></div><button class='btn btn-secondary hundra-hide'>Göm 10 tal</button><button class='btn btn-secondary hundra-clear'>Rensa</button></div><div class='hundra-grid'></div>`;
+        body.innerHTML = `<div class='hover-menu hundra-ctrl'><div class='hundra-colors'></div><select class='editor-select hundra-monster'><option value=''>Markera mönster…</option><option value='udda'>Udda tal</option><option value='jamna'>Jämna tal</option><option value='hopp3'>3-hopp</option><option value='hopp5'>5-hopp</option><option value='hopp10'>10-hopp</option><option value='mult9'>Multiplar av 9</option><option value='mult8'>Multiplar av 8</option><option value='mult7'>Multiplar av 7</option><option value='mult6'>Multiplar av 6</option><option value='mult5'>Multiplar av 5</option><option value='mult4'>Multiplar av 4</option><option value='mult3'>Multiplar av 3</option><option value='mult2'>Multiplar av 2</option></select><button class='btn btn-secondary hundra-clear'>Rensa</button></div><div class='hundra-grid'></div>`;
         const colorsEl=body.querySelector('.hundra-colors'), grid=body.querySelector('.hundra-grid');
         const COLORS=['#34c759','#ff9500','#5ac8fa','#ff2d55'];
         let marks={}, hidden=new Set(), cur=0; // cur = vald färg (0-3) eller 'sudd'
@@ -3430,9 +4404,33 @@
                 grid.appendChild(c);
             }
         };
-        body.querySelector('.hundra-hide').onclick=()=>{
-            const fria=[]; for(let n=1;n<=100;n++){ if(!hidden.has(n)) fria.push(n); }
-            for(let i=0;i<10 && fria.length>0;i++){ const k=Math.floor(Math.random()*fria.length); hidden.add(fria.splice(k,1)[0]); }
+        // Markera alla tal som matchar valt mönster, med den färg som är vald i paletten.
+        const monsterSel = body.querySelector('.hundra-monster');
+        function matcharMonster(n, m){
+            switch(m){
+                case 'udda':   return n % 2 !== 0;
+                case 'jamna':  return n % 2 === 0;
+                case 'hopp3':  return n % 3 === 0;
+                case 'hopp5':  return n % 5 === 0;
+                case 'hopp10': return n % 10 === 0;
+                case 'mult9':  return n % 9 === 0;
+                case 'mult8':  return n % 8 === 0;
+                case 'mult7':  return n % 7 === 0;
+                case 'mult6':  return n % 6 === 0;
+                case 'mult5':  return n % 5 === 0;
+                case 'mult4':  return n % 4 === 0;
+                case 'mult3':  return n % 3 === 0;
+                case 'mult2':  return n % 2 === 0;
+                default: return false;
+            }
+        }
+        monsterSel.onchange=()=>{
+            const m = monsterSel.value;
+            if(!m){ return; }
+            // Använd vald färg; om suddet är valt, måla ändå med första färgen så mönstret syns.
+            const farg = (cur==='sudd') ? 0 : cur;
+            for(let n=1;n<=100;n++){ if(matcharMonster(n, m)) marks[n]=farg; }
+            monsterSel.value=''; // återställ menyn så man kan välja samma igen
             render(); saveBoardState();
         };
         body.querySelector('.hundra-clear').onclick=()=>{ marks={}; hidden.clear(); render(); saveBoardState(); };
@@ -3475,6 +4473,112 @@
         lvlSel.onchange=()=>{ syncData(); nyUppgift(); saveBoardState(); };
         nextBtn.onclick=()=>{ nyUppgift(); };
         syncData(); nyUppgift();
+    }
+
+    // ---- STARTUPPGIFT ----
+    // Slumpar fram fyra matteuppgifter från olika områden (åk 4) med ett klick.
+    // Uppgift 1-3 kommer från grundområdena, uppgift 4 är alltid extra klurig
+    // (textproblem i två steg). Varje svar är gömt och visas när man klickar på det,
+    // precis som i Räkna-widgeten (.rakna-ans).
+    function createStartuppgift(config){
+        if(config===undefined) config=null;
+        const body = createWidget('STARTUPPGIFT', 400, 'startuppgift-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fyra nya uppgifter – den fjärde är lite klurigare!</div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
+        const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista');
+        const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
+
+        const OMRADEN = {
+            add_sub: {
+                namn:'Addition & subtraktion', emoji:'➕',
+                gen: function(){
+                    const typ = Math.random()<0.5 ? 'add' : 'sub';
+                    if(typ==='add'){ const a=ri(10,300), b=ri(10,300); return { fraga:a+' + '+b+' =', svar:a+b }; }
+                    const stor=ri(50,500), liten=ri(10,stor-1); return { fraga:stor+' − '+liten+' =', svar:stor-liten };
+                }
+            },
+            mul_div: {
+                namn:'Multiplikation & division', emoji:'✖️',
+                gen: function(){
+                    const typ = Math.random()<0.5 ? 'mul' : 'div';
+                    const a=ri(2,12), b=ri(2,12);
+                    if(typ==='mul') return { fraga:a+' × '+b+' =', svar:a*b };
+                    return { fraga:(a*b)+' ÷ '+b+' =', svar:a };
+                }
+            },
+            brak_tal: {
+                namn:'Bråk & tal', emoji:'🔢',
+                gen: function(){
+                    const val = ri(0,2);
+                    if(val===0){ const namnare=[2,3,4,5,10][ri(0,4)]; const multipel=ri(1,8)*namnare; return { fraga:'1/'+namnare+' av '+multipel+' =', svar:String(multipel/namnare) }; }
+                    if(val===1){ const tal=ri(11,989); const svar=Math.round(tal/10)*10; return { fraga:'Avrunda '+tal+' till närmaste tiotal:', svar:String(svar) }; }
+                    const tal=ri(1,200); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
+                }
+            },
+            geo_matt: {
+                namn:'Geometri, mätning & klockan', emoji:'📐',
+                gen: function(){
+                    const val = ri(0,2);
+                    if(val===0){ const l=ri(3,20), b=ri(3,20); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:(2*(l+b))+' cm' }; }
+                    if(val===1){ const h=ri(1,12), halv=Math.random()<0.5; const fraga = halv ? ('Vad är klockan en halvtimme efter '+h+':00?') : ('Vad är klockan en timme efter '+h+':00?'); const svarH = (h%12)+1; const svar = halv ? (h+':30') : (svarH+':00'); return { fraga:fraga, svar:svar }; }
+                    const l=ri(3,15), b=ri(3,15); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:(l*b)+' cm²' };
+                }
+            },
+            klurig: {
+                namn:'Klurig utmaning', emoji:'🧩',
+                gen: function(){
+                    const val = ri(0,3);
+                    if(val===0){
+                        const pris=ri(5,40), antal=ri(2,6); const kostnad=pris*antal; const pengar=kostnad+ri(10,150);
+                        return { fraga:'Alex har '+pengar+' kr. Hen köper '+antal+' block som kostar '+pris+' kr styck. Hur mycket pengar har Alex kvar?', svar:(pengar-kostnad)+' kr' };
+                    }
+                    if(val===1){
+                        const elever=ri(20,30), grupper=[2,3,4,5][ri(0,3)]; const rest=elever%grupper; const perGrupp=Math.floor(elever/grupper);
+                        const fraga = rest===0 ? ('Det är '+elever+' elever i klassen. De delas in i lika stora grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever i klassen. Läraren delar dem i grupper om '+grupper+' elever. Hur många elever blir över?');
+                        return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' grupper' : rest+' elever' };
+                    }
+                    if(val===2){
+                        const start=ri(2000,2015), alder=ri(6,12);
+                        return { fraga:'Ebba föddes år '+start+'. Hur gammal är hon år '+(start+alder)+'?', svar:alder+' år' };
+                    }
+                    const a=ri(15,60), b=ri(15,60), c=ri(5,30);
+                    return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:(a+b-c)+' frukter' };
+                }
+            }
+        };
+        const GRUNDOMRADEN = ['add_sub','mul_div','brak_tal','geo_matt'];
+
+        function dagensUppgifter(){
+            const uppgifter = blandaSU(GRUNDOMRADEN).map(key=>{
+                const u = OMRADEN[key].gen();
+                return { omrade:OMRADEN[key].namn, emoji:OMRADEN[key].emoji, klurig:false, fraga:u.fraga, svar:u.svar };
+            });
+            const k = OMRADEN.klurig.gen();
+            uppgifter.push({ omrade:OMRADEN.klurig.namn, emoji:OMRADEN.klurig.emoji, klurig:true, fraga:k.fraga, svar:k.svar });
+            return uppgifter;
+        }
+        function blandaSU(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+        function renderUppgifter(uppgifter){
+            lista.innerHTML='';
+            uppgifter.forEach((u,i)=>{
+                const rad=document.createElement('div'); rad.className='su-rad'+(u.klurig?' su-klurig':'');
+                const tagg=document.createElement('div'); tagg.className='su-tagg'; tagg.innerHTML=`<span>${u.emoji}</span>${u.omrade}${u.klurig?' <span class="su-klurig-lbl">✨ Extra klurig</span>':''}`;
+                const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
+                const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=(i+1)+'. '+u.fraga;
+                const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
+                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
+                rad2.appendChild(fr); rad2.appendChild(sv);
+                rad.appendChild(tagg); rad.appendChild(rad2);
+                lista.appendChild(rad);
+            });
+            widget.dataset.startuppgift = JSON.stringify(uppgifter);
+        }
+
+        btn.onclick=()=>{ renderUppgifter(dagensUppgifter()); saveBoardState(); };
+
+        if(config && config.data && Array.isArray(config.data) && config.data.length){ renderUppgifter(config.data); }
+        else { renderUppgifter(dagensUppgifter()); }
     }
 
     // ---- TALLINJE ----
@@ -3631,18 +4735,19 @@
         // Genererar en uppgift utifrån räknesätt (op) och nivå.
         function genUppgift(op, niva){
             if(op==='mix') op = ['vaxel','summa','flera','dela'][ri(0,3)];
-            let pris, betal, fraga, svar;
+            let pris, betal, fraga, svar, forklaring;
             if(op==='vaxel'){
                 if(niva==='latt'){ pris=ri(1,9); betal=10; }
                 else if(niva==='medel'){ pris=ri(11,49); betal=betalSedel(pris); }
                 else { pris=ri(51,189); betal=betalSedel(pris); }
                 fraga = `Du köper ${val(varor)} för <b>${pris} kr</b> och betalar med <b>${betal} kr</b>. Hur mycket får du tillbaka?`;
                 svar = (betal-pris)+' kr';
+                forklaring = `Växel = det du betalar − priset. Dra bort priset från sedeln: ${betal} − ${pris} = <b>${betal-pris}</b>. Alltså får du tillbaka ${betal-pris} kr.`;
             } else if(op==='summa'){
                 let a,b,c;
-                if(niva==='latt'){ a=ri(1,9); b=ri(1,9); fraga=`Du köper två saker som kostar <b>${a} kr</b> och <b>${b} kr</b>. Hur mycket kostar de tillsammans?`; svar=(a+b)+' kr'; }
-                else if(niva==='medel'){ a=ri(5,40); b=ri(5,40); fraga=`Du handlar för <b>${a} kr</b> och <b>${b} kr</b>. Hur mycket blir det tillsammans?`; svar=(a+b)+' kr'; }
-                else { a=ri(15,120); b=ri(15,120); c=ri(15,120); fraga=`Du köper tre saker: <b>${a} kr</b>, <b>${b} kr</b> och <b>${c} kr</b>. Hur mycket kostar allt tillsammans?`; svar=(a+b+c)+' kr'; }
+                if(niva==='latt'){ a=ri(1,9); b=ri(1,9); fraga=`Du köper två saker som kostar <b>${a} kr</b> och <b>${b} kr</b>. Hur mycket kostar de tillsammans?`; svar=(a+b)+' kr'; forklaring=`Lägg ihop priserna: ${a} + ${b} = <b>${a+b}</b>. Tillsammans kostar de ${a+b} kr.`; }
+                else if(niva==='medel'){ a=ri(5,40); b=ri(5,40); fraga=`Du handlar för <b>${a} kr</b> och <b>${b} kr</b>. Hur mycket blir det tillsammans?`; svar=(a+b)+' kr'; forklaring=`Addera de två beloppen: ${a} + ${b} = <b>${a+b}</b>. Det blir ${a+b} kr tillsammans.`; }
+                else { a=ri(15,120); b=ri(15,120); c=ri(15,120); fraga=`Du köper tre saker: <b>${a} kr</b>, <b>${b} kr</b> och <b>${c} kr</b>. Hur mycket kostar allt tillsammans?`; svar=(a+b+c)+' kr'; forklaring=`Lägg ihop alla tre priserna, ett i taget: ${a} + ${b} = ${a+b}, och ${a+b} + ${c} = <b>${a+b+c}</b>. Allt kostar ${a+b+c} kr.`; }
             } else if(op==='flera'){
                 let antal, styck;
                 if(niva==='latt'){ antal=ri(2,5); styck=ri(2,5); }
@@ -3650,6 +4755,7 @@
                 else { antal=ri(3,8); styck=ri(8,25); }
                 fraga = `Du köper <b>${antal} ${val(varor_fl)}</b> som kostar <b>${styck} kr</b> styck. Hur mycket kostar de tillsammans?`;
                 svar = (antal*styck)+' kr';
+                forklaring = `Samma pris flera gånger → multiplicera. Antal × styckpris: ${antal} × ${styck} = <b>${antal*styck}</b>. (Det är samma sak som att lägga ihop ${styck} kr, ${antal} gånger.) Alltså ${antal*styck} kr.`;
             } else { // dela
                 let antal, styck, total;
                 if(niva==='latt'){ antal=ri(2,4); styck=ri(2,5); }
@@ -3658,19 +4764,21 @@
                 total = antal*styck;
                 fraga = `Ni är <b>${antal}</b> kompisar som ska dela <b>${total} kr</b> lika. Hur mycket får var och en?`;
                 svar = styck+' kr';
+                forklaring = `Dela lika → dividera. Total ÷ antal personer: ${total} ÷ ${antal} = <b>${styck}</b>. Var och en får ${styck} kr. (Kontroll: ${styck} × ${antal} = ${total}.)`;
             }
-            return { fraga, svar };
+            return { fraga, svar, forklaring };
         }
         function visaUppgift(){
-            const { fraga, svar } = genUppgift(opSel.value, nivaSel.value);
+            const { fraga, svar, forklaring } = genUppgift(opSel.value, nivaSel.value);
             vaxelEl.style.display='block'; vaxelEl.innerHTML='';
             const q=document.createElement('span'); q.className='pengar-fraga'; q.innerHTML=fraga;
             const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
-            a.onclick=()=>{ a.textContent=svar; a.classList.add('revealed'); a.onclick=null; };
+            const forkEl=document.createElement('div'); forkEl.className='pengar-forklaring'; forkEl.style.display='none'; forkEl.innerHTML='<b>Så här tänker du:</b><br>'+forklaring;
+            a.onclick=()=>{ a.textContent=svar; a.classList.add('revealed'); a.onclick=null; forkEl.style.display='block'; };
             const wrap=document.createElement('div'); wrap.innerHTML='Svar: '; wrap.appendChild(a);
             const ny=document.createElement('button'); ny.className='pengar-ny'; ny.type='button'; ny.textContent='🎲 Ny uppgift';
             ny.onclick=()=> visaUppgift();
-            vaxelEl.appendChild(q); vaxelEl.appendChild(wrap); vaxelEl.appendChild(ny);
+            vaxelEl.appendChild(q); vaxelEl.appendChild(wrap); vaxelEl.appendChild(forkEl); vaxelEl.appendChild(ny);
         }
         opSel.onchange=()=>{ saveBoardState(); if(vaxelEl.style.display!=='none') visaUppgift(); };
         nivaSel.onchange=()=>{ saveBoardState(); if(vaxelEl.style.display!=='none') visaUppgift(); };
@@ -3686,12 +4794,102 @@
         if(config===undefined) config=null;
         const body = createWidget('GEOMETRI', 380, 'geo-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu geo-ctrl'><select class='editor-select geo-shape'><option value='kvadrat'>Kvadrat</option><option value='rektangel'>Rektangel</option><option value='triangel'>Triangel (rätvinklig)</option><option value='cirkel'>Cirkel</option></select><label class='tal-hopp-lbl'><input type='checkbox' class='geo-practice'> Öva-läge</label></div><svg class='geo-svg' viewBox='0 0 360 260' xmlns='http://www.w3.org/2000/svg'></svg><div class='geo-formler'></div><div class='geo-facts'></div><div class='pengar-tips'>Dra i de orangea punkterna för att ändra storlek – 1 ruta = 1 cm</div>`;
+        body.innerHTML = `<div class='hover-menu geo-ctrl'><select class='editor-select geo-shape'><option value='kvadrat'>Kvadrat</option><option value='rektangel'>Rektangel</option><option value='triangel'>Triangel (rätvinklig)</option><option value='cirkel'>Cirkel</option></select><button class='btn btn-secondary geo-figurer' title='Utforska 2D- och 3D-figurer'>🔷 Figurer</button><label class='tal-hopp-lbl'><input type='checkbox' class='geo-practice'> Öva-läge</label></div><svg class='geo-svg' viewBox='0 0 360 260' xmlns='http://www.w3.org/2000/svg'></svg><div class='geo-formler'></div><div class='geo-facts'></div><div class='pengar-tips'>Dra i de orangea punkterna för att ändra storlek – 1 ruta = 1 cm</div>`;
         const shapeSel=body.querySelector('.geo-shape'), practiceCb=body.querySelector('.geo-practice'), svg=body.querySelector('.geo-svg'), facts=body.querySelector('.geo-facts'), formler=body.querySelector('.geo-formler');
+        body.querySelector('.geo-figurer').onclick = openFigurutforskare;
         const NS='http://www.w3.org/2000/svg', U=20, X0=58, Y0=230; // bred vänstermarginal så höjdetiketten (t.ex. ”10 cm”) ryms helt
         let dims = { a:5, w:8, h:4, b:8, th:5, r:3 };
         if(config && config.data){ if(config.data.shape) shapeSel.value=config.data.shape; if(config.data.dims) dims=Object.assign(dims, config.data.dims); practiceCb.checked=!!config.data.practice; }
         const syncData=()=>{ widget.dataset.geo = JSON.stringify({ shape: shapeSel.value, dims: dims, practice: practiceCb.checked }); };
+
+        // ---- FIGURUTFORSKARE: 2D/3D-figurer med dolt namn + egenskaper att gissa ----
+        function openFigurutforskare(){
+            const S='http://www.w3.org/2000/svg';
+            // Enkla, tydliga SVG-figurer (streckade "dolda" kanter för 3D)
+            const FIG2D = {
+                'Kvadrat': '<svg viewBox="0 0 100 100"><rect x="22" y="22" width="56" height="56" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/></svg>',
+                'Rektangel': '<svg viewBox="0 0 100 100"><rect x="14" y="30" width="72" height="40" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/></svg>',
+                'Triangel': '<svg viewBox="0 0 100 100"><polygon points="50,20 82,78 18,78" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/></svg>',
+                'Cirkel': '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#fee2e2" stroke="#dc2626" stroke-width="3"/></svg>',
+                'Rätvinklig triangel': '<svg viewBox="0 0 100 100"><polygon points="22,78 82,78 22,26" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/></svg>',
+                'Romb': '<svg viewBox="0 0 100 100"><polygon points="50,18 82,50 50,82 18,50" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/></svg>',
+                'Parallellogram': '<svg viewBox="0 0 100 100"><polygon points="30,30 86,30 70,70 14,70" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/></svg>',
+                'Femhörning': '<svg viewBox="0 0 100 100"><polygon points="50,16 84,42 71,82 29,82 16,42" fill="#fef9c3" stroke="#ca8a04" stroke-width="3"/></svg>',
+                'Sexhörning': '<svg viewBox="0 0 100 100"><polygon points="30,22 70,22 88,50 70,78 30,78 12,50" fill="#fef9c3" stroke="#ca8a04" stroke-width="3"/></svg>'
+            };
+            const FIG3D = {
+                'Kub': '<svg viewBox="0 0 100 100"><path d="M28 38 L62 38 L62 72 L28 72 Z" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/><path d="M28 38 L44 24 L78 24 L62 38" fill="#bfdbfe" stroke="#2563eb" stroke-width="2.5"/><path d="M62 38 L78 24 L78 58 L62 72" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/><path d="M28 38 L44 24 L44 58 L28 72" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="4 3"/><path d="M44 58 L78 58 M44 58 L44 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="4 3"/></svg>',
+                'Rätblock': '<svg viewBox="0 0 100 100"><path d="M18 40 L64 40 L64 72 L18 72 Z" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/><path d="M18 40 L32 26 L78 26 L64 40" fill="#bfdbfe" stroke="#2563eb" stroke-width="2.5"/><path d="M64 40 L78 26 L78 58 L64 72" fill="#93c5fd" stroke="#2563eb" stroke-width="2.5"/></svg>',
+                'Klot': '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/><ellipse cx="50" cy="50" rx="30" ry="10" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4 3"/></svg>',
+                'Cylinder': '<svg viewBox="0 0 100 100"><path d="M28 30 L28 70" stroke="#7c3aed" stroke-width="2.5" fill="none"/><path d="M72 30 L72 70" stroke="#7c3aed" stroke-width="2.5" fill="none"/><ellipse cx="50" cy="30" rx="22" ry="9" fill="#ede9fe" stroke="#7c3aed" stroke-width="2.5"/><path d="M28 70 A22 9 0 0 0 72 70" fill="#ddd6fe" stroke="#7c3aed" stroke-width="2.5"/><path d="M28 70 A22 9 0 0 1 72 70" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3"/></svg>',
+                'Kon': '<svg viewBox="0 0 100 100"><path d="M50 20 L74 72 L26 72 Z" fill="#dcfce7" stroke="#16a34a" stroke-width="2.5"/><ellipse cx="50" cy="72" rx="24" ry="9" fill="#bbf7d0" stroke="#16a34a" stroke-width="2.5"/><path d="M26 72 A24 9 0 0 1 74 72" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4 3"/></svg>',
+                'Pyramid': '<svg viewBox="0 0 100 100"><path d="M50 18 L80 66 L50 80 L20 66 Z" fill="#fef9c3" stroke="#ca8a04" stroke-width="2.5"/><path d="M50 18 L50 80" stroke="#ca8a04" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M20 66 L80 66" stroke="#ca8a04" stroke-width="1.5" stroke-dasharray="4 3"/></svg>'
+            };
+            // Egenskaper: 2D -> hörn, sidor; 3D -> hörn, kanter, sidoytor
+            const PROPS2D = {
+                'Kvadrat': {Hörn:4, Sidor:4, Extra:'Alla sidor lika långa, fyra räta vinklar'},
+                'Rektangel': {Hörn:4, Sidor:4, Extra:'Motstående sidor lika långa, fyra räta vinklar'},
+                'Triangel': {Hörn:3, Sidor:3, Extra:'Vinklarna är tillsammans 180°'},
+                'Cirkel': {Hörn:0, Sidor:'0 (en böjd kurva)', Extra:'Alla punkter lika långt från mitten'},
+                'Rätvinklig triangel': {Hörn:3, Sidor:3, Extra:'Har en rät vinkel (90°)'},
+                'Romb': {Hörn:4, Sidor:4, Extra:'Alla sidor lika långa, sneda vinklar'},
+                'Parallellogram': {Hörn:4, Sidor:4, Extra:'Motstående sidor parallella och lika långa'},
+                'Femhörning': {Hörn:5, Sidor:5, Extra:'Regelbunden: alla sidor och vinklar lika'},
+                'Sexhörning': {Hörn:6, Sidor:6, Extra:'Regelbunden: alla sidor och vinklar lika'}
+            };
+            const PROPS3D = {
+                'Kub': {Hörn:8, Kanter:12, Sidoytor:6, Extra:'Alla sidoytor är lika stora kvadrater'},
+                'Rätblock': {Hörn:8, Kanter:12, Sidoytor:6, Extra:'Sidoytorna är rektanglar'},
+                'Klot': {Hörn:0, Kanter:0, Sidoytor:'1 böjd yta', Extra:'Alla punkter lika långt från mitten'},
+                'Cylinder': {Hörn:0, Kanter:2, Sidoytor:'3 (2 cirklar + 1 böjd)', Extra:'Två lika stora cirkelytor'},
+                'Kon': {Hörn:'1 spets', Kanter:1, Sidoytor:'2 (1 cirkel + 1 böjd)', Extra:'En cirkelbotten och en spets'},
+                'Pyramid': {Hörn:5, Kanter:8, Sidoytor:5, Extra:'Kvadratisk botten + 4 trianglar (kvadratisk pyramid)'}
+            };
+
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box';
+            const stäng=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stäng(); });
+
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent='🔷 Utforska figurer';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stäng;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const sub=document.createElement('p'); sub.className='figx-sub'; sub.textContent='Gissa figurens namn och egenskaper – tryck sedan på den gula rutan för att se svaret.';
+            box.appendChild(sub);
+
+            const tabs=document.createElement('div'); tabs.className='figx-tabs';
+            const grid=document.createElement('div'); grid.className='figx-grid';
+            let läge='2d';
+            function ritaKort(namn, svgHtml, props){
+                const card=document.createElement('div'); card.className='figx-card';
+                const fig=document.createElement('div'); fig.className='figx-fig'; fig.innerHTML=svgHtml;
+                const btn=document.createElement('button'); btn.className='figx-reveal'; btn.textContent='❓ Visa namn & egenskaper';
+                const info=document.createElement('div'); info.className='figx-info';
+                let rows='<div class="figx-namn">'+namn+'</div><ul class="figx-props">';
+                for(const k in props){ rows += '<li><span class="pk">'+k+'</span><span class="pv">'+props[k]+'</span></li>'; }
+                rows+='</ul>';
+                info.innerHTML=rows;
+                btn.onclick=()=>{ const synlig=info.classList.toggle('show'); btn.textContent = synlig ? '🙈 Dölj' : '❓ Visa namn & egenskaper'; };
+                card.appendChild(fig); card.appendChild(btn); card.appendChild(info);
+                return card;
+            }
+            function render(){
+                grid.innerHTML='';
+                const figs = läge==='2d' ? FIG2D : FIG3D;
+                const props = läge==='2d' ? PROPS2D : PROPS3D;
+                Object.keys(figs).forEach(namn=>{ grid.appendChild(ritaKort(namn, figs[namn], props[namn])); });
+            }
+            const t2=document.createElement('button'); t2.className='figx-tab active'; t2.textContent='▱ 2D-figurer';
+            const t3=document.createElement('button'); t3.className='figx-tab'; t3.textContent='⬡ 3D-figurer';
+            t2.onclick=()=>{ läge='2d'; t2.classList.add('active'); t3.classList.remove('active'); render(); };
+            t3.onclick=()=>{ läge='3d'; t3.classList.add('active'); t2.classList.remove('active'); render(); };
+            tabs.appendChild(t2); tabs.appendChild(t3); box.appendChild(tabs);
+            box.appendChild(grid);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            render();
+        }
         const fmt=v=>{ const r=Math.round(v*10)/10; return String(r).replace('.',','); };
         function el(tag,attrs,txt){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(txt!==undefined) e.textContent=txt; return e; }
         function handle(x,y,drag){ const h=el('circle',{cx:x,cy:y,r:9,fill:'#ff9500',stroke:'#fff','stroke-width':3,'class':'geo-handle'}); h._drag=drag; return h; }
@@ -3803,8 +5001,8 @@
         const body = createWidget('ENHETER', 320, 'enh-widget', config);
         const widget = body.parentElement.parentElement;
         const KAT = {
-            langd: { namn:'Längd', enheter:[ ['mm',0.001], ['cm',0.01], ['dm',0.1], ['m',1], ['km',1000] ] },
-            vikt:  { namn:'Vikt',   enheter:[ ['g',1], ['hg',100], ['kg',1000], ['ton',1000000] ] },
+            langd: { namn:'Längd', enheter:[ ['mm',0.001], ['cm',0.01], ['dm',0.1], ['m',1], ['km',1000], ['mil',10000] ] },
+            vikt:  { namn:'Vikt',   enheter:[ ['mg',0.001], ['g',1], ['hg',100], ['kg',1000], ['ton',1000000] ] },
             volym: { namn:'Volym',  enheter:[ ['ml',0.001], ['cl',0.01], ['dl',0.1], ['l',1] ] }
         };
         body.innerHTML = `<div class='hover-menu enh-ctrl'><select class='editor-select enh-kat'><option value='langd'>📏 Längd</option><option value='vikt'>⚖️ Vikt</option><option value='volym'>🧴 Volym</option></select></div><div class='enh-in-row'><input type='number' class='enh-varde-in' value='5' step='any'><select class='editor-select enh-enhet-sel'></select></div><input type='range' class='enh-slider' min='0' max='100' step='1'><div class='enh-rows'></div><div class='hover-menu' style='margin-top:10px;'><button class='btn btn-primary enh-ova' style='width:100%;'>Öva-uppgift ▶</button></div><div class='enh-uppgift' style='display:none;'></div>`;
@@ -3871,7 +5069,7 @@
         if(config===undefined) config=null;
         const body = createWidget('MATTEKAMP', 360, 'mk-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu mk-ctrl'><select class='editor-select mk-op'><option value='add'>Addition +</option><option value='sub'>Subtraktion −</option><option value='mul'>Multiplikation ×</option><option value='div'>Division ÷</option><option value='mix'>Blandat</option></select><select class='editor-select mk-lvl'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><select class='editor-select mk-mal'><option value='5'>Först till 5</option><option value='10'>Först till 10</option><option value='15'>Först till 15</option><option value='20'>Först till 20</option></select><select class='editor-select mk-tid'><option value='av'>⏱ Ingen timer</option><option value='5'>⏱ 5 sek</option><option value='10'>⏱ 10 sek</option><option value='15'>⏱ 15 sek</option><option value='20'>⏱ 20 sek</option></select></div><div class='mk-lag-rad'></div><div class='mk-tur'></div><div class='mk-timer' style='display:none;'><div class='mk-timer-spar'><div class='mk-timer-bar'></div></div><span class='mk-timer-text'></span></div><div class='mk-task'></div><div class='mk-doma'><button class='mk-ratt'>✔ Rätt (+1)</button><button class='mk-fel'>✘ Fel</button></div><div class='hover-menu'><button class='btn btn-secondary mk-ny'>Ny omgång (nollställ poäng)</button></div><div class='mk-info'>Fel svar = samma uppgift går vidare till nästa lag</div>`;
+        body.innerHTML = `<div class='hover-menu mk-ctrl'><select class='editor-select mk-op'><option value='add'>Addition +</option><option value='sub'>Subtraktion −</option><option value='mul'>Multiplikation ×</option><option value='div'>Division ÷</option><option value='mix'>Blandat</option></select><select class='editor-select mk-lvl'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><select class='editor-select mk-mal'><option value='5'>Först till 5</option><option value='10'>Först till 10</option><option value='15'>Först till 15</option><option value='20'>Först till 20</option></select><select class='editor-select mk-tid'><option value='av'>⏱ Ingen timer</option><option value='5'>⏱ 5 sek</option><option value='10'>⏱ 10 sek</option><option value='15'>⏱ 15 sek</option><option value='20'>⏱ 20 sek</option></select></div><div class='mk-lag-rad'></div><div class='mk-tur'></div><div class='mk-timer' style='display:none;'><div class='mk-timer-spar'><div class='mk-timer-bar'></div></div><span class='mk-timer-text'></span></div><div class='mk-task'></div><div class='mk-doma'><button class='mk-ratt'>✔ Rätt (+1)</button><button class='mk-fel'>✘ Fel</button></div><div class='hover-menu'><button class='btn btn-primary mk-nyuppg'>Ny uppgift ▶</button><button class='btn btn-secondary mk-ny'>Ny omgång (nollställ poäng)</button></div><div class='mk-info'>Fel svar = samma uppgift går vidare till nästa lag</div>`;
         const opSel=body.querySelector('.mk-op'), lvlSel=body.querySelector('.mk-lvl'), malSel=body.querySelector('.mk-mal'), tidSel=body.querySelector('.mk-tid'), lagRad=body.querySelector('.mk-lag-rad'), turEl=body.querySelector('.mk-tur'), taskEl=body.querySelector('.mk-task'), timerEl=body.querySelector('.mk-timer'), barEl=body.querySelector('.mk-timer-bar'), timerTxt=body.querySelector('.mk-timer-text');
         let tickId=null, deadline=0, timeoutLage=false;
         let teams=[{name:'Lag 1',p:0},{name:'Lag 2',p:0}], turn=0, uppgift=null, avslojad=false;
@@ -3952,12 +5150,14 @@
         }
         function mkBuzz(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; if(!window._remAC) window._remAC=new AC(); const ctx=window._remAC; if(ctx.state==='suspended') ctx.resume().catch(()=>{}); const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=170; const t=ctx.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.55); }catch(e){} }
         function tidenUte(){
+            stoppaTimer();
             timeoutLage=true;
             teams[turn].p=Math.max(0, teams[turn].p-1); // poängen stannar på 0, aldrig minus
             renderLag(); mkBuzz();
-            taskEl.innerHTML=''; const m=document.createElement('span'); m.textContent='⏰ Tiden är ute! −1 poäng'; m.style.color='#ff3b30'; taskEl.appendChild(m);
+            timerEl.style.display='none';
+            taskEl.innerHTML=''; const m=document.createElement('span'); m.textContent='⏰ Tiden är ute! −1 poäng · tryck "Ny uppgift"'; m.style.color='#ff3b30'; taskEl.appendChild(m);
             saveBoardState();
-            setTimeout(()=>{ timeoutLage=false; nastaLag(); nyUppgift(); saveBoardState(); }, 1500);
+            // Ingen automatisk start längre – läraren startar nästa uppgift manuellt med knappen.
         }
         const mkObs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ stoppaTimer(); mkObs.disconnect(); } });
         const mkCc=document.getElementById('canvas-container-v6'); if(mkCc) mkObs.observe(mkCc,{childList:true,subtree:true});
@@ -3976,7 +5176,13 @@
             else nyUppgift();
             saveBoardState();
         };
-        body.querySelector('.mk-ny').onclick=()=>{ teams.forEach(l=>l.p=0); turn=0; renderLag(); nyUppgift(); saveBoardState(); };
+        body.querySelector('.mk-nyuppg').onclick=()=>{
+            timeoutLage=false;
+            nastaLag();      // gå vidare till nästa lag
+            nyUppgift();     // ny uppgift + startar timern på nytt
+            saveBoardState();
+        };
+        body.querySelector('.mk-ny').onclick=()=>{ teams.forEach(l=>l.p=0); turn=0; timeoutLage=false; renderLag(); nyUppgift(); saveBoardState(); };
         opSel.onchange=()=>{ nyUppgift(); syncData(); saveBoardState(); };
         lvlSel.onchange=()=>{ nyUppgift(); syncData(); saveBoardState(); };
         malSel.onchange=()=>{ syncData(); saveBoardState(); };
@@ -4374,15 +5580,15 @@
     // Meningsbanken har inbyggt facit (s/v/a/o där o = övriga ord) så att
     // Rätta-knappen kan rätta på riktigt. Egna meningar = fri markering.
     function ordklassBank(){
-        // format: ord/klass, klass: s v a o
-        const M=('Den/o snabba/a hunden/s jagar/v en/o liten/a katt/s|Min/o bästa/a kompis/s äter/v ett/o rött/a äpple/s|Solen/s lyser/v över/o det/o blåa/a havet/s|Farmor/s bakar/v goda/a bullar/s i/o köket/s|Den/o trötta/a läraren/s dricker/v varmt/a kaffe/s|Barnen/s leker/v glatt/o på/o den/o stora/a gården/s|En/o gammal/a gubbe/s målar/v sitt/o gula/a hus/s|Katten/s sover/v djupt/o i/o den/o mjuka/a soffan/s|Vi/o läser/v spännande/a böcker/s varje/o dag/s|Den/o modiga/a riddaren/s red/v genom/o den/o mörka/a skogen/s|Flickan/s sjunger/v en/o vacker/a sång/s|Regnet/s faller/v mot/o det/o kalla/a fönstret/s|Pappa/s lagar/v god/a mat/s till/o hungriga/a barn/s|Eleverna/s skriver/v långa/a berättelser/s i/o skolan/s|En/o rolig/a clown/s gör/v konstiga/a trick/s|Hästen/s hoppar/v över/o det/o höga/a hindret/s').split('|');
+        // format: ord/klass, klass: s=substantiv v=verb a=adjektiv p=pronomen r=preposition o=övrigt
+        const M=('Den/p snabba/a hunden/s jagar/v en/p liten/a katt/s|Min/p bästa/a kompis/s äter/v ett/p rött/a äpple/s|Solen/s lyser/v över/r det/p blåa/a havet/s|Farmor/s bakar/v goda/a bullar/s i/r köket/s|Den/p trötta/a läraren/s dricker/v varmt/a kaffe/s|Barnen/s leker/v glatt/o på/r den/p stora/a gården/s|En/p gammal/a gubbe/s målar/v sitt/p gula/a hus/s|Katten/s sover/v djupt/o i/r den/p mjuka/a soffan/s|Vi/p läser/v spännande/a böcker/s varje/p dag/s|Den/p modiga/a riddaren/s red/v genom/r den/p mörka/a skogen/s|Flickan/s sjunger/v en/p vacker/a sång/s|Regnet/s faller/v mot/r det/p kalla/a fönstret/s|Pappa/s lagar/v god/a mat/s till/r hungriga/a barn/s|Eleverna/s skriver/v långa/a berättelser/s i/r skolan/s|En/p rolig/a clown/s gör/v konstiga/a trick/s|Hästen/s hoppar/v över/r det/p höga/a hindret/s').split('|');
         return M.map(m=>m.split(' ').map(t=>{ const i=t.lastIndexOf('/'); return { w:t.slice(0,i), k:t.slice(i+1) }; }));
     }
     function createWordClassWidget(config){
         if(config===undefined) config=null;
-        const body = createWidget('ORDKLASSER', 380, 'ok-widget', config);
+        const body = createWidget('ORDKLASSER', 430, 'ok-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu ok-palette'><span class='ok-pal s'><span class='prick'></span>Substantiv</span><span class='ok-pal v'><span class='prick'></span>Verb</span><span class='ok-pal a'><span class='prick'></span>Adjektiv</span><span class='ok-pal sudd'>🧽 Sudd</span></div><div class='ok-mening'></div><div class='ok-resultat'></div><div class='hover-menu ok-knappar'><button class='btn btn-primary ok-ny'>Ny mening ▶</button><button class='btn btn-secondary ok-ratta'>✔ Rätta</button><button class='btn btn-secondary ok-facit'>Visa facit</button><button class='btn btn-secondary ok-rensa'>Rensa</button></div><div class='hover-menu ok-egen'><input type='text' class='ok-egen-in' placeholder='Skriv en egen mening…'><button class='btn btn-secondary ok-anvand'>Använd</button></div>`;
+        body.innerHTML = `<div class='hover-menu ok-palette'><span class='ok-pal s'><span class='prick'></span>Substantiv</span><span class='ok-pal v'><span class='prick'></span>Verb</span><span class='ok-pal a'><span class='prick'></span>Adjektiv</span><span class='ok-pal p'><span class='prick'></span>Pronomen</span><span class='ok-pal r'><span class='prick'></span>Preposition</span><span class='ok-pal sudd'>🧽 Sudd</span></div><div class='ok-mening'></div><div class='ok-resultat'></div><div class='hover-menu ok-knappar'><button class='btn btn-primary ok-ny'>Ny mening ▶</button><button class='btn btn-secondary ok-ratta'>✔ Rätta</button><button class='btn btn-secondary ok-facit'>Visa facit</button><button class='btn btn-secondary ok-rensa'>Rensa</button></div><div class='hover-menu ok-egen'><input type='text' class='ok-egen-in' placeholder='Skriv en egen mening…'><button class='btn btn-secondary ok-anvand'>Använd</button></div>`;
         const meningEl=body.querySelector('.ok-mening'), resEl=body.querySelector('.ok-resultat'), rattaBtn=body.querySelector('.ok-ratta'), facitBtn=body.querySelector('.ok-facit'), egenIn=body.querySelector('.ok-egen-in');
         let mening=[], marks=[], egen=false, kls='s';
         if(config && config.data && Array.isArray(config.data.mening) && config.data.mening.length){
@@ -4391,7 +5597,7 @@
         const syncData=()=>{ widget.dataset.ordklass = JSON.stringify({ mening:mening, marks:marks, egen:egen }); };
         // palett
         body.querySelectorAll('.ok-pal').forEach(p=>{
-            p.onclick=()=>{ kls = p.classList.contains('sudd') ? 'sudd' : (p.classList.contains('s')?'s':p.classList.contains('v')?'v':'a'); body.querySelectorAll('.ok-pal').forEach(x=>x.classList.toggle('vald', x===p)); };
+            p.onclick=()=>{ kls = p.classList.contains('sudd') ? 'sudd' : (p.classList.contains('s')?'s':p.classList.contains('v')?'v':p.classList.contains('a')?'a':p.classList.contains('p')?'p':'r'); body.querySelectorAll('.ok-pal').forEach(x=>x.classList.toggle('vald', x===p)); };
         });
         body.querySelector('.ok-pal.s').classList.add('vald');
         function render(feedback){
@@ -4422,16 +5628,16 @@
         rattaBtn.onclick=()=>{
             const fb=[]; let ratt=0, ska=0;
             mening.forEach((t,i)=>{
-                if('sva'.includes(t.k)){ ska++; if(marks[i]===t.k){ ratt++; fb[i]='ratt'; } else fb[i]='fel'; }
+                if('svapr'.includes(t.k)){ ska++; if(marks[i]===t.k){ ratt++; fb[i]='ratt'; } else fb[i]='fel'; }
                 else if(marks[i]) fb[i]='fel'; // övrigt ord som markerats
             });
-            const felOvriga = mening.filter((t,i)=>!'sva'.includes(t.k) && marks[i]).length;
-            resEl.textContent = ratt+' av '+ska+' rätt'+(felOvriga? ' – '+felOvriga+' ord är inte substantiv/verb/adjektiv' : '')+(ratt===ska && !felOvriga ? ' 🎉' : '');
+            const felOvriga = mening.filter((t,i)=>!'svapr'.includes(t.k) && marks[i]).length;
+            resEl.textContent = ratt+' av '+ska+' rätt'+(felOvriga? ' – '+felOvriga+' ord hör inte till dessa ordklasser' : '')+(ratt===ska && !felOvriga ? ' 🎉' : '');
             resEl.style.color = (ratt===ska && !felOvriga) ? '#1f7a37' : '#c2261c';
             render(fb);
         };
         facitBtn.onclick=()=>{
-            marks = mening.map(t=>'sva'.includes(t.k) ? t.k : null);
+            marks = mening.map(t=>'svapr'.includes(t.k) ? t.k : null);
             resEl.textContent='Facit visas'; resEl.style.color='#8e8e93';
             render(); saveBoardState();
         };
@@ -7629,9 +8835,19 @@
             // Anpassa widgetens storlek efter korsordet (bredd + höjd), så inget klipps av
             const widgetEl = body.closest('.widget');
             if(widgetEl){
-                const cellPx = 34; // 32px ruta + 2px mellanrum
-                let wpx = lay.cols*cellPx + 48; // marginal för kant/padding (även vid hover)
-                const maxW = Math.max(340, Math.floor((window.innerWidth||1000) - 32));
+                const gap = 2, chrome = 48;         // mellanrum mellan celler + widgetens sidmarginaler
+                const idealCell = 32;               // önskad rutstorlek
+                const minCell = 16;                 // minsta läsbara rutstorlek
+                const maxW = Math.max(320, Math.floor((window.innerWidth||1000) - 32));
+                // Bredd om vi använder önskad cellstorlek
+                let wpx = lay.cols*(idealCell+gap) + chrome;
+                let cell = idealCell;
+                if(wpx > maxW){
+                    // Rutnätet är bredare än tillåtet – krymp cellerna så allt får plats utan sidoskroll
+                    cell = Math.max(minCell, Math.floor((maxW - chrome - lay.cols*gap) / lay.cols));
+                    wpx = lay.cols*(cell+gap) + chrome;
+                }
+                root.style.setProperty('--kw-cell', cell + 'px');
                 wpx = Math.max(320, Math.min(wpx, maxW));
                 widgetEl.style.width = wpx + 'px';
                 widgetEl.style.height = 'auto';
@@ -7758,8 +8974,12 @@
         return result;
     }
 
-    function printWordSearch(lay, title){
+    function printWordSearch(lay, title, allowDiag){
         if(!lay) return;
+        if(allowDiag===undefined) allowDiag=true;
+        const dirText = allowDiag
+            ? 'Orden kan gå vågrätt, lodrätt och diagonalt (även baklänges).'
+            : 'Orden kan gå vågrätt och lodrätt (även baklänges) – inga diagonala ord.';
         let cells='';
         for(let r=0;r<lay.size;r++){ for(let c=0;c<lay.size;c++){ cells+="<div class='pc'>"+kwEsc(lay.grid[r][c])+"</div>"; } }
         const wordsList = lay.placements.map(p=>"<li>"+kwEsc(p.word)+"</li>").join('');
@@ -7776,10 +8996,12 @@
             +".grid{display:grid;grid-template-columns:repeat("+lay.size+",1fr);width:"+gridMM+"mm;aspect-ratio:1/1;gap:0;margin:0 auto 12mm;border-left:1px solid #ccc;border-top:1px solid #ccc;}"
             +".pc{border-right:1px solid #ccc;border-bottom:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:"+fontMM+"mm;font-weight:700;}"
             +".words{width:"+gridMM+"mm;margin:0 auto;columns:3;font-size:14px;line-height:1.9;}"
+            +".dirnote{width:"+gridMM+"mm;margin:0 auto 8mm;text-align:center;font-size:13px;color:#444;}"
             +".words ul{list-style:none;padding:0;margin:0;}"
             +"@media print{ .grid{ page-break-inside:avoid; } .words{ page-break-inside:avoid; } }"
             +"</style></head><body>"
             +"<h1>"+kwEsc(title||'Ordgömma')+"</h1>"
+            +"<div class='dirnote'>"+kwEsc(dirText)+"</div>"
             +"<div class='grid'>"+cells+"</div>"
             +"<div class='words'><ul>"+wordsList+"</ul></div>"
             +"<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body></html>";
@@ -7789,16 +9011,20 @@
     }
 
     // Ritar ordgömman (rutnät + ordlista) till en canvas och laddar ner den som en PDF-fil
-    function saveWordSearchAsImage(lay, title){
+    function saveWordSearchAsImage(lay, title, allowDiag){
         if(!lay) return;
-        const cellPx = 40, pad = 36, titleH = 46;
+        if(allowDiag===undefined) allowDiag=true;
+        const dirText = allowDiag
+            ? 'Orden kan gå vågrätt, lodrätt och diagonalt (även baklänges).'
+            : 'Orden kan gå vågrätt och lodrätt (även baklänges) – inga diagonala ord.';
+        const cellPx = 40, pad = 36, titleH = 46, noteH = 28;
         const gridW = lay.size*cellPx, gridH = lay.size*cellPx;
         const words = lay.placements.map(p=>p.word);
         const cols = 3, rowsPerCol = Math.max(1, Math.ceil(words.length/cols));
         const lineH = 24;
         const wordsH = rowsPerCol*lineH + 30;
         const canvasW = Math.max(gridW + pad*2, 640);
-        const canvasH = titleH + gridH + wordsH + pad*2;
+        const canvasH = titleH + noteH + gridH + wordsH + pad*2;
         const cvs = document.createElement('canvas'); cvs.width=canvasW; cvs.height=canvasH;
         const ctx = cvs.getContext('2d');
         ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvasW,canvasH);
@@ -7806,6 +9032,9 @@
         ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.font='bold 26px Arial';
         ctx.fillText(title||'Ordgömma', canvasW/2, y+24);
         y += titleH;
+        ctx.fillStyle='#444'; ctx.font='14px Arial'; ctx.textAlign='center';
+        ctx.fillText(dirText, canvasW/2, y+16);
+        y += noteH;
         const gridX = (canvasW-gridW)/2;
         ctx.font=(cellPx*0.5)+'px Arial'; ctx.textBaseline='middle';
         for(let r=0;r<lay.size;r++){ for(let c=0;c<lay.size;c++){
@@ -7896,10 +9125,19 @@
             wrap.appendChild(g); root.appendChild(wrap);
             lay.placements.forEach(p=>{ if(state.found[p.word]){ p.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-found'); }); } });
 
+            const wlHead=document.createElement('div'); wlHead.className='og-wordlist-head'; wlHead.textContent='Ord att hitta ('+lay.placements.length+')'; root.appendChild(wlHead);
             const wl=document.createElement('div'); wl.className='og-wordlist';
             const chipEls={};
             lay.placements.forEach(p=>{ const chip=document.createElement('div'); chip.className='og-word-chip'+(state.found[p.word]?' og-found':''); chip.textContent=p.word; wl.appendChild(chip); chipEls[p.word]=chip; });
             root.appendChild(wl);
+
+            // Notering om ordens riktningar (om diagonala ord är med eller inte)
+            const dirNote=document.createElement('div'); dirNote.className='og-dir-note';
+            const diagPå = state.diag!==false;
+            dirNote.innerHTML = diagPå
+                ? '🧭 Orden kan gå <b>vågrätt, lodrätt och diagonalt</b> (även baklänges).'
+                : '🧭 Orden kan gå <b>vågrätt och lodrätt</b> (även baklänges) – <b>inga diagonala</b> ord.';
+            root.appendChild(dirNote);
 
             let startCell=null, dragging=false;
             const clearSel=()=> g.querySelectorAll('.og-cell.og-selecting').forEach(el=>el.classList.remove('og-selecting'));
@@ -7929,8 +9167,8 @@
 
             const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
             const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
-            const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut ordgömman'; prnt.onclick=()=>printWordSearch(state.layout, state.title);
-            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara ordgömman som PDF på datorn'; saveImg.onclick=()=>saveWordSearchAsImage(state.layout, state.title);
+            const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut ordgömman'; prnt.onclick=()=>printWordSearch(state.layout, state.title, state.diag!==false);
+            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara ordgömman som PDF på datorn'; saveImg.onclick=()=>saveWordSearchAsImage(state.layout, state.title, state.diag!==false);
             const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
             let showing=false;
             facit.onclick=()=>{ showing=!showing; if(showing){ lay.placements.forEach(p=>p.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-facit'); })); } else { g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-facit')); } facit.textContent=showing?'Dölj facit':'Visa facit'; };
@@ -7941,9 +9179,17 @@
 
             const widgetEl = body.closest('.widget');
             if(widgetEl){
-                const cellPx = 34;
-                let wpx = lay.size*cellPx + 48;
-                const maxW = Math.max(340, Math.floor((window.innerWidth||1000) - 32));
+                const gap = 2, chrome = 48;
+                const idealCell = 32;
+                const minCell = 16;
+                const maxW = Math.max(320, Math.floor((window.innerWidth||1000) - 32));
+                let wpx = lay.size*(idealCell+gap) + chrome;
+                let cell = idealCell;
+                if(wpx > maxW){
+                    cell = Math.max(minCell, Math.floor((maxW - chrome - lay.size*gap) / lay.size));
+                    wpx = lay.size*(cell+gap) + chrome;
+                }
+                root.style.setProperty('--og-cell', cell + 'px');
                 wpx = Math.max(320, Math.min(wpx, maxW));
                 widgetEl.style.width = wpx + 'px';
                 widgetEl.style.height = 'auto';
@@ -8504,6 +9750,8 @@
         if (savedData) {
             try {
                 const s = JSON.parse(savedData); document.getElementById('cb-app-wrapper').className = s.bodyClass || '';
+                // Lista över nyligen utlagda widgetar följer med tavlan (så elever ser markeringen)
+                try { if (Array.isArray(s.nyaWidgetKnappar)) localStorage.setItem('nyaWidgetKnappar', JSON.stringify(s.nyaWidgetKnappar)); } catch(e){}
                 document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
                 s.pages.forEach((p) => {
                     const pageId = p.id || Date.now() + '-' + Math.random().toString(16).slice(2);
@@ -8527,6 +9775,7 @@
         restorePresentationLock(); // om tavlan var låst före omladdning: lås igen och visa rätt ikon/etikett
         refreshPocketData();
         if(newDays > 0) saveBoardState();
+        if(typeof window.uppdateraNyWidgetBadges === 'function') setTimeout(window.uppdateraNyWidgetBadges, 300);
     }
 
     checkLogin();
@@ -8664,6 +9913,100 @@
                 setTimeout(function(){ wrapper.classList.remove('mtoolbar-open'); }, 60);
             }
         });
+    })();
+
+
+    /* =========================================================
+       NY-WIDGET-MARKERING – röd prick på verktygsknappen
+       Visar en röd prick på verktygsknappen för widgetar som
+       lagts ut sedan användaren senast var inne. Pricken tas
+       bort när användaren klickar på den knappen.
+       ========================================================= */
+    (function initNyWidgetBadge(){
+        // Nyckel för vad DENNA användare redan sett (lokalt per konto)
+        function seenKey(){
+            let u = 'lokal';
+            try { u = (typeof currentUser === 'string' && currentUser) ? currentUser : (localStorage.getItem('classboardzUser') || 'lokal'); } catch(e){}
+            return 'nyWidgetSedda_' + u;
+        }
+        function laddaSedda(){ try { return JSON.parse(localStorage.getItem(seenKey())) || {}; } catch(e){ return {}; } }
+        function sparaSedda(o){ try { localStorage.setItem(seenKey(), JSON.stringify(o)); } catch(e){} }
+
+        // Bygg koppling: funktionsnamn i onclick -> knapp-element
+        function knappForFn(fn){
+            const btns = document.querySelectorAll('.tool-btn');
+            for (let i=0;i<btns.length;i++){
+                const oc = btns[i].getAttribute('onclick') || '';
+                const mm = oc.match(/([a-zA-Z0-9_]+)\s*\(/);
+                if (mm && mm[1] === fn) return btns[i];
+            }
+            return null;
+        }
+        function allaKnappFn(){
+            const map = [];
+            document.querySelectorAll('.tool-btn').forEach(b=>{
+                const oc = b.getAttribute('onclick') || '';
+                const mm = oc.match(/([a-zA-Z0-9_]+)\s*\(/);
+                if (mm) map.push({ fn: mm[1], btn: b });
+            });
+            return map;
+        }
+
+        // Fånga klick på verktygsknappar
+        document.addEventListener('click', function(ev){
+            const btn = ev.target.closest && ev.target.closest('.tool-btn');
+            if (!btn) return;
+            const oc = btn.getAttribute('onclick') || '';
+            const mm = oc.match(/([a-zA-Z0-9_]+)\s*\(/);
+            const fn = mm ? mm[1] : null;
+            window._sistKlickadWidgetFn = fn;
+            if (!fn) return;
+            // 1) Klick = användaren "ser" knappen -> ta bort ev. prick och markera sedd för denna användare
+            if (btn.classList.contains('har-ny-badge')){
+                btn.classList.remove('har-ny-badge');
+                const s = laddaSedda(); s[fn] = true; sparaSedda(s);
+            }
+            // 2) Om det är admin/den som lägger ut widgeten: registrera den som "ny" för övriga.
+            //    (I lokalt läge och för alla inloggade fungerar detta; markeringen delas via tavlans data.)
+            const ärAdmin = (typeof isBoardAdmin === 'function') ? isBoardAdmin() : true;
+            if (ärAdmin){
+                // Den som lägger ut den har redan sett den
+                const s2 = laddaSedda(); s2[fn] = true; sparaSedda(s2);
+                // Registrera strax efter att widgeten hunnit skapas/sparas
+                setTimeout(()=>{ window.registreraNyWidget(fn); }, 50);
+            }
+        }, true);
+
+        // Registrera en nyligen utlagd widget i tavlans data (delas till alla via molnet/sparning)
+        window.registreraNyWidget = function(fn){
+            if (!fn) return;
+            try {
+                let lista = [];
+                try { lista = JSON.parse(localStorage.getItem('nyaWidgetKnappar')) || []; } catch(e){ lista = []; }
+                if (lista.indexOf(fn) === -1){ lista.push(fn); localStorage.setItem('nyaWidgetKnappar', JSON.stringify(lista)); }
+                if (typeof saveBoardState === 'function') saveBoardState();
+            } catch(e){}
+        };
+
+        // (Registrering sker via knappklick ovan – ingen createWidget-wrapper behövs.)
+
+        // Visa prickar: för varje registrerad ny widget som DENNA användare inte sett
+        window.uppdateraNyWidgetBadges = function(){
+            let lista = [];
+            try { lista = JSON.parse(localStorage.getItem('nyaWidgetKnappar')) || []; } catch(e){ lista = []; }
+            const sedda = laddaSedda();
+            lista.forEach(fn=>{
+                if (sedda[fn]) return;                 // användaren har redan sett/klickat
+                const btn = knappForFn(fn);
+                if (btn) btn.classList.add('har-ny-badge');
+            });
+        };
+
+        // Kör vid start (efter att tavlan hunnit initieras) och en gång till lite senare
+        function kör(){ try { window.uppdateraNyWidgetBadges(); } catch(e){} }
+        if (document.readyState === 'complete' || document.readyState === 'interactive'){ setTimeout(kör, 800); }
+        else document.addEventListener('DOMContentLoaded', function(){ setTimeout(kör, 800); });
+        setTimeout(kör, 2500);
     })();
 
 </script>
