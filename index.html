@@ -141,6 +141,7 @@
             <button class="tool-btn" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
             <button class="tool-btn" onclick="createReadingSpeed()"><div class="icon">📖</div><div class="label">Läshastighet</div></button>
             <button class="tool-btn" onclick="createTextGenres()"><div class="icon">📚</div><div class="label">Textgenrer</div></button>
+            <button class="tool-btn" onclick="createLasforstaelse()"><div class="icon">🧐</div><div class="label">Läsförståelse</div></button>
             <button class="tool-btn" onclick="createSpeakListen()"><div class="icon">🗣️</div><div class="label">Tal &amp; Lyssna</div></button>
             <button class="tool-btn" onclick="createConversation()"><div class="icon">💬</div><div class="label">Samtala</div></button>
             <button class="tool-btn" onclick="createPrata()"><div class="icon">🎤</div><div class="label">Prata</div></button>
@@ -747,6 +748,186 @@
     .bio-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f4f5f4; border:1px solid #e2e4e2; border-left:4px solid #3cb45f; border-radius:12px; padding:9px 12px; }
     .bio-begrepp-ord{ font-weight:800; color:#2f9e51; font-size:14px; }
     .bio-begrepp-def{ color:#3c463f; font-size:13px; line-height:1.45; }
+
+    /* ---- LÄSFÖRSTÅELSE ---- */
+    .lasf-widget .widget-header{ background:linear-gradient(135deg,#5856d6,#4644b8) !important; }
+    .lasf-body{ padding:14px 14px 12px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; overflow-x:hidden; }
+    .lasf-root{ display:flex; flex-direction:column; gap:10px; }
+    .lasf-hem-rubrik{ text-align:center; font-size:15px; font-weight:800; color:#3d3c8f; margin:2px 0 0; }
+    .lasf-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+    .lasf-tile{ background:#f4f4fb; border:1px solid #e2e2f2; border-radius:13px; min-height:74px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease; padding:8px 4px; text-align:center; }
+    .lasf-tile:hover{ transform:translateY(-2px); border-color:#5856d6; box-shadow:0 10px 20px -12px rgba(88,86,214,.55); }
+    .lasf-tile .lasf-emoji{ font-size:26px; }
+    .lasf-tile .lasf-lbl{ font-size:10.5px; font-weight:700; color:#5a5a72; line-height:1.15; }
+    .lasf-tile.lasf-tile-extra{ background:#efeffc; border-style:dashed; }
+    .lasf-footnote{ text-align:center; color:#9a9ab0; font-size:12.5px; font-style:italic; }
+    @media (max-width:480px){ .lasf-grid{ grid-template-columns:repeat(2, 1fr); } }
+
+    .lasf-back{ border:none; background:#f4f4fb; color:#3d3c8f; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; flex-shrink:0; }
+    .lasf-back:hover{ background:#e6e6f8; }
+    .lasf-topbar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .lasf-topbar .lasf-titel{ font-weight:800; color:#2c2c54; font-size:14.5px; flex-grow:1; min-width:120px; }
+    .lasf-typbadge{ display:inline-block; background:#eeeefb; color:#4644b8; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+    .lasf-tembadge{ display:inline-block; background:#fff4e0; color:#b06a00; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+    .lasf-ikonknapp{ border:1px solid #e2e2f2; background:#f4f4fb; border-radius:10px; padding:5px 9px; font-size:14px; cursor:pointer; line-height:1; transition:all .12s ease; flex-shrink:0; font-family:inherit; }
+    .lasf-ikonknapp:hover{ border-color:#5856d6; }
+    .lasf-ikonknapp.active{ background:#5856d6; border-color:#5856d6; color:#fff; }
+    .lasf-timerchip{ background:#34c759; color:#fff; border:none; border-radius:999px; font-weight:800; font-size:12.5px; padding:6px 11px; cursor:pointer; font-family:inherit; }
+    .lasf-timerchip.lasf-tid-ute{ background:#ff3b30; animation:lasfBlink 1s ease infinite; }
+    @keyframes lasfBlink{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
+    .lasf-timermeny{ display:flex; gap:6px; align-items:center; background:#f4f4fb; border:1px solid #e2e2f2; border-radius:10px; padding:5px 8px; }
+    .lasf-timermeny button{ border:none; background:#fff; border:1px solid #e2e2f2; border-radius:8px; padding:4px 9px; font-size:12px; font-weight:700; cursor:pointer; color:#3d3c8f; font-family:inherit; }
+    .lasf-timermeny button:hover{ border-color:#5856d6; }
+
+    .lasf-nav{ display:flex; flex-wrap:wrap; gap:6px; padding-bottom:2px; }
+    .lasf-navchip{ border:1px solid #e2e2f2; background:#f4f4fb; color:#3f3f5c; padding:6px 11px; border-radius:999px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .12s ease; font-family:inherit; }
+    .lasf-navchip:hover{ border-color:#5856d6; }
+    .lasf-navchip.active{ background:#5856d6; border-color:#5856d6; color:#fff; box-shadow:0 6px 14px -6px rgba(88,86,214,.6); }
+
+    .lasf-kort{ background:#fff; border:1px solid #e2e2f2; border-radius:16px; padding:14px; }
+    .lasf-kort h4{ margin:0 0 8px; color:#4644b8; font-size:14px; }
+    .lasf-verktyg{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .lasf-verktyg .lasf-sep{ width:1px; height:22px; background:#e2e2f2; margin:0 2px; }
+    .lasf-nivchip{ border:1px solid #e2e2f2; background:#f4f4fb; border-radius:999px; padding:5px 10px; font-size:11.5px; font-weight:800; cursor:pointer; color:#3f3f5c; font-family:inherit; }
+    .lasf-nivchip.active{ color:#fff; }
+    .lasf-nivchip.niv-latt.active{ background:#34c759; border-color:#34c759; }
+    .lasf-nivchip.niv-mellan.active{ background:#ff9500; border-color:#ff9500; }
+    .lasf-nivchip.niv-utmaning.active{ background:#ff3b30; border-color:#ff3b30; }
+
+    .lasf-reader{ background:#fdfdf6; border:1px solid #e8e8da; border-radius:16px; padding:16px 18px; line-height:1.75; color:#2c2c34; user-select:text; transition:background .25s ease, color .25s ease; }
+    .lasf-reader .lasf-lastitel{ font-size:1.25em; font-weight:800; margin:0 0 10px; display:flex; align-items:center; gap:8px; }
+    .lasf-reader p.lasf-p{ margin:0 0 12px; }
+    .lasf-reader p.lasf-p:last-child{ margin-bottom:0; }
+    .lasf-w{ cursor:pointer; border-radius:4px; padding:0 1px; }
+    .lasf-w:hover{ background:rgba(88,86,214,.12); }
+    .lasf-concept{ text-decoration:underline dotted #5856d6 2px; text-underline-offset:3px; font-weight:600; }
+    .lasf-marked{ background:#ffe97a !important; box-shadow:0 0 0 2px #ffe97a; }
+    .lasf-reader.lasf-dark{ background:#1e1e2c; border-color:#33334a; color:#f0f0f6; }
+    .lasf-reader.lasf-dark .lasf-w:hover{ background:rgba(255,255,255,.14); }
+    .lasf-reader.lasf-dark .lasf-concept{ text-decoration-color:#9d9bff; }
+    .lasf-reader.lasf-dark .lasf-marked{ background:#8a6d00 !important; box-shadow:0 0 0 2px #8a6d00; }
+    .lasf-lashint{ text-align:center; color:#9a9ab0; font-size:11.5px; font-style:italic; }
+
+    .lasf-ordkort{ background:#eeeefb; border:1px solid #cfcfF0; border-left:5px solid #5856d6; border-radius:14px; padding:12px 14px; position:relative; }
+    .lasf-ordkort .lasf-ok-ord{ font-size:16px; font-weight:800; color:#4644b8; display:flex; align-items:center; gap:8px; }
+    .lasf-ordkort .lasf-ok-bild{ font-size:26px; }
+    .lasf-ordkort .lasf-ok-def{ color:#2c2c54; font-size:13.5px; line-height:1.5; margin-top:5px; }
+    .lasf-ordkort .lasf-ok-ex{ color:#5a5a72; font-size:12.5px; font-style:italic; margin-top:5px; }
+    .lasf-ordkort .lasf-ok-stang{ position:absolute; top:8px; right:10px; border:none; background:transparent; font-size:14px; cursor:pointer; color:#8a8aa8; }
+
+    .lasf-strat{ border-left:5px solid #5856d6; }
+    .lasf-strat.strat-fore{ border-left-color:#34c759; }
+    .lasf-strat.strat-under{ border-left-color:#ff9500; }
+    .lasf-strat.strat-efter{ border-left-color:#5856d6; }
+    .lasf-stratrad{ display:flex; align-items:flex-start; gap:8px; padding:5px 0; font-size:13.5px; color:#3f3f5c; line-height:1.45; }
+    .lasf-stratrad input[type=checkbox]{ width:17px; height:17px; accent-color:#5856d6; margin-top:1px; cursor:pointer; flex-shrink:0; }
+
+    .lasf-fragtabs{ display:flex; gap:6px; flex-wrap:wrap; }
+    .lasf-fragtab{ border:1px solid #e2e2f2; background:#f4f4fb; border-radius:999px; padding:6px 12px; font-size:12px; font-weight:800; cursor:pointer; color:#3f3f5c; font-family:inherit; }
+    .lasf-fragtab.active.ft-pa{ background:#34c759; border-color:#34c759; color:#fff; }
+    .lasf-fragtab.active.ft-mellan{ background:#ff9500; border-color:#ff9500; color:#fff; }
+    .lasf-fragtab.active.ft-bortom{ background:#ff3b30; border-color:#ff3b30; color:#fff; }
+    .lasf-fragdesc{ font-size:12.5px; color:#7a7a94; font-style:italic; }
+    .lasf-fraga{ background:#fff; border:1px solid #e2e2f2; border-radius:14px; padding:11px 13px; }
+    .lasf-fraga .lasf-f-q{ font-size:14px; font-weight:700; color:#2c2c54; line-height:1.45; }
+    .lasf-visa-btn{ border:none; background:#eeeefb; color:#4644b8; font-weight:700; font-size:11.5px; padding:5px 11px; border-radius:999px; cursor:pointer; margin-top:8px; font-family:inherit; }
+    .lasf-visa-btn:hover{ background:#e0e0f8; }
+    .lasf-f-svar{ margin-top:8px; background:#f2fbf4; border:1px solid #cdebd5; border-radius:10px; padding:8px 11px; font-size:13px; color:#1e6b34; line-height:1.45; }
+
+    .lasf-sortlabel{ text-align:center; font-weight:800; font-size:12px; color:#8a8aa8; letter-spacing:1px; }
+    .lasf-sortlista{ display:flex; flex-direction:column; gap:6px; }
+    .lasf-sortrad{ display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #e2e2f2; border-radius:12px; padding:9px 11px; cursor:grab; font-size:13.5px; color:#2c2c54; line-height:1.4; transition:border-color .12s ease, box-shadow .12s ease; }
+    .lasf-sortrad:active{ cursor:grabbing; }
+    .lasf-sortrad .lasf-sorthand{ color:#b8b8cc; font-size:15px; flex-shrink:0; }
+    .lasf-sortrad .lasf-sorttext{ flex-grow:1; }
+    .lasf-sortrad .lasf-sortpil{ border:1px solid #e2e2f2; background:#f4f4fb; border-radius:8px; width:26px; height:26px; font-size:12px; cursor:pointer; flex-shrink:0; color:#3d3c8f; }
+    .lasf-sortrad.dragover{ border-color:#5856d6; box-shadow:0 0 0 2px rgba(88,86,214,.25); }
+    .lasf-sortrad.sort-ratt{ border-color:#34c759; background:#f2fbf4; }
+    .lasf-sortrad.sort-fel{ border-color:#ff3b30; background:#fff4f3; }
+    .lasf-knapprad{ display:flex; gap:8px; flex-wrap:wrap; }
+    .lasf-cta{ border:none; background:#5856d6; color:#fff; font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; cursor:pointer; font-family:inherit; box-shadow:0 6px 14px -6px rgba(88,86,214,.6); }
+    .lasf-cta:hover{ background:#4644b8; }
+    .lasf-cta.lasf-sekundar{ background:#f4f4fb; color:#3d3c8f; box-shadow:none; border:1px solid #e2e2f2; }
+    .lasf-cta.lasf-sekundar:hover{ border-color:#5856d6; }
+
+    .lasf-samtalkort{ background:linear-gradient(135deg,#5856d6,#7c7aff); border:none; border-radius:18px; padding:26px 20px; text-align:center; color:#fff; }
+    .lasf-samtalkort .lasf-samtal-q{ font-size:18px; font-weight:800; line-height:1.5; }
+    .lasf-samtal-nr{ font-size:11.5px; font-weight:700; opacity:.8; margin-bottom:8px; letter-spacing:1px; }
+    .lasf-samtal-knappar{ display:flex; justify-content:center; gap:8px; margin-top:14px; }
+    .lasf-samtal-knappar button{ border:none; background:rgba(255,255,255,.22); color:#fff; font-size:13px; font-weight:800; padding:7px 14px; border-radius:999px; cursor:pointer; font-family:inherit; }
+    .lasf-samtal-knappar button:hover{ background:rgba(255,255,255,.35); }
+
+    .lasf-sammtext{ width:100%; box-sizing:border-box; border:1px solid #e2e2f2; border-radius:12px; padding:10px 12px; font-size:14px; font-family:inherit; line-height:1.6; min-height:110px; resize:vertical; outline:none; user-select:text; }
+    .lasf-sammtext:focus{ border-color:#5856d6; }
+    .lasf-sammraknare{ font-size:12.5px; font-weight:700; color:#7a7a94; }
+    .lasf-sammraknare.ok{ color:#1e6b34; }
+
+    .lasf-quizq{ font-size:15px; font-weight:800; color:#2c2c54; line-height:1.5; margin:4px 0 10px; }
+    .lasf-quizalt{ display:flex; flex-direction:column; gap:7px; }
+    .lasf-quizalt button{ border:1px solid #e2e2f2; background:#f9f9fd; border-radius:12px; padding:10px 13px; font-size:13.5px; text-align:left; cursor:pointer; color:#2c2c54; font-family:inherit; transition:all .12s ease; line-height:1.4; }
+    .lasf-quizalt button:hover:not(:disabled){ border-color:#5856d6; }
+    .lasf-quizalt button.q-ratt{ background:#e9f9ee; border-color:#34c759; font-weight:800; }
+    .lasf-quizalt button.q-fel{ background:#ffefee; border-color:#ff3b30; }
+    .lasf-quizfeed{ margin-top:10px; font-weight:800; font-size:13.5px; min-height:18px; }
+    .lasf-quizfeed.ok{ color:#1e6b34; } .lasf-quizfeed.no{ color:#c22e24; }
+    .lasf-quizprog{ font-size:11.5px; font-weight:700; color:#8a8aa8; }
+    .lasf-paragrid{ display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+    .lasf-paragrid button{ border:1px solid #e2e2f2; background:#f9f9fd; border-radius:12px; padding:9px 10px; font-size:12.5px; cursor:pointer; color:#2c2c54; font-family:inherit; line-height:1.35; transition:all .12s ease; }
+    .lasf-paragrid button.vald{ border-color:#5856d6; background:#eeeefb; box-shadow:0 0 0 2px rgba(88,86,214,.2); }
+    .lasf-paragrid button.klar{ background:#e9f9ee; border-color:#34c759; color:#1e6b34; cursor:default; }
+    .lasf-paragrid button.fel-blink{ animation:lasfFel .4s ease; }
+    @keyframes lasfFel{ 0%,100%{ background:#f9f9fd; } 50%{ background:#ffd9d6; border-color:#ff3b30; } }
+    .lasf-quizres{ text-align:center; padding:10px 0; }
+    .lasf-quizres .lasf-poang{ font-size:40px; font-weight:900; color:#5856d6; }
+    .lasf-quizres .lasf-msg{ color:#5a5a72; font-size:14px; margin:6px 0 14px; }
+
+    .lasf-sjalvrad{ display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #e2e2f2; border-radius:12px; padding:11px 13px; font-size:14px; color:#2c2c54; cursor:pointer; }
+    .lasf-sjalvrad input[type=checkbox]{ width:19px; height:19px; accent-color:#34c759; cursor:pointer; flex-shrink:0; }
+    .lasf-sjalvrad.ikryssad{ background:#f2fbf4; border-color:#cdebd5; }
+    .lasf-kanslarad{ display:flex; gap:8px; justify-content:center; }
+    .lasf-kanslarad button{ border:1px solid #e2e2f2; background:#f9f9fd; border-radius:12px; font-size:22px; padding:7px 11px; cursor:pointer; transition:all .12s ease; font-family:inherit; }
+    .lasf-kanslarad button:hover{ transform:scale(1.1); }
+    .lasf-kanslarad button.vald{ background:#eeeefb; border-color:#5856d6; box-shadow:0 0 0 2px rgba(88,86,214,.25); }
+    .lasf-kanslalbl{ text-align:center; font-size:11px; color:#8a8aa8; font-weight:700; margin-top:4px; }
+    .lasf-beroem{ text-align:center; background:#f2fbf4; border:1px solid #cdebd5; color:#1e6b34; border-radius:12px; padding:9px; font-weight:800; font-size:13.5px; }
+
+    .lasf-listrad{ display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #e2e2f2; border-radius:14px; padding:12px 14px; cursor:pointer; transition:all .12s ease; }
+    .lasf-listrad:hover{ border-color:#5856d6; box-shadow:0 8px 18px -10px rgba(88,86,214,.5); }
+    .lasf-listrad .lasf-list-emoji{ font-size:24px; }
+    .lasf-listrad .lasf-list-titel{ font-weight:800; color:#2c2c54; font-size:14px; flex-grow:1; }
+    .lasf-temarad{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+    .lasf-temaknapp{ border:1px solid #e2e2f2; background:#f9f9fd; border-radius:14px; padding:12px 16px; font-size:13.5px; font-weight:800; color:#2c2c54; cursor:pointer; font-family:inherit; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:86px; transition:all .12s ease; }
+    .lasf-temaknapp:hover{ border-color:#5856d6; transform:translateY(-2px); }
+    .lasf-temaknapp .lasf-tema-emoji{ font-size:24px; }
+
+    .lasf-egen input[type=text], .lasf-egen select{ width:100%; box-sizing:border-box; border:1px solid #e2e2f2; border-radius:10px; padding:9px 11px; font-size:13.5px; font-family:inherit; outline:none; margin-bottom:8px; background:#fff; user-select:text; }
+    .lasf-egen input[type=text]:focus, .lasf-egen select:focus{ border-color:#5856d6; }
+    .lasf-egen textarea{ width:100%; box-sizing:border-box; border:1px solid #e2e2f2; border-radius:12px; padding:10px 12px; font-size:13.5px; font-family:inherit; line-height:1.6; min-height:150px; resize:vertical; outline:none; user-select:text; }
+    .lasf-egen textarea:focus{ border-color:#5856d6; }
+    .lasf-falt-lbl{ font-size:11.5px; font-weight:800; color:#7a7a94; margin-bottom:3px; display:block; letter-spacing:.3px; }
+    .lasf-infobox{ background:#fff8e6; border:1px solid #f4e3b0; border-radius:12px; padding:11px 13px; font-size:13px; color:#7a5c00; line-height:1.5; }
+
+    /* Uppgiftsbyggaren i Egen text */
+    .lasf-bygg-sek{ border:1px solid #e2e2f2; border-radius:14px; background:#fff; overflow:hidden; }
+    .lasf-bygg-huvud{ display:flex; align-items:center; gap:8px; padding:10px 13px; cursor:pointer; font-weight:800; color:#3d3c8f; font-size:13.5px; background:#f9f9fd; user-select:none; }
+    .lasf-bygg-huvud:hover{ background:#f1f1fa; }
+    .lasf-bygg-antal{ background:#5856d6; color:#fff; border-radius:999px; font-size:10.5px; padding:2px 8px; font-weight:800; }
+    .lasf-bygg-antal.tom{ background:#c9c9dd; }
+    .lasf-bygg-pil{ margin-left:auto; color:#8a8aa8; font-size:12px; }
+    .lasf-bygg-inne{ padding:11px 13px; display:flex; flex-direction:column; gap:8px; border-top:1px solid #eeeef6; }
+    .lasf-bygg-rad{ background:#f9f9fd; border:1px solid #e6e6f2; border-radius:12px; padding:9px 10px; display:flex; flex-direction:column; gap:6px; }
+    .lasf-bygg-rad input[type=text], .lasf-bygg-rad select{ width:100%; box-sizing:border-box; border:1px solid #e2e2f2; border-radius:8px; padding:7px 9px; font-size:12.5px; font-family:inherit; outline:none; background:#fff; user-select:text; margin:0; }
+    .lasf-bygg-rad input[type=text]:focus, .lasf-bygg-rad select:focus{ border-color:#5856d6; }
+    .lasf-bygg-2col{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .lasf-bygg-lbl{ font-size:10.5px; font-weight:800; color:#8a8aa8; letter-spacing:.3px; display:block; margin-bottom:2px; }
+    .lasf-bygg-verk{ display:flex; gap:5px; justify-content:flex-end; }
+    .lasf-bygg-verk button{ border:1px solid #e2e2f2; background:#fff; border-radius:7px; width:26px; height:26px; font-size:11px; cursor:pointer; color:#3d3c8f; line-height:1; font-family:inherit; }
+    .lasf-bygg-verk button:hover{ border-color:#5856d6; }
+    .lasf-bygg-verk .lasf-bygg-bort:hover{ border-color:#ff3b30; color:#ff3b30; }
+    .lasf-bygg-add{ border:1px dashed #b9b9e0; background:#f4f4fb; color:#4644b8; border-radius:10px; padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; align-self:flex-start; }
+    .lasf-bygg-add:hover{ background:#ebebf9; }
+    .lasf-bygg-tips{ font-size:11.5px; color:#8a8aa8; font-style:italic; }
+    .lasf-bygg-typrad{ display:flex; gap:6px; flex-wrap:wrap; }
 
     /* ---- FRÅN FRÖ TILL FRÖ ---- */
     .fro-widget .widget-header{ background:linear-gradient(135deg,#5bb36a,#3e8e4f) !important; }
@@ -2226,6 +2407,7 @@
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
                 else if (type === 'LÄSHASTIGHET') { state.data.niva = w.dataset.lashNiva || 'latt'; state.data.ord = w.dataset.lashOrd || ''; }
                 else if (type === 'TEXTGENRER') { state.data.genre = w.dataset.genre || 'berattelse'; }
+                else if (type === 'LÄSFÖRSTÅELSE') { try{ state.data = JSON.parse(w.dataset.lasf || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'TAL OCH LYSSNA') { state.data.fraga = w.dataset.talFraga || ''; state.data.tid = w.dataset.talTid || '60'; }
                 else if (type === 'SAMTALA') { state.data.fraga = w.dataset.samtalaFraga || ''; }
                 else if (type === 'PRATA') { state.data.fraga = w.dataset.prataFraga || ''; }
@@ -2325,6 +2507,7 @@
             else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
             else if (w.type === 'LÄSHASTIGHET') createReadingSpeed(w);
             else if (w.type === 'TEXTGENRER') createTextGenres(w);
+            else if (w.type === 'LÄSFÖRSTÅELSE') createLasforstaelse(w);
             else if (w.type === 'TAL OCH LYSSNA') createSpeakListen(w);
             else if (w.type === 'SAMTALA') createConversation(w);
             else if (w.type === 'PRATA') createPrata(w);
@@ -6079,6 +6262,1673 @@
         }
         drawQuestion();
     }
+    // ---- LÄSFÖRSTÅELSE: välj texttyp, läs med stöd, lässtrategier, frågor på tre nivåer, begrepp, quiz m.m. ----
+    function lasfTyper(){
+        return [
+            {id:'berattande', namn:'Berättande text', emoji:'📖'},
+            {id:'faktatext', namn:'Faktatext', emoji:'🌍'},
+            {id:'nyhet', namn:'Nyhetsartikel', emoji:'📰'},
+            {id:'dagbok', namn:'Dagbok', emoji:'📔'},
+            {id:'instruktion', namn:'Instruktion', emoji:'📋'},
+            {id:'fabel', namn:'Fabel', emoji:'🐭'},
+            {id:'dikt', namn:'Dikt', emoji:'📜'}
+        ];
+    }
+    function lasfBank(){
+        if(window._lasfBank) return window._lasfBank;
+        window._lasfBank = [
+        {
+            id:'ryggsacken', typ:'berattande', tema:'Vänskap', titel:'Den försvunna ryggsäcken', bild:'🎒',
+            niv:{
+                latt:`Maja kom in efter rasten. Hennes ryggsäck var borta! I den låg hennes nycklar och hennes mattebok. Maja blev orolig.
+
+– Jag hjälper dig att leta, sa hennes vän Elton.
+
+De letade i korridoren. De letade i matsalen. Ingen ryggsäck.
+
+Då sa Elton: – Vi hade ju idrott i morse!
+
+De sprang till idrottshallen. Där, på en bänk, stod ryggsäcken. Maja log stort.
+
+– Tack Elton! Du är en riktig vän.
+
+De delade en kanelbulle på vägen tillbaka.`,
+                mellan:`När Maja kom in från rasten upptäckte hon att hennes ryggsäck var borta. Kroken i korridoren, där den brukade hänga, var tom. I ryggsäcken låg både hennes nycklar och matteboken hon skulle ha till läxan.
+
+– Har du sett min ryggsäck? frågade hon sin vän Elton med darrig röst.
+
+– Nej, men jag hjälper dig att leta, svarade han direkt.
+
+De letade i korridoren, i klassrummet och i matsalen, men ryggsäcken var som uppslukad av jorden. Maja kände sig alldeles förtvivlad. Då stannade Elton plötsligt.
+
+– Vänta! Vi hade ju idrott första lektionen. Kollade du bänken i idrottshallen?
+
+De sprang över skolgården och öppnade den tunga dörren till hallen. Där, på bänken vid väggen, stod ryggsäcken kvar. Maja kände en våg av lättnad.
+
+– Tack, Elton. Utan dig hade jag fortfarande letat, sa hon och bjöd honom på halva sin kanelbulle.`,
+                utmaning:`När Maja kom in från rasten på tisdagen upptäckte hon något som fick magen att knyta sig: hennes blå ryggsäck var spårlöst försvunnen. Kroken i korridoren, där den alltid brukade hänga, gapade tom. I ryggsäcken låg inte bara matteboken hon behövde till läxförhöret – där låg också nycklarna hem.
+
+– Har du sett min ryggsäck? frågade hon sin vän Elton och försökte låta lugn, fast rösten darrade.
+
+– Nej, men vi hittar den. Jag hjälper dig, svarade han utan att tveka.
+
+Tillsammans genomsökte de korridoren, klassrummet och matsalen. De frågade till och med vaktmästaren, som lovade att hålla utkik. Men ryggsäcken var som uppslukad av jorden, och Maja kände sig alltmer förtvivlad.
+
+Då stannade Elton tvärt mitt i korridoren.
+
+– Vänta lite... Vi hade ju idrott första lektionen i morse. Kollade du bänken i omklädningsrummet?
+
+De rusade över skolgården och drog upp den tunga dörren till idrottshallen. Och där, på bänken längst in, stod ryggsäcken precis där Maja hade glömt den. Lättnaden sköljde över henne som en varm våg.
+
+– Tack, Elton. Utan dig hade jag nog letat hela dagen, sa hon.
+
+På vägen tillbaka delade de en kanelbulle, och Maja tänkte att en riktig vän är den som hjälper till att leta – även när det inte är hans saker som är borta.`
+            },
+            begrepp:[
+                {ord:'korridor', former:['korridoren','korridorer','korridorerna'], bild:'🚪', forklaring:'En lång gång inomhus som binder ihop olika rum, till exempel klassrum.', exempel:'Vi hänger våra jackor på krokarna i korridoren.'},
+                {ord:'förtvivlad', former:['förtvivlat','förtvivlade'], bild:'😟', forklaring:'Mycket ledsen och orolig – nästan utan hopp.', exempel:'Han blev förtvivlad när cykeln var borta.'},
+                {ord:'lättnad', former:['lättnaden'], bild:'😮‍💨', forklaring:'Den sköna känslan när något jobbigt äntligen är över.', exempel:'Vilken lättnad att provet var klart!'},
+                {ord:'vaktmästare', former:['vaktmästaren'], bild:'🔧', forklaring:'En person som tar hand om och lagar saker i en byggnad, till exempel på en skola.', exempel:'Vaktmästaren bytte den trasiga lampan.'},
+                {ord:'uppslukad', former:['uppslukat','uppslukade'], bild:'🕳️', forklaring:'Helt försvunnen – som om jorden hade svalt den.', exempel:'Bollen var som uppslukad av jorden.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vad hette flickan som tappade bort sin ryggsäck?', a:'Hon hette Maja.'},
+                    {q:'Vad låg i ryggsäcken?', a:'Hennes nycklar och matteboken.'},
+                    {q:'Var hittade de ryggsäcken till slut?', a:'På en bänk i idrottshallen.'}
+                ],
+                mellan:[
+                    {q:'Varför blev Maja så orolig när ryggsäcken var borta?', tips:'Tänk på vad som låg i väskan – vad händer om man tappar bort sådana saker?'},
+                    {q:'Hur kom Elton på var ryggsäcken kunde vara?', tips:'Vad hade klassen gjort första lektionen på morgonen?'},
+                    {q:'Hur förstår man att Maja och Elton är bra vänner?', tips:'Titta på vad Elton gör – och vad Maja gör i slutet.'}
+                ],
+                bortom:[
+                    {q:'Har du någon gång tappat bort något viktigt? Hur kändes det?'},
+                    {q:'Vad hade du gjort om du var Elton?'},
+                    {q:'Vilka knep kan man använda för att inte glömma sina saker?'}
+                ]
+            },
+            hitta:[
+                {label:'👤 Hitta huvudpersonen', svar:'Maja (och hennes vän Elton).'},
+                {label:'📍 Hitta platsen', svar:'Skolan – korridoren, matsalen och idrottshallen.'},
+                {label:'⚡ Hitta problemet', svar:'Majas ryggsäck med nycklar och mattebok var försvunnen.'},
+                {label:'✅ Hitta lösningen', svar:'Elton kom ihåg idrottslektionen – ryggsäcken stod kvar i idrottshallen.'}
+            ],
+            ordning:[
+                'Maja upptäcker att ryggsäcken är borta.',
+                'Elton lovar att hjälpa till att leta.',
+                'De letar i korridoren, klassrummet och matsalen.',
+                'Elton kommer ihåg idrottslektionen.',
+                'De hittar ryggsäcken i idrottshallen och delar en kanelbulle.'
+            ],
+            samtal:[
+                'Vad hade du gjort om din väska plötsligt var borta?',
+                'Varför känns det lättare att leta när någon hjälper till?',
+                'Hur visar man att man är en bra kompis? Ge exempel.'
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vad letade Maja efter?', alt:['Sin ryggsäck','Sin mobil','Sin jacka'], ratt:0},
+                {typ:'sant', q:'Ryggsäcken hittades i matsalen.', ratt:false},
+                {typ:'flerval', q:'Vad låg i ryggsäcken?', alt:['Nycklar och mattebok','Gympakläder','Matsäck'], ratt:0},
+                {typ:'fyll', fore:'Elton hjälpte Maja att ', efter:' efter ryggsäcken.', alt:['leta','springa','ropa'], ratt:0},
+                {typ:'para', par:[['Maja','huvudpersonen'],['Elton','Majas vän'],['idrottshallen','där ryggsäcken stod'],['kanelbullen','det de delade']]}
+            ]
+        },
+        {
+            id:'manen', typ:'faktatext', tema:'Rymden', titel:'Månen', bild:'🌕',
+            niv:{
+                latt:`Månen är jordens granne i rymden. Den snurrar runt jorden. Ett varv tar ungefär en månad.
+
+På månen finns inga djur och inga växter. Där finns ingen luft att andas. Ytan är full av gropar. Groparna kallas kratrar. De blev till när stenar från rymden krockade med månen.
+
+På månen är tyngdkraften svagare än på jorden. Därför kan en astronaut hoppa jättehögt.
+
+År 1969 gick en människa på månen för första gången. Han hette Neil Armstrong.`,
+                mellan:`Månen är jordens närmaste granne i rymden. Den rör sig i en omloppsbana runt jorden, och ett varv tar ungefär en månad.
+
+Månens yta är täckt av damm, sten och tusentals gropar som kallas kratrar. Kratrarna bildades när stenar från rymden, meteoriter, krockade med månen för länge sedan. På månen finns ingen luft och inget flytande vatten. Därför kan varken växter eller djur leva där.
+
+Tyngdkraften på månen är ungefär sex gånger svagare än på jorden. En astronaut som väger 60 kilo på jorden känns därför lätt som en fjäder och kan hoppa mycket högre än hemma.
+
+Den 20 juli 1969 blev Neil Armstrong den första människan som satte sin fot på månen. Fotspåren finns faktiskt kvar än i dag, eftersom det inte finns någon vind som kan sopa bort dem.`,
+                utmaning:`Månen är jordens ständiga följeslagare och vår närmaste granne i rymden. Den rör sig i en omloppsbana runt jorden, och ett varv tar ungefär en månad – det är faktiskt därifrån ordet månad kommer.
+
+Månens yta är täckt av ett fint grått damm och ärrad av tusentals kratrar. De bildades när meteoriter, alltså stenar från rymden, slog ner på ytan för miljontals år sedan. Eftersom månen saknar atmosfär finns där ingen luft att andas, inget väder och inget skydd mot solens strålar. Temperaturen kan växla från över 100 plusgrader på dagen till nästan 200 minusgrader på natten.
+
+Tyngdkraften på månen är ungefär en sjättedel av jordens. En astronaut i tung rymddräkt kan därför skutta fram i långa, svävande hopp.
+
+Månen lyser inte av sig själv – den speglar solens ljus. Beroende på var månen befinner sig i sin bana ser vi olika mycket av den upplysta sidan. Det är därför månen ibland är rund som en pannkaka och ibland smal som en skära. Vi kallar det månens faser.
+
+Den 20 juli 1969 klev Neil Armstrong ut ur månlandaren Eagle och blev den första människan på månen. Hans fotspår finns kvar än i dag, eftersom ingen vind någonsin blåser där.`
+            },
+            begrepp:[
+                {ord:'krater', former:['kratrar','kratern','kratrarna'], bild:'🕳️', forklaring:'En stor, rund grop i marken – på månen bildades de av nedslag från rymden.', exempel:'Månens yta är full av kratrar.'},
+                {ord:'meteorit', former:['meteoriter','meteoriten'], bild:'☄️', forklaring:'En sten från rymden som slår ner på en planet eller måne.', exempel:'Kratern bildades när en meteorit slog ner.'},
+                {ord:'tyngdkraft', former:['tyngdkraften'], bild:'🧲', forklaring:'Kraften som drar allting mot marken – det är den som gör att saker faller neråt.', exempel:'Tyngdkraften gör att bollen faller ner.'},
+                {ord:'omloppsbana', former:['omloppsbanan'], bild:'🔄', forklaring:'Den väg som till exempel månen följer runt jorden, varv efter varv.', exempel:'Månen rör sig i en omloppsbana runt jorden.'},
+                {ord:'astronaut', former:['astronauter','astronauten'], bild:'👨‍🚀', forklaring:'En person som reser ut i rymden.', exempel:'Astronauten svävade viktlös i rymdstationen.'},
+                {ord:'atmosfär', former:['atmosfären'], bild:'🌫️', forklaring:'Lagret av luft och gaser som omger en planet.', exempel:'Jordens atmosfär skyddar oss mot solens farliga strålar.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vad kallas groparna på månens yta?', a:'De kallas kratrar.'},
+                    {q:'Hur lång tid tar det för månen att åka ett varv runt jorden?', a:'Ungefär en månad.'},
+                    {q:'Vem var den första människan på månen?', a:'Neil Armstrong, år 1969.'}
+                ],
+                mellan:[
+                    {q:'Varför kan inga djur eller växter leva på månen?', tips:'Vad saknas på månen som allt levande behöver?'},
+                    {q:'Varför kan en astronaut hoppa högre på månen än på jorden?', tips:'Läs stycket om tyngdkraften.'},
+                    {q:'Varför finns Armstrongs fotspår kvar än i dag?', tips:'Vad finns det inte på månen, som annars brukar sopa bort spår?'}
+                ],
+                bortom:[
+                    {q:'Skulle du vilja resa till månen? Varför eller varför inte?'},
+                    {q:'Vad tror du är svårast med att vara astronaut?'},
+                    {q:'Vad mer skulle du vilja ta reda på om rymden?'}
+                ]
+            },
+            hitta:[
+                {label:'🧭 Hitta ämnet – vad handlar texten om?', svar:'Om månen: dess yta, tyngdkraften och den första månlandningen.'},
+                {label:'📌 Hitta tre fakta om månen', svar:'Till exempel: ytan har kratrar, det finns ingen luft, tyngdkraften är svagare, Armstrong landade 1969.'},
+                {label:'🔤 Hitta ett ämnesord (fackord)', svar:'Till exempel: krater, meteorit, tyngdkraft, omloppsbana.'},
+                {label:'📅 Hitta ett årtal', svar:'1969 – då landade den första människan på månen.'}
+            ],
+            ordning:[
+                'Raketen startar från jorden.',
+                'Resan genom rymden tar ungefär tre dygn.',
+                'Astronauterna landar på månens yta.',
+                'De undersöker månen och samlar stenar.',
+                'Rymdfarkosten återvänder till jorden.'
+            ],
+            ordningRubrik:'Sortera: En resa till månen',
+            samtal:[
+                'Hur tror du att det känns att titta på jorden från månen?',
+                'Vad skulle du packa med dig på en månresa?',
+                'Varför tror du att människor vill utforska rymden?'
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vad kallas groparna på månen?', alt:['Kratrar','Vulkaner','Dalar'], ratt:0},
+                {typ:'sant', q:'På månen finns luft att andas.', ratt:false},
+                {typ:'flerval', q:'Vem gick först på månen?', alt:['Neil Armstrong','En rysk hund','Christofer Columbus'], ratt:0},
+                {typ:'fyll', fore:'På månen är tyngdkraften ', efter:' än på jorden.', alt:['svagare','starkare','likadan'], ratt:0},
+                {typ:'para', par:[['krater','grop på månens yta'],['meteorit','sten från rymden'],['astronaut','person som reser i rymden'],['omloppsbana','månens väg runt jorden']]}
+            ]
+        },
+        {
+            id:'ludde', typ:'nyhet', tema:'Djur', titel:'Hunden Ludde väckte familjen', bild:'🐕',
+            niv:{
+                latt:`Hunden Ludde räddade sin familj
+
+RÄTTVIK. En hund räddade sin familj i natt. Det brann i familjens hus. Hunden Ludde skällde och skällde. Familjen vaknade och sprang ut. Ingen blev skadad.
+
+Branden startade i tvättstugan. Brandkåren kom snabbt och släckte elden.
+
+– Ludde är vår hjälte, säger pappa Jonas. Han får extra godis i dag!`,
+                mellan:`Hunden Ludde väckte familjen – räddade alla ur branden
+
+RÄTTVIK. En familj i Rättvik kan tacka sin hund Ludde för att alla klarade sig när deras hus började brinna natten till torsdag.
+
+Branden startade i tvättstugan vid tvåtiden på natten, medan hela familjen låg och sov. Men Ludde, en fem år gammal labrador, kände röklukten. Han sprang upp till sovrummen och skällde tills alla vaknade.
+
+– Jag förstod direkt att något var fel. Ludde skäller nästan aldrig på natten, berättar pappa Jonas Berg.
+
+Familjen, två vuxna och två barn, tog sig snabbt ut ur huset. Räddningstjänsten var på plats inom tio minuter och kunde släcka branden innan den spred sig.
+
+– Utan hunden hade det kunnat sluta riktigt illa, säger räddningsledaren Karin Ek.
+
+Ludde firades under torsdagen med extra godis och en lång promenad.`,
+                utmaning:`Hunden Ludde väckte familjen – räddade alla ur nattens villabrand
+
+RÄTTVIK. En familj i Rättvik kan tacka sin hund Ludde för att alla kom oskadda ur natten till torsdagens villabrand. Labradoren kände röklukten långt innan någon människa hann reagera – och vägrade sluta skälla förrän hela familjen var vaken.
+
+Branden startade i tvättstugan strax efter klockan två på natten, troligen på grund av ett elfel. Familjens brandvarnare i hallen hade av misstag fått batteriet urtaget, så ingen larmsignal ljöd när röken började sprida sig.
+
+Men Ludde, en fem år gammal labrador, uppfattade faran. Han rusade upp för trappan till sovrummen och skällde ihärdigt utanför varje dörr.
+
+– Jag förstod direkt att något var fel. Ludde skäller nästan aldrig på natten, berättar pappa Jonas Berg, som snabbt fick med sig hela familjen ut på gården.
+
+Räddningstjänsten var på plats inom tio minuter och lyckades begränsa branden till tvättstugan.
+
+– Den här natten hade kunnat sluta i tragedi. Familjens hund gjorde en livsviktig insats, men händelsen påminner också om hur viktigt det är att kontrollera sina brandvarnare, säger räddningsledaren Karin Ek.
+
+Ludde själv verkade oberörd av all uppmärksamhet. Under torsdagen firades han med extra godis, en ny tuggleksak och en lång promenad.`
+            },
+            begrepp:[
+                {ord:'rubrik', former:['rubriken','rubriker'], bild:'📰', forklaring:'Överskriften på en text. I en tidning ska rubriken locka till läsning.', exempel:'Rubriken stod med stora bokstäver högst upp.'},
+                {ord:'ingress', former:['ingressen'], bild:'📄', forklaring:'Den korta inledningen i en nyhetsartikel som sammanfattar det viktigaste.', exempel:'Läs ingressen så vet du vad artikeln handlar om.'},
+                {ord:'räddningstjänsten', former:['räddningstjänst'], bild:'🚒', forklaring:'De som rycker ut vid bränder och olyckor – det vi ofta kallar brandkåren.', exempel:'Räddningstjänsten släckte elden på tio minuter.'},
+                {ord:'ihärdigt', former:['ihärdig','ihärdiga'], bild:'💪', forklaring:'Envist och uthålligt, utan att ge upp.', exempel:'Hon tränade ihärdigt varje dag.'},
+                {ord:'brandvarnare', former:['brandvarnaren'], bild:'🚨', forklaring:'En liten apparat i taket som tjuter högt om det börjar ryka.', exempel:'Kom ihåg att testa brandvarnaren varje månad.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vad heter hunden i artikeln?', a:'Ludde – en labrador.'},
+                    {q:'Var i huset startade branden?', a:'I tvättstugan.'},
+                    {q:'Hur väckte Ludde familjen?', a:'Han sprang till sovrummen och skällde tills alla vaknade.'}
+                ],
+                mellan:[
+                    {q:'Varför förstod pappa Jonas direkt att något var fel?', tips:'Vad brukar Ludde nästan aldrig göra på natten?'},
+                    {q:'Varför får räddningsledaren uttala sig i artikeln, tror du?', tips:'Vem litar läsarna extra mycket på?'},
+                    {q:'Vad kunde ha hänt om Ludde inte hade skällt?', tips:'Tänk på att hela familjen sov.'}
+                ],
+                bortom:[
+                    {q:'Känner du till något djur som har hjälpt en människa? Berätta!'},
+                    {q:'Vad skulle du göra om brandvarnaren tjöt hemma hos dig?'},
+                    {q:'Varför tror du att tidningar gärna skriver om djur som blir hjältar?'}
+                ]
+            },
+            hitta:[
+                {label:'📰 Hitta rubriken', svar:'”Hunden Ludde väckte familjen – räddade alla ur branden”.'},
+                {label:'❓ Hitta svar på: Vad har hänt?', svar:'Ett hus började brinna, men hunden väckte familjen så att alla hann ut.'},
+                {label:'📍 Hitta var och när det hände', svar:'I Rättvik, natten till torsdag, vid tvåtiden.'},
+                {label:'💬 Hitta ett citat (någon som pratar)', svar:'Till exempel pappa Jonas: ”Ludde skäller nästan aldrig på natten.”'}
+            ],
+            ordning:[
+                'Branden startar i tvättstugan mitt i natten.',
+                'Ludde känner röklukten och börjar skälla.',
+                'Familjen vaknar och tar sig ut ur huset.',
+                'Räddningstjänsten kommer och släcker branden.',
+                'Ludde firas med extra godis och en lång promenad.'
+            ],
+            samtal:[
+                'Varför är citat (pratminus) viktiga i en nyhetsartikel?',
+                'Hur märker man att detta är en nyhetsartikel och inte en saga?',
+                'Vilka fler frågor skulle du vilja ställa till familjen Berg?'
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vilken hundras är Ludde?', alt:['Labrador','Pudel','Schäfer'], ratt:0},
+                {typ:'sant', q:'Branden startade i köket.', ratt:false},
+                {typ:'flerval', q:'Vad gjorde Ludde när det började brinna?', alt:['Skällde tills alla vaknade','Sprang ut själv','Gömde sig under sängen'], ratt:0},
+                {typ:'fyll', fore:'Räddningstjänsten var på plats inom tio ', efter:'.', alt:['minuter','timmar','dagar'], ratt:0},
+                {typ:'para', par:[['rubrik','textens överskrift'],['ingress','artikelns inledning'],['citat','något en person har sagt'],['räddningstjänsten','de som släcker bränder']]}
+            ]
+        },
+        {
+            id:'nyaskolan', typ:'dagbok', tema:'Vänskap', titel:'Första dagen i nya skolan', bild:'📔',
+            niv:{
+                latt:`Kära dagbok!
+
+I dag började jag i min nya skola. Jag var jättenervös i morse. Tänk om ingen ville vara med mig?
+
+På första rasten stod jag ensam. Då kom en tjej fram. Hon heter Alva. Hon frågade om jag ville spela king. Det ville jag!
+
+Nu känns allt mycket bättre. I morgon ska jag fråga Alva om hon vill sitta med mig i matsalen.
+
+Godnatt!`,
+                mellan:`Kära dagbok!
+
+I dag var första dagen i min nya skola, och i morse var jag så nervös att jag knappt fick i mig frukosten. Det pirrade i hela magen. Tänk om alla redan hade sina kompisar? Tänk om ingen ens skulle prata med mig?
+
+Förmiddagen var precis så jobbig som jag hade trott. På första rasten stod jag ensam vid väggen och visste inte var jag skulle ta vägen.
+
+Men på lunchrasten hände något. En tjej från min klass, Alva, kom fram och frågade om jag ville spela king. Först vågade jag knappt svara, men sedan sa jag ja. Vi spelade hela rasten, och hon skrattade inte alls när jag slog bollen rakt ut i buskarna.
+
+Nu ligger jag i sängen och känner mig nästan lite lycklig. I morgon ska jag våga fråga Alva om hon vill sitta bredvid mig i matsalen.
+
+Godnatt, dagboken!`,
+                utmaning:`Kära dagbok!
+
+I dag var första dagen i min nya skola, och jag tror aldrig att jag har varit så nervös i hela mitt liv. Redan vid frukosten pirrade det i magen som om jag hade svalt en hel burk fjärilar. Tusen tankar snurrade i huvudet: Tänk om alla redan har sina kompisgäng? Tänk om jag säger något dumt första dagen och alla minns det för alltid?
+
+Förmiddagen blev precis så seg som jag hade fruktat. Klassrummet kändes främmande, alla visste var de skulle sitta utom jag, och på första rasten ställde jag mig vid tegelväggen och försökte se upptagen ut, fast jag mest räknade sekunderna tills det ringde in.
+
+Men på lunchrasten vände allting. Alva, en tjej från min klass med två långa flätor, kom fram och frågade rakt ut: ”Vill du spela king med oss?” Jag blev så förvånad att jag nästan glömde svara, men sedan hörde jag mig själv säga ja. Vi spelade hela rasten, och när jag slog bollen rakt ut i buskarna skrattade hon – men med mig, inte åt mig. Det är faktiskt stor skillnad.
+
+Nu ligger jag under täcket och känner mig nästan fånigt lycklig. Den nya skolan kanske inte blir så hemsk trots allt. I morgon ska jag samla mod och fråga Alva om hon vill sitta bredvid mig i matsalen.
+
+Godnatt, kära dagbok!`
+            },
+            begrepp:[
+                {ord:'nervös', former:['nervöst','nervösa'], bild:'😬', forklaring:'Orolig och spänd inför något som ska hända.', exempel:'Hon var nervös inför uppträdandet.'},
+                {ord:'pirra', former:['pirrade','pirrar'], bild:'🦋', forklaring:'Kittla lite inuti, ofta i magen, när man är nervös eller förväntansfull.', exempel:'Det pirrade i magen före matchen.'},
+                {ord:'främmande', former:['främmandet'], bild:'🤷', forklaring:'Okänd – något eller någon man inte känner igen.', exempel:'Staden kändes främmande första veckan.'},
+                {ord:'mod', former:['modet','modig'], bild:'💪', forklaring:'Att våga göra något fast man är rädd.', exempel:'Det krävdes mod att räcka upp handen.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vad heter tjejen som frågar om skribenten vill spela king?', a:'Hon heter Alva.'},
+                    {q:'Vad gjorde skribenten på första rasten?', a:'Stod ensam vid väggen.'},
+                    {q:'Vad ska skribenten våga fråga Alva i morgon?', a:'Om hon vill sitta bredvid i matsalen.'}
+                ],
+                mellan:[
+                    {q:'Varför fick skribenten knappt i sig frukosten?', tips:'Vilken känsla beskrivs i början av texten?'},
+                    {q:'Vad menas med att Alva skrattade ”med mig, inte åt mig”?', tips:'Vad är skillnaden mellan de två sätten att skratta?'},
+                    {q:'Hur förändras skribentens känslor under dagen?', tips:'Jämför morgonen med kvällen.'}
+                ],
+                bortom:[
+                    {q:'Hur kändes det för dig när du började i en ny klass eller grupp?'},
+                    {q:'Vad kan man göra för att en ny elev ska känna sig välkommen?'},
+                    {q:'Varför kan det kännas skönt att skriva dagbok?'}
+                ]
+            },
+            hitta:[
+                {label:'👤 Hitta vem som skriver', svar:'En elev som just börjat i en ny skola (vi får aldrig veta namnet).'},
+                {label:'💭 Hitta en känsla i texten', svar:'Till exempel: nervös, ensam, förvånad, lycklig.'},
+                {label:'⚡ Hitta problemet', svar:'Skribenten är ny och rädd att inte få några vänner.'},
+                {label:'✅ Hitta vändpunkten', svar:'När Alva frågar om skribenten vill spela king.'}
+            ],
+            ordning:[
+                'Skribenten vaknar nervös och får knappt i sig frukosten.',
+                'På första rasten står skribenten ensam vid väggen.',
+                'Alva frågar om skribenten vill spela king.',
+                'De spelar tillsammans hela lunchrasten.',
+                'På kvällen känner sig skribenten lycklig och planerar morgondagen.'
+            ],
+            samtal:[
+                'Varför vågade skribenten först knappt svara Alva?',
+                'Vad gjorde Alva som var både modigt och snällt?',
+                'Varför skriver människor dagbok, tror du?'
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vilken lek spelade de på rasten?', alt:['King','Kull','Fotboll'], ratt:0},
+                {typ:'sant', q:'Skribenten kände sig lycklig på kvällen.', ratt:true},
+                {typ:'flerval', q:'Hur börjar en dagbokstext ofta?', alt:['”Kära dagbok”','”Det var en gång”','”Hej alla läsare”'], ratt:0},
+                {typ:'fyll', fore:'I morse var jag så ', efter:' att jag knappt fick i mig frukosten.', alt:['nervös','hungrig','trött'], ratt:0},
+                {typ:'para', par:[['nervös','orolig och spänd'],['Alva','tjejen med flätorna'],['”Kära dagbok”','textens början'],['jag-form','dagbokens berättarröst']]}
+            ]
+        },
+        {
+            id:'talgboll', typ:'instruktion', tema:'Djur', titel:'Gör en talgboll till fåglarna', bild:'🐦',
+            niv:{
+                latt:`Gör en talgboll till fåglarna
+
+Du behöver:
+• kokosfett
+• fågelfrön
+• ett snöre
+• en mugg
+
+Gör så här:
+1. Smält kokosfettet i en kastrull. Ta hjälp av en vuxen.
+2. Blanda ner fågelfröna i fettet.
+3. Lägg snöret i muggen. Häll i blandningen.
+4. Ställ muggen i kylen tills bollen har stelnat.
+5. Ta ut bollen och häng upp den i ett träd.
+
+Nu kan du titta på när fåglarna kalasar!`,
+                mellan:`Gör en talgboll till fåglarna
+
+På vintern är det svårt för småfåglar att hitta mat. Med en hemgjord talgboll kan du hjälpa dem – och samtidigt få se fåglar på nära håll.
+
+Du behöver:
+• 250 gram kokosfett
+• 3 deciliter fågelfrön
+• ett snöre
+• en mugg eller liten skål
+
+Gör så här:
+1. Smält kokosfettet försiktigt i en kastrull på låg värme. Ta hjälp av en vuxen.
+2. Rör ner fågelfröna i det smälta fettet.
+3. Lägg snöret i muggen så att en bit hänger utanför, och häll sedan i blandningen.
+4. Ställ muggen i kylskåpet i några timmar tills blandningen har stelnat.
+5. Ta försiktigt ut bollen ur muggen och häng upp den i ett träd eller på balkongen.
+
+Tips! Häng bollen så att katter inte kommer åt den. Talgoxar, blåmesar och pilfinkar brukar hitta maten redan efter någon dag.`,
+                utmaning:`Gör en talgboll till fåglarna
+
+När marken är frusen och täckt av snö har småfåglarna svårt att hitta insekter och frön. En energirik talgboll kan då vara skillnaden mellan att svälta och att klara vintern. Så här gör du en egen – det tar bara en kvart plus tiden i kylskåpet.
+
+Du behöver:
+• 250 gram kokosfett (eller ister)
+• 3 deciliter fågelfrön, gärna solrosfrön
+• havregryn eller russin om du vill lyxa till det
+• ett kraftigt snöre
+• en mugg eller liten skål
+
+Gör så här:
+1. Smält fettet försiktigt i en kastrull på låg värme – det ska smälta, inte koka. Ta hjälp av en vuxen vid spisen.
+2. Rör ner fröna, och eventuellt havregryn och russin, i det smälta fettet.
+3. Placera snöret i muggen så att en lång bit hänger utanför kanten, och häll sedan i den varma blandningen.
+4. Låt muggen stå i kylskåpet i minst tre timmar, tills blandningen har stelnat helt.
+5. Lossa bollen ur muggen och knyt upp den i ett träd, gärna högt så att katter inte når den.
+
+Tänk på! Fortsätt gärna mata hela vintern när du väl har börjat – fåglarna lär sig snabbt var matplatsen finns och återvänder dag efter dag. Talgoxar, blåmesar och pilfinkar brukar bli stammisar redan första veckan.`
+            },
+            begrepp:[
+                {ord:'instruktion', former:['instruktioner','instruktionen'], bild:'📋', forklaring:'En text som talar om hur man gör något, steg för steg.', exempel:'Följ instruktionen så blir det rätt.'},
+                {ord:'stelna', former:['stelnat','stelnar'], bild:'🧊', forklaring:'Gå från flytande till fast – som när smält fett blir hårt igen.', exempel:'Låt chokladen stelna i kylen.'},
+                {ord:'energirik', former:['energirika','energirikt'], bild:'⚡', forklaring:'Full av energi – mat som ger mycket kraft.', exempel:'Nötter är energirik mat.'},
+                {ord:'deciliter', former:['dl'], bild:'🥛', forklaring:'Ett mått för volym. En deciliter är en tiondels liter.', exempel:'Receptet kräver tre deciliter mjölk.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vad ska du blanda ner i det smälta fettet?', a:'Fågelfrön.'},
+                    {q:'Var ska muggen stå tills blandningen stelnat?', a:'I kylskåpet.'},
+                    {q:'Vad gör du i det sista steget?', a:'Hänger upp bollen i ett träd.'}
+                ],
+                mellan:[
+                    {q:'Varför ska man ta hjälp av en vuxen?', tips:'Vilket steg kan vara farligt?'},
+                    {q:'Varför ska snöret läggas i muggen innan man häller i blandningen?', tips:'Vad ska snöret användas till på slutet?'},
+                    {q:'Varför är det extra viktigt att mata fåglarna just på vintern?', tips:'Läs inledningen av texten.'}
+                ],
+                bortom:[
+                    {q:'Har du matat fåglar någon gång? Hur gjorde du?'},
+                    {q:'Vad mer kan man göra för att hjälpa djur på vintern?'},
+                    {q:'Vilka instruktioner har du följt? (Recept, bygga, spel...) Vad gör en instruktion bra?'}
+                ]
+            },
+            hitta:[
+                {label:'📰 Hitta rubriken', svar:'”Gör en talgboll till fåglarna”.'},
+                {label:'🧺 Hitta materiallistan', svar:'Listan under ”Du behöver”: kokosfett, fågelfrön, snöre och en mugg.'},
+                {label:'1️⃣ Hitta det första steget', svar:'Smält kokosfettet försiktigt i en kastrull.'},
+                {label:'🗣️ Hitta ett verb i uppmaningsform', svar:'Till exempel: smält, blanda, häll, ställ, häng.'}
+            ],
+            ordning:[
+                'Smält kokosfettet i en kastrull.',
+                'Rör ner fågelfröna i fettet.',
+                'Lägg snöret i muggen och häll i blandningen.',
+                'Ställ muggen i kylskåpet tills bollen stelnat.',
+                'Häng upp talgbollen i ett träd.'
+            ],
+            ordningRubrik:'Sortera stegen i rätt ordning',
+            samtal:[
+                'Vad händer om man gör stegen i fel ordning?',
+                'Varför är instruktioner ofta numrerade?',
+                'Vilka fåglar har du sett där du bor?'
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vad kallas texttypen du just läst?', alt:['Instruktion','Saga','Dagbok'], ratt:0},
+                {typ:'sant', q:'Fettet ska koka så mycket det går.', ratt:false},
+                {typ:'flerval', q:'Varför lägger man snöret i muggen?', alt:['För att kunna hänga upp bollen','Som dekoration','Fåglarna äter snöret'], ratt:0},
+                {typ:'fyll', fore:'Ställ muggen i kylskåpet tills blandningen har ', efter:'.', alt:['stelnat','smält','försvunnit'], ratt:0},
+                {typ:'para', par:[['smälta','göra fett flytande'],['stelna','bli fast igen'],['deciliter','ett mått'],['talgoxe','en småfågel']]}
+            ]
+        },
+        {
+            id:'lejonet', typ:'fabel', tema:'Djur', titel:'Lejonet och musen', bild:'🦁',
+            niv:{
+                latt:`Ett lejon låg och sov. En liten mus sprang rakt över lejonets nos. Lejonet vaknade och fångade musen med sin stora tass.
+
+– Snälla, släpp mig! pep musen. En dag kanske jag kan hjälpa dig.
+
+Lejonet skrattade. Hur skulle en liten mus kunna hjälpa ett stort lejon? Men det släppte musen ändå.
+
+Några dagar senare fastnade lejonet i ett jägarnät. Det röt och slet, men kom inte loss. Då kom musen. Hon gnagde av repen, ett efter ett, tills lejonet var fritt.
+
+– Tack, sa lejonet. Du var större än jag trodde.
+
+Sensmoral: Även den som är liten kan hjälpa den som är stor.`,
+                mellan:`En het eftermiddag låg ett lejon och sov i skuggan under ett träd. En liten mus, som hade bråttom hem, sprang av misstag rakt över lejonets nos. Lejonet vaknade blixtsnabbt och fångade musen under sin väldiga tass.
+
+– Snälla, skona mig! pep musen förskräckt. Släpper du mig, lovar jag att hjälpa dig en dag, om du någonsin behöver det.
+
+Lejonet brast ut i skratt. Hur skulle ett så litet kryp kunna hjälpa djurens konung? Men musen var modig, tyckte lejonet, så det lyfte på tassen och lät henne springa.
+
+Några dagar senare smög jägare i skogen. De spände upp ett starkt nät mellan träden, och rakt i fällan klev lejonet. Ju mer det slet och röt, desto hårdare satt repen. Hela skogen hörde dess förtvivlade rytande – och det gjorde även musen.
+
+Hon skyndade dit, började genast gnaga på repen och bet av dem, ett efter ett, tills lejonet äntligen kunde resa sig, fritt igen.
+
+– Du skrattade åt mig, sa musen blygt, men även en liten vän kan vara en stor hjälp.
+
+Sedan den dagen skrattade lejonet aldrig mer åt någon för att den var liten.
+
+Sensmoral: Även den som är liten kan hjälpa den som är stor.`,
+                utmaning:`En het eftermiddag på savannen låg ett mäktigt lejon och slumrade i skuggan av ett ensamt träd. En liten mus, som hade bråttom hem till sitt bo, tog en genväg – rakt över lejonets nos. På ett ögonblick var lejonet vaket, och innan musen hann blinka låg hon fångad under en tass stor som en middagstallrik.
+
+– Skona mig, mäktige konung! pep musen med bultande hjärta. Släpper du mig i dag, lovar jag att återgälda tjänsten. En dag kan även jag vara till nytta för dig.
+
+Lejonet brast ut i ett dånande skratt. Tanken att detta lilla kryp skulle kunna hjälpa djurens konung var det löjligaste det hade hört. Men kanske var det just musens mod som rörde lejonet, för det lyfte tassen och lät henne kila i väg.
+
+Några dagar senare rörde sig jägare i området. Mellan två träd hade de spänt upp ett kraftigt nät, och rakt i fällan klev lejonet. Ju vildare det slet och kastade sig, desto hårdare drogs repen åt. Dess förtvivlade rytande rullade som åska över savannen – och nådde även musens små öron.
+
+Hon sprang genast mot ljudet. Utan att tveka satte hon tänderna i det grova repet och gnagde, tråd för tråd, rep efter rep, tills nätet till sist gav vika och lejonet kunde resa sig, fritt igen.
+
+– Du skrattade åt mitt löfte, sa musen stilla. Men nu ser du: en tjänst är aldrig för liten, och en vän är aldrig för obetydlig.
+
+Från den dagen skrattade lejonet aldrig mer åt någon för dess litenhet.
+
+Sensmoral: Även den lilla kan hjälpa den stora – en god gärning kommer alltid tillbaka.`
+            },
+            begrepp:[
+                {ord:'fabel', former:['fabeln','fabler'], bild:'🐭', forklaring:'En kort berättelse där djur pratar och beter sig som människor. Den slutar ofta med en läxa – en sensmoral.', exempel:'”Lejonet och musen” är en känd fabel.'},
+                {ord:'sensmoral', former:['sensmoralen'], bild:'💡', forklaring:'Läxan eller budskapet i slutet av en fabel – det vi ska lära oss.', exempel:'Fabelns sensmoral är att man inte ska ge upp.'},
+                {ord:'skona', former:['skonade','skonar'], bild:'🙏', forklaring:'Låta bli att skada någon – visa nåd.', exempel:'Riddaren valde att skona sin fiende.'},
+                {ord:'återgälda', former:['återgäldade','återgäldar'], bild:'🤝', forklaring:'Ge tillbaka en tjänst – göra något snällt mot den som har hjälpt dig.', exempel:'Hon ville återgälda hjälpen hon fått.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vad gjorde lejonet när musen sprang över dess nos?', a:'Det vaknade och fångade henne under tassen.'},
+                    {q:'Vad lovade musen om lejonet släppte henne?', a:'Att hjälpa lejonet en dag.'},
+                    {q:'Hur befriade musen lejonet ur nätet?', a:'Hon gnagde av repen, ett efter ett.'}
+                ],
+                mellan:[
+                    {q:'Varför skrattade lejonet åt musens löfte?', tips:'Vad tänkte lejonet om storlek och styrka?'},
+                    {q:'Varför släppte lejonet musen, fast det skrattade åt henne?', tips:'Vad tyckte lejonet om musens sätt?'},
+                    {q:'Vad menas med att ”en tjänst är aldrig för liten”?', tips:'Tänk på vad musen gjorde för lejonet.'}
+                ],
+                bortom:[
+                    {q:'Har någon ”liten” hjälp någon gång betytt mycket för dig?'},
+                    {q:'Håller du med om fabelns sensmoral? Varför eller varför inte?'},
+                    {q:'Vilka andra fabler känner du till?'}
+                ]
+            },
+            hitta:[
+                {label:'👤 Hitta huvudpersonerna', svar:'Lejonet och musen.'},
+                {label:'📍 Hitta platsen', svar:'Savannen/skogen, i skuggan under ett träd.'},
+                {label:'⚡ Hitta problemet', svar:'Lejonet fastnar i jägarnas nät.'},
+                {label:'💡 Hitta sensmoralen', svar:'Även den som är liten kan hjälpa den som är stor.'}
+            ],
+            ordning:[
+                'Musen springer över det sovande lejonets nos.',
+                'Lejonet fångar musen men släpper henne.',
+                'Lejonet fastnar i jägarnas nät.',
+                'Musen gnager av repen och befriar lejonet.',
+                'Lejonet förstår att även små vänner är viktiga.'
+            ],
+            samtal:[
+                'Varför pratar djuren i fabler, tror du?',
+                'Kan en liten person hjälpa en stor? Ge exempel från verkligheten.',
+                'Vilken sensmoral skulle du vilja skriva en egen fabel om?'
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vad kallas läxan i slutet av en fabel?', alt:['Sensmoral','Rubrik','Ingress'], ratt:0},
+                {typ:'sant', q:'Musen befriade lejonet genom att gnaga av repen.', ratt:true},
+                {typ:'flerval', q:'Varför skrattade lejonet åt musen?', alt:['Det trodde inte att en liten mus kunde hjälpa','Musen berättade en rolig historia','Lejonet var kittligt'], ratt:0},
+                {typ:'fyll', fore:'Även den som är ', efter:' kan hjälpa den som är stor.', alt:['liten','stark','snabb'], ratt:0},
+                {typ:'para', par:[['fabel','berättelse med talande djur'],['sensmoral','fabelns budskap'],['lejonet','fastnade i nätet'],['musen','gnagde av repen']]}
+            ]
+        },
+        {
+            id:'natthimlen', typ:'dikt', tema:'Rymden', titel:'Natthimlen', bild:'🌌',
+            niv:{
+                latt:`Natthimlen
+
+När dagen somnat, tyst och still,
+tänds tusen lampor, en efter en.
+Stjärnorna blinkar: kom om du vill,
+vi väntar här på vår himlascen.
+
+Månen seglar i mörkblått hav,
+en silverbåt som natten gav.
+Tyst den glider längs himlens rand
+och strör sitt silver över land.`,
+                mellan:`Natthimlen
+
+När dagen somnat, tyst och still,
+tänds tusen lampor, en efter en.
+Stjärnorna blinkar: kom om du vill,
+vi väntar här på vår himlascen.
+
+Månen seglar i mörkblått hav,
+en silverbåt som natten gav.
+Tyst den glider längs himlens rand
+och strör sitt silver över land.
+
+Och Vintergatan, bred och lång,
+är miljontals stjärnor på en gång –
+en väg av ljus, en glittrig flod,
+som rinner stilla, lugn och god.`,
+                utmaning:`Natthimlen
+
+När dagen somnat, tyst och still,
+tänds tusen lampor, en efter en.
+Stjärnorna blinkar: kom om du vill,
+vi väntar här på vår himlascen.
+
+Månen seglar i mörkblått hav,
+en silverbåt som natten gav.
+Tyst den glider längs himlens rand
+och strör sitt silver över land.
+
+Och Vintergatan, bred och lång,
+är miljontals stjärnor på en gång –
+en väg av ljus, en glittrig flod,
+som rinner stilla, lugn och god.
+
+Det ljus du ser från stjärnan klar
+har färdats hit i tusen år.
+Så natten viskar: titta hit –
+en hälsning från en svunnen tid.`
+            },
+            begrepp:[
+                {ord:'strof', former:['strofer','strofen','stroferna'], bild:'📄', forklaring:'En grupp rader i en dikt – diktens ”stycke”.', exempel:'Dikten har fyra strofer med fyra rader i varje.'},
+                {ord:'rim', former:['rimmar','rimmen','rimma'], bild:'🎵', forklaring:'När ord slutar med samma ljud, som katt och hatt.', exempel:'Orden ”still” och ”vill” rimmar.'},
+                {ord:'Vintergatan', former:['vintergatan'], bild:'🌌', forklaring:'Det ljusa bandet av miljontals stjärnor som syns över natthimlen – vår galax.', exempel:'En stjärnklar natt kan man se Vintergatan.'},
+                {ord:'metafor', former:['metaforer','metaforen'], bild:'🖼️', forklaring:'En bild i språket: att kalla månen ”en silverbåt” utan att använda ordet ”som”.', exempel:'”Livet är en resa” är en metafor.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vad kallas månen i dikten?', a:'En silverbåt.'},
+                    {q:'Vad beskrivs Vintergatan som?', a:'En väg av ljus – en glittrig flod.'},
+                    {q:'När tänds de ”tusen lamporna”?', a:'När dagen somnat, alltså på natten.'}
+                ],
+                mellan:[
+                    {q:'Vad menar poeten med att ”dagen somnat”?', tips:'Vad händer med ljuset på kvällen?'},
+                    {q:'Varför passar ”silverbåt” så bra som bild för månen?', tips:'Tänk på månens form och färg.'},
+                    {q:'Vilken känsla vill dikten ge dig?', tips:'Läs dikten långsamt – blir du lugn, glad, sömnig?'}
+                ],
+                bortom:[
+                    {q:'Vad tänker du på när du tittar på stjärnhimlen?'},
+                    {q:'Hitta på en egen metafor för solen.'},
+                    {q:'Tycker du att dikter måste rimma? Varför eller varför inte?'}
+                ]
+            },
+            hitta:[
+                {label:'🎵 Hitta två ord som rimmar', svar:'Till exempel: still–vill, hav–gav, rand–land.'},
+                {label:'📄 Hitta en strof', svar:'En grupp rader – dikten har flera strofer med fyra rader i varje.'},
+                {label:'🖼️ Hitta en språklig bild (metafor)', svar:'Till exempel ”månen är en silverbåt” eller ”Vintergatan är en glittrig flod”.'},
+                {label:'⭐ Hitta din favoritrad', svar:'Här finns inget rätt svar – välj raden du tycker mest om och berätta varför!'}
+            ],
+            ordning:[
+                'Dagen somnar och stjärnorna tänds.',
+                'Månen seglar som en silverbåt.',
+                'Vintergatan flyter som en glittrig flod.',
+                'Stjärnans ljus når oss som en hälsning från förr.'
+            ],
+            ordningRubrik:'Sortera diktens strofer i rätt ordning',
+            samtal:[
+                'Hur skiljer sig en dikt från en berättelse?',
+                'Vilken bild i dikten tyckte du bäst om? Varför?',
+                'Varför tror du att människor i alla tider har skrivit dikter om himlen?'
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vad kallas en grupp rader i en dikt?', alt:['Strof','Kapitel','Ingress'], ratt:0},
+                {typ:'sant', q:'I dikten kallas månen för en silverbåt.', ratt:true},
+                {typ:'flerval', q:'Vilka ord i dikten rimmar?', alt:['hav och gav','måne och stjärna','natt och dag'], ratt:0},
+                {typ:'fyll', fore:'Vintergatan beskrivs som en glittrig ', efter:'.', alt:['flod','öken','trappa'], ratt:0},
+                {typ:'para', par:[['strof','diktens stycke'],['rim','ord med samma slutljud'],['metafor','en bild i språket'],['Vintergatan','vår galax']]}
+            ]
+        },
+        {
+            id:'vasa', typ:'faktatext', tema:'Historia', titel:'Skeppet Vasa', bild:'🚢',
+            niv:{
+                latt:`Vasa var ett stort krigsskepp. Det byggdes i Stockholm för nästan 400 år sedan. Kungen ville ha det finaste skeppet i världen. Vasa fick många kanoner och fina träfigurer.
+
+Den 10 augusti 1628 seglade Vasa ut på sin första resa. Tusentals människor tittade på. Men efter bara en liten stund kom en vindby. Skeppet lutade, vatten rann in och Vasa sjönk.
+
+Vasa låg på havets botten i 333 år. År 1961 lyftes skeppet upp. I dag kan du se Vasa på ett museum i Stockholm.`,
+                mellan:`Skeppet Vasa
+
+För nästan 400 år sedan lät Sveriges kung Gustav II Adolf bygga ett enormt krigsskepp. Det fick namnet Vasa och skulle bli det mäktigaste skeppet på hela Östersjön. Vasa smyckades med hundratals snidade träfigurer och utrustades med 64 kanoner.
+
+Den 10 augusti 1628 var det dags för jungfruresan, skeppets allra första färd. Tusentals stockholmare stod längs stränderna för att titta. Men Vasa var byggt för smalt och bar för mycket tyngd högt uppe. När en vindby fick skeppet att luta strömmade vatten in genom kanonportarna, och efter bara omkring 1 300 meter sjönk Vasa på sin första resa.
+
+Skeppet blev kvar på havets botten i 333 år. Först år 1961 lyckades man bärga Vasa, alltså lyfta upp det ur vattnet. Eftersom Östersjöns vatten är bräckt hade träet klarat sig ovanligt bra.
+
+I dag står skeppet på Vasamuseet i Stockholm, ett av världens mest besökta museer. Där kan du se det riktiga 1600-talsskeppet med egna ögon.`,
+                utmaning:`Skeppet Vasa – örlogsfartyget som sjönk på sin jungfruresa
+
+I början av 1600-talet var Sverige en krigförande stormakt, och kung Gustav II Adolf behövde mäktiga örlogsfartyg till sin flotta. Han lät därför bygga Vasa – ett praktskepp utsmyckat med hundratals snidade och målade träfigurer, bestyckat med 64 kanoner i två rader ovanpå varandra.
+
+Den 10 augusti 1628 var det äntligen dags för jungfruresan. Tusentals stockholmare kantade stränderna när det ståtliga skeppet sköt sina saluter och gled ut på Strömmen. Men glädjen blev kortvarig. Vasa var byggt för smalt, och med de tunga kanonerna högt uppe låg tyngdpunkten alldeles för högt. Redan efter omkring 1 300 meter fick en vindby skeppet att kränga, vatten forsade in genom de öppna kanonportarna, och inför tusentals ögonvittnen sjönk Vasa till botten. Omkring 30 människor följde med i djupet.
+
+Skeppet blev kvar på Strömmens botten i 333 år. Först 1961, efter flera års förberedelser, lyckades man bärga Vasa. Tack vare Östersjöns bräckta vatten, där skeppsmasken inte trivs, var skrovet förvånansvärt välbevarat. Arkeologerna fann dessutom tusentals föremål: mynt, verktyg, kläder och till och med matrester, som berättar om livet ombord på 1600-talet.
+
+I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens mest besökta museer. Där står det enda bevarade skeppet i sitt slag från 1600-talet och påminner om hur en enda felberäkning kan sänka även det mäktigaste bygget.`
+            },
+            begrepp:[
+                {ord:'jungfruresa', former:['jungfruresan'], bild:'🚢', forklaring:'Ett fartygs allra första resa.', exempel:'Titanic sjönk på sin jungfruresa.'},
+                {ord:'bärga', former:['bärgade','bärgades','bärgning'], bild:'🏗️', forklaring:'Lyfta upp något som har sjunkit, eller rädda något som är i fara.', exempel:'Dykarna hjälpte till att bärga båten.'},
+                {ord:'örlogsfartyg', former:['örlogsfartyget'], bild:'⚓', forklaring:'Ett krigsfartyg – ett skepp byggt för strid.', exempel:'Vasa var ett av flottans örlogsfartyg.'},
+                {ord:'kanonport', former:['kanonportar','kanonportarna'], bild:'🪟', forklaring:'En lucka i skeppets sida som kanonen sticker ut genom.', exempel:'Vattnet forsade in genom kanonportarna.'},
+                {ord:'bräckt', former:['bräckta'], bild:'💧', forklaring:'Vatten som är en blandning av sött och salt, som i Östersjön.', exempel:'I bräckt vatten trivs inte skeppsmasken.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vilket år sjönk Vasa?', a:'År 1628, den 10 augusti.'},
+                    {q:'Hur länge låg skeppet på botten?', a:'333 år – ända till 1961.'},
+                    {q:'Var kan man se Vasa i dag?', a:'På Vasamuseet i Stockholm.'}
+                ],
+                mellan:[
+                    {q:'Varför sjönk Vasa?', tips:'Hur var skeppet byggt, och var satt de tunga kanonerna?'},
+                    {q:'Varför var träet så välbevarat efter alla år under vattnet?', tips:'Vad är speciellt med Östersjöns vatten?'},
+                    {q:'Varför ville kungen ha ett så praktfullt skepp, tror du?', tips:'Vad ville han visa andra länder?'}
+                ],
+                bortom:[
+                    {q:'Skulle du vilja besöka Vasamuseet? Vad skulle du helst titta på?'},
+                    {q:'Vad kan vi i dag lära oss av misstaget med Vasa?'},
+                    {q:'Vad från historien skulle du vilja veta mer om?'}
+                ]
+            },
+            hitta:[
+                {label:'🧭 Hitta ämnet', svar:'Krigsskeppet Vasa: bygget, förlisningen och bärgningen.'},
+                {label:'📅 Hitta två årtal', svar:'1628 (Vasa sjönk) och 1961 (Vasa bärgades).'},
+                {label:'📌 Hitta orsaken till att skeppet sjönk', svar:'Det var byggt för smalt och bar för tung vikt högt uppe – vattnet kom in genom kanonportarna.'},
+                {label:'🔤 Hitta ett ämnesord', svar:'Till exempel: jungfruresa, bärga, örlogsfartyg, kanonport.'}
+            ],
+            ordning:[
+                'Kungen låter bygga det praktfulla skeppet Vasa.',
+                'Vasa seglar ut på sin jungfruresa år 1628.',
+                'En vindby får skeppet att luta och vatten strömmar in.',
+                'Vasa sjunker och blir kvar på botten i 333 år.',
+                'Skeppet bärgas 1961 och står i dag på Vasamuseet.'
+            ],
+            samtal:[
+                'Hur tror du att det kändes att stå på stranden och se Vasa sjunka?',
+                'Varför är gamla föremål viktiga för att förstå historien?',
+                'Vems fel var det att Vasa sjönk, tror du?'
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vad hände på Vasas jungfruresa?', alt:['Skeppet sjönk','Skeppet vann ett sjöslag','Skeppet seglade till Amerika'], ratt:0},
+                {typ:'sant', q:'Vasa bärgades år 1961.', ratt:true},
+                {typ:'flerval', q:'Varför sjönk Vasa?', alt:['Det var för smalt och tungt högst upp','Det krockade med ett isberg','Pirater sänkte det'], ratt:0},
+                {typ:'fyll', fore:'Ett fartygs allra första resa kallas ', efter:'.', alt:['jungfruresa','långresa','provtur'], ratt:0},
+                {typ:'para', par:[['1628','året då Vasa sjönk'],['1961','året då Vasa bärgades'],['Gustav II Adolf','kungen som beställde skeppet'],['Vasamuseet','där skeppet står i dag']]}
+            ]
+        }
+        ];
+        return window._lasfBank;
+    }
+
+    function createLasforstaelse(config){
+        if(config===undefined) config=null;
+        const body = createWidget('LÄSFÖRSTÅELSE', 780, 'lasf-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.classList.add('lasf-body');
+        if(!config || !config.h){ widget.style.height = Math.min(640, Math.max(420, (window.innerHeight||800) - 160)) + 'px'; }
+        const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const bank = lasfBank();
+        const TYPER = lasfTyper();
+        const NIVAER = [ {id:'latt', namn:'🟢 Lätt'}, {id:'mellan', namn:'🟡 Mellan'}, {id:'utmaning', namn:'🔴 Utmaning'} ];
+        const SEKTIONER = [
+            {id:'las', namn:'📖 Läs text'}, {id:'strategier', namn:'💡 Lässtrategier'}, {id:'begrepp', namn:'🔤 Begrepp'},
+            {id:'fragor', namn:'❓ Frågor'}, {id:'hitta', namn:'🎯 Hitta i texten'}, {id:'ordning', namn:'🔗 Sortera'},
+            {id:'samtal', namn:'👥 Samtala'}, {id:'samman', namn:'📝 Sammanfatta'}, {id:'quiz', namn:'🎲 Quiz'}, {id:'sjalv', namn:'⭐ Jag kan'}
+        ];
+        const TEMAN = [ {id:'Djur', emoji:'🐾'}, {id:'Historia', emoji:'🏰'}, {id:'Rymden', emoji:'🚀'}, {id:'Vänskap', emoji:'💛'} ];
+
+        // ---- sparat läge ----
+        let st = { view:'home', textId:'', sektion:'las', niva:'mellan', zoom:16, dark:false, listaTyp:'', samtalIdx:0,
+                   samm:'', sammMal:3, sjalv:[false,false,false,false], kansla:'', egen:{titel:'', typ:'berattande', text:''} };
+        if(config && config.data){ try{ st = Object.assign(st, JSON.parse(JSON.stringify(config.data))); }catch(e){} }
+        if(!st.egen) st.egen = {titel:'', typ:'berattande', text:''};
+        if(!Array.isArray(st.sjalv) || st.sjalv.length!==4) st.sjalv=[false,false,false,false];
+        function sparaState(){ widget.dataset.lasf = JSON.stringify(st); if(typeof saveBoardState==='function') saveBoardState(); }
+        widget.dataset.lasf = JSON.stringify(st);
+
+        let markMode = false, talBtnRef = null, timerInt = null, timerSlut = 0, timerVisning = null;
+
+        const root = document.createElement('div'); root.className='lasf-root'; body.appendChild(root);
+
+        function egenNorm(){
+            if(!st.egen || typeof st.egen !== 'object') st.egen = {};
+            const e = st.egen;
+            if(e.titel===undefined) e.titel='';
+            if(!e.typ) e.typ='berattande';
+            if(e.text===undefined) e.text='';
+            ['begrepp','fragorPa','fragorMellan','fragorBortom','hitta','ordning','samtal','quiz'].forEach(k=>{ if(!Array.isArray(e[k])) e[k]=[]; });
+            return e;
+        }
+        function egenSomText(){
+            const e = egenNorm();
+            const typObj = TYPER.find(t=>t.id===e.typ) || TYPER[0];
+            const txt = e.text || '';
+            const blanda = arr => { const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t2=a[i]; a[i]=a[j]; a[j]=t2; } return a; };
+            // Lärarens egna quizfrågor: rätt svar skrivs alltid först i byggaren och blandas här
+            const quiz = [];
+            (e.quiz||[]).forEach(f=>{
+                if(!f) return;
+                if(f.typ==='sant' && String(f.q||'').trim()){ quiz.push({typ:'sant', q:f.q, ratt:!!f.ratt}); return; }
+                if(f.typ==='para'){ const par=(f.par||[]).filter(p=>p && String(p[0]||'').trim() && String(p[1]||'').trim()).map(p=>[String(p[0]).trim(), String(p[1]).trim()]); if(par.length>=2) quiz.push({typ:'para', par:par}); return; }
+                if(f.typ==='flerval' || f.typ==='fyll'){
+                    const alts=(f.alt||[]).map(a=>String(a||'').trim()).filter(Boolean);
+                    if(alts.length<2) return;
+                    if(f.typ==='flerval' && !String(f.q||'').trim()) return;
+                    if(f.typ==='fyll' && !String(f.fore||'').trim()) return;
+                    const alt = blanda(alts);
+                    const o = {typ:f.typ, alt:alt, ratt: alt.indexOf(alts[0])};
+                    if(f.typ==='flerval'){ o.q=f.q; } else { o.fore=f.fore; o.efter=f.efter||''; }
+                    quiz.push(o);
+                }
+            });
+            const begrepp = (e.begrepp||[]).filter(b=> b && String(b.ord||'').trim() && String(b.forklaring||'').trim()).map(b=>({
+                ord:String(b.ord).trim(), bild:String(b.bild||'').trim()||'📖', forklaring:String(b.forklaring).trim(), exempel:String(b.exempel||'').trim(),
+                former:String(b.former||'').split(',').map(s=>s.trim()).filter(Boolean)
+            }));
+            const fpa = (e.fragorPa||[]).filter(f=>f && String(f.q||'').trim()).map(f=>({q:f.q, a:String(f.a||'').trim()}));
+            const fme = (e.fragorMellan||[]).filter(f=>f && String(f.q||'').trim()).map(f=>({q:f.q, tips:String(f.tips||'').trim()}));
+            const fbo = (e.fragorBortom||[]).filter(f=>f && String(f.q||'').trim()).map(f=>({q:f.q}));
+            const hitta = (e.hitta||[]).filter(h=>h && String(h.label||'').trim()).map(h=>({label:h.label, svar:String(h.svar||'').trim()}));
+            const ordning = (e.ordning||[]).map(o=>String(o||'').trim()).filter(Boolean);
+            const samtal = (e.samtal||[]).map(o=>String(o||'').trim()).filter(Boolean);
+            return {
+                id:'egen', typ:typObj.id, tema:'Egen text', titel:e.titel || 'Min text', bild:'✏️', egen:true,
+                niv:{ latt:txt, mellan:txt, utmaning:txt },
+                begrepp: begrepp,
+                fragor:{
+                    pa: fpa.length ? fpa : [ {q:'Vilka personer, djur eller saker nämns i texten?', a:''}, {q:'Var utspelar sig texten?', a:''}, {q:'Plocka ut tre fakta eller händelser ur texten.', a:''} ],
+                    mellan: fme.length ? fme : [ {q:'Varför händer det som händer i texten?', tips:'Leta efter orsaker – ord som ”därför”, ”eftersom” eller händelser som hänger ihop.'}, {q:'Vad menar författaren med rubriken?', tips:'Läs rubriken igen efter att du läst hela texten.'}, {q:'Vad tror du händer sedan, efter textens slut?', tips:'Använd ledtrådar från texten.'} ],
+                    bortom: fbo.length ? fbo : [ {q:'Vad påminner texten dig om? Har du varit med om något liknande?'}, {q:'Vad tycker du om texten? Motivera!'}, {q:'Vem mer borde läsa den här texten? Varför?'} ]
+                },
+                hitta: hitta.length ? hitta : [ {label:'👤 Hitta huvudpersonen eller ämnet', svar:''}, {label:'📍 Hitta platsen', svar:''}, {label:'⚡ Hitta problemet eller det viktigaste', svar:''}, {label:'✅ Hitta lösningen eller slutsatsen', svar:''} ],
+                ordning: ordning.length>=2 ? ordning : null,
+                ordningRubrik:'Sortera i rätt ordning',
+                samtal: samtal.length ? samtal : [ 'Vad var viktigast i texten?', 'Vad hade du gjort i samma situation?', 'Vad i texten skulle du vilja fråga författaren om?' ],
+                quiz: quiz.length ? quiz : null
+            };
+        }
+        function aktuellText(){ if(st.textId==='egen') return egenSomText(); return bank.find(t=>t.id===st.textId) || null; }
+        function typNamn(id){ const t=TYPER.find(x=>x.id===id); return t ? t.namn : id; }
+        function typEmoji(id){ const t=TYPER.find(x=>x.id===id); return t ? t.emoji : '📄'; }
+
+        function lasfTala(txt, btn){
+            if(!('speechSynthesis' in window)){ customAlert('Uppläsning stöds inte i den här webbläsaren.', 'ℹ️'); return; }
+            const varSamma = (talBtnRef === btn) && window.speechSynthesis.speaking;
+            window.speechSynthesis.cancel();
+            if(talBtnRef) talBtnRef.classList.remove('active');
+            if(varSamma){ talBtnRef=null; return; }
+            const u = new SpeechSynthesisUtterance(txt); u.lang='sv-SE'; u.rate=0.95;
+            try{ const sv = window.speechSynthesis.getVoices().find(v=>/sv|swed/i.test(v.lang+' '+v.name)); if(sv) u.voice=sv; }catch(e){}
+            u.onend = ()=>{ if(btn) btn.classList.remove('active'); if(talBtnRef===btn) talBtnRef=null; };
+            if(btn){ btn.classList.add('active'); talBtnRef=btn; }
+            window.speechSynthesis.speak(u);
+        }
+        function tystna(){ try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){} if(talBtnRef){ talBtnRef.classList.remove('active'); talBtnRef=null; } }
+
+        // ---- TIMER ----
+        function startaTimer(min){
+            stoppaTimer();
+            timerSlut = Date.now() + min*60000;
+            timerInt = setInterval(()=>{
+                if(!widget.isConnected){ stoppaTimer(); return; }
+                uppdateraTimerChip();
+            }, 500);
+            uppdateraTimerChip();
+        }
+        function stoppaTimer(){ if(timerInt){ clearInterval(timerInt); timerInt=null; } timerSlut=0; if(timerVisning){ timerVisning.textContent='⏱️'; timerVisning.classList.remove('lasf-tid-ute','lasf-timerchip'); timerVisning.classList.add('lasf-ikonknapp'); } }
+        function uppdateraTimerChip(){
+            if(!timerVisning) return;
+            const kvar = timerSlut - Date.now();
+            timerVisning.classList.remove('lasf-ikonknapp'); timerVisning.classList.add('lasf-timerchip');
+            if(kvar <= 0){
+                timerVisning.textContent = '⏰ Tiden är ute!';
+                if(!timerVisning.classList.contains('lasf-tid-ute')){
+                    timerVisning.classList.add('lasf-tid-ute');
+                    try{ const AC = window.AudioContext || window.webkitAudioContext; const ctx = new AC(); [0,1,2].forEach(i=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=880; g.gain.setValueAtTime(0.18, ctx.currentTime+i*0.3); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+i*0.3+0.22); o.start(ctx.currentTime+i*0.3); o.stop(ctx.currentTime+i*0.3+0.25); }); }catch(e){}
+                    clearInterval(timerInt); timerInt=null;
+                }
+            } else {
+                const m = Math.floor(kvar/60000), s = Math.floor((kvar%60000)/1000);
+                timerVisning.textContent = '⏱️ ' + m + ':' + (s<10?'0':'') + s;
+            }
+        }
+
+        // ---- UTSKRIFT ----
+        function skrivUt(){
+            const t = aktuellText(); if(!t) return;
+            const raw = t.niv[st.niva] || t.niv.mellan || '';
+            const stycken = raw.split(/\n\n+/).map(p=>'<p>'+esc(p).replace(/\n/g,'<br>')+'</p>').join('');
+            let html = '<!DOCTYPE html><html lang="sv"><head><meta charset="utf-8"><title>Arbetsblad – '+esc(t.titel)+'</title>';
+            html += '<style>body{font-family:Georgia,serif;max-width:720px;margin:24px auto;padding:0 18px;color:#222;line-height:1.6;}h1{font-size:22px;border-bottom:3px solid #5856d6;padding-bottom:6px;}h2{font-size:15px;margin:22px 0 8px;color:#4644b8;}.meta{color:#666;font-size:12px;margin-bottom:14px;}.text{border:1px solid #ccc;border-radius:8px;padding:14px 16px;font-size:14px;}.linje{border-bottom:1px solid #999;height:26px;}.fr{margin:8px 0 2px;font-size:13.5px;font-weight:bold;}ul{font-size:13px;}.ruta{display:inline-block;width:13px;height:13px;border:1.5px solid #444;margin-right:8px;vertical-align:-2px;}@media print{.noprint{display:none;}}</style></head><body>';
+            html += '<h1>📚 Läsförståelse: '+esc(t.titel)+'</h1>';
+            html += '<div class="meta">'+esc(typNamn(t.typ))+' · Nivå: '+esc(st.niva==='latt'?'Lätt':(st.niva==='utmaning'?'Utmaning':'Mellan'))+' · Namn: ________________________</div>';
+            html += '<h2>📖 Läs texten</h2><div class="text">'+stycken+'</div>';
+            if(t.begrepp && t.begrepp.length){ html += '<h2>🔤 Ordbank</h2><ul>'+t.begrepp.map(b=>'<li><b>'+esc(b.ord)+'</b> – '+esc(b.forklaring)+'</li>').join('')+'</ul>'; }
+            const skrivFragor = (rubrik, arr)=>{ if(!arr||!arr.length) return ''; let s='<h2>'+rubrik+'</h2>'; arr.forEach((f,i)=>{ s+='<div class="fr">'+(i+1)+'. '+esc(f.q)+'</div><div class="linje"></div><div class="linje"></div>'; }); return s; };
+            html += skrivFragor('🟢 På raden – svaret står i texten', t.fragor.pa);
+            html += skrivFragor('🟡 Mellan raderna – tänk efter', t.fragor.mellan);
+            html += skrivFragor('🔴 Bortom raderna – koppla till dig själv', t.fragor.bortom);
+            html += '<h2>📝 Sammanfatta texten med egna ord</h2><div class="linje"></div><div class="linje"></div><div class="linje"></div><div class="linje"></div>';
+            html += '<h2>⭐ Självskattning</h2><div class="fr"><span class="ruta"></span>Jag förstod texten.</div><div class="fr"><span class="ruta"></span>Jag lärde mig nya ord.</div><div class="fr"><span class="ruta"></span>Jag kunde svara på frågorna.</div><div class="fr"><span class="ruta"></span>Jag behöver läsa en gång till.</div>';
+            html += '<div class="noprint" style="margin-top:20px;"><button onclick="window.print()" style="padding:10px 18px;font-size:14px;cursor:pointer;">🖨️ Skriv ut</button></div>';
+            html += '</body></html>';
+            const w = window.open('', 'lasfUtskrift', 'width=840,height=920,scrollbars=yes,resizable=yes');
+            if(!w){ customAlert('Webbläsaren blockerade utskriftsfönstret. Tillåt popup-fönster och försök igen.', 'ℹ️'); return; }
+            w.document.write(html); w.document.close(); try{ w.focus(); }catch(e){}
+        }
+
+        // ---- HUVUDRENDER ----
+        function render(){
+            tystna();
+            root.innerHTML='';
+            if(st.view==='text' && aktuellText()) renderTextVy();
+            else if(st.view==='lista') renderLista();
+            else if(st.view==='egen') renderEgenVy();
+            else if(st.view==='slumpa') renderSlumpaVy();
+            else { st.view='home'; renderHem(); }
+        }
+
+        function renderHem(){
+            const rub = document.createElement('div'); rub.className='lasf-hem-rubrik'; rub.textContent='Vad ska vi läsa i dag? Välj texttyp!';
+            const grid = document.createElement('div'); grid.className='lasf-grid';
+            TYPER.forEach(typ=>{
+                const tile = document.createElement('div'); tile.className='lasf-tile';
+                tile.innerHTML = '<span class="lasf-emoji">'+typ.emoji+'</span><span class="lasf-lbl">'+esc(typ.namn)+'</span>';
+                tile.onclick = ()=>{
+                    const texter = bank.filter(t=>t.typ===typ.id);
+                    if(texter.length===1){ oppnaText(texter[0].id); }
+                    else { st.view='lista'; st.listaTyp=typ.id; sparaState(); render(); }
+                };
+                grid.appendChild(tile);
+            });
+            const slump = document.createElement('div'); slump.className='lasf-tile lasf-tile-extra';
+            slump.innerHTML = '<span class="lasf-emoji">🎲</span><span class="lasf-lbl">Slumpa text</span>';
+            slump.onclick = ()=>{ st.view='slumpa'; sparaState(); render(); };
+            grid.appendChild(slump);
+            const egen = document.createElement('div'); egen.className='lasf-tile lasf-tile-extra';
+            egen.innerHTML = '<span class="lasf-emoji">✏️</span><span class="lasf-lbl">Egen text</span>';
+            egen.onclick = ()=>{ st.view='egen'; sparaState(); render(); };
+            grid.appendChild(egen);
+            const fot = document.createElement('div'); fot.className='lasf-footnote'; fot.textContent='Samma verktyg till varje text: lässtrategier, begrepp, frågor på tre nivåer, quiz och mycket mer.';
+            root.appendChild(rub); root.appendChild(grid); root.appendChild(fot);
+        }
+
+        function renderLista(){
+            const typ = st.listaTyp;
+            const top = document.createElement('div'); top.className='lasf-topbar';
+            const back = document.createElement('button'); back.className='lasf-back'; back.textContent='← Tillbaka';
+            back.onclick = ()=>{ st.view='home'; sparaState(); render(); };
+            const titel = document.createElement('div'); titel.className='lasf-titel'; titel.textContent = typEmoji(typ)+' '+typNamn(typ)+' – välj text';
+            top.appendChild(back); top.appendChild(titel);
+            root.appendChild(top);
+            bank.filter(t=>t.typ===typ).forEach(t=>{
+                const rad = document.createElement('div'); rad.className='lasf-listrad';
+                rad.innerHTML = '<span class="lasf-list-emoji">'+t.bild+'</span><span class="lasf-list-titel">'+esc(t.titel)+'</span><span class="lasf-tembadge">'+esc(t.tema)+'</span>';
+                rad.onclick = ()=> oppnaText(t.id);
+                root.appendChild(rad);
+            });
+        }
+
+        function renderSlumpaVy(){
+            const top = document.createElement('div'); top.className='lasf-topbar';
+            const back = document.createElement('button'); back.className='lasf-back'; back.textContent='← Tillbaka';
+            back.onclick = ()=>{ st.view='home'; sparaState(); render(); };
+            const titel = document.createElement('div'); titel.className='lasf-titel'; titel.textContent='🎲 Slumpa text – välj tema';
+            top.appendChild(back); top.appendChild(titel);
+            root.appendChild(top);
+            const rad = document.createElement('div'); rad.className='lasf-temarad';
+            const val = TEMAN.concat([{id:'Alla', emoji:'🎲'}]);
+            val.forEach(tm=>{
+                const b = document.createElement('button'); b.className='lasf-temaknapp';
+                b.innerHTML = '<span class="lasf-tema-emoji">'+tm.emoji+'</span>'+esc(tm.id);
+                b.onclick = ()=>{
+                    let kandidater = (tm.id==='Alla') ? bank.slice() : bank.filter(t=>t.tema===tm.id);
+                    if(kandidater.length>1 && st.textId) kandidater = kandidater.filter(t=>t.id!==st.textId).length ? kandidater.filter(t=>t.id!==st.textId) : kandidater;
+                    if(!kandidater.length){ customAlert('Det finns ingen text med det temat ännu.', 'ℹ️'); return; }
+                    const t = kandidater[Math.floor(Math.random()*kandidater.length)];
+                    oppnaText(t.id);
+                };
+                rad.appendChild(b);
+            });
+            root.appendChild(rad);
+            const fot = document.createElement('div'); fot.className='lasf-footnote'; fot.textContent='Widgeten väljer en text åt dig inom temat.';
+            root.appendChild(fot);
+        }
+
+        function renderEgenVy(){
+            const arb = JSON.parse(JSON.stringify(egenNorm()));
+            const top = document.createElement('div'); top.className='lasf-topbar';
+            const back = document.createElement('button'); back.className='lasf-back'; back.textContent='← Tillbaka';
+            back.onclick = ()=>{ st.view='home'; sparaState(); render(); };
+            const titel = document.createElement('div'); titel.className='lasf-titel'; titel.textContent='✏️ Egen text';
+            top.appendChild(back); top.appendChild(titel);
+            root.appendChild(top);
+
+            const kort = document.createElement('div'); kort.className='lasf-kort lasf-egen';
+            kort.innerHTML = '<span class="lasf-falt-lbl">RUBRIK</span><input type="text" class="lasf-egen-titel" placeholder="Textens rubrik...">'
+                + '<span class="lasf-falt-lbl">TEXTTYP</span><select class="lasf-egen-typ">'+TYPER.map(t=>'<option value="'+t.id+'">'+t.emoji+' '+esc(t.namn)+'</option>').join('')+'</select>'
+                + '<span class="lasf-falt-lbl">TEXT</span><textarea class="lasf-egen-text" placeholder="Klistra in eller skriv texten här. Gör nytt stycke med en tom rad."></textarea>';
+            kort.querySelector('.lasf-egen-titel').value = arb.titel || '';
+            kort.querySelector('.lasf-egen-typ').value = arb.typ || 'berattande';
+            kort.querySelector('.lasf-egen-text').value = arb.text || '';
+            root.appendChild(kort);
+
+            // ---- Uppgiftsbyggaren: skapa egna uppgifter till texten ----
+            const byggInfo = document.createElement('div'); byggInfo.className='lasf-infobox';
+            byggInfo.innerHTML = '🧩 <b>Skapa egna uppgifter (valfritt):</b> öppna delarna nedan och bygg begrepp, frågor, quiz m.m. till just din text. Delar som lämnas tomma får färdiga standarduppgifter.';
+            root.appendChild(byggInfo);
+
+            function inp(ph, val, cb, lbl){
+                const w = document.createElement('div');
+                if(lbl){ const l=document.createElement('span'); l.className='lasf-bygg-lbl'; l.textContent=lbl; w.appendChild(l); }
+                const i = document.createElement('input'); i.type='text'; i.placeholder=ph; i.value=val||'';
+                i.addEventListener('input', ()=>cb(i.value));
+                w.appendChild(i); return w;
+            }
+            function radVerktyg(lista, idx, rerita, medPilar){
+                const v = document.createElement('div'); v.className='lasf-bygg-verk';
+                if(medPilar){
+                    const upp=document.createElement('button'); upp.type='button'; upp.textContent='▲'; upp.title='Flytta upp';
+                    upp.onclick=()=>{ if(idx>0){ const t2=lista[idx-1]; lista[idx-1]=lista[idx]; lista[idx]=t2; rerita(); } };
+                    const ner=document.createElement('button'); ner.type='button'; ner.textContent='▼'; ner.title='Flytta ner';
+                    ner.onclick=()=>{ if(idx<lista.length-1){ const t2=lista[idx+1]; lista[idx+1]=lista[idx]; lista[idx]=t2; rerita(); } };
+                    v.appendChild(upp); v.appendChild(ner);
+                }
+                const bort=document.createElement('button'); bort.type='button'; bort.className='lasf-bygg-bort'; bort.textContent='✖'; bort.title='Ta bort';
+                bort.onclick=()=>{ lista.splice(idx,1); rerita(); };
+                v.appendChild(bort);
+                return v;
+            }
+            function gorSektion(emoji, namn, antalFn, ritaInne){
+                const sek = document.createElement('div'); sek.className='lasf-bygg-sek';
+                const huvud = document.createElement('div'); huvud.className='lasf-bygg-huvud';
+                const antal = document.createElement('span'); antal.className='lasf-bygg-antal';
+                const pil = document.createElement('span'); pil.className='lasf-bygg-pil'; pil.textContent='▸';
+                huvud.appendChild(document.createTextNode(emoji+' '+namn+' ')); huvud.appendChild(antal); huvud.appendChild(pil);
+                const inne = document.createElement('div'); inne.className='lasf-bygg-inne'; inne.style.display='none';
+                function uppdAntal(){ const n=antalFn(); antal.textContent = n+' st'; antal.classList.toggle('tom', n===0); }
+                function rerita(){ inne.innerHTML=''; ritaInne(inne, rerita); uppdAntal(); }
+                huvud.onclick = ()=>{ const oppen = inne.style.display!=='none'; inne.style.display = oppen?'none':'flex'; pil.textContent = oppen?'▸':'▾'; if(!oppen) rerita(); };
+                inne.addEventListener('input', uppdAntal); // antal-märket följer med medan man skriver
+                uppdAntal();
+                sek.appendChild(huvud); sek.appendChild(inne);
+                root.appendChild(sek);
+            }
+
+            // 🔤 Begrepp
+            gorSektion('🔤','Begrepp (ordförklaringar)', ()=>arb.begrepp.length, (inne, rerita)=>{
+                const tips=document.createElement('div'); tips.className='lasf-bygg-tips'; tips.textContent='Orden blir klickbara direkt i texten och visas i fliken Begrepp.'; inne.appendChild(tips);
+                arb.begrepp.forEach((b,i)=>{
+                    const rad=document.createElement('div'); rad.className='lasf-bygg-rad';
+                    const tva=document.createElement('div'); tva.className='lasf-bygg-2col';
+                    tva.appendChild(inp('T.ex. vulkan', b.ord, v=>b.ord=v, 'ORD'));
+                    tva.appendChild(inp('T.ex. 🌋', b.bild, v=>b.bild=v, 'BILD (EMOJI)'));
+                    rad.appendChild(tva);
+                    rad.appendChild(inp('Vad betyder ordet?', b.forklaring, v=>b.forklaring=v, 'FÖRKLARING'));
+                    rad.appendChild(inp('En mening med ordet (valfritt)', b.exempel, v=>b.exempel=v, 'EXEMPEL (VALFRITT)'));
+                    rad.appendChild(inp('T.ex. vulkanen, vulkaner (valfritt)', b.former, v=>b.former=v, 'BÖJNINGAR, KOMMASEPARERADE (VALFRITT)'));
+                    rad.appendChild(radVerktyg(arb.begrepp, i, rerita, false));
+                    inne.appendChild(rad);
+                });
+                const add=document.createElement('button'); add.type='button'; add.className='lasf-bygg-add'; add.textContent='+ Lägg till begrepp';
+                add.onclick=()=>{ arb.begrepp.push({ord:'',bild:'',forklaring:'',exempel:'',former:''}); rerita(); };
+                inne.appendChild(add);
+            });
+
+            // ❓ Frågor på tre nivåer
+            gorSektion('❓','Frågor på tre nivåer', ()=>arb.fragorPa.length+arb.fragorMellan.length+arb.fragorBortom.length, (inne, rerita)=>{
+                function grupp(rubrik, lista, falt){
+                    const r=document.createElement('div'); r.className='lasf-bygg-lbl'; r.style.fontSize='11.5px'; r.textContent=rubrik; inne.appendChild(r);
+                    lista.forEach((f,i)=>{
+                        const rad=document.createElement('div'); rad.className='lasf-bygg-rad';
+                        falt.forEach(fd=> rad.appendChild(inp(fd.ph, f[fd.key], v=>{ f[fd.key]=v; }, fd.lbl)) );
+                        rad.appendChild(radVerktyg(lista, i, rerita, false));
+                        inne.appendChild(rad);
+                    });
+                    const add=document.createElement('button'); add.type='button'; add.className='lasf-bygg-add'; add.textContent='+ Lägg till fråga';
+                    add.onclick=()=>{ const o={}; falt.forEach(fd=>{ o[fd.key]=''; }); lista.push(o); rerita(); };
+                    inne.appendChild(add);
+                }
+                grupp('🟢 PÅ RADEN – svaret står i texten', arb.fragorPa, [{key:'q',lbl:'FRÅGA',ph:'T.ex. Vad heter huvudpersonen?'},{key:'a',lbl:'SVAR – VISAS MED 💡-KNAPPEN (VALFRITT)',ph:'Svaret...'}]);
+                grupp('🟡 MELLAN RADERNA – eleven tänker själv', arb.fragorMellan, [{key:'q',lbl:'FRÅGA',ph:'T.ex. Varför tror du att hon blev ledsen?'},{key:'tips',lbl:'LEDTRÅD (VALFRITT)',ph:'En ledtråd som hjälper eleven...'}]);
+                grupp('🔴 BORTOM RADERNA – egna erfarenheter', arb.fragorBortom, [{key:'q',lbl:'FRÅGA',ph:'T.ex. Hur skulle du ha gjort?'}]);
+            });
+
+            // 🎯 Hitta i texten
+            gorSektion('🎯','Hitta i texten', ()=>arb.hitta.length, (inne, rerita)=>{
+                arb.hitta.forEach((h,i)=>{
+                    const rad=document.createElement('div'); rad.className='lasf-bygg-rad';
+                    rad.appendChild(inp('T.ex. Hitta huvudpersonen', h.label, v=>h.label=v, 'UPPGIFT'));
+                    rad.appendChild(inp('Visas med 💡-knappen (valfritt)', h.svar, v=>h.svar=v, 'FÖRSLAG PÅ SVAR (VALFRITT)'));
+                    rad.appendChild(radVerktyg(arb.hitta, i, rerita, false));
+                    inne.appendChild(rad);
+                });
+                const add=document.createElement('button'); add.type='button'; add.className='lasf-bygg-add'; add.textContent='+ Lägg till uppgift';
+                add.onclick=()=>{ arb.hitta.push({label:'', svar:''}); rerita(); };
+                inne.appendChild(add);
+            });
+
+            // 🔗 Sortera händelser
+            gorSektion('🔗','Sortera händelser', ()=>arb.ordning.filter(x=>String(x||'').trim()).length, (inne, rerita)=>{
+                const tips=document.createElement('div'); tips.className='lasf-bygg-tips'; tips.textContent='Skriv händelserna i RÄTT ordning (minst två) – eleverna får dem blandade och ska sortera.'; inne.appendChild(tips);
+                arb.ordning.forEach((o,i)=>{
+                    const rad=document.createElement('div'); rad.className='lasf-bygg-rad';
+                    rad.appendChild(inp('Vad händer?', o, v=>{ arb.ordning[i]=v; }, 'HÄNDELSE '+(i+1)));
+                    rad.appendChild(radVerktyg(arb.ordning, i, rerita, true));
+                    inne.appendChild(rad);
+                });
+                const add=document.createElement('button'); add.type='button'; add.className='lasf-bygg-add'; add.textContent='+ Lägg till händelse';
+                add.onclick=()=>{ arb.ordning.push(''); rerita(); };
+                inne.appendChild(add);
+            });
+
+            // 👥 Samtalsfrågor
+            gorSektion('👥','Samtalsfrågor', ()=>arb.samtal.filter(x=>String(x||'').trim()).length, (inne, rerita)=>{
+                arb.samtal.forEach((s,i)=>{
+                    const rad=document.createElement('div'); rad.className='lasf-bygg-rad';
+                    rad.appendChild(inp('T.ex. Vad hade du gjort?', s, v=>{ arb.samtal[i]=v; }, 'SAMTALSFRÅGA '+(i+1)));
+                    rad.appendChild(radVerktyg(arb.samtal, i, rerita, false));
+                    inne.appendChild(rad);
+                });
+                const add=document.createElement('button'); add.type='button'; add.className='lasf-bygg-add'; add.textContent='+ Lägg till samtalsfråga';
+                add.onclick=()=>{ arb.samtal.push(''); rerita(); };
+                inne.appendChild(add);
+            });
+
+            // 🎲 Quiz
+            gorSektion('🎲','Quiz', ()=>arb.quiz.length, (inne, rerita)=>{
+                const tips=document.createElement('div'); tips.className='lasf-bygg-tips'; tips.textContent='Skriv alltid det RÄTTA svaret överst – widgeten blandar ordningen för eleverna.'; inne.appendChild(tips);
+                arb.quiz.forEach((f,i)=>{
+                    const rad=document.createElement('div'); rad.className='lasf-bygg-rad';
+                    const typLbl={flerval:'FLERVAL', sant:'SANT / FALSKT', fyll:'FYLL I ORD', para:'PARA IHOP'}[f.typ] || f.typ;
+                    const l=document.createElement('span'); l.className='lasf-bygg-lbl'; l.textContent='FRÅGA '+(i+1)+' · '+typLbl; rad.appendChild(l);
+                    if(f.typ==='flerval'){
+                        if(!Array.isArray(f.alt)) f.alt=['','',''];
+                        rad.appendChild(inp('Frågan...', f.q, v=>f.q=v, 'FRÅGA'));
+                        rad.appendChild(inp('Rätt svar', f.alt[0], v=>{ f.alt[0]=v; }, '✅ RÄTT SVAR'));
+                        const tva=document.createElement('div'); tva.className='lasf-bygg-2col';
+                        tva.appendChild(inp('Fel svar', f.alt[1], v=>{ f.alt[1]=v; }, '❌ FEL SVAR'));
+                        tva.appendChild(inp('Fel svar (valfritt)', f.alt[2], v=>{ f.alt[2]=v; }, '❌ FEL SVAR (VALFRITT)'));
+                        rad.appendChild(tva);
+                    } else if(f.typ==='sant'){
+                        rad.appendChild(inp('Påståendet...', f.q, v=>f.q=v, 'PÅSTÅENDE'));
+                        const selW=document.createElement('div');
+                        const sl=document.createElement('span'); sl.className='lasf-bygg-lbl'; sl.textContent='RÄTT SVAR'; selW.appendChild(sl);
+                        const sel=document.createElement('select');
+                        sel.innerHTML='<option value="sant">✅ Sant</option><option value="falskt">❌ Falskt</option>';
+                        sel.value = f.ratt ? 'sant' : 'falskt';
+                        sel.onchange=()=>{ f.ratt = (sel.value==='sant'); };
+                        selW.appendChild(sel); rad.appendChild(selW);
+                    } else if(f.typ==='fyll'){
+                        if(!Array.isArray(f.alt)) f.alt=['','',''];
+                        rad.appendChild(inp('T.ex. Maja tappade bort sin', f.fore, v=>f.fore=v, 'MENINGEN FÖRE LUCKAN'));
+                        rad.appendChild(inp('T.ex. i skolan. (valfritt)', f.efter, v=>f.efter=v, 'EFTER LUCKAN (VALFRITT)'));
+                        rad.appendChild(inp('Ordet som ska in i luckan', f.alt[0], v=>{ f.alt[0]=v; }, '✅ RÄTT ORD'));
+                        const tva=document.createElement('div'); tva.className='lasf-bygg-2col';
+                        tva.appendChild(inp('Fel ord', f.alt[1], v=>{ f.alt[1]=v; }, '❌ FEL ORD'));
+                        tva.appendChild(inp('Fel ord (valfritt)', f.alt[2], v=>{ f.alt[2]=v; }, '❌ FEL ORD (VALFRITT)'));
+                        rad.appendChild(tva);
+                    } else if(f.typ==='para'){
+                        if(!Array.isArray(f.par)) f.par=[['',''],['',''],['',''],['','']];
+                        const tipsP=document.createElement('div'); tipsP.className='lasf-bygg-tips'; tipsP.textContent='Fyll i minst två par. Höger sida blandas för eleverna.'; rad.appendChild(tipsP);
+                        f.par.forEach((p,pi)=>{
+                            const tva=document.createElement('div'); tva.className='lasf-bygg-2col';
+                            tva.appendChild(inp('Ord '+(pi+1), p[0], v=>{ p[0]=v; }));
+                            tva.appendChild(inp('...hör ihop med', p[1], v=>{ p[1]=v; }));
+                            rad.appendChild(tva);
+                        });
+                    }
+                    rad.appendChild(radVerktyg(arb.quiz, i, rerita, false));
+                    inne.appendChild(rad);
+                });
+                const typRad=document.createElement('div'); typRad.className='lasf-bygg-typrad';
+                [['flerval','+ Flerval'],['sant','+ Sant/Falskt'],['fyll','+ Fyll i ord'],['para','+ Para ihop']].forEach(t2=>{
+                    const b=document.createElement('button'); b.type='button'; b.className='lasf-bygg-add'; b.textContent=t2[1];
+                    b.onclick=()=>{
+                        if(t2[0]==='flerval') arb.quiz.push({typ:'flerval', q:'', alt:['','','']});
+                        else if(t2[0]==='sant') arb.quiz.push({typ:'sant', q:'', ratt:true});
+                        else if(t2[0]==='fyll') arb.quiz.push({typ:'fyll', fore:'', efter:'', alt:['','','']});
+                        else arb.quiz.push({typ:'para', par:[['',''],['',''],['',''],['','']]});
+                        rerita();
+                    };
+                    typRad.appendChild(b);
+                });
+                inne.appendChild(typRad);
+            });
+
+            const knappar = document.createElement('div'); knappar.className='lasf-knapprad';
+            const spara = document.createElement('button'); spara.className='lasf-cta'; spara.textContent='📖 Spara och läs';
+            spara.onclick = ()=>{
+                const txt = kort.querySelector('.lasf-egen-text').value.trim();
+                if(!txt){ customAlert('Skriv eller klistra in en text först.', 'ℹ️'); return; }
+                arb.titel = kort.querySelector('.lasf-egen-titel').value.trim();
+                arb.typ = kort.querySelector('.lasf-egen-typ').value;
+                arb.text = txt;
+                arb.begrepp = arb.begrepp.filter(b=> String(b.ord||'').trim() && String(b.forklaring||'').trim());
+                arb.fragorPa = arb.fragorPa.filter(f=> String(f.q||'').trim());
+                arb.fragorMellan = arb.fragorMellan.filter(f=> String(f.q||'').trim());
+                arb.fragorBortom = arb.fragorBortom.filter(f=> String(f.q||'').trim());
+                arb.hitta = arb.hitta.filter(h=> String(h.label||'').trim());
+                arb.ordning = arb.ordning.map(o=>String(o||'').trim()).filter(Boolean);
+                arb.samtal = arb.samtal.map(o=>String(o||'').trim()).filter(Boolean);
+                arb.quiz = arb.quiz.filter(f=>{
+                    if(f.typ==='sant') return String(f.q||'').trim();
+                    if(f.typ==='para') return (f.par||[]).filter(p=>String(p[0]||'').trim() && String(p[1]||'').trim()).length>=2;
+                    const alts=(f.alt||[]).filter(a=>String(a||'').trim());
+                    if(f.typ==='flerval') return String(f.q||'').trim() && alts.length>=2;
+                    return String(f.fore||'').trim() && alts.length>=2;
+                });
+                if(arb.ordning.length===1){ customAlert('Sortera händelser behöver minst två händelser – lägg till fler eller ta bort raden.', 'ℹ️'); return; }
+                st.egen = arb;
+                oppnaText('egen');
+            };
+            knappar.appendChild(spara);
+            root.appendChild(knappar);
+            const fot = document.createElement('div'); fot.className='lasf-footnote'; fot.textContent='Text och egna uppgifter sparas med tavlan. Tomma delar använder färdiga standarduppgifter.';
+            root.appendChild(fot);
+        }
+        function oppnaText(id){
+            st.textId = id; st.view='text'; st.sektion='las'; st.samtalIdx=0;
+            sparaState(); render();
+        }
+
+        // ---- TEXTVY MED SEKTIONER ----
+        function renderTextVy(){
+            const t = aktuellText();
+            const top = document.createElement('div'); top.className='lasf-topbar';
+            const back = document.createElement('button'); back.className='lasf-back'; back.textContent='← Texter';
+            back.onclick = ()=>{ stoppaTimer(); st.view = (st.textId==='egen') ? 'egen' : 'home'; sparaState(); render(); };
+            const titel = document.createElement('div'); titel.className='lasf-titel'; titel.textContent = t.bild+' '+t.titel;
+            const badge = document.createElement('span'); badge.className='lasf-typbadge'; badge.textContent = typEmoji(t.typ)+' '+typNamn(t.typ);
+            top.appendChild(back); top.appendChild(titel); top.appendChild(badge);
+
+            // Timer-knapp/chip
+            const timerBtn = document.createElement('button');
+            timerBtn.className='lasf-ikonknapp'; timerBtn.textContent='⏱️'; timerBtn.title='Lästimer (5, 10 eller 15 minuter)';
+            timerVisning = timerBtn;
+            timerBtn.onclick = ()=>{
+                if(timerSlut){ stoppaTimer(); return; }
+                const fanns = top.querySelector('.lasf-timermeny');
+                if(fanns){ fanns.remove(); return; }
+                const meny = document.createElement('div'); meny.className='lasf-timermeny';
+                [5,10,15].forEach(m=>{ const b=document.createElement('button'); b.textContent=m+' min'; b.onclick=(e)=>{ e.stopPropagation(); meny.remove(); startaTimer(m); }; meny.appendChild(b); });
+                top.appendChild(meny);
+            };
+            if(timerInt || timerSlut) uppdateraTimerChip();
+            top.appendChild(timerBtn);
+
+            const printBtn = document.createElement('button'); printBtn.className='lasf-ikonknapp'; printBtn.textContent='🖨️'; printBtn.title='Skriv ut arbetsblad med text och frågor';
+            printBtn.onclick = skrivUt;
+            top.appendChild(printBtn);
+            root.appendChild(top);
+
+            // Sektionschips
+            const nav = document.createElement('div'); nav.className='lasf-nav';
+            SEKTIONER.forEach(sek=>{
+                const c = document.createElement('button'); c.className='lasf-navchip'+(st.sektion===sek.id?' active':''); c.textContent=sek.namn;
+                c.onclick = ()=>{ tystna(); st.sektion=sek.id; sparaState(); nav.querySelectorAll('.lasf-navchip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); ritaSektion(); };
+                nav.appendChild(c);
+            });
+            root.appendChild(nav);
+
+            const sekEl = document.createElement('div'); sekEl.className='lasf-root'; root.appendChild(sekEl);
+            function ritaSektion(){
+                sekEl.innerHTML='';
+                const fn = { las:sekLas, strategier:sekStrategier, begrepp:sekBegrepp, fragor:sekFragor, hitta:sekHitta, ordning:sekOrdning, samtal:sekSamtal, samman:sekSammanfatta, quiz:sekQuiz, sjalv:sekSjalv }[st.sektion] || sekLas;
+                fn(sekEl, t);
+            }
+            ritaSektion();
+        }
+
+        // ---- SEKTION: LÄS ----
+        function sekLas(el, t){
+            const verktyg = document.createElement('div'); verktyg.className='lasf-verktyg';
+            const talBtn = document.createElement('button'); talBtn.className='lasf-ikonknapp'; talBtn.textContent='🔊'; talBtn.title='Läs upp texten';
+            const zoomUt = document.createElement('button'); zoomUt.className='lasf-ikonknapp'; zoomUt.textContent='A−'; zoomUt.title='Mindre text';
+            const zoomIn = document.createElement('button'); zoomIn.className='lasf-ikonknapp'; zoomIn.textContent='A+'; zoomIn.title='Större text';
+            const darkBtn = document.createElement('button'); darkBtn.className='lasf-ikonknapp'+(st.dark?' active':''); darkBtn.textContent='🌙'; darkBtn.title='Mörkt läge';
+            const markBtn = document.createElement('button'); markBtn.className='lasf-ikonknapp'+(markMode?' active':''); markBtn.textContent='🖍️'; markBtn.title='Markera ord: klicka på ord i texten för att färga dem';
+            verktyg.appendChild(talBtn); verktyg.appendChild(zoomUt); verktyg.appendChild(zoomIn); verktyg.appendChild(darkBtn); verktyg.appendChild(markBtn);
+            if(!t.egen){
+                const sep = document.createElement('span'); sep.className='lasf-sep'; verktyg.appendChild(sep);
+                NIVAER.forEach(n=>{
+                    const b = document.createElement('button'); b.className='lasf-nivchip niv-'+n.id+(st.niva===n.id?' active':''); b.textContent=n.namn; b.title='Visa texten på nivån '+n.namn;
+                    b.onclick = ()=>{ st.niva=n.id; sparaState(); sekLas(elWrap(), t); };
+                    verktyg.appendChild(b);
+                });
+            }
+            function elWrap(){ el.innerHTML=''; return el; }
+            el.appendChild(verktyg);
+
+            const ordkortPlats = document.createElement('div'); el.appendChild(ordkortPlats);
+
+            const reader = document.createElement('div'); reader.className='lasf-reader'+(st.dark?' lasf-dark':'');
+            reader.style.fontSize = (st.zoom||16)+'px';
+            const raw = t.niv[st.niva] || t.niv.mellan || '';
+            const map = {};
+            (t.begrepp||[]).forEach(b=>{ map[b.ord.toLowerCase()]=b; (b.former||[]).forEach(f=>{ map[String(f).toLowerCase()]=b; }); });
+            const rubrikEl = document.createElement('div'); rubrikEl.className='lasf-lastitel'; rubrikEl.textContent = t.bild+' '+t.titel; reader.appendChild(rubrikEl);
+            raw.split(/\n\n+/).forEach(stycke=>{
+                const p = document.createElement('p'); p.className='lasf-p';
+                stycke.split(/\n/).forEach((rad, ri)=>{
+                    if(ri>0) p.appendChild(document.createElement('br'));
+                    rad.split(/(\s+)/).forEach(tok=>{
+                        if(tok==='') return;
+                        if(/^\s+$/.test(tok)){ p.appendChild(document.createTextNode(tok)); return; }
+                        const ren = tok.replace(/^[^0-9A-Za-zÅÄÖåäöÉé]+|[^0-9A-Za-zÅÄÖåäöÉé]+$/g,'').toLowerCase();
+                        const sp = document.createElement('span'); sp.className='lasf-w'; sp.textContent=tok;
+                        const b = map[ren];
+                        if(b){ sp.classList.add('lasf-concept'); sp.title='Klicka för ordförklaring'; }
+                        sp.onclick = (e)=>{
+                            e.stopPropagation();
+                            if(markMode){ sp.classList.toggle('lasf-marked'); return; }
+                            if(b) visaOrdkort(b);
+                        };
+                        p.appendChild(sp);
+                    });
+                });
+                reader.appendChild(p);
+            });
+            el.appendChild(reader);
+            const hint = document.createElement('div'); hint.className='lasf-lashint';
+            hint.textContent = (t.begrepp && t.begrepp.length) ? 'Prickade ord har ordförklaring – klicka på dem! Med 🖍️ på markerar du ord i stället.' : 'Slå på 🖍️ och klicka på ord i texten för att markera dem.';
+            el.appendChild(hint);
+
+            talBtn.onclick = ()=> lasfTala(t.titel+'. '+raw.replace(/\n+/g,' '), talBtn);
+            zoomIn.onclick = ()=>{ st.zoom = Math.min(28, (st.zoom||16)+2); reader.style.fontSize=st.zoom+'px'; sparaState(); };
+            zoomUt.onclick = ()=>{ st.zoom = Math.max(12, (st.zoom||16)-2); reader.style.fontSize=st.zoom+'px'; sparaState(); };
+            darkBtn.onclick = ()=>{ st.dark=!st.dark; darkBtn.classList.toggle('active', st.dark); reader.classList.toggle('lasf-dark', st.dark); sparaState(); };
+            markBtn.onclick = ()=>{ markMode=!markMode; markBtn.classList.toggle('active', markMode); };
+
+            function visaOrdkort(b){
+                ordkortPlats.innerHTML='';
+                const kort = document.createElement('div'); kort.className='lasf-ordkort';
+                kort.innerHTML = '<button class="lasf-ok-stang" title="Stäng">✖</button>'
+                    + '<div class="lasf-ok-ord"><span class="lasf-ok-bild">'+ (b.bild||'📖') +'</span>'+esc(b.ord)+' <button class="lasf-ikonknapp lasf-ok-tal" title="Lyssna på ordet">🔊</button></div>'
+                    + '<div class="lasf-ok-def">'+esc(b.forklaring)+'</div>'
+                    + (b.exempel ? '<div class="lasf-ok-ex">Exempel: '+esc(b.exempel)+'</div>' : '');
+                kort.querySelector('.lasf-ok-stang').onclick = ()=> ordkortPlats.innerHTML='';
+                kort.querySelector('.lasf-ok-tal').onclick = (e)=> lasfTala(b.ord+'. '+b.forklaring, e.currentTarget);
+                ordkortPlats.appendChild(kort);
+            }
+        }
+
+        // ---- SEKTION: LÄSSTRATEGIER ----
+        function sekStrategier(el){
+            const data = [
+                {kl:'strat-fore', rub:'🔮 Före läsningen', rader:['Titta på rubriken och bilden. Vad tror du att texten handlar om?','Vad kan du redan om ämnet?','Varför ska du läsa texten – vad vill du ta reda på?']},
+                {kl:'strat-under', rub:'👀 Under läsningen', rader:['Markera ord du inte förstår (använd 🖍️ i läsvyn).','Stanna upp ibland: Vad har hänt hittills? Stämde det du trodde?','Skapa inre bilder – se ”filmen” i huvudet.','Läs om meningar som känns krångliga.']},
+                {kl:'strat-efter', rub:'🎯 Efter läsningen', rader:['Sammanfatta texten med egna ord (fliken 📝).','Vad var viktigast i texten?','Vad var nytt för dig? Vad vill du veta mer om?']}
+            ];
+            data.forEach(d=>{
+                const kort = document.createElement('div'); kort.className='lasf-kort lasf-strat '+d.kl;
+                kort.innerHTML = '<h4>'+d.rub+'</h4>';
+                d.rader.forEach(r=>{
+                    const rad = document.createElement('label'); rad.className='lasf-stratrad';
+                    const cb = document.createElement('input'); cb.type='checkbox';
+                    const txt = document.createElement('span'); txt.textContent=r;
+                    rad.appendChild(cb); rad.appendChild(txt); kort.appendChild(rad);
+                });
+                el.appendChild(kort);
+            });
+            const fot = document.createElement('div'); fot.className='lasf-footnote'; fot.textContent='Bocka av strategierna medan ni arbetar med texten.';
+            el.appendChild(fot);
+        }
+
+        // ---- SEKTION: BEGREPP ----
+        function sekBegrepp(el, t){
+            if(!t.begrepp || !t.begrepp.length){
+                const info = document.createElement('div'); info.className='lasf-infobox';
+                info.textContent = 'Inga begrepp ännu för den här texten. Gå tillbaka via ← Texter och lägg till egna begrepp under 🔤 Begrepp i uppgiftsbyggaren – eller låt eleverna markera svåra ord med 🖍️ i läsvyn.';
+                el.appendChild(info); return;
+            }
+            t.begrepp.forEach(b=>{
+                const kort = document.createElement('div'); kort.className='lasf-ordkort';
+                kort.innerHTML = '<div class="lasf-ok-ord"><span class="lasf-ok-bild">'+(b.bild||'📖')+'</span>'+esc(b.ord)+' <button class="lasf-ikonknapp lasf-ok-tal" title="Lyssna">🔊</button></div>'
+                    + '<div class="lasf-ok-def">'+esc(b.forklaring)+'</div>'
+                    + (b.exempel ? '<div class="lasf-ok-ex">Exempel: '+esc(b.exempel)+'</div>' : '');
+                kort.querySelector('.lasf-ok-tal').onclick = (e)=> lasfTala(b.ord+'. '+b.forklaring+(b.exempel?(' Exempel: '+b.exempel):''), e.currentTarget);
+                el.appendChild(kort);
+            });
+            const fot = document.createElement('div'); fot.className='lasf-footnote'; fot.textContent='Orden är också klickbara direkt i texten.';
+            el.appendChild(fot);
+        }
+
+        // ---- SEKTION: FRÅGOR PÅ TRE NIVÅER ----
+        function sekFragor(el, t){
+            const tabsDef = [
+                {id:'pa', kl:'ft-pa', namn:'🟢 På raden', desc:'Svaret står direkt i texten.'},
+                {id:'mellan', kl:'ft-mellan', namn:'🟡 Mellan raderna', desc:'Du måste tänka efter och dra egna slutsatser.'},
+                {id:'bortom', kl:'ft-bortom', namn:'🔴 Bortom raderna', desc:'Koppla till dina egna erfarenheter – här finns inga fel svar.'}
+            ];
+            let akt = 'pa';
+            const tabs = document.createElement('div'); tabs.className='lasf-fragtabs';
+            const desc = document.createElement('div'); desc.className='lasf-fragdesc';
+            const lista = document.createElement('div'); lista.className='lasf-root';
+            tabsDef.forEach(td=>{
+                const b = document.createElement('button'); b.className='lasf-fragtab '+td.kl+(akt===td.id?' active':''); b.textContent=td.namn;
+                b.onclick = ()=>{ akt=td.id; tabs.querySelectorAll('.lasf-fragtab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); rita(); };
+                tabs.appendChild(b);
+            });
+            function rita(){
+                const td = tabsDef.find(x=>x.id===akt);
+                desc.textContent = td.desc;
+                lista.innerHTML='';
+                (t.fragor[akt]||[]).forEach((f,i)=>{
+                    const kort = document.createElement('div'); kort.className='lasf-fraga';
+                    kort.innerHTML = '<div class="lasf-f-q">'+(i+1)+'. '+esc(f.q)+'</div>';
+                    if(akt==='pa' && f.a){
+                        const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='💡 Visa svar';
+                        btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=f.a; kort.appendChild(s); btn.remove(); };
+                        kort.appendChild(btn);
+                    } else if(akt==='mellan' && f.tips){
+                        const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='🔎 Ledtråd';
+                        btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent='Ledtråd: '+f.tips; kort.appendChild(s); btn.remove(); };
+                        kort.appendChild(btn);
+                    }
+                    lista.appendChild(kort);
+                });
+            }
+            rita();
+            el.appendChild(tabs); el.appendChild(desc); el.appendChild(lista);
+        }
+
+        // ---- SEKTION: HITTA I TEXTEN ----
+        function sekHitta(el, t){
+            (t.hitta||[]).forEach(h=>{
+                const kort = document.createElement('div'); kort.className='lasf-fraga';
+                kort.innerHTML = '<div class="lasf-f-q">'+esc(h.label)+'</div>';
+                if(h.svar){
+                    const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='💡 Visa förslag';
+                    btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=h.svar; kort.appendChild(s); btn.remove(); };
+                    kort.appendChild(btn);
+                }
+                el.appendChild(kort);
+            });
+            const fot = document.createElement('div'); fot.className='lasf-footnote'; fot.textContent='Gå tillbaka till läsvyn och peka i texten när ni hittar svaret!';
+            el.appendChild(fot);
+        }
+
+        // ---- SEKTION: SORTERA HÄNDELSER ----
+        function sekOrdning(el, t){
+            if(!t.ordning || !t.ordning.length){
+                const info = document.createElement('div'); info.className='lasf-infobox';
+                info.textContent='Inga händelser att sortera ännu. Gå tillbaka via ← Texter och skriv textens händelser i rätt ordning under 🔗 Sortera händelser i uppgiftsbyggaren.';
+                el.appendChild(info); return;
+            }
+            const facit = t.ordning.slice();
+            const rub = document.createElement('div'); rub.className='lasf-kort'; rub.innerHTML='<h4>🔗 '+esc(t.ordningRubrik||'Dra händelserna i rätt ordning')+'</h4><div class="lasf-fragdesc">Dra raderna eller använd pilarna. Tryck sedan på Rätta.</div>';
+            el.appendChild(rub);
+            const startLbl = document.createElement('div'); startLbl.className='lasf-sortlabel'; startLbl.textContent='▲ BÖRJAN';
+            const lista = document.createElement('div'); lista.className='lasf-sortlista';
+            const slutLbl = document.createElement('div'); slutLbl.className='lasf-sortlabel'; slutLbl.textContent='▼ SLUTET';
+            function blanda(){
+                let arr = facit.slice();
+                for(let f=0; f<10; f++){
+                    for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp; }
+                    if(arr.join('|')!==facit.join('|')) break;
+                }
+                lista.innerHTML='';
+                arr.forEach(txt=> lista.appendChild(gorRad(txt)));
+            }
+            function gorRad(txt){
+                const rad = document.createElement('div'); rad.className='lasf-sortrad'; rad.draggable=true;
+                rad.innerHTML = '<span class="lasf-sorthand">⠿</span><span class="lasf-sorttext">'+esc(txt)+'</span>';
+                const upp = document.createElement('button'); upp.className='lasf-sortpil'; upp.textContent='▲'; upp.title='Flytta upp';
+                const ner = document.createElement('button'); ner.className='lasf-sortpil'; ner.textContent='▼'; ner.title='Flytta ner';
+                upp.onclick = ()=>{ const f=rad.previousElementSibling; if(f) lista.insertBefore(rad, f); rensaFacit(); };
+                ner.onclick = ()=>{ const n=rad.nextElementSibling; if(n) lista.insertBefore(n, rad); rensaFacit(); };
+                rad.appendChild(upp); rad.appendChild(ner);
+                rad.addEventListener('dragstart', (e)=>{ rad.classList.add('drar'); try{ e.dataTransfer.setData('text/plain',''); e.dataTransfer.effectAllowed='move'; }catch(_){}});
+                rad.addEventListener('dragend', ()=>{ rad.classList.remove('drar'); lista.querySelectorAll('.dragover').forEach(x=>x.classList.remove('dragover')); rensaFacit(); });
+                rad.addEventListener('dragover', (e)=>{
+                    e.preventDefault();
+                    const drar = lista.querySelector('.drar'); if(!drar || drar===rad) return;
+                    rad.classList.add('dragover');
+                    const r = rad.getBoundingClientRect();
+                    if(e.clientY < r.top + r.height/2) lista.insertBefore(drar, rad); else lista.insertBefore(drar, rad.nextSibling);
+                });
+                rad.addEventListener('dragleave', ()=> rad.classList.remove('dragover'));
+                rad.addEventListener('drop', (e)=>{ e.preventDefault(); rad.classList.remove('dragover'); });
+                return rad;
+            }
+            function rensaFacit(){ lista.querySelectorAll('.lasf-sortrad').forEach(r=> r.classList.remove('sort-ratt','sort-fel')); feed.textContent=''; }
+            blanda();
+            el.appendChild(startLbl); el.appendChild(lista); el.appendChild(slutLbl);
+            const knappar = document.createElement('div'); knappar.className='lasf-knapprad';
+            const ratta = document.createElement('button'); ratta.className='lasf-cta'; ratta.textContent='✅ Rätta';
+            const om = document.createElement('button'); om.className='lasf-cta lasf-sekundar'; om.textContent='🔀 Blanda om';
+            const feed = document.createElement('div'); feed.className='lasf-quizfeed';
+            ratta.onclick = ()=>{
+                const rader = [...lista.querySelectorAll('.lasf-sortrad')];
+                let alltRatt = true;
+                rader.forEach((r,i)=>{
+                    const ok = r.querySelector('.lasf-sorttext').textContent === facit[i];
+                    r.classList.toggle('sort-ratt', ok); r.classList.toggle('sort-fel', !ok);
+                    if(!ok) alltRatt=false;
+                });
+                feed.className = 'lasf-quizfeed '+(alltRatt?'ok':'no');
+                feed.textContent = alltRatt ? '🎉 Perfekt ordning – precis som i texten!' : 'Inte riktigt – de röda raderna står på fel plats. Prova igen!';
+            };
+            om.onclick = ()=>{ blanda(); feed.textContent=''; };
+            knappar.appendChild(ratta); knappar.appendChild(om);
+            el.appendChild(knappar); el.appendChild(feed);
+        }
+
+        // ---- SEKTION: SAMTALA ----
+        function sekSamtal(el, t){
+            const fragor = t.samtal || [];
+            if(!fragor.length){ el.innerHTML='<div class="lasf-infobox">Inga samtalsfrågor för den här texten.</div>'; return; }
+            if(st.samtalIdx >= fragor.length) st.samtalIdx = 0;
+            const kort = document.createElement('div'); kort.className='lasf-samtalkort';
+            function rita(){
+                kort.innerHTML = '<div class="lasf-samtal-nr">SAMTALSFRÅGA '+(st.samtalIdx+1)+' AV '+fragor.length+'</div>'
+                    + '<div class="lasf-samtal-q">'+esc(fragor[st.samtalIdx])+'</div>'
+                    + '<div class="lasf-samtal-knappar"><button class="s-forra">◀ Föregående</button><button class="s-tal">🔊</button><button class="s-nasta">Nästa ▶</button></div>';
+                kort.querySelector('.s-forra').onclick = ()=>{ st.samtalIdx = (st.samtalIdx-1+fragor.length)%fragor.length; sparaState(); rita(); };
+                kort.querySelector('.s-nasta').onclick = ()=>{ st.samtalIdx = (st.samtalIdx+1)%fragor.length; sparaState(); rita(); };
+                kort.querySelector('.s-tal').onclick = (e)=> lasfTala(fragor[st.samtalIdx], e.currentTarget);
+            }
+            rita();
+            el.appendChild(kort);
+            const fot = document.createElement('div'); fot.className='lasf-footnote'; fot.textContent='Prata två och två (EPA) eller i helklass. Lyssna färdigt på varandra!';
+            el.appendChild(fot);
+        }
+
+        // ---- SEKTION: SAMMANFATTA ----
+        function sekSammanfatta(el){
+            const kort = document.createElement('div'); kort.className='lasf-kort';
+            kort.innerHTML = '<h4>📝 Sammanfatta texten med egna ord</h4>';
+            const chips = document.createElement('div'); chips.className='lasf-fragtabs';
+            [1,3,5].forEach(m=>{
+                const b = document.createElement('button'); b.className='lasf-fragtab ft-pa'+(st.sammMal===m?' active':''); b.textContent = m===1?'1️⃣ En mening':(m===3?'3️⃣ Tre meningar':'5️⃣ Fem meningar');
+                b.onclick = ()=>{ st.sammMal=m; sparaState(); chips.querySelectorAll('.lasf-fragtab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); uppdateraRaknare(); };
+                chips.appendChild(b);
+            });
+            kort.appendChild(chips);
+            const tips = document.createElement('div'); tips.className='lasf-fragdesc'; tips.style.margin='8px 0';
+            tips.textContent = 'Börja gärna med: ”Texten handlar om ...” Ta bara med det viktigaste.';
+            kort.appendChild(tips);
+            const ta = document.createElement('textarea'); ta.className='lasf-sammtext'; ta.placeholder='Skriv din sammanfattning här...';
+            ta.value = st.samm || '';
+            const raknare = document.createElement('div'); raknare.className='lasf-sammraknare';
+            function raknaMeningar(s){ return s.split(/[.!?]+/).map(x=>x.trim()).filter(x=>x.length>1).length; }
+            function uppdateraRaknare(){
+                const n = raknaMeningar(ta.value);
+                raknare.textContent = 'Du har skrivit '+n+' mening'+(n===1?'':'ar')+' (mål: '+st.sammMal+').';
+                raknare.classList.toggle('ok', n>=st.sammMal && n>0);
+                if(n>=st.sammMal && n>0) raknare.textContent += ' ✔ Bra jobbat!';
+            }
+            let sparTimer = null;
+            ta.addEventListener('input', ()=>{ st.samm = ta.value; uppdateraRaknare(); widget.dataset.lasf = JSON.stringify(st); if(sparTimer) clearTimeout(sparTimer); sparTimer = setTimeout(()=>{ if(typeof saveBoardState==='function') saveBoardState(); }, 900); });
+            uppdateraRaknare();
+            kort.appendChild(ta); kort.appendChild(raknare);
+            el.appendChild(kort);
+        }
+
+        // ---- SEKTION: QUIZ ----
+        function sekQuiz(el, t){
+            if(!t.quiz || !t.quiz.length){
+                el.innerHTML='<div class="lasf-infobox">Inget quiz ännu för den här texten. Gå tillbaka via ← Texter och skapa egna quizfrågor under 🎲 Quiz i uppgiftsbyggaren (flerval, sant/falskt, fyll i ord och para ihop).</div>';
+                return;
+            }
+            const fragor = t.quiz.slice();
+            let idx=0, poang=0;
+            const kort = document.createElement('div'); kort.className='lasf-kort';
+            el.appendChild(kort);
+            function rita(){
+                if(idx>=fragor.length){ resultat(); return; }
+                const f = fragor[idx];
+                kort.innerHTML = '<div class="lasf-quizprog">Fråga '+(idx+1)+' av '+fragor.length+' · '+poang+' poäng</div>';
+                const feed = document.createElement('div'); feed.className='lasf-quizfeed';
+                const nasta = ()=>{ const b=document.createElement('button'); b.className='lasf-cta'; b.style.marginTop='10px'; b.textContent = idx<fragor.length-1?'Nästa fråga ▶':'Visa resultat ▶'; b.onclick=()=>{ idx++; rita(); }; kort.appendChild(b); };
+                if(f.typ==='flerval' || f.typ==='sant' || f.typ==='fyll'){
+                    const qEl = document.createElement('div'); qEl.className='lasf-quizq';
+                    let alt, rattIdx;
+                    if(f.typ==='sant'){ qEl.textContent='Sant eller falskt? '+f.q; alt=['✅ Sant','❌ Falskt']; rattIdx = f.ratt ? 0 : 1; }
+                    else if(f.typ==='fyll'){ qEl.textContent='Fyll i ordet: '+f.fore+'______'+f.efter; alt=f.alt; rattIdx=f.ratt; }
+                    else { qEl.textContent=f.q; alt=f.alt; rattIdx=f.ratt; }
+                    kort.appendChild(qEl);
+                    const wrap = document.createElement('div'); wrap.className='lasf-quizalt';
+                    let klar=false;
+                    alt.forEach((a,i)=>{
+                        const b = document.createElement('button'); b.textContent=a;
+                        b.onclick = ()=>{
+                            if(klar) return; klar=true;
+                            wrap.querySelectorAll('button').forEach((x,xi)=>{ x.disabled=true; if(xi===rattIdx) x.classList.add('q-ratt'); });
+                            if(i===rattIdx){ poang++; feed.textContent='✅ Rätt!'; feed.classList.add('ok'); }
+                            else { b.classList.add('q-fel'); feed.textContent='❌ Inte riktigt – rätt svar är grönt.'; feed.classList.add('no'); }
+                            nasta();
+                        };
+                        wrap.appendChild(b);
+                    });
+                    kort.appendChild(wrap); kort.appendChild(feed);
+                } else if(f.typ==='para'){
+                    const qEl = document.createElement('div'); qEl.className='lasf-quizq'; qEl.textContent='Para ihop! Klicka först på ett ord till vänster, sedan på rätt beskrivning till höger.';
+                    kort.appendChild(qEl);
+                    const grid = document.createElement('div'); grid.className='lasf-paragrid';
+                    const venster = f.par.map(p=>p[0]);
+                    const hoger = f.par.map(p=>p[1]).slice();
+                    for(let i=hoger.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=hoger[i]; hoger[i]=hoger[j]; hoger[j]=tmp; }
+                    let vald=null, fel=0, klara=0;
+                    const facit = {}; f.par.forEach(p=>{ facit[p[0]]=p[1]; });
+                    const vKnappar=[], hKnappar=[];
+                    venster.forEach(v=>{ const b=document.createElement('button'); b.textContent=v; b.dataset.v=v; vKnappar.push(b); });
+                    hoger.forEach(h=>{ const b=document.createElement('button'); b.textContent=h; b.dataset.h=h; hKnappar.push(b); });
+                    for(let i=0;i<venster.length;i++){ grid.appendChild(vKnappar[i]); grid.appendChild(hKnappar[i]); }
+                    vKnappar.forEach(b=>{ b.onclick=()=>{ if(b.classList.contains('klar')) return; vKnappar.forEach(x=>x.classList.remove('vald')); b.classList.add('vald'); vald=b; }; });
+                    hKnappar.forEach(b=>{ b.onclick=()=>{
+                        if(b.classList.contains('klar') || !vald) return;
+                        if(facit[vald.dataset.v]===b.dataset.h){
+                            vald.classList.remove('vald'); vald.classList.add('klar'); b.classList.add('klar'); vald=null; klara++;
+                            if(klara===venster.length){ if(fel===0) poang++; feed.textContent = fel===0 ? '✅ Alla par rätt på första försöket!' : '👍 Alla par klara ('+fel+' fel på vägen).'; feed.classList.add(fel===0?'ok':'no'); nasta(); }
+                        } else { fel++; b.classList.add('fel-blink'); setTimeout(()=>b.classList.remove('fel-blink'), 450); }
+                    }; });
+                    kort.appendChild(grid); kort.appendChild(feed);
+                } else { idx++; rita(); }
+            }
+            function resultat(){
+                const pct = Math.round(poang/fragor.length*100);
+                let msg;
+                if(pct===100) msg='Fantastiskt! Du förstod verkligen texten. 🌟';
+                else if(pct>=60) msg='Bra jobbat! Läs gärna texten en gång till och testa igen.';
+                else msg='Bra försök! Gå tillbaka till texten, läs igen och prova en gång till.';
+                kort.innerHTML = '<div class="lasf-quizres"><div class="lasf-quizprog">QUIZ – RESULTAT</div><div class="lasf-poang">'+poang+' / '+fragor.length+'</div><div class="lasf-msg">'+esc(msg)+'</div></div>';
+                const knappar = document.createElement('div'); knappar.className='lasf-knapprad'; knappar.style.justifyContent='center';
+                const igen = document.createElement('button'); igen.className='lasf-cta'; igen.textContent='↻ Gör om quizet'; igen.onclick=()=>{ idx=0; poang=0; rita(); };
+                const tillText = document.createElement('button'); tillText.className='lasf-cta lasf-sekundar'; tillText.textContent='📖 Läs texten igen';
+                tillText.onclick = ()=>{ st.sektion='las'; sparaState(); render(); };
+                knappar.appendChild(igen); knappar.appendChild(tillText);
+                kort.querySelector('.lasf-quizres').appendChild(knappar);
+            }
+            rita();
+        }
+
+        // ---- SEKTION: SJÄLVSKATTNING ----
+        function sekSjalv(el){
+            const pastenden = ['Jag förstod texten.','Jag lärde mig nya ord.','Jag kunde svara på frågorna.','Jag behöver läsa en gång till.'];
+            const beroem = document.createElement('div');
+            function uppdateraBeroem(){
+                const bra = st.sjalv[0] && st.sjalv[2];
+                beroem.className = bra ? 'lasf-beroem' : 'lasf-footnote';
+                beroem.textContent = bra ? '🌟 Snyggt jobbat – du har koll på texten!' : 'Var ärlig – det är smart att läsa en gång till om det behövs!';
+            }
+            pastenden.forEach((p,i)=>{
+                const rad = document.createElement('label'); rad.className='lasf-sjalvrad'+(st.sjalv[i]?' ikryssad':'');
+                const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=!!st.sjalv[i];
+                cb.onchange = ()=>{ st.sjalv[i]=cb.checked; rad.classList.toggle('ikryssad', cb.checked); sparaState(); uppdateraBeroem(); };
+                const txt = document.createElement('span'); txt.textContent=p;
+                rad.appendChild(cb); rad.appendChild(txt);
+                el.appendChild(rad);
+            });
+            const kanslaKort = document.createElement('div'); kanslaKort.className='lasf-kort';
+            kanslaKort.innerHTML='<h4>Hur kändes texten?</h4>';
+            const kRad = document.createElement('div'); kRad.className='lasf-kanslarad';
+            [['😄','Lätt'],['🙂','Lagom'],['😅','Klurig'],['😟','Svår']].forEach(k=>{
+                const b = document.createElement('button'); b.textContent=k[0]; b.title=k[1];
+                if(st.kansla===k[1]) b.classList.add('vald');
+                b.onclick = ()=>{ st.kansla=k[1]; kRad.querySelectorAll('button').forEach(x=>x.classList.remove('vald')); b.classList.add('vald'); lbl.textContent=k[1]; sparaState(); };
+                kRad.appendChild(b);
+            });
+            const lbl = document.createElement('div'); lbl.className='lasf-kanslalbl'; lbl.textContent = st.kansla || '';
+            kanslaKort.appendChild(kRad); kanslaKort.appendChild(lbl);
+            el.appendChild(kanslaKort);
+            uppdateraBeroem();
+            el.appendChild(beroem);
+        }
+
+        render();
+    }
+
     function createBiologiWidget(config){
         if(config===undefined) config=null;
         const body = createWidget('BIOLOGI ÅK 4', 560, 'bio-widget', config);
