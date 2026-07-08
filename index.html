@@ -6208,6 +6208,27 @@
         ];
         return window._adjOreg;
     }
+    // Inbyggd motsatslista för vanliga skolord - pålitlig och nätoberoende.
+    // Wiktionarys Motsatsord-avsnitt (se jmfSynonymer nedan) används bara som
+    // reserv för ord som inte finns här, eftersom det avsnittet saknas på de
+    // allra flesta sidor även för enkla, vanliga adjektiv.
+    function adjektivMotsatser(){
+        if(window._adjMotsats) return window._adjMotsats;
+        const PAR = [
+            ["glad","ledsen"], ["stor","liten"], ["lång","kort"], ["hög","låg"], ["snabb","långsam"],
+            ["ny","gammal"], ["varm","kall"], ["torr","blöt"], ["ren","smutsig"], ["tung","lätt"],
+            ["stark","svag"], ["hård","mjuk"], ["ljus","mörk"], ["öppen","stängd"], ["full","tom"],
+            ["dyr","billig"], ["rik","fattig"], ["tjock","tunn"], ["bred","smal"], ["djup","grund"],
+            ["svår","enkel"], ["sann","falsk"], ["säker","osäker"], ["snäll","elak"], ["modig","feg"],
+            ["lugn","orolig"], ["vacker","ful"], ["rolig","tråkig"], ["viktig","oviktig"], ["tidig","sen"],
+            ["nära","avlägsen"], ["hel","trasig"], ["sur","söt"], ["frisk","sjuk"], ["vaken","trött"],
+            ["klok","dum"], ["artig","oartig"], ["positiv","negativ"], ["tyst","högljudd"]
+        ];
+        const map={};
+        PAR.forEach(p=>{ map[p[0]]=p[1]; map[p[1]]=p[0]; });
+        window._adjMotsats = map;
+        return window._adjMotsats;
+    }
     function jamforAdjektiv(ord){
         const w=(ord||'').toLowerCase().trim();
         if(!w) return null;
@@ -6233,9 +6254,9 @@
     // (helt fristående från subSynonymer så de två uppslagen inte påverkar varandra).
     async function jmfSynonymer(ord){
         const w=(ord||'').toLowerCase().trim(); if(!w) return null;
-        let cache={}; try{ cache=JSON.parse(localStorage.getItem('jmfSynCacheV1')||'{}'); }catch(e){}
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('jmfSynCacheV3')||'{}'); }catch(e){}
         if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
-        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('jmfSynCacheV1', JSON.stringify(cache)); }catch(e){} };
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('jmfSynCacheV3', JSON.stringify(cache)); }catch(e){} };
         let j;
         try{
             const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
@@ -6244,18 +6265,26 @@
         if(!j || !j.parse || !j.parse.text){ sparaCache('saknas'); return null; }
         const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
         const clean=(txt)=> (txt||'').replace(/\[\d+\]/g,'').replace(/\s+/g,' ').trim();
-        const rubriker=[...doc.querySelectorAll('.mw-headline')];
+        // Rubriker hittas på två sätt beroende på MediaWikis version: äldre sidor
+        // wrappar rubriktexten i <span class="mw-headline">, medan nyare sidor (från
+        // och med MediaWiki 1.42, 2024) lägger id:t direkt på <h2>-<h6> och wrappar hela
+        // rubriken i en <div class="mw-heading">. Vi läser rubrikens text direkt från
+        // h-taggen (funkar i båda fallen) och letar upp rätt "ankarnod" (div:en om den
+        // finns, annars h-taggen själv) för att hitta listan som hör till rubriken.
+        const headingEls=[...doc.querySelectorAll('h2,h3,h4,h5,h6')];
+        const rubriker = headingEls.map(h=>({ el:h, text:(h.textContent||'').replace(/\[[^\]]*\]/g,'').trim() }));
+        const isRubrikGrans=(node)=> /^H[2-6]$/.test(node.tagName) || (node.classList && node.classList.contains('mw-heading'));
         const listaEfterRubrik=(rub)=>{
-            let node = rub.closest('h2,h3,h4,h5'); if(!node) return null;
-            let sib = node.nextElementSibling;
-            while(sib && !/^H[2-5]$/.test(sib.tagName)){
+            const ankare = rub.el.closest('.mw-heading') || rub.el;
+            let sib = ankare.nextElementSibling;
+            while(sib && !isRubrikGrans(sib)){
                 if(sib.tagName==='UL' || sib.tagName==='OL') return sib;
                 sib = sib.nextElementSibling;
             }
             return null;
         };
         // 1) Synonymer-avsnitt (om det finns) → ta upp till två
-        const synRub = rubriker.find(h=>/^synonym/i.test(h.textContent||''));
+        const synRub = rubriker.find(r=>/^synonym/i.test(r.text));
         if(synRub){
             const lista = listaEfterRubrik(synRub);
             if(lista){
@@ -6263,18 +6292,13 @@
                 if(items.length){ const res={ typ:'synonymer', varde: items.slice(0,2) }; sparaCache(res); return res; }
             }
         }
-        // 2) Annars: första betydelseförklaringen under Adjektiv-rubriken (eller första numrerade listan på sidan)
-        const adjRub = rubriker.find(h=>/^adjektiv/i.test(h.textContent||''));
-        let defLista = adjRub ? listaEfterRubrik(adjRub) : null;
-        if(!defLista) defLista = doc.querySelector('ol');
-        if(defLista){
-            const forsta = defLista.querySelector('li');
-            if(forsta){
-                let txt = clean(forsta.textContent);
-                const slut = txt.search(/[.!?]/);
-                if(slut>-1) txt = txt.slice(0, slut+1);
-                if(txt.length>90) txt = txt.slice(0,87).trim()+'…';
-                if(txt){ const res={ typ:'forklaring', varde: txt }; sparaCache(res); return res; }
+        // 2) Annars: Motsatsord/Antonymer-avsnitt (om det finns) → ta upp till två
+        const motsatsRub = rubriker.find(r=>/^(motsats|antonym)/i.test(r.text));
+        if(motsatsRub){
+            const lista = listaEfterRubrik(motsatsRub);
+            if(lista){
+                const items=[...lista.querySelectorAll('li')].map(li=>clean(li.textContent)).filter(Boolean);
+                if(items.length){ const res={ typ:'motsats', varde: items.slice(0,2) }; sparaCache(res); return res; }
             }
         }
         sparaCache('saknas'); return null;
@@ -6301,12 +6325,12 @@
         let synNr=0;
         function synRad(state){
             synEl.classList.remove('laddar');
-            if(state==='laddar'){ synEl.classList.add('laddar'); synEl.textContent='Slår upp synonymer…'; return; }
+            if(state==='laddar'){ synEl.classList.add('laddar'); synEl.textContent='Slår upp…'; return; }
             if(!state){ synEl.innerHTML=''; return; }
             if(state.typ==='synonymer'){
                 synEl.innerHTML = `<span class='sub-syn-lbl'>Synonymer</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('');
-            } else if(state.typ==='forklaring'){
-                synEl.innerHTML = `<span class='sub-syn-lbl'>Betyder</span>${state.varde}`;
+            } else if(state.typ==='motsats'){
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Motsats</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('');
             } else { synEl.innerHTML=''; }
         }
         function render(){
@@ -6318,14 +6342,21 @@
             rowsEl.appendChild(rad('Positiv', res.positiv, true, false));
             rowsEl.appendChild(rad('Komparativ', res.komparativ, false, P));
             rowsEl.appendChild(rad('Superlativ', res.superlativ, false, P));
-            // synonymer eller kort förklaring – oberoende uppslag för det framsökta ordet
+            // Motsats: kolla först i den inbyggda, pålitliga motsatslistan (funkar
+            // direkt och utan nät). Finns ordet inte där slås Synonymer/Motsatsord
+            // upp mot Wiktionary som reserv.
             const mittSynNr=++synNr;
             const ordDaaSyn=inp.value;
-            synRad('laddar');
-            jmfSynonymer(res.positiv).then(s=>{
-                if(mittSynNr!==synNr || inp.value!==ordDaaSyn) return; // användaren hann skriva nytt
-                synRad(s);
-            });
+            const lokalMotsats = adjektivMotsatser()[res.positiv];
+            if(lokalMotsats){
+                synRad({ typ:'motsats', varde:[lokalMotsats] });
+            } else {
+                synRad('laddar');
+                jmfSynonymer(res.positiv).then(s=>{
+                    if(mittSynNr!==synNr || inp.value!==ordDaaSyn) return; // användaren hann skriva nytt
+                    synRad(s);
+                });
+            }
         }
         bojBtn.onclick=()=>{ render(); saveBoardState(); };
         inp.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); render(); saveBoardState(); } };
