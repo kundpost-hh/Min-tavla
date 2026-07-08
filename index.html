@@ -75,7 +75,7 @@
                 <div id="sp-pages"></div>
                 <button class="sp-add-btn" onclick="addPageV6()">+ Ny sida</button>
                 <button class="sp-add-btn sp-dup-btn" onclick="duplicateCurrentPageV6()" title="Kopiera sidan du tittar på just nu">⧉ Kopiera: <span id="sp-dup-current-name">denna sida</span></button>
-                <button class="sp-add-btn sp-export-btn" onclick="exportCurrentPageImage()" title="Spara den visade sidan som en bild (PNG)">🖼️ Spara sidan som bild</button>
+                <button class="sp-add-btn sp-export-btn" onclick="exportCurrentPageImage()" title="Spara den visade sidan som en PDF-fil">📄 Spara sidan som PDF</button>
             </div>
             <div class="sp-section">
                 <div class="sp-head">🗂️ Mallar</div>
@@ -166,6 +166,7 @@
             <button class="tool-btn" onclick="createNounWidget()"><div class="icon">🅰️</div><div class="label">En/Ett</div></button>
             <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Medborgare</div></button>
             <button class="tool-btn" onclick="createWordClassWidget()"><div class="icon">📚</div><div class="label">Ordklasser</div></button>
+            <button class="tool-btn" onclick="createComparisonWidget()"><div class="icon">🆚</div><div class="label">Jämföra</div></button>
             <button class="tool-btn" onclick="createSynonymWidget()"><div class="icon">🔎</div><div class="label">Synonymer</div></button>
             <button class="tool-btn" onclick="createSpellingBattle()"><div class="icon">✏️</div><div class="label">Stavningskamp</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
@@ -194,6 +195,7 @@
             <button class="tool-btn" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
             <button class="tool-btn" onclick="createAttendance()"><div class="icon">🙋</div><div class="label">Närvaro</div></button>
             <button class="tool-btn" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
+            <button class="tool-btn" onclick="createGoodWidget()"><div class="icon">👍</div><div class="label">Good</div></button>
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
             <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
             <button class="tool-btn" onclick="createPracticeClock()"><div class="icon">🕐</div><div class="label">Övningsklocka</div></button>
@@ -545,6 +547,42 @@
     .list-name-input { flex-grow: 1; padding: 6px; border-radius: 6px; border: 1px solid #d1d1d6; font-size: 12px; outline: none; }
     .name-input { width: 100%; flex-grow: 1; min-height: 80px; border: 1px solid #ddd; border-radius: 8px; padding: 8px; resize: none; font-family: inherit; margin-bottom: 8px; font-size: 13px; outline: none; }
     .name-result { font-size: 22px; font-weight: bold; text-align: center; margin-top: 8px; color: #007aff; min-height: 30px; word-break: break-all; }
+    .gotd-kort{ width:100%; display:flex; flex-direction:column; gap:8px; }
+    .gotd-word{ font-size:28px; font-weight:900; color:#ff3b30; text-align:center; word-break:break-word; }
+    .gotd-panels{ display:flex; flex-direction:column; gap:6px; max-height:300px; overflow-y:auto; padding-right:4px; }
+    .gotd-panel{ background:#f7f7fa; border-radius:10px; padding:8px 10px; }
+    .gotd-reveal-btn{ border:none; background:#eef4ff; color:#1f5fbf; font-weight:700; font-size:13px; padding:7px 10px; border-radius:8px; cursor:pointer; width:100%; text-align:center; font-family:inherit; }
+    .gotd-reveal-btn:hover{ background:#dfeaff; }
+    .gotd-panel-body{ margin-top:6px; font-size:14px; color:#333; line-height:1.4; text-align:center; }
+    .gotd-panel-body img{ display:block; margin:0 auto; max-width:100%; max-height:160px; border-radius:10px; }
+    .gotd-loading{ color:#8e8e93; font-style:italic; font-size:13px; }
+    .gotd-tom{ color:#8e8e93; font-style:italic; font-size:13px; }
+    .gotd-reveal-all{ width:100%; }
+    /* ---- GOOD: dra en sur min till glasburken, den blir glad ---- */
+    .good-widget .widget-body{ padding:18px 18px 16px; }
+    .good-intro{ font-size:14px; color:#8e8e93; text-align:center; margin-bottom:14px; }
+    .good-area{ display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+    .good-pile{ position:relative; flex:1; min-height:230px; }
+    .good-sour{ position:absolute; font-size:56px; cursor:grab; user-select:none; touch-action:none; line-height:1; transform:rotate(var(--r,0deg)); transition:transform .12s ease, opacity .12s ease; }
+    .good-sour:hover{ transform:rotate(var(--r,0deg)) scale(1.12); }
+    .good-sour.dragging-source{ opacity:.3; }
+    .good-jar-col{ display:flex; flex-direction:column; align-items:center; gap:10px; flex-shrink:0; }
+    .good-jar-wrap{ position:relative; width:220px; height:275px; }
+    .good-jar-svg{ position:absolute; top:0; left:0; pointer-events:none; }
+    .good-jar-drop{ position:absolute; left:33px; top:40px; width:118px; height:206px; border-radius:2px 2px 16px 16px; overflow:hidden; transition:background .1s ease, outline .1s ease; }
+    .good-jar-drop.drag-over{ background:rgba(76,175,107,0.22); outline:2px dashed #4caf6b; outline-offset:-2px; }
+    .good-jar-contents{ position:relative; width:100%; height:100%; }
+    .good-jar-happy{ position:absolute; font-size:56px; line-height:1; transform:rotate(var(--r,0deg)); }
+    .good-jar-happy.landing{ animation: goodLand .45s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes goodLand{
+        0%{ transform:translateY(-26px) scale(.3) rotate(var(--r,0deg)); opacity:0; }
+        55%{ transform:translateY(2px) scale(1.16) rotate(var(--r,0deg)); opacity:1; }
+        78%{ transform:translateY(-2px) scale(.94) rotate(var(--r,0deg)); }
+        100%{ transform:translateY(0) scale(1) rotate(var(--r,0deg)); opacity:1; }
+    }
+    .good-footer{ display:flex; align-items:center; justify-content:center; margin-top:16px; }
+    .good-count{ font-weight:800; color:#3c463f; font-size:18px; }
+    .good-drag-ghost{ position:fixed; font-size:56px; pointer-events:none; z-index:99999; will-change:left,top; }
     .group-result { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 10px; font-size: 13px; overflow-y: auto; }
     .group-card { background: #f9f9fb; padding: 6px; border-radius: 6px; border: 1px solid #d1d1d6; }
     .group-title { font-weight: bold; border-bottom: 1px solid #d1d1d6; margin-bottom: 4px; padding-bottom: 2px; color: #007aff; }
@@ -748,6 +786,8 @@
     .bio-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f4f5f4; border:1px solid #e2e4e2; border-left:4px solid #3cb45f; border-radius:12px; padding:9px 12px; }
     .bio-begrepp-ord{ font-weight:800; color:#2f9e51; font-size:14px; }
     .bio-begrepp-def{ color:#3c463f; font-size:13px; line-height:1.45; }
+    .bio-begrepp .bio-back{ border:none; background:#f4f5f4; color:#26322b; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .bio-begrepp .bio-tag{ display:inline-block; background:#e8f7ec; color:#2f9e51; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
 
     /* ---- LÄSFÖRSTÅELSE ---- */
     .lasf-widget .widget-header{ background:linear-gradient(135deg,#5856d6,#4644b8) !important; }
@@ -955,6 +995,8 @@
     .fro-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f3f8f0; border:1px solid #dce7d6; border-left:4px solid #5bb36a; border-radius:12px; padding:9px 12px; }
     .fro-begrepp-ord{ font-weight:800; color:#3e8e4f; font-size:14px; }
     .fro-begrepp-def{ color:#38402f; font-size:13px; line-height:1.45; }
+    .fro-begrepp .fro-back{ border:none; background:#f3f8f0; color:#2c3a2a; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .fro-begrepp .fro-tag{ display:inline-block; background:#e6f4e2; color:#3e8e4f; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
     /* Livscykel-vy */
     .fro-cycle{ background:#fff; border:1px solid #dce7d6; border-radius:16px; padding:18px 16px; }
     .fro-cycle h3{ margin:0 0 14px; color:#3e8e4f; font-size:16px; text-align:center; }
@@ -992,6 +1034,8 @@
     .kemi-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f5f4f7; border:1px solid #e4e2ea; border-left:4px solid #8b5cf6; border-radius:12px; padding:9px 12px; }
     .kemi-begrepp-ord{ font-weight:800; color:#6d3fd4; font-size:14px; }
     .kemi-begrepp-def{ color:#3c3646; font-size:13px; line-height:1.45; }
+    .kemi-begrepp .kemi-back{ border:none; background:#f5f4f7; color:#2a2632; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .kemi-begrepp .kemi-tag{ display:inline-block; background:#efe9fb; color:#6d3fd4; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
 
     /* ---- FYSIK ÅK 4 ---- */
     .fysik-widget .widget-header{ background:linear-gradient(135deg,#1e6fd4,#0d4fa8) !important; }
@@ -1019,6 +1063,8 @@
     .fysik-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#f3f5f9; border:1px solid #dde3ec; border-left:4px solid #1e6fd4; border-radius:12px; padding:9px 12px; }
     .fysik-begrepp-ord{ font-weight:800; color:#0d4fa8; font-size:14px; }
     .fysik-begrepp-def{ color:#333b44; font-size:13px; line-height:1.45; }
+    .fysik-begrepp .fysik-back{ border:none; background:#f3f5f9; color:#232a33; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .fysik-begrepp .fysik-tag{ display:inline-block; background:#e4eefb; color:#0d4fa8; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
     /* Quiz-ruta + quiz-vy */
     .fysik-tile.fysik-quiz-tile{ background:linear-gradient(135deg,#1e6fd4,#0d4fa8); border-color:#1e6fd4; }
     .fysik-tile.fysik-quiz-tile .fysik-lbl{ color:#eaf2ff; }
@@ -1073,6 +1119,10 @@
     .subj-quiz .fq-result .fq-again:hover{ background:var(--q-dark); }
     .subj-quiz-tile .teknik-lbl{ color:#fff !important; }
 
+    /* Gemensam "Begrepp per omrade" -platta (gissa-begreppet) */
+    .subj-begrepp-tile{ background:linear-gradient(135deg,#ffd66b,#f2b234) !important; border-color:#f2b234 !important; }
+    .subj-begrepp-tile .bio-lbl, .subj-begrepp-tile .fro-lbl, .subj-begrepp-tile .kemi-lbl, .subj-begrepp-tile .fysik-lbl, .subj-begrepp-tile .teknik-lbl{ color:#7a5200 !important; }
+
     /* ---- TEKNIK ÅK 4 ---- */
     .teknik-widget .widget-header{ background:linear-gradient(135deg,#f59e0b,#d97706) !important; }
     .teknik-body{ padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
@@ -1099,6 +1149,8 @@
     .teknik-begrepp-item{ display:flex; flex-direction:column; gap:2px; background:#faf6ef; border:1px solid #ece3d3; border-left:4px solid #f59e0b; border-radius:12px; padding:9px 12px; }
     .teknik-begrepp-ord{ font-weight:800; color:#b45309; font-size:14px; }
     .teknik-begrepp-def{ color:#3f382c; font-size:13px; line-height:1.45; }
+    .teknik-begrepp .teknik-back{ border:none; background:#faf6ef; color:#3a3226; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-bottom:10px; }
+    .teknik-begrepp .teknik-tag{ display:inline-block; background:#fdf0d9; color:#b45309; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
     @keyframes alpha-dance { 0% { transform: scale(1.5) rotate(0deg); } 25% { transform: scale(1.55) rotate(-13deg); } 50% { transform: scale(1.65) rotate(0deg); } 75% { transform: scale(1.55) rotate(13deg); } 100% { transform: scale(1.5) rotate(0deg); } }
 
     /* ---- KORSORD ---- */
@@ -1232,6 +1284,15 @@
     .exit-total { font-size:11px; color:#999; margin-top:2px; }
     .exit-reset { margin-top:2px; font-size:11px; color:#999; text-decoration:underline; cursor:pointer; background:none; border:none; font-family:inherit; }
     .exit-reset:hover { color:#ff3b30; }
+    .exit-tabs { display:flex; gap:6px; width:100%; margin-bottom:2px; background:#f2f2f7; padding:4px; border-radius:10px; }
+    .exit-tab { flex:1; border:none; background:transparent; padding:7px 6px; border-radius:8px; font-weight:800; font-size:12.5px; color:#6b6b70; cursor:pointer; font-family:inherit; }
+    .exit-tab.active { background:#007aff; color:#fff; }
+    .exit-panel-utv { display:flex; flex-direction:column; align-items:center; width:100%; gap:10px; }
+    .exit-panel-atk { display:flex; flex-direction:column; width:100%; gap:12px; }
+    .exit-atk-block { width:100%; background:#f7f7f9; border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:8px; box-sizing:border-box; }
+    .exit-atk-block h4 { margin:0; font-size:12px; color:#666; text-align:center; font-weight:800; }
+    .exit-atk-fraga-box { min-height:36px; text-align:center; font-size:13.5px; font-weight:700; color:#1d1d1f; background:#fff; border-radius:8px; padding:8px 10px; display:flex; align-items:center; justify-content:center; }
+    .exit-atk-elev-box { min-height:20px; text-align:center; font-size:15px; font-weight:800; color:#007aff; background:#fff; border-radius:8px; padding:8px 10px; }
     .poll-widget .widget-inner { background:#fff; }
     .poll-root { display:flex; flex-direction:column; width:100%; }
     .poll-opt-input { flex:1; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; outline:none; font-family:inherit; background:#fff; }
@@ -1565,6 +1626,8 @@
     .genre-huvud { background:#fff; border:1px solid #ece9f4; border-radius:14px; padding:14px 16px; }
     .genre-huvud h3 { margin:0 0 8px; color:#7c3aed; font-size:18px; display:flex; align-items:center; gap:8px; }
     .genre-huvud p { margin:0; color:#3a3546; font-size:14px; line-height:1.55; }
+    .genre-print-btn { margin-left:auto; border:none; background:#f3e8ff; color:#7c3aed; width:30px; height:30px; border-radius:50%; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .genre-print-btn:hover { background:#e9d5ff; }
     .genre-sektion { border-radius:14px; padding:12px 14px; }
     .genre-sektion h4 { margin:0 0 8px; font-size:13px; text-transform:uppercase; letter-spacing:.5px; }
     .genre-sektion.kannetecken { background:#f3f0fb; border-left:4px solid #8b5cf6; }
@@ -1687,10 +1750,18 @@
     .figx-info.show { display:block; }
     .figx-namn { font-size:15px; font-weight:800; color:#007aff; text-align:center; margin-bottom:6px; }
     .figx-props { list-style:none; margin:0; padding:0; font-size:12.5px; color:#3a3a44; }
-    .figx-props li { display:flex; justify-content:space-between; gap:8px; padding:2px 0; border-bottom:1px dashed #e6e7ee; }
+    .figx-props li { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:6px 0; border-bottom:1px dashed #e6e7ee; text-align:left; }
     .figx-props li:last-child { border-bottom:none; }
-    .figx-props .pk { color:#8a8a95; font-weight:600; }
-    .figx-props .pv { font-weight:800; color:#222; }
+    .figx-props .pk { color:#8a8a95; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
+    .figx-props .pv { font-weight:700; color:#222; line-height:1.4; }
+    .figx-ovning { margin-top:20px; padding-top:16px; border-top:2px dashed #e6e7ee; }
+    .figx-ov-rubrik { margin:0 0 10px; font-size:15px; color:#1a1a2e; }
+    .figx-ov-panel { display:flex; flex-direction:column; align-items:center; gap:10px; max-width:340px; margin:0 auto; }
+    .figx-ov-fig { width:130px; height:130px; }
+    .figx-ov-fig svg { width:100%; height:100%; }
+    .figx-ov-svar { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
+    .figx-ov-feedback { font-weight:800; font-size:14px; min-height:20px; }
+    .figx-ov-poang { font-size:12.5px; color:#7a7a86; font-weight:700; }
     .geo-svg { width:100%; height:auto; display:block; background:#fdfdff; border:1.5px solid #eee; border-radius:12px; touch-action:none; }
     .geo-handle { cursor:grab; }
     .geo-facts { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
@@ -1772,6 +1843,11 @@
     .sub-artikel { display:inline-block; padding:3px 14px; border-radius:999px; font-size:18px; font-weight:900; letter-spacing:1px; }
     .sub-artikel.en { background:#e8f2ff; color:#007aff; box-shadow:inset 0 0 0 2px #007aff; }
     .sub-artikel.ett { background:#fff3e0; color:#e07f00; box-shadow:inset 0 0 0 2px #ff9500; }
+    .sub-syn { margin-top:8px; padding:8px 12px; border-radius:10px; background:#f2fbf5; border:1.5px solid #cdeedb; font-size:13px; color:#2f6b45; min-height:0; }
+    .sub-syn:empty { display:none; }
+    .sub-syn .sub-syn-lbl { font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:0.3px; color:#3a9a5c; margin-right:6px; }
+    .sub-syn .sub-syn-chip { display:inline-block; background:#fff; border:1.5px solid #b9e4c9; color:#2f6b45; font-weight:800; padding:2px 10px; border-radius:999px; margin:2px 4px 2px 0; }
+    .sub-syn.laddar { color:#8e8e93; font-style:italic; }
 
     /* ---- LÄNDER ---- */
     .land-forslag { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
@@ -2133,6 +2209,62 @@
         }, 1200);
     }
 
+    // ---- ADMINENS VERKTYGSLÅDA GÄLLER ALLA ----
+    // Adminens ordning och sortering (verktygsraden överst + verktygsfickan till vänster)
+    // sparas i ETT delat dokument i molnet (config/toolbar). Alla användare hämtar den
+    // vid inloggning och lyssnar live på ändringar – så ser hela skolan samma verktygslåda.
+    // I lokalt/offline-läge finns bara en användare, då behövs ingen delning.
+    let _sharedToolbarUnsub = null;
+    let _sharedToolbarPushTimer = null;
+    function applySharedToolbar(d){
+        if (!d || !currentUser) return;
+        try {
+            let andrat = false;
+            if (typeof d.toolbarOrder === 'string' && d.toolbarOrder && d.toolbarOrder !== localStorage.getItem('mintavla_toolbarOrder_' + currentUser)){
+                localStorage.setItem('mintavla_toolbarOrder_' + currentUser, d.toolbarOrder); andrat = true;
+            }
+            if (typeof d.toolPocketLayout === 'string' && d.toolPocketLayout && d.toolPocketLayout !== localStorage.getItem('mintavla_toolPocketLayout_' + currentUser)){
+                localStorage.setItem('mintavla_toolPocketLayout_' + currentUser, d.toolPocketLayout); andrat = true;
+            }
+            if (!andrat) return; // samma ordning som redan visas – rita inte om i onödan
+            if (typeof restoreToolbarOrder === 'function') restoreToolbarOrder();
+            if (typeof window.rebuildToolPocketGrid === 'function') window.rebuildToolPocketGrid();
+        } catch(e){ console.warn('[MinTavla] Kunde inte tillämpa den delade verktygslådan:', e); }
+    }
+    async function startSharedToolbarSync(){
+        if (!window.cloudReady || !fbDB) return;
+        try {
+            if (_sharedToolbarUnsub){ try{ _sharedToolbarUnsub(); }catch(e){} _sharedToolbarUnsub = null; }
+            // Finns inget delat dokument ännu (första gången)? Låt adminen så det med sin nuvarande ordning.
+            try {
+                const snap = await fbDB.collection('config').doc('toolbar').get();
+                if (!snap.exists && typeof isBoardAdmin === 'function' && isBoardAdmin()) pushSharedToolbar();
+            } catch(e){ /* läsning misslyckades – lyssnaren nedan försöker ändå */ }
+            _sharedToolbarUnsub = fbDB.collection('config').doc('toolbar').onSnapshot(snap => {
+                if (!snap.exists) return;
+                const tc = document.getElementById('toolbar-container');
+                if (tc && tc.classList.contains('tb-reordering')) return; // stör inte ett pågående drag
+                applySharedToolbar(snap.data());
+            }, err => console.warn('[MinTavla] Kunde inte lyssna på den delade verktygslådan:', err));
+        } catch(e){ console.warn('[MinTavla] Delad verktygslåda kunde inte startas:', e); }
+    }
+    function pushSharedToolbar(){
+        if (!window.cloudReady || !fbDB || !currentUser) return;
+        if (typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara ADMINENS ordning delas till alla
+        clearTimeout(_sharedToolbarPushTimer);
+        _sharedToolbarPushTimer = setTimeout(()=>{
+            const payload = {
+                toolbarOrder: localStorage.getItem('mintavla_toolbarOrder_' + currentUser) || '',
+                toolPocketLayout: localStorage.getItem('mintavla_toolPocketLayout_' + currentUser) || '',
+                updatedAt: Date.now(),
+                uppdateradAv: currentUser
+            };
+            if (!payload.toolbarOrder && !payload.toolPocketLayout) return; // inget att dela ännu
+            fbDB.collection('config').doc('toolbar').set(payload, { merge:true })
+                .catch(err => console.warn('[MinTavla] Kunde inte dela verktygslådans ordning (kontrollera Firestore-reglerna för config/toolbar):', err));
+        }, 1200);
+    }
+
     // Registrera/uppdatera användaren i den centrala listan
     async function registerUser(email, name){
         try {
@@ -2182,6 +2314,7 @@
             document.getElementById('login-overlay').style.display = 'none';
             migrateOldLists(currentUser); initBoard();
             updateAdminButton();
+            startSharedToolbarSync(); // adminens ordning i verktygslådan gäller alla användare
         } finally { _handlingSignIn = false; }
     }
 
@@ -2384,6 +2517,7 @@
     function logoutUser() {
         customConfirm('Vill du logga ut?', () => {
             saveBoardState();
+            if (_sharedToolbarUnsub){ try{ _sharedToolbarUnsub(); }catch(e){} _sharedToolbarUnsub = null; }
             currentUser = null; localStorage.removeItem('classboardzUser');
             document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
             updateAdminButton();
@@ -2416,6 +2550,7 @@
                 else if (type === 'QR-KOD') { state.data.url = w.querySelector('.list-name-input')?.value || ''; }
                 else if (type === 'ARBETSSÄTT') { state.data.icon = w.querySelector('.work-symbol.active')?.dataset.icon || ''; }
                 else if (type === 'BELÖNING') { state.data.points = w.querySelectorAll('.reward-star').length; }
+                else if (type === 'GOOD 👍') { try{ state.data = JSON.parse(w.dataset.good || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'GRATTIS') { state.data.name = w.querySelector('.grattis-name-input')?.value || ''; }
                 else if (type === 'NÄRVARO') { state.data.text = w.querySelector('.att-names')?.value || ''; state.data.list = w.querySelector('.att-sel')?.value || ''; try{ state.data.absent = JSON.parse(w.dataset.attAbsent || '[]'); }catch(e){ state.data.absent = [...w.querySelectorAll('.att-name.absent')].map(b=>b.textContent); } }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
@@ -2451,6 +2586,7 @@
                 else if (type === 'EN / ETT') { try{ state.data = JSON.parse(w.dataset.substantiv || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'LÄNDER' || type === 'MEDBORGARE') { try{ state.data = JSON.parse(w.dataset.land || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDKLASSER') { try{ state.data = JSON.parse(w.dataset.ordklass || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'JÄMFÖRA') { try{ state.data = JSON.parse(w.dataset.jamfora || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'SYNONYMJAKTEN') { try{ state.data = JSON.parse(w.dataset.synonym || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'STAVNINGSKAMPEN') { try{ state.data = JSON.parse(w.dataset.stavning || '{}'); }catch(e){ state.data={}; } }
                 
@@ -2489,6 +2625,7 @@
             else if (w.type === 'QR-KOD') createQRCode(w);
             else if (w.type === 'ARBETSSÄTT') createWorkSymbols(w);
             else if (w.type === 'BELÖNING') createRewardSystem(w);
+            else if (w.type === 'GOOD 👍') createGoodWidget(w);
             else if (w.type === 'MINIRÄKNARE') createCalculator(w);
             else if (w.type === 'BRÅK / TID' || w.type === 'TALFORMER') createFractionVisualizer(w);
             else if (w.type === 'SVENSKA ALFABETET') createAlphabetWidget(w);
@@ -2535,6 +2672,7 @@
             else if (w.type === 'EN / ETT') createNounWidget(w);
             else if (w.type === 'LÄNDER' || w.type === 'MEDBORGARE') createCountryWidget(w);
             else if (w.type === 'ORDKLASSER') createWordClassWidget(w);
+            else if (w.type === 'JÄMFÖRA') createComparisonWidget(w);
             else if (w.type === 'SYNONYMJAKTEN') createSynonymWidget(w);
             else if (w.type === 'STAVNINGSKAMPEN') createSpellingBattle(w);
             else if (w.type === 'BIOLOGI ÅK 4') createBiologiWidget(w);
@@ -2645,7 +2783,7 @@
             if(e.button && e.button !== 0) return;
             const t = e.target;
             // Element med egen interaktion – starta INTE flytt där
-            if(t.closest && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], canvas, .pclock-face, .real-clock-face, .analog-clock-face, .hand, .schedule-color-strip, .widget-resizer, .widget-controls')) return;
+            if(t.closest && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], canvas, .pclock-face, .real-clock-face, .analog-clock-face, .hand, .schedule-color-strip, .sched-top-strip, .widget-resizer, .widget-controls')) return;
             const startX = e.clientX, startY = e.clientY;
             const origLeft = el.offsetLeft, origTop = el.offsetTop;
             let dragging = false;
@@ -2752,8 +2890,8 @@
         try {
             if(!window.html2canvas) await _loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
             const canvas = await window.html2canvas(target, { backgroundColor:'#ffffff', scale:2, useCORS:true, logging:false });
-            const a=document.createElement('a'); a.download='min-tavla-'+String(activePageLabel()||'sida').replace(/[^\wåäöÅÄÖ-]+/g,'_')+'.png'; a.href=canvas.toDataURL('image/png'); a.click();
-        } catch(e){ console.warn('Bildexport misslyckades, försöker skriva ut istället:', e); try{ window.print(); }catch(_){} }
+            downloadCanvasAsPDF(canvas, 'min-tavla-'+String(activePageLabel()||'sida').replace(/[^\wåäöÅÄÖ-]+/g,'_')+'.pdf');
+        } catch(e){ console.warn('PDF-export misslyckades, försöker skriva ut istället:', e); try{ window.print(); }catch(_){} }
     }
     function duplicatePageV6(index){
         if(!pagesListV6[index]) return;
@@ -3168,6 +3306,131 @@
         if(config && config.data && config.data.html) ec.innerHTML = config.data.html; body.appendChild(tb); body.appendChild(ec);
     }
 
+    // ---- DAGENS ORD: berikning av det slumpade ordet ----
+    // Efter slumpningen visas ordet direkt (ingen festlig helskärmsvisning). Fyra
+    // fält – bild, exempel, förklaring och synonym – hämtas i bakgrunden och hålls
+    // dolda bakom varsin Visa-knapp tills läraren själv väljer att visa dem.
+    // Bild + förklaring: Wikipedias öppna summary-API. Exempel + synonym: en egen,
+    // fristående uppslagning mot sv.wiktionary.org (skild cache från de andra
+    // ordboks-uppslagen i appen, se subWiktionary/subSynonymer ovan).
+    function gotdEsc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    async function gotdWikipedia(ord){
+        const w=(ord||'').trim(); if(!w) return null;
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdWikiCacheV1')||'{}'); }catch(e){}
+        if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdWikiCacheV1', JSON.stringify(cache)); }catch(e){} };
+        let j;
+        try{
+            const url='https://sv.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(w);
+            const r=await fetch(url);
+            if(!r.ok){ sparaCache('saknas'); return null; }
+            j=await r.json();
+        }catch(e){ return null; } // nätfel: cacha INTE, kan funka nästa gång
+        if(!j || j.type==='disambiguation'){ sparaCache('saknas'); return null; }
+        let forklaring=null;
+        if(j.extract){
+            let t=j.extract;
+            const slut=t.search(/[.!?](\s|$)/);
+            if(slut>-1) t=t.slice(0, slut+1);
+            if(t.length>160) t=t.slice(0,157).trim()+'…';
+            forklaring=t;
+        }
+        const bild=(j.thumbnail && j.thumbnail.source) ? j.thumbnail.source : null;
+        if(!bild && !forklaring){ sparaCache('saknas'); return null; }
+        const res={ bild:bild, forklaring:forklaring };
+        sparaCache(res); return res;
+    }
+    async function gotdOrdbok(ord){
+        const w=(ord||'').toLowerCase().trim(); if(!w) return null;
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdOrdbokCacheV1')||'{}'); }catch(e){}
+        if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdOrdbokCacheV1', JSON.stringify(cache)); }catch(e){} };
+        let j;
+        try{
+            const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
+            const r=await fetch(url); j=await r.json();
+        }catch(e){ return null; } // nätfel: cacha INTE, kan funka nästa gång
+        if(!j || !j.parse || !j.parse.text){ sparaCache('saknas'); return null; }
+        const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
+        const clean=(txt)=> (txt||'').replace(/\[\d+\]/g,'').replace(/\s+/g,' ').trim();
+        const rubriker=[...doc.querySelectorAll('.mw-headline')];
+        const listaEfterRubrik=(rub)=>{
+            let node = rub.closest('h2,h3,h4,h5'); if(!node) return null;
+            let sib = node.nextElementSibling;
+            while(sib && !/^H[2-5]$/.test(sib.tagName)){
+                if(sib.tagName==='UL' || sib.tagName==='OL') return sib;
+                sib = sib.nextElementSibling;
+            }
+            return null;
+        };
+        let synonym=null, exempel=null;
+        const synRub = rubriker.find(h=>/^synonym/i.test(h.textContent||''));
+        if(synRub){
+            const lista = listaEfterRubrik(synRub);
+            if(lista){
+                const items=[...lista.querySelectorAll('li')].map(li=>clean(li.textContent)).filter(Boolean);
+                if(items.length) synonym = items.slice(0,2).join(', ');
+            }
+        }
+        // Exempel: leta efter en nästlad exempelrad i den första betydelselistan
+        const defLista = doc.querySelector('ol');
+        if(defLista){
+            const forstaLi = defLista.querySelector('li');
+            if(forstaLi){
+                const nastlad = forstaLi.querySelector('dl,ul,i');
+                if(nastlad){ const t=clean(nastlad.textContent); if(t && t.length>3) exempel=t; }
+            }
+        }
+        if(!synonym && !exempel){ sparaCache('saknas'); return null; }
+        const res={ synonym:synonym, exempel:exempel };
+        sparaCache(res); return res;
+    }
+    function gotdPanelHtml(kind, icon, label){
+        return `<div class='gotd-panel' data-kind='${kind}'>
+            <button class='gotd-reveal-btn' type='button'>${icon} Visa ${label}</button>
+            <div class='gotd-panel-body' style='display:none;'><span class='gotd-loading'>Hämtar…</span></div>
+        </div>`;
+    }
+    function gotdKortHtml(word){
+        return `<div class='gotd-kort'>
+            <div class='gotd-word'>${gotdEsc(word)}</div>
+            <div class='gotd-panels'>
+                ${gotdPanelHtml('bild','🖼️','bild')}
+                ${gotdPanelHtml('exempel','📝','exempel')}
+                ${gotdPanelHtml('forklaring','💬','förklaring')}
+                ${gotdPanelHtml('synonym','🔄','synonym')}
+            </div>
+            <button class='gotd-reveal-all btn btn-secondary' type='button'>👁️ Visa allt</button>
+        </div>`;
+    }
+    function wireGotdKort(container, word){
+        container.querySelectorAll('.gotd-panel').forEach(panel=>{
+            const btn = panel.querySelector('.gotd-reveal-btn');
+            const bodyEl = panel.querySelector('.gotd-panel-body');
+            if(!btn || !bodyEl) return;
+            btn.onclick = ()=>{ bodyEl.style.display='block'; btn.style.display='none'; saveBoardState(); };
+        });
+        const allBtn = container.querySelector('.gotd-reveal-all');
+        if(allBtn){
+            allBtn.onclick = ()=>{
+                container.querySelectorAll('.gotd-panel-body').forEach(b=> b.style.display='block');
+                container.querySelectorAll('.gotd-reveal-btn').forEach(b=> b.style.display='none');
+                saveBoardState();
+            };
+        }
+    }
+    async function fyllGotdKort(container, word){
+        const bildBody = container.querySelector('.gotd-panel[data-kind="bild"] .gotd-panel-body');
+        const exBody = container.querySelector('.gotd-panel[data-kind="exempel"] .gotd-panel-body');
+        const forkBody = container.querySelector('.gotd-panel[data-kind="forklaring"] .gotd-panel-body');
+        const synBody = container.querySelector('.gotd-panel[data-kind="synonym"] .gotd-panel-body');
+        const [wiki, ordbok] = await Promise.all([gotdWikipedia(word), gotdOrdbok(word)]);
+        if(bildBody) bildBody.innerHTML = (wiki && wiki.bild) ? `<img src="${wiki.bild}" alt="${gotdEsc(word)}">` : `<span class='gotd-tom'>Ingen bild hittades.</span>`;
+        if(forkBody) forkBody.innerHTML = (wiki && wiki.forklaring) ? gotdEsc(wiki.forklaring) : `<span class='gotd-tom'>Ingen förklaring hittades.</span>`;
+        if(exBody) exBody.innerHTML = gotdEsc((ordbok && ordbok.exempel) ? ordbok.exempel : ('Kan du använda ordet "'+word+'" i en egen mening?'));
+        if(synBody) synBody.innerHTML = (ordbok && ordbok.synonym) ? gotdEsc(ordbok.synonym) : `<span class='gotd-tom'>Inga synonymer hittades.</span>`;
+        saveBoardState();
+    }
     function createWordOfTheDay(config){
         const body=createWidget('DAGENS ORD', 320, 'word-widget', config);
         body.innerHTML = `<div class='list-selector-area hover-menu'><select class='editor-select'></select><button class='btn btn-danger btn-del'>Ta bort</button></div><div class='save-list-area hover-menu'><input type='text' class='list-name-input' placeholder='Namn på ordlista...'><button class='btn btn-secondary btn-save'>Spara</button></div><button class='btn btn-secondary btn-toggle-list' style='width:100%;margin-bottom:6px;'>👁️ Visa ordlista</button><textarea class='name-input hover-menu' placeholder='Ett ord per rad...' style='display:none;'></textarea><button class='btn btn-primary hover-menu btn-roll' style='width:100%'>Slumpa ord!</button><div class='name-result' style='min-height:60px;display:flex;align-items:center;justify-content:center;'></div>`;
@@ -3213,8 +3476,34 @@
         };
         body.querySelector('.btn-save').onclick=()=>{ let t=ni.value.trim(), cn=txt.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; l[t]=cn; localStorage.setItem('savedWordLists_',JSON.stringify(l)); ni.value=''; loadW(); sel.value=t; saveBoardState(); };
         body.querySelector('.btn-del').onclick=()=>{ if(!sel.value)return; if(sel.value.startsWith('exempel:')){ customAlert('Exempellistor kan inte raderas. Du kan spara en egen lista i stället.', 'ℹ️'); return; } customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedWordLists_'))||{}; delete l[sel.value]; localStorage.setItem('savedWordLists_',JSON.stringify(l)); txt.value=''; res.innerHTML=''; loadW(); saveBoardState(); }); };
-        if(config&&config.data){ if(config.data.list) setTimeout(()=>sel.value=config.data.list, 100); if(config.data.text) txt.value=config.data.text; if(config.data.result) res.innerHTML=config.data.result; }
-        body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; res.innerHTML='Väljer...'; let ct=0; let iv=setInterval(()=>{ res.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let w=n[Math.floor(Math.random()*n.length)]; res.innerHTML=`<span style='color:#ff3b30;font-size:36px;font-weight:900;'>${w}</span>`; saveBoardState(); showWinnerPopup(w); } },80); };
+        if(config&&config.data){
+            if(config.data.list) setTimeout(()=>sel.value=config.data.list, 100);
+            if(config.data.text) txt.value=config.data.text;
+            if(config.data.result){
+                res.innerHTML=config.data.result;
+                const wordEl = res.querySelector('.gotd-word');
+                if(wordEl){
+                    const word = wordEl.textContent;
+                    wireGotdKort(res, word);
+                    if(res.querySelector('.gotd-loading')) fyllGotdKort(res, word);
+                }
+            }
+        }
+        body.querySelector('.btn-roll').onclick=()=>{
+            let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return;
+            res.innerHTML='Väljer...'; let ct=0;
+            let iv=setInterval(()=>{
+                res.innerText=n[Math.floor(Math.random()*n.length)]; ct++;
+                if(ct>10){
+                    clearInterval(iv);
+                    let w=n[Math.floor(Math.random()*n.length)];
+                    res.innerHTML = gotdKortHtml(w);
+                    wireGotdKort(res, w);
+                    fyllGotdKort(res, w);
+                    saveBoardState();
+                }
+            },80);
+        };
     }
 
     // ---- LÄSHASTIGHET ----
@@ -3704,7 +3993,7 @@
         }
         function renderPanel(){
             const g=GENRER[current];
-            let html = `<div class='genre-huvud'><h3>${g.emoji} ${g.namn}</h3><p>${g.om}</p></div>`;
+            let html = `<div class='genre-huvud'><h3>${g.emoji} ${g.namn}<button class='genre-print-btn' title='Skriv ut denna genre'>🖨️</button></h3><p>${g.om}</p></div>`;
             html += `<div class='genre-sektion kannetecken'><h4>✦ Kännetecken &amp; egenskaper</h4><ul>`;
             g.kannetecken.forEach(k=>{ html += `<li>${k}</li>`; });
             html += `</ul></div>`;
@@ -3716,6 +4005,26 @@
                 html += `<div class='genre-sektion exempel'><h4>📄 Exempeltext</h4><div class='genre-exempel-text'>${esc(g.exempel)}</div></div>`;
             }
             panelEl.innerHTML = html;
+            const printBtn = panelEl.querySelector('.genre-print-btn');
+            if(printBtn) printBtn.onclick = (e)=>{ e.stopPropagation(); skrivUtGenre(); };
+        }
+
+        // ---- UTSKRIFT: skriv ut den aktuella genren/sidan i ett fristående popup-fönster ----
+        function skrivUtGenre(){
+            const g = GENRER[current];
+            const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let html = '<!DOCTYPE html><html lang="sv"><head><meta charset="utf-8"><title>Textgenre – '+esc(g.namn)+'</title>';
+            html += '<style>body{font-family:Georgia,serif;max-width:720px;margin:24px auto;padding:0 18px;color:#222;line-height:1.6;}h1{font-size:22px;border-bottom:3px solid #7c3aed;padding-bottom:6px;}h2{font-size:15px;margin:22px 0 8px;color:#6d28d9;}ul{font-size:13.5px;padding-left:20px;}.chips{margin-top:4px;}.chip{display:inline-block;background:#f3e8ff;border:1px solid #d8b4fe;color:#6d28d9;border-radius:999px;padding:3px 11px;margin:3px 5px 3px 0;font-size:12.5px;font-weight:700;}.exempel{border:1px solid #ccc;border-radius:8px;padding:14px 16px;font-size:13.5px;white-space:pre-wrap;background:#fafafa;}@media print{.noprint{display:none;}}</style></head><body>';
+            html += '<h1>'+g.emoji+' '+esc(g.namn)+'</h1>';
+            html += '<p>'+esc(g.om)+'</p>';
+            html += '<h2>✦ Kännetecken &amp; egenskaper</h2><ul>'+g.kannetecken.map(k=>'<li>'+esc(k)+'</li>').join('')+'</ul>';
+            html += '<h2>✎ Typiska ord &amp; fraser</h2><div class="chips">'+g.ord.map(o=>'<span class="chip">'+esc(o)+'</span>').join('')+'</div>';
+            if(g.exempel){ html += '<h2>📄 Exempeltext</h2><div class="exempel">'+esc(g.exempel)+'</div>'; }
+            html += '<div class="noprint" style="margin-top:20px;"><button onclick="window.print()" style="padding:10px 18px;font-size:14px;cursor:pointer;">🖨️ Skriv ut</button></div>';
+            html += '</body></html>';
+            const w = window.open('', 'genreUtskrift', 'width=780,height=900,scrollbars=yes,resizable=yes');
+            if(!w){ if(typeof customAlert==='function') customAlert('Webbläsaren blockerade utskriftsfönstret. Tillåt popup-fönster och försök igen.', 'ℹ️'); return; }
+            w.document.write(html); w.document.close(); try{ w.focus(); }catch(e){}
         }
 
         // ===== INTERAKTIVA ÖVNINGAR =====
@@ -5028,6 +5337,33 @@
                 'Kon': {Hörn:'1 spets', Kanter:1, Sidoytor:'2 (1 cirkel + 1 böjd)', Extra:'En cirkelbotten och en spets'},
                 'Pyramid': {Hörn:5, Kanter:8, Sidoytor:5, Extra:'Kvadratisk botten + 4 trianglar (kvadratisk pyramid)'}
             };
+            // ---- VINKLAR: samma kort-med-facit-koncept som figurerna, plus en liten gissa-övning ----
+            const VINKEL_TYPER = ['Spetsig vinkel','Rät vinkel','Trubbig vinkel','Rak vinkel','Fullvinkel'];
+            const VINKLAR = {
+                'Spetsig vinkel': { deg:50, Gradtal:'Mindre än 90°', Kännetecken:'Ser "smal" och skarp ut – mindre än en rät vinkel.' },
+                'Rät vinkel':     { deg:90, Gradtal:'Exakt 90°', Kännetecken:'Hörnet i t.ex. en kvadrat eller rektangel. Ritas ofta med en liten fyrkant.' },
+                'Trubbig vinkel': { deg:130, Gradtal:'Mellan 90° och 180°', Kännetecken:'Större och "bredare" än en rät vinkel, men inte helt rak.' },
+                'Rak vinkel':     { deg:180, Gradtal:'Exakt 180°', Kännetecken:'Ser ut som en rak linje – benen pekar åt varsitt håll.' },
+                'Fullvinkel':     { deg:360, Gradtal:'Exakt 360°', Kännetecken:'Ett helt varv runt en punkt, tillbaka till start.' }
+            };
+            function vinkelSvg(deg){
+                const vx=30, vy=78, L=58, r=22;
+                const theta = deg*Math.PI/180;
+                const x1=vx+L, y1=vy;
+                let arcPath;
+                if(deg>=360){
+                    arcPath = `<circle cx="${vx}" cy="${vy}" r="${r}" fill="none" stroke="#dc2626" stroke-width="2.5"/>`+
+                              `<path d="M ${vx+r} ${vy-6} L ${vx+r} ${vy+6} L ${vx+r+8} ${vy} Z" fill="#dc2626"/>`;
+                } else {
+                    const x2=vx+L*Math.cos(theta), y2=vy-L*Math.sin(theta);
+                    const largeArc = deg>180 ? 1 : 0;
+                    const ax=vx+r*Math.cos(theta), ay=vy-r*Math.sin(theta);
+                    arcPath = `<line x1="${vx}" y1="${vy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#2563eb" stroke-width="3"/>`+
+                              `<path d="M ${(vx+r).toFixed(1)} ${vy} A ${r} ${r} 0 ${largeArc} 0 ${ax.toFixed(1)} ${ay.toFixed(1)}" fill="none" stroke="#dc2626" stroke-width="2.5"/>`;
+                }
+                return `<svg viewBox="0 0 100 100"><line x1="${vx}" y1="${vy}" x2="${x1}" y2="${y1}" stroke="#2563eb" stroke-width="3"/>${arcPath}<circle cx="${vx}" cy="${vy}" r="3" fill="#111"/></svg>`;
+            }
+            function blandaVinkel(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
             const ov=document.createElement('div'); ov.className='figx-overlay';
             const box=document.createElement('div'); box.className='figx-box';
@@ -5043,6 +5379,7 @@
 
             const tabs=document.createElement('div'); tabs.className='figx-tabs';
             const grid=document.createElement('div'); grid.className='figx-grid';
+            const ovningEl=document.createElement('div'); ovningEl.className='figx-ovning'; ovningEl.style.display='none';
             let läge='2d';
             function ritaKort(namn, svgHtml, props){
                 const card=document.createElement('div'); card.className='figx-card';
@@ -5057,18 +5394,71 @@
                 card.appendChild(fig); card.appendChild(btn); card.appendChild(info);
                 return card;
             }
+            // ---- Öva: gissa vilken sorts vinkel som visas ----
+            function renderVinkelOvning(){
+                ovningEl.style.display='';
+                ovningEl.innerHTML = `<h3 class="figx-ov-rubrik">🎯 Öva: Gissa vinkeln</h3>`;
+                const panel=document.createElement('div'); panel.className='figx-ov-panel';
+                const fig=document.createElement('div'); fig.className='figx-fig figx-ov-fig';
+                const svarWrap=document.createElement('div'); svarWrap.className='figx-ov-svar';
+                const fb=document.createElement('div'); fb.className='figx-ov-feedback';
+                const poangEl=document.createElement('div'); poangEl.className='figx-ov-poang';
+                const nastaBtn=document.createElement('button'); nastaBtn.className='genre-ov-next'; nastaBtn.textContent='Nästa vinkel ▶'; nastaBtn.style.display='none';
+                let poang=0, antal=0, rattSvar=null;
+                const spann = { 'Spetsig vinkel':[15,80], 'Rät vinkel':[90,90], 'Trubbig vinkel':[100,170], 'Rak vinkel':[180,180] };
+                const kategorier = Object.keys(spann);
+                function nyFraga(){
+                    fb.textContent=''; nastaBtn.style.display='none';
+                    rattSvar = kategorier[Math.floor(Math.random()*kategorier.length)];
+                    const [min,max] = spann[rattSvar];
+                    const deg = min===max ? min : (min + Math.floor(Math.random()*(max-min+1)));
+                    fig.innerHTML = vinkelSvg(deg);
+                    svarWrap.innerHTML='';
+                    blandaVinkel(kategorier).forEach(namn=>{
+                        const b=document.createElement('button'); b.className='genre-svar-btn'; b.textContent=namn;
+                        b.onclick=()=>{
+                            svarWrap.querySelectorAll('.genre-svar-btn').forEach(x=>x.disabled=true);
+                            antal++;
+                            if(namn===rattSvar){ b.classList.add('ratt'); poang++; fb.textContent='✔ Rätt!'; fb.style.color='#1f7a37'; }
+                            else {
+                                b.classList.add('fel'); fb.textContent='✘ Rätt svar: '+rattSvar; fb.style.color='#c2261c';
+                                svarWrap.querySelectorAll('.genre-svar-btn').forEach(x=>{ if(x.textContent===rattSvar) x.classList.add('ratt'); });
+                            }
+                            poangEl.textContent = 'Poäng: '+poang+' av '+antal;
+                            nastaBtn.style.display='';
+                        };
+                        svarWrap.appendChild(b);
+                    });
+                }
+                nastaBtn.onclick=nyFraga;
+                panel.appendChild(fig); panel.appendChild(svarWrap); panel.appendChild(fb); panel.appendChild(poangEl); panel.appendChild(nastaBtn);
+                ovningEl.appendChild(panel);
+                nyFraga();
+            }
             function render(){
                 grid.innerHTML='';
+                if(läge==='vinklar'){
+                    sub.textContent='Gissa vinkelns namn och egenskaper – tryck sedan på den gula rutan för att se svaret. Testa dig själv i övningen längst ned.';
+                    VINKEL_TYPER.forEach(namn=>{ const v=VINKLAR[namn]; grid.appendChild(ritaKort(namn, vinkelSvg(v.deg), {Gradtal:v.Gradtal, Kännetecken:v.Kännetecken})); });
+                    renderVinkelOvning();
+                    return;
+                }
+                sub.textContent='Gissa figurens namn och egenskaper – tryck sedan på den gula rutan för att se svaret.';
+                ovningEl.style.display='none'; ovningEl.innerHTML='';
                 const figs = läge==='2d' ? FIG2D : FIG3D;
                 const props = läge==='2d' ? PROPS2D : PROPS3D;
                 Object.keys(figs).forEach(namn=>{ grid.appendChild(ritaKort(namn, figs[namn], props[namn])); });
             }
             const t2=document.createElement('button'); t2.className='figx-tab active'; t2.textContent='▱ 2D-figurer';
             const t3=document.createElement('button'); t3.className='figx-tab'; t3.textContent='⬡ 3D-figurer';
-            t2.onclick=()=>{ läge='2d'; t2.classList.add('active'); t3.classList.remove('active'); render(); };
-            t3.onclick=()=>{ läge='3d'; t3.classList.add('active'); t2.classList.remove('active'); render(); };
-            tabs.appendChild(t2); tabs.appendChild(t3); box.appendChild(tabs);
+            const t4=document.createElement('button'); t4.className='figx-tab'; t4.textContent='📐 Vinklar';
+            const alla=[t2,t3,t4];
+            t2.onclick=()=>{ läge='2d'; alla.forEach(t=>t.classList.remove('active')); t2.classList.add('active'); render(); };
+            t3.onclick=()=>{ läge='3d'; alla.forEach(t=>t.classList.remove('active')); t3.classList.add('active'); render(); };
+            t4.onclick=()=>{ läge='vinklar'; alla.forEach(t=>t.classList.remove('active')); t4.classList.add('active'); render(); };
+            tabs.appendChild(t2); tabs.appendChild(t3); tabs.appendChild(t4); box.appendChild(tabs);
             box.appendChild(grid);
+            box.appendChild(ovningEl);
             ov.appendChild(box);
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
             render();
@@ -5335,10 +5725,12 @@
         function tidenUte(){
             stoppaTimer();
             timeoutLage=true;
+            avslojad=true; // tiden är ute – visa rätt svar automatiskt
             teams[turn].p=Math.max(0, teams[turn].p-1); // poängen stannar på 0, aldrig minus
             renderLag(); mkBuzz();
             timerEl.style.display='none';
-            taskEl.innerHTML=''; const m=document.createElement('span'); m.textContent='⏰ Tiden är ute! −1 poäng · tryck "Ny uppgift"'; m.style.color='#ff3b30'; taskEl.appendChild(m);
+            renderTask(); // visar uppgiften med facit synligt
+            const m=document.createElement('span'); m.style.flexBasis='100%'; m.style.textAlign='center'; m.style.fontSize='16px'; m.textContent='⏰ Tiden är ute! Svaret visas ovan · −1 poäng · tryck "Ny uppgift"'; m.style.color='#ff3b30'; taskEl.appendChild(m);
             saveBoardState();
             // Ingen automatisk start längre – läraren startar nästa uppgift manuellt med knappen.
         }
@@ -5624,12 +6016,64 @@
         sparaCache('saknas'); return null;
     }
 
+    // ---- SYNONYMER/FÖRKLARING (EN/ETT): slå upp två synonymer på sv.wiktionary.org,
+    // annars en kort förklaring hämtad ur ordets första betydelse. Egen cache/nätanrop,
+    // helt fristående från subWiktionary ovan så den formen-uppslagningen inte påverkas.
+    async function subSynonymer(ord){
+        const w=(ord||'').toLowerCase().trim(); if(!w) return null;
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('subSynCacheV1')||'{}'); }catch(e){}
+        if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('subSynCacheV1', JSON.stringify(cache)); }catch(e){} };
+        let j;
+        try{
+            const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
+            const r=await fetch(url); j=await r.json();
+        }catch(e){ return null; } // nätfel: cacha INTE, kan funka nästa gång
+        if(!j || !j.parse || !j.parse.text){ sparaCache('saknas'); return null; }
+        const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
+        const clean=(txt)=> (txt||'').replace(/\[\d+\]/g,'').replace(/\s+/g,' ').trim();
+        const rubriker=[...doc.querySelectorAll('.mw-headline')];
+        const listaEfterRubrik=(rub)=>{
+            let node = rub.closest('h2,h3,h4,h5'); if(!node) return null;
+            let sib = node.nextElementSibling;
+            while(sib && !/^H[2-5]$/.test(sib.tagName)){
+                if(sib.tagName==='UL' || sib.tagName==='OL') return sib;
+                sib = sib.nextElementSibling;
+            }
+            return null;
+        };
+        // 1) Synonymer-avsnitt (om det finns) → ta upp till två
+        const synRub = rubriker.find(h=>/^synonym/i.test(h.textContent||''));
+        if(synRub){
+            const lista = listaEfterRubrik(synRub);
+            if(lista){
+                const items=[...lista.querySelectorAll('li')].map(li=>clean(li.textContent)).filter(Boolean);
+                if(items.length){ const res={ typ:'synonymer', varde: items.slice(0,2) }; sparaCache(res); return res; }
+            }
+        }
+        // 2) Annars: första betydelseförklaringen under Substantiv-rubriken (eller första numrerade listan på sidan)
+        const substRub = rubriker.find(h=>/^substantiv/i.test(h.textContent||''));
+        let defLista = substRub ? listaEfterRubrik(substRub) : null;
+        if(!defLista) defLista = doc.querySelector('ol');
+        if(defLista){
+            const forsta = defLista.querySelector('li');
+            if(forsta){
+                let txt = clean(forsta.textContent);
+                const slut = txt.search(/[.!?]/);
+                if(slut>-1) txt = txt.slice(0, slut+1);
+                if(txt.length>90) txt = txt.slice(0,87).trim()+'…';
+                if(txt){ const res={ typ:'forklaring', varde: txt }; sparaCache(res); return res; }
+            }
+        }
+        sparaCache('saknas'); return null;
+    }
+
     function createNounWidget(config){
         if(config===undefined) config=null;
         const body = createWidget('EN / ETT', 320, 'sub-widget verb-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett substantiv… t.ex. äpple'><button class='btn btn-primary verb-boj'>Böj ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj formerna)</label><div class='verb-typ'></div><div class='verb-rows'></div>`;
-        const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), rowsEl=body.querySelector('.verb-rows');
+        body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett substantiv… t.ex. äpple'><button class='btn btn-primary verb-boj'>Böj ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj formerna)</label><div class='verb-typ'></div><div class='verb-rows'></div><div class='sub-syn'></div>`;
+        const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), rowsEl=body.querySelector('.verb-rows'), synEl=body.querySelector('.sub-syn');
         if(config && config.data){ if(config.data.word) inp.value=config.data.word; practiceCb.checked=!!config.data.practice; }
         const syncData=()=>{ widget.dataset.substantiv = JSON.stringify({ word: inp.value, practice: practiceCb.checked }); };
         function rad(tempus, form, huvud, dolj, htmlForm){
@@ -5643,9 +6087,19 @@
             else { const f=document.createElement('span'); f.className='verb-form'; f.textContent=form; r.appendChild(f); }
             return r;
         }
-        let uppslagNr=0;
+        let uppslagNr=0, synNr=0;
+        function synRad(state){
+            synEl.classList.remove('laddar');
+            if(state==='laddar'){ synEl.classList.add('laddar'); synEl.textContent='Slår upp synonymer…'; return; }
+            if(!state){ synEl.innerHTML=''; return; }
+            if(state.typ==='synonymer'){
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Synonymer</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('');
+            } else if(state.typ==='forklaring'){
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Betyder</span>${state.varde}`;
+            } else { synEl.innerHTML=''; }
+        }
         function render(){
-            syncData(); rowsEl.innerHTML=''; typEl.textContent='';
+            syncData(); rowsEl.innerHTML=''; typEl.textContent=''; synRad(null);
             const p=subSlaUpp(inp.value);
             if(!p){ typEl.textContent='Skriv ett substantiv ovan och tryck Böj'; return; }
             rita(p);
@@ -5661,6 +6115,14 @@
                     saveBoardState();
                 });
             }
+            // synonymer eller kort förklaring – oberoende uppslag för det framsökta ordet
+            const mittSynNr=++synNr;
+            const ordDaaSyn=inp.value;
+            synRad('laddar');
+            subSynonymer(p.sg).then(s=>{
+                if(mittSynNr!==synNr || inp.value!==ordDaaSyn) return; // användaren hann skriva nytt
+                synRad(s);
+            });
         }
         function rita(p){
             rowsEl.innerHTML='';
@@ -5679,6 +6141,166 @@
         practiceCb.onchange=()=>{ render(); saveBoardState(); };
         if(inp.value) render(); else { typEl.textContent='Skriv ett substantiv – okända ord slås upp på sv.wiktionary.org'; }
     }
+
+    // ---- JÄMFÖRA: adjektivets komparation (Positiv – Komparativ – Superlativ) ----
+    // Skriv ett adjektiv i grundform (positiv) så räknar widgeten själv ut de andra
+    // formerna enligt svenska komparationsregler: oregelbunden komparation (t.ex.
+    // bra/god->bättre->bäst, liten->mindre->minst), omskrivning med mer/mest (adjektiv
+    // på -isk, particip på -ande/-ende/-erad, samt några oböjliga låneord) och annars
+    // den vanliga ändelsen -are/-ast (med kort form där ett obetonat e faller bort,
+    // t.ex. vacker->vackrare, mogen->mognare, enkel->englare). Känner även igen om
+    // eleven råkar skriva komparativ- eller superlativformen och letar då upp grundordet.
+    // Synonymer hämtas separat från sv.wiktionary.org (samma mönster som i En/Ett,
+    // men söker under Adjektiv-rubriken och har en egen cache så uppslagen inte krockar).
+    function adjektivOregelbundna(){
+        if(window._adjOreg) return window._adjOreg;
+        window._adjOreg = [
+            ["bra","bättre","bäst"], ["god","bättre","bäst"], ["gott","bättre","bäst"], ["goda","bättre","bäst"],
+            ["dålig","sämre","sämst"], ["ont","värre","värst"], ["ond","värre","värst"],
+            ["liten","mindre","minst"], ["lilla","mindre","minst"], ["litet","mindre","minst"],
+            ["gammal","äldre","äldst"],
+            ["ung","yngre","yngst"],
+            ["stor","större","störst"],
+            ["hög","högre","högst"],
+            ["låg","lägre","lägst"],
+            ["lång","längre","längst"],
+            ["tung","tyngre","tyngst"],
+            ["trång","trängre","trängst"],
+            ["få","färre","färst"],
+            ["många","fler","flest"],
+            ["mycket","mer","mest"], ["mycken","mer","mest"],
+            ["nära","närmare","närmast"],
+            ["gärna","hellre","helst"],
+            ["sen","senare","senast"], ["sena","senare","senast"],
+            ["tidig","tidigare","tidigast"]
+        ];
+        return window._adjOreg;
+    }
+    function jamforAdjektiv(ord){
+        const w=(ord||'').toLowerCase().trim();
+        if(!w) return null;
+        const OREG = adjektivOregelbundna();
+        for(let i=0;i<OREG.length;i++){ if(OREG[i][0]===w) return { positiv:OREG[i][0], komparativ:OREG[i][1], superlativ:OREG[i][2], regel:'oregelbunden komparation' }; }
+        // Skrev eleven redan komparativ- eller superlativformen? Hitta då grundordet.
+        for(let i=0;i<OREG.length;i++){ if(OREG[i][1]===w || OREG[i][2]===w) return { positiv:OREG[i][0], komparativ:OREG[i][1], superlativ:OREG[i][2], regel:'oregelbunden komparation (kände igen böjd form)' }; }
+        // Omskrivning med mer/mest: adjektiv på -isk, particip på -ande/-ende/-erad, samt några oböjliga låneord
+        const PERIFRAS_ORD = ["rosa","lila","beige","prima","gratis","kul"];
+        if(/(isk|ande|ende|erad)$/.test(w) || PERIFRAS_ORD.indexOf(w)!==-1){
+            return { positiv:w, komparativ:'mer '+w, superlativ:'mest '+w, regel:'omskrivning med mer/mest' };
+        }
+        // Kort form: obetonat e faller bort framför konsonant + el/en/er (vacker->vackrare, mogen->mognare, enkel->englare)
+        let stam = w, regel = 'regelbunden (+are / +ast)';
+        if(/[bcdfghjklmnpqrstvwxz](el|en|er)$/.test(w)){
+            stam = w.slice(0,-2) + w.slice(-1);
+            regel = 'kort form (tappar obetonat e)';
+        }
+        return { positiv:w, komparativ:stam+'are', superlativ:stam+'ast', regel:regel };
+    }
+
+    // Synonymer/förklaring för adjektiv – eget uppslag mot sv.wiktionary.org, egen cache
+    // (helt fristående från subSynonymer så de två uppslagen inte påverkar varandra).
+    async function jmfSynonymer(ord){
+        const w=(ord||'').toLowerCase().trim(); if(!w) return null;
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('jmfSynCacheV1')||'{}'); }catch(e){}
+        if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('jmfSynCacheV1', JSON.stringify(cache)); }catch(e){} };
+        let j;
+        try{
+            const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
+            const r=await fetch(url); j=await r.json();
+        }catch(e){ return null; } // nätfel: cacha INTE, kan funka nästa gång
+        if(!j || !j.parse || !j.parse.text){ sparaCache('saknas'); return null; }
+        const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
+        const clean=(txt)=> (txt||'').replace(/\[\d+\]/g,'').replace(/\s+/g,' ').trim();
+        const rubriker=[...doc.querySelectorAll('.mw-headline')];
+        const listaEfterRubrik=(rub)=>{
+            let node = rub.closest('h2,h3,h4,h5'); if(!node) return null;
+            let sib = node.nextElementSibling;
+            while(sib && !/^H[2-5]$/.test(sib.tagName)){
+                if(sib.tagName==='UL' || sib.tagName==='OL') return sib;
+                sib = sib.nextElementSibling;
+            }
+            return null;
+        };
+        // 1) Synonymer-avsnitt (om det finns) → ta upp till två
+        const synRub = rubriker.find(h=>/^synonym/i.test(h.textContent||''));
+        if(synRub){
+            const lista = listaEfterRubrik(synRub);
+            if(lista){
+                const items=[...lista.querySelectorAll('li')].map(li=>clean(li.textContent)).filter(Boolean);
+                if(items.length){ const res={ typ:'synonymer', varde: items.slice(0,2) }; sparaCache(res); return res; }
+            }
+        }
+        // 2) Annars: första betydelseförklaringen under Adjektiv-rubriken (eller första numrerade listan på sidan)
+        const adjRub = rubriker.find(h=>/^adjektiv/i.test(h.textContent||''));
+        let defLista = adjRub ? listaEfterRubrik(adjRub) : null;
+        if(!defLista) defLista = doc.querySelector('ol');
+        if(defLista){
+            const forsta = defLista.querySelector('li');
+            if(forsta){
+                let txt = clean(forsta.textContent);
+                const slut = txt.search(/[.!?]/);
+                if(slut>-1) txt = txt.slice(0, slut+1);
+                if(txt.length>90) txt = txt.slice(0,87).trim()+'…';
+                if(txt){ const res={ typ:'forklaring', varde: txt }; sparaCache(res); return res; }
+            }
+        }
+        sparaCache('saknas'); return null;
+    }
+
+    function createComparisonWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('JÄMFÖRA', 340, 'cmp-widget verb-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett adjektiv… t.ex. snäll'><button class='btn btn-primary verb-boj'>Jämför ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj formerna)</label><div class='verb-typ'></div><div class='verb-rows'></div><div class='sub-syn'></div>`;
+        const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), rowsEl=body.querySelector('.verb-rows'), synEl=body.querySelector('.sub-syn');
+        if(config && config.data){ if(config.data.word) inp.value=config.data.word; practiceCb.checked=!!config.data.practice; }
+        const syncData=()=>{ widget.dataset.jamfora = JSON.stringify({ word: inp.value, practice: practiceCb.checked }); };
+        function rad(rubrik, form, huvud, dolj){
+            const r=document.createElement('div'); r.className='verb-row'+(huvud?' huvud':'');
+            const t=document.createElement('span'); t.className='verb-tempus'; t.textContent=rubrik; r.appendChild(t);
+            if(dolj){
+                const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa';
+                a.onclick=()=>{ a.textContent=form; a.classList.add('revealed'); a.onclick=null; };
+                r.appendChild(a);
+            } else { const f=document.createElement('span'); f.className='verb-form'; f.textContent=form; r.appendChild(f); }
+            return r;
+        }
+        let synNr=0;
+        function synRad(state){
+            synEl.classList.remove('laddar');
+            if(state==='laddar'){ synEl.classList.add('laddar'); synEl.textContent='Slår upp synonymer…'; return; }
+            if(!state){ synEl.innerHTML=''; return; }
+            if(state.typ==='synonymer'){
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Synonymer</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('');
+            } else if(state.typ==='forklaring'){
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Betyder</span>${state.varde}`;
+            } else { synEl.innerHTML=''; }
+        }
+        function render(){
+            syncData(); rowsEl.innerHTML=''; typEl.textContent=''; synRad(null);
+            const res = jamforAdjektiv(inp.value);
+            if(!res){ typEl.textContent='Skriv ett adjektiv ovan och tryck Jämför'; return; }
+            typEl.textContent = 'Komparation · ' + res.regel;
+            const P = practiceCb.checked;
+            rowsEl.appendChild(rad('Positiv', res.positiv, true, false));
+            rowsEl.appendChild(rad('Komparativ', res.komparativ, false, P));
+            rowsEl.appendChild(rad('Superlativ', res.superlativ, false, P));
+            // synonymer eller kort förklaring – oberoende uppslag för det framsökta ordet
+            const mittSynNr=++synNr;
+            const ordDaaSyn=inp.value;
+            synRad('laddar');
+            jmfSynonymer(res.positiv).then(s=>{
+                if(mittSynNr!==synNr || inp.value!==ordDaaSyn) return; // användaren hann skriva nytt
+                synRad(s);
+            });
+        }
+        bojBtn.onclick=()=>{ render(); saveBoardState(); };
+        inp.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); render(); saveBoardState(); } };
+        practiceCb.onchange=()=>{ render(); saveBoardState(); };
+        if(inp.value) render(); else { typEl.textContent='Skriv ett adjektiv – t.ex. snäll, stor, gammal, glad'; }
+    }
+
 
     // ---- LÄNDER: land → invånarnamn, adjektiv och huvudstad ----
     // Inbyggd lista med ~130 länder. Sökbar även baklänges (”norrman” → Norge)
@@ -7935,10 +8557,27 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const widget = body.parentElement.parentElement;
         body.classList.add('bio-body');
         const bank = biologiBank();
-        const BEGREPP = 'Begrepp';
-        const cats = Object.keys(bank).concat([BEGREPP]);
+        const cats = Object.keys(bank);
         let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
         widget.dataset.bioCat = currentCat;
+        const BIO_BEGREPP_CATS = {
+            "Djur & växter": ["Biologi","Art","Däggdjur","Groddjur","Pollinering"],
+            "Människokroppen": ["Organ","Skelett"],
+            "Sinnen": ["Sinne"],
+            "Ekosystem": ["Ekosystem","Habitat","Nedbrytare","Näringsväv"],
+            "Näringskedjor": ["Näringskedja","Producent","Konsument","Rovdjur","Växtätare"],
+            "Årstider": ["Årstider","Vinterdvala"],
+            "Livscykler": ["Livscykel","Larv"],
+            "Växter": ["Blomma","Frö","Rot","Stjälk"],
+            "Djurens livsmiljöer": ["Habitat"],
+            "Fotosyntes": ["Fotosyntes","Klorofyll","Klyvöppning","Koldioxid","Syre"],
+            "Vatten & kretslopp": ["Kretslopp"],
+            "Naturen": ["Biologisk mångfald"]
+        };
+        function bioBegreppForCat(cat){
+            const wanted = BIO_BEGREPP_CATS[cat] || [];
+            return biologiBegrepp().filter(b => wanted.indexOf(b.ord) !== -1);
+        }
 
         const tabsEl = document.createElement('div'); tabsEl.className = 'bio-tabs';
         const gridEl = document.createElement('div'); gridEl.className = 'bio-grid';
@@ -7956,8 +8595,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
         }
         function renderView(){
-            if(currentCat === BEGREPP) renderBegrepp();
-            else renderGrid();
+            renderGrid();
         }
         function renderGrid(){
             tabsEl.style.display='flex';
@@ -7976,6 +8614,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             quizTile.innerHTML = `<span class="bio-emoji">📝</span><span class="bio-lbl">Quiz</span>`;
             quizTile.onclick = ()=> renderQuiz();
             gridEl.appendChild(quizTile);
+            const begreppTile = document.createElement('div');
+            begreppTile.className = 'bio-tile subj-begrepp-tile';
+            begreppTile.innerHTML = `<span class="bio-emoji">📖</span><span class="bio-lbl">Begrepp</span>`;
+            begreppTile.onclick = ()=> renderBegrepp();
+            gridEl.appendChild(begreppTile);
         }
         function renderQuiz(){
             tabsEl.style.display='none'; footEl.style.display='none';
@@ -7998,23 +8641,41 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             gridEl.querySelector('.bio-back').onclick = ()=>{ renderGrid(); };
         }
         function renderBegrepp(){
-            tabsEl.style.display='flex';
+            tabsEl.style.display='none'; footEl.style.display='none';
             gridEl.className='bio-begrepp'; gridEl.style.display='block';
-            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen i biologi åk 4';
             const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            let html = '<input type="text" class="bio-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            const terms = bioBegreppForCat(currentCat);
+            let html = '<button class="bio-back" type="button">← Tillbaka</button>';
+            html += `<div class="bio-tag">${esc(currentCat)} · Begrepp – gissa innan du visar!</div>`;
+            if(!terms.length){
+                html += '<p style="color:#7a8a7e;font-size:13px;padding:8px 2px;">Inga begrepp kopplade till det här området ännu.</p>';
+                gridEl.innerHTML = html;
+                gridEl.querySelector('.bio-back').onclick = ()=> renderGrid();
+                return;
+            }
+            html += '<input type="text" class="bio-begrepp-search" placeholder="🔍 Sök begrepp…">';
             html += '<div class="bio-begrepp-list">';
-            biologiBegrepp().forEach(b=>{
-                html += `<div class="bio-begrepp-item"><span class="bio-begrepp-ord">${esc(b.ord)}</span><span class="bio-begrepp-def">${esc(b.def)}</span></div>`;
+            terms.forEach(b=>{
+                html += `<div class="bio-begrepp-item"><span class="bio-begrepp-def">${esc(b.def)}</span><button class="figx-reveal" type="button" style="margin-top:6px;">❓ Visa begreppet</button></div>`;
             });
             html += '</div>';
             gridEl.innerHTML = html;
+            gridEl.querySelector('.bio-back').onclick = ()=> renderGrid();
+            gridEl.querySelectorAll('.bio-begrepp-item').forEach((el,i)=>{
+                const btn = el.querySelector('.figx-reveal');
+                btn.onclick = ()=>{
+                    const span = document.createElement('span');
+                    span.className = 'bio-begrepp-ord';
+                    span.textContent = terms[i].ord;
+                    btn.replaceWith(span);
+                };
+            });
             const search = gridEl.querySelector('.bio-begrepp-search');
-            const items = gridEl.querySelectorAll('.bio-begrepp-item');
+            const itemEls = gridEl.querySelectorAll('.bio-begrepp-item');
             search.oninput = ()=>{
                 const q = search.value.trim().toLowerCase();
-                items.forEach(it=>{
-                    const txt = it.textContent.toLowerCase();
+                itemEls.forEach(it=>{
+                    const txt = it.querySelector('.bio-begrepp-def').textContent.toLowerCase();
                     it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
                 });
             };
@@ -8115,10 +8776,25 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         body.classList.add('fro-body');
         const bank = froBank();
         const CYCLE = '🔄 Växtens livscykel';
-        const BEGREPP = 'Begrepp';
-        const cats = Object.keys(bank).concat([BEGREPP]);
+        const cats = Object.keys(bank);
         let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
         widget.dataset.froCat = currentCat;
+        const FRO_BEGREPP_CATS = {
+            "🌾 Fröet": ["Frö"],
+            "💧 Fröet vaknar": ["Gro"],
+            "🌱 Grodden": ["Grodd"],
+            "☀️ Växten växer": ["Rot","Stam","Blad","Fotosyntes"],
+            "🌼 Blomman": ["Blomma","Pistill","Ståndare"],
+            "🐝 Pollinering": ["Pollinering","Nektar"],
+            "🌰 Frukt och frön": ["Frukt"],
+            "🍃 Fröspridning": ["Fröspridning"],
+            "🔄 Växtens livscykel": ["Livscykel"],
+            "🔍 Undersök & upptäck": []
+        };
+        function froBegreppForCat(cat){
+            const wanted = FRO_BEGREPP_CATS[cat] || [];
+            return froBegrepp().filter(b => wanted.indexOf(b.ord) !== -1);
+        }
 
         const tabsEl = document.createElement('div'); tabsEl.className = 'fro-tabs';
         const gridEl = document.createElement('div'); gridEl.className = 'fro-grid';
@@ -8137,8 +8813,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
         }
         function renderView(){
-            if(currentCat === BEGREPP) renderBegrepp();
-            else if(currentCat === CYCLE) renderCycle();
+            if(currentCat === CYCLE) renderCycle();
             else renderGrid();
         }
         function renderGrid(){
@@ -8157,6 +8832,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             quizTile.innerHTML = `<span class="fro-emoji">📝</span><span class="fro-lbl">Quiz</span>`;
             quizTile.onclick = ()=> renderQuiz();
             gridEl.appendChild(quizTile);
+            const begreppTile = document.createElement('div');
+            begreppTile.className = 'fro-tile subj-begrepp-tile';
+            begreppTile.innerHTML = `<span class="fro-emoji">📖</span><span class="fro-lbl">Begrepp</span>`;
+            begreppTile.onclick = ()=> renderBegrepp();
+            gridEl.appendChild(begreppTile);
         }
         function renderQuiz(){
             tabsEl.style.display='none'; footEl.style.display='none';
@@ -8193,26 +8873,47 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
             // sluter cirkeln tillbaka till Frö
             flow += `<span class="fro-cycle-arrow">↩︎</span><div class="fro-cycle-step"><span class="fcs-emoji">🌰</span><span class="fcs-lbl">Frö igen</span></div>`;
-            gridEl.innerHTML = `<div class="fro-cycle"><h3>🔄 Växtens livscykel</h3><div class="fro-cycle-flow">${flow}</div></div>`;
+            gridEl.innerHTML = `<div class="fro-cycle"><h3>🔄 Växtens livscykel</h3><div class="fro-cycle-flow">${flow}</div>
+                <div style="text-align:center;margin-top:14px;"><button class="fro-tile subj-begrepp-tile fro-cycle-begrepp-btn" type="button" style="display:inline-flex;width:auto;aspect-ratio:auto;padding:8px 16px;border-radius:999px;">📖 Begrepp</button></div>
+            </div>`;
+            gridEl.querySelector('.fro-cycle-begrepp-btn').onclick = ()=> renderBegrepp();
         }
         function renderBegrepp(){
-            tabsEl.style.display='flex';
+            tabsEl.style.display='none'; footEl.style.display='none';
             gridEl.className='fro-begrepp'; gridEl.style.display='block';
-            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen';
             const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            let html = '<input type="text" class="fro-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            const terms = froBegreppForCat(currentCat);
+            let html = '<button class="fro-back" type="button">← Tillbaka</button>';
+            html += `<div class="fro-tag">${esc(currentCat)} · Begrepp – gissa innan du visar!</div>`;
+            if(!terms.length){
+                html += '<p style="color:#6d7a68;font-size:13px;padding:8px 2px;">Inga begrepp kopplade till det här området ännu.</p>';
+                gridEl.innerHTML = html;
+                gridEl.querySelector('.fro-back').onclick = ()=> renderView();
+                return;
+            }
+            html += '<input type="text" class="fro-begrepp-search" placeholder="🔍 Sök begrepp…">';
             html += '<div class="fro-begrepp-list">';
-            froBegrepp().forEach(b=>{
-                html += `<div class="fro-begrepp-item"><span class="fro-begrepp-ord">${esc(b.ord)}</span><span class="fro-begrepp-def">${esc(b.def)}</span></div>`;
+            terms.forEach(b=>{
+                html += `<div class="fro-begrepp-item"><span class="fro-begrepp-def">${esc(b.def)}</span><button class="figx-reveal" type="button" style="margin-top:6px;">❓ Visa begreppet</button></div>`;
             });
             html += '</div>';
             gridEl.innerHTML = html;
+            gridEl.querySelector('.fro-back').onclick = ()=> renderView();
+            gridEl.querySelectorAll('.fro-begrepp-item').forEach((el,i)=>{
+                const btn = el.querySelector('.figx-reveal');
+                btn.onclick = ()=>{
+                    const span = document.createElement('span');
+                    span.className = 'fro-begrepp-ord';
+                    span.textContent = terms[i].ord;
+                    btn.replaceWith(span);
+                };
+            });
             const search = gridEl.querySelector('.fro-begrepp-search');
-            const items = gridEl.querySelectorAll('.fro-begrepp-item');
+            const itemEls = gridEl.querySelectorAll('.fro-begrepp-item');
             search.oninput = ()=>{
                 const q = search.value.trim().toLowerCase();
-                items.forEach(it=>{
-                    const txt = it.textContent.toLowerCase();
+                itemEls.forEach(it=>{
+                    const txt = it.querySelector('.fro-begrepp-def').textContent.toLowerCase();
                     it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
                 });
             };
@@ -8375,10 +9076,30 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const widget = body.parentElement.parentElement;
         body.classList.add('kemi-body');
         const bank = kemiBank();
-        const BEGREPP = 'Begrepp';
-        const cats = Object.keys(bank).concat([BEGREPP]);
+        const cats = Object.keys(bank);
         let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
         widget.dataset.kemiCat = currentCat;
+        const KEMI_BEGREPP_CATS = {
+            "Materia & material": ["Atom","Egenskap","Materia","Material"],
+            "Stater & faser": ["Partikel","Fast form","Flytande form","Gas","Smälta","Stelna","Koka","Kondensera"],
+            "Blandningar": ["Blandning","Ren substans"],
+            "Lösningar": ["Lösning","Lösningsmedel","Mättad lösning"],
+            "Vatten": ["Vattnets kretslopp"],
+            "Luft": ["Koldioxid","Syre"],
+            "Ändringar i material": ["Kemisk reaktion"],
+            "Enkla reaktioner": ["Förbränning","Rost"],
+            "Syra & bas": ["Syra","Bas","Neutral","Indikator"],
+            "Upplösning": ["Avdunstning"],
+            "Filtrering": ["Dekantering","Filtrering"],
+            "Vardagskemi": [],
+            "Säkerhet": [],
+            "Undersök & upptäck": [],
+            "Återvinning": []
+        };
+        function kemiBegreppForCat(cat){
+            const wanted = KEMI_BEGREPP_CATS[cat] || [];
+            return kemiBegrepp().filter(b => wanted.indexOf(b.ord) !== -1);
+        }
 
         const tabsEl = document.createElement('div'); tabsEl.className = 'kemi-tabs';
         const gridEl = document.createElement('div'); gridEl.className = 'kemi-grid';
@@ -8396,8 +9117,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
         }
         function renderView(){
-            if(currentCat === BEGREPP) renderBegrepp();
-            else renderGrid();
+            renderGrid();
         }
         function renderGrid(){
             tabsEl.style.display='flex';
@@ -8416,6 +9136,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             quizTile.innerHTML = `<span class="kemi-emoji">📝</span><span class="kemi-lbl">Quiz</span>`;
             quizTile.onclick = ()=> renderQuiz();
             gridEl.appendChild(quizTile);
+            const begreppTile = document.createElement('div');
+            begreppTile.className = 'kemi-tile subj-begrepp-tile';
+            begreppTile.innerHTML = `<span class="kemi-emoji">📖</span><span class="kemi-lbl">Begrepp</span>`;
+            begreppTile.onclick = ()=> renderBegrepp();
+            gridEl.appendChild(begreppTile);
         }
         function renderQuiz(){
             tabsEl.style.display='none'; footEl.style.display='none';
@@ -8438,23 +9163,41 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             gridEl.querySelector('.kemi-back').onclick = ()=>{ renderGrid(); };
         }
         function renderBegrepp(){
-            tabsEl.style.display='flex';
+            tabsEl.style.display='none'; footEl.style.display='none';
             gridEl.className='kemi-begrepp'; gridEl.style.display='block';
-            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen i kemi åk 4';
             const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            let html = '<input type="text" class="kemi-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            const terms = kemiBegreppForCat(currentCat);
+            let html = '<button class="kemi-back" type="button">← Tillbaka</button>';
+            html += `<div class="kemi-tag">${esc(currentCat)} · Begrepp – gissa innan du visar!</div>`;
+            if(!terms.length){
+                html += '<p style="color:#726c7d;font-size:13px;padding:8px 2px;">Inga begrepp kopplade till det här området ännu.</p>';
+                gridEl.innerHTML = html;
+                gridEl.querySelector('.kemi-back').onclick = ()=> renderGrid();
+                return;
+            }
+            html += '<input type="text" class="kemi-begrepp-search" placeholder="🔍 Sök begrepp…">';
             html += '<div class="kemi-begrepp-list">';
-            kemiBegrepp().forEach(b=>{
-                html += `<div class="kemi-begrepp-item"><span class="kemi-begrepp-ord">${esc(b.ord)}</span><span class="kemi-begrepp-def">${esc(b.def)}</span></div>`;
+            terms.forEach(b=>{
+                html += `<div class="kemi-begrepp-item"><span class="kemi-begrepp-def">${esc(b.def)}</span><button class="figx-reveal" type="button" style="margin-top:6px;">❓ Visa begreppet</button></div>`;
             });
             html += '</div>';
             gridEl.innerHTML = html;
+            gridEl.querySelector('.kemi-back').onclick = ()=> renderGrid();
+            gridEl.querySelectorAll('.kemi-begrepp-item').forEach((el,i)=>{
+                const btn = el.querySelector('.figx-reveal');
+                btn.onclick = ()=>{
+                    const span = document.createElement('span');
+                    span.className = 'kemi-begrepp-ord';
+                    span.textContent = terms[i].ord;
+                    btn.replaceWith(span);
+                };
+            });
             const search = gridEl.querySelector('.kemi-begrepp-search');
-            const items = gridEl.querySelectorAll('.kemi-begrepp-item');
+            const itemEls = gridEl.querySelectorAll('.kemi-begrepp-item');
             search.oninput = ()=>{
                 const q = search.value.trim().toLowerCase();
-                items.forEach(it=>{
-                    const txt = it.textContent.toLowerCase();
+                itemEls.forEach(it=>{
+                    const txt = it.querySelector('.kemi-begrepp-def').textContent.toLowerCase();
                     it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
                 });
             };
@@ -8610,10 +9353,29 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const widget = body.parentElement.parentElement;
         body.classList.add('fysik-body');
         const bank = fysikBank();
-        const BEGREPP = 'Begrepp';
-        const cats = Object.keys(bank).concat([BEGREPP]);
+        const cats = Object.keys(bank);
         let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
         widget.dataset.fysikCat = currentCat;
+        const FYSIK_BEGREPP_CATS = {
+            "Ljus & syn": ["Ljuskälla","Reflektion","Skugga"],
+            "Ljud & hörsel": ["Ljudvåg","Vibration"],
+            "Krafter & rörelse": ["Kraft","Friktion","Balans","Tyngdkraft"],
+            "Magnetism": ["Magnet","Magnetfält","Kompass"],
+            "Elektricitet": ["Batteri","Elektricitet","Strömkrets","Ledare","Isolator"],
+            "Värme & temperatur": ["Temperatur","Termometer"],
+            "Enkla maskiner": ["Hävstång"],
+            "Material & egenskaper": [],
+            "Luft & tryck": ["Lufttryck","Luftmotstånd"],
+            "Rörelse & fart": ["Fart","Rörelse"],
+            "Energi": ["Energi","Energiform"],
+            "Väder & vind": ["Vind","Nederbörd"],
+            "Vattenkraft": ["Turbin","Vattenkraft"],
+            "Undersök & upptäck": []
+        };
+        function fysikBegreppForCat(cat){
+            const wanted = FYSIK_BEGREPP_CATS[cat] || [];
+            return fysikBegrepp().filter(b => wanted.indexOf(b.ord) !== -1);
+        }
 
         const tabsEl = document.createElement('div'); tabsEl.className = 'fysik-tabs';
         const gridEl = document.createElement('div'); gridEl.className = 'fysik-grid';
@@ -8631,8 +9393,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
         }
         function renderView(){
-            if(currentCat === BEGREPP) renderBegrepp();
-            else renderGrid();
+            renderGrid();
         }
         function renderGrid(){
             tabsEl.style.display='flex';
@@ -8651,6 +9412,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             quizTile.innerHTML = `<span class="fysik-emoji">📝</span><span class="fysik-lbl">Quiz</span>`;
             quizTile.onclick = ()=> renderQuiz();
             gridEl.appendChild(quizTile);
+            const begreppTile = document.createElement('div');
+            begreppTile.className = 'fysik-tile subj-begrepp-tile';
+            begreppTile.innerHTML = `<span class="fysik-emoji">📖</span><span class="fysik-lbl">Begrepp</span>`;
+            begreppTile.onclick = ()=> renderBegrepp();
+            gridEl.appendChild(begreppTile);
         }
         function renderDetail(item){
             tabsEl.style.display='none'; footEl.style.display='none';
@@ -8734,23 +9500,41 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             drawQuestion();
         }
         function renderBegrepp(){
-            tabsEl.style.display='flex';
+            tabsEl.style.display='none'; footEl.style.display='none';
             gridEl.className='fysik-begrepp'; gridEl.style.display='block';
-            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen i fysik åk 4';
             const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            let html = '<input type="text" class="fysik-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            const terms = fysikBegreppForCat(currentCat);
+            let html = '<button class="fysik-back" type="button">← Tillbaka</button>';
+            html += `<div class="fysik-tag">${esc(currentCat)} · Begrepp – gissa innan du visar!</div>`;
+            if(!terms.length){
+                html += '<p style="color:#5c6672;font-size:13px;padding:8px 2px;">Inga begrepp kopplade till det här området ännu.</p>';
+                gridEl.innerHTML = html;
+                gridEl.querySelector('.fysik-back').onclick = ()=> renderGrid();
+                return;
+            }
+            html += '<input type="text" class="fysik-begrepp-search" placeholder="🔍 Sök begrepp…">';
             html += '<div class="fysik-begrepp-list">';
-            fysikBegrepp().forEach(b=>{
-                html += `<div class="fysik-begrepp-item"><span class="fysik-begrepp-ord">${esc(b.ord)}</span><span class="fysik-begrepp-def">${esc(b.def)}</span></div>`;
+            terms.forEach(b=>{
+                html += `<div class="fysik-begrepp-item"><span class="fysik-begrepp-def">${esc(b.def)}</span><button class="figx-reveal" type="button" style="margin-top:6px;">❓ Visa begreppet</button></div>`;
             });
             html += '</div>';
             gridEl.innerHTML = html;
+            gridEl.querySelector('.fysik-back').onclick = ()=> renderGrid();
+            gridEl.querySelectorAll('.fysik-begrepp-item').forEach((el,i)=>{
+                const btn = el.querySelector('.figx-reveal');
+                btn.onclick = ()=>{
+                    const span = document.createElement('span');
+                    span.className = 'fysik-begrepp-ord';
+                    span.textContent = terms[i].ord;
+                    btn.replaceWith(span);
+                };
+            });
             const search = gridEl.querySelector('.fysik-begrepp-search');
-            const items = gridEl.querySelectorAll('.fysik-begrepp-item');
+            const itemEls = gridEl.querySelectorAll('.fysik-begrepp-item');
             search.oninput = ()=>{
                 const q = search.value.trim().toLowerCase();
-                items.forEach(it=>{
-                    const txt = it.textContent.toLowerCase();
+                itemEls.forEach(it=>{
+                    const txt = it.querySelector('.fysik-begrepp-def').textContent.toLowerCase();
                     it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
                 });
             };
@@ -8892,10 +9676,27 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const widget = body.parentElement.parentElement;
         body.classList.add('teknik-body');
         const bank = teknikBank();
-        const BEGREPP = 'Begrepp';
-        const cats = Object.keys(bank).concat([BEGREPP]);
+        const cats = Object.keys(bank);
         let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
         widget.dataset.teknikCat = currentCat;
+        const TEKNIK_BEGREPP_CATS = {
+            "Tekniska lösningar": ["Teknik","Teknisk lösning","Verktyg","Maskin","System"],
+            "Vardagsteknik": [],
+            "Konstruktioner": ["Bärande konstruktion","Triangel","Balk","Valv","Stabilitet","Konstruktion"],
+            "Material": ["Material"],
+            "Hjul & axlar": ["Hjul","Axel","Kugghjul","Rullager","Friktion"],
+            "Hävstänger": ["Hävstång","Stödjepunkt"],
+            "Bygga & konstruera": ["Mekanism"],
+            "Ritningar & modeller": ["Ritning","Skiss","Modell","Symbol","Skala"],
+            "Teknik i hemmet": ["Vitvaror"],
+            "Teknik i samhället": ["Elnät"],
+            "Uppfinnare": ["Patent","Uppfinning","Uppfinnare"],
+            "Undersök & upptäck": []
+        };
+        function teknikBegreppForCat(cat){
+            const wanted = TEKNIK_BEGREPP_CATS[cat] || [];
+            return teknikBegrepp().filter(b => wanted.indexOf(b.ord) !== -1);
+        }
 
         const tabsEl = document.createElement('div'); tabsEl.className = 'teknik-tabs';
         const gridEl = document.createElement('div'); gridEl.className = 'teknik-grid';
@@ -8913,8 +9714,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
         }
         function renderView(){
-            if(currentCat === BEGREPP) renderBegrepp();
-            else renderGrid();
+            renderGrid();
         }
         function renderGrid(){
             tabsEl.style.display='flex';
@@ -8933,6 +9733,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             quizTile.innerHTML = `<span class="teknik-emoji">📝</span><span class="teknik-lbl">Quiz</span>`;
             quizTile.onclick = ()=> renderQuiz();
             gridEl.appendChild(quizTile);
+            const begreppTile = document.createElement('div');
+            begreppTile.className = 'teknik-tile subj-begrepp-tile';
+            begreppTile.innerHTML = `<span class="teknik-emoji">📖</span><span class="teknik-lbl">Begrepp</span>`;
+            begreppTile.onclick = ()=> renderBegrepp();
+            gridEl.appendChild(begreppTile);
         }
         function renderQuiz(){
             tabsEl.style.display='none'; footEl.style.display='none';
@@ -8955,23 +9760,41 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             gridEl.querySelector('.teknik-back').onclick = ()=>{ renderGrid(); };
         }
         function renderBegrepp(){
-            tabsEl.style.display='flex';
+            tabsEl.style.display='none'; footEl.style.display='none';
             gridEl.className='teknik-begrepp'; gridEl.style.display='block';
-            footEl.style.display='block'; footEl.textContent='De viktigaste nyckelbegreppen i teknik åk 4';
             const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            let html = '<input type="text" class="teknik-begrepp-search" placeholder="🔍 Sök begrepp…">';
+            const terms = teknikBegreppForCat(currentCat);
+            let html = '<button class="teknik-back" type="button">← Tillbaka</button>';
+            html += `<div class="teknik-tag">${esc(currentCat)} · Begrepp – gissa innan du visar!</div>`;
+            if(!terms.length){
+                html += '<p style="color:#7d715c;font-size:13px;padding:8px 2px;">Inga begrepp kopplade till det här området ännu.</p>';
+                gridEl.innerHTML = html;
+                gridEl.querySelector('.teknik-back').onclick = ()=> renderGrid();
+                return;
+            }
+            html += '<input type="text" class="teknik-begrepp-search" placeholder="🔍 Sök begrepp…">';
             html += '<div class="teknik-begrepp-list">';
-            teknikBegrepp().forEach(b=>{
-                html += `<div class="teknik-begrepp-item"><span class="teknik-begrepp-ord">${esc(b.ord)}</span><span class="teknik-begrepp-def">${esc(b.def)}</span></div>`;
+            terms.forEach(b=>{
+                html += `<div class="teknik-begrepp-item"><span class="teknik-begrepp-def">${esc(b.def)}</span><button class="figx-reveal" type="button" style="margin-top:6px;">❓ Visa begreppet</button></div>`;
             });
             html += '</div>';
             gridEl.innerHTML = html;
+            gridEl.querySelector('.teknik-back').onclick = ()=> renderGrid();
+            gridEl.querySelectorAll('.teknik-begrepp-item').forEach((el,i)=>{
+                const btn = el.querySelector('.figx-reveal');
+                btn.onclick = ()=>{
+                    const span = document.createElement('span');
+                    span.className = 'teknik-begrepp-ord';
+                    span.textContent = terms[i].ord;
+                    btn.replaceWith(span);
+                };
+            });
             const search = gridEl.querySelector('.teknik-begrepp-search');
-            const items = gridEl.querySelectorAll('.teknik-begrepp-item');
+            const itemEls = gridEl.querySelectorAll('.teknik-begrepp-item');
             search.oninput = ()=>{
                 const q = search.value.trim().toLowerCase();
-                items.forEach(it=>{
-                    const txt = it.textContent.toLowerCase();
+                itemEls.forEach(it=>{
+                    const txt = it.querySelector('.teknik-begrepp-def').textContent.toLowerCase();
                     it.style.display = (!q || txt.indexOf(q) !== -1) ? 'flex' : 'none';
                 });
             };
@@ -9462,9 +10285,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // ---- ÖVNINGSKLOCKA (vrid visarna, digital tid följer med) – PNG + skalbar ----
     function createPracticeClock(config){
         if(config===undefined)config=null;
-        const body = createWidget('ÖVNINGSKLOCKA', 210, 'practice-clock-widget', config);
+        const body = createWidget('ÖVNINGSKLOCKA', 420, 'practice-clock-widget', config);
         const widgetEl = body.parentElement.parentElement;
-        if(!config){ widgetEl.style.width='210px'; widgetEl.style.height='280px'; }
+        if(!config){ widgetEl.style.width='420px'; widgetEl.style.height='560px'; }
         body.innerHTML = `<div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital'>03:00</div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
         const inner=body.querySelector('.pclock-inner'), cf=body.querySelector('.pclock-face'), hh=body.querySelector('.pclock-hh'), mh=body.querySelector('.pclock-mh'), dig=body.querySelector('.pclock-digital');
         for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
@@ -9678,7 +10501,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         render();
     }
 
-    // ---- EXIT TICKET (snabb koll: hur kändes lektionen?) ----
+    // ---- EXIT TICKET (snabb koll: hur kändes lektionen? + återkoppling) ----
     const EXIT_TICKET_DEFAULT_OPTIONS = [
         { emoji:'😄', label:'Toppen' },
         { emoji:'🙂', label:'Bra' },
@@ -9686,29 +10509,71 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         { emoji:'🙁', label:'Svårt' },
         { emoji:'😢', label:'Jobbigt' }
     ];
+    // Reflektionsfrågor till fliken "Återkoppla" – en slumpas fram i taget
+    const EXIT_ATK_FRAGOR = [
+        'Vad är det viktigaste du tar med dig från idag?',
+        'Beskriv [dagens huvudämne/koncept] med egna ord på en minut.',
+        'Om du skulle förklara det vi gjorde idag för en kompis som var sjuk, vad skulle du säga?',
+        'Vilka är de tre viktigaste punkterna från dagens lektion/möte?',
+        'Vad var det svåraste eller mest otydliga idag?',
+        'Finns det något som fortfarande känns luddigt? I så fall, vad?',
+        'Vilken fråga har du kvar som du inte fått svar på?',
+        'Säg en sak som du skulle vilja att vi går igenom mer noggrant nästa gång.',
+        'Hur väl förstår du dagens ämne på en skala 1–5?',
+        'Hur fokuserad eller aktiv var du idag på en skala 1–5?',
+        'Vad gjorde du idag som hjälpte dig att förstå eller bidra?',
+        'Nämn 3 saker du lärt dig, 2 saker du tyckte var intressanta och 1 fråga du har kvar.',
+        'Sammanfatta dagens lektion med några meningar.'
+    ];
 
     function createExitTicket(config){
         const body = createWidget('EXIT TICKET', 300, 'exit-widget', config);
         const widgetEl = body.parentElement.parentElement;
-        if(!config){ widgetEl.style.height = '300px'; }
+        if(!config){ widgetEl.style.height = '380px'; }
         const options = EXIT_TICKET_DEFAULT_OPTIONS;
         let question = 'Hur kändes lektionen idag?';
         let counts = options.map(()=>0);
+        let läge = 'utv';
+        let atkListVald = '';
         if(config && config.data){
             if(typeof config.data.question === 'string') question = config.data.question;
             if(Array.isArray(config.data.counts) && config.data.counts.length===options.length) counts = config.data.counts.map(n=>parseInt(n)||0);
+            if(config.data.läge==='atk') läge = 'atk';
+            if(typeof config.data.atkList === 'string') atkListVald = config.data.atkList;
         }
 
         const root=document.createElement('div'); root.className='exit-root'; body.appendChild(root);
-        const qInput=document.createElement('input'); qInput.type='text'; qInput.className='exit-question'; qInput.value=question; qInput.placeholder='Skriv din fråga...'; root.appendChild(qInput);
 
-        const optsRow=document.createElement('div'); optsRow.className='exit-options'; root.appendChild(optsRow);
-        const barsWrap=document.createElement('div'); barsWrap.className='exit-bar-wrap'; root.appendChild(barsWrap);
-        const totalEl=document.createElement('div'); totalEl.className='exit-total'; root.appendChild(totalEl);
-        const resetBtn=document.createElement('button'); resetBtn.className='exit-reset'; resetBtn.type='button'; resetBtn.textContent='Nollställ svar'; root.appendChild(resetBtn);
+        // ---- Flikar: Utvärdera / Återkoppla ----
+        const tabsEl=document.createElement('div'); tabsEl.className='exit-tabs'; root.appendChild(tabsEl);
+        const tUtv=document.createElement('button'); tUtv.type='button'; tUtv.className='exit-tab'; tUtv.textContent='😀 Utvärdera';
+        const tAtk=document.createElement('button'); tAtk.type='button'; tAtk.className='exit-tab'; tAtk.textContent='💬 Återkoppla';
+        tabsEl.appendChild(tUtv); tabsEl.appendChild(tAtk);
+
+        const panelUtv=document.createElement('div'); panelUtv.className='exit-panel-utv'; root.appendChild(panelUtv);
+        const panelAtk=document.createElement('div'); panelAtk.className='exit-panel-atk'; root.appendChild(panelAtk);
+
+        // ---- UTVÄRDERA: befintlig emoji-koll, oförändrad funktion ----
+        const qInput=document.createElement('input'); qInput.type='text'; qInput.className='exit-question'; qInput.value=question; qInput.placeholder='Skriv din fråga...'; panelUtv.appendChild(qInput);
+        const optsRow=document.createElement('div'); optsRow.className='exit-options'; panelUtv.appendChild(optsRow);
+        const barsWrap=document.createElement('div'); barsWrap.className='exit-bar-wrap'; panelUtv.appendChild(barsWrap);
+        const totalEl=document.createElement('div'); totalEl.className='exit-total'; panelUtv.appendChild(totalEl);
+        const resetBtn=document.createElement('button'); resetBtn.className='exit-reset'; resetBtn.type='button'; resetBtn.textContent='Nollställ svar'; panelUtv.appendChild(resetBtn);
+
+        // ---- ÅTERKOPPLA: slumpa reflektionsfråga + slumpa elev ur sparad lista ----
+        const fragaBlock=document.createElement('div'); fragaBlock.className='exit-atk-block';
+        fragaBlock.innerHTML = `<h4>💬 Slumpa en återkopplingsfråga</h4><button type='button' class='btn btn-primary exit-atk-slump-fraga' style='width:100%;'>🎲 Slumpa fråga</button><div class='exit-atk-fraga-box'>Tryck på knappen för att få en fråga.</div>`;
+        panelAtk.appendChild(fragaBlock);
+        const fragaBox = fragaBlock.querySelector('.exit-atk-fraga-box');
+
+        const elevBlock=document.createElement('div'); elevBlock.className='exit-atk-block';
+        elevBlock.innerHTML = `<h4>🙋 Slumpa en elev att svara</h4><select class='editor-select exit-atk-listval'></select><button type='button' class='btn btn-secondary exit-atk-slump-elev' style='width:100%;'>🎲 Slumpa elev</button><div class='exit-atk-elev-box'>Välj en lista och tryck på knappen.</div>`;
+        panelAtk.appendChild(elevBlock);
+        const atkListSel = elevBlock.querySelector('.exit-atk-listval');
+        const elevBox = elevBlock.querySelector('.exit-atk-elev-box');
 
         const widgetElRef = widgetEl;
-        const stamp=()=>{ widgetElRef.dataset.exitTicket = JSON.stringify({ question, counts }); };
+        const stamp=()=>{ widgetElRef.dataset.exitTicket = JSON.stringify({ question, counts, läge, atkList: atkListSel.value }); };
         const persist=()=>{ stamp(); saveBoardState(); };
 
         function renderBars(){
@@ -9748,6 +10613,42 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 renderBars(); persist();
             });
         };
+
+        fragaBlock.querySelector('.exit-atk-slump-fraga').onclick=()=>{
+            const f = EXIT_ATK_FRAGOR[Math.floor(Math.random()*EXIT_ATK_FRAGOR.length)];
+            fragaBox.textContent = f;
+        };
+
+        const loadAtkLists=()=>{
+            const valt = atkListSel.value || atkListVald;
+            atkListSel.innerHTML = '<option value="">-- Välj lista --</option>';
+            const l = JSON.parse(localStorage.getItem('savedClassLists_'+currentUser)||'{}');
+            Object.keys(l).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=k; atkListSel.appendChild(o); });
+            if(valt && [...atkListSel.options].some(o=>o.value===valt)) atkListSel.value = valt;
+        };
+        loadAtkLists();
+        atkListSel.onchange=()=>{ elevBox.textContent='Tryck på knappen för att slumpa en elev.'; persist(); };
+        elevBlock.querySelector('.exit-atk-slump-elev').onclick=()=>{
+            if(!atkListSel.value){ elevBox.textContent='Välj en lista först.'; return; }
+            const l = JSON.parse(localStorage.getItem('savedClassLists_'+currentUser)||'{}');
+            const namn = (l[atkListSel.value]||'').split('\n').map(n=>n.trim()).filter(n=>n);
+            if(!namn.length){ elevBox.textContent='Listan är tom.'; return; }
+            const vald = namn[Math.floor(Math.random()*namn.length)];
+            elevBox.textContent = '🙋 ' + vald;
+        };
+
+        function visaLäge(l){
+            läge = l;
+            tUtv.classList.toggle('active', l==='utv');
+            tAtk.classList.toggle('active', l==='atk');
+            panelUtv.style.display = l==='utv' ? '' : 'none';
+            panelAtk.style.display = l==='atk' ? '' : 'none';
+            if(l==='atk') loadAtkLists(); // uppdatera ifall nya elevlistor sparats sedan widgeten skapades
+            persist();
+        }
+        tUtv.onclick=()=>visaLäge('utv');
+        tAtk.onclick=()=>visaLäge('atk');
+        visaLäge(läge);
 
         renderBars();
         stamp();
@@ -9806,6 +10707,140 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         el.appendChild(del);
         if(cfg.shape==='rect'){ const rb=document.createElement('div'); rb.className='seat-rot'; rb.textContent='↻'; rb.title='Snurra bordet 45°'; el.appendChild(rb); }
         return el;
+    }
+
+
+    // ---- GOOD: klassrumsbelöning – dra en sur min till glasburken, den blir glad ----
+    // En replenishing hög av sura mun-emoji (🙁) längst till vänster; läraren
+    // drar (pekar/pointer, funkar även touch) en av dem till glasburken. Släpps
+    // den innanför burkens dropzon räknas den och visas som en glad mun (🙂)
+    // inne i burken, och en ny sur min dyker upp i högen så den aldrig tar slut.
+    // Egen pointerdown-hantering med e.stopPropagation() så att widgetens egen
+    // dra-hela-widgeten-logik (makeBodyDraggable) inte krockar med dragningen
+    // av en enskild emoji – samma mönster som Bordsplaceringens möbeldrag.
+    function createGoodWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('GOOD 👍', 480, 'good-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='good-intro'>Dra en sur min till burken när en elev gjort något bra – den blir glad! 🙂</div>
+            <div class='good-area'>
+                <div class='good-pile'></div>
+                <div class='good-jar-col'>
+                    <div class='good-jar-wrap'>
+                        <svg class='good-jar-svg' viewBox='0 0 120 150' width='220' height='275'>
+                            <rect x='34' y='2' width='52' height='10' rx='3' fill='#dfe2e6' stroke='#8b8f96' stroke-width='2'/>
+                            <rect x='30' y='10' width='60' height='14' rx='4' fill='#c9ccd1' stroke='#8b8f96' stroke-width='2'/>
+                            <path d='M20 26 Q20 22 26 22 L94 22 Q100 22 100 26 L100 128 Q100 140 88 140 L32 140 Q20 140 20 128 Z' fill='rgba(190,225,255,0.22)' stroke='#7fa8c9' stroke-width='3'/>
+                            <path d='M27 30 Q25 62 27 132' fill='none' stroke='#ffffff' stroke-width='4' opacity='0.5' stroke-linecap='round'/>
+                        </svg>
+                        <div class='good-jar-drop'><div class='good-jar-contents'></div></div>
+                    </div>
+                    <div class='good-count'></div>
+                </div>
+            </div>
+            <div class='good-footer'>
+                <button class='btn btn-secondary good-clear' type='button'>🗑️ Töm burken</button>
+            </div>`;
+        const pileEl = body.querySelector('.good-pile');
+        const jarDrop = body.querySelector('.good-jar-drop');
+        const jarContents = body.querySelector('.good-jar-contents');
+        const countEl = body.querySelector('.good-count');
+        const clearBtn = body.querySelector('.good-clear');
+        const PILE_SIZE = 6, VIS_MAX = 40, TILE_SIZE = 56, HAPPY_SIZE = 56, STACK_STEP = 14;
+        let count = (config && config.data && typeof config.data.count === 'number') ? config.data.count : 0;
+        let visualN = 0; // hur många glada miner som faktiskt ritats i burken just nu
+
+        const syncData = ()=>{ widget.dataset.good = JSON.stringify({ count: count }); };
+        function updateCount(){ countEl.textContent = count + ' st i burken'; syncData(); }
+        // Slumpad position + rotation inom en yta så att de sura minerna i högen ligger huller om buller.
+        function slumpaHög(el, w, h, size){
+            const maxL = Math.max(4, w - size - 4), maxT = Math.max(4, h - size - 4);
+            const left = 4 + Math.random()*maxL, top = 4 + Math.random()*maxT;
+            const rot = -24 + Math.random()*48;
+            el.style.left = left+'px'; el.style.top = top+'px'; el.style.setProperty('--r', rot+'deg');
+        }
+        // Travar en glad mun snyggt ovanpå de tidigare i stället för att strö ut dem slumpmässigt:
+        // varje ny hamnar lite högre upp i burken, med en liten sidledes och rotationsvariation.
+        function travaIBurken(el, idx){
+            const jw = jarDrop.clientWidth || 118, jh = jarDrop.clientHeight || 206;
+            const center = (jw - HAPPY_SIZE) / 2;
+            const jitterX = (Math.random()*2 - 1) * Math.max(0, center - 6);
+            const left = Math.max(2, Math.min(center + jitterX, jw - HAPPY_SIZE - 2));
+            const top = Math.max(4, jh - HAPPY_SIZE - idx * STACK_STEP);
+            const rot = -16 + Math.random()*32;
+            el.style.left = left+'px'; el.style.top = top+'px'; el.style.setProperty('--r', rot+'deg');
+        }
+        function addHappyToJar(animate){
+            if(visualN >= VIS_MAX) return;
+            const s = document.createElement('span');
+            s.className = 'good-jar-happy' + (animate ? ' landing' : '');
+            s.textContent = '🙂';
+            travaIBurken(s, visualN);
+            jarContents.appendChild(s);
+            visualN++;
+        }
+        function renderJarContents(){
+            jarContents.innerHTML = ''; visualN = 0;
+            const n = Math.min(count, VIS_MAX);
+            for(let i=0;i<n;i++) addHappyToJar(false);
+        }
+        function wireDrag(tile){
+            tile.addEventListener('pointerdown', (e)=>{
+                if(typeof canEditBoard === 'function' && !canEditBoard()) return;
+                if(e.button && e.button !== 0) return;
+                e.stopPropagation(); e.preventDefault();
+                const ghost = document.createElement('span');
+                ghost.className='good-drag-ghost'; ghost.textContent='🙁';
+                document.body.appendChild(ghost);
+                const placeGhost=(cx,cy)=>{ ghost.style.left=(cx-28)+'px'; ghost.style.top=(cy-30)+'px'; };
+                placeGhost(e.clientX, e.clientY);
+                tile.classList.add('dragging-source');
+                try{ tile.setPointerCapture(e.pointerId); }catch(_){}
+                let overJar=false;
+                const checkOver=(cx,cy)=>{
+                    const r = jarDrop.getBoundingClientRect();
+                    const inside = cx>=r.left && cx<=r.right && cy>=r.top && cy<=r.bottom;
+                    if(inside!==overJar){ overJar=inside; jarDrop.classList.toggle('drag-over', inside); }
+                    return inside;
+                };
+                const cleanup=()=>{
+                    tile.removeEventListener('pointermove', move);
+                    tile.removeEventListener('pointerup', up);
+                    tile.removeEventListener('pointercancel', cleanup);
+                    ghost.remove();
+                    tile.classList.remove('dragging-source');
+                    jarDrop.classList.remove('drag-over');
+                };
+                const move=(ev)=>{ placeGhost(ev.clientX, ev.clientY); checkOver(ev.clientX, ev.clientY); };
+                const up=(ev)=>{
+                    const dropped = checkOver(ev.clientX, ev.clientY);
+                    cleanup();
+                    if(dropped){
+                        tile.remove();
+                        count++; updateCount(); addHappyToJar(true);
+                        addSourTile();
+                        saveBoardState();
+                    }
+                };
+                tile.addEventListener('pointermove', move);
+                tile.addEventListener('pointerup', up);
+                tile.addEventListener('pointercancel', cleanup);
+            });
+        }
+        function addSourTile(){
+            const tile = document.createElement('span');
+            tile.className='good-sour'; tile.textContent='🙁'; tile.title='Dra till burken';
+            slumpaHög(tile, pileEl.clientWidth || 260, pileEl.clientHeight || 230, TILE_SIZE);
+            wireDrag(tile);
+            pileEl.appendChild(tile);
+        }
+        function fillPile(){ pileEl.innerHTML=''; for(let i=0;i<PILE_SIZE;i++) addSourTile(); }
+
+        clearBtn.onclick=()=>{ customConfirm('Töm burken helt?', ()=>{ count=0; updateCount(); jarContents.innerHTML=''; visualN=0; saveBoardState(); }); };
+
+        fillPile();
+        updateCount();
+        renderJarContents();
     }
 
     function createSeatingChart(config){
@@ -10673,12 +11708,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             // knappar
             const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
             const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
-            const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut korsordet'; prnt.onclick=()=>printCrossword(state.layout, state.title, false);
-            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara korsordet som PDF på datorn'; saveImg.onclick=()=>saveCrosswordAsImage(state.layout, state.title, false);
-            const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
             let showing=false;
-            facit.onclick=()=>{ showing=!showing; g.querySelectorAll('.kw-input').forEach(inp=>{ const cell=inp.parentElement; if(showing){ inp.value=inp.dataset.ans; cell.classList.add('kw-facit'); } else { inp.value=state.answers[inp.dataset.k]||''; cell.classList.remove('kw-facit'); } }); facit.textContent=showing?'Dölj facit':'Visa facit'; };
-            const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.answers={}; g.querySelectorAll('.kw-input').forEach(inp=>{ inp.value=''; inp.parentElement.classList.remove('kw-facit'); }); showing=false; facit.textContent='Visa facit'; persist(); };
+            const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut korsordet utan facit'; prnt.onclick=()=>printCrossword(state.layout, state.title, showing);
+            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara korsordet som PDF utan facit'; saveImg.onclick=()=>saveCrosswordAsImage(state.layout, state.title, showing);
+            const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
+            facit.onclick=()=>{ showing=!showing; g.querySelectorAll('.kw-input').forEach(inp=>{ const cell=inp.parentElement; if(showing){ inp.value=inp.dataset.ans; cell.classList.add('kw-facit'); } else { inp.value=state.answers[inp.dataset.k]||''; cell.classList.remove('kw-facit'); } }); facit.textContent=showing?'Dölj facit':'Visa facit'; prnt.title = showing ? 'Skriv ut korsordet med facit' : 'Skriv ut korsordet utan facit'; saveImg.title = showing ? 'Spara korsordet som PDF med facit' : 'Spara korsordet som PDF utan facit'; };
+            const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.answers={}; g.querySelectorAll('.kw-input').forEach(inp=>{ inp.value=''; inp.parentElement.classList.remove('kw-facit'); }); showing=false; facit.textContent='Visa facit'; prnt.title='Skriv ut korsordet utan facit'; saveImg.title='Spara korsordet som PDF utan facit'; persist(); };
             const shuffle=document.createElement('button'); shuffle.className='kw-btn kw-btn-ghost'; shuffle.textContent='🔀 Nytt utseende'; shuffle.onclick=()=>{ const arr=state.entries.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp; } const lay2=buildCrossword(arr); if(lay2){ state.layout=lay2; state.answers={}; render(); persist(); } };
             const aiBtn2=document.createElement('button'); aiBtn2.className='kw-btn kw-btn-ai'; aiBtn2.textContent='✨ AI'; aiBtn2.title='Skapa nytt korsord med AI'; aiBtn2.onclick=openAiDialog;
             btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(saveImg); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
@@ -10824,14 +11859,17 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         return result;
     }
 
-    function printWordSearch(lay, title, allowDiag){
+    function printWordSearch(lay, title, allowDiag, withFacit){
         if(!lay) return;
         if(allowDiag===undefined) allowDiag=true;
         const dirText = allowDiag
             ? 'Orden kan gå vågrätt, lodrätt och diagonalt (även baklänges).'
             : 'Orden kan gå vågrätt och lodrätt (även baklänges) – inga diagonala ord.';
+        // Facit = de bokstäver som ingår i något av de gömda orden, markerade med gul bakgrund (samma som i widgeten).
+        const facitAt={};
+        if(withFacit) lay.placements.forEach(p=>p.cells.forEach(cc=>{ facitAt[cc.r+','+cc.c]=true; }));
         let cells='';
-        for(let r=0;r<lay.size;r++){ for(let c=0;c<lay.size;c++){ cells+="<div class='pc'>"+kwEsc(lay.grid[r][c])+"</div>"; } }
+        for(let r=0;r<lay.size;r++){ for(let c=0;c<lay.size;c++){ const fc = withFacit && facitAt[r+','+c]; cells+="<div class='pc"+(fc?' pcf':'')+"'>"+kwEsc(lay.grid[r][c])+"</div>"; } }
         const wordsList = lay.placements.map(p=>"<li>"+kwEsc(p.word)+"</li>").join('');
         // Rutnätet skalas till att fylla hela sidans utskriftsbara bredd (A4 - marginaler), oavsett storlek på ordgömman
         const gridMM = 170; // ungefärlig utskriftsbar bredd i mm (A4 210mm - 2x15mm marginal + lite luft)
@@ -10845,12 +11883,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             +"h1{text-align:center;font-size:22px;margin:0 0 12mm;}"
             +".grid{display:grid;grid-template-columns:repeat("+lay.size+",1fr);width:"+gridMM+"mm;aspect-ratio:1/1;gap:0;margin:0 auto 12mm;border-left:1px solid #ccc;border-top:1px solid #ccc;}"
             +".pc{border-right:1px solid #ccc;border-bottom:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:"+fontMM+"mm;font-weight:700;}"
+            +".pc.pcf{background:#fff3cd;}"
             +".words{width:"+gridMM+"mm;margin:0 auto;columns:3;font-size:14px;line-height:1.9;}"
             +".dirnote{width:"+gridMM+"mm;margin:0 auto 8mm;text-align:center;font-size:13px;color:#444;}"
             +".words ul{list-style:none;padding:0;margin:0;}"
-            +"@media print{ .grid{ page-break-inside:avoid; } .words{ page-break-inside:avoid; } }"
+            +"@media print{ .grid{ page-break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact; } .words{ page-break-inside:avoid; } }"
             +"</style></head><body>"
-            +"<h1>"+kwEsc(title||'Ordgömma')+"</h1>"
+            +"<h1>"+kwEsc(title||'Ordgömma')+(withFacit?' – facit':'')+"</h1>"
             +"<div class='dirnote'>"+kwEsc(dirText)+"</div>"
             +"<div class='grid'>"+cells+"</div>"
             +"<div class='words'><ul>"+wordsList+"</ul></div>"
@@ -10861,12 +11900,15 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
 
     // Ritar ordgömman (rutnät + ordlista) till en canvas och laddar ner den som en PDF-fil
-    function saveWordSearchAsImage(lay, title, allowDiag){
+    function saveWordSearchAsImage(lay, title, allowDiag, withFacit){
         if(!lay) return;
         if(allowDiag===undefined) allowDiag=true;
         const dirText = allowDiag
             ? 'Orden kan gå vågrätt, lodrätt och diagonalt (även baklänges).'
             : 'Orden kan gå vågrätt och lodrätt (även baklänges) – inga diagonala ord.';
+        // Facit = de bokstäver som ingår i något av de gömda orden, markerade med gul bakgrund (samma som i widgeten).
+        const facitAt={};
+        if(withFacit) lay.placements.forEach(p=>p.cells.forEach(cc=>{ facitAt[cc.r+','+cc.c]=true; }));
         const cellPx = 40, pad = 36, titleH = 46, noteH = 28;
         const gridW = lay.size*cellPx, gridH = lay.size*cellPx;
         const words = lay.placements.map(p=>p.word);
@@ -10880,7 +11922,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvasW,canvasH);
         let y = pad;
         ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.font='bold 26px Arial';
-        ctx.fillText(title||'Ordgömma', canvasW/2, y+24);
+        ctx.fillText((title||'Ordgömma') + (withFacit?' – facit':''), canvasW/2, y+24);
         y += titleH;
         ctx.fillStyle='#444'; ctx.font='14px Arial'; ctx.textAlign='center';
         ctx.fillText(dirText, canvasW/2, y+16);
@@ -10889,6 +11931,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         ctx.font=(cellPx*0.5)+'px Arial'; ctx.textBaseline='middle';
         for(let r=0;r<lay.size;r++){ for(let c=0;c<lay.size;c++){
             const x=gridX+c*cellPx, yy=y+r*cellPx;
+            if(withFacit && facitAt[r+','+c]){ ctx.fillStyle='#fff3cd'; ctx.fillRect(x,yy,cellPx,cellPx); }
             ctx.strokeStyle='#ccc'; ctx.lineWidth=1; ctx.strokeRect(x,yy,cellPx,cellPx);
             ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.fillText(lay.grid[r][c], x+cellPx/2, yy+cellPx/2+1);
         }}
@@ -11017,12 +12060,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
             const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
             const edit=document.createElement('button'); edit.className='kw-btn kw-btn-ghost'; edit.textContent='✏️ Ändra ord'; edit.onclick=()=>{ state.mode='edit'; render(); persist(); };
-            const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut ordgömman'; prnt.onclick=()=>printWordSearch(state.layout, state.title, state.diag!==false);
-            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara ordgömman som PDF på datorn'; saveImg.onclick=()=>saveWordSearchAsImage(state.layout, state.title, state.diag!==false);
-            const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
             let showing=false;
-            facit.onclick=()=>{ showing=!showing; if(showing){ lay.placements.forEach(p=>p.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-facit'); })); } else { g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-facit')); } facit.textContent=showing?'Dölj facit':'Visa facit'; };
-            const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.found={}; g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-found','og-facit')); wl.querySelectorAll('.og-word-chip').forEach(ch=>ch.classList.remove('og-found')); showing=false; facit.textContent='Visa facit'; persist(); };
+            const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut ordgömman utan facit'; prnt.onclick=()=>printWordSearch(state.layout, state.title, state.diag!==false, showing);
+            const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara ordgömman som PDF utan facit'; saveImg.onclick=()=>saveWordSearchAsImage(state.layout, state.title, state.diag!==false, showing);
+            const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
+            facit.onclick=()=>{ showing=!showing; if(showing){ lay.placements.forEach(p=>p.cells.forEach(cc=>{ const el=cellEls[cc.r+','+cc.c]; if(el) el.classList.add('og-facit'); })); } else { g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-facit')); } facit.textContent=showing?'Dölj facit':'Visa facit'; prnt.title = showing ? 'Skriv ut ordgömman med facit' : 'Skriv ut ordgömman utan facit'; saveImg.title = showing ? 'Spara ordgömman som PDF med facit' : 'Spara ordgömman som PDF utan facit'; };
+            const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.found={}; g.querySelectorAll('.og-cell').forEach(el=>el.classList.remove('og-found','og-facit')); wl.querySelectorAll('.og-word-chip').forEach(ch=>ch.classList.remove('og-found')); showing=false; facit.textContent='Visa facit'; prnt.title='Skriv ut ordgömman utan facit'; saveImg.title='Spara ordgömman som PDF utan facit'; persist(); };
             const shuffle=document.createElement('button'); shuffle.className='kw-btn kw-btn-ghost'; shuffle.textContent='🔀 Nytt utseende'; shuffle.onclick=()=>{ const words=lay.placements.map(p=>p.word); const lay2=buildWordSearch(words, state.diag!==false); if(lay2){ state.layout=lay2; state.found={}; render(); persist(); } };
             const aiBtn2=document.createElement('button'); aiBtn2.className='kw-btn kw-btn-ai'; aiBtn2.textContent='✨ AI'; aiBtn2.title='Skapa ny ordgömma med AI'; aiBtn2.onclick=openOgAiDialog;
             btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(saveImg); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
@@ -11364,6 +12407,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const extra=[...tc.querySelectorAll('.tool-extra .tool-btn')].map(toolBtnId);
         try{ localStorage.setItem(toolbarOrderKey(), JSON.stringify({fav:fav, extra:extra})); }catch(e){}
         if(typeof syncToCloud==='function') syncToCloud();
+        if(typeof pushSharedToolbar==='function') pushSharedToolbar(); // adminens ordning delas till alla
     }
     function restoreToolbarOrder(){
         const tc=document.getElementById('toolbar-container'); if(!tc) return;
@@ -11452,6 +12496,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         }).filter(Boolean);
         try { localStorage.setItem(toolPocketLayoutKey(), JSON.stringify(layout)); } catch(e){}
         if(typeof syncToCloud==='function') syncToCloud();
+        if(typeof pushSharedToolbar==='function') pushSharedToolbar(); // adminens ordning delas till alla
     }
     window.saveToolPocketLayout = saveToolPocketLayout;
     function buildDefaultToolPocketLayout(btnIds){
