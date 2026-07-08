@@ -164,7 +164,7 @@
             <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
             <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">💬</div><div class="label">Verb</div></button>
             <button class="tool-btn" onclick="createNounWidget()"><div class="icon">🅰️</div><div class="label">En/Ett</div></button>
-            <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Medborgare</div></button>
+            <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder</div></button>
             <button class="tool-btn" onclick="createWordClassWidget()"><div class="icon">📚</div><div class="label">Ordklasser</div></button>
             <button class="tool-btn" onclick="createComparisonWidget()"><div class="icon">🆚</div><div class="label">Jämföra</div></button>
             <button class="tool-btn" onclick="createSynonymWidget()"><div class="icon">🔎</div><div class="label">Synonymer</div></button>
@@ -4976,17 +4976,47 @@
         if(config===undefined) config=null;
         const body = createWidget('STARTUPPGIFT', 400, 'startuppgift-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fyra nya uppgifter – den fjärde är lite klurigare!</div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
+        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är lite klurigare!</div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
         const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
+
+        // Klockfrågor med flera olika tidslängder (kvart, tjugo minuter, halvtimme,
+        // timme, flera timmar) och båda riktningarna (framåt/senare och bakåt/innan).
+        function genKlockfraga(){
+            const h=ri(1,12);
+            const DURATIONER=[
+                {namn:'en kvart', min:15},
+                {namn:'tjugo minuter', min:20},
+                {namn:'en halvtimme', min:30},
+                {namn:'en timme', min:60},
+                {namn:'två timmar', min:120},
+                {namn:'tre timmar', min:180}
+            ];
+            const d = DURATIONER[ri(0,DURATIONER.length-1)];
+            const framat = Math.random()<0.5;
+            const totalMin = h*60 + (framat ? d.min : -d.min);
+            const totMod = ((totalMin % 720) + 720) % 720;
+            let svarH = Math.floor(totMod/60); if(svarH===0) svarH=12;
+            const svarM = totMod%60;
+            const svarTxt = svarH+':'+String(svarM).padStart(2,'0');
+            let fraga, forklaring;
+            if(framat){
+                fraga = 'Klockan är '+h+':00. Vad är klockan '+d.namn+' senare?';
+                forklaring = 'Räkna framåt från '+h+':00 med '+d.namn+': klockan blir <b>'+svarTxt+'</b>.';
+            } else {
+                fraga = 'Klockan är '+h+':00. Vad var klockan '+d.namn+' innan (för '+d.namn+' sedan)?';
+                forklaring = 'Räkna bakåt från '+h+':00 med '+d.namn+': klockan var <b>'+svarTxt+'</b>.';
+            }
+            return { fraga:fraga, svar:svarTxt, forklaring:forklaring };
+        }
 
         const OMRADEN = {
             add_sub: {
                 namn:'Addition & subtraktion', emoji:'➕',
                 gen: function(){
                     const typ = Math.random()<0.5 ? 'add' : 'sub';
-                    if(typ==='add'){ const a=ri(10,300), b=ri(10,300); return { fraga:a+' + '+b+' =', svar:a+b }; }
-                    const stor=ri(50,500), liten=ri(10,stor-1); return { fraga:stor+' − '+liten+' =', svar:stor-liten };
+                    if(typ==='add'){ const a=ri(10,300), b=ri(10,300); return { fraga:a+' + '+b+' =', svar:a+b, forklaring:'Lägg ihop de två talen: '+a+' + '+b+' = <b>'+(a+b)+'</b>.' }; }
+                    const stor=ri(50,500), liten=ri(10,stor-1); return { fraga:stor+' − '+liten+' =', svar:stor-liten, forklaring:'Dra bort det mindre talet från det större: '+stor+' − '+liten+' = <b>'+(stor-liten)+'</b>.' };
                 }
             },
             mul_div: {
@@ -4994,26 +5024,26 @@
                 gen: function(){
                     const typ = Math.random()<0.5 ? 'mul' : 'div';
                     const a=ri(2,12), b=ri(2,12);
-                    if(typ==='mul') return { fraga:a+' × '+b+' =', svar:a*b };
-                    return { fraga:(a*b)+' ÷ '+b+' =', svar:a };
+                    if(typ==='mul') return { fraga:a+' × '+b+' =', svar:a*b, forklaring:'Multiplicera de två talen: '+a+' × '+b+' = <b>'+(a*b)+'</b>.' };
+                    return { fraga:(a*b)+' ÷ '+b+' =', svar:a, forklaring:'Dividera talet med '+b+': '+(a*b)+' ÷ '+b+' = <b>'+a+'</b>. (Kontroll: '+a+' × '+b+' = '+(a*b)+'.)' };
                 }
             },
             brak_tal: {
                 namn:'Bråk & tal', emoji:'🔢',
                 gen: function(){
                     const val = ri(0,2);
-                    if(val===0){ const namnare=[2,3,4,5,10][ri(0,4)]; const multipel=ri(1,8)*namnare; return { fraga:'1/'+namnare+' av '+multipel+' =', svar:String(multipel/namnare) }; }
-                    if(val===1){ const tal=ri(11,989); const svar=Math.round(tal/10)*10; return { fraga:'Avrunda '+tal+' till närmaste tiotal:', svar:String(svar) }; }
-                    const tal=ri(1,200); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
+                    if(val===0){ const namnare=[2,3,4,5,10][ri(0,4)]; const multipel=ri(1,8)*namnare; const svar=multipel/namnare; return { fraga:'1/'+namnare+' av '+multipel+' =', svar:String(svar), forklaring:'1/'+namnare+' av ett tal = talet delat med '+namnare+': '+multipel+' ÷ '+namnare+' = <b>'+svar+'</b>.' }; }
+                    if(val===1){ const tal=ri(11,989); const svar=Math.round(tal/10)*10; return { fraga:'Avrunda '+tal+' till närmaste tiotal:', svar:String(svar), forklaring:'Titta på entalssiffran i '+tal+'. Är den 5 eller mer avrundar du uppåt, annars nedåt: '+tal+' avrundas till <b>'+svar+'</b>.' }; }
+                    const tal=ri(1,200); const jamn=(tal%2===0); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(jamn?'Jämnt':'Udda'), forklaring:'Ett tal är jämnt om det går att dela med 2 utan rest. '+tal+' ÷ 2 = '+(tal/2)+(jamn?' (går jämnt ut) → jämnt.':' (går inte jämnt ut) → udda.')+' Svar: <b>'+(jamn?'Jämnt':'Udda')+'</b>.' };
                 }
             },
             geo_matt: {
                 namn:'Geometri, mätning & klockan', emoji:'📐',
                 gen: function(){
                     const val = ri(0,2);
-                    if(val===0){ const l=ri(3,20), b=ri(3,20); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:(2*(l+b))+' cm' }; }
-                    if(val===1){ const h=ri(1,12), halv=Math.random()<0.5; const fraga = halv ? ('Vad är klockan en halvtimme efter '+h+':00?') : ('Vad är klockan en timme efter '+h+':00?'); const svarH = (h%12)+1; const svar = halv ? (h+':30') : (svarH+':00'); return { fraga:fraga, svar:svar }; }
-                    const l=ri(3,15), b=ri(3,15); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:(l*b)+' cm²' };
+                    if(val===0){ const l=ri(3,20), b=ri(3,20); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:(2*(l+b))+' cm', forklaring:'Omkrets = summan av alla sidor. En rektangel har två längder och två bredder: 2 × (längd + bredd) = 2 × ('+l+' + '+b+') = <b>'+(2*(l+b))+'</b>.' }; }
+                    if(val===1){ return genKlockfraga(); }
+                    const l=ri(3,15), b=ri(3,15); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:(l*b)+' cm²', forklaring:'Arean av en rektangel = längd × bredd: '+l+' × '+b+' = <b>'+(l*b)+'</b>.' };
                 }
             },
             klurig: {
@@ -5022,19 +5052,22 @@
                     const val = ri(0,3);
                     if(val===0){
                         const pris=ri(5,40), antal=ri(2,6); const kostnad=pris*antal; const pengar=kostnad+ri(10,150);
-                        return { fraga:'Alex har '+pengar+' kr. Hen köper '+antal+' block som kostar '+pris+' kr styck. Hur mycket pengar har Alex kvar?', svar:(pengar-kostnad)+' kr' };
+                        return { fraga:'Alex har '+pengar+' kr. Hen köper '+antal+' block som kostar '+pris+' kr styck. Hur mycket pengar har Alex kvar?', svar:(pengar-kostnad)+' kr', forklaring:'Räkna först ut vad blocken kostar totalt: '+antal+' × '+pris+' = '+kostnad+' kr. Dra sedan bort det från pengarna Alex hade: '+pengar+' − '+kostnad+' = <b>'+(pengar-kostnad)+'</b> kr.' };
                     }
                     if(val===1){
                         const elever=ri(20,30), grupper=[2,3,4,5][ri(0,3)]; const rest=elever%grupper; const perGrupp=Math.floor(elever/grupper);
                         const fraga = rest===0 ? ('Det är '+elever+' elever i klassen. De delas in i lika stora grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever i klassen. Läraren delar dem i grupper om '+grupper+' elever. Hur många elever blir över?');
-                        return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' grupper' : rest+' elever' };
+                        const forklaring = rest===0
+                            ? ('Dela antalet elever med gruppstorleken: '+elever+' ÷ '+grupper+' = <b>'+(elever/grupper)+'</b> grupper.')
+                            : ('Dela antalet elever med gruppstorleken: '+elever+' ÷ '+grupper+' = '+perGrupp+' grupper, med '+rest+' elever kvar som inte får plats i en hel grupp. Svar: <b>'+rest+'</b> elever blir över.');
+                        return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' grupper' : rest+' elever', forklaring:forklaring };
                     }
                     if(val===2){
                         const start=ri(2000,2015), alder=ri(6,12);
-                        return { fraga:'Ebba föddes år '+start+'. Hur gammal är hon år '+(start+alder)+'?', svar:alder+' år' };
+                        return { fraga:'Ebba föddes år '+start+'. Hur gammal är hon år '+(start+alder)+'?', svar:alder+' år', forklaring:'Räkna ut skillnaden mellan årtalen: '+(start+alder)+' − '+start+' = <b>'+alder+'</b> år.' };
                     }
                     const a=ri(15,60), b=ri(15,60), c=ri(5,30);
-                    return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:(a+b-c)+' frukter' };
+                    return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:(a+b-c)+' frukter', forklaring:'Räkna först ihop alla frukter: '+a+' + '+b+' = '+(a+b)+'. Dra sedan bort de sålda frukterna: '+(a+b)+' − '+c+' = <b>'+(a+b-c)+'</b> frukter.' };
                 }
             }
         };
@@ -5043,10 +5076,10 @@
         function dagensUppgifter(){
             const uppgifter = blandaSU(GRUNDOMRADEN).map(key=>{
                 const u = OMRADEN[key].gen();
-                return { omrade:OMRADEN[key].namn, emoji:OMRADEN[key].emoji, klurig:false, fraga:u.fraga, svar:u.svar };
+                return { omrade:OMRADEN[key].namn, emoji:OMRADEN[key].emoji, klurig:false, fraga:u.fraga, svar:u.svar, forklaring:u.forklaring };
             });
             const k = OMRADEN.klurig.gen();
-            uppgifter.push({ omrade:OMRADEN.klurig.namn, emoji:OMRADEN.klurig.emoji, klurig:true, fraga:k.fraga, svar:k.svar });
+            uppgifter.push({ omrade:OMRADEN.klurig.namn, emoji:OMRADEN.klurig.emoji, klurig:true, fraga:k.fraga, svar:k.svar, forklaring:k.forklaring });
             return uppgifter;
         }
         function blandaSU(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -5059,9 +5092,11 @@
                 const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
                 const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=(i+1)+'. '+u.fraga;
                 const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
-                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
+                const forkEl=document.createElement('div'); forkEl.className='pengar-forklaring'; forkEl.style.display='none'; forkEl.innerHTML = u.forklaring ? ('<b>Så här tänker du:</b><br>'+u.forklaring) : '';
+                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; if(u.forklaring) forkEl.style.display='block'; };
                 rad2.appendChild(fr); rad2.appendChild(sv);
                 rad.appendChild(tagg); rad.appendChild(rad2);
+                if(u.forklaring) rad.appendChild(forkEl);
                 lista.appendChild(rad);
             });
             widget.dataset.startuppgift = JSON.stringify(uppgifter);
@@ -6321,7 +6356,7 @@
 
     function createCountryWidget(config){
         if(config===undefined) config=null;
-        const body = createWidget('MEDBORGARE', 320, 'land-widget verb-widget', config);
+        const body = createWidget('LÄNDER', 320, 'land-widget verb-widget', config);
         const widget = body.parentElement.parentElement;
         body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett land… t.ex. Egypten'><button class='btn btn-primary verb-boj'>Visa ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj svaren)</label><div class='verb-typ'></div><div class='land-forslag'></div><div class='verb-rows'></div>`;
         const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), forslagEl=body.querySelector('.land-forslag'), rowsEl=body.querySelector('.verb-rows');
@@ -9809,9 +9844,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(window._synBank) return window._synBank;
         const rad=s=>{ const [ord,syn]=s.split(':'); return { ord:ord, syn:syn.split(',') }; };
         window._synBank={
-            latt:  'glad:lycklig,nöjd,munter,upprymd|stor:enorm,jättelik,väldig,gigantisk|snabb:kvick,rapp,hastig,flink|fin:vacker,snygg,söt,stilig|rolig:kul,skojig,festlig,lustig|arg:sur,ilsken,förbannad,rasande|rädd:skraj,ängslig,skrämd,förskräckt|trött:sömnig,utmattad,sliten,dåsig|prata:tala,snacka,samtala,babbla|springa:löpa,rusa,spurta,kuta'.split('|').map(rad),
-            medel: 'vacker:skön,tjusig,bedårande,ståtlig|smart:klok,intelligent,begåvad,fiffig|börja:starta,inleda,påbörja,sätta igång|sluta:avsluta,upphöra,avbryta,lägga av|hjälpa:bistå,assistera,stötta,undsätta|viktig:betydelsefull,väsentlig,central,avgörande|konstig:märklig,underlig,besynnerlig,egendomlig|gammal:åldrig,antik,ålderstigen,uråldrig|titta:kika,glo,betrakta,blicka|äta:förtära,spisa,mumsa,inmundiga'.split('|').map(rad),
-            svar:  'modig:tapper,orädd,djärv,oförskräckt|noggrann:petig,omsorgsfull,minutiös,grundlig|lat:loj,bekväm,maklig,håglös|generös:givmild,frikostig,storsint|envis:ihärdig,egensinnig,enveten,halsstarrig|tydlig:klar,distinkt,uppenbar,entydig|ledsen:sorgsen,bedrövad,nedstämd,dyster|vanlig:ordinär,alldaglig,gängse,sedvanlig|snäll:vänlig,godhjärtad,hygglig,välvillig|lugn:stilla,rofylld,fridfull,sansad'.split('|').map(rad)
+            latt:  'glad:lycklig,nöjd,munter,upprymd|stor:enorm,jättelik,väldig,gigantisk|snabb:kvick,rapp,hastig,flink|fin:vacker,snygg,söt,stilig|rolig:kul,skojig,festlig,lustig|arg:sur,ilsken,förbannad,rasande|rädd:skraj,ängslig,skrämd,förskräckt|trött:sömnig,utmattad,sliten,dåsig|prata:tala,snacka,samtala,babbla|springa:löpa,rusa,spurta,kuta|ren:fräsch,prydlig,städad,oklanderlig|kall:frusen,iskall,kylig,frostig|ny:färsk,modern,fräsch,oanvänd|stark:kraftig,mäktig,robust,tålig|svag:kraftlös,matt,klen,skör|gullig:söt,rar,förtjusande,näpen'.split('|').map(rad),
+            medel: 'vacker:skön,tjusig,bedårande,ståtlig|smart:klok,intelligent,begåvad,fiffig|börja:starta,inleda,påbörja,sätta igång|sluta:avsluta,upphöra,avbryta,lägga av|hjälpa:bistå,assistera,stötta,undsätta|viktig:betydelsefull,väsentlig,central,avgörande|konstig:märklig,underlig,besynnerlig,egendomlig|gammal:åldrig,antik,ålderstigen,uråldrig|titta:kika,glo,betrakta,blicka|äta:förtära,spisa,mumsa,inmundiga|berätta:redogöra,skildra,återge,förklara|fundera:reflektera,grubbla,tänka efter,överväga|bestämma:besluta,avgöra,fastställa,välja|förstå:begripa,fatta,uppfatta,inse|skynda:rusa,ila,jäkta,hasta|leta:söka,spana,speja,eftersöka'.split('|').map(rad),
+            svar:  'modig:tapper,orädd,djärv,oförskräckt|noggrann:petig,omsorgsfull,minutiös,grundlig|lat:loj,bekväm,maklig,håglös|generös:givmild,frikostig,storsint|envis:ihärdig,egensinnig,enveten,halsstarrig|tydlig:klar,distinkt,uppenbar,entydig|ledsen:sorgsen,bedrövad,nedstämd,dyster|vanlig:ordinär,alldaglig,gängse,sedvanlig|snäll:vänlig,godhjärtad,hygglig,välvillig|lugn:stilla,rofylld,fridfull,sansad|komplicerad:invecklad,krånglig,svårbegriplig,komplex|effektiv:verkningsfull,ändamålsenlig,produktiv,rationell|avundsjuk:missunnsam,svartsjuk,avundsam,bitter|arrogant:högfärdig,mallig,övermodig,dryg|entusiastisk:ivrig,engagerad,hängiven,passionerad|skeptisk:tvivlande,misstänksam,kritisk,avvaktande'.split('|').map(rad)
         };
         return window._synBank;
     }
@@ -9991,9 +10026,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             teams[turn].p=Math.max(0, teams[turn].p-1);
             renderLag();
             try{ const AC=window.AudioContext||window.webkitAudioContext; if(AC){ if(!window._remAC) window._remAC=new AC(); const ctx=window._remAC; if(ctx.state==='suspended') ctx.resume().catch(()=>{}); const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=170; const t=ctx.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.55); } }catch(e){}
-            ordEl.innerHTML=''; const m=document.createElement('span'); m.style.cssText='font-size:20px;font-weight:900;color:#ff3b30;'; m.textContent='⏰ Tiden är ute! −1 poäng'; ordEl.appendChild(m);
+            avslojade=ord.length; renderOrd();
+            const m=document.createElement('div'); m.style.cssText='font-size:15px;font-weight:900;color:#ff3b30;margin-top:8px;text-align:center;'; m.textContent='⏰ Tiden är ute! −1 poäng · Rätt svar: '+ord; ordEl.appendChild(m);
             saveBoardState();
-            setTimeout(()=>{ timeoutLage=false; nastaLag(); nastaOrd(); saveBoardState(); }, 1500);
+            setTimeout(()=>{ timeoutLage=false; nastaLag(); nastaOrd(); saveBoardState(); }, 2200);
         }
         function visaVinst(namn){
             const wrapper=document.getElementById('cb-app-wrapper');
