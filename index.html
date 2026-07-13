@@ -2188,6 +2188,28 @@
     // Gör om e-post till en säker dokument-nyckel (Firestore tillåter inte vissa tecken)
     function emailKey(email){ return (email||'').toLowerCase().replace(/[^a-z0-9]/g, '_'); }
 
+    // FIX: om man ordnat om widgetarna INNAN man loggade in (sparat under "lokal"),
+    // och kontot man loggar in med ännu inte har någon egen sparad ordning (varken
+    // lokalt eller i molnet), ärv den lokala ordningen istället för att tyst börja
+    // om med standardordningen. Rör INTE något om kontot redan har en egen ordning.
+    function migrateLocalLayoutIfNeeded(){
+        try {
+            if (!currentUser || currentUser === 'lokal') return;
+            const acctPocketKey = 'mintavla_toolPocketLayout_' + currentUser;
+            const acctToolbarKey = 'mintavla_toolbarOrder_' + currentUser;
+            const localPocket = localStorage.getItem('mintavla_toolPocketLayout_lokal');
+            const localToolbar = localStorage.getItem('mintavla_toolbarOrder_lokal');
+            let migrated = false;
+            if (!localStorage.getItem(acctPocketKey) && localPocket){
+                localStorage.setItem(acctPocketKey, localPocket); migrated = true;
+            }
+            if (!localStorage.getItem(acctToolbarKey) && localToolbar){
+                localStorage.setItem(acctToolbarKey, localToolbar); migrated = true;
+            }
+            if (migrated && typeof syncToCloudImmediate === 'function') syncToCloudImmediate();
+        } catch(e){ console.warn('[MinTavla] Kunde inte ärva lokal verktygsordning:', e); }
+    }
+
     // Hämta ner användarens data från molnet vid inloggning
     async function syncFromCloud(user){
         if (!window.cloudReady || !user) return;
@@ -2207,6 +2229,17 @@
             fbDB.collection('boards').doc(emailKey(currentUser)).set(payload, { merge:true })
                 .catch(err => console.warn('[MinTavla] Molnsparning misslyckades:', err));
         }, 1200);
+    }
+    // FIX: direkt (odämpad) molnsparning – för sällanintraffande, medvetna ändringar
+    // som att dra om verktygsordningen. Här finns ingen risk för att spamma Firestore
+    // (det sker bara när man släpper en drag eller trycker en knapp), så vi vill INTE
+    // riskera att en snabb sidladdning hinner före den vanliga 1,2s-fördröjningen.
+    function syncToCloudImmediate(){
+        if (!window.cloudReady || !currentUser) return Promise.resolve();
+        clearTimeout(cloudSyncTimer);
+        const payload = cloudGatherData(); payload.updatedAt = Date.now();
+        return fbDB.collection('boards').doc(emailKey(currentUser)).set(payload, { merge:true })
+            .catch(err => console.warn('[MinTavla] Molnsparning misslyckades:', err));
     }
 
     // ---- ADMINENS VERKTYGSLÅDA GÄLLER ALLA ----
@@ -2252,17 +2285,23 @@
         if (!window.cloudReady || !fbDB || !currentUser) return;
         if (typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara ADMINENS ordning delas till alla
         clearTimeout(_sharedToolbarPushTimer);
-        _sharedToolbarPushTimer = setTimeout(()=>{
-            const payload = {
-                toolbarOrder: localStorage.getItem('mintavla_toolbarOrder_' + currentUser) || '',
-                toolPocketLayout: localStorage.getItem('mintavla_toolPocketLayout_' + currentUser) || '',
-                updatedAt: Date.now(),
-                uppdateradAv: currentUser
-            };
-            if (!payload.toolbarOrder && !payload.toolPocketLayout) return; // inget att dela ännu
-            fbDB.collection('config').doc('toolbar').set(payload, { merge:true })
-                .catch(err => console.warn('[MinTavla] Kunde inte dela verktygslådans ordning (kontrollera Firestore-reglerna för config/toolbar):', err));
-        }, 1200);
+        _sharedToolbarPushTimer = setTimeout(()=>{ pushSharedToolbarImmediate(); }, 1200);
+    }
+    // FIX: odämpad variant, används vid medvetna ordningsändringar så en snabb
+    // sidladdning inte hinner före sparningen till det delade admin-dokumentet.
+    function pushSharedToolbarImmediate(){
+        if (!window.cloudReady || !fbDB || !currentUser) return Promise.resolve();
+        if (typeof isBoardAdmin === 'function' && !isBoardAdmin()) return Promise.resolve();
+        clearTimeout(_sharedToolbarPushTimer);
+        const payload = {
+            toolbarOrder: localStorage.getItem('mintavla_toolbarOrder_' + currentUser) || '',
+            toolPocketLayout: localStorage.getItem('mintavla_toolPocketLayout_' + currentUser) || '',
+            updatedAt: Date.now(),
+            uppdateradAv: currentUser
+        };
+        if (!payload.toolbarOrder && !payload.toolPocketLayout) return Promise.resolve(); // inget att dela ännu
+        return fbDB.collection('config').doc('toolbar').set(payload, { merge:true })
+            .catch(err => console.warn('[MinTavla] Kunde inte dela verktygslådans ordning (kontrollera Firestore-reglerna för config/toolbar):', err));
     }
 
     // Registrera/uppdatera användaren i den centrala listan
@@ -2311,6 +2350,7 @@
             applyAdminUIMode();
             await registerUser(email, name);
             await syncFromCloud(email);
+            migrateLocalLayoutIfNeeded(); // fix: ärv den lokala verktygs-ordningen om kontot ännu inte har någon egen
             document.getElementById('login-overlay').style.display = 'none';
             migrateOldLists(currentUser); initBoard();
             updateAdminButton();
@@ -12558,8 +12598,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             return null;
         }).filter(Boolean);
         try { localStorage.setItem(toolPocketLayoutKey(), JSON.stringify(layout)); } catch(e){}
-        if(typeof syncToCloud==='function') syncToCloud();
-        if(typeof pushSharedToolbar==='function') pushSharedToolbar(); // adminens ordning delas till alla
+        if(typeof syncToCloudImmediate==='function') syncToCloudImmediate();
+        else if(typeof syncToCloud==='function') syncToCloud();
+        if(typeof pushSharedToolbarImmediate==='function') pushSharedToolbarImmediate(); // adminens ordning delas till alla
+        else if(typeof pushSharedToolbar==='function') pushSharedToolbar();
     }
     window.saveToolPocketLayout = saveToolPocketLayout;
     function buildDefaultToolPocketLayout(btnIds){
@@ -12641,6 +12683,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         saveToolPocketLayout();
     }
     window.rebuildToolPocketGrid = rebuildToolPocketGrid;
+    // FIX: varna vid stängning/omladdning om en molnsparning fortfarande väntar,
+    // så man inte råkar ladda om sidan innan ändringen hunnit sparas.
+    window.addEventListener('beforeunload', function(e){
+        if (cloudSyncTimer || _sharedToolbarPushTimer){
+            e.preventDefault(); e.returnValue = '';
+        }
+    });
     function initToolPocketSortable(){
         const grid=document.getElementById('tool-pocket-grid'); if(!grid || grid.dataset.sortableInit) return;
         grid.dataset.sortableInit='1';
@@ -12970,3 +13019,5 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 </script>
 </body>
 </html>
+
+    
