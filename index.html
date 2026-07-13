@@ -161,10 +161,11 @@
             <button class="tool-btn" onclick="createMoneyWidget()"><div class="icon">💰</div><div class="label">Pengar</div></button>
             <button class="tool-btn" onclick="createGeometryWidget()"><div class="icon">📐</div><div class="label">Geometri</div></button>
             <button class="tool-btn" onclick="createUnitConverter()"><div class="icon">⚖️</div><div class="label">Enheter</div></button>
+            <button class="tool-btn" onclick="createFormlerWidget()"><div class="icon">📐</div><div class="label">Formler</div></button>
             <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
             <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">💬</div><div class="label">Verb</div></button>
             <button class="tool-btn" onclick="createNounWidget()"><div class="icon">🅰️</div><div class="label">En/Ett</div></button>
-            <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Medborgare</div></button>
+            <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder/Invånare</div></button>
             <button class="tool-btn" onclick="createWordClassWidget()"><div class="icon">📚</div><div class="label">Ordklasser</div></button>
             <button class="tool-btn" onclick="createComparisonWidget()"><div class="icon">🆚</div><div class="label">Jämföra</div></button>
             <button class="tool-btn" onclick="createSynonymWidget()"><div class="icon">🔎</div><div class="label">Synonymer</div></button>
@@ -731,6 +732,18 @@
     .sw-lap-num { color: #7048e8; }
     .sw-lap-time { font-family: monospace; color: #1f2937; }
     .sw-lap-diff { color: #999; font-weight: 600; font-size: 11px; }
+    /* FORMLER */
+    .formler-widget .widget-body { padding: 12px 14px; }
+    .formler-search { width: 100%; border: 1px solid #d1d1d6; border-radius: 10px; padding: 8px 12px; font-size: 14px; font-family: inherit; outline: none; margin-bottom: 10px; box-sizing: border-box; }
+    .formler-search:focus { border-color: #007aff; }
+    .formler-cat-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #007aff; margin: 12px 0 6px; }
+    .formler-cat-title:first-child { margin-top: 0; }
+    .formler-card { background: #f7f7fa; border: 1px solid #e5e5ea; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+    .formler-name { font-weight: 800; font-size: 14px; color: #1f2937; margin-bottom: 3px; }
+    .formler-expr { font-family: 'SF Mono', Consolas, monospace; font-size: 15px; font-weight: 700; color: #7048e8; background: #ede9fe; display: inline-block; padding: 2px 9px; border-radius: 7px; margin-bottom: 6px; }
+    .formler-example { font-size: 12.5px; color: #555; line-height: 1.5; }
+    .formler-example b { color: #333; }
+    .formler-empty { text-align: center; color: #999; font-size: 13px; padding: 20px 0; }
     /* KAMERA */
     .cam-wrap { position: relative; width: 100%; background: #111; border-radius: 10px; overflow: hidden; min-height: 180px; display: flex; align-items: center; justify-content: center; }
     .cam-video { width: 100%; height: 100%; max-height: 70vh; object-fit: contain; display: block; }
@@ -2723,6 +2736,7 @@
             else if (w.type === 'PENGAR') createMoneyWidget(w);
             else if (w.type === 'GEOMETRI') createGeometryWidget(w);
             else if (w.type === 'ENHETER') createUnitConverter(w);
+            else if (w.type === 'FORMLER') createFormlerWidget(w);
             else if (w.type === 'MATTEKAMP') createMathBattle(w);
             else if (w.type === 'VERB') createVerbWidget(w);
             else if (w.type === 'EN / ETT') createNounWidget(w);
@@ -6442,6 +6456,8 @@
         if(config===undefined) config=null;
         const body = createWidget('MEDBORGARE', 320, 'land-widget verb-widget', config);
         const widget = body.parentElement.parentElement;
+        // Nytt namn i rubrikraden (behåller internt typ-namn 'MEDBORGARE' så gamla sparade tavlor fortsätter fungera)
+        const headerLabel = widget.querySelector('.widget-header > span'); if(headerLabel) headerLabel.textContent = 'Länder/Invånare';
         body.innerHTML = `<div class='hover-menu verb-ctrl'><input type='text' class='verb-in' placeholder='Skriv ett land… t.ex. Egypten'><button class='btn btn-primary verb-boj'>Visa ▶</button></div><label class='tal-hopp-lbl hover-menu' style='margin-bottom:6px;justify-content:center;'><input type='checkbox' class='verb-practice'> Öva-läge (dölj svaren)</label><div class='verb-typ'></div><div class='land-forslag'></div><div class='verb-rows'></div>`;
         const inp=body.querySelector('.verb-in'), bojBtn=body.querySelector('.verb-boj'), practiceCb=body.querySelector('.verb-practice'), typEl=body.querySelector('.verb-typ'), forslagEl=body.querySelector('.land-forslag'), rowsEl=body.querySelector('.verb-rows');
         if(config && config.data){ if(config.data.word) inp.value=config.data.word; practiceCb.checked=!!config.data.practice; }
@@ -10238,7 +10254,52 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         render();
     }
 
-    // ---- DOKUMENTKAMERA / WEBBKAMERA ----
+    // ---- FORMLER (mellanstadiet: åk 4-6) ----
+    const FORMLER_DATA = [
+        { kat:'Geometri – omkrets', namn:'Omkrets, rektangel', expr:'O = 2 × (l + b)', ex:'Ett rum är 5 m långt (l) och 3 m brett (b).\nO = 2 × (5 + 3) = <b>16 m</b>' },
+        { kat:'Geometri – omkrets', namn:'Omkrets, kvadrat', expr:'O = 4 × s', ex:'En kvadrat har sidan 4 cm (s).\nO = 4 × 4 = <b>16 cm</b>' },
+        { kat:'Geometri – omkrets', namn:'Omkrets, cirkel', expr:'O = π × d', ex:'En cirkel har diametern 10 cm. π ≈ 3,14.\nO = 3,14 × 10 = <b>31,4 cm</b>' },
+        { kat:'Geometri – area', namn:'Area, rektangel', expr:'A = l × b', ex:'Ett golv är 6 m långt och 4 m brett.\nA = 6 × 4 = <b>24 m²</b>' },
+        { kat:'Geometri – area', namn:'Area, kvadrat', expr:'A = s × s', ex:'En kvadrat har sidan 5 cm.\nA = 5 × 5 = <b>25 cm²</b>' },
+        { kat:'Geometri – area', namn:'Area, triangel', expr:'A = (b × h) / 2', ex:'En triangel har basen 8 cm och höjden 5 cm.\nA = (8 × 5) / 2 = <b>20 cm²</b>' },
+        { kat:'Geometri – area', namn:'Area, cirkel', expr:'A = π × r²', ex:'En cirkel har radien 4 cm. π ≈ 3,14.\nA = 3,14 × 4² = 3,14 × 16 = <b>50,24 cm²</b>' },
+        { kat:'Geometri – volym', namn:'Volym, rätblock/kub', expr:'V = l × b × h', ex:'En låda är 4 cm lång, 3 cm bred och 2 cm hög.\nV = 4 × 3 × 2 = <b>24 cm³</b>' },
+        { kat:'Vardagsmatematik', namn:'Medelvärde', expr:'Medelvärde = Summan av talen / Antal tal', ex:'Provresultat: 4, 6 och 8 poäng.\n(4 + 6 + 8) / 3 = <b>6 poäng</b>' },
+        { kat:'Vardagsmatematik', namn:'Median', expr:'Median = det mittersta talet i en sorterad lista', ex:'Tal: 3, 7, 5, 9, 2.\nSortera: 2, 3, 5, 7, 9 → mittersta talet är <b>5</b>.\n(Jämnt antal tal: ta medelvärdet av de två mittersta.)' },
+        { kat:'Vardagsmatematik', namn:'Typvärde', expr:'Typvärde = det tal som förekommer flest gånger', ex:'Tal: 2, 3, 3, 5, 7.\n3:an finns två gånger, fler än något annat tal → typvärde = <b>3</b>.' },
+        { kat:'Vardagsmatematik', namn:'Hastighet', expr:'v = s / t  (sträcka / tid)', ex:'En bil kör 100 km på 2 timmar.\nv = 100 / 2 = <b>50 km/h</b>' },
+        { kat:'Vardagsmatematik', namn:'Andel/Procent av ett tal', expr:'Del = (Procent / 100) × Helhet', ex:'Hur mycket är 20 % av 50 kr?\n(20 / 100) × 50 = <b>10 kr</b>' },
+        { kat:'Vardagsmatematik', namn:'Skala', expr:'Verklig längd = Ritad längd / Skala', ex:'En karta har skalan 1:100 och en sträcka på kartan är 3 cm.\n3 × 100 = <b>300 cm = 3 m</b>' }
+    ];
+    function createFormlerWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('FORMLER', 340, 'formler-widget', config);
+        if(!config) body.parentElement.parentElement.style.height = '420px';
+        body.innerHTML = `<input type='text' class='formler-search' placeholder='🔎 Sök en formel... t.ex. area'><div class='formler-list'></div>`;
+        const searchEl = body.querySelector('.formler-search'), listEl = body.querySelector('.formler-list');
+        function render(filter){
+            const f = (filter||'').trim().toLowerCase();
+            listEl.innerHTML = '';
+            let lastKat = null, any = false;
+            FORMLER_DATA.forEach(item=>{
+                if(f && !(item.namn.toLowerCase().includes(f) || item.kat.toLowerCase().includes(f) || item.expr.toLowerCase().includes(f))) return;
+                any = true;
+                if(item.kat !== lastKat){
+                    const h = document.createElement('div'); h.className='formler-cat-title'; h.textContent = item.kat; listEl.appendChild(h);
+                    lastKat = item.kat;
+                }
+                const card = document.createElement('div'); card.className='formler-card';
+                card.innerHTML = `<div class='formler-name'>${item.namn}</div><div class='formler-expr'>${item.expr}</div><div class='formler-example'>${item.ex.replace(/\n/g,'<br>')}</div>`;
+                listEl.appendChild(card);
+            });
+            if(!any){ listEl.innerHTML = `<div class='formler-empty'>Ingen formel hittades. Prova ett annat sökord.</div>`; }
+        }
+        searchEl.oninput = ()=> render(searchEl.value);
+        render('');
+    }
+    window.createFormlerWidget = createFormlerWidget;
+
+    // ---- KAMERA (DOKUMENTKAMERA / WEBBKAMERA) ----
     function createCamera(config){
         if(config===undefined)config=null;
         const body = createWidget('KAMERA', 360, 'camera-widget', config);
