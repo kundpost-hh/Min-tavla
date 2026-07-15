@@ -139,6 +139,11 @@
             <button class="tool-btn" onclick="createGroupMaker()"><div class="icon">👥</div><div class="label">Grupper</div></button>
             <button class="tool-btn" onclick="createRandomName()"><div class="icon">🎲</div><div class="label">Slumpa</div></button>
             <button class="tool-btn" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
+            <button class="tool-btn" onclick="createBegreppskort()"><div class="icon">🌱</div><div class="label">Begreppskort</div></button>
+            <button class="tool-btn" onclick="createNoFraga()"><div class="icon">🔬</div><div class="label">Dagens NO-fråga</div></button>
+            <button class="tool-btn" onclick="createSantFalskt()"><div class="icon">🧠</div><div class="label">Sant eller falskt</div></button>
+            <button class="tool-btn" onclick="createRymden()"><div class="icon">🌎</div><div class="label">Rymden</div></button>
+            <button class="tool-btn" onclick="createVadret()"><div class="icon">🌦️</div><div class="label">Vädret</div></button>
             <button class="tool-btn" onclick="createReadingSpeed()"><div class="icon">📖</div><div class="label">Läshastighet</div></button>
             <button class="tool-btn" onclick="createTextGenres()"><div class="icon">📚</div><div class="label">Textgenrer</div></button>
             <button class="tool-btn" onclick="createLasforstaelse()"><div class="icon">🧐</div><div class="label">Läsförståelse</div></button>
@@ -608,6 +613,94 @@
     .gotd-loading{ color:#8e8e93; font-style:italic; font-size:13px; }
     .gotd-tom{ color:#8e8e93; font-style:italic; font-size:13px; }
     .gotd-reveal-all{ width:100%; }
+    /* BEGREPPSKORT */
+    .bg-word{ font-size:26px; font-weight:900; color:#1a7a34; text-align:center; word-break:break-word; }
+    .bg-emoji{ font-size:56px; text-align:center; line-height:1.1; }
+    .bg-nivåbar{ display:flex; justify-content:center; margin-bottom:6px; }
+    /* DAGENS NO-FRÅGA */
+    .nf-fraga{ font-size:19px; font-weight:800; color:#1d1d1f; text-align:center; line-height:1.4; background:linear-gradient(135deg,#eef4ff,#f4f0fb); border-radius:14px; padding:20px 16px; margin-bottom:12px; }
+    .nf-svar{ border-radius:14px; padding:14px 16px; background:#d2f8dc; border:1.5px solid #34c759; text-align:center; animation:pclockPop .35s ease; margin-bottom:12px; }
+    .nf-svar-label{ font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.4px; color:#1a7a34; margin-bottom:6px; }
+    .nf-svar-text{ font-size:14.5px; color:#1d1d1f; line-height:1.5; }
+    /* SANT ELLER FALSKT */
+    .sf-pastaende{ font-size:18px; font-weight:800; color:#1d1d1f; text-align:center; line-height:1.4; padding:4px 6px 14px; }
+    .sf-knappar{ display:flex; gap:10px; margin-bottom:10px; }
+    .sf-knapp{ flex:1; }
+    /* RYMDEN */
+    .ry-emoji{ font-size:64px; text-align:center; line-height:1.1; margin-bottom:4px; }
+    .ry-typbadge{ display:block; text-align:center; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.5px; color:#5856d6; background:#eeeefb; border-radius:999px; padding:4px 12px; margin:0 auto 12px; width:fit-content; }
+    .ry-tabs{ display:flex; gap:6px; }
+    .ry-tabs .btn{ flex:1; font-size:12.5px; padding:8px 6px; }
+    .ry-planet-row{ display:flex; align-items:flex-end; justify-content:center; gap:10px; flex-wrap:wrap; padding:14px 6px 10px; background:radial-gradient(circle at 50% 0%,#1b1035,#0a0a1a); border-radius:14px; margin-bottom:12px; }
+    .ry-planet-col{ display:flex; flex-direction:column; align-items:center; gap:6px; width:52px; }
+    .ry-planet-circle{ border-radius:50%; cursor:pointer; transition:transform .15s, box-shadow .15s; box-shadow:0 2px 8px rgba(0,0,0,0.4); flex-shrink:0; }
+    .ry-planet-circle:hover{ transform:scale(1.1); }
+    .ry-planet-circle.vald{ box-shadow:0 0 0 3px #fff, 0 0 14px 3px #5856d6; }
+    .ry-planet-lbl{ font-size:10px; font-weight:800; color:#fff; text-align:center; line-height:1.2; }
+    .ry-planet-typlbl{ font-size:8.5px; font-weight:700; color:#c7c7d6; text-align:center; }
+    .ry-typ-badge{ display:inline-block; font-size:11px; font-weight:900; padding:3px 10px; border-radius:999px; margin-top:6px; }
+    .ry-typ-sten{ background:#f3e6da; color:#8a5a2c; }
+    .ry-typ-gas{ background:#e6f0ff; color:#0a5cd8; }
+    .ry-quiz-score{ text-align:center; font-size:12.5px; font-weight:800; color:#5856d6; background:#eeeefb; border-radius:999px; padding:4px 12px; margin:0 auto 12px; width:fit-content; }
+    .ry-quiz-fraga{ font-size:16.5px; font-weight:800; color:#1d1d1f; text-align:center; line-height:1.4; margin-bottom:14px; }
+    .ry-quiz-alt{ display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+    .ry-quiz-btn{ border:1.5px solid #e0e0e5; background:#f7f7fa; border-radius:10px; padding:10px 14px; font-size:14px; font-weight:700; color:#1d1d1f; cursor:pointer; text-align:left; font-family:inherit; }
+    .ry-quiz-btn:hover:not(:disabled){ border-color:#5856d6; background:#f0f0fb; }
+    .ry-quiz-btn:disabled{ cursor:default; }
+    .ry-quiz-btn.ratt{ background:#d2f8dc; border-color:#34c759; color:#1a7a34; }
+    .ry-quiz-btn.fel{ background:#ffe1df; border-color:#ff3b30; color:#c0392b; }
+    .ry-quiz-fork{ font-size:13px; color:#333; line-height:1.5; background:#f7f7fa; border-radius:10px; padding:10px 12px; }
+    /* VÄDRET */
+    .vd-widget{ min-width:340px; }
+    .vd-widget .widget-body{ overflow-y:auto; overflow-x:hidden; min-height:0; }
+    .vd-widget .widget-inner{ min-height:0; }
+    .vd-tabs .btn{ font-size:11.5px; padding:7px 5px; }
+    .vd-live-card{ text-align:center; background:linear-gradient(135deg,#eef4ff,#f4f0fb); border-radius:16px; padding:20px 14px; margin-bottom:12px; }
+    .vd-live-plats{ font-size:12px; font-weight:800; color:#5856d6; text-transform:uppercase; letter-spacing:.4px; margin-bottom:8px; }
+    .vd-live-emoji{ font-size:56px; line-height:1.1; }
+    .vd-live-text{ font-size:16px; font-weight:800; color:#1d1d1f; margin:4px 0 10px; }
+    .vd-live-temp{ font-size:38px; font-weight:900; color:#1d1d1f; }
+    .vd-live-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+    .vd-live-stat{ background:#fff; border-radius:10px; padding:8px 6px; font-size:12px; }
+    .vd-live-stat b{ display:block; font-size:15px; color:#1d1d1f; }
+    .vd-msg{ text-align:center; color:#8a8a90; font-size:13px; padding:24px 10px; }
+    .vd-spin{ width:26px; height:26px; border:3px solid #e5e5ea; border-top-color:#5856d6; border-radius:50%; margin:16px auto; animation:vd-spin 0.8s linear infinite; }
+    @keyframes vd-spin{ to{ transform:rotate(360deg); } }
+    .vd-jamfor-grid{ display:flex; gap:10px; margin-bottom:12px; }
+    .vd-jamfor-col{ flex:1; background:#f7f7fa; border-radius:12px; padding:12px 10px; text-align:center; }
+    .vd-jamfor-col.idag{ background:#eef4ff; border:1.5px solid #5856d6; }
+    .vd-jamfor-lbl{ font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.4px; color:#8a8a90; margin-bottom:6px; }
+    .vd-jamfor-emoji{ font-size:34px; }
+    .vd-jamfor-rad{ font-size:12px; margin-top:6px; color:#333; }
+    .vd-jamfor-rad b{ color:#1d1d1f; }
+    .vd-jamfor-slutsats{ background:#d2f8dc; border:1.5px solid #34c759; border-radius:12px; padding:10px 12px; font-size:13px; color:#1a7a34; line-height:1.5; }
+    .vd-lex-sektion-titel{ font-size:13px; font-weight:900; color:#5856d6; margin:14px 0 8px; text-transform:uppercase; letter-spacing:.4px; }
+    .vd-lex-sektion-titel:first-child{ margin-top:0; }
+    .vd-lex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .vd-lex-card{ background:#f7f7fa; border-radius:10px; padding:10px; }
+    .vd-lex-emoji{ font-size:26px; text-align:center; }
+    .vd-lex-namn{ font-size:12.5px; font-weight:800; color:#1d1d1f; text-align:center; margin:4px 0 3px; }
+    .vd-lex-besk{ font-size:11px; color:#555; line-height:1.4; text-align:center; }
+    .vd-lex-matter{ font-size:10.5px; font-weight:700; color:#5856d6; text-align:center; margin-bottom:3px; }
+    .vd-lex-klickbar{ cursor:pointer; padding:14px 8px; transition:background .15s, transform .1s; }
+    .vd-lex-klickbar:hover{ background:#eeeefb; transform:scale(1.03); }
+    .vd-lex-klickbar .vd-lex-emoji{ font-size:30px; }
+    .vd-lex-klickbar .vd-lex-namn{ margin:6px 0 0; }
+    .vd-lex-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:9999; padding:20px; }
+    .vd-lex-modal{ background:#fff; border-radius:16px; width:100%; max-width:360px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.35); }
+    .vd-lex-modal-header{ background:#5856d6; color:#fff; font-weight:900; font-size:17px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; }
+    .vd-lex-modal-close{ background:rgba(255,255,255,.2); border:none; color:#fff; width:28px; height:28px; border-radius:8px; font-size:14px; cursor:pointer; flex-shrink:0; }
+    .vd-lex-modal-close:hover{ background:rgba(255,255,255,.35); }
+    .vd-lex-modal-body{ padding:16px 18px 20px; }
+    .vd-lex-modal-matter{ display:inline-block; font-size:12px; font-weight:800; color:#5856d6; background:#eeeefb; border-radius:999px; padding:4px 12px; margin-bottom:10px; }
+    .vd-lex-modal-besk{ font-size:14.5px; color:#1d1d1f; line-height:1.6; }
+    .ry-planet-info{ background:#f7f7fa; border-radius:12px; padding:12px 14px; font-size:13.5px; line-height:1.5; color:#1d1d1f; animation:pclockPop .35s ease; }
+    .ry-planet-diameter{ font-weight:700; color:#5856d6; font-size:12px; }
+    .ry-planet-rad{ margin-top:8px; padding-top:8px; border-top:1px solid #e5e5ea; }
+    .ry-planet-rad:first-of-type{ border-top:none; margin-top:6px; padding-top:0; }
+    .ry-widget .widget-body{ overflow-y:auto; overflow-x:hidden; min-height:0; }
+    .ry-widget .widget-inner{ min-height:0; }
+    .ry-content{ overflow-y:auto; overflow-x:hidden; max-height:100%; }
     /* ---- GOOD: dra en sur min till glasburken, den blir glad ---- */
     .good-widget .widget-body{ padding:18px 18px 16px; }
     .good-intro{ font-size:14px; color:#8e8e93; text-align:center; margin-bottom:14px; }
@@ -1777,7 +1870,7 @@
     .video-hint { font-size:10px; color:#b0b0b6; margin-top:5px; text-align:center; line-height:1.4; }
 
     /* VECKOSCHEMA */
-    .week-widget { min-width:560px; }
+    .week-widget { min-width:680px; }
     .week-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
     .week-toolbar .btn { font-size:12px; padding:6px 10px; }
     .week-grid { display:flex; gap:6px; width:100%; align-items:flex-start; }
@@ -2918,6 +3011,11 @@
                 else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.dataset.icon || 'skriv', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea' }); }); }
                 else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; const clk = w.querySelectorAll('.lesson-clock .pclock-digital'); const pT=(el)=>{ const t=(el?.textContent||'08:00').split(':'); return {h:(parseInt(t[0])||0)%24, m:parseInt(t[1])||0}; }; if(clk[0]) state.data.clock1=pT(clk[0]); if(clk[1]) state.data.clock2=pT(clk[1]); }
                 else if (type === 'SKAPA GRUPPER' || type === 'SLUMPA NAMN' || type === 'DAGENS ORD') { state.data.list = w.querySelector('select')?.value || ''; state.data.text = w.querySelector('.name-input')?.value || ''; if(type === 'SKAPA GRUPPER') { state.data.count = w.querySelector('input[type="number"]')?.value || '4'; state.data.result = w.querySelector('.group-result')?.innerHTML || ''; } if(type === 'SLUMPA NAMN') { state.data.removeCb = w.querySelector('input[type="checkbox"]')?.checked || false; } if(type === 'DAGENS ORD') { state.data.result = w.querySelector('.name-result')?.innerHTML || ''; } }
+                else if (type === 'BEGREPPSKORT') { try{ state.data = JSON.parse(w.dataset.begrepp || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'NO-FRÅGA') { try{ state.data = JSON.parse(w.dataset.nofraga || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'SANT ELLER FALSKT') { try{ state.data = JSON.parse(w.dataset.santfalskt || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'RYMDEN') { try{ state.data = JSON.parse(w.dataset.rymden || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'VÄDRET') { try{ state.data = JSON.parse(w.dataset.vadret || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
                 else if (type === 'LÄSHASTIGHET') { state.data.niva = w.dataset.lashNiva || 'latt'; state.data.ord = w.dataset.lashOrd || ''; }
@@ -3051,6 +3149,11 @@
             else if (w.type === 'CHECKLISTA') createChecklist(w);
             else if (w.type === 'SLUMPA-HJUL') createWheel(w);
             else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
+            else if (w.type === 'BEGREPPSKORT') createBegreppskort(w);
+            else if (w.type === 'NO-FRÅGA') createNoFraga(w);
+            else if (w.type === 'SANT ELLER FALSKT') createSantFalskt(w);
+            else if (w.type === 'RYMDEN') createRymden(w);
+            else if (w.type === 'VÄDRET') createVadret(w);
             else if (w.type === 'LÄSHASTIGHET') createReadingSpeed(w);
             else if (w.type === 'TEXTGENRER') createTextGenres(w);
             else if (w.type === 'LÄSFÖRSTÅELSE') createLasforstaelse(w);
@@ -3170,9 +3273,31 @@
         getActiveCanvasV6().appendChild(widget); makeDraggable(widget, header); makeBodyDraggable(widget, inner); makeResizable(widget, resizer);
         
         header.querySelector('.widget-close-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; customConfirm("Vill du stänga rutan?", () => { widget.remove(); saveBoardState(); }); };
-        header.querySelector('.btn-min').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; const m = body.style.display === 'none'; body.style.display = m ? 'flex' : 'none'; widget.dataset.minimized = m ? 'false' : 'true'; saveBoardState(); };
+        header.querySelector('.btn-min').onclick = (e) => {
+            e.stopPropagation();
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return;
+            const m = body.style.display === 'none';
+            if(m){
+                // Återställ: visa innehållet igen och ge tillbaka den höjd widgeten hade innan minimering
+                body.style.display = 'flex';
+                if(widget.dataset.prevHeight){ widget.style.height = widget.dataset.prevHeight; delete widget.dataset.prevHeight; }
+                widget.dataset.minimized = 'false';
+            } else {
+                // Minimera: spara ev. fast satt höjd undan och låt widgeten krympa till bara rubrikraden
+                if(widget.style.height){ widget.dataset.prevHeight = widget.style.height; }
+                body.style.display = 'none';
+                widget.style.height = 'auto';
+                widget.dataset.minimized = 'true';
+            }
+            saveBoardState();
+        };
         lockIcon.onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; widget.classList.toggle('locked'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓'; saveBoardState(); };
-        if(config && config.minimized) { body.style.display = 'none'; widget.dataset.minimized = 'true'; }
+        if(config && config.minimized) {
+            body.style.display = 'none';
+            widget.dataset.minimized = 'true';
+            if(widget.style.height){ widget.dataset.prevHeight = widget.style.height; }
+            widget.style.height = 'auto';
+        }
         if(typeof presentationLocked !== 'undefined' && presentationLocked) widget.classList.add('locked');
         // Bara adminen får flytta/ändra storlek på widgetar – för alla andra är tavlan alltid låst,
         // oavsett widgetens eget lås-läge eller det generella presentationsläget.
@@ -3546,25 +3671,56 @@
         
         function addRow(ti, ta, ic, co){
             const r = document.createElement('div'); r.className='schedule-row';
-            const cs = document.createElement('div'); cs.className='schedule-color-strip'; cs.dataset.color=co; cs.style.backgroundColor=co;
-            cs.onclick=()=>{ const cl=['#e5e5ea','#ff3b30','#ff9500','#ffcc00','#4cd964','#5ac8fa','#007aff','#5856d6','#ff2d55']; let idx=(cl.indexOf(cs.dataset.color)+1)%cl.length; cs.dataset.color=cl[idx]; cs.style.backgroundColor=cl[idx]; saveBoardState(); };
+            const startColor = (co && co!==SCHEDULE_DEFAULT_COLOR) ? co : (matchSubjectColor(ta) || co || SCHEDULE_DEFAULT_COLOR);
+            const cs = document.createElement('div'); cs.className='schedule-color-strip'; cs.dataset.color=startColor; cs.style.backgroundColor=startColor;
+            cs.onclick=()=>{ const cl=SCHEDULE_COLOR_CYCLE; let idx=(cl.indexOf(cs.dataset.color)+1)%cl.length; cs.dataset.color=cl[idx]; cs.style.backgroundColor=cl[idx]; saveBoardState(); };
             const tin = document.createElement('input'); tin.className='schedule-time-input'; tin.value=ti;
             const sel = document.createElement('button'); sel.type='button'; sel.className='schedule-icon-select schedule-icon-btn';
             sel.dataset.icon = (ic && SCHEDULE_ICONS[ic]) ? ic : ((ic && ic.length) ? ic : 'skriv'); renderSchedIcon(sel);
             sel.onclick=()=>{ openSchedIconPicker(sel.dataset.icon, (k)=>{ sel.dataset.icon=k; renderSchedIcon(sel); saveBoardState(); }); };
             const tain = document.createElement('input'); tain.className='schedule-task-input'; tain.value=ta;
+            tain.oninput=()=>{
+                if(cs.dataset.color===SCHEDULE_DEFAULT_COLOR){ const auto=matchSubjectColor(tain.value); if(auto){ cs.dataset.color=auto; cs.style.backgroundColor=auto; } }
+                saveBoardState();
+            };
             const d = document.createElement('button'); d.className='row-del-btn row-hover-menu'; d.innerText='✕'; d.onclick=()=>{r.remove();saveBoardState();};
             r.appendChild(cs); r.appendChild(tin); r.appendChild(sel); r.appendChild(tain); r.appendChild(d); cont.appendChild(r);
         }
         if(config && config.data && config.data.rows) config.data.rows.forEach(r => addRow(r.time, r.task, r.icon||'skriv', r.color));
-        else { addRow('08:15','Morgonsamling','samling','#e5e5ea'); addRow('09:00','Matematik','matte','#e5e5ea'); addRow('10:30','Svenska','abc','#e5e5ea'); }
-        const act = document.createElement('div'); act.className='hover-menu'; act.style.padding='10px'; const ab=document.createElement('button'); ab.className='btn btn-primary'; ab.innerText='+ Rad'; ab.onclick=()=>{addRow('08:30','Lektion','skriv','#e5e5ea');saveBoardState();}; act.appendChild(ab); schContent.appendChild(act);
+        else { addRow('08:00','Morgonsamling','samling','#e5e5ea'); addRow('09:00','Matematik','matte','#e5e5ea'); addRow('10:30','Svenska','abc','#e5e5ea'); }
+        const act = document.createElement('div'); act.className='hover-menu'; act.style.padding='10px'; const ab=document.createElement('button'); ab.className='btn btn-primary'; ab.innerText='+ Rad'; ab.onclick=()=>{ const forstaTid = cont.querySelectorAll('.schedule-row').length===0 ? '08:00' : '08:30'; addRow(forstaTid,'Lektion','skriv','#e5e5ea');saveBoardState();}; act.appendChild(ab); schContent.appendChild(act);
         body.appendChild(schContent);
         if(config && config.minimized){ body.style.display=''; schContent.style.display='none'; widgetEl.classList.add('minimized'); }
     }
 
 
     // === EGNA piktogram för Dagens schema (original, ej kopierade från Widgit) ===
+    // Ämne -> färg. Används för att automatiskt föreslå en färg när man skriver ett känt
+    // ämnesnamn i "Ämne"-fältet (Dagens schema + Veckoschema). Föreslagningen sker bara så
+    // länge färgremsan fortfarande står på standardgrått - så fort någon klickat och valt en
+    // egen färg manuellt rörs den aldrig igen, dvs. helt flexibelt att ändra i efterhand.
+    const SCHEDULE_DEFAULT_COLOR = '#e5e5ea';
+    const SUBJECT_COLOR_MAP = [
+        [/svensk/i, '#007aff'],                          // Svenska - Blå
+        [/matte|matematik/i, '#ff3b30'],                  // Matematik - Röd
+        [/engelsk/i, '#5856d6'],                          // Engelska - Lila
+        [/\bno\b|naturkunskap|natur ?vet/i, '#4cd964'],   // NO - Grön
+        [/\bso\b|samhälls ?kunskap|samhäll/i, '#ff9500'], // SO - Orange
+        [/idrott|\bgymp/i, '#ffcc00'],                    // Idrott - Gul
+        [/^bild\b|\bbild$|bildlektion/i, '#ff2d55'],      // Bild - Rosa
+        [/musik/i, '#00c7be'],                            // Musik - Turkos
+        [/slöjd/i, '#a0522d'],                            // Slöjd - Brun
+        [/teknik/i, '#48484a'],                           // Teknik - Mörkgrå
+        [/hem-? ?och ?konsument|hemkunskap|\bhkk\b/i, '#8bc34a'] // Hem- och konsumentkunskap - Ljusgrön
+    ];
+    function matchSubjectColor(text){
+        if(!text) return null;
+        for(const [re,color] of SUBJECT_COLOR_MAP){ if(re.test(text)) return color; }
+        return null;
+    }
+    // Hela färgpaletten (bas + ämnesfärger) som färgremsans klickmeny cyklar igenom.
+    const SCHEDULE_COLOR_CYCLE = ['#e5e5ea','#ff3b30','#ff9500','#ffcc00','#4cd964','#8bc34a','#5ac8fa','#00c7be','#007aff','#5856d6','#ff2d55','#a0522d','#48484a'];
+
     const SCHEDULE_ICONS = {
       skriv:    {l:'Skriva',   s:"<svg viewBox='0 0 48 48'><path d='M12 36l3-9 16-16 6 6-16 16-9 3z' fill='#ffd24d' stroke='#6b4e17' stroke-width='2' stroke-linejoin='round'/><path d='M31 11l6 6 3-3a2 2 0 0 0 0-3l-3-3a2 2 0 0 0-3 0z' fill='#ff9f43' stroke='#6b4e17' stroke-width='2' stroke-linejoin='round'/><path d='M12 36l4-4 5 5z' fill='#5a4a2a'/></svg>"},
       abc:      {l:'Bokstäver',s:"<svg viewBox='0 0 48 48'><rect x='4' y='14' width='13' height='20' rx='3' fill='#ff6b6b'/><rect x='17.5' y='14' width='13' height='20' rx='3' fill='#4dabf7'/><rect x='31' y='14' width='13' height='20' rx='3' fill='#51cf66'/><text x='10.5' y='30' font-family='Arial' font-size='14' font-weight='bold' fill='#fff' text-anchor='middle'>A</text><text x='24' y='30' font-family='Arial' font-size='14' font-weight='bold' fill='#fff' text-anchor='middle'>B</text><text x='37.5' y='30' font-family='Arial' font-size='14' font-weight='bold' fill='#fff' text-anchor='middle'>C</text></svg>"},
@@ -3771,9 +3927,9 @@
     }
     async function gotdOrdbok(ord){
         const w=(ord||'').toLowerCase().trim(); if(!w) return null;
-        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdOrdbokCacheV1')||'{}'); }catch(e){}
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdOrdbokCacheV2')||'{}'); }catch(e){}
         if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
-        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdOrdbokCacheV1', JSON.stringify(cache)); }catch(e){} };
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdOrdbokCacheV2', JSON.stringify(cache)); }catch(e){} };
         let j;
         try{
             const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
@@ -3801,17 +3957,28 @@
                 if(items.length) synonym = items.slice(0,2).join(', ');
             }
         }
-        // Exempel: leta efter en nästlad exempelrad i den första betydelselistan
+        // Exempel + förklaring hämtas från SAMMA betydelse (första <li> i första betydelselistan)
+        // så att de garanterat hänger ihop logiskt, istället för att korsreferera mot en
+        // eventuellt annan betydelse från Wikipedia (t.ex. "ton" som viktenhet vs. som ljud).
+        let forklaring=null;
         const defLista = doc.querySelector('ol');
         if(defLista){
             const forstaLi = defLista.querySelector('li');
             if(forstaLi){
-                const nastlad = forstaLi.querySelector('dl,ul,i');
+                // Exempel: leta specifikt efter den inbäddade exempellistan (dl/ul) - INTE
+                // en lös <i>-tagg, som oftast bara är en ämnestagg som "(måttenheter)".
+                const nastlad = forstaLi.querySelector('dl') || forstaLi.querySelector('ul');
                 if(nastlad){ const t=clean(nastlad.textContent); if(t && t.length>3) exempel=t; }
+                // Förklaring: hela radens text minus den inbäddade exempellistan, så
+                // ämnestaggen ("(måttenheter)") följer med som en del av förklaringen.
+                const liClone = forstaLi.cloneNode(true);
+                liClone.querySelectorAll('dl,ul,ol').forEach(n=>n.remove());
+                const gloss = clean(liClone.textContent);
+                if(gloss && gloss.length>2) forklaring = gloss;
             }
         }
-        if(!synonym && !exempel){ sparaCache('saknas'); return null; }
-        const res={ synonym:synonym, exempel:exempel };
+        if(!synonym && !exempel && !forklaring){ sparaCache('saknas'); return null; }
+        const res={ synonym:synonym, exempel:exempel, forklaring:forklaring };
         sparaCache(res); return res;
     }
     function gotdPanelHtml(kind, icon, label){
@@ -3855,7 +4022,8 @@
         const synBody = container.querySelector('.gotd-panel[data-kind="synonym"] .gotd-panel-body');
         const [wiki, ordbok] = await Promise.all([gotdWikipedia(word), gotdOrdbok(word)]);
         if(bildBody) bildBody.innerHTML = (wiki && wiki.bild) ? `<img src="${wiki.bild}" alt="${gotdEsc(word)}">` : `<span class='gotd-tom'>Ingen bild hittades.</span>`;
-        if(forkBody) forkBody.innerHTML = (wiki && wiki.forklaring) ? gotdEsc(wiki.forklaring) : `<span class='gotd-tom'>Ingen förklaring hittades.</span>`;
+        const forklaringText = (ordbok && ordbok.forklaring) ? ordbok.forklaring : ((wiki && wiki.forklaring) ? wiki.forklaring : null);
+        if(forkBody) forkBody.innerHTML = forklaringText ? gotdEsc(forklaringText) : `<span class='gotd-tom'>Ingen förklaring hittades.</span>`;
         if(exBody) exBody.innerHTML = gotdEsc((ordbok && ordbok.exempel) ? ordbok.exempel : ('Kan du använda ordet "'+word+'" i en egen mening?'));
         if(synBody) synBody.innerHTML = (ordbok && ordbok.synonym) ? gotdEsc(ordbok.synonym) : `<span class='gotd-tom'>Inga synonymer hittades.</span>`;
         saveBoardState();
@@ -3933,6 +4101,750 @@
                 }
             },80);
         };
+    }
+
+    // ---- BEGREPPSKORT ----
+    // Visar ett NO-begrepp med förklaring, symbol/bild (emoji), exempel och en
+    // minnesregel ("kom ihåg"). Begreppet byts automatiskt varje dag (baserat på
+    // dagens datum, samma för hela klassen), men går även att slumpa manuellt.
+    const BEGREPPSKORT_BANK = [
+        { ord:'Fotosyntes', emoji:'🌱', forklaring:'Processen där gröna växter omvandlar solljus, vatten och koldioxid till socker (näring) och syre.', exempel:'Ett träds gröna blad fångar solljus och gör om det till energi som trädet växer av.', komihag:'Växter "äter" solljus – det är så de gör sin egen mat!' },
+        { ord:'Näringskedja', emoji:'🔗', forklaring:'En kedja som visar vem som äter vem i naturen, från växt till rovdjur.', exempel:'Gräs äts av kanin, kaninen äts av räv.', komihag:'Energin vandrar vidare varje gång något äts upp.' },
+        { ord:'Avdunstning', emoji:'💨', forklaring:'När vatten värms upp och övergår från flytande form till osynlig vattenånga i luften.', exempel:'Vattenpölar på gatan försvinner en solig dag eftersom vattnet avdunstar.', komihag:'Värme får vatten att "försvinna" upp i luften.' },
+        { ord:'Kretslopp', emoji:'🔄', forklaring:'En process som upprepas om och om igen i naturen, till exempel vattnets väg mellan hav, moln och regn.', exempel:'Vattnets kretslopp: avdunstning → moln → regn → sjöar och hav → avdunstning igen.', komihag:'Naturen återanvänder – inget vatten försvinner, det bara byter form.' },
+        { ord:'Magnetism', emoji:'🧲', forklaring:'En osynlig kraft som gör att vissa metaller dras till eller stöts bort från varandra.', exempel:'En magnet kan lyfta ett gem utan att röra det.', komihag:'Lika poler stöter bort varandra, olika poler drar till sig varandra.' },
+        { ord:'Friktion', emoji:'🛞', forklaring:'En kraft som bromsar rörelse när två ytor gnids mot varandra.', exempel:'Det är svårare att glida på asfalt än på is, eftersom asfalt har mer friktion.', komihag:'Mer friktion = mer motstånd = svårare att röra sig.' },
+        { ord:'Gravitation', emoji:'🍎', forklaring:'Den kraft som drar allt mot jordens mitt – det som gör att saker faller nedåt.', exempel:'Ett äpple som lossnar från trädet faller alltid rakt ner mot marken.', komihag:'Jorden "drar" i allt – därför flyger inget iväg ut i rymden.' },
+        { ord:'Ekosystem', emoji:'🌳', forklaring:'Alla levande varelser och miljön de lever i, tillsammans, på en plats.', exempel:'En skog är ett ekosystem med träd, djur, svampar och insekter som lever tillsammans.', komihag:'Allt hänger ihop – ändras en sak i ekosystemet påverkas allt annat.' },
+        { ord:'Fossil', emoji:'🦴', forklaring:'Rester eller avtryck av växter eller djur som levt för mycket länge sedan, bevarade i sten.', exempel:'Dinosaurieben som hittats i berg är fossil.', komihag:'Fossil är naturens egna, urgamla "foton" av forntida liv.' },
+        { ord:'Kondensation', emoji:'💧', forklaring:'När vattenånga i luften kyls ner och blir till flytande vatten igen.', exempel:'Imma på ett kallt glas läsk en varm dag är kondenserat vatten.', komihag:'Motsatsen till avdunstning – ångan blir vatten igen när det kyls av.' },
+        { ord:'Elektricitet', emoji:'⚡', forklaring:'Energi som kan flöda genom sladdar och få saker som lampor och apparater att fungera.', exempel:'När du trycker på strömbrytaren flödar elektricitet till lampan så den lyser.', komihag:'Elektricitet måste ha en sluten krets (bana) för att kunna flöda.' },
+        { ord:'Fast form', emoji:'❄️', forklaring:'Ett tillstånd hos material där partiklarna sitter tätt och stilla – ämnet har en bestämd form.', exempel:'Is är vatten i fast form.', komihag:'Fast = stelt, håller formen av sig själv.' },
+        { ord:'Flytande form', emoji:'💦', forklaring:'Ett tillstånd hos material där partiklarna kan röra sig och glida – ämnet tar formen av sin behållare.', exempel:'Vatten i ett glas är i flytande form.', komihag:'Flytande ämnen "rinner" och anpassar sig efter kärlet.' },
+        { ord:'Gasform', emoji:'☁️', forklaring:'Ett tillstånd hos material där partiklarna rör sig fritt och sprids ut – ämnet fyller hela sitt utrymme.', exempel:'Vattenånga och luften vi andas är gaser.', komihag:'Gaser syns oftast inte, men de finns runt omkring oss.' },
+        { ord:'Pollinering', emoji:'🐝', forklaring:'När pollen flyttas från en blomma till en annan, ofta med hjälp av insekter, så att växten kan bilda frön.', exempel:'En bi som flyger mellan blommor pollinerar dem samtidigt som den samlar nektar.', komihag:'Utan pollinerare som bin skulle många växter inte kunna föröka sig.' },
+        { ord:'Klorofyll', emoji:'🍃', forklaring:'Det gröna ämnet i växters blad som fångar upp solens energi.', exempel:'Det är klorofyllet som gör att blad ser gröna ut.', komihag:'Klorofyll = växtens egen "solpanel".' },
+        { ord:'Nedbrytare', emoji:'🍄', forklaring:'Organismer, som svampar och bakterier, som bryter ner döda växter och djur till näring i jorden.', exempel:'Svampar på skogsbotten bryter ner fallna löv och grenar.', komihag:'Nedbrytare är naturens egen återvinningscentral.' },
+        { ord:'Solsystemet', emoji:'☀️', forklaring:'Solen och alla planeter, månar och andra himlakroppar som kretsar runt den.', exempel:'Jorden är en av åtta planeter i vårt solsystem.', komihag:'Allt i solsystemet snurrar runt solen, som är i mitten.' },
+        { ord:'Rotation', emoji:'🌍', forklaring:'När jorden snurrar runt sin egen axel, vilket tar ett dygn (24 timmar).', exempel:'Det blir dag och natt för att jorden roterar runt sig själv.', komihag:'Rotation ger oss dag och natt.' },
+        { ord:'Organ', emoji:'🫀', forklaring:'En kroppsdel som gör ett visst jobb i kroppen, till exempel hjärtat som pumpar blod.', exempel:'Hjärtat, lungorna och hjärnan är alla organ.', komihag:'Varje organ har sin egen viktiga uppgift i kroppen.' },
+        { ord:'Cell', emoji:'🔬', forklaring:'Den minsta byggstenen som allt levande är uppbyggt av.', exempel:'Din kropp består av miljarder små celler.', komihag:'Celler är kroppens minsta "byggklossar".' },
+        { ord:'Livscykel', emoji:'🐛', forklaring:'De olika stadierna en växt eller ett djur går igenom under sitt liv, från att det föds eller gror till att det dör.', exempel:'En fjärils livscykel: ägg → larv → puppa → fjäril.', komihag:'Alla levande varelser föds, växer, förökar sig och dör – det är en livscykel.' },
+        { ord:'Ryggradsdjur', emoji:'🐟', forklaring:'Djur som har en ryggrad (skelett) inuti kroppen, till exempel fiskar, fåglar, groddjur, kräldjur och däggdjur.', exempel:'En katt, en groda och en örn är alla ryggradsdjur, fast de ser mycket olika ut.', komihag:'Har djuret ett skelett med ryggrad inuti – då är det ett ryggradsdjur.' },
+        { ord:'Nederbörd', emoji:'🌧️', forklaring:'Vatten som faller från molnen ner till marken, till exempel som regn, snö eller hagel.', exempel:'På vintern kommer nederbörden ofta som snö istället för regn, eftersom det är kallare.', komihag:'Nederbörd är alla former av vatten som faller från himlen.' }
+    ];
+    function begreppskortDagensIndex(){
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now - start;
+        const dagensDagIÅret = Math.floor(diff / 86400000);
+        return dagensDagIÅret % BEGREPPSKORT_BANK.length;
+    }
+    function begreppskortHtml(b){
+        return `<div class='gotd-kort bg-kort'>
+            <div class='bg-word'>${gotdEsc(b.ord)}</div>
+            <div class='gotd-panels'>
+                <div class='gotd-panel' data-kind='bild'><button class='gotd-reveal-btn' type='button'>🖼️ Visa bild</button><div class='gotd-panel-body' style='display:none;'><div class='bg-emoji'>${b.emoji}</div></div></div>
+                <div class='gotd-panel' data-kind='forklaring'><button class='gotd-reveal-btn' type='button'>💬 Visa förklaring</button><div class='gotd-panel-body' style='display:none;'>${gotdEsc(b.forklaring)}</div></div>
+                <div class='gotd-panel' data-kind='exempel'><button class='gotd-reveal-btn' type='button'>📝 Visa exempel</button><div class='gotd-panel-body' style='display:none;'>${gotdEsc(b.exempel)}</div></div>
+                <div class='gotd-panel' data-kind='komihag'><button class='gotd-reveal-btn' type='button'>⭐ Visa "kom ihåg"</button><div class='gotd-panel-body' style='display:none;'>${gotdEsc(b.komihag)}</div></div>
+            </div>
+            <button class='gotd-reveal-all btn btn-secondary' type='button'>👁️ Visa allt</button>
+        </div>`;
+    }
+    function createBegreppskort(config){
+        const body = createWidget('BEGREPPSKORT', 320, 'word-widget bg-widget', config);
+        const widget = body.parentElement.parentElement;
+        let idx = (config && config.data && typeof config.data.idx==='number') ? config.data.idx : begreppskortDagensIndex();
+        if(idx<0 || idx>=BEGREPPSKORT_BANK.length) idx = begreppskortDagensIndex();
+
+        const ctrl=document.createElement('div'); ctrl.className='hover-menu'; ctrl.style.padding='8px 8px 0';
+        const slumpBtn=document.createElement('button'); slumpBtn.type='button'; slumpBtn.className='btn btn-secondary'; slumpBtn.style.width='100%'; slumpBtn.textContent='🎲 Slumpa nytt begrepp';
+        ctrl.appendChild(slumpBtn);
+        body.appendChild(ctrl);
+
+        const kortWrap = document.createElement('div'); kortWrap.style.padding='10px';
+        body.appendChild(kortWrap);
+
+        function persist(){ widget.dataset.begrepp = JSON.stringify({ idx: idx }); saveBoardState(); }
+        function render(){
+            const b = BEGREPPSKORT_BANK[idx];
+            kortWrap.innerHTML = begreppskortHtml(b);
+            wireGotdKort(kortWrap, b.ord);
+        }
+        slumpBtn.onclick=()=>{
+            let ny; do { ny=Math.floor(Math.random()*BEGREPPSKORT_BANK.length); } while(BEGREPPSKORT_BANK.length>1 && ny===idx);
+            idx=ny; render(); persist();
+        };
+        render();
+        if(!config) persist();
+    }
+
+    // ---- DAGENS NO-FRÅGA ----
+    // En kort startfråga för NO-lektionen, med ett dolt (logiskt förklarat) svar
+    // bakom en Visa-knapp. Byts automatiskt varje dag, går även att slumpa manuellt.
+    const NOFRAGA_BANK = [
+        { fraga:'Varför flyter en båt av stål?', svar:'Båtens form gör att den trycker undan mycket vatten, och det ger en uppåtriktad kraft (uppdrift) som är stark nog att bära båten, fast stålet i sig är tungt.' },
+        { fraga:'Vad behöver en växt för att leva?', svar:'Vatten, solljus, koldioxid från luften och näring från jorden.' },
+        { fraga:'Varför blir det dag och natt?', svar:'Jorden snurrar runt sin egen axel (roterar), så olika delar av jorden vänds mot eller bort från solen under dygnet.' },
+        { fraga:'Vad händer när vatten fryser?', svar:'Vattnet övergår från flytande form till fast form (is) när temperaturen sjunker under 0 grader.' },
+        { fraga:'Varför syns blixten före du hör åskan?', svar:'Ljus färdas mycket snabbare än ljud, så blixten hinner fram till ögat innan mullret hinner fram till örat.' },
+        { fraga:'Vad är skillnaden på ett ryggradsdjur och ett ryggradslöst djur?', svar:'Ryggradsdjur har ett skelett med ryggrad inuti kroppen, som fiskar och fåglar. Ryggradslösa djur, som insekter och maskar, saknar det.' },
+        { fraga:'Varför behöver vi andas in syre?', svar:'Kroppens celler behöver syre för att kunna omvandla maten vi äter till energi.' },
+        { fraga:'Vad är fotosyntes?', svar:'Processen där gröna växter använder solljus för att tillverka socker och syre av vatten och koldioxid.' },
+        { fraga:'Varför smälter is snabbare i solen än i skuggan?', svar:'Solens värmestrålning värmer upp isen snabbare, vilket gör att den smälter fortare.' },
+        { fraga:'Vad är en näringskedja?', svar:'En kedja som visar vem som äter vem i naturen, till exempel gräs → kanin → räv.' },
+        { fraga:'Varför känns metall kallare än trä, fast de har samma temperatur?', svar:'Metall leder bort värme från handen snabbare än trä, vilket gör att metallen känns kallare vid beröring.' },
+        { fraga:'Vad gör hjärtat i kroppen?', svar:'Hjärtat pumpar runt blod i kroppen, vilket för med sig syre och näring till alla kroppens celler.' },
+        { fraga:'Varför flyter is på vatten istället för att sjunka?', svar:'Is är lättare (mindre tätt packat) än flytande vatten, så isen flyter ovanpå.' },
+        { fraga:'Vad är skillnaden mellan väder och årstid?', svar:'Väder är hur det är just nu, till exempel regn idag. Årstid handlar om längre perioder, som vår, sommar, höst och vinter.' },
+        { fraga:'Varför behöver bin blommor?', svar:'Bin samlar nektar och pollen från blommor som mat, och hjälper samtidigt till att pollinera blommorna.' },
+        { fraga:'Vad händer med vatten när det kokar?', svar:'Vattnet värms upp så mycket att det övergår från flytande form till gasform (vattenånga).' },
+        { fraga:'Varför fastnar ett gem på en magnet men inte en tallrik av plast?', svar:'Gemmet är gjort av en metall som dras till magneter, medan plast inte påverkas av magnetism.' },
+        { fraga:'Vad är skillnaden på ett rovdjur och ett bytesdjur?', svar:'Ett rovdjur jagar och äter andra djur, medan ett bytesdjur är det djur som blir uppätet.' },
+        { fraga:'Varför blir det svårare att cykla i sand än på asfalt?', svar:'Sand ger mer friktion (motstånd) mot cykelns däck än den jämna asfalten, vilket bromsar rörelsen.' },
+        { fraga:'Vad är ett fossil?', svar:'Rester eller avtryck av växter eller djur som levt för mycket länge sedan, bevarade i sten.' },
+        { fraga:'Varför svettas vi när det är varmt?', svar:'Svetten avdunstar från huden och kyler kroppen, vilket hjälper oss att inte bli överhettade.' },
+        { fraga:'Vad behöver ett frö för att gro?', svar:'Vatten, syre och lagom temperatur (värme).' },
+        { fraga:'Varför syns månen ibland på himlen mitt på dagen?', svar:'Månen reflekterar solljus och kan synas oavsett om det är dag eller natt, beroende på var den befinner sig på himlen.' },
+        { fraga:'Vad är skillnaden på fast, flytande och gasform?', svar:'Fast form har en bestämd form (till exempel is), flytande form tar formen av sin behållare (till exempel vatten), och gasform sprider ut sig fritt (till exempel vattenånga).' },
+        { fraga:'Varför väger samma sten olika mycket på jorden och på månen?', svar:'Månens gravitation (dragningskraft) är svagare än jordens, så allt väger mindre där.' },
+        { fraga:'Vad gör lungorna?', svar:'Lungorna tar upp syre från luften vi andas in, och släpper ut koldioxid när vi andas ut.' },
+        { fraga:'Varför rostar järn men inte plast?', svar:'Järn reagerar med syre och fukt i luften och bildar rost, medan plast inte reagerar på samma sätt.' },
+        { fraga:'Vad är skillnaden mellan ett ekosystem och en näringskedja?', svar:'Ett ekosystem är alla levande varelser och miljön tillsammans på en plats, medan en näringskedja bara visar vem som äter vem.' },
+        { fraga:'Varför är det kallare på vintern än på sommaren i Sverige?', svar:'Under vintern lutar jordens norra halvklot bort från solen, så solens strålar träffar marken mer snett och ger mindre värme.' },
+        { fraga:'Vad är skillnaden på ett ledande och ett isolerande material?', svar:'Ett ledande material, som metall, släpper lätt igenom el. Ett isolerande material, som gummi eller plast, stoppar elen.' }
+    ];
+    function nofragaDagensIndex(){
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now - start;
+        const dagensDagIÅret = Math.floor(diff / 86400000);
+        return dagensDagIÅret % NOFRAGA_BANK.length;
+    }
+    function createNoFraga(config){
+        const body = createWidget('NO-FRÅGA', 340, 'nf-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '340px'; }
+        const root=document.createElement('div'); body.appendChild(root);
+
+        let idx = (config && config.data && typeof config.data.idx==='number') ? config.data.idx : nofragaDagensIndex();
+        if(idx<0 || idx>=NOFRAGA_BANK.length) idx = nofragaDagensIndex();
+        let revealed = (config && config.data && config.data.revealed) || false;
+
+        const persist=()=>{ widget.dataset.nofraga = JSON.stringify({ idx: idx, revealed: revealed }); saveBoardState(); };
+
+        function render(){
+            root.innerHTML='';
+            const q = NOFRAGA_BANK[idx];
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🔬 Dagens fråga att fundera över tillsammans innan lektionen börjar:'; root.appendChild(hint);
+            const fragaEl=document.createElement('div'); fragaEl.className='nf-fraga'; fragaEl.textContent=q.fraga; root.appendChild(fragaEl);
+
+            if(revealed){
+                const svar=document.createElement('div'); svar.className='nf-svar';
+                const lbl=document.createElement('div'); lbl.className='nf-svar-label'; lbl.textContent='✅ Svar'; svar.appendChild(lbl);
+                const txt=document.createElement('div'); txt.className='nf-svar-text'; txt.textContent=q.svar; svar.appendChild(txt);
+                root.appendChild(svar);
+            }
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Ny fråga';
+            nyBtn.onclick=()=>{
+                let ny; do { ny=Math.floor(Math.random()*NOFRAGA_BANK.length); } while(NOFRAGA_BANK.length>1 && ny===idx);
+                idx=ny; revealed=false; render(); persist();
+            };
+            btns.appendChild(nyBtn);
+            if(!revealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa svar';
+                revealBtn.onclick=()=>{ revealed=true; render(); persist(); };
+                btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj svar';
+                hideBtn.onclick=()=>{ revealed=false; render(); persist(); };
+                btns.appendChild(hideBtn);
+            }
+            root.appendChild(btns);
+        }
+        render();
+        if(!config) persist();
+    }
+
+    // ---- SANT ELLER FALSKT ----
+    // Slumpar fram ett NO-påstående (sant eller falskt) som eleverna får fundera
+    // över och rösta på, innan facit och motivering avslöjas.
+    const SANTFALSKT_BANK = [
+        { text:'Alla magneter fastnar på metall.', korrekt:false, motivering:'Magneter fastnar bara på vissa metaller, som järn, nickel och kobolt – inte på till exempel aluminium eller koppar.' },
+        { text:'Månen lyser av sig själv.', korrekt:false, motivering:'Månen har inget eget ljus, den reflekterar bara solens ljus.' },
+        { text:'Is är lättare än vatten.', korrekt:true, motivering:'Is är mindre tätt packat (har lägre densitet) än flytande vatten, därför flyter is på vatten.' },
+        { text:'Växter behöver solljus för att leva.', korrekt:true, motivering:'Växter använder solljus för fotosyntesen, där de tillverkar sin egen näring.' },
+        { text:'Alla djur med skelett kallas ryggradsdjur.', korrekt:true, motivering:'Djur som har ett skelett med en ryggrad inuti kroppen kallas ryggradsdjur, till exempel fiskar, fåglar och däggdjur.' },
+        { text:'Vatten kokar alltid vid exakt samma temperatur oavsett var man är.', korrekt:false, motivering:'Vatten kokar vid en lägre temperatur högt uppe i bergen, eftersom lufttrycket är lägre där.' },
+        { text:'Blixten syns alltid före man hör åskan.', korrekt:true, motivering:'Ljus färdas mycket snabbare än ljud, så blixten syns innan mullret från åskan hörs, även om de skapas samtidigt.' },
+        { text:'Alla fåglar kan flyga.', korrekt:false, motivering:'Vissa fåglar, som strutsen och pingvinen, kan inte flyga.' },
+        { text:'Solen är en stjärna.', korrekt:true, motivering:'Solen är den stjärna som är närmast jorden.' },
+        { text:'Jorden är den enda planeten i solsystemet.', korrekt:false, motivering:'Det finns åtta planeter i solsystemet – jorden är bara en av dem.' },
+        { text:'Syre behövs för att en eld ska brinna.', korrekt:true, motivering:'Eld behöver syre, bränsle och värme för att kunna brinna – tas syret bort slocknar elden.' },
+        { text:'Alla insekter har sex ben.', korrekt:true, motivering:'Insekter kännetecknas bland annat av att de har exakt sex ben.' },
+        { text:'Ljud kan färdas genom rymden precis som på jorden.', korrekt:false, motivering:'Ljud behöver ett medium (som luft) för att färdas, och i rymden finns nästan ingen luft, så ljud kan inte färdas där.' },
+        { text:'Fotosyntes sker bara på natten.', korrekt:false, motivering:'Fotosyntes sker när det finns solljus, alltså på dagen.' },
+        { text:'Regnbågar bildas när solljus bryts i vattendroppar.', korrekt:true, motivering:'När solljus träffar och bryts i regndroppar i luften kan det bilda en regnbåge.' },
+        { text:'Alla växter har blommor.', korrekt:false, motivering:'Vissa växter, som ormbunkar och mossor, har inga blommor.' },
+        { text:'Metall leder elektricitet bättre än plast.', korrekt:true, motivering:'Metaller är oftast bra ledare av elektricitet, medan plast är en isolator som stoppar strömmen.' },
+        { text:'En magnet har bara en pol.', korrekt:false, motivering:'En magnet har alltid två poler, en nordpol och en sydpol.' },
+        { text:'Månen har en egen atmosfär precis som jorden.', korrekt:false, motivering:'Månen har nästan ingen atmosfär alls, till skillnad från jorden.' },
+        { text:'Vatten övergår till gasform när det avdunstar.', korrekt:true, motivering:'När vatten avdunstar övergår det från flytande form till osynlig vattenånga (gasform).' },
+        { text:'Alla djur föder levande ungar.', korrekt:false, motivering:'Många djur, som fåglar, fiskar och reptiler, lägger ägg istället för att föda levande ungar.' },
+        { text:'Ett ekosystem kan bestå av både djur, växter och miljön de lever i.', korrekt:true, motivering:'Ett ekosystem är alla levande varelser tillsammans med den miljö de lever i, på en viss plats.' },
+        { text:'Ett fossil är alltid av ett djur.', korrekt:false, motivering:'Fossil kan vara rester eller avtryck av både djur och växter.' },
+        { text:'Jordens rotation orsakar dag och natt.', korrekt:true, motivering:'När jorden snurrar runt sin egen axel vänds olika delar mot och bort från solen, vilket ger dag och natt.' },
+        { text:'Alla ämnen krymper när de fryser till fast form.', korrekt:false, motivering:'Vatten är ovanligt eftersom det utvidgas (blir större) när det fryser till is, till skillnad från de flesta andra ämnen.' },
+        { text:'Solen roterar runt jorden.', korrekt:false, motivering:'Det är jorden som roterar runt solen, inte tvärtom.' },
+        { text:'Näringskedjor visar vem som äter vem i naturen.', korrekt:true, motivering:'En näringskedja visar hur energi förs vidare genom att djur och växter äter varandra.' },
+        { text:'Alla svampar är växter.', korrekt:false, motivering:'Svampar tillhör en egen grupp av organismer – de räknas varken som växter eller djur.' },
+        { text:'Friktion kan göra det svårare att röra sig.', korrekt:true, motivering:'Friktion är en kraft som bromsar rörelse när två ytor gnids mot varandra.' },
+        { text:'Kroppens celler behöver syre för att fungera.', korrekt:true, motivering:'Cellerna i kroppen använder syre för att omvandla mat till energi.' }
+    ];
+    function createSantFalskt(config){
+        if(config===undefined) config=null;
+        const body = createWidget('SANT ELLER FALSKT', 340, 'sf-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '420px'; }
+        const root=document.createElement('div'); root.className='poll-root sf-root'; body.appendChild(root);
+
+        let state = { idx:0, votesSant:0, votesFalskt:0, revealed:false };
+        if(config && config.data && typeof config.data.idx==='number'){ Object.assign(state, config.data); }
+        else { state.idx = Math.floor(Math.random()*SANTFALSKT_BANK.length); }
+
+        const persist=()=>{ widget.dataset.santfalskt = JSON.stringify(state); saveBoardState(); };
+        function nyttPastaende(){
+            let ny; do { ny=Math.floor(Math.random()*SANTFALSKT_BANK.length); } while(SANTFALSKT_BANK.length>1 && ny===state.idx);
+            state.idx=ny; state.votesSant=0; state.votesFalskt=0; state.revealed=false;
+        }
+
+        function render(){
+            root.innerHTML='';
+            const p = SANTFALSKT_BANK[state.idx];
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🧠 Är påståendet sant eller falskt? Fundera och rösta!'; root.appendChild(hint);
+            const pEl=document.createElement('div'); pEl.className='sf-pastaende'; pEl.textContent='"'+p.text+'"'; root.appendChild(pEl);
+
+            const total = (state.votesSant||0)+(state.votesFalskt||0);
+            const knappar=document.createElement('div'); knappar.className='sf-knappar';
+            const mkBtn=(ärSant)=>{
+                const votes = ärSant ? (state.votesSant||0) : (state.votesFalskt||0);
+                const pct = total>0 ? Math.round(votes/total*100) : 0;
+                const btn=document.createElement('button'); btn.type='button'; btn.className='poll-opt-btn sf-knapp';
+                if(state.revealed && ärSant===p.korrekt) btn.classList.add('poll-opt-correct');
+                const fill=document.createElement('div'); fill.className='poll-opt-fill'; fill.style.width=pct+'%'; btn.appendChild(fill);
+                const content=document.createElement('div'); content.className='poll-opt-content';
+                const label=document.createElement('span'); label.textContent=(ärSant?'✅ Sant':'❌ Falskt')+(state.revealed && ärSant===p.korrekt?' ⭐':'');
+                const stat=document.createElement('span'); stat.className='poll-opt-pct'; stat.textContent=votes+' ('+pct+'%)';
+                content.appendChild(label); content.appendChild(stat);
+                btn.appendChild(content);
+                btn.onclick=()=>{ if(ärSant) state.votesSant=(state.votesSant||0)+1; else state.votesFalskt=(state.votesFalskt||0)+1; render(); persist(); };
+                return btn;
+            };
+            knappar.appendChild(mkBtn(true)); knappar.appendChild(mkBtn(false));
+            root.appendChild(knappar);
+
+            const totalEl=document.createElement('div'); totalEl.className='exit-total'; totalEl.textContent = total===0 ? 'Inga röster än' : total+' röster totalt'; root.appendChild(totalEl);
+
+            if(state.revealed){
+                const facit=document.createElement('div'); facit.className='rml-facit '+(p.korrekt?'rml-facit-yes':'rml-facit-no');
+                const icon=document.createElement('div'); icon.className='rml-facit-icon'; icon.textContent=p.korrekt?'✅':'❌'; facit.appendChild(icon);
+                const label=document.createElement('div'); label.className='rml-facit-label'; label.textContent=p.korrekt?'Sant!':'Falskt!'; facit.appendChild(label);
+                const mot=document.createElement('div'); mot.className='rml-facit-mot'; mot.textContent=p.motivering; facit.appendChild(mot);
+                root.appendChild(facit);
+            }
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Nytt påstående';
+            nyBtn.onclick=()=>{ nyttPastaende(); render(); persist(); };
+            const resetBtn=document.createElement('button'); resetBtn.className='kw-btn kw-btn-warn'; resetBtn.textContent='🔄 Nollställ röster';
+            resetBtn.onclick=()=>{ state.votesSant=0; state.votesFalskt=0; state.revealed=false; render(); persist(); };
+            btns.appendChild(nyBtn); btns.appendChild(resetBtn);
+            if(!state.revealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa facit';
+                revealBtn.onclick=()=>{ state.revealed=true; render(); persist(); };
+                btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj facit';
+                hideBtn.onclick=()=>{ state.revealed=false; render(); persist(); };
+                btns.appendChild(hideBtn);
+            }
+            root.appendChild(btns);
+        }
+        render();
+        if(!config) persist();
+    }
+
+    // ---- RYMDEN ----
+    // Två lägen: "Slumpa objekt" (dolda svar på Vad heter den?/Hur skiljer den sig
+    // från jorden?) och "Planeter" (alla åtta planeter som klickbara bilder i
+    // storleksordning, med beskrivning som visas när man klickar på en planet).
+    const RYMDEN_BANK = [
+        { namn:'Merkurius', typ:'Planet', emoji:'🪐', beskrivning:'Den planet som ligger närmast solen. Ett år på Merkurius (ett varv runt solen) tar bara 88 dagar.', skillnad:'Merkurius har ingen atmosfär och kan bli över 400 grader varmt på dagen men minus 180 grader kallt på natten – mycket mer extremt än jordens klimat.' },
+        { namn:'Venus', typ:'Planet', emoji:'🪐', beskrivning:'Den hetaste planeten i hela solsystemet, trots att den inte ligger närmast solen.', skillnad:'Venus har en tjock atmosfär av koldioxid som fångar in värme, vilket gör ytan runt 465 grader varm – mycket hetare än jorden.' },
+        { namn:'Mars', typ:'Planet', emoji:'🔴', beskrivning:'Kallas den röda planeten på grund av det rostfärgade stoftet på ytan.', skillnad:'Mars har en mycket tunnare atmosfär än jorden och är kallare, men har liksom jorden både berg, dalar och is vid polerna.' },
+        { namn:'Jupiter', typ:'Planet', emoji:'🪐', beskrivning:'Den största planeten i solsystemet – så stor att över 1000 jordklot skulle få plats inuti den.', skillnad:'Jupiter är en gasjätte utan fast yta att stå på, till skillnad från jorden som har fast mark.' },
+        { namn:'Saturnus', typ:'Planet', emoji:'🪐', beskrivning:'Känd för sina tydliga ringar, som består av is och stenbitar.', skillnad:'Saturnus har ringar av is och sten runt sig, vilket jorden inte har, och den är så lätt att den skulle flyta på vatten om det fanns ett hav stort nog.' },
+        { namn:'Uranus', typ:'Planet', emoji:'🪐', beskrivning:'En isjätte som roterar nästan liggande på sidan, till skillnad från de flesta andra planeterna.', skillnad:'Uranus lutar nästan helt på sidan när den snurrar, medan jorden roterar mer upprätt.' },
+        { namn:'Neptunus', typ:'Planet', emoji:'🪐', beskrivning:'Den planet som ligger längst bort från solen och har de starkaste vindarna i solsystemet.', skillnad:'Neptunus har enormt starka vindar, mycket starkare än några stormar på jorden, och är extremt kall.' },
+        { namn:'Pluto', typ:'Dvärgplanet', emoji:'🪐', beskrivning:'En dvärgplanet långt ute i solsystemets ytterkant, som förr räknades som den nionde planeten.', skillnad:'Pluto är mycket mindre än jorden, och det tar den hela 248 år att åka ett varv runt solen.' },
+        { namn:'Månen', typ:'Måne', emoji:'🌙', beskrivning:'Jordens enda naturliga måne, och den himlakropp som ligger närmast oss.', skillnad:'Månen har ingen luft att andas och inget flytande vatten på ytan, till skillnad från jorden som har både atmosfär och hav.' },
+        { namn:'Europa', typ:'Måne', emoji:'🧊', beskrivning:'En av Jupiters månar, täckt av ett tjockt lager is.', skillnad:'Under Europas isiga yta kan det finnas ett hav av flytande vatten, men det är helt fruset ovanpå – till skillnad från jordens öppna hav.' },
+        { namn:'Titan', typ:'Måne', emoji:'🌫️', beskrivning:'Saturnus största måne, och den enda månen i solsystemet med en tjock atmosfär.', skillnad:'Titan har sjöar, men de är fyllda med flytande metan istället för vatten som på jorden.' },
+        { namn:'Phobos', typ:'Måne', emoji:'🪨', beskrivning:'En av Mars två små månar, formad som en oval potatis.', skillnad:'Phobos är mycket mindre och har en ojämn form, till skillnad från jordens runda måne.' },
+        { namn:'Io', typ:'Måne', emoji:'🌋', beskrivning:'En av Jupiters månar och den mest vulkaniskt aktiva platsen i hela solsystemet.', skillnad:'Io har hundratals aktiva vulkaner, betydligt fler än jordens vulkaner.' },
+        { namn:'Asteroid', typ:'Asteroid', emoji:'🪨', beskrivning:'Ett stenigt objekt som kretsar runt solen, mindre än en planet. De flesta finns i asteroidbältet mellan Mars och Jupiter.', skillnad:'En asteroid är oftast bara en stenklump utan atmosfär eller liv, medan jorden har både luft, vatten och liv.' },
+        { namn:'Ceres', typ:'Asteroid (dvärgplanet)', emoji:'🪨', beskrivning:'Den största kroppen i asteroidbältet, ibland kallad en dvärgplanet.', skillnad:'Ceres är mycket mindre än jorden och saknar en riktig atmosfär.' },
+        { namn:'Komet', typ:'Komet', emoji:'☄️', beskrivning:'Ett isigt objekt som får en lysande svans av gas och stoft när den kommer nära solen.', skillnad:'En komet består mest av is och stoft och har en svans som pekar bort från solen – något jorden inte har alls.' },
+        { namn:'Halleys komet', typ:'Komet', emoji:'☄️', beskrivning:'En berömd komet som syns från jorden ungefär vart 76:e år.', skillnad:'Till skillnad från jorden, som har en nästan cirkelformad bana runt solen, har Halleys komet en mycket avlång bana.' },
+        { namn:'Meteorit', typ:'Meteorit', emoji:'🌠', beskrivning:'En bit sten eller metall från rymden som överlevt resan genom atmosfären och landat på marken.', skillnad:'En meteorit kommer utifrån rymden, medan de flesta stenar på jorden bildats här på plats.' },
+        { namn:'Solen', typ:'Stjärna', emoji:'☀️', beskrivning:'Den stjärna som ligger i mitten av vårt solsystem och ger oss ljus och värme.', skillnad:'Solen är en glödande gasboll utan fast yta, helt olik jordens fasta mark.' },
+        { namn:'Stjärna', typ:'Stjärna', emoji:'⭐', beskrivning:'Ett enormt klot av het gas som lyser av sig själv, precis som vår sol.', skillnad:'En stjärna skapar sitt eget ljus genom reaktioner inuti sig, medan jorden bara reflekterar solens ljus.' },
+        { namn:'Vintergatan', typ:'Galax', emoji:'🌌', beskrivning:'Galaxen som hela vårt solsystem befinner sig i, med hundratals miljarder stjärnor.', skillnad:'Vintergatan innehåller miljarder stjärnor och solsystem, medan jorden bara är en liten planet i en enda del av den.' }
+    ];
+    // Alla åtta planeter, i ordning efter avstånd från solen (Merkurius närmast - Neptunus längst bort).
+    // avstandMiljKm = ungefärligt avstånd till solen i miljoner km (jorden = 149,6 milj. km).
+    const PLANETER_BANK = [
+        { namn:'Merkurius', typ:'Stenplanet', diameterKm:4879, avstandMiljKm:57.9, manar:0, manarText:'Inga månar alls.', farg:'#9c9c9c', sammansattning:'En stenplanet, mest gjord av berg och en stor kärna av järn.', beskrivning:'Den minsta och innersta planeten. Ingen atmosfär och extrema temperaturskillnader mellan dag och natt.' },
+        { namn:'Venus', typ:'Stenplanet', diameterKm:12104, avstandMiljKm:108.2, manar:0, manarText:'Inga månar alls.', farg:'#e8cfa0', sammansattning:'En stenplanet med en mycket tjock atmosfär av koldioxid och moln av svavelsyra.', beskrivning:'Den hetaste planeten, med en tjock atmosfär av koldioxid som ger en kraftig växthuseffekt.' },
+        { namn:'Jorden', typ:'Stenplanet', diameterKm:12742, avstandMiljKm:149.6, manar:1, manarText:'1 måne: Månen.', farg:'#3a86c8', sammansattning:'En stenplanet med fast mark, stora hav av flytande vatten och en atmosfär av mest kväve och syre.', beskrivning:'Vår egen planet – den enda kända planeten med flytande vatten på ytan och liv.' },
+        { namn:'Mars', typ:'Stenplanet', diameterKm:6779, avstandMiljKm:227.9, manar:2, manarText:'2 månar: Phobos och Deimos.', farg:'#c1440e', sammansattning:'En stenplanet med röd yta av järnoxid (rost) och en mycket tunn atmosfär av koldioxid.', beskrivning:'Den röda planeten, med det största vulkanberget och den djupaste kanjonen i hela solsystemet.' },
+        { namn:'Jupiter', typ:'Gasplanet', diameterKm:139820, avstandMiljKm:778.5, manar:95, manarText:'95 kända månar, bland annat Europa, Io och Ganymedes.', farg:'#d9a066', sammansattning:'En gasjätte, mest gjord av väte och helium, utan någon fast yta att stå på.', beskrivning:'Den största planeten i solsystemet – så stor att över 1000 jordklot skulle få plats inuti den.' },
+        { namn:'Saturnus', typ:'Gasplanet', diameterKm:116460, avstandMiljKm:1434, manar:146, manarText:'Hela 146 kända månar, flest av alla planeter! Största är Titan.', farg:'#e3c16f', sammansattning:'En gasjätte, mest gjord av väte och helium, känd för sina tydliga ringar av is och sten.', beskrivning:'Känd för sina tydliga ringar av is och sten. Så lätt att den skulle flyta på vatten.' },
+        { namn:'Uranus', typ:'Gasplanet', diameterKm:50724, avstandMiljKm:2871, manar:27, manarText:'27 kända månar.', farg:'#7fd4e0', sammansattning:'En isjätte, gjord av gas och is. Den blåaktiga färgen kommer av metan i atmosfären.', beskrivning:'En isjätte som roterar liggande på sidan, till skillnad från de andra planeterna.' },
+        { namn:'Neptunus', typ:'Gasplanet', diameterKm:49244, avstandMiljKm:4495, manar:14, manarText:'14 kända månar, störst är Triton.', farg:'#3a56d4', sammansattning:'En isjätte, gjord av gas och is (vatten, ammoniak och metan) runt en liten stenkärna.', beskrivning:'Den planet som ligger längst bort från solen, med de starkaste vindarna i solsystemet.' }
+    ];
+    // Quizfrågor om planeterna - fyra svarsalternativ, ett rätt.
+    const PLANET_QUIZ_BANK = [
+        { fraga:'Vilken planet ligger närmast solen?', alt:['Merkurius','Venus','Mars','Jorden'], ratt:0, forklaring:'Merkurius är den innersta planeten och ligger bara ca 58 miljoner km från solen.' },
+        { fraga:'Vilken planet ligger längst bort från solen?', alt:['Uranus','Saturnus','Neptunus','Jupiter'], ratt:2, forklaring:'Neptunus ligger längst ut, hela ca 4,5 miljarder km från solen.' },
+        { fraga:'Vilken är den största planeten i solsystemet?', alt:['Saturnus','Jupiter','Neptunus','Jorden'], ratt:1, forklaring:'Jupiter är så stor att över 1000 jordklot skulle få plats inuti den.' },
+        { fraga:'Vilken är den minsta planeten i solsystemet?', alt:['Mars','Venus','Merkurius','Jorden'], ratt:2, forklaring:'Merkurius är minst av de åtta planeterna, med en diameter på bara ca 4879 km.' },
+        { fraga:'Vilken planet har flest kända månar?', alt:['Jupiter','Saturnus','Uranus','Neptunus'], ratt:1, forklaring:'Saturnus har hela 146 kända månar, flest av alla planeter.' },
+        { fraga:'Vilken av dessa planeter har inga månar alls?', alt:['Venus','Mars','Jorden','Jupiter'], ratt:0, forklaring:'Varken Merkurius eller Venus har några månar.' },
+        { fraga:'Vilken planet är känd för sina tydliga ringar av is och sten?', alt:['Uranus','Saturnus','Jupiter','Mars'], ratt:1, forklaring:'Saturnus ringar är så stora att de syns tydligt även från jorden med en vanlig kikare.' },
+        { fraga:'Vilken planet kallas "den röda planeten"?', alt:['Venus','Mars','Merkurius','Jupiter'], ratt:1, forklaring:'Mars yta är täckt av rostfärgat (järnoxidrikt) stoft, vilket ger den röda färgen.' },
+        { fraga:'Vilken planet har den hetaste ytan i hela solsystemet?', alt:['Merkurius','Venus','Mars','Jupiter'], ratt:1, forklaring:'Venus tjocka koldioxidatmosfär ger en kraftig växthuseffekt som gör ytan runt 465 grader varm.' },
+        { fraga:'Vilken planet är den enda kända med flytande vatten och liv?', alt:['Jorden','Mars','Venus','Neptunus'], ratt:0, forklaring:'Jorden är hittills den enda planeten vi känner till där det finns liv.' },
+        { fraga:'Vilken planet ligger precis efter Mars, räknat utåt från solen?', alt:['Saturnus','Jupiter','Uranus','Neptunus'], ratt:1, forklaring:'Efter de fyra stenplaneterna (Merkurius, Venus, Jorden, Mars) kommer gasjätten Jupiter.' },
+        { fraga:'Vilken av dessa planeter räknas som en gasplanet?', alt:['Mars','Jupiter','Jorden','Venus'], ratt:1, forklaring:'Jupiter, Saturnus, Uranus och Neptunus är gasplaneter (de fyra yttre planeterna).' },
+        { fraga:'Vilken av dessa planeter räknas som en stenplanet?', alt:['Mars','Saturnus','Uranus','Neptunus'], ratt:0, forklaring:'Merkurius, Venus, Jorden och Mars är stenplaneter (de fyra inre planeterna).' },
+        { fraga:'Vilken planet roterar liggande nästan helt på sidan?', alt:['Neptunus','Uranus','Saturnus','Jupiter'], ratt:1, forklaring:'Uranus är unik genom att den snurrar liggande på sidan, till skillnad från de andra planeterna.' },
+        { fraga:'Vilken planet har de starkaste vindarna i solsystemet?', alt:['Jupiter','Neptunus','Saturnus','Mars'], ratt:1, forklaring:'Neptunus har de allra starkaste uppmätta vindarna av alla planeter.' },
+        { fraga:'Hur många planeter finns det i vårt solsystem?', alt:['7','8','9','10'], ratt:1, forklaring:'Det finns åtta planeter, efter att Pluto omklassades till dvärgplanet 2006.' },
+        { fraga:'Vilken planet ligger mellan Venus och Mars, räknat från solen?', alt:['Merkurius','Jorden','Jupiter','Saturnus'], ratt:1, forklaring:'Ordningen från solen är: Merkurius, Venus, Jorden, Mars ...' },
+        { fraga:'Vilken planet skulle flyta på vatten (om det fanns ett hav stort nog) eftersom den är så lätt för sin storlek?', alt:['Jupiter','Saturnus','Uranus','Neptunus'], ratt:1, forklaring:'Saturnus har så låg densitet att den skulle flyta på vatten, om det bara funnits ett tillräckligt stort hav.' }
+    ];
+    function createRymden(config){
+        const body = createWidget('RYMDEN', 480, 'word-widget ry-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '440px'; }
+        let idx = (config && config.data && typeof config.data.idx==='number') ? config.data.idx : Math.floor(Math.random()*RYMDEN_BANK.length);
+        if(idx<0 || idx>=RYMDEN_BANK.length) idx = 0;
+        let mode = (config && config.data && config.data.mode) || 'slumpa';
+        let valdPlanetIdx = (config && config.data && typeof config.data.planetIdx==='number') ? config.data.planetIdx : null;
+        let quizIdx = (config && config.data && typeof config.data.quizIdx==='number') ? config.data.quizIdx : Math.floor(Math.random()*PLANET_QUIZ_BANK.length);
+        let quizValt = (config && config.data && typeof config.data.quizValt==='number') ? config.data.quizValt : null;
+        let quizScore = (config && config.data && config.data.quizScore) || 0;
+        let quizTotal = (config && config.data && config.data.quizTotal) || 0;
+
+        const tabRow=document.createElement('div'); tabRow.className='hover-menu ry-tabs'; tabRow.style.padding='8px 8px 0';
+        const tabSlumpa=document.createElement('button'); tabSlumpa.type='button'; tabSlumpa.className='btn'; tabSlumpa.textContent='🎲 Slumpa objekt';
+        const tabPlaneter=document.createElement('button'); tabPlaneter.type='button'; tabPlaneter.className='btn'; tabPlaneter.textContent='🪐 Planeter';
+        const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🧠 Quiz';
+        tabRow.appendChild(tabSlumpa); tabRow.appendChild(tabPlaneter); tabRow.appendChild(tabQuiz);
+        body.appendChild(tabRow);
+
+        const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
+        body.appendChild(kortWrap);
+
+        function persist(){ widget.dataset.rymden = JSON.stringify({ idx: idx, mode: mode, planetIdx: valdPlanetIdx, quizIdx: quizIdx, quizValt: quizValt, quizScore: quizScore, quizTotal: quizTotal }); saveBoardState(); }
+
+        function renderSlumpa(){
+            const o = RYMDEN_BANK[idx];
+            kortWrap.innerHTML = `<div class='gotd-kort'>
+                <div class='ry-emoji'>${o.emoji}</div>
+                <div class='ry-typbadge'>${gotdEsc(o.typ)}</div>
+                <div class='gotd-panels'>
+                    <div class='gotd-panel' data-kind='namn'><button class='gotd-reveal-btn' type='button'>❓ Vad heter den?</button><div class='gotd-panel-body' style='display:none;'><b>${gotdEsc(o.namn)}</b><br>${gotdEsc(o.beskrivning)}</div></div>
+                    <div class='gotd-panel' data-kind='skillnad'><button class='gotd-reveal-btn' type='button'>❓ Hur skiljer den sig från jorden?</button><div class='gotd-panel-body' style='display:none;'>${gotdEsc(o.skillnad)}</div></div>
+                </div>
+                <button class='gotd-reveal-all btn btn-secondary' type='button'>👁️ Visa allt</button>
+                <div class='hover-menu' style='margin-top:10px;'><button type='button' class='btn btn-primary ry-nytt' style='width:100%;'>🎲 Nytt objekt</button></div>
+            </div>`;
+            wireGotdKort(kortWrap, o.namn);
+            kortWrap.querySelector('.ry-nytt').onclick=()=>{
+                let ny; do { ny=Math.floor(Math.random()*RYMDEN_BANK.length); } while(RYMDEN_BANK.length>1 && ny===idx);
+                idx=ny; renderSlumpa(); persist();
+            };
+        }
+
+        function renderPlaneter(){
+            const maxD = Math.max(...PLANETER_BANK.map(p=>p.diameterKm));
+            const minPx=22, maxPx=100;
+            const rad=document.createElement('div'); rad.className='ry-planet-row';
+            PLANETER_BANK.forEach((p,i)=>{
+                const px = Math.round(minPx + (maxPx-minPx) * (p.diameterKm/maxD));
+                const col=document.createElement('div'); col.className='ry-planet-col';
+                const circle=document.createElement('div'); circle.className='ry-planet-circle'+(valdPlanetIdx===i?' vald':'');
+                circle.style.width=px+'px'; circle.style.height=px+'px'; circle.style.background=`radial-gradient(circle at 35% 32%, ${p.farg}, ${p.farg}cc 70%, #00000055)`;
+                circle.title=p.namn;
+                circle.onclick=()=>{ valdPlanetIdx=(valdPlanetIdx===i)?null:i; renderPlaneter(); persist(); };
+                col.appendChild(circle);
+                const lbl=document.createElement('div'); lbl.className='ry-planet-lbl'; lbl.textContent=p.namn;
+                col.appendChild(lbl);
+                const typLbl=document.createElement('div'); typLbl.className='ry-planet-typlbl'; typLbl.textContent=p.typ==='Gasplanet'?'💨 Gas':'🪨 Sten';
+                col.appendChild(typLbl);
+                rad.appendChild(col);
+            });
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Alla åtta planeter i ordning efter avstånd från solen – klicka på en planet för att läsa om den!'; kortWrap.appendChild(hint);
+            kortWrap.appendChild(rad);
+            if(valdPlanetIdx!==null){
+                const p = PLANETER_BANK[valdPlanetIdx];
+                const jorden = PLANETER_BANK.find(x=>x.namn==='Jorden');
+                const info=document.createElement('div'); info.className='ry-planet-info';
+                let storlekJmf, avstandJmf;
+                if(p.namn==='Jorden'){
+                    storlekJmf = 'Jorden är den planet vi jämför de andra med.';
+                    avstandJmf = 'Jordens avstånd till solen (ca 150 miljoner km) är det vi mäter övriga planeters avstånd emot.';
+                } else {
+                    const storlekFaktor = p.diameterKm / jorden.diameterKm;
+                    storlekJmf = storlekFaktor >= 1
+                        ? 'Ungefär '+storlekFaktor.toFixed(1).replace('.0','')+' gånger så stor som jorden (i diameter).'
+                        : 'Ungefär '+(1/storlekFaktor).toFixed(1).replace('.0','')+' gånger mindre än jorden (i diameter).';
+                    const avstandFaktor = p.avstandMiljKm / jorden.avstandMiljKm;
+                    avstandJmf = 'Ligger ungefär '+avstandFaktor.toFixed(1).replace('.0','')+' gånger så långt från solen som jorden gör ('+p.avstandMiljKm.toLocaleString('sv-SE')+' miljoner km, jorden ligger på ca 150 miljoner km).';
+                }
+                info.innerHTML = `<b>${gotdEsc(p.namn)}</b> <span class='ry-planet-diameter'>(diameter: ca ${p.diameterKm.toLocaleString('sv-SE')} km)</span>
+                    <div><span class='ry-typ-badge ry-typ-${p.typ==='Gasplanet'?'gas':'sten'}'>${p.typ==='Gasplanet'?'💨':'🪨'} ${gotdEsc(p.typ)}</span></div>
+                    <div class='ry-planet-rad'>${gotdEsc(p.beskrivning)}</div>
+                    <div class='ry-planet-rad'><b>🪨 Består av:</b> ${gotdEsc(p.sammansattning)}</div>
+                    <div class='ry-planet-rad'><b>🌙 Månar:</b> ${gotdEsc(p.manarText)}</div>
+                    <div class='ry-planet-rad'><b>📏 Storlek jämfört med jorden:</b> ${gotdEsc(storlekJmf)}</div>
+                    <div class='ry-planet-rad'><b>📍 Avstånd jämfört med jorden:</b> ${gotdEsc(avstandJmf)}</div>`;
+                kortWrap.appendChild(info);
+            }
+        }
+
+        function renderQuiz(){
+            const q = PLANET_QUIZ_BANK[quizIdx];
+            kortWrap.innerHTML='';
+            const scoreEl=document.createElement('div'); scoreEl.className='ry-quiz-score'; scoreEl.textContent='Poäng: '+quizScore+' / '+quizTotal; kortWrap.appendChild(scoreEl);
+            const fragaEl=document.createElement('div'); fragaEl.className='ry-quiz-fraga'; fragaEl.textContent=q.fraga; kortWrap.appendChild(fragaEl);
+
+            const altWrap=document.createElement('div'); altWrap.className='ry-quiz-alt';
+            q.alt.forEach((a,i)=>{
+                const b=document.createElement('button'); b.type='button'; b.className='ry-quiz-btn';
+                if(quizValt!==null){
+                    if(i===q.ratt) b.classList.add('ratt');
+                    else if(i===quizValt) b.classList.add('fel');
+                }
+                b.textContent=a;
+                b.disabled = quizValt!==null;
+                b.onclick=()=>{
+                    if(quizValt!==null) return;
+                    quizValt=i; quizTotal++;
+                    if(i===q.ratt) quizScore++;
+                    renderQuiz(); persist();
+                };
+                altWrap.appendChild(b);
+            });
+            kortWrap.appendChild(altWrap);
+
+            if(quizValt!==null){
+                const fork=document.createElement('div'); fork.className='ry-quiz-fork';
+                fork.textContent=(quizValt===q.ratt?'✅ Rätt! ':'❌ Fel. ')+q.forklaring;
+                kortWrap.appendChild(fork);
+                const nextBtn=document.createElement('button'); nextBtn.type='button'; nextBtn.className='btn btn-primary'; nextBtn.style.width='100%'; nextBtn.style.marginTop='10px'; nextBtn.textContent='➡️ Nästa fråga';
+                nextBtn.onclick=()=>{
+                    let ny; do { ny=Math.floor(Math.random()*PLANET_QUIZ_BANK.length); } while(PLANET_QUIZ_BANK.length>1 && ny===quizIdx);
+                    quizIdx=ny; quizValt=null; renderQuiz(); persist();
+                };
+                kortWrap.appendChild(nextBtn);
+            }
+            const resetBtn=document.createElement('button'); resetBtn.type='button'; resetBtn.className='btn btn-secondary'; resetBtn.style.width='100%'; resetBtn.style.marginTop='6px'; resetBtn.textContent='🔄 Börja om quizet';
+            resetBtn.onclick=()=>{ quizScore=0; quizTotal=0; quizValt=null; renderQuiz(); persist(); };
+            kortWrap.appendChild(resetBtn);
+        }
+
+        function render(){
+            tabSlumpa.classList.toggle('btn-primary', mode==='slumpa');
+            tabSlumpa.classList.toggle('btn-secondary', mode!=='slumpa');
+            tabPlaneter.classList.toggle('btn-primary', mode==='planeter');
+            tabPlaneter.classList.toggle('btn-secondary', mode!=='planeter');
+            tabQuiz.classList.toggle('btn-primary', mode==='quiz');
+            tabQuiz.classList.toggle('btn-secondary', mode!=='quiz');
+            if(mode==='planeter') renderPlaneter(); else if(mode==='quiz') renderQuiz(); else renderSlumpa();
+        }
+        tabSlumpa.onclick=()=>{ mode='slumpa'; render(); persist(); };
+        tabPlaneter.onclick=()=>{ mode='planeter'; render(); persist(); };
+        tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
+        render();
+        if(!config) persist();
+    }
+
+    // ---- VÄDRET ----
+    // Fyra flikar: Dagens väder (live-prognos, Open-Meteo API, inget API-nyckel behövs),
+    // Jämför med igår, Väderlexikon (vädertyper + instrument) och Quiz.
+    const VADER_TYPER = [
+        { namn:'Klart väder', emoji:'☀️', beskrivning:'Ingen eller nästan inga moln på himlen, solen syns tydligt.' },
+        { namn:'Molnigt', emoji:'☁️', beskrivning:'Himlen är till stor del eller helt täckt av moln.' },
+        { namn:'Växlande molnighet', emoji:'⛅', beskrivning:'Himlen växlar mellan soligt och molnigt under dagen.' },
+        { namn:'Regn', emoji:'🌧️', beskrivning:'Vattendroppar faller från molnen ner till marken.' },
+        { namn:'Duggregn', emoji:'🌦️', beskrivning:'Mycket lätt, fint regn med små droppar.' },
+        { namn:'Åska', emoji:'⛈️', beskrivning:'Blixtar och mullrande ljud, ofta tillsammans med kraftigt regn.' },
+        { namn:'Snö', emoji:'❄️', beskrivning:'Frusna, vita iskristaller faller från himlen istället för regn, när det är tillräckligt kallt.' },
+        { namn:'Hagel', emoji:'🧊', beskrivning:'Klumpar av is som faller ner, ofta i samband med kraftiga åskväder.' },
+        { namn:'Dimma', emoji:'🌫️', beskrivning:'Ett moln av vattendroppar nära marken som gör att sikten blir dålig.' },
+        { namn:'Blåsigt / Storm', emoji:'💨', beskrivning:'Kraftiga vindar blåser, kan i extrema fall rycka upp träd.' },
+        { namn:'Regnbåge', emoji:'🌈', beskrivning:'Ett färgglatt, bågformat ljusfenomen som bildas när solljus bryts i regndroppar.' },
+        { namn:'Frost', emoji:'🥶', beskrivning:'Ett tunt lager is som bildas på ytor när det är kallt och fuktigt nattetid.' }
+    ];
+    const VADER_INSTRUMENT = [
+        { namn:'Termometer', emoji:'🌡️', matter:'Mäter: temperatur', beskrivning:'Visar hur varmt eller kallt det är, oftast i grader Celsius.' },
+        { namn:'Barometer', emoji:'🎚️', matter:'Mäter: lufttryck', beskrivning:'Hjälper till att förutsäga om vädret blir bättre eller sämre.' },
+        { namn:'Vindmätare', emoji:'🌬️', matter:'Mäter: vindstyrka', beskrivning:'Mäter hur snabbt vinden blåser (kallas även anemometer).' },
+        { namn:'Vindstrut', emoji:'🎏', matter:'Visar: vindriktning', beskrivning:'En kon-formad tygpåse som visar vilket håll vinden blåser ifrån.' },
+        { namn:'Regnmätare', emoji:'☔', matter:'Mäter: nederbörd', beskrivning:'Samlar upp regn i ett kärl för att mäta hur många millimeter som fallit.' },
+        { namn:'Hygrometer', emoji:'💧', matter:'Mäter: luftfuktighet', beskrivning:'Mäter hur mycket vattenånga det finns i luften.' }
+    ];
+    const VADER_QUIZ_BANK = [
+        { fraga:'Vad kallas det när vattendroppar faller från molnen?', alt:['Regn','Dimma','Frost','Hagel'], ratt:0, forklaring:'Regn är vattendroppar som faller från molnen ner till marken.' },
+        { fraga:'Vilket instrument mäter temperatur?', alt:['Barometer','Termometer','Hygrometer','Vindmätare'], ratt:1, forklaring:'En termometer visar hur varmt eller kallt det är.' },
+        { fraga:'Vad heter fenomenet när solljus bryts i regndroppar och bildar färger på himlen?', alt:['Norrsken','Regnbåge','Halo','Blixt'], ratt:1, forklaring:'En regnbåge bildas när solljus bryts i vattendroppar i luften.' },
+        { fraga:'Vilket instrument mäter lufttryck?', alt:['Termometer','Barometer','Regnmätare','Vindstrut'], ratt:1, forklaring:'En barometer mäter lufttrycket, vilket hjälper till att förutsäga vädret.' },
+        { fraga:'Vad kallas is som faller ner i klumpar, ofta vid kraftiga åskväder?', alt:['Snö','Hagel','Frost','Dimma'], ratt:1, forklaring:'Hagel är klumpar av is som bildas i kraftiga åskmoln.' },
+        { fraga:'Vad visar en vindstrut?', alt:['Temperatur','Vindriktning','Lufttryck','Luftfuktighet'], ratt:1, forklaring:'Vindstruten visar vilket håll vinden blåser ifrån.' },
+        { fraga:'Vad kallas det när sikten blir dålig på grund av ett moln av vattendroppar nära marken?', alt:['Moln','Dimma','Regn','Frost'], ratt:1, forklaring:'Dimma är ett moln av vattendroppar precis vid marken.' },
+        { fraga:'Vad mäter en hygrometer?', alt:['Vindstyrka','Luftfuktighet','Temperatur','Lufttryck'], ratt:1, forklaring:'En hygrometer mäter hur mycket vattenånga det finns i luften.' },
+        { fraga:'Vilket väder ger blixtar och mullrande ljud?', alt:['Storm','Åska','Regn','Hagel'], ratt:1, forklaring:'Åska ger blixtar och mullrande dån, ofta med kraftigt regn.' },
+        { fraga:'Vad kallas frusna iskristaller som faller från himlen istället för regn?', alt:['Hagel','Snö','Frost','Dimma'], ratt:1, forklaring:'Snö bildas när det är tillräckligt kallt för att vattnet ska frysa till iskristaller.' },
+        { fraga:'Vad mäter en vindmätare (anemometer)?', alt:['Temperatur','Vindstyrka','Nederbörd','Lufttryck'], ratt:1, forklaring:'En vindmätare mäter hur snabbt vinden blåser.' },
+        { fraga:'Vad kallas det tunna lagret is som bildas på ytor kalla, fuktiga nätter?', alt:['Snö','Frost','Hagel','Dimma'], ratt:1, forklaring:'Frost bildas när fukt fryser till is på kalla ytor nattetid.' },
+        { fraga:'Med vilket instrument mäter man hur mycket regn som fallit?', alt:['Barometer','Regnmätare','Termometer','Hygrometer'], ratt:1, forklaring:'En regnmätare samlar upp regn för att mäta mängden i millimeter.' },
+        { fraga:'Vad kallas mycket lätt, fint regn med små droppar?', alt:['Skyfall','Duggregn','Hagel','Frost'], ratt:1, forklaring:'Duggregn är mycket lätt regn med små, fina droppar.' },
+        { fraga:'I vilken enhet mäts temperatur oftast i Sverige?', alt:['Fahrenheit','Celsius','Kelvin','Bar'], ratt:1, forklaring:'I Sverige och de flesta länder mäts temperatur i grader Celsius.' }
+    ];
+    function vadretKodInfo(code){
+        const map = {
+            0:{e:'☀️',t:'Klart väder'}, 1:{e:'🌤️',t:'Mest klart'}, 2:{e:'⛅',t:'Delvis molnigt'}, 3:{e:'☁️',t:'Molnigt'},
+            45:{e:'🌫️',t:'Dimma'}, 48:{e:'🌫️',t:'Underkyld dimma'},
+            51:{e:'🌦️',t:'Lätt duggregn'}, 53:{e:'🌦️',t:'Måttligt duggregn'}, 55:{e:'🌦️',t:'Tätt duggregn'},
+            56:{e:'🌧️',t:'Underkylt duggregn'}, 57:{e:'🌧️',t:'Underkylt tätt duggregn'},
+            61:{e:'🌧️',t:'Lätt regn'}, 63:{e:'🌧️',t:'Måttligt regn'}, 65:{e:'🌧️',t:'Kraftigt regn'},
+            66:{e:'🌧️',t:'Underkylt lätt regn'}, 67:{e:'🌧️',t:'Underkylt kraftigt regn'},
+            71:{e:'🌨️',t:'Lätt snöfall'}, 73:{e:'🌨️',t:'Måttligt snöfall'}, 75:{e:'❄️',t:'Kraftigt snöfall'}, 77:{e:'❄️',t:'Snökorn'},
+            80:{e:'🌦️',t:'Lätta regnskurar'}, 81:{e:'🌦️',t:'Måttliga regnskurar'}, 82:{e:'⛈️',t:'Kraftiga regnskurar'},
+            85:{e:'🌨️',t:'Lätta snöbyar'}, 86:{e:'🌨️',t:'Kraftiga snöbyar'},
+            95:{e:'⛈️',t:'Åska'}, 96:{e:'⛈️',t:'Åska med hagel'}, 99:{e:'⛈️',t:'Åska med kraftigt hagel'}
+        };
+        return map[code] || {e:'❓', t:'Okänt väder'};
+    }
+    async function vadretFetch(){
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=58.4109&longitude=15.6216&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,cloud_cover&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&past_days=1&forecast_days=1&timezone=Europe%2FBerlin';
+        const r = await fetch(url);
+        if(!r.ok) throw new Error('Väderdata kunde inte hämtas');
+        return await r.json();
+    }
+    function createVadret(config){
+        if(config===undefined) config=null;
+        const body = createWidget('VÄDRET', 460, 'vd-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '520px'; }
+
+        let mode = (config && config.data && config.data.mode) || 'idag';
+        let quizIdx = (config && config.data && typeof config.data.quizIdx==='number') ? config.data.quizIdx : Math.floor(Math.random()*VADER_QUIZ_BANK.length);
+        let quizValt = (config && config.data && typeof config.data.quizValt==='number') ? config.data.quizValt : null;
+        let quizScore = (config && config.data && config.data.quizScore) || 0;
+        let quizTotal = (config && config.data && config.data.quizTotal) || 0;
+        let vaderData = null, vaderFel = false, vaderLaddar = false, reqToken = 0;
+
+        const tabRow=document.createElement('div'); tabRow.className='hover-menu vd-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.gap='6px';
+        const tabIdag=document.createElement('button'); tabIdag.type='button'; tabIdag.className='btn'; tabIdag.textContent='🌤️ Dagens väder'; tabIdag.style.flex='1';
+        const tabJamfor=document.createElement('button'); tabJamfor.type='button'; tabJamfor.className='btn'; tabJamfor.textContent='📅 Jämför igår'; tabJamfor.style.flex='1';
+        const tabLexikon=document.createElement('button'); tabLexikon.type='button'; tabLexikon.className='btn'; tabLexikon.textContent='📖 Lexikon'; tabLexikon.style.flex='1';
+        const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🧠 Quiz'; tabQuiz.style.flex='1';
+        [tabIdag,tabJamfor,tabLexikon,tabQuiz].forEach(t=>tabRow.appendChild(t));
+        body.appendChild(tabRow);
+
+        const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
+        body.appendChild(kortWrap);
+
+        function persist(){ widget.dataset.vadret = JSON.stringify({ mode, quizIdx, quizValt, quizScore, quizTotal }); saveBoardState(); }
+
+        async function sakerstallData(){
+            if(vaderData || vaderLaddar) return;
+            vaderLaddar = true; vaderFel = false;
+            const my = ++reqToken;
+            render();
+            try{
+                const d = await vadretFetch();
+                if(my!==reqToken) return;
+                vaderData = d; vaderLaddar = false; render();
+            }catch(e){
+                if(my!==reqToken) return;
+                vaderFel = true; vaderLaddar = false; render();
+            }
+        }
+
+        function renderIdag(){
+            kortWrap.innerHTML='';
+            if(vaderLaddar || (!vaderData && !vaderFel)){
+                kortWrap.innerHTML = "<div class='vd-msg'>Hämtar dagens väder för Linköping…<div class='vd-spin'></div></div>";
+                return;
+            }
+            if(vaderFel || !vaderData){
+                kortWrap.innerHTML = "<div class='vd-msg'>☁️ Kunde inte hämta väderdata just nu.<br>Kontrollera internetuppkopplingen.</div>";
+                const retry=document.createElement('button'); retry.type='button'; retry.className='btn btn-primary'; retry.style.width='100%'; retry.textContent='🔄 Försök igen';
+                retry.onclick=()=>{ vaderData=null; vaderFel=false; sakerstallData(); };
+                kortWrap.appendChild(retry);
+                return;
+            }
+            const c = vaderData.current;
+            const info = vadretKodInfo(c.weather_code);
+            const card=document.createElement('div'); card.className='vd-live-card';
+            card.innerHTML = `<div class='vd-live-plats'>📍 Linköping – idag</div>
+                <div class='vd-live-emoji'>${info.e}</div>
+                <div class='vd-live-text'>${info.t}</div>
+                <div class='vd-live-temp'>${Math.round(c.temperature_2m)}°C</div>
+                <div class='vd-live-grid'>
+                    <div class='vd-live-stat'>🤔 Känns som<b>${Math.round(c.apparent_temperature)}°C</b></div>
+                    <div class='vd-live-stat'>💨 Vind<b>${Math.round(c.wind_speed_10m)} km/h</b></div>
+                    <div class='vd-live-stat'>☁️ Molnighet<b>${Math.round(c.cloud_cover)}%</b></div>
+                    <div class='vd-live-stat'>🌧️ Nederbörd<b>${c.precipitation} mm</b></div>
+                </div>`;
+            kortWrap.appendChild(card);
+            const refresh=document.createElement('button'); refresh.type='button'; refresh.className='btn btn-secondary'; refresh.style.width='100%'; refresh.textContent='🔄 Uppdatera';
+            refresh.onclick=()=>{ vaderData=null; vaderFel=false; sakerstallData(); };
+            kortWrap.appendChild(refresh);
+            const kalla=document.createElement('div'); kalla.style.textAlign='center'; kalla.style.fontSize='10.5px'; kalla.style.color='#b0b0b6'; kalla.style.marginTop='8px'; kalla.textContent='Källa: open-meteo.com';
+            kortWrap.appendChild(kalla);
+        }
+
+        function renderJamfor(){
+            kortWrap.innerHTML='';
+            if(vaderLaddar || (!vaderData && !vaderFel)){
+                kortWrap.innerHTML = "<div class='vd-msg'>Hämtar väderdata…<div class='vd-spin'></div></div>";
+                return;
+            }
+            if(vaderFel || !vaderData){
+                kortWrap.innerHTML = "<div class='vd-msg'>☁️ Kunde inte hämta väderdata just nu.<br>Kontrollera internetuppkopplingen.</div>";
+                const retry=document.createElement('button'); retry.type='button'; retry.className='btn btn-primary'; retry.style.width='100%'; retry.textContent='🔄 Försök igen';
+                retry.onclick=()=>{ vaderData=null; vaderFel=false; sakerstallData(); };
+                kortWrap.appendChild(retry);
+                return;
+            }
+            const daily = vaderData.daily;
+            const iIgar=0, iIdag=daily.time.length-1; // past_days=1 -> index 0 = igår, sista = idag
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='📍 Linköping – jämför temperatur, moln, nederbörd och vind mellan igår och idag.'; kortWrap.appendChild(hint);
+
+            const grid=document.createElement('div'); grid.className='vd-jamfor-grid';
+            [['Igår',iIgar,''],['Idag',iIdag,'idag']].forEach(([lbl,i,cls])=>{
+                const info = vadretKodInfo(daily.weather_code[i]);
+                const col=document.createElement('div'); col.className='vd-jamfor-col '+cls;
+                col.innerHTML = `<div class='vd-jamfor-lbl'>${lbl}</div>
+                    <div class='vd-jamfor-emoji'>${info.e}</div>
+                    <div class='vd-jamfor-rad'>${info.t}</div>
+                    <div class='vd-jamfor-rad'>🌡️ <b>${Math.round(daily.temperature_2m_min[i])}° / ${Math.round(daily.temperature_2m_max[i])}°</b></div>
+                    <div class='vd-jamfor-rad'>🌧️ Nederbörd: <b>${daily.precipitation_sum[i]} mm</b></div>
+                    <div class='vd-jamfor-rad'>💨 Vind (max): <b>${Math.round(daily.wind_speed_10m_max[i])} km/h</b></div>`;
+                grid.appendChild(col);
+            });
+            kortWrap.appendChild(grid);
+
+            const diffMax = Math.round(daily.temperature_2m_max[iIdag] - daily.temperature_2m_max[iIgar]);
+            const regnIgar = daily.precipitation_sum[iIgar], regnIdag = daily.precipitation_sum[iIdag];
+            let regnText;
+            if(regnIdag>0 && regnIgar===0) regnText='Det regnade inte igår, men gör det idag.';
+            else if(regnIdag===0 && regnIgar>0) regnText='Det regnade igår, men inte idag.';
+            else if(regnIdag>regnIgar) regnText='Det har regnat mer idag än igår.';
+            else if(regnIdag<regnIgar) regnText='Det har regnat mindre idag än igår.';
+            else regnText='Nederbörden är ungefär likadan idag som igår.';
+            const slutsats=document.createElement('div'); slutsats.className='vd-jamfor-slutsats';
+            slutsats.innerHTML = `🔎 <b>Vad märker vi?</b><br>Idag är det ${diffMax===0?'ungefär lika varmt':(diffMax>0?diffMax+' grader varmare':(-diffMax)+' grader kallare')} som igår (jämfört på dagens högsta temperatur). ${regnText}`;
+            kortWrap.appendChild(slutsats);
+        }
+
+        function vdOpenLexPopup(item, matterText){
+            const ov = document.createElement('div'); ov.className='vd-lex-overlay';
+            const modal = document.createElement('div'); modal.className='vd-lex-modal';
+            modal.innerHTML = `<div class='vd-lex-modal-header'><span>${item.emoji} ${gotdEsc(item.namn)}</span><button type='button' class='vd-lex-modal-close'>✕</button></div>
+                <div class='vd-lex-modal-body'>
+                    ${matterText ? `<div class='vd-lex-modal-matter'>${gotdEsc(matterText)}</div>` : ''}
+                    <div class='vd-lex-modal-besk'>${gotdEsc(item.beskrivning)}</div>
+                </div>`;
+            ov.appendChild(modal);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            const closeIt=()=> ov.remove();
+            modal.querySelector('.vd-lex-modal-close').onclick=closeIt;
+            ov.onclick=(e)=>{ if(e.target===ov) closeIt(); };
+        }
+        function renderLexikon(){
+            kortWrap.innerHTML='';
+            const t1=document.createElement('div'); t1.className='vd-lex-sektion-titel'; t1.textContent='☁️ Vädertyper'; kortWrap.appendChild(t1);
+            const g1=document.createElement('div'); g1.className='vd-lex-grid';
+            VADER_TYPER.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> vdOpenLexPopup(v, null);
+                g1.appendChild(c);
+            });
+            kortWrap.appendChild(g1);
+
+            const t2=document.createElement('div'); t2.className='vd-lex-sektion-titel'; t2.textContent='🔧 Instrument'; kortWrap.appendChild(t2);
+            const g2=document.createElement('div'); g2.className='vd-lex-grid';
+            VADER_INSTRUMENT.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> vdOpenLexPopup(v, v.matter);
+                g2.appendChild(c);
+            });
+            kortWrap.appendChild(g2);
+        }
+
+        function renderQuiz(){
+            const q = VADER_QUIZ_BANK[quizIdx];
+            kortWrap.innerHTML='';
+            const scoreEl=document.createElement('div'); scoreEl.className='ry-quiz-score'; scoreEl.textContent='Poäng: '+quizScore+' / '+quizTotal; kortWrap.appendChild(scoreEl);
+            const fragaEl=document.createElement('div'); fragaEl.className='ry-quiz-fraga'; fragaEl.textContent=q.fraga; kortWrap.appendChild(fragaEl);
+            const altWrap=document.createElement('div'); altWrap.className='ry-quiz-alt';
+            q.alt.forEach((a,i)=>{
+                const b=document.createElement('button'); b.type='button'; b.className='ry-quiz-btn';
+                if(quizValt!==null){ if(i===q.ratt) b.classList.add('ratt'); else if(i===quizValt) b.classList.add('fel'); }
+                b.textContent=a; b.disabled=quizValt!==null;
+                b.onclick=()=>{ if(quizValt!==null) return; quizValt=i; quizTotal++; if(i===q.ratt) quizScore++; renderQuiz(); persist(); };
+                altWrap.appendChild(b);
+            });
+            kortWrap.appendChild(altWrap);
+            if(quizValt!==null){
+                const fork=document.createElement('div'); fork.className='ry-quiz-fork'; fork.textContent=(quizValt===q.ratt?'✅ Rätt! ':'❌ Fel. ')+q.forklaring; kortWrap.appendChild(fork);
+                const nextBtn=document.createElement('button'); nextBtn.type='button'; nextBtn.className='btn btn-primary'; nextBtn.style.width='100%'; nextBtn.style.marginTop='10px'; nextBtn.textContent='➡️ Nästa fråga';
+                nextBtn.onclick=()=>{ let ny; do { ny=Math.floor(Math.random()*VADER_QUIZ_BANK.length); } while(VADER_QUIZ_BANK.length>1 && ny===quizIdx); quizIdx=ny; quizValt=null; renderQuiz(); persist(); };
+                kortWrap.appendChild(nextBtn);
+            }
+            const resetBtn=document.createElement('button'); resetBtn.type='button'; resetBtn.className='btn btn-secondary'; resetBtn.style.width='100%'; resetBtn.style.marginTop='6px'; resetBtn.textContent='🔄 Börja om quizet';
+            resetBtn.onclick=()=>{ quizScore=0; quizTotal=0; quizValt=null; renderQuiz(); persist(); };
+            kortWrap.appendChild(resetBtn);
+        }
+
+        function render(){
+            [[tabIdag,'idag'],[tabJamfor,'jamfor'],[tabLexikon,'lexikon'],[tabQuiz,'quiz']].forEach(([btn,m])=>{
+                btn.classList.toggle('btn-primary', mode===m); btn.classList.toggle('btn-secondary', mode!==m);
+            });
+            if(mode==='jamfor'){ renderJamfor(); sakerstallData(); }
+            else if(mode==='lexikon') renderLexikon();
+            else if(mode==='quiz') renderQuiz();
+            else { renderIdag(); sakerstallData(); }
+        }
+        tabIdag.onclick=()=>{ mode='idag'; render(); persist(); };
+        tabJamfor.onclick=()=>{ mode='jamfor'; render(); persist(); };
+        tabLexikon.onclick=()=>{ mode='lexikon'; render(); persist(); };
+        tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
+        render();
+        if(!config) persist();
     }
 
     // ---- LÄSHASTIGHET ----
@@ -5634,9 +6546,9 @@
     }
 
     function createWeekSchedule(config){
-        const body = createWidget('VECKOSCHEMA', 820, 'week-widget', config);
+        const body = createWidget('VECKOSCHEMA', 1180, 'week-widget', config);
         const widget = body.parentElement.parentElement;
-        if(!config){ widget.style.height = '480px'; }
+        if(!config){ widget.style.height = '560px'; }
         const days=['Måndag','Tisdag','Onsdag','Torsdag','Fredag'];
         const todayIdx = (()=>{ const d=new Date().getDay(); return (d>=1 && d<=5) ? d-1 : -1; })();
 
@@ -5657,13 +6569,18 @@
         function addRow(dayIdx, ti, ta, ic, co){
             const cont = containers[dayIdx];
             const r = document.createElement('div'); r.className='schedule-row week-row';
-            const cs = document.createElement('div'); cs.className='schedule-color-strip'; cs.dataset.color=co; cs.style.backgroundColor=co;
-            cs.onclick=()=>{ const cl=['#e5e5ea','#ff3b30','#ff9500','#ffcc00','#4cd964','#5ac8fa','#007aff','#5856d6','#ff2d55']; let idx=(cl.indexOf(cs.dataset.color)+1)%cl.length; cs.dataset.color=cl[idx]; cs.style.backgroundColor=cl[idx]; saveBoardState(); };
+            const startColor = (co && co!==SCHEDULE_DEFAULT_COLOR) ? co : (matchSubjectColor(ta) || co || SCHEDULE_DEFAULT_COLOR);
+            const cs = document.createElement('div'); cs.className='schedule-color-strip'; cs.dataset.color=startColor; cs.style.backgroundColor=startColor;
+            cs.onclick=()=>{ const cl=SCHEDULE_COLOR_CYCLE; let idx=(cl.indexOf(cs.dataset.color)+1)%cl.length; cs.dataset.color=cl[idx]; cs.style.backgroundColor=cl[idx]; saveBoardState(); };
             const tin = document.createElement('input'); tin.className='schedule-time-input'; tin.value=ti; tin.placeholder='Tid'; tin.oninput=saveBoardState;
             const sel = document.createElement('button'); sel.type='button'; sel.className='schedule-icon-select schedule-icon-btn';
             sel.dataset.icon = (ic && SCHEDULE_ICONS[ic]) ? ic : ((ic && ic.length) ? ic : 'skriv'); renderSchedIcon(sel);
             sel.onclick=()=>{ openSchedIconPicker(sel.dataset.icon, (k)=>{ sel.dataset.icon=k; renderSchedIcon(sel); saveBoardState(); }); };
-            const tain = document.createElement('input'); tain.className='schedule-task-input'; tain.value=ta; tain.placeholder='Ämne'; tain.oninput=saveBoardState;
+            const tain = document.createElement('input'); tain.className='schedule-task-input'; tain.value=ta; tain.placeholder='Ämne';
+            tain.oninput=()=>{
+                if(cs.dataset.color===SCHEDULE_DEFAULT_COLOR){ const auto=matchSubjectColor(tain.value); if(auto){ cs.dataset.color=auto; cs.style.backgroundColor=auto; } }
+                saveBoardState();
+            };
             const del = document.createElement('button'); del.className='row-del-btn row-hover-menu'; del.type='button'; del.innerText='✕'; del.onclick=()=>{ r.remove(); saveBoardState(); };
             r.appendChild(cs); r.appendChild(tin); r.appendChild(sel); r.appendChild(tain); r.appendChild(del);
             cont.appendChild(r);
@@ -5689,7 +6606,11 @@
         }
 
         body.querySelectorAll('.week-add-row').forEach(btn=>{
-            btn.onclick=()=>{ addRow(parseInt(btn.dataset.day,10), '', '', 'skriv', '#e5e5ea'); saveBoardState(); };
+            btn.onclick=()=>{
+                const dayIdx = parseInt(btn.dataset.day,10);
+                const forstaTid = containers[dayIdx].querySelectorAll('.week-row').length===0 ? '08:00' : '';
+                addRow(dayIdx, forstaTid, '', 'skriv', '#e5e5ea'); saveBoardState();
+            };
         });
 
         body.querySelector('.week-copy-btn').onclick=()=>{
@@ -5775,13 +6696,14 @@
         const w = window.open('', '_blank');
         if(!w) return;
         let html = '<html><head><title>Veckoschema</title><meta charset="utf-8"><style>'
-            + 'body{font-family:-apple-system,Arial,sans-serif;padding:24px;color:#1d1d1f;} h1{text-align:center;} '
-            + '.grid{display:flex;gap:10px;} .col{flex:1;border:1px solid #ccc;border-radius:8px;overflow:hidden;} '
-            + '.hd{background:#007aff;color:#fff;text-align:center;padding:8px;font-weight:bold;} '
-            + '.row{display:flex;gap:8px;align-items:center;padding:8px;border-bottom:1px solid #eee;} '
-            + '.strip{width:8px;height:24px;border-radius:3px;flex-shrink:0;} .time{font-weight:bold;width:50px;flex-shrink:0;} .task{flex-grow:1;} '
-            + '@media print{ .grid{ page-break-inside:avoid; } }'
-            + '</style></head><body><h1>Veckoschema</h1><div class="grid">';
+            + '*{ -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact; }'
+            + 'body{font-family:-apple-system,Arial,sans-serif;padding:24px;color:#1d1d1f;} h1{text-align:center;color:#ff3b30;} '
+            + '.grid{display:flex;gap:10px;} .col{flex:1;border:1.5px solid #ccc;border-radius:10px;overflow:hidden;} '
+            + '.hd{background:#007aff;color:#fff;text-align:center;padding:10px;font-weight:bold;font-size:15px;} '
+            + '.row{display:flex;gap:8px;align-items:center;padding:9px 8px;border-bottom:1px solid #eee;} '
+            + '.strip{width:10px;height:26px;border-radius:3px;flex-shrink:0;} .time{font-weight:bold;width:52px;flex-shrink:0;} .task{flex-grow:1;font-weight:600;} '
+            + '@media print{ .grid{ page-break-inside:avoid; } body{ padding:8px; } }'
+            + '</style></head><body><h1>📅 Veckoschema</h1><div class="grid">';
         days.forEach((d,i)=>{
             html += '<div class="col"><div class="hd">'+d+'</div>';
             const rows = containers[i] ? [...containers[i].querySelectorAll('.week-row')] : [];
@@ -5790,7 +6712,8 @@
                 const task=r.querySelector('.schedule-task-input').value;
                 const color=r.querySelector('.schedule-color-strip').dataset.color;
                 if(!time && !task) return;
-                html += '<div class="row"><div class="strip" style="background:'+color+'"></div><div class="time">'+ (time||'') +'</div><div class="task">'+ (task||'').replace(/</g,'&lt;') +'</div></div>';
+                const tint = /^#[0-9a-f]{6}$/i.test(color) ? color+'26' : 'transparent'; // ~15% opacity ton bakom hela raden
+                html += '<div class="row" style="background:'+tint+'"><div class="strip" style="background:'+color+'"></div><div class="time">'+ (time||'') +'</div><div class="task">'+ (task||'').replace(/</g,'&lt;') +'</div></div>';
             });
             html += '</div>';
         });
