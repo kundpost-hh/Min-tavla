@@ -839,6 +839,16 @@
     .upp-result.revealed { color: #007aff; animation: upp-pop 0.25s ease; }
     @keyframes upp-pop { 0%{ transform: scale(0.5); opacity: 0; } 100%{ transform: scale(1); opacity: 1; } }
     .upp-steg-ctrl { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+    /* Kort division – klassisk uppställning med divisor, "hänglås"-linjer och kvot ovanför */
+    .upp-div-wrap { display: flex; flex-direction: column; align-items: flex-start; font-family: 'SF Mono', Consolas, monospace; margin: 0 auto; }
+    .upp-div-qrow { display: flex; gap: 2px; margin-left: 40px; margin-bottom: 2px; min-height: 30px; }
+    .upp-div-qcell { width: 30px; display: flex; justify-content: center; }
+    .upp-div-body { display: flex; align-items: stretch; }
+    .upp-div-divisor { width: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: #1f2937; }
+    .upp-div-dividend-row { display: flex; gap: 2px; border-left: 3px solid #1f2937; border-top: 3px solid #1f2937; padding: 4px 6px 2px 4px; }
+    .upp-div-dcell { width: 30px; display: flex; flex-direction: column; align-items: center; }
+    .upp-div-dcell .upp-carry { height: 16px; font-size: 11px; font-weight: 800; }
+    .upp-div-dcell .upp-digit { font-size: 20px; font-weight: 700; color: #1f2937; }
     /* FORMLER */
     .formler-widget .widget-body { padding: 12px 14px; }
     .formler-search { width: 100%; border: 1px solid #d1d1d6; border-radius: 10px; padding: 8px 12px; font-size: 14px; font-family: inherit; outline: none; margin-bottom: 10px; box-sizing: border-box; }
@@ -10481,6 +10491,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     <option value='+'>+</option>
                     <option value='-'>−</option>
                     <option value='×'>×</option>
+                    <option value='÷'>÷</option>
                 </select>
                 <input type='number' class='upp-in upp-b' placeholder='Tal 2' min='0'>
                 <button class='btn btn-primary upp-starta'>Starta</button>
@@ -10505,7 +10516,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const gridEl=body.querySelector('.upp-grid'), statusEl=body.querySelector('.upp-status');
         const stegBtn=body.querySelector('.upp-steg'), allaBtn=body.querySelector('.upp-alla'), omBtn=body.querySelector('.upp-om');
 
-        let cols=[], op='+', step=0, n=0, extraDigit=null, extraRevealed=false;
+        let cols=[], op='+', step=0, n=0, extraDigit=null, extraRevealed=false, divisor=0;
 
         function syncData(){
             widget.dataset.uppData = JSON.stringify({ a: aIn.value, b: bIn.value, op: opSel.value, step, extraRevealed, started: n>0 });
@@ -10546,12 +10557,25 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     cols[i]={topDigit:stora[i], bottomDigit:(i===width-1?multiplier:null), carryIn, result:resultDigit, carryOut:carry};
                 }
                 extraDigit = carry>0 ? carry : null;
+            } else if(op==='÷'){
+                // Kort division: divisorn (b) är en ensiffrig siffra, kvoten räknas fram siffra för siffra från vänster.
+                divisor = b;
+                let remainder=0;
+                for(let i=0;i<width;i++){
+                    const carryIn=remainder;
+                    const current=remainder*10+aD[i];
+                    const qDigit=Math.floor(current/b);
+                    remainder=current%b;
+                    cols[i]={digit:aD[i], carryIn, quotientDigit:qDigit, remainderOut:remainder};
+                }
+                extraDigit=null;
             }
             step=0; extraRevealed=false;
             render(); syncData();
         }
 
         function render(){
+            if(op==='÷'){ renderDivision(); return; }
             gridEl.innerHTML='';
             if(extraDigit!==null){
                 const ec=document.createElement('div'); ec.className='upp-col upp-extra';
@@ -10564,10 +10588,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 const colEl=document.createElement('div'); colEl.className='upp-col';
                 let carryHtml='';
                 if((op==='+'||op==='×') && c.carryIn>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-carry'>+${c.carryIn}</span>`;
-                if(op==='-' && c.borrowIn>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-borrow'>+10</span>`;
+                if(op==='-' && c.borrowOut===1 && revealed) carryHtml = `<span class='upp-chip upp-chip-borrow'>+10</span>`;
                 let topHtml = `<span class='upp-digit'>${c.topDigit}</span>`;
-                if(op==='-' && c.borrowOut===1 && revealed){
-                    topHtml = `<span class='upp-digit upp-strike'>${c.topDigit}</span><span class='upp-digit-reduced'>${c.topDigit-1}</span>`;
+                if(op==='-' && c.borrowIn>0 && revealed){
+                    topHtml = `<span class='upp-digit upp-strike'>${c.topDigit}</span><span class='upp-digit-reduced'>${c.topDigit-c.borrowIn}</span>`;
                 }
                 const opSymbolHtml = isFirst ? `<span class='upp-op-symbol'>${op}</span>` : '';
                 const bottomHtml = (c.bottomDigit!==null && c.bottomDigit!==undefined) ? `${opSymbolHtml}<span class='upp-digit'>${c.bottomDigit}</span>` : opSymbolHtml;
@@ -10591,6 +10615,48 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             stegBtn.disabled = doneAll; allaBtn.disabled = doneAll;
         }
 
+        function renderDivision(){
+            gridEl.innerHTML='';
+            const wrap=document.createElement('div'); wrap.className='upp-div-wrap';
+
+            const qRow=document.createElement('div'); qRow.className='upp-div-qrow';
+            cols.forEach((c,i)=>{
+                const revealed = i < step;
+                const qc=document.createElement('div'); qc.className='upp-div-qcell';
+                qc.innerHTML = `<span class='upp-result ${revealed?'revealed':''}'>${revealed?c.quotientDigit:''}</span>`;
+                qRow.appendChild(qc);
+            });
+            wrap.appendChild(qRow);
+
+            const bodyRow=document.createElement('div'); bodyRow.className='upp-div-body';
+            const divisorEl=document.createElement('div'); divisorEl.className='upp-div-divisor'; divisorEl.textContent=String(divisor);
+            bodyRow.appendChild(divisorEl);
+            const dividendRow=document.createElement('div'); dividendRow.className='upp-div-dividend-row';
+            cols.forEach((c,i)=>{
+                const revealed = i < step;
+                const cell=document.createElement('div'); cell.className='upp-div-dcell';
+                let carryHtml='';
+                if(revealed && c.carryIn>0) carryHtml = `<span class='upp-chip upp-chip-carry'>${c.carryIn}</span>`;
+                cell.innerHTML = `<div class='upp-carry'>${carryHtml}</div><div class='upp-digit'>${c.digit}</div>`;
+                dividendRow.appendChild(cell);
+            });
+            bodyRow.appendChild(dividendRow);
+            wrap.appendChild(bodyRow);
+            gridEl.appendChild(wrap);
+
+            const doneAll = step>=n;
+            if(doneAll){
+                const svar = cols.map(c=>c.quotientDigit).join('').replace(/^0+(?=\d)/,'') || '0';
+                const rest = cols[n-1].remainderOut;
+                statusEl.innerHTML = rest>0 ? `✅ Klart! Svaret är <b>${svar}</b> rest <b>${rest}</b>` : `✅ Klart! Svaret är <b>${svar}</b>`;
+            } else if(step===0){
+                statusEl.textContent = 'Klicka "Nästa steg" för att räkna en siffra i taget, från vänster.';
+            } else {
+                statusEl.textContent = 'Siffra '+step+' av '+n+' klar. Klicka igen för nästa.';
+            }
+            stegBtn.disabled = doneAll; allaBtn.disabled = doneAll;
+        }
+
         function nextStep(){ if(step<n){ step++; } else if(extraDigit!==null && !extraRevealed){ extraRevealed=true; } render(); syncData(); }
         function showAll(){ step=n; extraRevealed = extraDigit!==null; render(); syncData(); }
         function reset(){ step=0; extraRevealed=false; render(); syncData(); }
@@ -10599,6 +10665,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             if(isNaN(a)||isNaN(b)||a<0||b<0){ statusEl.textContent='Skriv två positiva heltal i båda fälten.'; return false; }
             if(operation==='-' && b>a){ statusEl.textContent='Tal 2 måste vara mindre än eller lika med Tal 1 vid subtraktion.'; return false; }
             if(operation==='×' && Math.min(String(a).length,String(b).length)>1){ statusEl.textContent='Vid multiplikation ska ett av talen vara en ensiffrig siffra (kort multiplikation).'; return false; }
+            if(operation==='÷' && (b<1||b>9)){ statusEl.textContent='Vid division ska Tal 2 (nämnaren) vara en ensiffrig siffra 1–9 (kort division).'; return false; }
             build(a,b,operation);
             stegBtn.disabled=false; allaBtn.disabled=false; omBtn.disabled=false;
             return true;
@@ -10609,7 +10676,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const digitsN=parseInt(siffrorSel.value,10), operation=opSel.value;
             const max=Math.pow(10,digitsN)-1, min=Math.pow(10,digitsN-1);
             let a=Math.floor(Math.random()*(max-min+1))+min, b;
-            if(operation==='×'){ b=Math.floor(Math.random()*8)+2; }
+            if(operation==='×' || operation==='÷'){ b=Math.floor(Math.random()*8)+2; }
             else { b=Math.floor(Math.random()*(max-min+1))+min; if(operation==='-' && b>a){ const t=a; a=b; b=t; } }
             aIn.value=a; bIn.value=b;
             startaMed(a,b,operation); saveBoardState();
