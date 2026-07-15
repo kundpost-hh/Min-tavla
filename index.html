@@ -165,6 +165,7 @@
             <button class="tool-btn" onclick="createKoordinatsystem()"><div class="icon">📍</div><div class="label">Koordinatsystem</div></button>
             <button class="tool-btn" onclick="createSannolikhet()"><div class="icon">🪙</div><div class="label">Sannolikhet</div></button>
             <button class="tool-btn" onclick="createHundredChart()"><div class="icon">💯</div><div class="label">Hundraruta</div></button>
+            <button class="tool-btn" onclick="createSudoku()"><div class="icon">9️⃣</div><div class="label">Sudoku</div></button>
             <button class="tool-btn" onclick="createPositionssystemet()"><div class="icon">🧊</div><div class="label">Positionssystemet</div></button>
             <button class="tool-btn" onclick="createOverslagsrakning()"><div class="icon">🧭</div><div class="label">Överslagsräkning</div></button>
             <button class="tool-btn" onclick="createAvrundning()"><div class="icon">🎚️</div><div class="label">Avrundning</div></button>
@@ -1117,6 +1118,24 @@
     .ps-legend { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; font-size:11px; font-weight:700; color:#8a8a90; margin-bottom:10px; }
     .ps-legend span { display:inline-flex; align-items:center; gap:4px; }
     .ps-legend i { width:10px; height:10px; border-radius:3px; display:inline-block; }
+    /* SUDOKU */
+    .sd-status { text-align:center; font-size:12.5px; font-weight:700; color:#8a8a90; margin-bottom:8px; min-height:16px; }
+    .sd-status.win { color:#1a7a34; font-weight:900; }
+    .sd-grid { display:grid; grid-template-columns:repeat(9,1fr); width:min(100%,380px); aspect-ratio:1/1; margin:0 auto 12px; border:2.5px solid #1d1d1f; border-radius:6px; overflow:hidden; background:#1d1d1f; gap:1px; }
+    .sd-cell { background:#fff; display:flex; align-items:center; justify-content:center; font-size:clamp(12px,3vw,18px); font-weight:800; color:#1d1d1f; cursor:pointer; user-select:none; position:relative; }
+    .sd-cell.clue { color:#1d1d1f; background:#f0f0f3; cursor:default; }
+    .sd-cell.entry { color:#007aff; }
+    .sd-cell.solved-preview { color:#af52de; background:#f6effc; cursor:default; }
+    .sd-cell.selected { background:#cfe6ff; }
+    .sd-cell.peer { background:#eef4ff; }
+    .sd-cell.ok { background:#d2f8dc; color:#1a7a34; }
+    .sd-cell.fel { background:#ffe1df; color:#c0392b; }
+    .sd-cell.br { border-right:2.5px solid #1d1d1f; }
+    .sd-cell.bb { border-bottom:2.5px solid #1d1d1f; }
+    .sd-palette { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:12px; }
+    .sd-pal-btn { width:36px; height:36px; border-radius:9px; border:1.5px solid #d1d1d6; background:#fff; font-weight:900; font-size:16px; color:#1d1d1f; cursor:pointer; }
+    .sd-pal-btn:hover { border-color:#007aff; background:#eef4ff; }
+    .sd-pal-btn.erase { width:auto; padding:0 12px; font-size:13px; }
     /* ÖVERSLAGSRÄKNING */
     .os-problem { text-align:center; font-size:32px; font-weight:900; color:#1d1d1f; background:linear-gradient(135deg,#eef4ff,#f4f0fb); border-radius:16px; padding:26px 16px; margin-bottom:14px; font-variant-numeric:tabular-nums; }
     .os-facit { margin-bottom:14px; display:flex; flex-direction:column; gap:8px; }
@@ -1759,11 +1778,42 @@
 
     /* VECKOSCHEMA */
     .week-widget { min-width:560px; }
-    .week-grid { display:flex; gap:6px; width:100%; height:100%; }
-    .week-col { flex:1; display:flex; flex-direction:column; min-width:0; }
-    .week-day { background:#007aff; color:white; font-size:12px; font-weight:800; text-align:center; padding:5px; border-radius:8px 8px 0 0; }
-    .week-cell { flex:1; min-height:120px; border:1px solid #e5e5ea; border-top:none; border-radius:0 0 8px 8px; padding:6px; font-size:13px; outline:none; overflow-y:auto; background:white; line-height:1.4; }
-    .week-cell:focus { background:#f0f8ff; }
+    .week-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .week-toolbar .btn { font-size:12px; padding:6px 10px; }
+    .week-grid { display:flex; gap:6px; width:100%; align-items:flex-start; }
+    .week-col { flex:1; display:flex; flex-direction:column; min-width:0; background:#fff; border:1px solid #e5e5ea; border-radius:10px; overflow:hidden; }
+    .week-col.today { border-color:#007aff; box-shadow:0 0 0 2px rgba(0,122,255,.25); }
+    .week-day { background:#007aff; color:white; font-size:12px; font-weight:800; text-align:center; padding:6px 4px; display:flex; align-items:center; justify-content:center; gap:5px; }
+    .week-col.today .week-day { background:#0a5cd8; }
+    .week-today-badge { background:#fff; color:#007aff; font-size:9px; font-weight:900; padding:1px 5px; border-radius:999px; letter-spacing:.3px; }
+    .week-rows { min-height:50px; padding:6px 6px 0; }
+    .week-row { margin-bottom:6px; padding:4px; gap:4px; }
+    .week-row .schedule-time-input { width:42px; font-size:10.5px; padding:5px 2px; }
+    .week-row .schedule-task-input { font-size:11.5px; padding:5px 5px; min-width:40px; }
+    .week-row .schedule-icon-select { width:28px; height:28px; padding:2px; }
+    .week-add-row { display:block; width:calc(100% - 12px); margin:0 6px 8px; padding:6px; border:1.5px dashed #d1d1d6; background:none; border-radius:8px; color:#8a8a90; font-weight:700; font-size:11.5px; cursor:pointer; font-family:inherit; }
+    .week-add-row:hover { border-color:#007aff; color:#007aff; }
+    .week-day-clickable { cursor:pointer; transition:background .15s; }
+    .week-day-clickable:hover { background:#0a5cd8; }
+    .week-day-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:9999; padding:20px; }
+    .week-day-modal { background:#fff; border-radius:16px; width:100%; max-width:480px; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.35); }
+    .week-day-modal-header { background:#ff3b30; color:#fff; font-weight:900; font-size:18px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; }
+    .week-day-modal-close { background:rgba(255,255,255,.2); border:none; color:#fff; width:30px; height:30px; border-radius:8px; font-size:15px; cursor:pointer; }
+    .week-day-modal-close:hover { background:rgba(255,255,255,.35); }
+    .week-day-modal-content { padding:16px 20px 20px; overflow-y:auto; }
+    .week-day-modal-thead { display:flex; gap:10px; font-size:12px; font-weight:800; color:#8a8a90; text-transform:uppercase; letter-spacing:.4px; padding:0 4px 8px; }
+    .week-day-modal-thead span:first-child { width:70px; flex-shrink:0; }
+    .week-day-modal-rows { display:flex; flex-direction:column; gap:8px; margin-bottom:18px; }
+    .week-day-modal-row { display:flex; align-items:center; gap:10px; background:#f7f7fa; border:1px solid #e5e5ea; border-radius:12px; padding:8px 10px; }
+    .week-day-modal-strip { width:6px; align-self:stretch; min-height:34px; border-radius:3px; flex-shrink:0; }
+    .week-day-modal-time { width:60px; flex-shrink:0; font-weight:800; font-size:14px; color:#1d1d1f; }
+    .week-day-modal-icon { width:34px; height:34px; flex-shrink:0; }
+    .week-day-modal-icon svg { width:100%; height:100%; display:block; }
+    .week-day-modal-task { font-weight:800; font-size:15px; color:#1d1d1f; }
+    .week-day-modal-empty { text-align:center; color:#8a8a90; font-size:13px; padding:20px 0; }
+    .week-day-modal-noteslabel { font-size:12.5px; font-weight:800; color:#555; margin-bottom:6px; }
+    .week-day-modal-notes { width:100%; box-sizing:border-box; min-height:90px; border:1.5px solid #e5e5ea; border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; line-height:1.5; outline:none; resize:vertical; }
+    .week-day-modal-notes:focus { border-color:#007aff; }
 
     /* CHECKLISTA */
     .check-title { width:100%; font-size:15px; font-weight:800; border:none; border-bottom:2px solid #eee; outline:none; padding:4px 2px; margin-bottom:8px; font-family:inherit; }
@@ -2886,6 +2936,7 @@
                 else if (type === 'ORDKLASSPOKER') { try{ state.data = JSON.parse(w.dataset.ordklass || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'KÄLLKRITIK') { try{ state.data = JSON.parse(w.dataset.kallkritik || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'POSITIONSSYSTEMET') { try{ state.data = JSON.parse(w.dataset.pos || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'SUDOKU') { try{ state.data = JSON.parse(w.dataset.sudoku || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ÖVERSLAGSRÄKNING') { try{ state.data = JSON.parse(w.dataset.overslag || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'AVRUNDNING') { try{ state.data = JSON.parse(w.dataset.avrundning || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BRÅKJÄMFÖRELSE') { try{ state.data = JSON.parse(w.dataset.brak || '{}'); }catch(e){ state.data={}; } }
@@ -2904,7 +2955,16 @@
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VIDEO') { state.data.kind = w.dataset.videoKind || ''; state.data.src = w.dataset.videoSrc || ''; }
-                else if (type === 'VECKOSCHEMA') { state.data.days = []; w.querySelectorAll('.week-cell').forEach(c=> state.data.days.push(c.innerHTML)); }
+                else if (type === 'VECKOSCHEMA') {
+                    const conts = [...w.querySelectorAll('.week-rows')];
+                    state.data.days = conts.map(cont => [...cont.querySelectorAll('.week-row')].map(r => ({
+                        time: r.querySelector('.schedule-time-input')?.value || '',
+                        task: r.querySelector('.schedule-task-input')?.value || '',
+                        icon: r.querySelector('.schedule-icon-select')?.dataset.icon || 'skriv',
+                        color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea'
+                    })));
+                    try{ state.data.notes = JSON.parse(w.dataset.weekNotes || '[]'); }catch(e){ state.data.notes = []; }
+                }
                 else if (type === 'CHECKLISTA') { state.data.title = w.querySelector('.check-title')?.value || ''; state.data.items = []; w.querySelectorAll('.check-item').forEach(r=> state.data.items.push({ text: r.querySelector('.check-text')?.value || '', done: r.querySelector('input[type=checkbox]')?.checked || false })); }
                 else if (type === 'SLUMPA-HJUL') { state.data.names = w.querySelector('.wheel-names')?.value || ''; }
                 else if (type === 'STICKER') { state.data.emoji = w.dataset.emoji || '⭐'; }
@@ -3002,6 +3062,7 @@
             else if (w.type === 'ORDKLASSPOKER') createOrdklasspoker(w);
             else if (w.type === 'KÄLLKRITIK') createKallkritik(w);
             else if (w.type === 'POSITIONSSYSTEMET') createPositionssystemet(w);
+            else if (w.type === 'SUDOKU') createSudoku(w);
             else if (w.type === 'ÖVERSLAGSRÄKNING') createOverslagsrakning(w);
             else if (w.type === 'AVRUNDNING') createAvrundning(w);
             else if (w.type === 'BRÅKJÄMFÖRELSE') createBrakjamforelse(w);
@@ -5573,12 +5634,169 @@
     }
 
     function createWeekSchedule(config){
-        const body = createWidget('VECKOSCHEMA', 640, 'week-widget', config);
+        const body = createWidget('VECKOSCHEMA', 820, 'week-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '480px'; }
         const days=['Måndag','Tisdag','Onsdag','Torsdag','Fredag'];
-        body.innerHTML = `<div class='week-grid'>`+days.map((d,i)=>`<div class='week-col'><div class='week-day'>${d}</div><div class='week-cell' contenteditable='true' data-day='${i}'></div></div>`).join('')+`</div>`;
-        const cells = body.querySelectorAll('.week-cell');
-        if(config && config.data && config.data.days){ config.data.days.forEach((html,i)=>{ if(cells[i]) cells[i].innerHTML=html; }); }
-        cells.forEach(c=> c.oninput = saveBoardState);
+        const todayIdx = (()=>{ const d=new Date().getDay(); return (d>=1 && d<=5) ? d-1 : -1; })();
+
+        body.innerHTML = `<div class='hover-menu week-toolbar'>`
+            + `<button type='button' class='btn btn-secondary week-copy-btn'>📋 Kopiera måndag till alla dagar</button>`
+            + `<button type='button' class='btn btn-secondary week-print-btn'>🖨️ Skriv ut</button>`
+            + `<button type='button' class='btn btn-secondary week-clear-btn'>🗑️ Rensa allt</button>`
+            + `</div><div class='week-grid'>`
+            + days.map((d,i)=>`<div class='week-col${i===todayIdx?' today':''}'><div class='week-day week-day-clickable' data-day='${i}' title='Klicka för att se ${d} i större format'>${d}${i===todayIdx?' <span class="week-today-badge">idag</span>':''}</div><div class='week-rows' data-day='${i}'></div><button type='button' class='week-add-row hover-menu' data-day='${i}'>+ Rad</button></div>`).join('')
+            + `</div>`;
+
+        const containers = [...body.querySelectorAll('.week-rows')];
+        let notesArr = (config && config.data && Array.isArray(config.data.notes)) ? config.data.notes.slice(0,5) : ['','','','',''];
+        while(notesArr.length<5) notesArr.push('');
+        const persistNotes = ()=>{ widget.dataset.weekNotes = JSON.stringify(notesArr); saveBoardState(); };
+        widget.dataset.weekNotes = JSON.stringify(notesArr);
+
+        function addRow(dayIdx, ti, ta, ic, co){
+            const cont = containers[dayIdx];
+            const r = document.createElement('div'); r.className='schedule-row week-row';
+            const cs = document.createElement('div'); cs.className='schedule-color-strip'; cs.dataset.color=co; cs.style.backgroundColor=co;
+            cs.onclick=()=>{ const cl=['#e5e5ea','#ff3b30','#ff9500','#ffcc00','#4cd964','#5ac8fa','#007aff','#5856d6','#ff2d55']; let idx=(cl.indexOf(cs.dataset.color)+1)%cl.length; cs.dataset.color=cl[idx]; cs.style.backgroundColor=cl[idx]; saveBoardState(); };
+            const tin = document.createElement('input'); tin.className='schedule-time-input'; tin.value=ti; tin.placeholder='Tid'; tin.oninput=saveBoardState;
+            const sel = document.createElement('button'); sel.type='button'; sel.className='schedule-icon-select schedule-icon-btn';
+            sel.dataset.icon = (ic && SCHEDULE_ICONS[ic]) ? ic : ((ic && ic.length) ? ic : 'skriv'); renderSchedIcon(sel);
+            sel.onclick=()=>{ openSchedIconPicker(sel.dataset.icon, (k)=>{ sel.dataset.icon=k; renderSchedIcon(sel); saveBoardState(); }); };
+            const tain = document.createElement('input'); tain.className='schedule-task-input'; tain.value=ta; tain.placeholder='Ämne'; tain.oninput=saveBoardState;
+            const del = document.createElement('button'); del.className='row-del-btn row-hover-menu'; del.type='button'; del.innerText='✕'; del.onclick=()=>{ r.remove(); saveBoardState(); };
+            r.appendChild(cs); r.appendChild(tin); r.appendChild(sel); r.appendChild(tain); r.appendChild(del);
+            cont.appendChild(r);
+        }
+
+        // Migrering: stöd både det nya radformatet och det gamla fria textformatet (HTML per dag)
+        let daysData = null;
+        if(config && config.data && Array.isArray(config.data.days) && config.data.days.length){
+            daysData = config.data.days.map(d=>{
+                if(Array.isArray(d)) return d;
+                if(typeof d === 'string'){
+                    const tmp=document.createElement('div'); tmp.innerHTML=d;
+                    const text=tmp.textContent.trim();
+                    return text ? [{time:'',task:text,icon:'skriv',color:'#e5e5ea'}] : [];
+                }
+                return [];
+            });
+        }
+        if(daysData){
+            daysData.forEach((rows,i)=>{ (rows||[]).forEach(r=> addRow(i, r.time||'', r.task||'', r.icon||'skriv', r.color||'#e5e5ea')); });
+        } else {
+            days.forEach((d,i)=> addRow(i, '', '', 'skriv', '#e5e5ea'));
+        }
+
+        body.querySelectorAll('.week-add-row').forEach(btn=>{
+            btn.onclick=()=>{ addRow(parseInt(btn.dataset.day,10), '', '', 'skriv', '#e5e5ea'); saveBoardState(); };
+        });
+
+        body.querySelector('.week-copy-btn').onclick=()=>{
+            customConfirm('Kopiera måndagens schema till övriga dagar? Det skriver över nuvarande innehåll på tisdag–fredag.', ()=>{
+                const monRows = [...containers[0].querySelectorAll('.week-row')].map(r=>({
+                    time: r.querySelector('.schedule-time-input').value,
+                    task: r.querySelector('.schedule-task-input').value,
+                    icon: r.querySelector('.schedule-icon-select').dataset.icon,
+                    color: r.querySelector('.schedule-color-strip').dataset.color
+                }));
+                for(let i=1;i<5;i++){
+                    containers[i].innerHTML='';
+                    monRows.forEach(r=> addRow(i, r.time, r.task, r.icon, r.color));
+                }
+                saveBoardState();
+            });
+        };
+
+        body.querySelector('.week-clear-btn').onclick=()=>{
+            customConfirm('Rensa hela veckoschemat?', ()=>{
+                containers.forEach(c=> c.innerHTML='');
+                days.forEach((d,i)=> addRow(i,'','','skriv','#e5e5ea'));
+                saveBoardState();
+            });
+        };
+
+        body.querySelector('.week-print-btn').onclick=()=> printWeekSchedule(days, containers);
+
+        body.querySelectorAll('.week-day-clickable').forEach(el=>{
+            el.onclick=(e)=>{ e.stopPropagation(); openDayPopup(parseInt(el.dataset.day,10)); };
+        });
+
+        function openDayPopup(dayIdx){
+            const dayName = days[dayIdx];
+            const ov = document.createElement('div'); ov.className='week-day-overlay';
+            const modal = document.createElement('div'); modal.className='week-day-modal';
+            const header = document.createElement('div'); header.className='week-day-modal-header';
+            header.innerHTML = `<span>📅 ${dayName}</span><div class='week-day-modal-controls'><button type='button' class='week-day-modal-close'>✕</button></div>`;
+            modal.appendChild(header);
+
+            const content = document.createElement('div'); content.className='week-day-modal-content';
+            const thead = document.createElement('div'); thead.className='week-day-modal-thead';
+            thead.innerHTML = `<span>Tid</span><span>Aktivitet</span>`;
+            content.appendChild(thead);
+
+            const rowsList = document.createElement('div'); rowsList.className='week-day-modal-rows';
+            const rows = [...containers[dayIdx].querySelectorAll('.week-row')];
+            if(rows.length===0){
+                const empty=document.createElement('div'); empty.className='week-day-modal-empty'; empty.textContent='Inga lektioner inlagda ännu för '+dayName+'.';
+                rowsList.appendChild(empty);
+            } else {
+                rows.forEach(r=>{
+                    const time=r.querySelector('.schedule-time-input').value;
+                    const task=r.querySelector('.schedule-task-input').value;
+                    const icon=r.querySelector('.schedule-icon-select').dataset.icon;
+                    const color=r.querySelector('.schedule-color-strip').dataset.color;
+                    const card=document.createElement('div'); card.className='week-day-modal-row';
+                    card.innerHTML = `<div class='week-day-modal-strip' style='background:${color}'></div>`
+                        + `<div class='week-day-modal-time'>${time || '--:--'}</div>`
+                        + `<div class='week-day-modal-icon'>${schedIconSvg(icon) || ''}</div>`
+                        + `<div class='week-day-modal-task'>${(task || '(namnlös aktivitet)').replace(/</g,'&lt;')}</div>`;
+                    rowsList.appendChild(card);
+                });
+            }
+            content.appendChild(rowsList);
+
+            const notesLabel=document.createElement('div'); notesLabel.className='week-day-modal-noteslabel'; notesLabel.textContent='📝 Egna noteringar för '+dayName+':';
+            content.appendChild(notesLabel);
+            const notesTa=document.createElement('textarea'); notesTa.className='week-day-modal-notes'; notesTa.placeholder='Skriv egna anteckningar, förberedelser eller kommentarer till '+dayName.toLowerCase()+' här...'; notesTa.value=notesArr[dayIdx]||'';
+            notesTa.oninput=()=>{ notesArr[dayIdx]=notesTa.value; persistNotes(); };
+            content.appendChild(notesTa);
+
+            modal.appendChild(content);
+            ov.appendChild(modal);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            const closeIt=()=> ov.remove();
+            header.querySelector('.week-day-modal-close').onclick=closeIt;
+            ov.onclick=(e)=>{ if(e.target===ov) closeIt(); };
+        }
+    }
+
+    function printWeekSchedule(days, containers){
+        const w = window.open('', '_blank');
+        if(!w) return;
+        let html = '<html><head><title>Veckoschema</title><meta charset="utf-8"><style>'
+            + 'body{font-family:-apple-system,Arial,sans-serif;padding:24px;color:#1d1d1f;} h1{text-align:center;} '
+            + '.grid{display:flex;gap:10px;} .col{flex:1;border:1px solid #ccc;border-radius:8px;overflow:hidden;} '
+            + '.hd{background:#007aff;color:#fff;text-align:center;padding:8px;font-weight:bold;} '
+            + '.row{display:flex;gap:8px;align-items:center;padding:8px;border-bottom:1px solid #eee;} '
+            + '.strip{width:8px;height:24px;border-radius:3px;flex-shrink:0;} .time{font-weight:bold;width:50px;flex-shrink:0;} .task{flex-grow:1;} '
+            + '@media print{ .grid{ page-break-inside:avoid; } }'
+            + '</style></head><body><h1>Veckoschema</h1><div class="grid">';
+        days.forEach((d,i)=>{
+            html += '<div class="col"><div class="hd">'+d+'</div>';
+            const rows = containers[i] ? [...containers[i].querySelectorAll('.week-row')] : [];
+            rows.forEach(r=>{
+                const time=r.querySelector('.schedule-time-input').value;
+                const task=r.querySelector('.schedule-task-input').value;
+                const color=r.querySelector('.schedule-color-strip').dataset.color;
+                if(!time && !task) return;
+                html += '<div class="row"><div class="strip" style="background:'+color+'"></div><div class="time">'+ (time||'') +'</div><div class="task">'+ (task||'').replace(/</g,'&lt;') +'</div></div>';
+            });
+            html += '</div>';
+        });
+        html += '</div></body></html>';
+        w.document.write(html); w.document.close();
+        setTimeout(()=>{ try{ w.print(); }catch(e){} }, 300);
     }
 
     function createChecklist(config){
@@ -6192,6 +6410,178 @@
                 hideBtn.onclick=()=>{ state.revealed=false; render(); persist(); };
                 btns.appendChild(hideBtn);
             }
+            root.appendChild(btns);
+        }
+        render();
+        if(!config) persist();
+    }
+
+    // ---- SUDOKU ----
+    // Genererar slumpmässiga, lösbara sudoku (garanterat unik lösning) via backtracking
+    // med bitmask-optimering. Tomma rutor fylls genom att klicka rutan och sedan en siffra.
+    function sdBoxIdx(r,c){ return Math.floor(r/3)*3 + Math.floor(c/3); }
+    function sdShuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=arr[i]; arr[i]=arr[j]; arr[j]=t; } return arr; }
+    function sdFullGrid(){
+        const grid = new Array(81).fill(0);
+        const rows = new Array(9).fill(0), cols = new Array(9).fill(0), boxes = new Array(9).fill(0);
+        function fill(pos){
+            if(pos===81) return true;
+            const r=Math.floor(pos/9), c=pos%9, b=sdBoxIdx(r,c);
+            const used = rows[r]|cols[c]|boxes[b];
+            const nums = sdShuffle([1,2,3,4,5,6,7,8,9]);
+            for(const n of nums){
+                const bit=1<<n;
+                if(used & bit) continue;
+                grid[pos]=n; rows[r]|=bit; cols[c]|=bit; boxes[b]|=bit;
+                if(fill(pos+1)) return true;
+                grid[pos]=0; rows[r]&=~bit; cols[c]&=~bit; boxes[b]&=~bit;
+            }
+            return false;
+        }
+        fill(0);
+        return grid;
+    }
+    function sdCountSolutions(startGrid, limit){
+        const g = startGrid.slice();
+        const rows=new Array(9).fill(0), cols=new Array(9).fill(0), boxes=new Array(9).fill(0);
+        for(let i=0;i<81;i++){ if(g[i]){ const r=Math.floor(i/9),c=i%9,b=sdBoxIdx(r,c); const bit=1<<g[i]; rows[r]|=bit; cols[c]|=bit; boxes[b]|=bit; } }
+        let count=0;
+        function pickCell(){
+            let best=-1, bestCands=null;
+            for(let i=0;i<81;i++){
+                if(g[i]!==0) continue;
+                const r=Math.floor(i/9), c=i%9, b=sdBoxIdx(r,c);
+                const used = rows[r]|cols[c]|boxes[b];
+                const cands=[];
+                for(let n=1;n<=9;n++){ if(!(used&(1<<n))) cands.push(n); }
+                if(!bestCands || cands.length<bestCands.length){ best=i; bestCands=cands; if(cands.length===0) return {pos:best,cands}; }
+            }
+            return best===-1 ? null : {pos:best,cands:bestCands};
+        }
+        function solve(){
+            if(count>=limit) return;
+            const cell = pickCell();
+            if(cell===null){ count++; return; }
+            if(cell.cands.length===0) return;
+            const r=Math.floor(cell.pos/9), c=cell.pos%9, b=sdBoxIdx(r,c);
+            for(const n of cell.cands){
+                if(count>=limit) return;
+                const bit=1<<n;
+                g[cell.pos]=n; rows[r]|=bit; cols[c]|=bit; boxes[b]|=bit;
+                solve();
+                g[cell.pos]=0; rows[r]&=~bit; cols[c]&=~bit; boxes[b]&=~bit;
+            }
+        }
+        solve();
+        return count;
+    }
+    function sdGeneratePuzzle(clues){
+        const solution = sdFullGrid();
+        const puzzle = solution.slice();
+        const order = sdShuffle([...Array(81).keys()]);
+        let removed = 0;
+        const target = 81 - clues;
+        for(const pos of order){
+            if(removed>=target) break;
+            const backup = puzzle[pos];
+            puzzle[pos]=0;
+            if(sdCountSolutions(puzzle,2)===1){ removed++; } else { puzzle[pos]=backup; }
+        }
+        return { puzzle, solution };
+    }
+    const SUDOKU_CLUES = { latt:40, medel:32, svar:26 };
+
+    function createSudoku(config){
+        if(config===undefined) config=null;
+        const body = createWidget('SUDOKU', 420, 'sd-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '620px'; }
+        const root=document.createElement('div'); body.appendChild(root);
+
+        let state = { level:'latt', puzzle:null, solution:null, entries:{}, checked:false, showSolution:false, selected:null };
+        if(config && config.data && Array.isArray(config.data.puzzle)){ Object.assign(state, config.data); state.selected=null; }
+        else { nyttSudoku('latt', false); }
+
+        function nyttSudoku(level, doPersist){
+            const { puzzle, solution } = sdGeneratePuzzle(SUDOKU_CLUES[level] || 40);
+            state.level=level; state.puzzle=puzzle; state.solution=solution; state.entries={}; state.checked=false; state.showSolution=false; state.selected=null;
+            if(doPersist!==false) persist();
+        }
+        const persist=()=>{ widget.dataset.sudoku = JSON.stringify({ level:state.level, puzzle:state.puzzle, solution:state.solution, entries:state.entries, checked:state.checked, showSolution:state.showSolution }); saveBoardState(); };
+
+        function render(){
+            root.innerHTML='';
+            const ctrl=document.createElement('div'); ctrl.className='hover-menu sam-ctrl'; ctrl.style.marginBottom='8px';
+            const nivaSel=document.createElement('select'); nivaSel.className='editor-select';
+            [['latt','Lätt (40 siffror givna)'],['medel','Medel (32 siffror givna)'],['svar','Svår (26 siffror givna)']].forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; if(v===state.level) o.selected=true; nivaSel.appendChild(o); });
+            nivaSel.onchange=()=>{ statusEl.textContent='Genererar nytt sudoku …'; setTimeout(()=>{ nyttSudoku(nivaSel.value); render(); }, 20); };
+            ctrl.appendChild(nivaSel);
+            root.appendChild(ctrl);
+
+            const statusEl=document.createElement('div'); statusEl.className='sd-status'; root.appendChild(statusEl);
+
+            const grid=document.createElement('div'); grid.className='sd-grid';
+            const selR = state.selected!==null ? Math.floor(state.selected/9) : -1;
+            const selC = state.selected!==null ? state.selected%9 : -1;
+            const selB = state.selected!==null ? sdBoxIdx(selR,selC) : -1;
+
+            for(let i=0;i<81;i++){
+                const r=Math.floor(i/9), c=i%9, b=sdBoxIdx(r,c);
+                const cell=document.createElement('div'); cell.className='sd-cell';
+                if(c===2||c===5) cell.classList.add('br');
+                if(r===2||r===5) cell.classList.add('bb');
+                const isClue = state.puzzle[i]!==0;
+                if(isClue){
+                    cell.classList.add('clue'); cell.textContent=state.puzzle[i];
+                } else if(state.showSolution){
+                    cell.classList.add('solved-preview'); cell.textContent=state.solution[i];
+                } else if(state.entries[i]){
+                    cell.classList.add('entry'); cell.textContent=state.entries[i];
+                    if(state.checked){ cell.classList.add(state.entries[i]===state.solution[i] ? 'ok' : 'fel'); }
+                }
+                if(!isClue && !state.showSolution){
+                    if(i===state.selected) cell.classList.add('selected');
+                    else if(r===selR || c===selC || b===selB) cell.classList.add('peer');
+                    cell.onclick=()=>{ state.selected = (state.selected===i) ? null : i; render(); };
+                }
+                grid.appendChild(cell);
+            }
+            root.appendChild(grid);
+
+            const palette=document.createElement('div'); palette.className='sd-palette';
+            for(let n=1;n<=9;n++){
+                const b=document.createElement('button'); b.type='button'; b.className='sd-pal-btn'; b.textContent=n;
+                b.onclick=()=>{
+                    if(state.selected===null){ statusEl.textContent='Klicka först på en tom ruta, sedan på en siffra.'; return; }
+                    state.entries[state.selected]=n; state.checked=false; persist(); render();
+                };
+                palette.appendChild(b);
+            }
+            const eraseBtn=document.createElement('button'); eraseBtn.type='button'; eraseBtn.className='sd-pal-btn erase'; eraseBtn.textContent='␡ Radera';
+            eraseBtn.onclick=()=>{
+                if(state.selected===null) return;
+                delete state.entries[state.selected]; state.checked=false; persist(); render();
+            };
+            palette.appendChild(eraseBtn);
+            root.appendChild(palette);
+
+            const filledCount = Object.keys(state.entries).length + state.puzzle.filter(x=>x!==0).length;
+            const allCorrect = filledCount===81 && Object.keys(state.entries).every(k=> state.entries[k]===state.solution[k]);
+            if(state.showSolution){ statusEl.textContent='👁️ Lösningen visas.'; }
+            else if(allCorrect){ statusEl.textContent='🎉 Grattis, sudokun är rätt löst!'; statusEl.classList.add('win'); }
+            else if(state.checked){ statusEl.textContent='Rättat! Gröna rutor är rätt, röda är fel.'; }
+            else { statusEl.textContent='Klicka på en tom ruta och välj sedan en siffra.'; }
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Nytt sudoku';
+            nyBtn.onclick=()=>{ statusEl.textContent='Genererar nytt sudoku …'; setTimeout(()=>{ nyttSudoku(state.level); render(); }, 20); };
+            const rattaBtn=document.createElement('button'); rattaBtn.className='kw-btn kw-btn-green'; rattaBtn.textContent='✅ Rätta';
+            rattaBtn.onclick=()=>{ state.checked=true; persist(); render(); };
+            const losBtn=document.createElement('button'); losBtn.className='kw-btn kw-btn-ghost'; losBtn.textContent = state.showSolution ? '🙈 Dölj lösning' : '💡 Visa lösning';
+            losBtn.onclick=()=>{ state.showSolution=!state.showSolution; persist(); render(); };
+            const rensaBtn=document.createElement('button'); rensaBtn.className='kw-btn kw-btn-warn'; rensaBtn.textContent='🧹 Rensa svar';
+            rensaBtn.onclick=()=>{ state.entries={}; state.checked=false; persist(); render(); };
+            btns.appendChild(nyBtn); btns.appendChild(rattaBtn); btns.appendChild(losBtn); btns.appendChild(rensaBtn);
             root.appendChild(btns);
         }
         render();
