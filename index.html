@@ -154,16 +154,21 @@
             <button class="tool-btn" onclick="createTimer()"><div class="icon">⏱️</div><div class="label">D. Timer</div></button>
             <button class="tool-btn" onclick="createReminderWidget()"><div class="icon">⏰</div><div class="label">Reminder</div></button>
             <button class="tool-btn" onclick="createMultiplicationTable()"><div class="icon">✖️</div><div class="label">Multiplikation</div></button>
+            <button class="tool-btn" onclick="createUppstallning()"><div class="icon">🧾</div><div class="label">Uppställning</div></button>
+            <button class="tool-btn" onclick="createTalfoljder()"><div class="icon">🔗</div><div class="label">Talföljder</div></button>
+            <button class="tool-btn" onclick="createDiagramWidget()"><div class="icon">📈</div><div class="label">Diagram</div></button>
+            <button class="tool-btn" onclick="createKoordinatsystem()"><div class="icon">📍</div><div class="label">Koordinatsystem</div></button>
+            <button class="tool-btn" onclick="createSannolikhet()"><div class="icon">🪙</div><div class="label">Sannolikhet</div></button>
             <button class="tool-btn" onclick="createHundredChart()"><div class="icon">💯</div><div class="label">Hundraruta</div></button>
-            <button class="tool-btn" onclick="createMathChallenge()"><div class="icon">🔢</div><div class="label">Räkna</div></button>
+            <button class="tool-btn" onclick="createMathChallenge()"><div class="icon">➗</div><div class="label">Räkna</div></button>
             <button class="tool-btn" onclick="createStartuppgift()"><div class="icon">🎯</div><div class="label">Startuppgift</div></button>
             <button class="tool-btn" onclick="createNumberLine()"><div class="icon">📏</div><div class="label">Tallinje</div></button>
             <button class="tool-btn" onclick="createMoneyWidget()"><div class="icon">💰</div><div class="label">Pengar</div></button>
             <button class="tool-btn" onclick="createGeometryWidget()"><div class="icon">📐</div><div class="label">Geometri</div></button>
             <button class="tool-btn" onclick="createUnitConverter()"><div class="icon">⚖️</div><div class="label">Enheter</div></button>
-            <button class="tool-btn" onclick="createFormlerWidget()"><div class="icon">📐</div><div class="label">Formler</div></button>
+            <button class="tool-btn" onclick="createFormlerWidget()"><div class="icon">🔣</div><div class="label">Formler</div></button>
             <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
-            <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">💬</div><div class="label">Verb</div></button>
+            <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">⚡</div><div class="label">Verb</div></button>
             <button class="tool-btn" onclick="createNounWidget()"><div class="icon">🅰️</div><div class="label">En/Ett</div></button>
             <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder/Invånare</div></button>
             <button class="tool-btn" onclick="createWordClassWidget()"><div class="icon">📚</div><div class="label">Ordklasser</div></button>
@@ -200,6 +205,7 @@
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
             <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
             <button class="tool-btn" onclick="createPracticeClock()"><div class="icon">🕐</div><div class="label">Övningsklocka</div></button>
+            <button class="tool-btn" onclick="createRimlighet()"><div class="icon">🤔</div><div class="label">Rimlighet</div></button>
             <button class="tool-btn" onclick="createBiologiWidget()"><div class="icon">🧬</div><div class="label">Biologi</div></button>
             <button class="tool-btn" onclick="createFroWidget()"><div class="icon">🌱</div><div class="label">Frö till frö</div></button>
             <button class="tool-btn" onclick="createKemiWidget()"><div class="icon">⚗️</div><div class="label">Kemi</div></button>
@@ -494,13 +500,43 @@
     /* ÖVNINGSKLOCKA */
     .practice-clock-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
     .practice-clock-widget .widget-resizer::after { border-color: #999; }
-    .practice-clock-widget .widget-body { align-items: center; justify-content: center; overflow: hidden; }
-    .pclock-fit { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .practice-clock-widget .widget-body { align-items: center; justify-content: center; overflow: hidden; flex-direction: column; gap: 6px; }
+    .pclock-fit { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; flex: 1; }
     .pclock-inner { display: flex; flex-direction: column; align-items: center; gap: 8px; transform-origin: center center; }
-    .pclock-digital { font-size: 34px; font-weight: 900; color: #007aff; font-family: monospace; text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
+    .pclock-digital-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .pclock-digital { font-size: 26px; font-weight: 900; color: #007aff; font-family: monospace; text-shadow: 0 1px 3px rgba(255,255,255,0.9); line-height: 1.1; }
+    .pclock-digital.pclock-hidden { color: #94a3b8; letter-spacing: 2px; }
     .pclock-face { cursor: grab; touch-action: none; margin: 0 !important; }
     .pclock-face:active { cursor: grabbing; }
     .pclock-face .hand { cursor: grab; }
+    .pclock-toolbar { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; flex-shrink: 0; padding: 4px 4px 0; }
+    .pclock-btn { font-size: 12px; padding: 5px 11px; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700; color: #334155; transition: background .15s, transform .1s; white-space: nowrap; }
+    .pclock-btn:hover { background: #f1f5f9; }
+    .pclock-btn:active { transform: scale(0.95); }
+    .pclock-btn.pclock-random-btn { color: #7c3aed; border-color: #c4b5fd; }
+    .pclock-btn.pclock-facit-btn { color: #059669; border-color: #6ee7b7; background: #ecfdf5; }
+    .pclock-digital.pclock-reveal { animation: pclockPop .35s ease; }
+    @keyframes pclockPop { 0%{ transform: scale(1);} 40%{ transform: scale(1.18);} 100%{ transform: scale(1);} }
+    .pclock-analog { font-size: 15px; font-weight: 700; color: #059669; text-align: center; max-width: 170px; line-height: 1.25; min-height: 1.25em; }
+    .pclock-legend { display: flex; gap: 14px; justify-content: center; font-size: 12px; font-weight: 700; color: #475569; }
+    .pclock-legend-item { display: flex; align-items: center; gap: 5px; }
+    .pclock-legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+    .pclock-legend-hour { background: #d32f2f; }
+    .pclock-legend-min { background: #1565c0; }
+    /* Förfinad urtavla: färgkodade visare som matchar siffer-ringarna (röd timme, blå minut) för tydligare avläsning */
+    .practice-clock-widget .real-clock-face { width: 180px; height: 180px; background: radial-gradient(circle at 50% 36%, #ffffff 0%, #eef1f5 100%); border-color: #546e7a; }
+    .practice-clock-widget .real-clock-face::after { background: #263238; border: 2.5px solid #ffffff; box-shadow: 0 0 0 1.5px rgba(38,50,56,0.35); width: 12px; height: 12px; }
+    .practice-clock-widget .hand { box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
+    .practice-clock-widget .hand.hour { background: #d32f2f !important; width: 7.5px; height: 46px; margin-left: -3.75px; border-radius: 4px 4px 2px 2px; z-index: 4; }
+    .practice-clock-widget .hand.minute { background: #1565c0 !important; width: 5px; height: 64px; margin-left: -2.5px; border-radius: 3px; z-index: 5; }
+    .practice-clock-widget .clock-tick { top: 2px; transform-origin: 50% 0; }
+    .practice-clock-widget .clock-tick.minor { background: #d7dbe0; width: 1px; height: 3px; margin-left: -0.5px; }
+    .practice-clock-widget .clock-tick.major { background: #8593a1; width: 2px; height: 6px; margin-left: -1px; }
+    .practice-clock-widget .clock-tick.big { background: #f59e0b; width: 3.5px; height: 11px; margin-left: -1.75px; box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15); }
+    .practice-clock-widget .clock-num-hour { font-size: 17px; font-weight: 800; color: #c62828; width: 22px; }
+    .practice-clock-widget .clock-num-24 { font-size: 8px; font-weight: 700; color: #9aa7b0; width: 16px; }
+    .practice-clock-widget .clock-num-min { font-size: 9px; font-weight: 700; color: #1565c0; width: 16px; }
+    .practice-clock-widget .clock-num-min-quarter { color: #fff; background: #f59e0b; border-radius: 7px; padding: 1.5px 4px; font-weight: 900; font-size: 9.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
     /* Integrerade övningsklockor i lektionsschemat */
     .lesson-clock { position: absolute; z-index: 30; width: 92px; height: 110px; display: flex; align-items: flex-start; justify-content: center; }
     .lesson-clock .pclock-inner { transform: scale(0.46); transform-origin: top center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -732,6 +768,77 @@
     .sw-lap-num { color: #7048e8; }
     .sw-lap-time { font-family: monospace; color: #1f2937; }
     .sw-lap-diff { color: #999; font-weight: 600; font-size: 11px; }
+    /* SANNOLIKHET */
+    .sim-widget .widget-body { padding: 12px 14px; }
+    .sim-ctrl { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
+    .sim-anim { text-align: center; font-size: 52px; height: 64px; line-height: 64px; margin-bottom: 8px; }
+    .sim-anim.rolling { animation: sim-shake 0.12s infinite; }
+    @keyframes sim-shake { 0%{ transform: rotate(-8deg); } 50%{ transform: rotate(8deg); } 100%{ transform: rotate(-8deg); } }
+    .sim-chart { display: flex; justify-content: center; margin: 8px 0; }
+    .sim-bar-g { animation: upp-pop 0.3s ease; }
+    .sim-stats { text-align: center; font-size: 12px; color: #666; margin-bottom: 6px; }
+    /* KOORDINATSYSTEM */
+    .koord-widget .widget-body { padding: 10px 12px; }
+    .koord-ctrl { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; justify-content: center; }
+    .koord-ctrl label { font-size: 12px; color: #555; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+    .koord-grid-wrap { display: flex; justify-content: center; margin-bottom: 8px; }
+    .koord-grid-wrap svg { cursor: crosshair; background: #fff; border-radius: 10px; touch-action: none; }
+    .koord-list { max-height: 90px; overflow-y: auto; font-size: 12.5px; display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+    .koord-list-row { display: flex; align-items: center; justify-content: space-between; background: #f2f2f7; border-radius: 7px; padding: 3px 8px; }
+    .koord-list-row button { border: none; background: transparent; color: #ff3b30; font-size: 13px; cursor: pointer; }
+    .koord-footer { display: flex; gap: 6px; }
+    .koord-footer .btn { flex: 1; font-size: 12.5px; padding: 6px; }
+    /* DIAGRAM/STATISTIK */
+    .ds-widget .widget-body { padding: 12px 14px; }
+    .ds-title { width: 100%; border: none; border-bottom: 2px solid #e5e5ea; font-size: 15px; font-weight: 800; color: #1f2937; text-align: center; padding: 4px 2px 8px; margin-bottom: 10px; background: transparent; }
+    .ds-title:focus { outline: none; border-color: #007aff; }
+    .ds-typectrl { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
+    .ds-typectrl button.active { background: #007aff; color: #fff; }
+    .ds-chart { display: flex; justify-content: center; margin-bottom: 10px; }
+    .ds-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .ds-row { display: flex; align-items: center; gap: 6px; }
+    .ds-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    .ds-label { flex: 1; min-width: 0; border: 1px solid #d1d1d6; border-radius: 8px; padding: 5px 8px; font-size: 13px; }
+    .ds-minus, .ds-plus { width: 26px; height: 26px; border-radius: 8px; border: 1px solid #d1d1d6; background: #f2f2f7; font-weight: 800; font-size: 15px; cursor: pointer; flex-shrink: 0; }
+    .ds-count { min-width: 26px; text-align: center; font-weight: 800; font-size: 15px; color: #1f2937; }
+    .ds-remove { width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent; color: #ff3b30; font-size: 14px; cursor: pointer; flex-shrink: 0; }
+    .ds-footer { display: flex; gap: 6px; margin-top: 6px; }
+    .ds-footer .btn { flex: 1; font-size: 12.5px; padding: 6px; }
+    .ds-legend-pct { color: #999; font-size: 11px; margin-left: 4px; }
+    /* TALFORMER (bråk/procent) */
+    .tf-viewctrl button.active { background: #007aff; color: #fff; }
+    .tf-bit { cursor: pointer; transition: opacity 0.15s; }
+    .tf-bit:hover { opacity: 0.8; }
+    /* TALFÖLJDER */
+    .talfoljder-widget .widget-body { padding: 14px; }
+    .tf-ctrl { display: flex; gap: 6px; margin-bottom: 14px; justify-content: center; }
+    .tf-seq { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+    .tf-chip { min-width: 46px; height: 46px; padding: 0 6px; border-radius: 10px; background: #f2f2f7; border: 2px solid #e5e5ea; display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 800; color: #1f2937; }
+    .tf-chip.gap { background: #fff3cd; border-color: #ffcc00; color: #b8860b; }
+    .tf-chip.gap.revealed { background: #d1f2dd; border-color: #34c759; color: #1a7a3c; animation: upp-pop 0.25s ease; }
+    .tf-arrow { font-size: 13px; font-weight: 800; color: #b0b0b8; min-width: 22px; text-align: center; }
+    .tf-arrow.solved { color: #007aff; }
+    .tf-regel { text-align: center; font-size: 13px; color: #555; min-height: 18px; margin-top: 4px; }
+    /* UPPSTÄLLNING */
+    .uppstallning-widget .widget-body { padding: 10px 12px; }
+    .upp-ctrl, .upp-ctrl2 { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+    .upp-in { width: 72px; border: 1px solid #d1d1d6; border-radius: 8px; padding: 6px 8px; font-size: 14px; text-align: center; }
+    .upp-status { font-size: 12.5px; color: #666; text-align: center; margin: 8px 0; min-height: 16px; }
+    .upp-grid { display: flex; justify-content: center; gap: 2px; background: #f7f7fa; border-radius: 12px; padding: 14px 10px 10px; font-family: 'SF Mono', Consolas, monospace; }
+    .upp-col { display: flex; flex-direction: column; align-items: center; width: 34px; }
+    .upp-carry { height: 18px; font-size: 12px; font-weight: 800; }
+    .upp-chip { display: inline-block; border-radius: 6px; padding: 0 4px; }
+    .upp-chip-carry { color: #fff; background: #34c759; }
+    .upp-chip-borrow { color: #fff; background: #ff9500; font-size: 10px; }
+    .upp-top, .upp-bottom { height: 26px; font-size: 20px; font-weight: 700; color: #1f2937; display: flex; align-items: center; justify-content: center; position: relative; }
+    .upp-op-symbol { position: absolute; left: -20px; font-size: 20px; font-weight: 800; color: #ff3b30; }
+    .upp-digit-reduced { font-size: 12px; color: #ff9500; font-weight: 800; margin-left: 1px; align-self: flex-start; }
+    .upp-strike { text-decoration: line-through; text-decoration-color: #ff9500; text-decoration-thickness: 2px; color: #999; }
+    .upp-line { width: 100%; border-top: 3px solid #1f2937; margin: 2px 0 4px; }
+    .upp-result { height: 30px; font-size: 22px; font-weight: 800; color: #ccc; display: flex; align-items: center; justify-content: center; }
+    .upp-result.revealed { color: #007aff; animation: upp-pop 0.25s ease; }
+    @keyframes upp-pop { 0%{ transform: scale(0.5); opacity: 0; } 100%{ transform: scale(1); opacity: 1; } }
+    .upp-steg-ctrl { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
     /* FORMLER */
     .formler-widget .widget-body { padding: 12px 14px; }
     .formler-search { width: 100%; border: 1px solid #d1d1d6; border-radius: 10px; padding: 8px 12px; font-size: 14px; font-family: inherit; outline: none; margin-bottom: 10px; box-sizing: border-box; }
@@ -781,7 +888,8 @@
     .calc-btn.op { background: #ff9500; color: white; border-color: #e08300; }
     .calc-display { grid-column: span 4; background: #222; color: #4cd964; font-family: monospace; font-size: 22px; text-align: right; padding: 8px; border-radius: 8px; margin-bottom: 6px; min-height: 44px; word-break: break-all; }
     
-    .fraction-circle { width: 140px; height: 140px; border-radius: 50%; border: 4px solid #333; margin: 0 auto 10px; transition: background 0.3s; }
+    .fraction-circle { display: flex; justify-content: center; align-items: center; margin: 0 auto 10px; }
+    .fraction-circle svg { display: block; }
     
     .alphabet-widget .widget-inner { background: rgba(255, 255, 255, 0.97); }
     .alphabet-widget .widget-header { background: #FF2D55; border-bottom: 1px solid #d31a3e; }
@@ -1333,6 +1441,27 @@
     .poll-opt-content { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:center; gap:8px; }
     .poll-opt-correct { background:#d2f8dc !important; border-color:#34c759 !important; }
     .poll-opt-pct { font-weight:800; color:#555; font-size:13px; flex-shrink:0; }
+    /* RIMLIGHET */
+    .rml-widget .widget-inner { background:#fff; }
+    .rml-textarea { width:100%; border:1px solid #d1d1d6; border-radius:10px; padding:8px 10px; font-size:14px; font-family:inherit; resize:vertical; outline:none; background:#fff; margin-bottom:8px; box-sizing:border-box; line-height:1.4; }
+    .rml-textarea:focus { border-color:#007aff; }
+    .rml-textarea-small { font-size:12.5px; color:#444; }
+    .rml-slump-btn { width:100%; margin-bottom:10px; }
+    .rml-facit-toggle { width:100%; }
+    .rml-facit-box { border:1.5px dashed #d1d1d6; border-radius:12px; padding:10px; margin-top:8px; background:#fbfbfd; }
+    .rml-choice-row { display:flex; gap:8px; margin-bottom:4px; }
+    .rml-choice-btn { flex:1; border:1.5px solid #e0e0e5; border-radius:10px; padding:9px 8px; font-weight:800; font-size:13px; cursor:pointer; background:#f7f7f9; color:#555; transition:background .15s, border-color .15s, color .15s; }
+    .rml-choice-btn:hover { filter:brightness(0.97); }
+    .rml-choice-btn.active { background:#e6f0ff; border-color:#007aff; color:#0a4fa8; }
+    .rml-choice-btn.active::after { content:' ✓'; }
+    .rml-problem { font-size:15px; line-height:1.4; padding:2px 4px 10px; }
+    .rml-vote-btn { font-size:14.5px; }
+    .rml-facit { margin-top:10px; padding:12px 14px; border-radius:12px; text-align:center; animation:pclockPop .35s ease; }
+    .rml-facit-yes { background:#d2f8dc; border:1.5px solid #34c759; }
+    .rml-facit-no { background:#ffe1df; border:1.5px solid #ff3b30; }
+    .rml-facit-icon { font-size:28px; line-height:1; margin-bottom:2px; }
+    .rml-facit-label { font-weight:900; font-size:16px; color:#1d1d1f; margin-bottom:4px; }
+    .rml-facit-mot { font-size:13px; color:#333; line-height:1.4; }
 
     /* ---- LUNCH (matmeny via meny.mateo.se) ---- */
     .lunch-widget .widget-inner { background:#fff; }
@@ -2610,6 +2739,11 @@
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
                 else if (type === 'LÄSHASTIGHET') { state.data.niva = w.dataset.lashNiva || 'latt'; state.data.ord = w.dataset.lashOrd || ''; }
                 else if (type === 'TEXTGENRER') { state.data.genre = w.dataset.genre || 'berattelse'; }
+                else if (type === 'UPPSTÄLLNING') { try{ state.data = JSON.parse(w.dataset.uppData || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'TALFÖLJDER') { try{ state.data = JSON.parse(w.dataset.tfData || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'DIAGRAM') { try{ state.data = JSON.parse(w.dataset.dsData || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'KOORDINATSYSTEM') { try{ state.data = JSON.parse(w.dataset.koordData || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'SANNOLIKHET') { try{ state.data = JSON.parse(w.dataset.simData || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'LÄSFÖRSTÅELSE') { try{ state.data = JSON.parse(w.dataset.lasf || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'TAL OCH LYSSNA') { state.data.fraga = w.dataset.talFraga || ''; state.data.tid = w.dataset.talTid || '60'; }
                 else if (type === 'SAMTALA') { state.data.fraga = w.dataset.samtalaFraga || ''; state.data.tid = w.dataset.samtalaTid || '60'; }
@@ -2625,7 +2759,7 @@
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
-                else if (type === 'ÖVNINGSKLOCKA') { const t=(w.querySelector('.pclock-digital')?.textContent||'03:00').split(':'); state.data.h = (parseInt(t[0])||0)%24; state.data.m = parseInt(t[1])||0; }
+                else if (type === 'ÖVNINGSKLOCKA') { let _ph=parseInt(w.dataset.pclockH), _pm=parseInt(w.dataset.pclockM); if(isNaN(_ph)||isNaN(_pm)){ const t=(w.querySelector('.pclock-digital-am')?.textContent.replace(/[^\d:]/g,'')||'08:00').split(':'); _ph=(parseInt(t[0])||0)%24; _pm=parseInt(t[1])||0; } state.data.h = _ph; state.data.m = _pm; state.data.hidden = w.dataset.pclockHidden === 'true'; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VIDEO') { state.data.kind = w.dataset.videoKind || ''; state.data.src = w.dataset.videoSrc || ''; }
@@ -2636,6 +2770,7 @@
                 else if (type === 'BORDSPLACERING') { try{ state.data.items = JSON.parse(w.dataset.seating || '[]'); }catch(e){ state.data.items=[]; } }
                 else if (type === 'EXIT TICKET') { try{ state.data = JSON.parse(w.dataset.exitTicket || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'OMRÖSTNING') { try{ state.data = JSON.parse(w.dataset.poll || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'RIMLIGHET') { try{ state.data = JSON.parse(w.dataset.rimlighet || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'REMINDER') { try{ state.data.items = (typeof remLoad==='function') ? remLoad() : JSON.parse(w.dataset.reminders || '[]'); }catch(e){ state.data.items = []; } }
                 else if (type === 'MULTIPLIKATION') { try{ state.data = JSON.parse(w.dataset.multi || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'HUNDRARUTA') { try{ state.data = JSON.parse(w.dataset.hundra || '{}'); }catch(e){ state.data={}; } }
@@ -2727,6 +2862,7 @@
             else if (w.type === 'BORDSPLACERING') createSeatingChart(w);
             else if (w.type === 'EXIT TICKET') createExitTicket(w);
             else if (w.type === 'OMRÖSTNING') createQuizPoll(w);
+            else if (w.type === 'RIMLIGHET') createRimlighet(w);
             else if (w.type === 'REMINDER') createReminderWidget(w);
             else if (w.type === 'MULTIPLIKATION') createMultiplicationTable(w);
             else if (w.type === 'HUNDRARUTA') createHundredChart(w);
@@ -2737,6 +2873,11 @@
             else if (w.type === 'GEOMETRI') createGeometryWidget(w);
             else if (w.type === 'ENHETER') createUnitConverter(w);
             else if (w.type === 'FORMLER') createFormlerWidget(w);
+            else if (w.type === 'UPPSTÄLLNING') createUppstallning(w);
+            else if (w.type === 'TALFÖLJDER') createTalfoljder(w);
+            else if (w.type === 'DIAGRAM') createDiagramWidget(w);
+            else if (w.type === 'KOORDINATSYSTEM') createKoordinatsystem(w);
+            else if (w.type === 'SANNOLIKHET') createSannolikhet(w);
             else if (w.type === 'MATTEKAMP') createMathBattle(w);
             else if (w.type === 'VERB') createVerbWidget(w);
             else if (w.type === 'EN / ETT') createNounWidget(w);
@@ -6118,14 +6259,16 @@
         sparaCache('saknas'); return null;
     }
 
-    // ---- SYNONYMER/FÖRKLARING (EN/ETT): slå upp två synonymer på sv.wiktionary.org,
-    // annars en kort förklaring hämtad ur ordets första betydelse. Egen cache/nätanrop,
-    // helt fristående från subWiktionary ovan så den formen-uppslagningen inte påverkas.
+    // ---- SYNONYMER (EN/ETT): slå upp riktiga synonymer på sv.wiktionary.org.
+    // Synonymer skrivs där oftast INLINE i löptexten (t.ex. "Synonymer: valp" på
+    // sidan för "hundvalp") snarare än under en egen rubrik, så vi läser hela det
+    // svenska avsnittets text och letar efter mönstret – inte bara ev. rubrik.
+    // Egen cache/nätanrop, helt fristående från subWiktionary ovan.
     async function subSynonymer(ord){
         const w=(ord||'').toLowerCase().trim(); if(!w) return null;
-        let cache={}; try{ cache=JSON.parse(localStorage.getItem('subSynCacheV1')||'{}'); }catch(e){}
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('subSynCacheV3')||'{}'); }catch(e){}
         if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
-        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('subSynCacheV1', JSON.stringify(cache)); }catch(e){} };
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('subSynCacheV3', JSON.stringify(cache)); }catch(e){} };
         let j;
         try{
             const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
@@ -6134,7 +6277,20 @@
         if(!j || !j.parse || !j.parse.text){ sparaCache('saknas'); return null; }
         const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
         const clean=(txt)=> (txt||'').replace(/\[\d+\]/g,'').replace(/\s+/g,' ').trim();
-        const rubriker=[...doc.querySelectorAll('.mw-headline')];
+        // Begränsa till det svenska avsnittet om sidan täcker flera språk (t.ex. även tyska/danska),
+        // så vi aldrig råkar plocka synonymer från fel språk.
+        let scopeEl = doc.body;
+        const h2headlines=[...doc.querySelectorAll('h2 .mw-headline')];
+        const svHeadline = h2headlines.find(h=>/^svenska$/i.test((h.textContent||'').trim()));
+        if(svHeadline){
+            const startH2 = svHeadline.closest('h2');
+            const frag = document.createElement('div');
+            let sib = startH2 ? startH2.nextElementSibling : null;
+            while(sib && sib.tagName!=='H2'){ frag.appendChild(sib.cloneNode(true)); sib = sib.nextElementSibling; }
+            scopeEl = frag;
+        }
+        // 1) Egen rubrik "Synonymer" (äldre/mer utförliga uppslag)
+        const rubriker=[...scopeEl.querySelectorAll('.mw-headline')];
         const listaEfterRubrik=(rub)=>{
             let node = rub.closest('h2,h3,h4,h5'); if(!node) return null;
             let sib = node.nextElementSibling;
@@ -6144,7 +6300,6 @@
             }
             return null;
         };
-        // 1) Synonymer-avsnitt (om det finns) → ta upp till två
         const synRub = rubriker.find(h=>/^synonym/i.test(h.textContent||''));
         if(synRub){
             const lista = listaEfterRubrik(synRub);
@@ -6153,10 +6308,17 @@
                 if(items.length){ const res={ typ:'synonymer', varde: items.slice(0,2) }; sparaCache(res); return res; }
             }
         }
-        // 2) Annars: första betydelseförklaringen under Substantiv-rubriken (eller första numrerade listan på sidan)
+        // 2) Vanligast: inline-mall "Synonymer: ord1, ord2" i löptexten, direkt under betydelsen
+        const heltext = clean(scopeEl.textContent||'');
+        const m = heltext.match(/Synonymer:\s*([^·]+?)(?=\s*(?:Hyperonymer|Hyponymer|Kohyponymer|Motsatsord|Antonymer|Se även|Sammansättningar|Besläktade ord|Uttal|Böjning|Etymologi|Översättningar|Fraser|$))/i);
+        if(m){
+            const items = m[1].split(',').map(s=>s.trim()).filter(Boolean);
+            if(items.length){ const res={ typ:'synonymer', varde: items.slice(0,2) }; sparaCache(res); return res; }
+        }
+        // 3) Inga riktiga synonymer hittades – visa istället en kort förklaring ur ordets första betydelse
         const substRub = rubriker.find(h=>/^substantiv/i.test(h.textContent||''));
         let defLista = substRub ? listaEfterRubrik(substRub) : null;
-        if(!defLista) defLista = doc.querySelector('ol');
+        if(!defLista) defLista = scopeEl.querySelector('ol');
         if(defLista){
             const forsta = defLista.querySelector('li');
             if(forsta){
@@ -6204,24 +6366,29 @@
             syncData(); rowsEl.innerHTML=''; typEl.textContent=''; synRad(null);
             const p=subSlaUpp(inp.value);
             if(!p){ typEl.textContent='Skriv ett substantiv ovan och tryck Böj'; return; }
-            rita(p);
-            // okänt ord? slå upp i riktiga ordboken (sv.wiktionary) och rita om
-            if(p.typ.indexOf('gissning')>=0 || p.typ.indexOf('angiven artikel')>=0){
-                const mittNr=++uppslagNr;
-                const ordDaa=inp.value;
-                typEl.textContent='Slår upp i ordboken…';
-                subWiktionary(p.sg).then(w=>{
-                    if(mittNr!==uppslagNr || inp.value!==ordDaa) return; // användaren hann skriva nytt
-                    if(w){ rita(w); }
-                    else { rita(p); typEl.textContent=(p.a==='e'?'EN-ord':'ETT-ord')+' · ⚠ hittades inte i ordboken – '+p.typ; }
-                    saveBoardState();
-                });
+            const arKand = p.typ.indexOf('gissning')<0 && p.typ.indexOf('angiven artikel')<0; // hittat direkt i vår kurerade ordlista
+            if(arKand){
+                rita(p);
+                hamtaSynonymer(p.sg);
+                return;
             }
-            // synonymer eller kort förklaring – oberoende uppslag för det framsökta ordet
+            // Okänt ord: slå ALDRIG upp en gissad böjning – fråga riktiga ordboken (sv.wiktionary) och lita bara på ett bekräftat svar
+            rowsEl.innerHTML='';
+            typEl.textContent='Slår upp i ordboken…';
+            const mittNr=++uppslagNr;
+            const ordDaa=inp.value;
+            subWiktionary(p.sg).then(w=>{
+                if(mittNr!==uppslagNr || inp.value!==ordDaa) return; // användaren hann skriva nytt
+                if(w){ rita(w); hamtaSynonymer(w.sg); }
+                else { typEl.textContent='⚠️ Ordet hittades inte i ordboken.'; rowsEl.innerHTML=''; synRad(null); }
+                saveBoardState();
+            });
+        }
+        function hamtaSynonymer(ord){
             const mittSynNr=++synNr;
             const ordDaaSyn=inp.value;
             synRad('laddar');
-            subSynonymer(p.sg).then(s=>{
+            subSynonymer(ord).then(s=>{
                 if(mittSynNr!==synNr || inp.value!==ordDaaSyn) return; // användaren hann skriva nytt
                 synRad(s);
             });
@@ -10299,6 +10466,610 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
     window.createFormlerWidget = createFormlerWidget;
 
+    // ---- UPPSTÄLLNING (kolumnräkning +, −, ×) ----
+    // Lärarstyrd genomgång: skriv in eller slumpa fram två tal, klicka "Nästa steg" för
+    // att räkna en kolumn i taget (från höger), med minnessiffror (+) och lån (−) synliga.
+    function createUppstallning(config){
+        if(config===undefined) config=null;
+        const body = createWidget('UPPSTÄLLNING', 300, 'uppstallning-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config) widget.style.height = '440px';
+        body.innerHTML = `
+            <div class='hover-menu upp-ctrl'>
+                <input type='number' class='upp-in upp-a' placeholder='Tal 1' min='0'>
+                <select class='editor-select upp-op'>
+                    <option value='+'>+</option>
+                    <option value='-'>−</option>
+                    <option value='×'>×</option>
+                </select>
+                <input type='number' class='upp-in upp-b' placeholder='Tal 2' min='0'>
+                <button class='btn btn-primary upp-starta'>Starta</button>
+            </div>
+            <div class='hover-menu upp-ctrl2'>
+                <select class='editor-select upp-siffror'>
+                    <option value='2'>2 siffror</option>
+                    <option value='3' selected>3 siffror</option>
+                    <option value='4'>4 siffror</option>
+                </select>
+                <button class='btn btn-secondary upp-slumpa'>🎲 Slumpa tal</button>
+            </div>
+            <div class='upp-grid'></div>
+            <div class='upp-status'>Skriv två tal eller slumpa fram ett exempel, välj räknesätt och klicka Starta.</div>
+            <div class='hover-menu upp-steg-ctrl'>
+                <button class='btn btn-secondary upp-steg' disabled>Nästa steg ▶</button>
+                <button class='btn btn-secondary upp-alla' disabled>Visa allt</button>
+                <button class='btn btn-danger upp-om' disabled>Börja om</button>
+            </div>`;
+        const aIn=body.querySelector('.upp-a'), bIn=body.querySelector('.upp-b'), opSel=body.querySelector('.upp-op');
+        const siffrorSel=body.querySelector('.upp-siffror'), slumpaBtn=body.querySelector('.upp-slumpa'), startaBtn=body.querySelector('.upp-starta');
+        const gridEl=body.querySelector('.upp-grid'), statusEl=body.querySelector('.upp-status');
+        const stegBtn=body.querySelector('.upp-steg'), allaBtn=body.querySelector('.upp-alla'), omBtn=body.querySelector('.upp-om');
+
+        let cols=[], op='+', step=0, n=0, extraDigit=null, extraRevealed=false;
+
+        function syncData(){
+            widget.dataset.uppData = JSON.stringify({ a: aIn.value, b: bIn.value, op: opSel.value, step, extraRevealed, started: n>0 });
+        }
+
+        function digits(numStr, width){ return numStr.padStart(width,'0').split('').map(Number); }
+
+        function build(a,b,operation){
+            op=operation;
+            let aStr=String(a), bStr=String(b);
+            const width = Math.max(aStr.length, bStr.length);
+            const aD = digits(aStr, width);
+            const bD = digits(bStr, width);
+            n = width; cols=[];
+            let carry=0;
+            if(op==='+'){
+                for(let i=width-1;i>=0;i--){
+                    const sum=aD[i]+bD[i]+carry, carryIn=carry;
+                    const resultDigit=sum%10; carry=Math.floor(sum/10);
+                    cols[i]={topDigit:aD[i], bottomDigit:bD[i], carryIn, result:resultDigit, carryOut:carry};
+                }
+                extraDigit = carry>0 ? carry : null;
+            } else if(op==='-'){
+                for(let i=width-1;i>=0;i--){
+                    let top=aD[i]-carry; let borrowOut=0;
+                    if(top<bD[i]){ top+=10; borrowOut=1; }
+                    const resultDigit=top-bD[i];
+                    cols[i]={topDigit:aD[i], bottomDigit:bD[i], borrowIn:carry, result:resultDigit, borrowOut};
+                    carry=borrowOut;
+                }
+                extraDigit=null;
+            } else if(op==='×'){
+                const multiplier = bStr.length<=aStr.length ? Number(bStr) : Number(aStr);
+                const stora = bStr.length<=aStr.length ? aD : digits(String(Math.max(a,b)), width);
+                for(let i=width-1;i>=0;i--){
+                    const prod = stora[i]*multiplier+carry, carryIn=carry;
+                    const resultDigit=prod%10; carry=Math.floor(prod/10);
+                    cols[i]={topDigit:stora[i], bottomDigit:(i===width-1?multiplier:null), carryIn, result:resultDigit, carryOut:carry};
+                }
+                extraDigit = carry>0 ? carry : null;
+            }
+            step=0; extraRevealed=false;
+            render(); syncData();
+        }
+
+        function render(){
+            gridEl.innerHTML='';
+            if(extraDigit!==null){
+                const ec=document.createElement('div'); ec.className='upp-col upp-extra';
+                ec.innerHTML = `<div class='upp-carry'></div><div class='upp-top'></div><div class='upp-bottom'></div><div class='upp-line'></div><div class='upp-result ${extraRevealed?'revealed':''}'>${extraRevealed?extraDigit:''}</div>`;
+                gridEl.appendChild(ec);
+            }
+            cols.forEach((c,i)=>{
+                const revealed = i >= n-step;
+                const isFirst = i===0;
+                const colEl=document.createElement('div'); colEl.className='upp-col';
+                let carryHtml='';
+                if((op==='+'||op==='×') && c.carryIn>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-carry'>+${c.carryIn}</span>`;
+                if(op==='-' && c.borrowIn>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-borrow'>+10</span>`;
+                let topHtml = `<span class='upp-digit'>${c.topDigit}</span>`;
+                if(op==='-' && c.borrowOut===1 && revealed){
+                    topHtml = `<span class='upp-digit upp-strike'>${c.topDigit}</span><span class='upp-digit-reduced'>${c.topDigit-1}</span>`;
+                }
+                const opSymbolHtml = isFirst ? `<span class='upp-op-symbol'>${op}</span>` : '';
+                const bottomHtml = (c.bottomDigit!==null && c.bottomDigit!==undefined) ? `${opSymbolHtml}<span class='upp-digit'>${c.bottomDigit}</span>` : opSymbolHtml;
+                colEl.innerHTML = `
+                    <div class='upp-carry'>${carryHtml}</div>
+                    <div class='upp-top'>${topHtml}</div>
+                    <div class='upp-bottom'>${bottomHtml}</div>
+                    <div class='upp-line'></div>
+                    <div class='upp-result ${revealed?'revealed':''}'>${revealed?c.result:'?'}</div>`;
+                gridEl.appendChild(colEl);
+            });
+            const doneAll = step>=n && (extraDigit===null || extraRevealed);
+            if(doneAll){
+                const svar = ((extraDigit!==null?String(extraDigit):'') + cols.map(c=>c.result).join('')).replace(/^0+(?=\d)/,'');
+                statusEl.innerHTML = `✅ Klart! Svaret är <b>${svar}</b>`;
+            } else if(step===0){
+                statusEl.textContent = 'Klicka "Nästa steg" för att räkna en kolumn i taget, från höger.';
+            } else {
+                statusEl.textContent = 'Kolumn '+step+' av '+n+' klar. Klicka igen för nästa.';
+            }
+            stegBtn.disabled = doneAll; allaBtn.disabled = doneAll;
+        }
+
+        function nextStep(){ if(step<n){ step++; } else if(extraDigit!==null && !extraRevealed){ extraRevealed=true; } render(); syncData(); }
+        function showAll(){ step=n; extraRevealed = extraDigit!==null; render(); syncData(); }
+        function reset(){ step=0; extraRevealed=false; render(); syncData(); }
+
+        function startaMed(a,b,operation){
+            if(isNaN(a)||isNaN(b)||a<0||b<0){ statusEl.textContent='Skriv två positiva heltal i båda fälten.'; return false; }
+            if(operation==='-' && b>a){ statusEl.textContent='Tal 2 måste vara mindre än eller lika med Tal 1 vid subtraktion.'; return false; }
+            if(operation==='×' && Math.min(String(a).length,String(b).length)>1){ statusEl.textContent='Vid multiplikation ska ett av talen vara en ensiffrig siffra (kort multiplikation).'; return false; }
+            build(a,b,operation);
+            stegBtn.disabled=false; allaBtn.disabled=false; omBtn.disabled=false;
+            return true;
+        }
+
+        startaBtn.onclick=()=>{ startaMed(parseInt(aIn.value,10), parseInt(bIn.value,10), opSel.value); saveBoardState(); };
+        slumpaBtn.onclick=()=>{
+            const digitsN=parseInt(siffrorSel.value,10), operation=opSel.value;
+            const max=Math.pow(10,digitsN)-1, min=Math.pow(10,digitsN-1);
+            let a=Math.floor(Math.random()*(max-min+1))+min, b;
+            if(operation==='×'){ b=Math.floor(Math.random()*8)+2; }
+            else { b=Math.floor(Math.random()*(max-min+1))+min; if(operation==='-' && b>a){ const t=a; a=b; b=t; } }
+            aIn.value=a; bIn.value=b;
+            startaMed(a,b,operation); saveBoardState();
+        };
+        stegBtn.onclick=()=>{ nextStep(); saveBoardState(); };
+        allaBtn.onclick=()=>{ showAll(); saveBoardState(); };
+        omBtn.onclick=()=>{ reset(); saveBoardState(); };
+
+        if(config && config.data && config.data.started){
+            aIn.value=config.data.a; bIn.value=config.data.b; opSel.value=config.data.op||'+';
+            const a=parseInt(config.data.a,10), b=parseInt(config.data.b,10);
+            if(startaMed(a,b,config.data.op||'+')){
+                step = Math.min(config.data.step||0, n); extraRevealed=!!config.data.extraRevealed;
+                render(); syncData();
+            }
+        }
+    }
+    window.createUppstallning = createUppstallning;
+
+    // ---- TALFÖLJDER / MÖNSTER ----
+    // Lärarstyrt "gissa och avslöja"-flöde: en sekvens visas med en lucka, klassen
+    // gissar högt, läraren klickar "Visa facit" för att avslöja svaret och regeln.
+    function createTalfoljder(config){
+        if(config===undefined) config=null;
+        const body = createWidget('TALFÖLJDER', 340, 'talfoljder-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `
+            <div class='hover-menu tf-ctrl'>
+                <select class='editor-select tf-niva'>
+                    <option value='latt'>Lätt</option>
+                    <option value='medel' selected>Medel</option>
+                    <option value='svar'>Svår</option>
+                </select>
+                <button class='btn btn-primary tf-nytt'>🔄 Nytt mönster</button>
+            </div>
+            <div class='tf-seq'></div>
+            <div class='tf-regel'></div>
+            <button class='btn btn-secondary tf-facit' style='width:100%;margin-top:10px;'>Visa facit</button>`;
+        const nivaSel=body.querySelector('.tf-niva'), nyttBtn=body.querySelector('.tf-nytt'), seqEl=body.querySelector('.tf-seq'), regelEl=body.querySelector('.tf-regel'), facitBtn=body.querySelector('.tf-facit');
+        let state=null, revealed=false;
+
+        function syncData(){ widget.dataset.tfData = JSON.stringify({ niva: nivaSel.value, state, revealed }); }
+
+        function genSekvens(niva){
+            const n=6;
+            let seq=[], mult=false;
+            if(niva==='latt'){
+                const start=Math.floor(Math.random()*10)+1;
+                const step=Math.floor(Math.random()*3)+1;
+                for(let i=0;i<n;i++) seq.push(start+i*step);
+            } else if(niva==='medel'){
+                const nedat = Math.random()<0.35;
+                let step=Math.floor(Math.random()*9)+2;
+                let start = nedat ? Math.floor(Math.random()*30)+40 : Math.floor(Math.random()*20)+1;
+                if(nedat) step=-step;
+                for(let i=0;i<n;i++) seq.push(start+i*step);
+            } else {
+                if(Math.random()<0.5){
+                    mult=true;
+                    const start=Math.floor(Math.random()*3)+1;
+                    for(let i=0;i<n;i++) seq.push(start*Math.pow(2,i));
+                } else {
+                    mult=true;
+                    const startBas=Math.floor(Math.random()*6)+3;
+                    const start = startBas*Math.pow(2,n-1);
+                    for(let i=0;i<n;i++) seq.push(start/Math.pow(2,i));
+                }
+            }
+            const gapMitten = Math.floor(Math.random()*(n-2))+1;
+            const gapIdx = Math.random()<0.3 ? n-1 : gapMitten;
+            return { seq, gapIdx, mult };
+        }
+
+        function render(){
+            seqEl.innerHTML=''; regelEl.textContent='';
+            if(!state) return;
+            state.seq.forEach((v,i)=>{
+                const chip=document.createElement('div');
+                chip.className='tf-chip'+(i===state.gapIdx?' gap':'')+((i===state.gapIdx && revealed)?' revealed':'');
+                chip.textContent = (i===state.gapIdx && !revealed) ? '?' : v;
+                seqEl.appendChild(chip);
+                if(i<state.seq.length-1){
+                    const arrow=document.createElement('div'); arrow.className='tf-arrow'+(revealed?' solved':'');
+                    if(revealed){
+                        if(state.mult){ arrow.textContent = state.seq[i+1] > state.seq[i] ? '×2' : '÷2'; }
+                        else { const diff=state.seq[i+1]-state.seq[i]; arrow.textContent = diff>=0 ? '+'+diff : String(diff); }
+                    } else { arrow.textContent='›'; }
+                    seqEl.appendChild(arrow);
+                }
+            });
+            if(revealed){
+                let regel;
+                if(state.mult){ regel = 'Regeln: '+(state.seq[1]>state.seq[0]?'dubbelt så stort':'hälften så stort')+' varje gång.'; }
+                else { const diff=state.seq[1]-state.seq[0]; regel = 'Regeln: '+(diff>=0?'+':'')+diff+' varje gång.'; }
+                regelEl.textContent = regel;
+            }
+        }
+
+        function nyttMonster(){
+            state = genSekvens(nivaSel.value);
+            revealed = false;
+            render(); syncData();
+        }
+
+        nyttBtn.onclick=()=>{ nyttMonster(); saveBoardState(); };
+        facitBtn.onclick=()=>{ if(!state) return; revealed = !revealed; render(); syncData(); saveBoardState(); };
+        nivaSel.onchange=()=>{ nyttMonster(); saveBoardState(); };
+
+        if(config && config.data && config.data.state){
+            nivaSel.value = config.data.niva || 'medel';
+            state = config.data.state; revealed = !!config.data.revealed;
+            render();
+        } else { nyttMonster(); }
+    }
+    window.createTalfoljder = createTalfoljder;
+
+    // ---- DIAGRAM/STATISTIK ----
+    // Läraren matar in klassens data live (handuppräckning, omröstning, mätning) och
+    // widgeten ritar stapel- eller cirkeldiagram direkt på tavlan, i realtid.
+    const DS_FARGER = ['#007aff','#ff3b30','#34c759','#ff9500','#af52de','#5ac8fa','#ffcc00','#ff2d55'];
+    function createDiagramWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('DIAGRAM', 340, 'ds-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config) widget.style.height = '480px';
+        body.innerHTML = `
+            <input type='text' class='ds-title' placeholder='Skriv en fråga, t.ex. Hur många har syskon?' value=''>
+            <div class='hover-menu ds-typectrl'>
+                <button class='btn btn-secondary ds-typ-stapel active'>📊 Stapel</button>
+                <button class='btn btn-secondary ds-typ-cirkel'>🥧 Cirkel</button>
+            </div>
+            <div class='ds-chart'></div>
+            <div class='ds-rows'></div>
+            <div class='hover-menu ds-footer'>
+                <button class='btn btn-secondary ds-lagg'>+ Lägg till</button>
+                <button class='btn btn-danger ds-nollstall'>Nollställ alla</button>
+            </div>`;
+        const titleEl=body.querySelector('.ds-title'), chartEl=body.querySelector('.ds-chart'), rowsEl=body.querySelector('.ds-rows');
+        const btnStapel=body.querySelector('.ds-typ-stapel'), btnCirkel=body.querySelector('.ds-typ-cirkel');
+        const laggBtn=body.querySelector('.ds-lagg'), nollstallBtn=body.querySelector('.ds-nollstall');
+
+        let data = { title:'', typ:'stapel', cats:[ {label:'Ja', count:0}, {label:'Nej', count:0} ] };
+
+        function syncData(){ widget.dataset.dsData = JSON.stringify(data); }
+
+        function renderRows(){
+            rowsEl.innerHTML='';
+            data.cats.forEach((c,i)=>{
+                const row=document.createElement('div'); row.className='ds-row';
+                row.innerHTML = `
+                    <span class='ds-swatch' style='background:${DS_FARGER[i%DS_FARGER.length]}'></span>
+                    <input type='text' class='ds-label' value='${c.label.replace(/"/g,'&quot;')}'>
+                    <button class='ds-minus'>−</button>
+                    <span class='ds-count'>${c.count}</span>
+                    <button class='ds-plus'>+</button>
+                    <button class='ds-remove' title='Ta bort kategori'>✕</button>`;
+                row.querySelector('.ds-label').oninput=(e)=>{ c.label=e.target.value; renderChart(); syncData(); };
+                row.querySelector('.ds-minus').onclick=()=>{ c.count=Math.max(0,c.count-1); renderRows(); renderChart(); syncData(); saveBoardState(); };
+                row.querySelector('.ds-plus').onclick=()=>{ c.count++; renderRows(); renderChart(); syncData(); saveBoardState(); };
+                row.querySelector('.ds-remove').onclick=()=>{ data.cats.splice(i,1); renderRows(); renderChart(); syncData(); saveBoardState(); };
+                rowsEl.appendChild(row);
+            });
+        }
+
+        function renderChart(){
+            const total = data.cats.reduce((s,c)=>s+c.count,0);
+            if(data.typ==='stapel'){
+                const w=300, h=170, padBottom=28, padTop=14, barGap=10;
+                const n=data.cats.length||1;
+                const barW = Math.max(18, Math.min(48, (w-barGap*(n+1))/n));
+                const maxV = Math.max(1, ...data.cats.map(c=>c.count));
+                let svg = `<svg viewBox='0 0 ${w} ${h}' width='${w}' height='${h}'><line x1='0' y1='${h-padBottom}' x2='${w}' y2='${h-padBottom}' stroke='#d1d1d6' stroke-width='2'/>`;
+                data.cats.forEach((c,i)=>{
+                    const barH = (h-padBottom-padTop) * (c.count/maxV);
+                    const x = barGap + i*(barW+barGap);
+                    const y = h-padBottom-barH;
+                    svg += `<rect x='${x}' y='${y}' width='${barW}' height='${barH}' rx='6' fill='${DS_FARGER[i%DS_FARGER.length]}'/>`;
+                    svg += `<text x='${x+barW/2}' y='${y-6}' text-anchor='middle' font-size='13' font-weight='800' fill='#1f2937'>${c.count}</text>`;
+                    const kortLabel = c.label.length>8 ? c.label.slice(0,7)+'…' : c.label;
+                    svg += `<text x='${x+barW/2}' y='${h-padBottom+16}' text-anchor='middle' font-size='11' fill='#666'>${kortLabel}</text>`;
+                });
+                svg += `</svg>`;
+                chartEl.innerHTML = svg;
+            } else {
+                const cx=100, cy=100, r=68, sw=38, circ=2*Math.PI*r;
+                let svg = `<svg viewBox='0 0 260 200' width='260' height='200'>`;
+                if(total===0){
+                    svg += `<circle cx='${cx}' cy='${cy}' r='${r}' fill='none' stroke='#e5e5ea' stroke-width='${sw}'/>`;
+                    svg += `<text x='${cx}' y='${cy+5}' text-anchor='middle' font-size='13' fill='#999'>Inga svar än</text>`;
+                } else {
+                    let offset=0;
+                    data.cats.forEach((c,i)=>{
+                        if(c.count<=0) return;
+                        const frac = c.count/total, dash = frac*circ;
+                        svg += `<circle cx='${cx}' cy='${cy}' r='${r}' fill='none' stroke='${DS_FARGER[i%DS_FARGER.length]}' stroke-width='${sw}' stroke-dasharray='${dash} ${circ-dash}' stroke-dashoffset='${-offset}' transform='rotate(-90 ${cx} ${cy})'/>`;
+                        offset += dash;
+                    });
+                    svg += `<text x='${cx}' y='${cy-4}' text-anchor='middle' font-size='20' font-weight='800' fill='#1f2937'>${total}</text><text x='${cx}' y='${cy+16}' text-anchor='middle' font-size='11' fill='#999'>st</text>`;
+                }
+                svg += `<g font-size='12' font-weight='700'>`;
+                let ly=30;
+                data.cats.forEach((c,i)=>{
+                    const pct = total>0 ? Math.round(c.count/total*100) : 0;
+                    svg += `<rect x='202' y='${ly-10}' width='10' height='10' rx='2' fill='${DS_FARGER[i%DS_FARGER.length]}'/>`;
+                    const kortLabel = c.label.length>9 ? c.label.slice(0,8)+'…' : c.label;
+                    svg += `<text x='216' y='${ly-1}' fill='#333'>${kortLabel} <tspan fill='#999' font-weight='400'>${total>0?pct+'%':''}</tspan></text>`;
+                    ly += 20;
+                });
+                svg += `</g></svg>`;
+                chartEl.innerHTML = svg;
+            }
+        }
+
+        titleEl.oninput=()=>{ data.title=titleEl.value; syncData(); };
+        titleEl.onblur=()=>saveBoardState();
+        btnStapel.onclick=()=>{ data.typ='stapel'; btnStapel.classList.add('active'); btnCirkel.classList.remove('active'); renderChart(); syncData(); saveBoardState(); };
+        btnCirkel.onclick=()=>{ data.typ='cirkel'; btnCirkel.classList.add('active'); btnStapel.classList.remove('active'); renderChart(); syncData(); saveBoardState(); };
+        laggBtn.onclick=()=>{ data.cats.push({label:'Ny kategori', count:0}); renderRows(); renderChart(); syncData(); saveBoardState(); };
+        nollstallBtn.onclick=()=>{ data.cats.forEach(c=>c.count=0); renderRows(); renderChart(); syncData(); saveBoardState(); };
+
+        if(config && config.data && Array.isArray(config.data.cats)){
+            data = config.data;
+        }
+        titleEl.value = data.title||'';
+        if(data.typ==='cirkel'){ btnCirkel.classList.add('active'); btnStapel.classList.remove('active'); }
+        renderRows(); renderChart(); syncData();
+    }
+    window.createDiagramWidget = createDiagramWidget;
+
+    // ---- KOORDINATSYSTEM ----
+    // Läraren klickar i rutnätet för att plotta punkter i tur och ordning (klassen
+    // följer med / gissar nästa punkt), t.ex. för att rita en figur genom att koppla
+    // punkterna med linjer i den ordning de klickas.
+    function createKoordinatsystem(config){
+        if(config===undefined) config=null;
+        const body = createWidget('KOORDINATSYSTEM', 380, 'koord-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config) widget.style.height = '480px';
+        body.innerHTML = `
+            <div class='hover-menu koord-ctrl'>
+                <select class='editor-select koord-storlek'>
+                    <option value='5'>0 till 5</option>
+                    <option value='8'>0 till 8</option>
+                    <option value='10' selected>0 till 10</option>
+                    <option value='12'>0 till 12</option>
+                    <option value='-5'>−5 till 5</option>
+                    <option value='-8'>−8 till 8</option>
+                    <option value='-10'>−10 till 10</option>
+                    <option value='-12'>−12 till 12</option>
+                </select>
+                <label><input type='checkbox' class='koord-koppla' checked> Koppla punkter</label>
+                <label><input type='checkbox' class='koord-stang'> Stäng figuren</label>
+            </div>
+            <div class='koord-grid-wrap'></div>
+            <div class='koord-list'></div>
+            <div class='hover-menu koord-footer'>
+                <button class='btn btn-secondary koord-angra'>↶ Ångra senaste</button>
+                <button class='btn btn-danger koord-rensa'>Rensa allt</button>
+            </div>`;
+        const gridWrap=body.querySelector('.koord-grid-wrap'), listEl=body.querySelector('.koord-list');
+        const storlekSel=body.querySelector('.koord-storlek'), kopplaCb=body.querySelector('.koord-koppla'), stangCb=body.querySelector('.koord-stang');
+        const angraBtn=body.querySelector('.koord-angra'), rensaBtn=body.querySelector('.koord-rensa');
+
+        let points=[];
+
+        function syncData(){
+            const raw=Number(storlekSel.value);
+            widget.dataset.koordData = JSON.stringify({ n: Math.abs(raw), fyra: raw<0, koppla: kopplaCb.checked, stang: stangCb.checked, points });
+        }
+
+        function render(){
+            const raw = Number(storlekSel.value);
+            const n = Math.abs(raw);
+            const fyra = raw<0;
+            const pad = 26, size = 280;
+            const range = fyra ? n*2 : n;
+            const cell = size/range;
+            const vb = size + pad*2;
+            const toScreenX = (x)=> pad + (fyra ? (x+n) : x) * cell;
+            const toScreenY = (y)=> pad + (n - y) * cell;
+
+            let svg = `<svg viewBox='0 0 ${vb} ${vb}' width='${vb>340?340:vb}' height='${vb>340?340:vb}'>`;
+            // rutnät
+            for(let i=0;i<=range;i++){
+                const gx = pad + i*cell, gy = pad + i*cell;
+                svg += `<line x1='${gx}' y1='${pad}' x2='${gx}' y2='${pad+size}' stroke='#eee' stroke-width='1'/>`;
+                svg += `<line x1='${pad}' y1='${gy}' x2='${pad+size}' y2='${gy}' stroke='#eee' stroke-width='1'/>`;
+            }
+            // axlar
+            const zeroX = toScreenX(0), zeroY = toScreenY(0);
+            svg += `<line x1='${pad}' y1='${zeroY}' x2='${pad+size}' y2='${zeroY}' stroke='#1f2937' stroke-width='2'/>`;
+            svg += `<line x1='${zeroX}' y1='${pad}' x2='${zeroX}' y2='${pad+size}' stroke='#1f2937' stroke-width='2'/>`;
+            // siffror
+            const stepLbl = range>16 ? 2 : 1;
+            const lo = fyra ? -n : 0;
+            for(let v=lo; v<=n; v+=stepLbl){
+                svg += `<text x='${toScreenX(v)}' y='${pad+size+14}' text-anchor='middle' font-size='9' fill='#888'>${v}</text>`;
+                if(v!==0) svg += `<text x='${zeroX-6}' y='${toScreenY(v)+3}' text-anchor='end' font-size='9' fill='#888'>${v}</text>`;
+            }
+            // linjer mellan punkter
+            if(kopplaCb.checked && points.length>1){
+                let d = points.map(p=>`${toScreenX(p.x)},${toScreenY(p.y)}`).join(' ');
+                if(stangCb.checked && points.length>2) d += ` ${toScreenX(points[0].x)},${toScreenY(points[0].y)}`;
+                svg += `<polyline points='${d}' fill='none' stroke='#007aff' stroke-width='2.5' stroke-linejoin='round'/>`;
+            }
+            // punkter
+            points.forEach((p,i)=>{
+                const sx=toScreenX(p.x), sy=toScreenY(p.y);
+                svg += `<circle cx='${sx}' cy='${sy}' r='6' fill='#ff3b30' stroke='#fff' stroke-width='2'/>`;
+                svg += `<text x='${sx+9}' y='${sy-8}' font-size='11' font-weight='800' fill='#ff3b30'>${i+1}</text>`;
+            });
+            svg += `</svg>`;
+            gridWrap.innerHTML = svg;
+
+            const svgEl = gridWrap.querySelector('svg');
+            svgEl.addEventListener('click', (e)=>{
+                const rect = svgEl.getBoundingClientRect();
+                const scale = vb/rect.width;
+                const sx = (e.clientX-rect.left)*scale, sy=(e.clientY-rect.top)*scale;
+                let gx = Math.round((sx-pad)/cell - (fyra?n:0));
+                let gy = n - Math.round((sy-pad)/cell);
+                if(gx<lo||gx>n||gy<lo||gy>n) return;
+                points.push({x:gx,y:gy});
+                render(); syncData(); saveBoardState();
+            });
+
+            listEl.innerHTML='';
+            points.forEach((p,i)=>{
+                const row=document.createElement('div'); row.className='koord-list-row';
+                row.innerHTML = `<span>${i+1}. (${p.x}, ${p.y})</span><button>✕</button>`;
+                row.querySelector('button').onclick=()=>{ points.splice(i,1); render(); syncData(); saveBoardState(); };
+                listEl.appendChild(row);
+            });
+        }
+
+        storlekSel.onchange=()=>{ points=[]; render(); syncData(); saveBoardState(); };
+        kopplaCb.onchange=()=>{ render(); syncData(); saveBoardState(); };
+        stangCb.onchange=()=>{ render(); syncData(); saveBoardState(); };
+        angraBtn.onclick=()=>{ points.pop(); render(); syncData(); saveBoardState(); };
+        rensaBtn.onclick=()=>{ points=[]; render(); syncData(); saveBoardState(); };
+
+        if(config && config.data && Array.isArray(config.data.points)){
+            storlekSel.value = (config.data.fyra ? '-' : '') + (config.data.n || 10);
+            kopplaCb.checked = config.data.koppla!==false;
+            stangCb.checked = !!config.data.stang;
+            points = config.data.points;
+        }
+        render(); syncData();
+    }
+    window.createKoordinatsystem = createKoordinatsystem;
+
+    // ---- SANNOLIKHET-SIMULATOR ----
+    // Läraren väljer tärning eller slant, kastar ett antal gånger med en snabb
+    // animation, och resultaten samlas i ett stapeldiagram (ackumuleras över flera
+    // körningar) med en streckad linje som visar det teoretiskt förväntade värdet,
+    // så klassen kan jämföra med vad de trodde skulle hända.
+    const SIM_DICE_FACES = {1:'⚀',2:'⚁',3:'⚂',4:'⚃',5:'⚄',6:'⚅'};
+    function createSannolikhet(config){
+        if(config===undefined) config=null;
+        const body = createWidget('SANNOLIKHET', 340, 'sim-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config) widget.style.height = '480px';
+        body.innerHTML = `
+            <div class='hover-menu sim-ctrl'>
+                <select class='editor-select sim-typ'>
+                    <option value='tarning'>🎲 Tärning</option>
+                    <option value='slant'>🪙 Slant</option>
+                </select>
+                <select class='editor-select sim-antal'>
+                    <option value='10'>×10</option>
+                    <option value='20' selected>×20</option>
+                    <option value='50'>×50</option>
+                    <option value='100'>×100</option>
+                </select>
+            </div>
+            <div class='sim-anim'>🎲</div>
+            <button class='btn btn-primary sim-kasta' style='width:100%;'>🎲 Kasta ×20</button>
+            <div class='sim-chart'></div>
+            <div class='sim-stats'></div>
+            <button class='btn btn-danger sim-reset' style='width:100%;margin-top:6px;'>Nollställ</button>`;
+        const typSel=body.querySelector('.sim-typ'), antalSel=body.querySelector('.sim-antal'), animEl=body.querySelector('.sim-anim');
+        const kastaBtn=body.querySelector('.sim-kasta'), chartEl=body.querySelector('.sim-chart'), statsEl=body.querySelector('.sim-stats'), resetBtn=body.querySelector('.sim-reset');
+
+        let counts={}, total=0;
+
+        function outcomes(){ return typSel.value==='tarning' ? ['1','2','3','4','5','6'] : ['Krona','Klave']; }
+        function rollOnce(){ return typSel.value==='tarning' ? String(1+Math.floor(Math.random()*6)) : (Math.random()<0.5?'Krona':'Klave'); }
+        function faceOf(r){ return typSel.value==='tarning' ? SIM_DICE_FACES[Number(r)] : (r==='Krona'?'🟡':'⚪'); }
+
+        function initCounts(){ counts={}; outcomes().forEach(o=>counts[o]=0); total=0; }
+
+        function syncData(){ widget.dataset.simData = JSON.stringify({ typ: typSel.value, antal: antalSel.value, counts, total }); }
+
+        function renderChart(){
+            const oc = outcomes();
+            const maxV = Math.max(1, ...oc.map(o=>counts[o]||0));
+            const w=280, h=170, padBottom=28, padTop=14, barGap=12;
+            const n=oc.length;
+            const barW = Math.max(24, Math.min(56, (w-barGap*(n+1))/n));
+            const forvantat = total>0 ? total/n : 0;
+            let svg = `<svg viewBox='0 0 ${w} ${h}' width='${w}' height='${h}'><line x1='0' y1='${h-padBottom}' x2='${w}' y2='${h-padBottom}' stroke='#d1d1d6' stroke-width='2'/>`;
+            if(total>0){
+                const fy = h-padBottom-(h-padBottom-padTop)*(forvantat/maxV);
+                svg += `<line x1='4' y1='${fy}' x2='${w-4}' y2='${fy}' stroke='#ff9500' stroke-width='2' stroke-dasharray='5 4'/>`;
+                svg += `<text x='${w-4}' y='${fy-4}' text-anchor='end' font-size='9' fill='#ff9500' font-weight='700'>förväntat</text>`;
+            }
+            oc.forEach((o,i)=>{
+                const c = counts[o]||0;
+                const barH = (h-padBottom-padTop) * (c/maxV);
+                const x = barGap + i*(barW+barGap);
+                const y = h-padBottom-barH;
+                svg += `<g class='sim-bar-g'><rect x='${x}' y='${y}' width='${barW}' height='${barH}' rx='6' fill='#007aff'/>`;
+                svg += `<text x='${x+barW/2}' y='${y-6}' text-anchor='middle' font-size='13' font-weight='800' fill='#1f2937'>${c}</text>`;
+                svg += `<text x='${x+barW/2}' y='${h-padBottom+16}' text-anchor='middle' font-size='12' fill='#666'>${typSel.value==='tarning'?SIM_DICE_FACES[Number(o)]:o}</text></g>`;
+            });
+            svg += `</svg>`;
+            chartEl.innerHTML = svg;
+            statsEl.textContent = total>0 ? `Totalt ${total} kast` : 'Inga kast ännu — klicka på knappen för att börja.';
+        }
+
+        function kasta(){
+            const n = parseInt(antalSel.value,10);
+            kastaBtn.disabled = true; resetBtn.disabled = true;
+            animEl.classList.add('rolling');
+            let ticks=0; const maxTicks=14;
+            const iv = setInterval(()=>{
+                animEl.textContent = faceOf(rollOnce());
+                ticks++;
+                if(ticks>=maxTicks){
+                    clearInterval(iv);
+                    animEl.classList.remove('rolling');
+                    let sistaResultat=null;
+                    for(let i=0;i<n;i++){ const r=rollOnce(); counts[r]=(counts[r]||0)+1; total++; sistaResultat=r; }
+                    animEl.textContent = faceOf(sistaResultat);
+                    renderChart(); syncData(); saveBoardState();
+                    kastaBtn.disabled=false; resetBtn.disabled=false;
+                }
+            }, 70);
+        }
+
+        typSel.onchange=()=>{
+            kastaBtn.textContent = (typSel.value==='tarning'?'🎲 Kasta ':'🪙 Singla ')+'×'+antalSel.value;
+            animEl.textContent = typSel.value==='tarning' ? '🎲' : '🪙';
+            initCounts(); renderChart(); syncData(); saveBoardState();
+        };
+        antalSel.onchange=()=>{ kastaBtn.textContent=(typSel.value==='tarning'?'🎲 Kasta ':'🪙 Singla ')+'×'+antalSel.value; saveBoardState(); };
+        kastaBtn.onclick=()=> kasta();
+        resetBtn.onclick=()=>{ initCounts(); renderChart(); syncData(); saveBoardState(); };
+
+        if(config && config.data && config.data.counts){
+            typSel.value = config.data.typ || 'tarning';
+            antalSel.value = config.data.antal || '20';
+            counts = config.data.counts; total = config.data.total || 0;
+        } else { initCounts(); }
+        kastaBtn.textContent = (typSel.value==='tarning'?'🎲 Kasta ':'🪙 Singla ')+'×'+antalSel.value;
+        animEl.textContent = typSel.value==='tarning' ? '🎲' : '🪙';
+        renderChart(); syncData();
+    }
+    window.createSannolikhet = createSannolikhet;
+
     // ---- KAMERA (DOKUMENTKAMERA / WEBBKAMERA) ----
     function createCamera(config){
         if(config===undefined)config=null;
@@ -10503,28 +11274,79 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const body = createWidget('ÖVNINGSKLOCKA', 420, 'practice-clock-widget', config);
         const widgetEl = body.parentElement.parentElement;
         if(!config){ widgetEl.style.width='420px'; widgetEl.style.height='560px'; }
-        body.innerHTML = `<div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital'>03:00</div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
-        const inner=body.querySelector('.pclock-inner'), cf=body.querySelector('.pclock-face'), hh=body.querySelector('.pclock-hh'), mh=body.querySelector('.pclock-mh'), dig=body.querySelector('.pclock-digital');
+        body.innerHTML = `<div class='pclock-toolbar'><button type='button' class='pclock-btn pclock-random-btn' title='Slumpa en ny tid som klassen ska läsa av'>🎲 Slumpa tid</button><button type='button' class='pclock-btn pclock-facit-btn' title='Visa rätt klockslag' style='display:none;'>👁️ Visa facit</button></div><div class='pclock-legend'><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-hour'></span>Timme</span><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-min'></span>Minut</span></div><div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital-wrap'><div class='pclock-digital pclock-digital-am'>08:00</div><div class='pclock-digital pclock-digital-pm'>20:00</div></div><div class='pclock-analog'></div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
+        const inner=body.querySelector('.pclock-inner'), cf=body.querySelector('.pclock-face'), hh=body.querySelector('.pclock-hh'), mh=body.querySelector('.pclock-mh'), digAM=body.querySelector('.pclock-digital-am'), digPM=body.querySelector('.pclock-digital-pm'), ana=body.querySelector('.pclock-analog');
+        const randomBtn=body.querySelector('.pclock-random-btn'), facitBtn=body.querySelector('.pclock-facit-btn');
         for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
         // Siffror runt urtavlan: 12-timmarssiffror (röda, stora), 24-timmarssiffror (röda, små, innanför) och minutsiffror (blå, ytterst)
-        const rHour=47, r24=30, rMin=63;
+        const rHour=50, r24=26, rMin=68;
         for(let i=1;i<=12;i++){
             const angle = i*30;
             const place = (el, radius)=>{ el.style.transform = `translate(-50%,-50%) rotate(${angle}deg) translate(0, -${radius}px) rotate(${-angle}deg)`; };
             const hourEl = document.createElement('div'); hourEl.className='clock-num clock-num-hour'; hourEl.textContent = i; place(hourEl, rHour); cf.appendChild(hourEl);
-            const h24El = document.createElement('div'); h24El.className='clock-num clock-num-24'; h24El.textContent = i+12; place(h24El, r24); cf.appendChild(h24El);
-            const minEl = document.createElement('div'); minEl.className='clock-num clock-num-min'; minEl.textContent = i*5; place(minEl, rMin); cf.appendChild(minEl);
+            const h24El = document.createElement('div'); h24El.className='clock-num clock-num-24'; h24El.textContent = (i===12) ? '0' : i+12; place(h24El, r24); cf.appendChild(h24El);
+            const isQuarter = (i===3 || i===6 || i===9 || i===12);            // kvart över / halv / kvart i / heltimme
+            const minEl = document.createElement('div'); minEl.className='clock-num clock-num-min'+(isQuarter?' clock-num-min-quarter':''); minEl.textContent = i*5; place(minEl, rMin); cf.appendChild(minEl);
         }
+        const HOUR_WORDS = ['tolv','ett','två','tre','fyra','fem','sex','sju','åtta','nio','tio','elva'];
+        const analogText = (h,m)=>{
+            const h12 = h%12, next = (h12+1)%12, cur = HOUR_WORDS[h12], nxt = HOUR_WORDS[next];
+            switch(m){
+                case 0: return 'Klockan är '+cur;
+                case 5: return 'Fem över '+cur;
+                case 10: return 'Tio över '+cur;
+                case 15: return 'Kvart över '+cur;
+                case 20: return 'Tio i halv '+nxt;
+                case 25: return 'Fem i halv '+nxt;
+                case 30: return 'Halv '+nxt;
+                case 35: return 'Fem över halv '+nxt;
+                case 40: return 'Tio över halv '+nxt;
+                case 45: return 'Kvart i '+nxt;
+                case 50: return 'Tio i '+nxt;
+                case 55: return 'Fem i '+nxt;
+                default: return cur+' och '+m+' minuter';
+            }
+        };
         let hourVal = 3, minuteVal = 0;
         if(config && config.data){ if(typeof config.data.h==='number') hourVal=config.data.h; if(typeof config.data.m==='number') minuteVal=config.data.m; }
+        let quizHidden = !!(config && config.data && config.data.hidden);
         const render = ()=>{
             mh.style.transform = `rotate(${minuteVal*6}deg)`;
             hh.style.transform = `rotate(${((hourVal%12)+minuteVal/60)*30}deg)`;
-            dig.textContent = String(hourVal%24).padStart(2,'0')+':'+String(minuteVal).padStart(2,'0');   // 24-timmarsformat
+            const mm = String(minuteVal).padStart(2,'0');
+            const h12 = hourVal%12===0 ? 12 : hourVal%12;         // 12-timmarssiffra som visas på urtavlan
+            const amH = h12===12 ? 0 : h12;                       // morgon/natt (fm) i 24-timmarsformat
+            const pmH = h12===12 ? 12 : h12+12;                   // kväll/eftermiddag (em) i 24-timmarsformat
+            const amStr = String(amH).padStart(2,'0')+':'+mm;
+            const pmStr = String(pmH).padStart(2,'0')+':'+mm;
+            digAM.textContent = quizHidden ? '❓:❓' : ('☀️ '+amStr);
+            digPM.textContent = quizHidden ? '❓:❓' : ('🌙 '+pmStr);
+            digAM.classList.toggle('pclock-hidden', quizHidden);
+            digPM.classList.toggle('pclock-hidden', quizHidden);
+            ana.textContent = quizHidden ? '' : analogText(hourVal, minuteVal);
+            facitBtn.style.display = quizHidden ? '' : 'none';
+            widgetEl.dataset.pclockH = hourVal;
+            widgetEl.dataset.pclockM = minuteVal;
+            widgetEl.dataset.pclockHidden = quizHidden ? 'true' : 'false';
         };
         render();
-        dig.style.cursor='pointer'; dig.title='Klicka för fm/em (+12 tim)';
-        dig.addEventListener('click',(e)=>{ e.stopPropagation(); hourVal=(hourVal+12)%24; render(); saveBoardState(); });
+        randomBtn.addEventListener('click',(e)=>{
+            e.stopPropagation();
+            hourVal = Math.floor(Math.random()*24);
+            minuteVal = Math.floor(Math.random()*12)*5; // 00,05,10 ... 55 – lättläst för övning
+            quizHidden = true;
+            render();
+            saveBoardState();
+        });
+        facitBtn.addEventListener('click',(e)=>{
+            e.stopPropagation();
+            quizHidden = false;
+            render();
+            digAM.classList.add('pclock-reveal');
+            digPM.classList.add('pclock-reveal');
+            setTimeout(()=>{ digAM.classList.remove('pclock-reveal'); digPM.classList.remove('pclock-reveal'); }, 400);
+            saveBoardState();
+        });
         let prevMin = minuteVal;
         const angleAt = (e)=>{ const r=cf.getBoundingClientRect(); const a=Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))*180/Math.PI + 90; return (a<0)?a+360:a; };
         const startDrag = (hand)=> (e)=>{
@@ -10552,9 +11374,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         mh.addEventListener('pointerdown', startDrag('minute'));
         cf.addEventListener('pointerdown', (e)=>{ if(e.target===hh||e.target===mh) return; startDrag('minute')(e); });
         // Skala hela klockan efter widgetens storlek (PNG-stil, behåller form)
-        const baseW=176, baseH=224;
-        const fitScale=()=>{ const aw=body.clientWidth, ah=body.clientHeight; if(!aw||!ah)return; const s=Math.max(0.3, Math.min(aw/baseW, ah/baseH)); inner.style.transform='scale('+s+')'; };
-        if(window.ResizeObserver){ const ro=new ResizeObserver(fitScale); ro.observe(body); }
+        const fitEl = body.querySelector('.pclock-fit');
+        const baseW=206, baseH=296;
+        const fitScale=()=>{ const aw=fitEl.clientWidth, ah=fitEl.clientHeight; if(!aw||!ah)return; const s=Math.max(0.3, Math.min(aw/baseW, ah/baseH)); inner.style.transform='scale('+s+')'; };
+        if(window.ResizeObserver){ const ro=new ResizeObserver(fitScale); ro.observe(fitEl); }
         setTimeout(fitScale, 60);
     }
 
@@ -10706,6 +11529,147 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             btns.appendChild(editBtn); btns.appendChild(resetBtn);
             if(state.quizMode && !state.revealed){
                 const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='✅ Visa rätt svar';
+                revealBtn.onclick=()=>{ state.revealed=true; renderPlay(); persist(); };
+                btns.appendChild(revealBtn);
+            }
+            root.appendChild(btns);
+        }
+
+        function render(){ stamp(); if(state.mode==='play') renderPlay(); else renderEdit(); }
+        render();
+    }
+
+    // ---- RIMLIGHET (vardagsproblem med givet svar, klassen röstar rimligt/ej rimligt, sen facit+motivering) ----
+    const RIMLIGHET_BANK = [
+        { text:'Pappa är 35 år och hans dotter är 8 år. Om 10 år är pappa 45 år.', correct:true, motivering:'Om 10 år ökar allas ålder med 10 år: 35 + 10 = 45. Det stämmer.' },
+        { text:'En buss kan ta 45 passagerare. Just nu sitter det 300 personer på bussen.', correct:false, motivering:'Det får bara plats 45 personer på bussen – 300 personer är alldeles för många.' },
+        { text:'Ett äpple väger ungefär 150 gram. En vattenmelon väger också ungefär 150 gram.', correct:false, motivering:'En vattenmelon är mycket större och tyngre än ett äpple – den väger oftast flera kilo.' },
+        { text:'Linnea cyklar till skolan. Det tar henne 12 minuter att cykla 3 km.', correct:true, motivering:'Det ger en fart på ungefär 15 km/h, vilket är en rimlig cykelfart.' },
+        { text:'En kopp kaffe kostar 35 kr. Filip köper 3 koppar och betalar totalt 105 kr.', correct:true, motivering:'3 × 35 kr = 105 kr, så uträkningen stämmer.' },
+        { text:'Ett vanligt klassrum är ungefär 60 meter långt.', correct:false, motivering:'60 meter är orimligt stort för ett klassrum – det är mer som ett helt kvarter. Ett klassrum är oftast 8–10 meter långt.' },
+        { text:'En elefant väger ungefär 5000 kg.', correct:true, motivering:'En vuxen elefant väger normalt mellan 4000 och 6000 kg, så det stämmer bra.' },
+        { text:'Simon springer 100 meter på 3 sekunder.', correct:false, motivering:'Det skulle innebära en fart på över 100 km/h – ingen människa springer så fort. Världsrekordet ligger på ungefär 10 sekunder.' },
+        { text:'Ett paket mjölk rymmer 1 liter. Familjen köper 5 paket och har totalt 5 liter mjölk hemma.', correct:true, motivering:'5 × 1 liter = 5 liter, så det stämmer.' },
+        { text:'Ett vanligt bostadshus har normalt 40 våningar.', correct:false, motivering:'De flesta bostadshus har 2–5 våningar. 40 våningar är en skyskrapa.' },
+        { text:'Alva är 9 år. Hennes storasyster är 4 år äldre, alltså 13 år.', correct:true, motivering:'9 + 4 = 13, så uträkningen stämmer.' },
+        { text:'En vuxen människa är ungefär 500 cm lång.', correct:false, motivering:'500 cm är 5 meter – det är orimligt långt. En vuxen människa är oftast 150–200 cm.' },
+        { text:'Ett tåg kör i 800 km/h på en vanlig järnväg i Sverige.', correct:false, motivering:'Vanliga tåg i Sverige kör ungefär 100–200 km/h. 800 km/h är snabbare än ett flygplan.' },
+        { text:'Klassen har 24 elever. Om de delas in i grupper om 4 blir det 6 grupper.', correct:true, motivering:'24 ÷ 4 = 6, så det stämmer.' },
+        { text:'En vanlig vattenflaska rymmer ungefär 5 liter.', correct:false, motivering:'En vanlig vattenflaska rymmer oftast 0,5–1,5 liter. 5 liter är alldeles för mycket.' },
+        { text:'Ett äpple kostar ungefär 5 kr. Maja köper 6 äpplen och betalar 30 kr.', correct:true, motivering:'6 × 5 kr = 30 kr, så det stämmer.' },
+        { text:'Ett badkar rymmer ungefär 150 liter vatten.', correct:true, motivering:'Ett vanligt badkar rymmer mellan 100 och 200 liter, så det är rimligt.' },
+        { text:'En giraff är ungefär 1 meter hög.', correct:false, motivering:'En vuxen giraff är 4,5–6 meter hög – 1 meter är alldeles för lågt.' }
+    ];
+
+    function createRimlighet(config){
+        const body = createWidget('RIMLIGHET', 340, 'rml-widget', config);
+        const widgetElRef = body.parentElement.parentElement;
+        if(!config){ widgetElRef.style.height = '500px'; }
+        const root=document.createElement('div'); root.className='poll-root rml-root'; body.appendChild(root);
+
+        let state = { text:'', correct:true, motivering:'', votesYes:0, votesNo:0, mode:'edit', revealed:false };
+        if(config && config.data){ try{ Object.assign(state, config.data); }catch(e){} }
+        let facitOpen = false; // dold som standard varje gång redigeringsläget öppnas – förhindrar att facit "läcker" på den delade tavlan
+
+        let saveTimer=null;
+        const stamp=()=>{ widgetElRef.dataset.rimlighet = JSON.stringify(state); };
+        const persist=()=>{ stamp(); saveBoardState(); };
+        const persistSoon=()=>{ stamp(); clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveBoardState(),700); };
+
+        function renderEdit(){
+            root.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Skriv ett kort vardagsproblem med ett givet svar – klassen ska bedöma om svaret är rimligt.'; root.appendChild(hint);
+
+            const ta=document.createElement('textarea'); ta.className='rml-textarea'; ta.rows=4; ta.placeholder='Ex: En buss kan ta 45 passagerare. Just nu sitter det 300 personer på bussen.'; ta.value=state.text;
+            ta.oninput=()=>{ state.text=ta.value; persistSoon(); };
+            root.appendChild(ta);
+
+            const slumpBtn=document.createElement('button'); slumpBtn.className='kw-btn kw-btn-ghost rml-slump-btn'; slumpBtn.type='button'; slumpBtn.textContent='🎲 Slumpa exempel';
+            slumpBtn.onclick=()=>{
+                const ex = RIMLIGHET_BANK[Math.floor(Math.random()*RIMLIGHET_BANK.length)];
+                state.text=ex.text; state.correct=ex.correct; state.motivering=ex.motivering;
+                renderEdit(); persist();
+            };
+            root.appendChild(slumpBtn);
+
+            // Facit döljs bakom en flik tills läraren aktivt klickar fram den – annars syns svaret
+            // direkt på den delade tavlan innan omröstningen ens har startat.
+            const toggleBtn=document.createElement('button'); toggleBtn.type='button'; toggleBtn.className='kw-btn kw-btn-ghost rml-facit-toggle';
+            toggleBtn.textContent = facitOpen ? '🙈 Dölj facit-inställningar' : '🔒 Visa facit-inställningar (dolt för klassen)';
+            toggleBtn.onclick=()=>{ facitOpen=!facitOpen; renderEdit(); };
+            root.appendChild(toggleBtn);
+
+            if(facitOpen){
+                const facitBox=document.createElement('div'); facitBox.className='rml-facit-box';
+                const choiceRow=document.createElement('div'); choiceRow.className='rml-choice-row';
+                const mkChoice=(val,label,cls)=>{
+                    const b=document.createElement('button'); b.type='button'; b.className='rml-choice-btn '+cls+(state.correct===val?' active':''); b.textContent=label;
+                    b.onclick=()=>{ state.correct=val; renderEdit(); persist(); };
+                    return b;
+                };
+                choiceRow.appendChild(mkChoice(true,'Rimligt','rml-choice-yes'));
+                choiceRow.appendChild(mkChoice(false,'Ej rimligt','rml-choice-no'));
+                facitBox.appendChild(choiceRow);
+
+                const motLabel=document.createElement('div'); motLabel.className='kw-edit-hint'; motLabel.style.marginTop='8px'; motLabel.textContent='Kort motivering (visas när facit avslöjas):'; facitBox.appendChild(motLabel);
+                const motTa=document.createElement('textarea'); motTa.className='rml-textarea rml-textarea-small'; motTa.rows=2; motTa.placeholder='Ex: Det får bara plats 45 personer på bussen...'; motTa.value=state.motivering;
+                motTa.oninput=()=>{ state.motivering=motTa.value; persistSoon(); };
+                facitBox.appendChild(motTa);
+                root.appendChild(facitBox);
+            }
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const startBtn=document.createElement('button'); startBtn.className='kw-btn kw-btn-primary'; startBtn.textContent='🚀 Starta';
+            startBtn.onclick=()=>{
+                if(!state.text.trim()){ customAlert('Skriv ett vardagsproblem först (eller slumpa fram ett exempel).', '✏️'); return; }
+                state.votesYes=0; state.votesNo=0; state.revealed=false; state.mode='play';
+                facitOpen=false;
+                render(); persist();
+            };
+            btns.appendChild(startBtn); root.appendChild(btns);
+        }
+
+        function renderPlay(){
+            root.innerHTML='';
+            const qEl=document.createElement('div'); qEl.className='kw-title rml-problem'; qEl.textContent=state.text; root.appendChild(qEl);
+
+            const total = (state.votesYes||0)+(state.votesNo||0);
+            const mkVoteBtn=(isYes)=>{
+                const votes = isYes ? (state.votesYes||0) : (state.votesNo||0);
+                const pct = total>0 ? Math.round(votes/total*100) : 0;
+                const btn=document.createElement('button'); btn.type='button'; btn.className='poll-opt-btn rml-vote-btn';
+                if(state.revealed){
+                    const isCorrectChoice = isYes === state.correct;
+                    if(isCorrectChoice) btn.classList.add('poll-opt-correct');
+                }
+                const fill=document.createElement('div'); fill.className='poll-opt-fill'; fill.style.width=pct+'%'; btn.appendChild(fill);
+                const content=document.createElement('div'); content.className='poll-opt-content';
+                const label=document.createElement('span'); label.textContent = (isYes ? '👍 Rimligt' : '👎 Ej rimligt') + (state.revealed && isYes===state.correct ? ' ✅' : '');
+                const stat=document.createElement('span'); stat.className='poll-opt-pct'; stat.textContent = votes + ' (' + pct + '%)';
+                content.appendChild(label); content.appendChild(stat);
+                btn.appendChild(content);
+                btn.onclick=()=>{ if(isYes) state.votesYes=(state.votesYes||0)+1; else state.votesNo=(state.votesNo||0)+1; renderPlay(); persist(); };
+                return btn;
+            };
+            root.appendChild(mkVoteBtn(true));
+            root.appendChild(mkVoteBtn(false));
+
+            const totalEl=document.createElement('div'); totalEl.className='exit-total'; totalEl.textContent = total===0 ? 'Inga röster än' : total + ' röster totalt'; root.appendChild(totalEl);
+
+            if(state.revealed){
+                const facit=document.createElement('div'); facit.className='rml-facit '+(state.correct?'rml-facit-yes':'rml-facit-no');
+                const icon=document.createElement('div'); icon.className='rml-facit-icon'; icon.textContent = state.correct ? '✅' : '❌'; facit.appendChild(icon);
+                const label=document.createElement('div'); label.className='rml-facit-label'; label.textContent = state.correct ? 'Rimligt!' : 'Ej rimligt!'; facit.appendChild(label);
+                if(state.motivering && state.motivering.trim()){ const mot=document.createElement('div'); mot.className='rml-facit-mot'; mot.textContent=state.motivering; facit.appendChild(mot); }
+                root.appendChild(facit);
+            }
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const editBtn=document.createElement('button'); editBtn.className='kw-btn kw-btn-ghost'; editBtn.textContent='✏️ Redigera'; editBtn.onclick=()=>{ state.mode='edit'; render(); persist(); };
+            const resetBtn=document.createElement('button'); resetBtn.className='kw-btn kw-btn-warn'; resetBtn.textContent='🔄 Nollställ röster'; resetBtn.onclick=()=>{ state.votesYes=0; state.votesNo=0; state.revealed=false; renderPlay(); persist(); };
+            btns.appendChild(editBtn); btns.appendChild(resetBtn);
+            if(!state.revealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa facit';
                 revealBtn.onclick=()=>{ state.revealed=true; renderPlay(); persist(); };
                 btns.appendChild(revealBtn);
             }
@@ -11270,12 +12234,90 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
 
     function createFractionVisualizer(config){
-        const body=createWidget('TALFORMER',340,'',config); body.innerHTML=`<div style='display:flex;gap:10px;justify-content:center;margin-bottom:15px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' class='d-i' style='width:50px;text-align:center;'></div><div class='fraction-circle' style='position:relative;'></div><div class='frac-values' style='display:flex;justify-content:center;gap:8px;margin-top:12px;'><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Procent</div><div class='frac-pct' style='font-size:15px;font-weight:800;color:#007aff;'>25 %</div></div><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Decimal</div><div class='frac-dec' style='font-size:15px;font-weight:800;color:#007aff;'>0,25</div></div></div><div class='hover-menu tf-ovn-ctrl' style='display:flex;gap:6px;margin-top:14px;'><select class='editor-select tf-niva' style='flex:1;'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><button class='btn btn-primary tf-uppgift' style='flex:1;'>Övningsuppgift ▶</button></div><div class='tf-uppg' style='display:none;'></div>`;
+        const body=createWidget('TALFORMER',340,'',config);
+        body.innerHTML=`<div style='display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:10px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' max='20' class='d-i' style='width:50px;text-align:center;'></div>
+            <div class='hover-menu tf-viewctrl' style='display:flex;gap:6px;justify-content:center;margin-bottom:10px;'>
+                <button class='btn btn-secondary tf-view-pizza'>🍕 Pizza</button>
+                <button class='btn btn-secondary tf-view-bar'>📊 Stapel</button>
+            </div>
+            <div class='fraction-circle' style='display:flex;justify-content:center;'></div>
+            <div class='tf-hint' style='text-align:center;font-size:11px;color:#999;margin-top:4px;'>Klicka på bitarna för att fylla i en bråkdel</div>
+            <div class='frac-values' style='display:flex;justify-content:center;gap:8px;margin-top:12px;'><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Procent</div><div class='frac-pct' style='font-size:15px;font-weight:800;color:#007aff;'>25 %</div></div><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Decimal</div><div class='frac-dec' style='font-size:15px;font-weight:800;color:#007aff;'>0,25</div></div></div><div class='hover-menu tf-ovn-ctrl' style='display:flex;gap:6px;margin-top:14px;'><select class='editor-select tf-niva' style='flex:1;'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><button class='btn btn-primary tf-uppgift' style='flex:1;'>Övningsuppgift ▶</button></div><div class='tf-uppg' style='display:none;'></div>`;
         const ni=body.querySelector('.n-i'), di=body.querySelector('.d-i'), circ=body.querySelector('.fraction-circle'), pctEl=body.querySelector('.frac-pct'), decEl=body.querySelector('.frac-dec'), nivaSel=body.querySelector('.tf-niva'), uppgEl=body.querySelector('.tf-uppg');
+        const btnPizza=body.querySelector('.tf-view-pizza'), btnBar=body.querySelector('.tf-view-bar');
         if(config && config.data && config.data.niva) nivaSel.value=config.data.niva;
         const fmtDec=(x)=>{ let s=parseFloat(x.toFixed(4)).toString(); return s.replace('.',','); };
         const fmtPct=(x)=>{ let s=parseFloat(x.toFixed(2)).toString(); return s.replace('.',','); };
-        const upd=()=>{ let n=parseInt(ni.value)||0, d=parseInt(di.value)||1; n=Math.max(0,Math.min(n,d)); circ.style.background=`conic-gradient(#007aff ${(n/d)*360}deg, #f2f2f7 ${(n/d)*360}deg)`; circ.innerHTML=''; if(d>1&&d<=20){ for(let i=0;i<d;i++){ let l=document.createElement('div'); l.style=`position:absolute;top:0;left:50%;width:1px;height:50%;background:#333;transform-origin:bottom center;transform:rotate(${i*360/d}deg);`; circ.appendChild(l); } } const andel=d>0?n/d:0; if(pctEl) pctEl.textContent=fmtPct(andel*100)+' %'; if(decEl) decEl.textContent=fmtDec(andel); saveBoardState(); }; ni.onchange=upd; ni.oninput=upd; di.onchange=upd; di.oninput=upd; upd();
+
+        let view = 'pizza';
+        let filled = []; // boolean per bit, längd = nämnare
+
+        function setActiveBtn(){
+            btnPizza.classList.toggle('active', view==='pizza');
+            btnBar.classList.toggle('active', view==='bar');
+        }
+        function polarToCartesian(cx,cy,r,angleDeg){ const rad=(angleDeg-90)*Math.PI/180; return { x:cx+r*Math.cos(rad), y:cy+r*Math.sin(rad) }; }
+        function wedgePath(cx,cy,r,a0,a1){
+            const p0=polarToCartesian(cx,cy,r,a1), p1=polarToCartesian(cx,cy,r,a0);
+            const large = (a1-a0)<=180 ? '0':'1';
+            return `M${cx},${cy} L${p0.x},${p0.y} A${r},${r} 0 ${large} 0 ${p1.x},${p1.y} Z`;
+        }
+        function attachClicks(){
+            circ.querySelectorAll('.tf-bit').forEach(el=>{
+                el.addEventListener('click', ()=>{
+                    const i=+el.dataset.i;
+                    filled[i] = !filled[i];
+                    ni.value = filled.filter(Boolean).length;
+                    renderShape(); updValues(); saveBoardState();
+                });
+            });
+        }
+        function renderShape(){
+            const d = filled.length;
+            if(view==='pizza'){
+                let svg = `<svg viewBox='0 0 120 120' width='150' height='150'>`;
+                for(let i=0;i<d;i++){
+                    const a0=i*360/d, a1=(i+1)*360/d;
+                    svg += `<path d='${wedgePath(60,60,55,a0,a1)}' fill='${filled[i]?'#007aff':'#f2f2f7'}' stroke='#fff' stroke-width='2' class='tf-bit' data-i='${i}'/>`;
+                }
+                svg += `</svg>`;
+                circ.innerHTML = svg;
+            } else {
+                const w=54, h=280, gap=3;
+                const segH = (h-gap*(d-1))/d;
+                let svg = `<svg viewBox='0 0 ${w} ${h}' width='${w}' height='${h}'>`;
+                for(let i=0;i<d;i++){
+                    const y = h - (i+1)*segH - i*gap; // index 0 längst ner, fylls uppåt
+                    svg += `<rect x='0' y='${y}' width='${w}' height='${segH}' rx='5' fill='${filled[i]?'#007aff':'#f2f2f7'}' class='tf-bit' data-i='${i}'/>`;
+                }
+                svg += `</svg>`;
+                circ.innerHTML = svg;
+            }
+            attachClicks();
+        }
+        function updValues(){
+            let n=parseInt(ni.value)||0, d=parseInt(di.value)||1;
+            n=Math.max(0,Math.min(n,d));
+            const andel = d>0 ? n/d : 0;
+            pctEl.textContent = fmtPct(andel*100)+' %';
+            decEl.textContent = fmtDec(andel);
+        }
+        function rebuildFromInputs(){
+            let n=parseInt(ni.value)||0, d=Math.max(1,Math.min(20,parseInt(di.value)||1));
+            n=Math.max(0,Math.min(n,d));
+            di.value=d; ni.value=n;
+            filled = Array.from({length:d}, (_,i)=> i<n);
+            renderShape(); updValues();
+        }
+        ni.onchange = ()=>{ rebuildFromInputs(); saveBoardState(); };
+        ni.oninput = ()=>{ rebuildFromInputs(); saveBoardState(); };
+        di.onchange = ()=>{ rebuildFromInputs(); saveBoardState(); };
+        di.oninput = ()=>{ rebuildFromInputs(); saveBoardState(); };
+        btnPizza.onclick = ()=>{ view='pizza'; setActiveBtn(); renderShape(); saveBoardState(); };
+        btnBar.onclick = ()=>{ view='bar'; setActiveBtn(); renderShape(); saveBoardState(); };
+
+        setActiveBtn();
+        rebuildFromInputs();
 
         // --- ÖVNINGSUPPGIFTER: omvandling mellan bråk, procent och decimal ---
         const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
