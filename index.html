@@ -144,6 +144,7 @@
             <button class="tool-btn" onclick="createSantFalskt()"><div class="icon">🧠</div><div class="label">Sant eller falskt</div></button>
             <button class="tool-btn" onclick="createRymden()"><div class="icon">🌎</div><div class="label">Rymden</div></button>
             <button class="tool-btn" onclick="createVadret()"><div class="icon">🌦️</div><div class="label">Vädret</div></button>
+            <button class="tool-btn" onclick="createKemi()"><div class="icon">🧪</div><div class="label">Kemivärlden</div></button>
             <button class="tool-btn" onclick="createReadingSpeed()"><div class="icon">📖</div><div class="label">Läshastighet</div></button>
             <button class="tool-btn" onclick="createTextGenres()"><div class="icon">📚</div><div class="label">Textgenrer</div></button>
             <button class="tool-btn" onclick="createLasforstaelse()"><div class="icon">🧐</div><div class="label">Läsförståelse</div></button>
@@ -657,6 +658,63 @@
     .vd-tabs .btn{ font-size:11.5px; padding:7px 5px; }
     .vd-live-card{ text-align:center; background:linear-gradient(135deg,#eef4ff,#f4f0fb); border-radius:16px; padding:20px 14px; margin-bottom:12px; }
     .vd-live-plats{ font-size:12px; font-weight:800; color:#5856d6; text-transform:uppercase; letter-spacing:.4px; margin-bottom:8px; }
+    .vd-karta{ margin-bottom:14px; }
+    .vd-karta-titel{ font-size:12.5px; font-weight:900; color:#3a7d3a; text-align:center; margin-bottom:8px; text-transform:uppercase; letter-spacing:.4px; }
+    .vd-karta-inner{ position:relative; width:100%; aspect-ratio:4/3; background:linear-gradient(160deg,#d4ecd5,#a9d8ab); border-radius:22px; border:2px solid #7cb342; overflow:hidden; box-shadow:inset 0 2px 10px rgba(0,0,0,0.1); }
+    .vd-karta-pin{ position:absolute; transform:translate(-50%,-50%); text-align:center; z-index:1; }
+    .vd-karta-pin.vd-karta-huvudstad{ z-index:2; }
+    .vd-karta-emoji{ font-size:19px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.35)); }
+    .vd-karta-pin.vd-karta-huvudstad .vd-karta-emoji{ font-size:28px; }
+    .vd-karta-temp{ font-size:10px; font-weight:900; color:#1d1d1f; background:rgba(255,255,255,0.9); border-radius:6px; padding:0 4px; margin-top:1px; display:inline-block; }
+    .vd-karta-namn{ font-size:8px; font-weight:800; color:#1d3d1d; margin-top:2px; white-space:nowrap; text-shadow:0 1px 2px rgba(255,255,255,0.8); }
+    .vd-karta-pin.vd-karta-huvudstad .vd-karta-namn{ font-size:10px; color:#5856d6; }
+    /* KEMIVÄRLDEN */
+    .km-widget{ min-width:360px; }
+    .km-widget .widget-body{ overflow-y:auto; overflow-x:hidden; min-height:0; }
+    .km-widget .widget-inner{ min-height:0; }
+    .km-tabs .btn{ font-size:11.5px; padding:7px 5px; }
+    .km-fraga-card{ text-align:center; background:linear-gradient(135deg,#fff3e0,#ffe0d6); border-radius:16px; padding:22px 16px; margin-bottom:14px; font-size:17px; font-weight:800; color:#1d1d1f; line-height:1.4; }
+    .km-svar{ border-radius:14px; padding:14px 16px; background:#d2f8dc; border:1.5px solid #34c759; text-align:center; animation:pclockPop .35s ease; margin-bottom:12px; font-size:14px; color:#1d1d1f; line-height:1.5; }
+    .km-svar-label{ font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.4px; color:#1a7a34; margin-bottom:6px; }
+    .km-agg-zoner{ display:flex; gap:8px; margin-bottom:14px; }
+    .km-agg-zon{ flex:1; min-height:110px; border-radius:14px; padding:10px 6px; border:2px dashed #d1d1d6; background:#f7f7fa; }
+    .km-agg-zon.over{ border-color:#5856d6; background:#eeeefb; }
+    .km-agg-zon-titel{ text-align:center; font-size:11px; font-weight:900; color:#5856d6; margin-bottom:8px; }
+    .km-agg-zon-titel .em{ font-size:20px; display:block; }
+    .km-agg-items{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; min-height:30px; }
+    .km-chip{ background:#fff; border:1.5px solid #d1d1d6; border-radius:10px; padding:5px 9px; font-size:11.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+    .km-chip:hover{ border-color:#5856d6; }
+    .km-chip.vald{ border-color:#5856d6; background:#eeeefb; box-shadow:0 0 0 2px rgba(88,86,214,.25); }
+    .km-chip.ratt{ border-color:#34c759; background:#d2f8dc; }
+    .km-chip.fel{ border-color:#ff3b30; background:#ffe1df; }
+    .km-agg-pool{ background:#f7f7fa; border-radius:14px; padding:10px; margin-bottom:10px; min-height:44px; }
+    .km-agg-pool-titel{ font-size:11px; font-weight:800; color:#8a8a90; text-align:center; margin-bottom:6px; }
+    .km-agg-status{ text-align:center; font-size:12.5px; font-weight:700; color:#8a8a90; margin-bottom:8px; min-height:16px; }
+    .km-vh-card{ text-align:center; background:#f7f7fa; border-radius:16px; padding:18px 14px; margin-bottom:14px; }
+    .km-vh-emoji{ font-size:48px; line-height:1.1; }
+    .km-vh-namn{ font-size:17px; font-weight:900; color:#1d1d1f; margin-top:4px; }
+    .km-vh-knappar{ display:flex; gap:10px; margin-bottom:12px; }
+    .km-vh-btn{ flex:1; border:1.5px solid #d1d1d6; border-radius:12px; padding:12px 8px; font-weight:800; font-size:14px; cursor:pointer; background:#fff; font-family:inherit; }
+    .km-vh-btn.varma{ color:#c1440e; } .km-vh-btn.varma:hover{ border-color:#c1440e; background:#fff3ee; }
+    .km-vh-btn.kyla{ color:#0a5cd8; } .km-vh-btn.kyla:hover{ border-color:#0a5cd8; background:#eef4ff; }
+    .km-vh-btn:disabled{ opacity:.5; cursor:default; }
+    .km-widget .kw-edit-hint{ font-size:13.5px; color:#48484a; font-weight:700; }
+    .km-vh-btn.vald{ box-shadow:0 0 0 2.5px currentColor; }
+    .km-vh-btn.vald.varma{ background:#fff3ee; }
+    .km-vh-btn.vald.kyla{ background:#eef4ff; }
+    .km-vh-resultat{ border-radius:14px; padding:14px 16px; text-align:center; font-size:14px; line-height:1.5; margin-bottom:12px; animation:pclockPop .35s ease; }
+    .km-vh-resultat.varma{ background:#ffe9e0; border:1.5px solid #c1440e; color:#8a3007; }
+    .km-vh-resultat.kyla{ background:#e0eeff; border:1.5px solid #0a5cd8; color:#0a3d8a; }
+    .km-bl-card{ background:#f7f7fa; border-radius:14px; padding:14px 16px; margin-bottom:10px; }
+    .km-bl-titel{ font-size:16px; font-weight:900; color:#1d1d1f; margin-bottom:6px; }
+    .km-bl-fork{ font-size:13px; color:#333; line-height:1.5; margin-bottom:10px; }
+    .km-bl-exempel-lbl{ font-size:10.5px; font-weight:900; text-transform:uppercase; letter-spacing:.4px; color:#8a8a90; margin-bottom:5px; }
+    .km-bl-exempel{ display:flex; flex-wrap:wrap; gap:5px; }
+    .km-bl-chip{ background:#fff; border:1px solid #d1d1d6; border-radius:8px; padding:3px 9px; font-size:11.5px; font-weight:700; color:#1d1d1f; }
+    .km-mat-rad{ margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #f0f0f3; }
+    .km-mat-rad:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0; }
+    .km-mat-material{ font-weight:900; font-size:14px; color:#5856d6; margin-bottom:4px; }
+    .km-mat-fork{ font-size:13px; color:#333; line-height:1.5; }
     .vd-live-emoji{ font-size:56px; line-height:1.1; }
     .vd-live-text{ font-size:16px; font-weight:800; color:#1d1d1f; margin:4px 0 10px; }
     .vd-live-temp{ font-size:38px; font-weight:900; color:#1d1d1f; }
@@ -3016,6 +3074,7 @@
                 else if (type === 'SANT ELLER FALSKT') { try{ state.data = JSON.parse(w.dataset.santfalskt || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'RYMDEN') { try{ state.data = JSON.parse(w.dataset.rymden || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'VÄDRET') { try{ state.data = JSON.parse(w.dataset.vadret || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'KEMIVÄRLDEN') { try{ state.data = JSON.parse(w.dataset.kemi || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
                 else if (type === 'LÄSHASTIGHET') { state.data.niva = w.dataset.lashNiva || 'latt'; state.data.ord = w.dataset.lashOrd || ''; }
@@ -3154,6 +3213,7 @@
             else if (w.type === 'SANT ELLER FALSKT') createSantFalskt(w);
             else if (w.type === 'RYMDEN') createRymden(w);
             else if (w.type === 'VÄDRET') createVadret(w);
+            else if (w.type === 'KEMIVÄRLDEN') createKemi(w);
             else if (w.type === 'LÄSHASTIGHET') createReadingSpeed(w);
             else if (w.type === 'TEXTGENRER') createTextGenres(w);
             else if (w.type === 'LÄSFÖRSTÅELSE') createLasforstaelse(w);
@@ -4590,8 +4650,9 @@
     // Fyra flikar: Dagens väder (live-prognos, Open-Meteo API, inget API-nyckel behövs),
     // Jämför med igår, Väderlexikon (vädertyper + instrument) och Quiz.
     const VADER_TYPER = [
-        { namn:'Klart väder', emoji:'☀️', beskrivning:'Ingen eller nästan inga moln på himlen, solen syns tydligt.' },
-        { namn:'Molnigt', emoji:'☁️', beskrivning:'Himlen är till stor del eller helt täckt av moln.' },
+        { namn:'Klart väder / Soligt', emoji:'☀️', beskrivning:'Ingen eller nästan inga moln på himlen, solen syns tydligt.' },
+        { namn:'Molnigt', emoji:'🌥️', beskrivning:'Himlen är till stor del eller helt täckt av moln.' },
+        { namn:'Mulet', emoji:'☁️', beskrivning:'Himlen är helt täckt av ett jämngrått molntäcke - solen syns inte alls.' },
         { namn:'Växlande molnighet', emoji:'⛅', beskrivning:'Himlen växlar mellan soligt och molnigt under dagen.' },
         { namn:'Regn', emoji:'🌧️', beskrivning:'Vattendroppar faller från molnen ner till marken.' },
         { namn:'Duggregn', emoji:'🌦️', beskrivning:'Mycket lätt, fint regn med små droppar.' },
@@ -4649,18 +4710,38 @@
         if(!r.ok) throw new Error('Väderdata kunde inte hämtas');
         return await r.json();
     }
+    // Städer/orter i Östergötland som visas som symboler på väderkartan.
+    // x/y är ungefärliga, stiliserade positioner (%) inom kartrutan - inte exakt geografiskt korrekta.
+    const VADER_ORTER = [
+        { namn:'Vadstena', lat:58.45, lon:14.90, x:8,  y:50 },
+        { namn:'Motala', lat:58.54, lon:15.04, x:16, y:38 },
+        { namn:'Mjölby', lat:58.33, lon:15.13, x:22, y:66 },
+        { namn:'Linköping', lat:58.4109, lon:15.6216, x:51, y:55, huvudstad:true },
+        { namn:'Finspång', lat:58.71, lon:15.77, x:60, y:15 },
+        { namn:'Norrköping', lat:58.59, lon:16.19, x:85, y:31 },
+        { namn:'Söderköping', lat:58.48, lon:16.32, x:93, y:46 },
+        { namn:'Åtvidaberg', lat:58.20, lon:16.01, x:75, y:83 }
+    ];
+    async function vadretFetchKarta(){
+        const lats = VADER_ORTER.map(o=>o.lat).join(',');
+        const lons = VADER_ORTER.map(o=>o.lon).join(',');
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons+'&current=temperature_2m,weather_code&timezone=Europe%2FBerlin';
+        const r = await fetch(url);
+        if(!r.ok) throw new Error('Kartdata kunde inte hämtas');
+        return await r.json();
+    }
     function createVadret(config){
         if(config===undefined) config=null;
-        const body = createWidget('VÄDRET', 460, 'vd-widget', config);
+        const body = createWidget('VÄDRET', 520, 'vd-widget', config);
         const widget = body.parentElement.parentElement;
-        if(!config){ widget.style.height = '520px'; }
+        if(!config){ widget.style.height = '640px'; }
 
         let mode = (config && config.data && config.data.mode) || 'idag';
         let quizIdx = (config && config.data && typeof config.data.quizIdx==='number') ? config.data.quizIdx : Math.floor(Math.random()*VADER_QUIZ_BANK.length);
         let quizValt = (config && config.data && typeof config.data.quizValt==='number') ? config.data.quizValt : null;
         let quizScore = (config && config.data && config.data.quizScore) || 0;
         let quizTotal = (config && config.data && config.data.quizTotal) || 0;
-        let vaderData = null, vaderFel = false, vaderLaddar = false, reqToken = 0;
+        let vaderData = null, kartaData = null, vaderFel = false, vaderLaddar = false, reqToken = 0;
 
         const tabRow=document.createElement('div'); tabRow.className='hover-menu vd-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.gap='6px';
         const tabIdag=document.createElement('button'); tabIdag.type='button'; tabIdag.className='btn'; tabIdag.textContent='🌤️ Dagens väder'; tabIdag.style.flex='1';
@@ -4676,33 +4757,49 @@
         function persist(){ widget.dataset.vadret = JSON.stringify({ mode, quizIdx, quizValt, quizScore, quizTotal }); saveBoardState(); }
 
         async function sakerstallData(){
-            if(vaderData || vaderLaddar) return;
+            if((vaderData && kartaData) || vaderLaddar) return;
             vaderLaddar = true; vaderFel = false;
             const my = ++reqToken;
             render();
             try{
-                const d = await vadretFetch();
+                const [d,k] = await Promise.all([vadretFetch(), vadretFetchKarta()]);
                 if(my!==reqToken) return;
-                vaderData = d; vaderLaddar = false; render();
+                vaderData = d; kartaData = k; vaderLaddar = false; render();
             }catch(e){
                 if(my!==reqToken) return;
                 vaderFel = true; vaderLaddar = false; render();
             }
         }
 
+        function renderKarta(){
+            const wrap=document.createElement('div'); wrap.className='vd-karta';
+            const titel=document.createElement('div'); titel.className='vd-karta-titel'; titel.textContent='🗺️ Väder över Östergötland'; wrap.appendChild(titel);
+            const inner=document.createElement('div'); inner.className='vd-karta-inner';
+            VADER_ORTER.forEach((o,i)=>{
+                const res = kartaData[i];
+                const info = vadretKodInfo(res.current.weather_code);
+                const pin=document.createElement('div'); pin.className='vd-karta-pin'+(o.huvudstad?' vd-karta-huvudstad':'');
+                pin.style.left=o.x+'%'; pin.style.top=o.y+'%';
+                pin.innerHTML = `<div class='vd-karta-emoji'>${info.e}</div><div class='vd-karta-temp'>${Math.round(res.current.temperature_2m)}°</div><div class='vd-karta-namn'>${gotdEsc(o.namn)}</div>`;
+                inner.appendChild(pin);
+            });
+            wrap.appendChild(inner);
+            return wrap;
+        }
         function renderIdag(){
             kortWrap.innerHTML='';
             if(vaderLaddar || (!vaderData && !vaderFel)){
-                kortWrap.innerHTML = "<div class='vd-msg'>Hämtar dagens väder för Linköping…<div class='vd-spin'></div></div>";
+                kortWrap.innerHTML = "<div class='vd-msg'>Hämtar dagens väder för Östergötland…<div class='vd-spin'></div></div>";
                 return;
             }
-            if(vaderFel || !vaderData){
+            if(vaderFel || !vaderData || !kartaData){
                 kortWrap.innerHTML = "<div class='vd-msg'>☁️ Kunde inte hämta väderdata just nu.<br>Kontrollera internetuppkopplingen.</div>";
                 const retry=document.createElement('button'); retry.type='button'; retry.className='btn btn-primary'; retry.style.width='100%'; retry.textContent='🔄 Försök igen';
-                retry.onclick=()=>{ vaderData=null; vaderFel=false; sakerstallData(); };
+                retry.onclick=()=>{ vaderData=null; kartaData=null; vaderFel=false; sakerstallData(); };
                 kortWrap.appendChild(retry);
                 return;
             }
+            kortWrap.appendChild(renderKarta());
             const c = vaderData.current;
             const info = vadretKodInfo(c.weather_code);
             const card=document.createElement('div'); card.className='vd-live-card';
@@ -4718,7 +4815,7 @@
                 </div>`;
             kortWrap.appendChild(card);
             const refresh=document.createElement('button'); refresh.type='button'; refresh.className='btn btn-secondary'; refresh.style.width='100%'; refresh.textContent='🔄 Uppdatera';
-            refresh.onclick=()=>{ vaderData=null; vaderFel=false; sakerstallData(); };
+            refresh.onclick=()=>{ vaderData=null; kartaData=null; vaderFel=false; sakerstallData(); };
             kortWrap.appendChild(refresh);
             const kalla=document.createElement('div'); kalla.style.textAlign='center'; kalla.style.fontSize='10.5px'; kalla.style.color='#b0b0b6'; kalla.style.marginTop='8px'; kalla.textContent='Källa: open-meteo.com';
             kortWrap.appendChild(kalla);
@@ -4733,7 +4830,7 @@
             if(vaderFel || !vaderData){
                 kortWrap.innerHTML = "<div class='vd-msg'>☁️ Kunde inte hämta väderdata just nu.<br>Kontrollera internetuppkopplingen.</div>";
                 const retry=document.createElement('button'); retry.type='button'; retry.className='btn btn-primary'; retry.style.width='100%'; retry.textContent='🔄 Försök igen';
-                retry.onclick=()=>{ vaderData=null; vaderFel=false; sakerstallData(); };
+                retry.onclick=()=>{ vaderData=null; kartaData=null; vaderFel=false; sakerstallData(); };
                 kortWrap.appendChild(retry);
                 return;
             }
@@ -4843,6 +4940,496 @@
         tabJamfor.onclick=()=>{ mode='jamfor'; render(); persist(); };
         tabLexikon.onclick=()=>{ mode='lexikon'; render(); persist(); };
         tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
+        render();
+        if(!config) persist();
+    }
+
+    // ---- KEMIVÄRLDEN ----
+    // Tre flikar: Dagens kemi (dagens fråga med dolt svar), Aggregationsformer
+    // (klicka och placera ämnen i rätt form) och Vad händer? (värma/kyla-utforskning).
+    const KEMI_FRAGA_BANK = [
+        { fraga:'Varför löser sig socker i vatten?', svar:'Sockrets små beståndsdelar binder till vattnets och sprids ut jämnt i vattnet, så sockret "försvinner" fast det egentligen bara är utspritt i vattnet.' },
+        { fraga:'Vad är luft?', svar:'Luft är en blandning av osynliga gaser, mest kväve och syre, som finns runt omkring oss hela tiden.' },
+        { fraga:'Kan alla ämnen smälta?', svar:'Nästan alla ämnen kan smälta om de blir tillräckligt varma, men olika ämnen smälter vid väldigt olika temperaturer - vissa metaller kräver enorm hetta.' },
+        { fraga:'Varför rostar järn?', svar:'Järn reagerar med syre och fukt i luften, vilket bildar ett nytt ämne som kallas rost.' },
+        { fraga:'Vad händer när vatten fryser?', svar:'Vattnet övergår från flytande form till fast form (is) när det blir kallare än 0 grader.' },
+        { fraga:'Varför känns is kallt att hålla i handen?', svar:'Isen suger åt sig värme från din hand för att smälta, vilket gör att handen känns kall.' },
+        { fraga:'Vad är ett ämne?', svar:'Allt som har en massa och tar plats kallas ett ämne, till exempel vatten, järn eller luft.' },
+        { fraga:'Varför flyter olja ovanpå vatten?', svar:'Olja är lättare (mindre tätt) än vatten och blandar sig inte med det, så den lägger sig ovanpå.' },
+        { fraga:'Vad är skillnaden på en blandning och ett rent ämne?', svar:'Ett rent ämne består bara av en sorts beståndsdelar, medan en blandning innehåller flera olika ämnen ihopblandade.' },
+        { fraga:'Varför bubblar det i en läsk när man öppnar den?', svar:'Det finns koldioxidgas upplöst i läsken under tryck. När flaskan öppnas frigörs gasen som bubblor.' },
+        { fraga:'Vad händer om man blandar bakpulver och vinäger?', svar:'Det uppstår en kemisk reaktion som bildar koldioxidgas, vilket syns som bubblor och hörs som ett fräsljud.' },
+        { fraga:'Varför smälter choklad i handen?', svar:'Choklad smälter vid en låg temperatur, nära kroppens temperatur, så handens värme räcker för att smälta den.' },
+        { fraga:'Vad kallas det när ett ämne går direkt från fast form till gas, utan att bli flytande?', svar:'Det kallas sublimering. Torris (fryst koldioxid) är ett exempel på detta.' },
+        { fraga:'Varför känns metall kallare än trä fast de har samma temperatur?', svar:'Metall leder bort värme från handen mycket snabbare än trä, vilket gör att den känns kallare.' },
+        { fraga:'Vad är vattenånga?', svar:'Vatten i gasform - osynligt för ögat - som finns i luften omkring oss.' },
+        { fraga:'Varför bildas moln?', svar:'Vattenånga i luften stiger, kyls av och kondenserar till små vattendroppar som tillsammans bildar ett moln.' },
+        { fraga:'Vad händer med socker om man hettar upp det tillräckligt?', svar:'Det smälter till en trögflytande vätska och kan sedan brännas till karamell.' },
+        { fraga:'Varför är vissa ämnen magnetiska och andra inte?', svar:'Bara vissa metaller, som järn, nickel och kobolt, dras till magneter.' },
+        { fraga:'Vad kallas ämnen som inte kan blandas med vatten?', svar:'De kallas ofta vattenavvisande, till exempel olja och fett.' },
+        { fraga:'Vad händer när man löser salt i vatten?', svar:'Saltet löser sig och sprids ut i vattnet, precis som socker, tills det inte längre syns.' },
+        { fraga:'Varför brinner ett stearinljus?', svar:'Vekens värme smälter stearinet, som sedan förångas och brinner tillsammans med syre i luften.' },
+        { fraga:'Vad är skillnaden mellan att smälta och att koka?', svar:'Att smälta är när ett ämne går från fast till flytande form. Att koka är när det går från flytande till gasform.' },
+        { fraga:'Varför fryser saltvatten vid en lägre temperatur än sötvatten?', svar:'Saltet stör vattnets isbildning, vilket gör att det krävs en lägre temperatur innan saltvatten fryser till is.' },
+        { fraga:'Vad kallas det när ett ämne ändrar form men fortfarande är samma ämne?', svar:'Det kallas en aggregationsform-förändring, till exempel när is smälter till vatten.' },
+        { fraga:'Varför utvidgas vatten när det fryser till is?', svar:'Vattenmolekylerna ordnar om sig till en gles kristallstruktur när de fryser, vilket gör att isen tar större plats än det flytande vattnet.' }
+    ];
+    const KEMI_AGG_ITEMS = [
+        { namn:'Is', emoji:'🧊', ratt:'fast' },
+        { namn:'Vatten', emoji:'💧', ratt:'flytande' },
+        { namn:'Ånga', emoji:'☁️', ratt:'gas' },
+        { namn:'Smör', emoji:'🧈', ratt:'fast' },
+        { namn:'Choklad', emoji:'🍫', ratt:'fast' },
+        { namn:'Stearin', emoji:'🕯️', ratt:'fast' }
+    ];
+    const KEMI_AGG_ZONER = [ ['fast','🧊','Fast form'], ['flytande','💧','Flytande form'], ['gas','☁️','Gas'] ];
+    const KEMI_VADHANDER_BANK = [
+        { namn:'Is', emoji:'🧊', varma:'Smälter till 💧 vatten (flytande form).', kyla:'Förblir is och blir bara ännu kallare - ingen formförändring.' },
+        { namn:'Vatten', emoji:'💧', varma:'Kokar till ☁️ ånga (gasform).', kyla:'Fryser till 🧊 is (fast form).' },
+        { namn:'Stearin', emoji:'🕯️', varma:'Smälter till flytande stearin.', kyla:'Förblir fast och stelnar ännu hårdare.' },
+        { namn:'Choklad', emoji:'🍫', varma:'Smälter till flytande choklad.', kyla:'Förblir fast.' },
+        { namn:'Smör', emoji:'🧈', varma:'Smälter till flytande smör.', kyla:'Förblir fast och blir hårdare.' },
+        { namn:'Järn', emoji:'🔩', varma:'Vid extremt hög värme smälter järnet till flytande metall.', kyla:'Förblir fast.' },
+        { namn:'Ånga', emoji:'☁️', varma:'Förblir gas och sprider ut sig ännu mer.', kyla:'Kondenserar till 💧 vatten (flytande form).' }
+    ];
+    function kemiDagensIndex(){
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const dagensDagIÅret = Math.floor((now-start) / 86400000);
+        return dagensDagIÅret % KEMI_FRAGA_BANK.length;
+    }
+    // Blandningar & Lösningar - referensdel med förklaring + flera exempel per begrepp.
+    const KEMI_BL_SEKTIONER = [
+        { titel:'Rent ämne', emoji:'🔵', forklaring:'Ett ämne som bara består av en sorts byggstenar. Går inte att separera i olika delar.', exempel:['Rent guld','Syrgas','Destillerat vatten','Socker (kristaller)'] },
+        { titel:'Blandning', emoji:'🥣', forklaring:'När två eller flera ämnen blandas utan att reagera kemiskt med varandra. Går ofta att separera igen, t.ex. genom att sila eller sortera.', exempel:['Sallad','Grus (sten + sand)','Luft (flera gaser)','Saft med fruktbitar','Müsli'] },
+        { titel:'Lösning', emoji:'💧', forklaring:'En särskild sorts blandning där ett ämne är helt upplöst i ett annat (oftast vatten) så att de olika delarna inte längre syns eller går att sila bort.', exempel:['Saltvatten','Sockervatten','Läsk (socker + koldioxid i vatten)','Havsvatten','Ättika (syra i vatten)'] }
+    ];
+    // Material omkring oss - klicka på ett föremål, se vad det är gjort av och varför.
+    const KEMI_MATERIAL_BANK = [
+        { namn:'Sked', emoji:'🥄', material:[ {m:'Metall (rostfritt stål)', f:'Tål värme, går att diska i diskmaskin och går inte lätt sönder.'}, {m:'Plast', f:'Billigt, lätt och går inte sönder om man tappar den - vanligt i barnbestick.'} ] },
+        { namn:'Fönster', emoji:'🪟', material:[ {m:'Glas', f:'Är genomskinligt så ljuset kommer in, men håller ute vind och kyla.'} ] },
+        { namn:'Bok', emoji:'📖', material:[ {m:'Papper (av trä)', f:'Lätt att skriva och trycka på, och går att vika och bläddra i.'} ] },
+        { namn:'Mugg', emoji:'☕', material:[ {m:'Keramik / Porslin', f:'Håller värmen bra och tål varma drycker som te och kaffe.'}, {m:'Plast', f:'Lätt och går inte sönder om den tappas - bra utomhus eller för barn.'} ] },
+        { namn:'Boll', emoji:'⚽', material:[ {m:'Gummi / Läder', f:'Är elastiskt så bollen studsar bra och tål att sparkas hårt.'} ] },
+        { namn:'Stol', emoji:'🪑', material:[ {m:'Trä', f:'Är starkt och stadigt, håller för att bära en person.'}, {m:'Plast', f:'Lätt att forma, billigt och tål regn utomhus.'} ] },
+        { namn:'Cykel', emoji:'🚲', material:[ {m:'Metall (stål / aluminium)', f:'Är starkt men ändå inte för tungt, tål stötar och slitage.'} ] },
+        { namn:'T-shirt', emoji:'👕', material:[ {m:'Bomull', f:'Är mjukt mot huden och andas bra, skönt att ha på sig.'} ] }
+    ];
+    // Sant eller falskt - kemipåståenden.
+    const KEMI_SF_BANK = [
+        { text:'Vatten kan vara gas.', ratt:true, mot:'Vatten kan finnas som gas (vattenånga), förutom som vätska och is.' },
+        { text:'Syre syns med ögat.', ratt:false, mot:'Syre är en osynlig gas, precis som resten av luften.' },
+        { text:'Salt löser sig i vatten.', ratt:true, mot:'Saltet sprids ut mellan vattnets partiklar och syns inte längre.' },
+        { text:'Plast kommer från träd.', ratt:false, mot:'De flesta plaster tillverkas av olja, inte av trä.' },
+        { text:'Is är tyngre än flytande vatten.', ratt:false, mot:'Is är lättare (mindre tätt) än vatten, därför flyter is.' },
+        { text:'Man kan separera en blandning av sand och vatten genom att sila den.', ratt:true, mot:'Sanden fastnar i silen medan vattnet rinner igenom.' },
+        { text:'Alla metaller är magnetiska.', ratt:false, mot:'Bara vissa metaller, som järn, är magnetiska - aluminium är till exempel inte det.' },
+        { text:'Koldioxid är en gas vi andas ut.', ratt:true, mot:'Vi andas in syre och andas ut koldioxid.' },
+        { text:'Trä leder elektricitet bra.', ratt:false, mot:'Trä är en isolator och leder inte elektricitet bra.' },
+        { text:'Socker försvinner helt när det löses i vatten.', ratt:false, mot:'Sockret finns fortfarande kvar men är utspritt så det inte syns - man kan smaka att det är kvar.' },
+        { text:'Rost är ett tecken på att järn reagerat med syre.', ratt:true, mot:'Rost bildas när järn reagerar med syre och fukt.' },
+        { text:'Man kan koka bort vatten ur saltvatten för att få kvar saltet.', ratt:true, mot:'Vattnet avdunstar och saltet blir kvar.' },
+        { text:'Olja blandar sig lätt med vatten.', ratt:false, mot:'Olja och vatten blandas inte - olja flyter ovanpå.' },
+        { text:'Luft är ett rent ämne.', ratt:false, mot:'Luft är en blandning av flera olika gaser, framförallt kväve och syre.' },
+        { text:'Is, vatten och ånga är samma ämne fast i olika former.', ratt:true, mot:'Det är samma ämne (vatten), bara i olika aggregationsformer.' }
+    ];
+    // Quiz - flervalsfrågor.
+    const KEMI_QUIZ_BANK = [
+        { fraga:'Vilket ämne behöver vi för att andas?', alt:['Syre','Koldioxid','Kväve','Väte'], ratt:0, fork:'Vi andas in luftens syre, som cellerna behöver för att fungera.' },
+        { fraga:'Vad händer när vatten fryser?', alt:['Smälter','Blir is','Kokar','Avdunstar'], ratt:1, fork:'Vatten som fryser övergår från flytande till fast form (is).' },
+        { fraga:'Vad kallas det när ett ämne går från flytande till gasform?', alt:['Smälta','Koka / Avdunsta','Frysa','Kondensera'], ratt:1, fork:'Koka (eller avdunsta) är när ett ämne går från flytande form till gasform.' },
+        { fraga:'Vilket av dessa är en blandning?', alt:['Rent guld','Syrgas','Sallad','Destillerat vatten'], ratt:2, fork:'Sallad består av flera olika ingredienser blandade, alltså en blandning.' },
+        { fraga:'Vad kallas den lilla byggsten som ämnen är uppbyggda av?', alt:['Cell','Partikel','Organ','Planet'], ratt:1, fork:'Partikel är en mycket liten byggsten som alla ämnen består av.' },
+        { fraga:'Vilket ämne reagerar järn med när det rostar?', alt:['Väte','Syre','Kväve','Koldioxid'], ratt:1, fork:'Järn reagerar med syre (och fukt) i luften och bildar rost.' },
+        { fraga:'Vad är plast oftast tillverkat av?', alt:['Trä','Olja','Sand','Vatten'], ratt:1, fork:'De flesta plaster tillverkas av olja.' },
+        { fraga:'Vad kallas det när ett ämne går från gas till flytande form?', alt:['Smälta','Frysa','Kondensera','Koka'], ratt:2, fork:'Kondensera är när ett ämne går från gasform till flytande form.' },
+        { fraga:'Vilket av dessa flyter ovanpå vatten?', alt:['Sten','Järnspik','Olja','Guld'], ratt:2, fork:'Olja är lättare än vatten och blandar sig inte med det, så den flyter ovanpå.' },
+        { fraga:'Vad kallas en blandning där ett ämne är helt upplöst i ett annat?', alt:['Legering','Lösning','Gas','Kristall'], ratt:1, fork:'En lösning är en blandning där ett ämne är helt upplöst i ett annat.' },
+        { fraga:'Vad bildas när bakpulver möter vinäger?', alt:['Syre','Koldioxid','Kväve','Vattenånga'], ratt:1, fork:'Det bildas koldioxidgas, vilket syns som bubblor.' },
+        { fraga:'Vilket material leder elektricitet bäst?', alt:['Trä','Plast','Metall','Glas'], ratt:2, fork:'Metaller är oftast bra ledare av elektricitet.' },
+        { fraga:'Vad kallas is, vatten och ånga tillsammans?', alt:['Tre olika ämnen','Samma ämne i olika former','Blandningar','Lösningar'], ratt:1, fork:'Is, vatten och ånga är samma ämne (vatten) i olika aggregationsformer.' },
+        { fraga:'Vilket ämne finns det mest av i luften vi andas?', alt:['Syre','Koldioxid','Kväve','Väte'], ratt:2, fork:'Luften består till största delen (ca 78%) av kväve.' },
+        { fraga:'Vad kallas det när ett fast ämne blir flytande?', alt:['Frysa','Smälta','Koka','Kondensera'], ratt:1, fork:'Smälta är när ett ämne går från fast till flytande form.' }
+    ];
+    // Lexikon - klickbara kemibegrepp med popup-förklaring.
+    const KEMI_LEX_BANK = [
+        { namn:'Ämne', emoji:'🔵', besk:'Allt som har en massa och tar plats, till exempel vatten, järn eller luft.' },
+        { namn:'Material', emoji:'🧱', besk:'Det ämne eller den blandning av ämnen som ett föremål är gjort av, till exempel trä, plast eller metall.' },
+        { namn:'Blandning', emoji:'🥣', besk:'När två eller flera ämnen blandas utan att reagera kemiskt - de kan ofta separeras igen.' },
+        { namn:'Lösning', emoji:'💧', besk:'En blandning där ett ämne är helt upplöst i ett annat, ofta vatten, så det inte längre syns.' },
+        { namn:'Partikel', emoji:'⚛️', besk:'En mycket liten byggsten som ämnen är uppbyggda av.' },
+        { namn:'Fast form', emoji:'🧊', besk:'Ett tillstånd där ämnets partiklar sitter tätt och stilla - ämnet har en bestämd form, t.ex. is.' },
+        { namn:'Flytande form', emoji:'💦', besk:'Ett tillstånd där partiklarna kan glida förbi varandra - ämnet tar formen av sin behållare, t.ex. vatten.' },
+        { namn:'Gas', emoji:'☁️', besk:'Ett tillstånd där partiklarna rör sig fritt och sprids ut - ämnet fyller hela sitt utrymme, t.ex. vattenånga.' },
+        { namn:'Smälta', emoji:'🔥', besk:'När ett ämne går från fast till flytande form, oftast genom uppvärmning.' },
+        { namn:'Stelna', emoji:'❄️', besk:'När ett ämne går från flytande till fast form, oftast genom avkylning.' },
+        { namn:'Avdunsta', emoji:'💨', besk:'När ett ämne går från flytande form till gasform, ofta vid rumstemperatur utan att koka.' },
+        { namn:'Kondensera', emoji:'🌫️', besk:'När ett ämne går från gasform till flytande form, oftast genom avkylning.' }
+    ];
+    // Hitta materialet - gissa vad ett föremål är gjort av, dolt svar.
+    const KEMI_HITTA_BANK = [
+        { namn:'Sked', emoji:'🥄', svar:'Metall (rostfritt stål)', mot:'Tål värme, går att diska i diskmaskin och går inte sönder lätt.' },
+        { namn:'Fönster', emoji:'🪟', svar:'Glas', mot:'Är genomskinligt så ljuset kommer in, men håller ute vind och kyla.' },
+        { namn:'Bok', emoji:'📖', svar:'Papper', mot:'Papper görs av trä (cellulosa) och går lätt att skriva och trycka på.' },
+        { namn:'Mugg', emoji:'☕', svar:'Keramik / Porslin', mot:'Håller värmen bra och tål varma drycker.' },
+        { namn:'Boll', emoji:'⚽', svar:'Gummi', mot:'Är elastiskt så bollen studsar bra.' },
+        { namn:'Regnjacka', emoji:'🧥', svar:'Plast / Nylon', mot:'Är vattentätt och håller kroppen torr i regn.' },
+        { namn:'Gaffel', emoji:'🍴', svar:'Metall', mot:'Tål värme och disk, går inte sönder lätt.' },
+        { namn:'Ballong', emoji:'🎈', svar:'Gummi', mot:'Är mycket elastiskt och kan blåsas upp till en stor storlek.' }
+    ];
+    // Kemi i vardagen - vardagsfrågor med dolda svar.
+    const KEMI_VARDAG_BANK = [
+        { fraga:'Varför rostar cyklar?', svar:'Metallen i cykeln (järn) reagerar med syre och fukt i luften, vilket bildar rost.' },
+        { fraga:'Varför tvättar tvål rent?', svar:'Tvål kan binda både till fett/smuts och till vatten samtidigt, så smutsen kan sköljas bort med vattnet.' },
+        { fraga:'Varför blir glas immiga?', svar:'Varm, fuktig luft möter en kall glasyta, och vattenångan kondenserar till små droppar.' },
+        { fraga:'Varför smälter choklad i handen?', svar:'Choklad smälter vid en temperatur nära kroppstemperatur, så handens värme räcker.' },
+        { fraga:'Varför bubblar läsk?', svar:'Koldioxidgas är upplöst i läsken under tryck och frigörs som bubblor när flaskan öppnas.' },
+        { fraga:'Varför fryser vattenledningar sönder på vintern?', svar:'Vatten utvidgas när det fryser till is, vilket kan spränga sönder rören.' },
+        { fraga:'Varför känns det kallt att gå ur en pool även en varm dag?', svar:'Vattnet som avdunstar från huden tar med sig värme, vilket kyler kroppen.' },
+        { fraga:'Varför lyser en tänd tändsticka?', svar:'Det sker en kemisk reaktion (förbränning) mellan tändstickans ämnen och syre, som frigör ljus och värme.' },
+        { fraga:'Varför missfärgas ett skuret äpple brunt?', svar:'Äpplets köttyta reagerar med syret i luften, en kemisk reaktion som färgar det brunt.' },
+        { fraga:'Varför blir bröd med jäst luftigt?', svar:'Jästen äter socker och bildar koldioxidgas, som bildar bubblor i degen.' },
+        { fraga:'Varför känns en kall metallstång kallare än en trästol i samma rum?', svar:'Metall leder bort värme från handen snabbare än trä.' },
+        { fraga:'Varför fräser det när man häller vatten på en varm stekpanna?', svar:'Vattnet värms upp så snabbt att det omedelbart kokar och blir till ånga.' },
+        { fraga:'Varför flyter en isbit i ett glas läsk?', svar:'Is är lättare (mindre tätt) än den flytande läsken, så den flyter.' },
+        { fraga:'Varför luktar det illa när mjölk blivit dålig?', svar:'Bakterier har brutit ner mjölken och bildat nya ämnen som luktar illa.' },
+        { fraga:'Varför blir en cykelkedja rostig om den inte oljas in?', svar:'Utan olja är metallen oskyddad och kan reagera med fukt och syre i luften, vilket bildar rost.' }
+    ];
+    function createKemi(config){
+        if(config===undefined) config=null;
+        const body = createWidget('KEMIVÄRLDEN', 460, 'km-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '540px'; }
+
+        let mode = (config && config.data && config.data.mode) || 'fraga';
+        let fragaIdx = (config && config.data && typeof config.data.fragaIdx==='number') ? config.data.fragaIdx : kemiDagensIndex();
+        let fragaRevealed = (config && config.data && config.data.fragaRevealed) || false;
+        let aggPlacering = (config && config.data && config.data.aggPlacering) || {};
+        let aggVald = null, aggChecked = (config && config.data && config.data.aggChecked) || false;
+        let vhIdx = (config && config.data && typeof config.data.vhIdx==='number') ? config.data.vhIdx : Math.floor(Math.random()*KEMI_VADHANDER_BANK.length);
+        let vhVal = (config && config.data && config.data.vhVal) || null;
+        let sfIdx = (config && config.data && typeof config.data.sfIdx==='number') ? config.data.sfIdx : Math.floor(Math.random()*KEMI_SF_BANK.length);
+        let sfVal = (config && config.data && config.data.sfVal) || null;
+        let quizIdx = (config && config.data && typeof config.data.quizIdx==='number') ? config.data.quizIdx : Math.floor(Math.random()*KEMI_QUIZ_BANK.length);
+        let quizValt = (config && config.data && typeof config.data.quizValt==='number') ? config.data.quizValt : null;
+        let quizScore = (config && config.data && config.data.quizScore) || 0;
+        let quizTotal = (config && config.data && config.data.quizTotal) || 0;
+        let hittaIdx = (config && config.data && typeof config.data.hittaIdx==='number') ? config.data.hittaIdx : Math.floor(Math.random()*KEMI_HITTA_BANK.length);
+        let hittaRevealed = (config && config.data && config.data.hittaRevealed) || false;
+        let vardagIdx = (config && config.data && typeof config.data.vardagIdx==='number') ? config.data.vardagIdx : Math.floor(Math.random()*KEMI_VARDAG_BANK.length);
+        let vardagRevealed = (config && config.data && config.data.vardagRevealed) || false;
+
+        const tabRow=document.createElement('div'); tabRow.className='hover-menu km-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.flexWrap='wrap'; tabRow.style.gap='6px';
+        const tabFraga=document.createElement('button'); tabFraga.type='button'; tabFraga.className='btn'; tabFraga.textContent='🧪 Dagens kemi';
+        const tabAgg=document.createElement('button'); tabAgg.type='button'; tabAgg.className='btn'; tabAgg.textContent='💧 Aggregationsformer';
+        const tabVh=document.createElement('button'); tabVh.type='button'; tabVh.className='btn'; tabVh.textContent='🔥 Vad händer?';
+        const tabBl=document.createElement('button'); tabBl.type='button'; tabBl.className='btn'; tabBl.textContent='🧪 Blandningar & Lösningar';
+        const tabMat=document.createElement('button'); tabMat.type='button'; tabMat.className='btn'; tabMat.textContent='🏭 Material omkring oss';
+        const tabSf=document.createElement('button'); tabSf.type='button'; tabSf.className='btn'; tabSf.textContent='🧠 Sant eller falskt';
+        const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🎯 Quiz';
+        const tabLex=document.createElement('button'); tabLex.type='button'; tabLex.className='btn'; tabLex.textContent='🧪 Lexikon';
+        const tabHitta=document.createElement('button'); tabHitta.type='button'; tabHitta.className='btn'; tabHitta.textContent='🔎 Hitta materialet';
+        const tabVardag=document.createElement('button'); tabVardag.type='button'; tabVardag.className='btn'; tabVardag.textContent='🌍 Kemi i vardagen';
+        [tabFraga,tabAgg,tabVh,tabBl,tabMat,tabSf,tabQuiz,tabLex,tabHitta,tabVardag].forEach(t=>{ t.style.flex='1 1 auto'; tabRow.appendChild(t); });
+        body.appendChild(tabRow);
+
+        const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
+        body.appendChild(kortWrap);
+
+        function persist(){ widget.dataset.kemi = JSON.stringify({ mode, fragaIdx, fragaRevealed, aggPlacering, aggChecked, vhIdx, vhVal, sfIdx, sfVal, quizIdx, quizValt, quizScore, quizTotal, hittaIdx, hittaRevealed, vardagIdx, vardagRevealed }); saveBoardState(); }
+
+        function renderFraga(){
+            kortWrap.innerHTML='';
+            const q = KEMI_FRAGA_BANK[fragaIdx];
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🧪 Dagens kemifråga - fundera och diskutera innan ni tittar på svaret!'; kortWrap.appendChild(hint);
+            const card=document.createElement('div'); card.className='km-fraga-card'; card.textContent=q.fraga; kortWrap.appendChild(card);
+            if(fragaRevealed){
+                const svar=document.createElement('div'); svar.className='km-svar';
+                const lbl=document.createElement('div'); lbl.className='km-svar-label'; lbl.textContent='✅ Svar'; svar.appendChild(lbl);
+                const txt=document.createElement('div'); txt.textContent=q.svar; svar.appendChild(txt);
+                kortWrap.appendChild(svar);
+            }
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Ny fråga';
+            nyBtn.onclick=()=>{ let ny; do{ ny=Math.floor(Math.random()*KEMI_FRAGA_BANK.length); }while(KEMI_FRAGA_BANK.length>1 && ny===fragaIdx); fragaIdx=ny; fragaRevealed=false; renderFraga(); persist(); };
+            btns.appendChild(nyBtn);
+            if(!fragaRevealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa svar';
+                revealBtn.onclick=()=>{ fragaRevealed=true; renderFraga(); persist(); };
+                btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj svar';
+                hideBtn.onclick=()=>{ fragaRevealed=false; renderFraga(); persist(); };
+                btns.appendChild(hideBtn);
+            }
+            kortWrap.appendChild(btns);
+        }
+
+        function renderAgg(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Klicka på ett ämne, klicka sedan på rätt aggregationsform för att placera det!'; kortWrap.appendChild(hint);
+            const status=document.createElement('div'); status.className='km-agg-status'; status.textContent = aggVald ? 'Valt: '+aggVald+' – klicka nu på rätt form' : 'Klicka på ett ämne i poolen nedan'; kortWrap.appendChild(status);
+
+            const pool=document.createElement('div'); pool.className='km-agg-pool';
+            const poolTitel=document.createElement('div'); poolTitel.className='km-agg-pool-titel'; poolTitel.textContent='Oplacerade ämnen'; pool.appendChild(poolTitel);
+            const poolItems=document.createElement('div'); poolItems.className='km-agg-items';
+            let poolCount=0;
+            KEMI_AGG_ITEMS.forEach(it=>{
+                if(aggPlacering[it.namn]) return;
+                poolCount++;
+                poolItems.appendChild(mkChip(it));
+            });
+            if(poolCount===0){ const tom=document.createElement('div'); tom.style.fontSize='11px'; tom.style.color='#b0b0b6'; tom.textContent='Alla ämnen är placerade!'; poolItems.appendChild(tom); }
+            pool.appendChild(poolItems);
+            kortWrap.appendChild(pool);
+
+            function mkChip(it){
+                const chip=document.createElement('div'); chip.className='km-chip'+(aggVald===it.namn?' vald':'');
+                if(aggChecked && aggPlacering[it.namn]){ chip.classList.add(aggPlacering[it.namn]===it.ratt ? 'ratt':'fel'); }
+                chip.innerHTML = `<span>${it.emoji}</span><span>${gotdEsc(it.namn)}</span>`;
+                chip.onclick=()=>{ aggVald = (aggVald===it.namn) ? null : it.namn; renderAgg(); };
+                return chip;
+            }
+
+            const zoner=document.createElement('div'); zoner.className='km-agg-zoner';
+            KEMI_AGG_ZONER.forEach(([key,emoji,namn])=>{
+                const zon=document.createElement('div'); zon.className='km-agg-zon';
+                const titel=document.createElement('div'); titel.className='km-agg-zon-titel'; titel.innerHTML=`<span class='em'>${emoji}</span>${namn}`; zon.appendChild(titel);
+                const items=document.createElement('div'); items.className='km-agg-items';
+                KEMI_AGG_ITEMS.forEach(it=>{ if(aggPlacering[it.namn]===key) items.appendChild(mkChip(it)); });
+                zon.appendChild(items);
+                zon.onclick=()=>{
+                    if(!aggVald) return;
+                    aggPlacering[aggVald]=key; aggVald=null; aggChecked=false; renderAgg(); persist();
+                };
+                zoner.appendChild(zon);
+            });
+            kortWrap.appendChild(zoner);
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const rattaBtn=document.createElement('button'); rattaBtn.className='kw-btn kw-btn-green'; rattaBtn.textContent='✅ Rätta';
+            rattaBtn.onclick=()=>{ aggChecked=true; renderAgg(); persist(); };
+            const resetBtn=document.createElement('button'); resetBtn.className='kw-btn kw-btn-warn'; resetBtn.textContent='🔄 Nollställ';
+            resetBtn.onclick=()=>{ aggPlacering={}; aggVald=null; aggChecked=false; renderAgg(); persist(); };
+            btns.appendChild(rattaBtn); btns.appendChild(resetBtn);
+            kortWrap.appendChild(btns);
+        }
+
+        function renderVh(){
+            kortWrap.innerHTML='';
+            const s = KEMI_VADHANDER_BANK[vhIdx];
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Välj om ni ska värma eller kyla ämnet – vad tror ni händer?'; kortWrap.appendChild(hint);
+            const card=document.createElement('div'); card.className='km-vh-card';
+            card.innerHTML = `<div class='km-vh-emoji'>${s.emoji}</div><div class='km-vh-namn'>${gotdEsc(s.namn)}</div>`;
+            kortWrap.appendChild(card);
+
+            const knappar=document.createElement('div'); knappar.className='km-vh-knappar';
+            const varmaBtn=document.createElement('button'); varmaBtn.type='button'; varmaBtn.className='km-vh-btn varma'+(vhVal==='varma'?' vald':''); varmaBtn.textContent='🔥 Värma';
+            varmaBtn.onclick=()=>{ vhVal='varma'; renderVh(); persist(); };
+            const kylaBtn=document.createElement('button'); kylaBtn.type='button'; kylaBtn.className='km-vh-btn kyla'+(vhVal==='kyla'?' vald':''); kylaBtn.textContent='❄️ Kyla';
+            kylaBtn.onclick=()=>{ vhVal='kyla'; renderVh(); persist(); };
+            knappar.appendChild(varmaBtn); knappar.appendChild(kylaBtn);
+            kortWrap.appendChild(knappar);
+
+            if(vhVal){
+                const res=document.createElement('div'); res.className='km-vh-resultat '+vhVal;
+                res.innerHTML = `<b>${vhVal==='varma'?'🔥 Om vi värmer '+s.namn.toLowerCase()+':':'❄️ Om vi kyler '+s.namn.toLowerCase()+':'}</b><br>${vhVal==='varma'?s.varma:s.kyla}`;
+                kortWrap.appendChild(res);
+            }
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.style.width='100%'; nyBtn.textContent='🎲 Nytt ämne';
+            nyBtn.onclick=()=>{ let ny; do{ ny=Math.floor(Math.random()*KEMI_VADHANDER_BANK.length); }while(KEMI_VADHANDER_BANK.length>1 && ny===vhIdx); vhIdx=ny; vhVal=null; renderVh(); persist(); };
+            btns.appendChild(nyBtn);
+            kortWrap.appendChild(btns);
+        }
+
+        function renderBl(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🧪 Vad är skillnaden mellan en blandning och en lösning? Läs och diskutera exemplen!'; kortWrap.appendChild(hint);
+            KEMI_BL_SEKTIONER.forEach(s=>{
+                const card=document.createElement('div'); card.className='km-bl-card';
+                card.innerHTML = `<div class='km-bl-titel'>${s.emoji} ${gotdEsc(s.titel)}</div>
+                    <div class='km-bl-fork'>${gotdEsc(s.forklaring)}</div>
+                    <div class='km-bl-exempel-lbl'>Exempel:</div>
+                    <div class='km-bl-exempel'>${s.exempel.map(e=>`<span class='km-bl-chip'>${gotdEsc(e)}</span>`).join('')}</div>`;
+                kortWrap.appendChild(card);
+            });
+        }
+
+        function kmOpenPopup(titel, bodyHtml){
+            const ov = document.createElement('div'); ov.className='vd-lex-overlay';
+            const modal = document.createElement('div'); modal.className='vd-lex-modal';
+            modal.innerHTML = `<div class='vd-lex-modal-header'><span>${titel}</span><button type='button' class='vd-lex-modal-close'>✕</button></div><div class='vd-lex-modal-body'>${bodyHtml}</div>`;
+            ov.appendChild(modal);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            const closeIt=()=> ov.remove();
+            modal.querySelector('.vd-lex-modal-close').onclick=closeIt;
+            ov.onclick=(e)=>{ if(e.target===ov) closeIt(); };
+        }
+        function renderMat(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Klicka på ett föremål för att se vad det är gjort av och varför!'; kortWrap.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='vd-lex-grid';
+            KEMI_MATERIAL_BANK.forEach(obj=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${obj.emoji}</div><div class='vd-lex-namn'>${gotdEsc(obj.namn)}</div>`;
+                c.onclick=()=>{
+                    const body = obj.material.map(mm=>`<div class='km-mat-rad'><div class='km-mat-material'>🧱 ${gotdEsc(mm.m)}</div><div class='km-mat-fork'>${gotdEsc(mm.f)}</div></div>`).join('');
+                    kmOpenPopup(obj.emoji+' '+gotdEsc(obj.namn), body);
+                };
+                grid.appendChild(c);
+            });
+            kortWrap.appendChild(grid);
+        }
+
+        function renderSf(){
+            kortWrap.innerHTML='';
+            const p = KEMI_SF_BANK[sfIdx];
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🧠 Är påståendet sant eller falskt?'; kortWrap.appendChild(hint);
+            const card=document.createElement('div'); card.className='sf-pastaende'; card.textContent='"'+p.text+'"'; kortWrap.appendChild(card);
+            const knappar=document.createElement('div'); knappar.className='sf-knappar';
+            const santBtn=document.createElement('button'); santBtn.type='button'; santBtn.className='poll-opt-btn sf-knapp'; santBtn.disabled=sfVal!==null;
+            const falsktBtn=document.createElement('button'); falsktBtn.type='button'; falsktBtn.className='poll-opt-btn sf-knapp'; falsktBtn.disabled=sfVal!==null;
+            if(sfVal!==null){ if(p.ratt===true) santBtn.classList.add('poll-opt-correct'); if(p.ratt===false) falsktBtn.classList.add('poll-opt-correct'); }
+            santBtn.innerHTML = `<div class='poll-opt-content'><span>✅ Sant${sfVal!==null && p.ratt===true?' ⭐':''}</span></div>`;
+            falsktBtn.innerHTML = `<div class='poll-opt-content'><span>❌ Falskt${sfVal!==null && p.ratt===false?' ⭐':''}</span></div>`;
+            santBtn.onclick=()=>{ if(sfVal!==null) return; sfVal=true; renderSf(); persist(); };
+            falsktBtn.onclick=()=>{ if(sfVal!==null) return; sfVal=false; renderSf(); persist(); };
+            knappar.appendChild(santBtn); knappar.appendChild(falsktBtn);
+            kortWrap.appendChild(knappar);
+            if(sfVal!==null){
+                const facit=document.createElement('div'); facit.className='rml-facit '+(p.ratt?'rml-facit-yes':'rml-facit-no');
+                const icon=document.createElement('div'); icon.className='rml-facit-icon'; icon.textContent=p.ratt?'✅':'❌'; facit.appendChild(icon);
+                const label=document.createElement('div'); label.className='rml-facit-label'; label.textContent=p.ratt?'Sant!':'Falskt!'; facit.appendChild(label);
+                const mot=document.createElement('div'); mot.className='rml-facit-mot'; mot.textContent=p.mot; facit.appendChild(mot);
+                kortWrap.appendChild(facit);
+            }
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Nytt påstående';
+            nyBtn.onclick=()=>{ let ny; do{ ny=Math.floor(Math.random()*KEMI_SF_BANK.length); }while(KEMI_SF_BANK.length>1 && ny===sfIdx); sfIdx=ny; sfVal=null; renderSf(); persist(); };
+            btns.appendChild(nyBtn);
+            kortWrap.appendChild(btns);
+        }
+
+        function renderQuiz(){
+            kortWrap.innerHTML='';
+            const q = KEMI_QUIZ_BANK[quizIdx];
+            const scoreEl=document.createElement('div'); scoreEl.className='ry-quiz-score'; scoreEl.textContent='Poäng: '+quizScore+' / '+quizTotal; kortWrap.appendChild(scoreEl);
+            const fragaEl=document.createElement('div'); fragaEl.className='ry-quiz-fraga'; fragaEl.textContent=q.fraga; kortWrap.appendChild(fragaEl);
+            const altWrap=document.createElement('div'); altWrap.className='ry-quiz-alt';
+            q.alt.forEach((a,i)=>{
+                const b=document.createElement('button'); b.type='button'; b.className='ry-quiz-btn';
+                if(quizValt!==null){ if(i===q.ratt) b.classList.add('ratt'); else if(i===quizValt) b.classList.add('fel'); }
+                b.textContent=a; b.disabled=quizValt!==null;
+                b.onclick=()=>{ if(quizValt!==null) return; quizValt=i; quizTotal++; if(i===q.ratt) quizScore++; renderQuiz(); persist(); };
+                altWrap.appendChild(b);
+            });
+            kortWrap.appendChild(altWrap);
+            if(quizValt!==null){
+                const fork=document.createElement('div'); fork.className='ry-quiz-fork'; fork.textContent=(quizValt===q.ratt?'✅ Rätt! ':'❌ Fel. ')+q.fork; kortWrap.appendChild(fork);
+                const nextBtn=document.createElement('button'); nextBtn.type='button'; nextBtn.className='btn btn-primary'; nextBtn.style.width='100%'; nextBtn.style.marginTop='10px'; nextBtn.textContent='➡️ Nästa fråga';
+                nextBtn.onclick=()=>{ let ny; do{ ny=Math.floor(Math.random()*KEMI_QUIZ_BANK.length); }while(KEMI_QUIZ_BANK.length>1 && ny===quizIdx); quizIdx=ny; quizValt=null; renderQuiz(); persist(); };
+                kortWrap.appendChild(nextBtn);
+            }
+            const resetBtn=document.createElement('button'); resetBtn.type='button'; resetBtn.className='btn btn-secondary'; resetBtn.style.width='100%'; resetBtn.style.marginTop='6px'; resetBtn.textContent='🔄 Börja om quizet';
+            resetBtn.onclick=()=>{ quizScore=0; quizTotal=0; quizValt=null; renderQuiz(); persist(); };
+            kortWrap.appendChild(resetBtn);
+        }
+
+        function renderLex(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Klicka på ett begrepp för att se dess förklaring!'; kortWrap.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='vd-lex-grid';
+            KEMI_LEX_BANK.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> kmOpenPopup(v.emoji+' '+gotdEsc(v.namn), `<div class='vd-lex-modal-besk'>${gotdEsc(v.besk)}</div>`);
+                grid.appendChild(c);
+            });
+            kortWrap.appendChild(grid);
+        }
+
+        function renderHitta(){
+            kortWrap.innerHTML='';
+            const o = KEMI_HITTA_BANK[hittaIdx];
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🔎 Vad är föremålet gjort av?'; kortWrap.appendChild(hint);
+            const card=document.createElement('div'); card.className='km-vh-card';
+            card.innerHTML = `<div class='km-vh-emoji'>${o.emoji}</div><div class='km-vh-namn'>${gotdEsc(o.namn)}</div>`;
+            kortWrap.appendChild(card);
+            if(hittaRevealed){
+                const svar=document.createElement('div'); svar.className='km-svar';
+                const lbl=document.createElement('div'); lbl.className='km-svar-label'; lbl.textContent='✅ '+o.svar; svar.appendChild(lbl);
+                const txt=document.createElement('div'); txt.textContent=o.mot; svar.appendChild(txt);
+                kortWrap.appendChild(svar);
+            }
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Nytt föremål';
+            nyBtn.onclick=()=>{ let ny; do{ ny=Math.floor(Math.random()*KEMI_HITTA_BANK.length); }while(KEMI_HITTA_BANK.length>1 && ny===hittaIdx); hittaIdx=ny; hittaRevealed=false; renderHitta(); persist(); };
+            btns.appendChild(nyBtn);
+            if(!hittaRevealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa svar';
+                revealBtn.onclick=()=>{ hittaRevealed=true; renderHitta(); persist(); };
+                btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj svar';
+                hideBtn.onclick=()=>{ hittaRevealed=false; renderHitta(); persist(); };
+                btns.appendChild(hideBtn);
+            }
+            kortWrap.appendChild(btns);
+        }
+
+        function renderVardag(){
+            kortWrap.innerHTML='';
+            const q = KEMI_VARDAG_BANK[vardagIdx];
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🌍 Kemi i vardagen - fundera innan ni tittar på svaret!'; kortWrap.appendChild(hint);
+            const card=document.createElement('div'); card.className='km-fraga-card'; card.textContent=q.fraga; kortWrap.appendChild(card);
+            if(vardagRevealed){
+                const svar=document.createElement('div'); svar.className='km-svar';
+                const lbl=document.createElement('div'); lbl.className='km-svar-label'; lbl.textContent='✅ Svar'; svar.appendChild(lbl);
+                const txt=document.createElement('div'); txt.textContent=q.svar; svar.appendChild(txt);
+                kortWrap.appendChild(svar);
+            }
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Ny fråga';
+            nyBtn.onclick=()=>{ let ny; do{ ny=Math.floor(Math.random()*KEMI_VARDAG_BANK.length); }while(KEMI_VARDAG_BANK.length>1 && ny===vardagIdx); vardagIdx=ny; vardagRevealed=false; renderVardag(); persist(); };
+            btns.appendChild(nyBtn);
+            if(!vardagRevealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa svar';
+                revealBtn.onclick=()=>{ vardagRevealed=true; renderVardag(); persist(); };
+                btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj svar';
+                hideBtn.onclick=()=>{ vardagRevealed=false; renderVardag(); persist(); };
+                btns.appendChild(hideBtn);
+            }
+            kortWrap.appendChild(btns);
+        }
+
+        function render(){
+            [[tabFraga,'fraga'],[tabAgg,'agg'],[tabVh,'vh'],[tabBl,'bl'],[tabMat,'mat'],[tabSf,'sf'],[tabQuiz,'quiz'],[tabLex,'lex'],[tabHitta,'hitta'],[tabVardag,'vardag']].forEach(([btn,m])=>{
+                btn.classList.toggle('btn-primary', mode===m); btn.classList.toggle('btn-secondary', mode!==m);
+            });
+            if(mode==='agg') renderAgg();
+            else if(mode==='vh') renderVh();
+            else if(mode==='bl') renderBl();
+            else if(mode==='mat') renderMat();
+            else if(mode==='sf') renderSf();
+            else if(mode==='quiz') renderQuiz();
+            else if(mode==='lex') renderLex();
+            else if(mode==='hitta') renderHitta();
+            else if(mode==='vardag') renderVardag();
+            else renderFraga();
+        }
+        tabFraga.onclick=()=>{ mode='fraga'; render(); persist(); };
+        tabAgg.onclick=()=>{ mode='agg'; render(); persist(); };
+        tabVh.onclick=()=>{ mode='vh'; render(); persist(); };
+        tabBl.onclick=()=>{ mode='bl'; render(); persist(); };
+        tabMat.onclick=()=>{ mode='mat'; render(); persist(); };
+        tabSf.onclick=()=>{ mode='sf'; render(); persist(); };
+        tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
+        tabLex.onclick=()=>{ mode='lex'; render(); persist(); };
+        tabHitta.onclick=()=>{ mode='hitta'; render(); persist(); };
+        tabVardag.onclick=()=>{ mode='vardag'; render(); persist(); };
         render();
         if(!config) persist();
     }
