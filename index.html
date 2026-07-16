@@ -145,6 +145,7 @@
             <button class="tool-btn" onclick="createRymden()"><div class="icon">🌎</div><div class="label">Rymden</div></button>
             <button class="tool-btn" onclick="createVadret()"><div class="icon">🌦️</div><div class="label">Vädret</div></button>
             <button class="tool-btn" onclick="createKemi()"><div class="icon">🧪</div><div class="label">Kemivärlden</div></button>
+            <button class="tool-btn" onclick="createVattenkretslopp()"><div class="icon">💧</div><div class="label">Vattenkretsloppet</div></button>
             <button class="tool-btn" onclick="createReadingSpeed()"><div class="icon">📖</div><div class="label">Läshastighet</div></button>
             <button class="tool-btn" onclick="createTextGenres()"><div class="icon">📚</div><div class="label">Textgenrer</div></button>
             <button class="tool-btn" onclick="createLasforstaelse()"><div class="icon">🧐</div><div class="label">Läsförståelse</div></button>
@@ -715,6 +716,19 @@
     .km-mat-rad:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0; }
     .km-mat-material{ font-weight:900; font-size:14px; color:#5856d6; margin-bottom:4px; }
     .km-mat-fork{ font-size:13px; color:#333; line-height:1.5; }
+    /* VATTENKRETSLOPPET */
+    .vk-widget{ min-width:360px; }
+    .vk-widget .widget-body{ overflow-y:auto; overflow-x:hidden; min-height:0; }
+    .vk-widget .widget-inner{ min-height:0; }
+    .vk-tabs .btn{ font-size:11.5px; padding:7px 5px; }
+    .vk-stage{ display:flex; gap:12px; align-items:flex-start; background:#f0f7ff; border-radius:14px; padding:14px; margin-bottom:2px; }
+    .vk-stage-num{ width:30px; height:30px; border-radius:50%; background:#0a84ff; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:13px; flex-shrink:0; }
+    .vk-stage-emoji{ font-size:26px; flex-shrink:0; }
+    .vk-stage-body{ flex:1; }
+    .vk-stage-title{ font-weight:900; font-size:15px; color:#1d1d1f; margin-bottom:3px; }
+    .vk-stage-text{ font-size:12.5px; color:#333; line-height:1.5; }
+    .vk-arrow{ text-align:center; font-size:20px; color:#0a84ff; margin:2px 0; line-height:1; }
+    .vk-loop{ text-align:center; background:#eef4ff; border:1.5px dashed #0a84ff; border-radius:12px; padding:10px; font-weight:800; color:#0a4fa8; margin-top:6px; font-size:13px; }
     .vd-live-emoji{ font-size:56px; line-height:1.1; }
     .vd-live-text{ font-size:16px; font-weight:800; color:#1d1d1f; margin:4px 0 10px; }
     .vd-live-temp{ font-size:38px; font-weight:900; color:#1d1d1f; }
@@ -3075,6 +3089,7 @@
                 else if (type === 'RYMDEN') { try{ state.data = JSON.parse(w.dataset.rymden || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'VÄDRET') { try{ state.data = JSON.parse(w.dataset.vadret || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'KEMIVÄRLDEN') { try{ state.data = JSON.parse(w.dataset.kemi || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'VATTENKRETSLOPPET') { try{ state.data = JSON.parse(w.dataset.vkl || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'TABELL') { state.data.html = w.querySelector('.board-table')?.innerHTML || ''; state.data.title = w.querySelector('.tbl-title')?.value || ''; state.data.rows = w.querySelectorAll('tr').length; state.data.cols = w.querySelector('tr')?.querySelectorAll('td').length || 0; }
                 else if (type === 'TRAFIKLJUS') { const act = w.querySelector('.light.active'); if(act) state.data.color = act.classList.contains('red') ? 'red' : act.classList.contains('yellow') ? 'yellow' : 'green'; }
                 else if (type === 'LÄSHASTIGHET') { state.data.niva = w.dataset.lashNiva || 'latt'; state.data.ord = w.dataset.lashOrd || ''; }
@@ -3214,6 +3229,7 @@
             else if (w.type === 'RYMDEN') createRymden(w);
             else if (w.type === 'VÄDRET') createVadret(w);
             else if (w.type === 'KEMIVÄRLDEN') createKemi(w);
+            else if (w.type === 'VATTENKRETSLOPPET') createVattenkretslopp(w);
             else if (w.type === 'LÄSHASTIGHET') createReadingSpeed(w);
             else if (w.type === 'TEXTGENRER') createTextGenres(w);
             else if (w.type === 'LÄSFÖRSTÅELSE') createLasforstaelse(w);
@@ -4084,7 +4100,7 @@
         if(bildBody) bildBody.innerHTML = (wiki && wiki.bild) ? `<img src="${wiki.bild}" alt="${gotdEsc(word)}">` : `<span class='gotd-tom'>Ingen bild hittades.</span>`;
         const forklaringText = (ordbok && ordbok.forklaring) ? ordbok.forklaring : ((wiki && wiki.forklaring) ? wiki.forklaring : null);
         if(forkBody) forkBody.innerHTML = forklaringText ? gotdEsc(forklaringText) : `<span class='gotd-tom'>Ingen förklaring hittades.</span>`;
-        if(exBody) exBody.innerHTML = gotdEsc((ordbok && ordbok.exempel) ? ordbok.exempel : ('Kan du använda ordet "'+word+'" i en egen mening?'));
+        if(exBody) exBody.innerHTML = gotdEsc((ordbok && ordbok.exempel) ? ordbok.exempel : ('Vi läste om ordet "'+word+'" i skolan och pratade om vad det betyder.'));
         if(synBody) synBody.innerHTML = (ordbok && ordbok.synonym) ? gotdEsc(ordbok.synonym) : `<span class='gotd-tom'>Inga synonymer hittades.</span>`;
         saveBoardState();
     }
@@ -4672,6 +4688,44 @@
         { namn:'Regnmätare', emoji:'☔', matter:'Mäter: nederbörd', beskrivning:'Samlar upp regn i ett kärl för att mäta hur många millimeter som fallit.' },
         { namn:'Hygrometer', emoji:'💧', matter:'Mäter: luftfuktighet', beskrivning:'Mäter hur mycket vattenånga det finns i luften.' }
     ];
+    // Begrepp relaterade till väder - en bredare ordlista utöver vädertyper/instrument.
+    const VADER_BEGREPP_BANK = [
+        { namn:'Sol', emoji:'☀️', beskrivning:'Ger ljus och värme till jorden.' },
+        { namn:'Väder', emoji:'🌤️', beskrivning:'Hur det är ute just nu.' },
+        { namn:'Klimat', emoji:'🌍', beskrivning:'Hur vädret brukar vara under lång tid.' },
+        { namn:'Temperatur', emoji:'🌡️', beskrivning:'Hur varmt eller kallt det är.' },
+        { namn:'Moln', emoji:'☁️', beskrivning:'Små vattendroppar eller iskristaller högt upp i luften.' },
+        { namn:'Nederbörd', emoji:'🌧️', beskrivning:'Regn, snö eller hagel som faller från molnen.' },
+        { namn:'Regnskur', emoji:'🌦️', beskrivning:'Ett kort regn som ofta går över snabbt.' },
+        { namn:'Snö', emoji:'❄️', beskrivning:'Fruset vatten som faller från molnen.' },
+        { namn:'Hagel', emoji:'🧊', beskrivning:'Små iskulor som faller från molnen.' },
+        { namn:'Dimma', emoji:'🌫️', beskrivning:'Små vattendroppar nära marken som gör det svårt att se.' },
+        { namn:'Vind', emoji:'💨', beskrivning:'Luft som rör sig.' },
+        { namn:'Vindriktning', emoji:'🧭', beskrivning:'Från vilket håll vinden blåser.' },
+        { namn:'Vindhastighet', emoji:'🌬️', beskrivning:'Hur snabbt vinden blåser.' },
+        { namn:'Luftfuktighet', emoji:'💧', beskrivning:'Hur mycket vattenånga som finns i luften.' },
+        { namn:'Molnighet', emoji:'☁️', beskrivning:'Hur stor del av himlen som täcks av moln.' },
+        { namn:'Lufttryck', emoji:'📈', beskrivning:'Hur hårt luften trycker mot marken.' },
+        { namn:'Regnbåge', emoji:'🌈', beskrivning:'Bildas när solljus bryts i regndroppar.' },
+        { namn:'Blixt', emoji:'⚡', beskrivning:'En kraftig elektrisk urladdning i luften.' },
+        { namn:'Åska', emoji:'⛈️', beskrivning:'Ljudet som hörs efter en blixt.' },
+        { namn:'Storm', emoji:'🌪️', beskrivning:'Mycket kraftig vind.' },
+        { namn:'Orkan', emoji:'🌬️', beskrivning:'En extremt kraftig storm (förekommer inte i Sverige).' },
+        { namn:'Tornado', emoji:'🌀', beskrivning:'En roterande luftpelare som sträcker sig från ett moln till marken.' },
+        { namn:'Plusgrader', emoji:'🌡️', beskrivning:'Temperatur över 0 °C.' },
+        { namn:'Minusgrader', emoji:'🧊', beskrivning:'Temperatur under 0 °C.' },
+        { namn:'Vattenånga', emoji:'🧪', beskrivning:'Vatten i gasform som finns i luften.' },
+        { namn:'Avdunstning', emoji:'☀️', beskrivning:'När vatten blir vattenånga.' },
+        { namn:'Kondensation', emoji:'💧', beskrivning:'När vattenånga kyls och blir vattendroppar.' },
+        { namn:'Vattnets kretslopp', emoji:'♻️', beskrivning:'Vattnets resa mellan hav, luft, moln och mark.' },
+        { namn:'Prognos', emoji:'🌦️', beskrivning:'En förutsägelse om hur vädret kommer att bli.' },
+        { namn:'Meteorolog', emoji:'👨‍🔬', beskrivning:'En person som studerar och förutspår vädret.' },
+        { namn:'Satellit', emoji:'🛰️', beskrivning:'Hjälper meteorologer att se moln och väder från rymden.' },
+        { namn:'Väderradar', emoji:'📡', beskrivning:'Används för att upptäcka regn, snö och oväder.' },
+        { namn:'Soluppgång', emoji:'🌅', beskrivning:'När solen går upp på morgonen.' },
+        { namn:'Solnedgång', emoji:'🌇', beskrivning:'När solen går ner på kvällen.' },
+        { namn:'UV-index', emoji:'☀️', beskrivning:'Visar hur starkt solens UV-strålning är, och hur försiktig man bör vara i solen.' }
+    ];
     const VADER_QUIZ_BANK = [
         { fraga:'Vad kallas det när vattendroppar faller från molnen?', alt:['Regn','Dimma','Frost','Hagel'], ratt:0, forklaring:'Regn är vattendroppar som faller från molnen ner till marken.' },
         { fraga:'Vilket instrument mäter temperatur?', alt:['Barometer','Termometer','Hygrometer','Vindmätare'], ratt:1, forklaring:'En termometer visar hur varmt eller kallt det är.' },
@@ -4743,11 +4797,11 @@
         let quizTotal = (config && config.data && config.data.quizTotal) || 0;
         let vaderData = null, kartaData = null, vaderFel = false, vaderLaddar = false, reqToken = 0;
 
-        const tabRow=document.createElement('div'); tabRow.className='hover-menu vd-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.gap='6px';
-        const tabIdag=document.createElement('button'); tabIdag.type='button'; tabIdag.className='btn'; tabIdag.textContent='🌤️ Dagens väder'; tabIdag.style.flex='1';
-        const tabJamfor=document.createElement('button'); tabJamfor.type='button'; tabJamfor.className='btn'; tabJamfor.textContent='📅 Jämför igår'; tabJamfor.style.flex='1';
-        const tabLexikon=document.createElement('button'); tabLexikon.type='button'; tabLexikon.className='btn'; tabLexikon.textContent='📖 Lexikon'; tabLexikon.style.flex='1';
-        const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🧠 Quiz'; tabQuiz.style.flex='1';
+        const tabRow=document.createElement('div'); tabRow.className='hover-menu vd-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.flexWrap='wrap'; tabRow.style.gap='6px';
+        const tabIdag=document.createElement('button'); tabIdag.type='button'; tabIdag.className='btn'; tabIdag.textContent='🌤️ Dagens väder'; tabIdag.style.flex='1 1 auto';
+        const tabJamfor=document.createElement('button'); tabJamfor.type='button'; tabJamfor.className='btn'; tabJamfor.textContent='📅 Jämför igår'; tabJamfor.style.flex='1 1 auto';
+        const tabLexikon=document.createElement('button'); tabLexikon.type='button'; tabLexikon.className='btn'; tabLexikon.textContent='📖 Lexikon'; tabLexikon.style.flex='1 1 auto';
+        const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🧠 Quiz'; tabQuiz.style.flex='1 1 auto';
         [tabIdag,tabJamfor,tabLexikon,tabQuiz].forEach(t=>tabRow.appendChild(t));
         body.appendChild(tabRow);
 
@@ -4900,6 +4954,16 @@
                 g2.appendChild(c);
             });
             kortWrap.appendChild(g2);
+
+            const t3=document.createElement('div'); t3.className='vd-lex-sektion-titel'; t3.textContent='📚 Begrepp'; kortWrap.appendChild(t3);
+            const g3=document.createElement('div'); g3.className='vd-lex-grid';
+            VADER_BEGREPP_BANK.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> vdOpenLexPopup(v, null);
+                g3.appendChild(c);
+            });
+            kortWrap.appendChild(g3);
         }
 
         function renderQuiz(){
@@ -5430,6 +5494,148 @@
         tabLex.onclick=()=>{ mode='lex'; render(); persist(); };
         tabHitta.onclick=()=>{ mode='hitta'; render(); persist(); };
         tabVardag.onclick=()=>{ mode='vardag'; render(); persist(); };
+        render();
+        if(!config) persist();
+    }
+
+    // ---- VATTENKRETSLOPPET ----
+    // Tre flikar: Processen (stegvis flöde med förklaring), Begrepp (klickbara termer
+    // med popup-förklaring) och Quiz (flervalsfrågor).
+    const VKL_STEG = [
+        { emoji:'☀️', titel:'Avdunstning', text:'Solen värmer vatten i hav, sjöar och floder. Vattnet övergår från flytande form till osynlig vattenånga och stiger upp i luften.' },
+        { emoji:'🍃', titel:'Transpiration', text:'Växter avger också vattenånga genom sina blad ut i luften - det kallas transpiration.' },
+        { emoji:'☁️', titel:'Kondensation', text:'Vattenångan stiger högt upp där luften är kallare. Där kyls den av och bildar små vattendroppar som klumpar ihop sig till moln.' },
+        { emoji:'🌧️', titel:'Nederbörd', text:'När molnens vattendroppar blir för tunga och stora faller de ner mot marken som regn, snö eller hagel.' },
+        { emoji:'🏞️', titel:'Avrinning', text:'En del av vattnet rinner på markytan, i bäckar och floder, tillbaka mot sjöar och hav.' },
+        { emoji:'💧', titel:'Infiltration (grundvatten)', text:'En del av vattnet sjunker istället ner genom marken och blir grundvatten, som med tiden också hittar tillbaka till hav och sjöar.' }
+    ];
+    const VKL_BEGREPP = [
+        { namn:'Avdunstning', emoji:'☀️', beskrivning:'När vatten värms upp av solen och övergår från flytande form till osynlig vattenånga.' },
+        { namn:'Kondensation', emoji:'☁️', beskrivning:'När vattenånga kyls av högt upp i luften och bildar små vattendroppar som klumpar ihop sig till moln.' },
+        { namn:'Nederbörd', emoji:'🌧️', beskrivning:'Vatten som faller från molnen till marken, som regn, snö eller hagel.' },
+        { namn:'Avrinning', emoji:'🏞️', beskrivning:'Vatten som rinner på markytan, i bäckar och floder, tillbaka mot sjöar och hav.' },
+        { namn:'Grundvatten', emoji:'💧', beskrivning:'Vatten som sjunkit ner och samlats i marken, under jordytan.' },
+        { namn:'Infiltration', emoji:'🌱', beskrivning:'När vatten sjunker ner genom marken och blir grundvatten.' },
+        { namn:'Transpiration', emoji:'🍃', beskrivning:'När växter avger vattenånga genom sina blad ut i luften.' },
+        { namn:'Molnbildning', emoji:'☁️', beskrivning:'När många kondenserade vattendroppar samlas och bildar ett synligt moln.' },
+        { namn:'Vattenånga', emoji:'🧪', beskrivning:'Vatten i osynlig gasform som finns i luften.' },
+        { namn:'Vattendrag', emoji:'🏞️', beskrivning:'En bäck, å eller flod där vatten rinner.' },
+        { namn:'Hav', emoji:'🌊', beskrivning:'Den största vattensamlingen på jorden, källan till det mesta av avdunstningen.' },
+        { namn:'Is / Snö', emoji:'❄️', beskrivning:'Vatten i fast form, en del av kretsloppet på kalla platser eller höjder.' },
+        { namn:'Sublimering', emoji:'🌫️', beskrivning:'När is eller snö går direkt till vattenånga utan att bli flytande vatten först.' },
+        { namn:'Grundvattenmagasin', emoji:'🪨', beskrivning:'Ett område under marken där grundvatten samlas och lagras.' },
+        { namn:'Kretslopp', emoji:'🔄', beskrivning:'En process som upprepas om och om igen, utan början eller slut.' }
+    ];
+    const VKL_QUIZ = [
+        { fraga:'Vad kallas det när vatten övergår från flytande form till vattenånga?', alt:['Kondensation','Avdunstning','Nederbörd','Avrinning'], ratt:1, fork:'Avdunstning sker när solen värmer vatten så att det blir till osynlig vattenånga.' },
+        { fraga:'Vad kallas det när vattenånga blir till vattendroppar i luften?', alt:['Avdunstning','Nederbörd','Kondensation','Infiltration'], ratt:2, fork:'Kondensation sker när vattenånga kyls av och blir till små vattendroppar, som bildar moln.' },
+        { fraga:'Vad kallas regn, snö och hagel tillsammans?', alt:['Kondensation','Nederbörd','Avrinning','Grundvatten'], ratt:1, fork:'Nederbörd är samlingsnamnet för allt vatten som faller från molnen.' },
+        { fraga:'Vad kallas det när vatten rinner på markytan tillbaka mot hav och sjöar?', alt:['Infiltration','Transpiration','Avrinning','Kondensation'], ratt:2, fork:'Avrinning är när vatten rinner i bäckar och floder på markytan.' },
+        { fraga:'Var samlas vatten som sjunkit ner genom marken?', alt:['I moln','Grundvatten','I havet direkt','Vattenånga'], ratt:1, fork:'Vatten som sjunker ner genom marken blir till grundvatten.' },
+        { fraga:'Vad är den viktigaste energikällan som driver vattnets kretslopp?', alt:['Vinden','Månen','Solen','Regnet'], ratt:2, fork:'Solens värme får vatten att avdunsta, vilket driver hela kretsloppet.' },
+        { fraga:'Vad kallas det när växter avger vattenånga genom sina blad?', alt:['Kondensation','Transpiration','Avdunstning','Nederbörd'], ratt:1, fork:'Transpiration är växternas eget sätt att avge vattenånga till luften.' },
+        { fraga:'Vad består moln egentligen av?', alt:['Bomull','Rök','Små vattendroppar eller iskristaller','Damm'], ratt:2, fork:'Moln är massor av mycket små vattendroppar eller iskristaller som svävar i luften.' },
+        { fraga:'Vad kallas det när vatten sjunker ner genom marken och blir grundvatten?', alt:['Avrinning','Kondensation','Infiltration','Avdunstning'], ratt:2, fork:'Infiltration är när vatten sjunker ner i marken och blir grundvatten.' },
+        { fraga:'Var finns det mesta av jordens vatten?', alt:['I sjöar','I molnen','I haven','Som grundvatten'], ratt:2, fork:'Haven innehåller mer än 96% av allt vatten på jorden.' },
+        { fraga:'Har vattnets kretslopp någon början eller slut?', alt:['Ja, det börjar i havet','Ja, det slutar i molnen','Nej, det är en cykel som upprepas om och om igen','Ja, det börjar på våren'], ratt:2, fork:'Vattnets kretslopp är en cykel utan verklig början eller slut - den upprepas ständigt.' },
+        { fraga:'Vad händer med vattenånga när den stiger högt upp i atmosfären?', alt:['Den försvinner','Den kyls av och kondenserar till moln','Den blir till is direkt','Den faller som regn direkt'], ratt:1, fork:'Högt upp är luften kallare, vilket får vattenångan att kondensera till moln.' },
+        { fraga:'Vilken aggregationsform har is i vattnets kretslopp?', alt:['Gas','Flytande form','Fast form','Ingen av dem'], ratt:2, fork:'Is är vatten i fast form.' },
+        { fraga:'Vad kallas ett moln som blivit så tungt av vattendroppar att det börjar regna?', alt:['Cirrusmoln','Regnmoln','Dimma','Ånga'], ratt:1, fork:'Ett regnmoln (nederbördsmoln) är fullt av vattendroppar som till slut faller som regn.' },
+        { fraga:'I vilken ordning sker vattnets kretslopp?', alt:['Nederbörd → Avdunstning → Kondensation','Avdunstning → Kondensation → Nederbörd → Avrinning','Kondensation → Avrinning → Avdunstning','Avrinning → Nederbörd → Avdunstning'], ratt:1, fork:'Den grundläggande ordningen är: avdunstning, kondensation, nederbörd, avrinning - sedan börjar det om.' }
+    ];
+    function vklOpenPopup(item){
+        const ov = document.createElement('div'); ov.className='vd-lex-overlay';
+        const modal = document.createElement('div'); modal.className='vd-lex-modal';
+        modal.innerHTML = `<div class='vd-lex-modal-header'><span>${item.emoji} ${gotdEsc(item.namn)}</span><button type='button' class='vd-lex-modal-close'>✕</button></div><div class='vd-lex-modal-body'><div class='vd-lex-modal-besk'>${gotdEsc(item.beskrivning)}</div></div>`;
+        ov.appendChild(modal);
+        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        const closeIt=()=> ov.remove();
+        modal.querySelector('.vd-lex-modal-close').onclick=closeIt;
+        ov.onclick=(e)=>{ if(e.target===ov) closeIt(); };
+    }
+    function createVattenkretslopp(config){
+        if(config===undefined) config=null;
+        const body = createWidget('VATTENKRETSLOPPET', 440, 'vk-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '560px'; }
+
+        let mode = (config && config.data && config.data.mode) || 'process';
+        let quizIdx = (config && config.data && typeof config.data.quizIdx==='number') ? config.data.quizIdx : Math.floor(Math.random()*VKL_QUIZ.length);
+        let quizValt = (config && config.data && typeof config.data.quizValt==='number') ? config.data.quizValt : null;
+        let quizScore = (config && config.data && config.data.quizScore) || 0;
+        let quizTotal = (config && config.data && config.data.quizTotal) || 0;
+
+        const tabRow=document.createElement('div'); tabRow.className='hover-menu vk-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.gap='6px';
+        const tabProcess=document.createElement('button'); tabProcess.type='button'; tabProcess.className='btn'; tabProcess.textContent='🔄 Processen'; tabProcess.style.flex='1';
+        const tabBegrepp=document.createElement('button'); tabBegrepp.type='button'; tabBegrepp.className='btn'; tabBegrepp.textContent='📚 Begrepp'; tabBegrepp.style.flex='1';
+        const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🎯 Quiz'; tabQuiz.style.flex='1';
+        [tabProcess,tabBegrepp,tabQuiz].forEach(t=>tabRow.appendChild(t));
+        body.appendChild(tabRow);
+
+        const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
+        body.appendChild(kortWrap);
+
+        function persist(){ widget.dataset.vkl = JSON.stringify({ mode, quizIdx, quizValt, quizScore, quizTotal }); saveBoardState(); }
+
+        function renderProcess(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='💧 Följ vattnets resa steg för steg - det är ett kretslopp som aldrig tar slut!'; kortWrap.appendChild(hint);
+            VKL_STEG.forEach((s,i)=>{
+                const stage=document.createElement('div'); stage.className='vk-stage';
+                stage.innerHTML = `<div class='vk-stage-num'>${i+1}</div><div class='vk-stage-emoji'>${s.emoji}</div><div class='vk-stage-body'><div class='vk-stage-title'>${gotdEsc(s.titel)}</div><div class='vk-stage-text'>${gotdEsc(s.text)}</div></div>`;
+                kortWrap.appendChild(stage);
+                if(i<VKL_STEG.length-1){ const arr=document.createElement('div'); arr.className='vk-arrow'; arr.textContent='⬇️'; kortWrap.appendChild(arr); }
+            });
+            const loop=document.createElement('div'); loop.className='vk-loop'; loop.textContent='🔁 ... och sedan börjar kretsloppet om igen med Avdunstning!'; kortWrap.appendChild(loop);
+        }
+
+        function renderBegrepp(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Klicka på ett begrepp för att se dess förklaring!'; kortWrap.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='vd-lex-grid';
+            VKL_BEGREPP.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> vklOpenPopup(v);
+                grid.appendChild(c);
+            });
+            kortWrap.appendChild(grid);
+        }
+
+        function renderQuiz(){
+            kortWrap.innerHTML='';
+            const q = VKL_QUIZ[quizIdx];
+            const scoreEl=document.createElement('div'); scoreEl.className='ry-quiz-score'; scoreEl.textContent='Poäng: '+quizScore+' / '+quizTotal; kortWrap.appendChild(scoreEl);
+            const fragaEl=document.createElement('div'); fragaEl.className='ry-quiz-fraga'; fragaEl.textContent=q.fraga; kortWrap.appendChild(fragaEl);
+            const altWrap=document.createElement('div'); altWrap.className='ry-quiz-alt';
+            q.alt.forEach((a,i)=>{
+                const b=document.createElement('button'); b.type='button'; b.className='ry-quiz-btn';
+                if(quizValt!==null){ if(i===q.ratt) b.classList.add('ratt'); else if(i===quizValt) b.classList.add('fel'); }
+                b.textContent=a; b.disabled=quizValt!==null;
+                b.onclick=()=>{ if(quizValt!==null) return; quizValt=i; quizTotal++; if(i===q.ratt) quizScore++; renderQuiz(); persist(); };
+                altWrap.appendChild(b);
+            });
+            kortWrap.appendChild(altWrap);
+            if(quizValt!==null){
+                const fork=document.createElement('div'); fork.className='ry-quiz-fork'; fork.textContent=(quizValt===q.ratt?'✅ Rätt! ':'❌ Fel. ')+q.fork; kortWrap.appendChild(fork);
+                const nextBtn=document.createElement('button'); nextBtn.type='button'; nextBtn.className='btn btn-primary'; nextBtn.style.width='100%'; nextBtn.style.marginTop='10px'; nextBtn.textContent='➡️ Nästa fråga';
+                nextBtn.onclick=()=>{ let ny; do{ ny=Math.floor(Math.random()*VKL_QUIZ.length); }while(VKL_QUIZ.length>1 && ny===quizIdx); quizIdx=ny; quizValt=null; renderQuiz(); persist(); };
+                kortWrap.appendChild(nextBtn);
+            }
+            const resetBtn=document.createElement('button'); resetBtn.type='button'; resetBtn.className='btn btn-secondary'; resetBtn.style.width='100%'; resetBtn.style.marginTop='6px'; resetBtn.textContent='🔄 Börja om quizet';
+            resetBtn.onclick=()=>{ quizScore=0; quizTotal=0; quizValt=null; renderQuiz(); persist(); };
+            kortWrap.appendChild(resetBtn);
+        }
+
+        function render(){
+            [[tabProcess,'process'],[tabBegrepp,'begrepp'],[tabQuiz,'quiz']].forEach(([btn,m])=>{
+                btn.classList.toggle('btn-primary', mode===m); btn.classList.toggle('btn-secondary', mode!==m);
+            });
+            if(mode==='begrepp') renderBegrepp(); else if(mode==='quiz') renderQuiz(); else renderProcess();
+        }
+        tabProcess.onclick=()=>{ mode='process'; render(); persist(); };
+        tabBegrepp.onclick=()=>{ mode='begrepp'; render(); persist(); };
+        tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
         render();
         if(!config) persist();
     }
@@ -17330,7 +17536,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         let newDays = 0;
         if (savedData) {
             try {
-                const s = JSON.parse(savedData); document.getElementById('cb-app-wrapper').className = s.bodyClass || '';
+                const s = JSON.parse(savedData); document.getElementById('cb-app-wrapper').className = s.bodyClass || 'theme-img-summer no-watermark';
                 // Lista över nyligen utlagda widgetar följer med tavlan (så elever ser markeringen)
                 try { if (Array.isArray(s.nyaWidgetKnappar)) localStorage.setItem('nyaWidgetKnappar', JSON.stringify(s.nyaWidgetKnappar)); } catch(e){}
                 document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
@@ -17350,8 +17556,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 let idx = s.activePageId ? pagesListV6.findIndex(pg=>pg.id===s.activePageId) : -1;
                 if(idx < 0) idx = (typeof s.activePage==='number' && s.activePage < pagesListV6.length) ? s.activePage : 0;
                 goToPageByIndexV6(idx);
-            } catch(e) { document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
-        } else { document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
+            } catch(e) { document.getElementById('cb-app-wrapper').className = 'theme-img-summer no-watermark'; document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
+        } else { document.getElementById('cb-app-wrapper').className = 'theme-img-summer no-watermark'; document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
         window.isLoadingBoard = false;
         restorePresentationLock(); // om tavlan var låst före omladdning: lås igen och visa rätt ikon/etikett
         refreshPocketData();
