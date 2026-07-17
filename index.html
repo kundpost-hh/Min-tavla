@@ -130,6 +130,8 @@
             <button class="tool-btn" onclick="createLunchWidget()"><div class="icon">🍽️</div><div class="label">Lunch</div></button>
             <button class="tool-btn" onclick="createTextEditor()"><div class="icon">📝</div><div class="label">Text</div></button>
             <button class="tool-btn" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
+            <button class="tool-btn" onclick="createKroppen()"><div class="icon">🧍</div><div class="label">Kroppen</div></button>
+            <button class="tool-btn" onclick="createSverigesNatur()"><div class="icon">🌲</div><div class="label">Sveriges natur</div></button>
             <button class="tool-btn" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
             <button class="tool-btn" onclick="createWordSearch()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2' y='2' width='15' height='15' rx='1.5' fill='none' stroke='#3a3a3c' stroke-width='1.4'/><line x1='2' y1='6.75' x2='17' y2='6.75' stroke='#3a3a3c' stroke-width='0.8'/><line x1='2' y1='11.5' x2='17' y2='11.5' stroke='#3a3a3c' stroke-width='0.8'/><line x1='6.75' y1='2' x2='6.75' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><line x1='11.5' y1='2' x2='11.5' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><circle cx='17.3' cy='17.3' r='4.3' fill='#fff' stroke='#3a3a3c' stroke-width='1.6'/><line x1='20.4' y1='20.4' x2='23' y2='23' stroke='#3a3a3c' stroke-width='1.8' stroke-linecap='round'/></svg></div><div class="label">Ordgömma</div></button>
             <button class="tool-btn" onclick="createWhiteboard()"><div class="icon">🖍️</div><div class="label">Rita</div></button>
@@ -518,7 +520,7 @@
     .clock-widget .time-display { text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
     .clock-widget .date-display { text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
     /* ÖVNINGSKLOCKA */
-    .practice-clock-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
+    .practice-clock-widget .widget-inner { background: #ffffff !important; box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important; border: 1px solid #e5e5ea !important; }
     .practice-clock-widget .widget-resizer::after { border-color: #999; }
     .practice-clock-widget .widget-body { align-items: center; justify-content: center; overflow: hidden; flex-direction: column; gap: 6px; }
     .pclock-fit { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; flex: 1; }
@@ -534,6 +536,7 @@
     .pclock-btn:hover { background: #f1f5f9; }
     .pclock-btn:active { transform: scale(0.95); }
     .pclock-btn.pclock-random-btn { color: #7c3aed; border-color: #c4b5fd; }
+    .pclock-btn.pclock-rakna-btn { color: #0369a1; border-color: #7dd3fc; background: #f0f9ff; }
     .pclock-btn.pclock-facit-btn { color: #059669; border-color: #6ee7b7; background: #ecfdf5; }
     .pclock-digital.pclock-reveal { animation: pclockPop .35s ease; }
     @keyframes pclockPop { 0%{ transform: scale(1);} 40%{ transform: scale(1.18);} 100%{ transform: scale(1);} }
@@ -1082,8 +1085,9 @@
     .alphabet-widget .widget-inner { background: rgba(255, 255, 255, 0.97); }
     .alphabet-widget .widget-header { background: #FF2D55; border-bottom: 1px solid #d31a3e; }
     .alphabet-container { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 6px; padding: 14px 8px; overflow: hidden; }
-    .alpha-letter { font-family: 'Comic Sans MS', 'Segoe UI', sans-serif; font-size: 40px; font-weight: bold; line-height: 1; padding: 6px 8px; border-radius: 14px; transition: transform 0.2s ease, background 0.2s ease; cursor: pointer; flex: 0 0 auto; user-select: none; }
-    .alpha-letter:hover { animation: alpha-dance 0.6s ease-in-out infinite; background: rgba(255,45,85,0.08); }
+    .alpha-letter-wrap { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto; }
+    .alpha-letter { font-family: 'Comic Sans MS', 'Segoe UI', sans-serif; font-size: 40px; font-weight: bold; line-height: 1; padding: 6px 8px; border-radius: 14px; transition: transform 0.2s ease, background 0.2s ease; user-select: none; }
+    .alpha-letter-wrap:hover .alpha-letter { animation: alpha-dance 0.6s ease-in-out infinite; background: rgba(255,45,85,0.08); }
 
     /* ---- BIOLOGI ÅK 4 ---- */
     .bio-widget .widget-header{ background:linear-gradient(135deg,#3cb45f,#2f9e51) !important; }
@@ -2106,7 +2110,7 @@
     .pengar-s100 { background:linear-gradient(135deg,#5aa7e0,#3478bd); }
     .pengar-s200 { background:linear-gradient(135deg,#5cb85c,#3d8b3d); }
     .pengar-s500 { background:linear-gradient(135deg,#e06a6a,#c03a3a); }
-    .pengar-yta { min-height:88px; background:#f7f7fa; border-radius:12px; padding:8px; display:flex; gap:5px; flex-wrap:wrap; align-content:flex-start; align-items:center; }
+    .pengar-yta { min-height:88px; background:#c7c9d1; border-radius:12px; padding:8px; display:flex; gap:5px; flex-wrap:wrap; align-content:flex-start; align-items:center; }
     .pengar-yta .pengar-mynt, .pengar-yta .pengar-sedel { cursor:pointer; }
     .pengar-yta .pengar-mynt:hover, .pengar-yta .pengar-sedel:hover { transform:scale(1.08); opacity:0.85; }
     .pengar-tom { width:100%; text-align:center; color:#b0b0b8; font-size:12.5px; font-weight:600; padding:26px 0; }
@@ -2241,11 +2245,33 @@
     .figx-close { border:none; background:#f2f2f7; width:34px; height:34px; border-radius:50%; font-size:17px; cursor:pointer; color:#555; }
     .figx-close:hover { background:#e5e5ea; }
     .figx-sub { margin:0 0 14px; color:#7a7a86; font-size:13px; }
-    .figx-tabs { display:flex; gap:8px; margin-bottom:14px; }
+    .figx-tabs { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
     .figx-tab { border:1px solid #e2e4ea; background:#f7f8fb; color:#333; padding:7px 16px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; }
     .figx-tab.active { background:#007aff; border-color:#007aff; color:#fff; }
     .figx-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
     .figx-card { border:1px solid #ecedf2; border-radius:14px; padding:12px; display:flex; flex-direction:column; align-items:center; gap:8px; background:#fff; }
+    .kroppen-widget .widget-body { padding:14px 16px; }
+    .kropp-namn { font-size:15px; font-weight:800; color:#2c2c3a; }
+    .kropp-quiz { max-width:420px; margin:10px auto 0; display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .kropp-quiz-poang { font-size:12.5px; color:#7a7a86; font-weight:700; }
+    .kropp-quiz-fraga { font-size:17px; font-weight:800; color:#2c2c3a; text-align:center; }
+    .kropp-quiz-svar { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
+    .gr-toolbar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+    .gr-toolbar .btn { font-size:12.5px; padding:7px 14px; }
+    .gr-area { position:relative; border:1.5px dashed #d8dae2; border-radius:14px; padding:14px; background:#fafbfc; min-height:380px; overflow:hidden; }
+    .gr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+    .gr-card { border:1px solid #ecedf2; border-radius:14px; padding:10px; background:#fff; display:flex; flex-direction:column; align-items:center; gap:6px; }
+    .gr-card-fig { width:100%; max-width:150px; }
+    .gr-card-fig svg { width:100%; height:auto; display:block; }
+    .gr-reveal { padding:4px 10px; border-radius:10px; background:#ffe9c2; color:#b57400; font-weight:800; font-size:12px; cursor:pointer; user-select:none; }
+    .gr-reveal:hover { background:#ffd98f; }
+    .gr-reveal.revealed { background:#d9f2df; color:#1f7a37; cursor:default; }
+    .gr-protractor { position:absolute; width:220px; height:130px; cursor:grab; touch-action:none; z-index:50; }
+    .gr-protractor:active { cursor:grabbing; }
+    .gr-prot-inner { width:100%; height:100%; pointer-events:none; }
+    .gr-prot-inner svg { display:block; }
+    .gr-prot-handle { position:absolute; left:197px; top:107px; width:16px; height:16px; border-radius:50%; background:#007aff; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.35); cursor:grab; touch-action:none; }
+    .gr-prot-handle:active { cursor:grabbing; }
     .figx-fig { width:100%; height:96px; display:flex; align-items:center; justify-content:center; }
     .figx-fig svg { max-width:100%; max-height:96px; }
     .figx-reveal { width:100%; border:none; border-radius:10px; padding:10px 8px; cursor:pointer; font-family:inherit; text-align:center; background:linear-gradient(135deg,#ffd66b,#f2b234); color:#7a5200; font-weight:800; font-size:13px; box-shadow:0 4px 10px -4px rgba(242,178,52,.6); }
@@ -3272,6 +3298,8 @@
             else if (w.type === 'TALFÖLJDER') createTalfoljder(w);
             else if (w.type === 'DIAGRAM') createDiagramWidget(w);
             else if (w.type === 'KOORDINATSYSTEM') createKoordinatsystem(w);
+            else if (w.type === 'KROPPEN') createKroppen(w);
+            else if (w.type === 'SVERIGES NATUR') createSverigesNatur(w);
             else if (w.type === 'SANNOLIKHET') createSannolikhet(w);
             else if (w.type === 'MATTEKAMP') createMathBattle(w);
             else if (w.type === 'VERB') createVerbWidget(w);
@@ -5115,6 +5143,29 @@
         { fraga:'Vilket ämne finns det mest av i luften vi andas?', alt:['Syre','Koldioxid','Kväve','Väte'], ratt:2, fork:'Luften består till största delen (ca 78%) av kväve.' },
         { fraga:'Vad kallas det när ett fast ämne blir flytande?', alt:['Frysa','Smälta','Koka','Kondensera'], ratt:1, fork:'Smälta är när ett ämne går från fast till flytande form.' }
     ];
+    // Gaser - kända gaser med beskrivning, funktion och användning.
+    const KEMI_GASER_BANK = [
+        { namn:'Syre (O₂)', emoji:'🫧', besk:'En osynlig gas som utgör ungefär 21% av luften.', funktion:'Behövs för att levande varelser ska kunna andas och för att saker ska kunna brinna.', anvandning:'Används inom sjukvården för patienter som har svårt att andas, och i rymddräkter.' },
+        { namn:'Kväve (N₂)', emoji:'💨', besk:'Den vanligaste gasen i luften, cirka 78%.', funktion:'Är ganska overksam (reagerar inte lätt) och späder ut syret så att saker inte brinner för snabbt.', anvandning:'Används för att förpacka mat så den håller längre, och för att fylla bildäck.' },
+        { namn:'Koldioxid (CO₂)', emoji:'🌫️', besk:'En gas som bildas bland annat när vi andas ut och när saker brinner.', funktion:'Växter använder koldioxid vid fotosyntesen för att skapa energi.', anvandning:'Får läsk att bubbla och används i brandsläckare.' },
+        { namn:'Väte (H₂)', emoji:'🎈', besk:'Den lättaste gasen som finns och den vanligaste i hela universum.', funktion:'Kan brinna eller reagera kraftigt tillsammans med syre.', anvandning:'Används som bränsle i vätgasbilar och för att skjuta upp raketer.' },
+        { namn:'Helium', emoji:'🎈', besk:'En mycket lätt, osynlig gas som inte reagerar med andra ämnen.', funktion:'Är lättare än luft, vilket gör att ballonger fyllda med helium flyter uppåt.', anvandning:'Fyller ballonger och används för att kyla ner till exempel MR-kameror.' },
+        { namn:'Ozon (O₃)', emoji:'☂️', besk:'En gas som bildas av tre syreatomer tillsammans.', funktion:'Ozonlagret högt uppe i atmosfären skyddar jorden från farlig UV-strålning från solen.', anvandning:'Används ibland för att rena vatten från bakterier.' },
+        { namn:'Metan (CH₄)', emoji:'🔥', besk:'En brännbar gas som bland annat bildas när organiskt material bryts ner.', funktion:'Är en så kallad växthusgas som bidrar till uppvärmning av jorden.', anvandning:'Är huvudbeståndsdelen i naturgas, som används för uppvärmning och matlagning.' },
+        { namn:'Klor (Cl₂)', emoji:'🧪', besk:'En giftig, gulgrön gas med stark, stickande lukt.', funktion:'Dödar bakterier och andra mikroorganismer.', anvandning:'Används för att rena dricksvatten och simbassänger.' }
+    ];
+    // Mineraler - kända mineraler med beskrivning, funktion och användning.
+    const KEMI_MINERALER_BANK = [
+        { namn:'Kvarts', emoji:'💎', besk:'Ett av de vanligaste mineralerna i jordskorpan, ofta genomskinligt eller vitt.', funktion:'Bygger upp berg och sand.', anvandning:'Används för att tillverka glas och i elektronik, till exempel klockor.' },
+        { namn:'Fältspat', emoji:'🪨', besk:'Det allra vanligaste mineralet i jordskorpan, finns i de flesta bergarter.', funktion:'En viktig byggsten i bergarter som granit.', anvandning:'Används vid tillverkning av porslin och keramik.' },
+        { namn:'Glimmer', emoji:'✨', besk:'Ett mineral som bildar tunna, blanka flagor som glittrar i solljus.', funktion:'Går att dela upp i tunna, böjliga skivor.', anvandning:'Används i elektronik och kosmetika för att ge glitter.' },
+        { namn:'Salt (Halit)', emoji:'🧂', besk:'Ett mineral uppbyggt av natrium och klor, känt som vanligt bordssalt.', funktion:'Kroppen behöver salt för att nerver och muskler ska fungera.', anvandning:'Används för att smaksätta och konservera mat, och för att smälta is på vintern.' },
+        { namn:'Guld', emoji:'🥇', besk:'En sällsynt, mjuk och tung metall med gul glans som inte rostar.', funktion:'Leder elektricitet mycket bra och är mycket beständigt.', anvandning:'Används i smycken, elektronik och som värdeförvaring.' },
+        { namn:'Silver', emoji:'🥈', besk:'En blank, vit metall som leder elektricitet och värme bäst av alla metaller.', funktion:'Har en naturlig förmåga att döda bakterier.', anvandning:'Används i smycken, bestick och elektronik.' },
+        { namn:'Diamant', emoji:'💎', besk:'Det hårdaste mineralet som finns naturligt, bildat av kol under enormt tryck.', funktion:'Är extremt hårt och slitstarkt.', anvandning:'Används i smycken samt för att skära och slipa andra hårda material.' },
+        { namn:'Kalcit', emoji:'⚪', besk:'Ett vanligt mineral som bygger upp bergarter som kalksten och marmor.', funktion:'Bubblar när det möter syra, vilket gör det lätt att känna igen.', anvandning:'Används i cement, byggmaterial och som krita.' },
+        { namn:'Magnetit', emoji:'🧲', besk:'Ett svart mineral som är naturligt magnetiskt.', funktion:'Dras till och kan dra andra järnhaltiga föremål.', anvandning:'Används för att utvinna järn och har historiskt använts i kompasser.' }
+    ];
     // Lexikon - klickbara kemibegrepp med popup-förklaring.
     const KEMI_LEX_BANK = [
         { namn:'Ämne', emoji:'🔵', besk:'Allt som har en massa och tar plats, till exempel vatten, järn eller luft.' },
@@ -5192,9 +5243,11 @@
         const tabSf=document.createElement('button'); tabSf.type='button'; tabSf.className='btn'; tabSf.textContent='🧠 Sant eller falskt';
         const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🎯 Quiz';
         const tabLex=document.createElement('button'); tabLex.type='button'; tabLex.className='btn'; tabLex.textContent='🧪 Lexikon';
+        const tabGaser=document.createElement('button'); tabGaser.type='button'; tabGaser.className='btn'; tabGaser.textContent='💨 Gaser';
+        const tabMineraler=document.createElement('button'); tabMineraler.type='button'; tabMineraler.className='btn'; tabMineraler.textContent='💎 Mineraler';
         const tabHitta=document.createElement('button'); tabHitta.type='button'; tabHitta.className='btn'; tabHitta.textContent='🔎 Hitta materialet';
         const tabVardag=document.createElement('button'); tabVardag.type='button'; tabVardag.className='btn'; tabVardag.textContent='🌍 Kemi i vardagen';
-        [tabFraga,tabAgg,tabVh,tabBl,tabMat,tabSf,tabQuiz,tabLex,tabHitta,tabVardag].forEach(t=>{ t.style.flex='1 1 auto'; tabRow.appendChild(t); });
+        [tabFraga,tabAgg,tabVh,tabBl,tabMat,tabSf,tabQuiz,tabLex,tabGaser,tabMineraler,tabHitta,tabVardag].forEach(t=>{ t.style.flex='1 1 auto'; tabRow.appendChild(t); });
         body.appendChild(tabRow);
 
         const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
@@ -5413,6 +5466,32 @@
             kortWrap.appendChild(grid);
         }
 
+        function renderGaser(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Klicka på en gas för att se beskrivning, funktion och användning!'; kortWrap.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='vd-lex-grid';
+            KEMI_GASER_BANK.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> kmOpenPopup(v.emoji+' '+gotdEsc(v.namn), `<div class='vd-lex-modal-besk'><b>Beskrivning:</b> ${gotdEsc(v.besk)}</div><div class='vd-lex-modal-besk'><b>Funktion:</b> ${gotdEsc(v.funktion)}</div><div class='vd-lex-modal-besk'><b>Användning:</b> ${gotdEsc(v.anvandning)}</div>`);
+                grid.appendChild(c);
+            });
+            kortWrap.appendChild(grid);
+        }
+
+        function renderMineraler(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Klicka på ett mineral för att se beskrivning, funktion och användning!'; kortWrap.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='vd-lex-grid';
+            KEMI_MINERALER_BANK.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> kmOpenPopup(v.emoji+' '+gotdEsc(v.namn), `<div class='vd-lex-modal-besk'><b>Beskrivning:</b> ${gotdEsc(v.besk)}</div><div class='vd-lex-modal-besk'><b>Funktion:</b> ${gotdEsc(v.funktion)}</div><div class='vd-lex-modal-besk'><b>Användning:</b> ${gotdEsc(v.anvandning)}</div>`);
+                grid.appendChild(c);
+            });
+            kortWrap.appendChild(grid);
+        }
+
         function renderHitta(){
             kortWrap.innerHTML='';
             const o = KEMI_HITTA_BANK[hittaIdx];
@@ -5470,7 +5549,7 @@
         }
 
         function render(){
-            [[tabFraga,'fraga'],[tabAgg,'agg'],[tabVh,'vh'],[tabBl,'bl'],[tabMat,'mat'],[tabSf,'sf'],[tabQuiz,'quiz'],[tabLex,'lex'],[tabHitta,'hitta'],[tabVardag,'vardag']].forEach(([btn,m])=>{
+            [[tabFraga,'fraga'],[tabAgg,'agg'],[tabVh,'vh'],[tabBl,'bl'],[tabMat,'mat'],[tabSf,'sf'],[tabQuiz,'quiz'],[tabLex,'lex'],[tabGaser,'gaser'],[tabMineraler,'mineraler'],[tabHitta,'hitta'],[tabVardag,'vardag']].forEach(([btn,m])=>{
                 btn.classList.toggle('btn-primary', mode===m); btn.classList.toggle('btn-secondary', mode!==m);
             });
             if(mode==='agg') renderAgg();
@@ -5480,6 +5559,8 @@
             else if(mode==='sf') renderSf();
             else if(mode==='quiz') renderQuiz();
             else if(mode==='lex') renderLex();
+            else if(mode==='gaser') renderGaser();
+            else if(mode==='mineraler') renderMineraler();
             else if(mode==='hitta') renderHitta();
             else if(mode==='vardag') renderVardag();
             else renderFraga();
@@ -5492,6 +5573,8 @@
         tabSf.onclick=()=>{ mode='sf'; render(); persist(); };
         tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
         tabLex.onclick=()=>{ mode='lex'; render(); persist(); };
+        tabGaser.onclick=()=>{ mode='gaser'; render(); persist(); };
+        tabMineraler.onclick=()=>{ mode='mineraler'; render(); persist(); };
         tabHitta.onclick=()=>{ mode='hitta'; render(); persist(); };
         tabVardag.onclick=()=>{ mode='vardag'; render(); persist(); };
         render();
@@ -5559,23 +5642,129 @@
         const widget = body.parentElement.parentElement;
         if(!config){ widget.style.height = '560px'; }
 
-        let mode = (config && config.data && config.data.mode) || 'process';
+        let mode = (config && config.data && config.data.mode) || 'illustration';
         let quizIdx = (config && config.data && typeof config.data.quizIdx==='number') ? config.data.quizIdx : Math.floor(Math.random()*VKL_QUIZ.length);
         let quizValt = (config && config.data && typeof config.data.quizValt==='number') ? config.data.quizValt : null;
         let quizScore = (config && config.data && config.data.quizScore) || 0;
         let quizTotal = (config && config.data && config.data.quizTotal) || 0;
 
-        const tabRow=document.createElement('div'); tabRow.className='hover-menu vk-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.gap='6px';
+        const tabRow=document.createElement('div'); tabRow.className='hover-menu vk-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.gap='6px'; tabRow.style.flexWrap='wrap';
+        const tabIllu=document.createElement('button'); tabIllu.type='button'; tabIllu.className='btn'; tabIllu.textContent='🖼️ Illustration'; tabIllu.style.flex='1';
         const tabProcess=document.createElement('button'); tabProcess.type='button'; tabProcess.className='btn'; tabProcess.textContent='🔄 Processen'; tabProcess.style.flex='1';
         const tabBegrepp=document.createElement('button'); tabBegrepp.type='button'; tabBegrepp.className='btn'; tabBegrepp.textContent='📚 Begrepp'; tabBegrepp.style.flex='1';
         const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🎯 Quiz'; tabQuiz.style.flex='1';
-        [tabProcess,tabBegrepp,tabQuiz].forEach(t=>tabRow.appendChild(t));
+        [tabIllu,tabProcess,tabBegrepp,tabQuiz].forEach(t=>tabRow.appendChild(t));
         body.appendChild(tabRow);
 
         const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
         body.appendChild(kortWrap);
 
         function persist(){ widget.dataset.vkl = JSON.stringify({ mode, quizIdx, quizValt, quizScore, quizTotal }); saveBoardState(); }
+
+        function renderIllustration(){
+            kortWrap.innerHTML='';
+            const wrap=document.createElement('div'); wrap.className='vk-illu-wrap';
+            wrap.innerHTML = `
+<svg viewBox="0 0 640 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <rect x="0" y="0" width="640" height="460" rx="18" fill="#eaf6fb"/>
+
+  <text x="320" y="38" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="27" font-weight="800" fill="#333">Vattnets Kretslopp</text>
+
+  <!-- Sol -->
+  <g>
+    <polygon points="577,20 588,45 615,38 597,58 618,75 590,72 585,98 573,75 548,82 562,60 543,45 570,48" fill="#f6c343"/>
+    <circle cx="580" cy="58" r="26" fill="#f8d268" stroke="#e0a92c" stroke-width="2"/>
+    <text x="580" y="63" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#7a5a12">Sol</text>
+  </g>
+
+  <!-- Moln -->
+  <g>
+    <ellipse cx="65" cy="98" rx="26" ry="18" fill="#d7dbe3"/>
+    <ellipse cx="95" cy="86" rx="32" ry="24" fill="#d7dbe3"/>
+    <ellipse cx="128" cy="98" rx="24" ry="16" fill="#d7dbe3"/>
+    <ellipse cx="95" cy="104" rx="44" ry="16" fill="#d7dbe3"/>
+  </g>
+  <g>
+    <ellipse cx="275" cy="118" rx="28" ry="19" fill="#ccd2db"/>
+    <ellipse cx="308" cy="105" rx="34" ry="25" fill="#ccd2db"/>
+    <ellipse cx="343" cy="118" rx="25" ry="17" fill="#ccd2db"/>
+    <ellipse cx="308" cy="124" rx="46" ry="17" fill="#ccd2db"/>
+  </g>
+  <g>
+    <ellipse cx="435" cy="178" rx="24" ry="16" fill="#d7dbe3"/>
+    <ellipse cx="463" cy="167" rx="29" ry="21" fill="#d7dbe3"/>
+    <ellipse cx="492" cy="178" rx="21" ry="14" fill="#d7dbe3"/>
+    <ellipse cx="463" cy="184" rx="38" ry="14" fill="#d7dbe3"/>
+  </g>
+
+  <!-- Regndroppar under första molnet -->
+  <g fill="#5b9bd5">
+    <path d="M40,128 q4,10 0,16 q-4,-6 0,-16 Z"/>
+    <path d="M58,134 q4,10 0,16 q-4,-6 0,-16 Z"/>
+    <path d="M76,128 q4,10 0,16 q-4,-6 0,-16 Z"/>
+    <path d="M94,134 q4,10 0,16 q-4,-6 0,-16 Z"/>
+    <path d="M112,128 q4,10 0,16 q-4,-6 0,-16 Z"/>
+  </g>
+
+  <!-- Vind: pil mellan molnen -->
+  <text x="222" y="98" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#444">Vind</text>
+  <line x1="255" y1="112" x2="195" y2="128" stroke="#5a5a68" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="182,132 210,120 202,142" fill="#5a5a68"/>
+
+  <!-- Nederbörd: pil ner mot berget -->
+  <text x="105" y="163" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#444">Nederbörd</text>
+  <line x1="105" y1="172" x2="105" y2="205" stroke="#5a5a68" stroke-width="9" stroke-linecap="round"/>
+  <polygon points="90,205 120,205 105,225" fill="#5a5a68"/>
+
+  <!-- Kondensering: pil upp mot moln -->
+  <text x="512" y="222" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#444">Kondensering</text>
+  <line x1="530" y1="290" x2="478" y2="212" stroke="#5a5a68" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="462,204 493,206 472,228" fill="#5a5a68"/>
+
+  <!-- Berg (bakre, grått) -->
+  <polygon points="150,460 288,190 426,460" fill="#c3ccd6"/>
+  <polygon points="255,232 288,190 321,232" fill="#f3f5f8"/>
+
+  <!-- Berg (främre, grönt) -->
+  <polygon points="0,460 168,168 336,460" fill="#3fa34d"/>
+  <polygon points="138,208 168,168 198,208" fill="#f3f5f8"/>
+
+  <!-- Filtrering: pil ner i berget -->
+  <text x="95" y="292" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#333">Filtrering</text>
+  <line x1="95" y1="302" x2="95" y2="335" stroke="#5a5a68" stroke-width="9" stroke-linecap="round"/>
+  <polygon points="80,335 110,335 95,355" fill="#5a5a68"/>
+
+  <!-- Grundvatten: pil åt höger längst ner till vänster -->
+  <text x="70" y="428" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#333">Grundvatten</text>
+  <line x1="25" y1="440" x2="130" y2="440" stroke="#5a5a68" stroke-width="9" stroke-linecap="round"/>
+  <polygon points="130,425 130,455 155,440" fill="#5a5a68"/>
+
+  <!-- Avrinning: pil mot floden -->
+  <text x="248" y="288" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#333">Avrinning</text>
+  <line x1="248" y1="298" x2="248" y2="328" stroke="#5a5a68" stroke-width="9" stroke-linecap="round"/>
+  <polygon points="233,328 263,328 248,348" fill="#5a5a68"/>
+
+  <!-- Flod -->
+  <path d="M235,240 C205,290 262,320 228,365 C200,400 258,420 305,458" stroke="#4a90d9" stroke-width="24" fill="none" stroke-linecap="round"/>
+  <path d="M235,240 C205,290 262,320 228,365 C200,400 258,420 305,458" stroke="#8fc1ec" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Hav -->
+  <path d="M300,430 Q330,415 360,430 T420,430 T480,430 T540,430 T600,430 T640,430 L640,460 L300,460 Z" fill="#5aa9dc"/>
+  <path d="M300,430 Q330,418 360,430 T420,430 T480,430" stroke="#8fc1ec" stroke-width="3" fill="none" opacity="0.8"/>
+  <text x="565" y="450" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="14" font-weight="700" fill="#fff">Hav</text>
+
+  <!-- Avdunstning: ånga + pil upp -->
+  <g stroke="#8fc1ec" stroke-width="4" fill="none" stroke-linecap="round">
+    <path d="M492,410 Q498,395 492,382 Q486,368 492,355"/>
+    <path d="M508,410 Q514,395 508,382 Q502,368 508,355"/>
+    <path d="M524,410 Q530,395 524,382 Q518,368 524,355"/>
+  </g>
+  <line x1="508" y1="350" x2="508" y2="312" stroke="#5a5a68" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="494,318 522,318 508,296" fill="#5a5a68"/>
+  <text x="508" y="379" text-anchor="middle" font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#333">Avdunstning</text>
+</svg>`;
+            kortWrap.appendChild(wrap);
+        }
 
         function renderProcess(){
             kortWrap.innerHTML='';
@@ -5628,11 +5817,12 @@
         }
 
         function render(){
-            [[tabProcess,'process'],[tabBegrepp,'begrepp'],[tabQuiz,'quiz']].forEach(([btn,m])=>{
+            [[tabIllu,'illustration'],[tabProcess,'process'],[tabBegrepp,'begrepp'],[tabQuiz,'quiz']].forEach(([btn,m])=>{
                 btn.classList.toggle('btn-primary', mode===m); btn.classList.toggle('btn-secondary', mode!==m);
             });
-            if(mode==='begrepp') renderBegrepp(); else if(mode==='quiz') renderQuiz(); else renderProcess();
+            if(mode==='begrepp') renderBegrepp(); else if(mode==='quiz') renderQuiz(); else if(mode==='process') renderProcess(); else renderIllustration();
         }
+        tabIllu.onclick=()=>{ mode='illustration'; render(); persist(); };
         tabProcess.onclick=()=>{ mode='process'; render(); persist(); };
         tabBegrepp.onclick=()=>{ mode='begrepp'; render(); persist(); };
         tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
@@ -8432,7 +8622,7 @@
                 const rad=document.createElement('div'); rad.className='su-rad'+(u.klurig?' su-klurig':'');
                 const tagg=document.createElement('div'); tagg.className='su-tagg'; tagg.innerHTML=`<span>${u.emoji}</span>${u.omrade}${u.klurig?' <span class="su-klurig-lbl">✨ Extra klurig</span>':''}`;
                 const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
-                const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=(i+1)+'. '+u.fraga;
+                const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
                 const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
                 sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
                 rad2.appendChild(fr); rad2.appendChild(sv);
@@ -8676,7 +8866,8 @@
             const FIG2D = {
                 'Kvadrat': '<svg viewBox="0 0 100 100"><rect x="22" y="22" width="56" height="56" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/></svg>',
                 'Rektangel': '<svg viewBox="0 0 100 100"><rect x="14" y="30" width="72" height="40" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/></svg>',
-                'Triangel': '<svg viewBox="0 0 100 100"><polygon points="50,20 82,78 18,78" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/></svg>',
+                'Liksidig triangel': '<svg viewBox="0 0 100 100"><polygon points="50,20 82,78 18,78" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/></svg>',
+                'Likbent triangel': '<svg viewBox="0 0 100 100"><polygon points="50,16 78,80 22,80" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/><line x1="50" y1="16" x2="36" y2="48" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="2 2"/><line x1="50" y1="16" x2="64" y2="48" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="2 2"/></svg>',
                 'Cirkel': '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#fee2e2" stroke="#dc2626" stroke-width="3"/></svg>',
                 'Rätvinklig triangel': '<svg viewBox="0 0 100 100"><polygon points="22,78 82,78 22,26" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/></svg>',
                 'Romb': '<svg viewBox="0 0 100 100"><polygon points="50,18 82,50 50,82 18,50" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/></svg>',
@@ -8696,7 +8887,8 @@
             const PROPS2D = {
                 'Kvadrat': {Hörn:4, Sidor:4, Extra:'Alla sidor lika långa, fyra räta vinklar'},
                 'Rektangel': {Hörn:4, Sidor:4, Extra:'Motstående sidor lika långa, fyra räta vinklar'},
-                'Triangel': {Hörn:3, Sidor:3, Extra:'Vinklarna är tillsammans 180°'},
+                'Liksidig triangel': {Hörn:3, Sidor:3, Extra:'Vinklarna är tillsammans 180°'},
+                'Likbent triangel': {Hörn:3, Sidor:3, Extra:'Två sidor är lika långa, och de två vinklarna vid basen är lika stora'},
                 'Cirkel': {Hörn:0, Sidor:'0 (en böjd kurva)', Extra:'Alla punkter lika långt från mitten'},
                 'Rätvinklig triangel': {Hörn:3, Sidor:3, Extra:'Har en rät vinkel (90°)'},
                 'Romb': {Hörn:4, Sidor:4, Extra:'Alla sidor lika långa, sneda vinklar'},
@@ -8755,6 +8947,7 @@
             const tabs=document.createElement('div'); tabs.className='figx-tabs';
             const grid=document.createElement('div'); grid.className='figx-grid';
             const ovningEl=document.createElement('div'); ovningEl.className='figx-ovning'; ovningEl.style.display='none';
+            const gradskivaEl=document.createElement('div'); gradskivaEl.className='gr-wrap'; gradskivaEl.style.display='none';
             let läge='2d';
             function ritaKort(namn, svgHtml, props){
                 const card=document.createElement('div'); card.className='figx-card';
@@ -8810,8 +9003,118 @@
                 ovningEl.appendChild(panel);
                 nyFraga();
             }
+            // ---- GRADSKIVA: vinkelexempel + genomskinlig gradskiva som går att flytta, vrida och vända ----
+            function buildGradskiva(){
+                const toolbar=document.createElement('div'); toolbar.className='gr-toolbar';
+                const flipBtn=document.createElement('button'); flipBtn.className='btn btn-secondary'; flipBtn.textContent='🔄 Vänd gradskivan';
+                const resetBtn=document.createElement('button'); resetBtn.className='btn btn-secondary'; resetBtn.textContent='↺ Återställ gradskivan';
+                toolbar.appendChild(flipBtn); toolbar.appendChild(resetBtn);
+                gradskivaEl.appendChild(toolbar);
+
+                const hint=document.createElement('p'); hint.className='figx-sub'; hint.textContent='Dra gradskivan över en vinkel, vrid den med den blå handtaget så att baslinjen ligger an mot ena benet, och läs sedan av gradtalet. Klicka på "Visa gradtal" för att kolla facit.';
+                gradskivaEl.appendChild(hint);
+
+                const area=document.createElement('div'); area.className='gr-area';
+                const cardGrid=document.createElement('div'); cardGrid.className='gr-grid';
+                area.appendChild(cardGrid);
+                gradskivaEl.appendChild(area);
+
+                // ---- Vinkelexempel ----
+                function angleCardSvg(deg, rot){
+                    const vx=75, vy=125, L=95;
+                    const rad1=rot*Math.PI/180, rad2=(rot+deg)*Math.PI/180;
+                    const p1={ x:vx+L*Math.cos(rad1), y:vy-L*Math.sin(rad1) };
+                    const p2={ x:vx+L*Math.cos(rad2), y:vy-L*Math.sin(rad2) };
+                    const r=26;
+                    const a1={ x:vx+r*Math.cos(rad1), y:vy-r*Math.sin(rad1) };
+                    const a2={ x:vx+r*Math.cos(rad2), y:vy-r*Math.sin(rad2) };
+                    const largeArc = deg>180?1:0;
+                    return `<svg viewBox="0 0 150 150">
+                        <line x1="${vx}" y1="${vy}" x2="${p1.x.toFixed(1)}" y2="${p1.y.toFixed(1)}" stroke="#1a1a2e" stroke-width="3"/>
+                        <line x1="${vx}" y1="${vy}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="#1a1a2e" stroke-width="3"/>
+                        <path d="M ${a1.x.toFixed(1)} ${a1.y.toFixed(1)} A ${r} ${r} 0 ${largeArc} 0 ${a2.x.toFixed(1)} ${a2.y.toFixed(1)}" fill="none" stroke="#dc2626" stroke-width="2"/>
+                        <circle cx="${vx}" cy="${vy}" r="3" fill="#1a1a2e"/>
+                    </svg>`;
+                }
+                const EXEMPEL = [
+                    { deg:40, rot:10 }, { deg:90, rot:0 }, { deg:120, rot:-15 },
+                    { deg:65, rot:35 }, { deg:150, rot:-10 }, { deg:100, rot:20 }
+                ];
+                EXEMPEL.forEach(ex=>{
+                    const card=document.createElement('div'); card.className='gr-card';
+                    const fig=document.createElement('div'); fig.className='gr-card-fig'; fig.innerHTML=angleCardSvg(ex.deg, ex.rot);
+                    const reveal=document.createElement('div'); reveal.className='gr-reveal'; reveal.textContent='Visa gradtal'; reveal.title='Klicka för att visa facit';
+                    reveal.onclick=()=>{ reveal.textContent=ex.deg+'°'; reveal.classList.add('revealed'); reveal.onclick=null; };
+                    card.appendChild(fig); card.appendChild(reveal);
+                    cardGrid.appendChild(card);
+                });
+
+                // ---- Genomskinlig, flyttbar, roterbar och vändbar gradskiva ----
+                const prot=document.createElement('div'); prot.className='gr-protractor';
+                const protInner=document.createElement('div'); protInner.className='gr-prot-inner';
+                const cx=110, cy=115, R=95;
+                let protSvg = `<svg viewBox="0 0 220 130" width="220" height="130">
+                    <path d="M ${cx-R} ${cy} A ${R} ${R} 0 0 1 ${cx+R} ${cy} Z" fill="rgba(59,130,246,0.14)" stroke="#2563eb" stroke-width="2"/>
+                    <line x1="${cx-R}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="#2563eb" stroke-width="1.5"/>`;
+                for(let d=0; d<=180; d+=10){
+                    const rad=d*Math.PI/180;
+                    const big = d%30===0;
+                    const rIn = big ? R-14 : R-8;
+                    const x1=cx+R*Math.cos(rad), y1=cy-R*Math.sin(rad);
+                    const x2=cx+rIn*Math.cos(rad), y2=cy-rIn*Math.sin(rad);
+                    protSvg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#1e3a8a" stroke-width="${big?1.6:1}"/>`;
+                    if(big){
+                        const lx=cx+(R-26)*Math.cos(rad), ly=cy-(R-26)*Math.sin(rad);
+                        protSvg += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">${180-d}</text>`;
+                    }
+                }
+                protSvg += `<circle cx="${cx}" cy="${cy}" r="3" fill="#dc2626"/></svg>`;
+                protInner.innerHTML = protSvg;
+                const handle=document.createElement('div'); handle.className='gr-prot-handle'; handle.title='Dra för att vrida';
+                prot.appendChild(protInner); prot.appendChild(handle);
+                area.appendChild(prot);
+
+                let px=20, py=20, rotation=0, flipped=false;
+                const applyPos=()=>{ prot.style.left=px+'px'; prot.style.top=py+'px'; };
+                const applyTransform=()=>{ protInner.style.transform = `rotate(${rotation}deg) scaleX(${flipped?-1:1})`; };
+                applyPos(); applyTransform();
+
+                let dragging=false, dragStartX=0, dragStartY=0, dragOrigX=0, dragOrigY=0;
+                prot.addEventListener('pointerdown',(e)=>{
+                    if(e.target===handle) return;
+                    e.preventDefault(); e.stopPropagation();
+                    dragging=true; dragStartX=e.clientX; dragStartY=e.clientY; dragOrigX=px; dragOrigY=py;
+                    try{ prot.setPointerCapture(e.pointerId); }catch(_){}
+                    const move=(ev)=>{ if(!dragging)return; px=dragOrigX+(ev.clientX-dragStartX); py=dragOrigY+(ev.clientY-dragStartY); applyPos(); };
+                    const up=()=>{ dragging=false; prot.removeEventListener('pointermove',move); prot.removeEventListener('pointerup',up); prot.removeEventListener('pointercancel',up); };
+                    prot.addEventListener('pointermove',move); prot.addEventListener('pointerup',up); prot.addEventListener('pointercancel',up);
+                });
+                handle.addEventListener('pointerdown',(e)=>{
+                    e.preventDefault(); e.stopPropagation();
+                    try{ handle.setPointerCapture(e.pointerId); }catch(_){}
+                    const move=(ev)=>{
+                        const r=prot.getBoundingClientRect();
+                        const pivotX=r.left+cx*(r.width/220), pivotY=r.top+cy*(r.height/130);
+                        const ang=Math.atan2(ev.clientY-pivotY, ev.clientX-pivotX)*180/Math.PI;
+                        rotation = flipped ? (180-ang) : ang;
+                        applyTransform();
+                    };
+                    const up=()=>{ handle.removeEventListener('pointermove',move); handle.removeEventListener('pointerup',up); handle.removeEventListener('pointercancel',up); };
+                    handle.addEventListener('pointermove',move); handle.addEventListener('pointerup',up); handle.addEventListener('pointercancel',up);
+                });
+                flipBtn.onclick=()=>{ flipped=!flipped; applyTransform(); };
+                resetBtn.onclick=()=>{ px=20; py=20; rotation=0; flipped=false; applyPos(); applyTransform(); };
+            }
+            buildGradskiva();
             function render(){
                 grid.innerHTML='';
+                if(läge==='gradskiva'){
+                    sub.textContent='Öva på att mäta vinklar med en genomskinlig gradskiva som går att flytta, vrida och vända.';
+                    ovningEl.style.display='none'; ovningEl.innerHTML='';
+                    gradskivaEl.style.display='';
+                    return;
+                }
+                gradskivaEl.style.display='none';
                 if(läge==='vinklar'){
                     sub.textContent='Gissa vinkelns namn och egenskaper – tryck sedan på den gula rutan för att se svaret. Testa dig själv i övningen längst ned.';
                     VINKEL_TYPER.forEach(namn=>{ const v=VINKLAR[namn]; grid.appendChild(ritaKort(namn, vinkelSvg(v.deg), {Gradtal:v.Gradtal, Kännetecken:v.Kännetecken})); });
@@ -8827,13 +9130,16 @@
             const t2=document.createElement('button'); t2.className='figx-tab active'; t2.textContent='▱ 2D-figurer';
             const t3=document.createElement('button'); t3.className='figx-tab'; t3.textContent='⬡ 3D-figurer';
             const t4=document.createElement('button'); t4.className='figx-tab'; t4.textContent='📐 Vinklar';
-            const alla=[t2,t3,t4];
+            const t5=document.createElement('button'); t5.className='figx-tab'; t5.textContent='📏 Gradskiva';
+            const alla=[t2,t3,t4,t5];
             t2.onclick=()=>{ läge='2d'; alla.forEach(t=>t.classList.remove('active')); t2.classList.add('active'); render(); };
             t3.onclick=()=>{ läge='3d'; alla.forEach(t=>t.classList.remove('active')); t3.classList.add('active'); render(); };
             t4.onclick=()=>{ läge='vinklar'; alla.forEach(t=>t.classList.remove('active')); t4.classList.add('active'); render(); };
-            tabs.appendChild(t2); tabs.appendChild(t3); tabs.appendChild(t4); box.appendChild(tabs);
+            t5.onclick=()=>{ läge='gradskiva'; alla.forEach(t=>t.classList.remove('active')); t5.classList.add('active'); render(); };
+            tabs.appendChild(t2); tabs.appendChild(t3); tabs.appendChild(t4); tabs.appendChild(t5); box.appendChild(tabs);
             box.appendChild(grid);
             box.appendChild(ovningEl);
+            box.appendChild(gradskivaEl);
             ov.appendChild(box);
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
             render();
@@ -14216,6 +14522,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 </select>
                 <label><input type='checkbox' class='koord-koppla' checked> Koppla punkter</label>
                 <label><input type='checkbox' class='koord-stang'> Stäng figuren</label>
+                <button type='button' class='btn btn-secondary koord-ovning'>🎯 Övningsuppgifter</button>
+                <button type='button' class='btn btn-secondary koord-begrepp'>📖 Begrepp</button>
             </div>
             <div class='koord-grid-wrap'></div>
             <div class='koord-list'></div>
@@ -14225,7 +14533,112 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             </div>`;
         const gridWrap=body.querySelector('.koord-grid-wrap'), listEl=body.querySelector('.koord-list');
         const storlekSel=body.querySelector('.koord-storlek'), kopplaCb=body.querySelector('.koord-koppla'), stangCb=body.querySelector('.koord-stang');
-        const angraBtn=body.querySelector('.koord-angra'), rensaBtn=body.querySelector('.koord-rensa');
+        const angraBtn=body.querySelector('.koord-angra'), rensaBtn=body.querySelector('.koord-rensa'), ovningBtn=body.querySelector('.koord-ovning'), begreppBtn=body.querySelector('.koord-begrepp');
+        ovningBtn.onclick=()=>openKoordOvning();
+        begreppBtn.onclick=()=>openKoordBegrepp();
+
+        // ---- BEGREPP: förklaringar av ord inom koordinatsystem, anpassade för åk 4 ----
+        function openKoordBegrepp(){
+            const BEGREPP = [
+                { ord:'Koordinatsystem', def:'Ett rutnät med två linjer (axlar) som du kan använda för att visa exakt var en punkt är.' },
+                { ord:'X-axeln', def:'Den vågräta linjen (i sidled) i koordinatsystemet.' },
+                { ord:'Y-axeln', def:'Den lodräta linjen (upp och ner) i koordinatsystemet.' },
+                { ord:'Origo', def:'Punkten där x-axeln och y-axeln möts. Har alltid koordinaterna (0, 0).' },
+                { ord:'Koordinat', def:'Ett par av två tal, till exempel (3, 5), som visar exakt var en punkt är i rutnätet.' },
+                { ord:'X-koordinat', def:'Det första talet i en koordinat. Visar hur många steg du ska gå åt sidan (höger) från origo.' },
+                { ord:'Y-koordinat', def:'Det andra talet i en koordinat. Visar hur många steg du ska gå uppåt från origo.' },
+                { ord:'Rutnät', def:'De små rutorna i koordinatsystemet som gör det lättare att räkna steg och hitta punkter.' },
+                { ord:'Punkt', def:'En exakt plats i koordinatsystemet, till exempel markerad med en prick.' }
+            ];
+
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent='📖 Begrepp – Koordinatsystem';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const sub=document.createElement('p'); sub.className='figx-sub'; sub.textContent='Viktiga ord och begrepp inom koordinatsystem, förklarade på ett enkelt sätt.';
+            box.appendChild(sub);
+
+            const lista=document.createElement('div'); lista.className='su-lista';
+            BEGREPP.forEach(b=>{
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=b.ord;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=b.def;
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            box.appendChild(lista);
+
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        // ---- ÖVNINGSUPPGIFTER: textuppgifter om koordinatsystem, anpassade för åk 4 ----
+        function openKoordOvning(){
+            const UPPGIFTER = [
+                { fraga:'Vad heter linjen som går vågrätt (i sidled) i ett koordinatsystem?', svar:'x-axeln' },
+                { fraga:'Vad heter linjen som går lodrätt (upp och ner) i ett koordinatsystem?', svar:'y-axeln' },
+                { fraga:'Vilka koordinater har origo, punkten där x-axeln och y-axeln möts?', svar:'(0, 0)' },
+                { fraga:'I punkten (5, 2) – vilket tal talar om hur många steg du ska gå åt höger?', svar:'5 (det är x-koordinaten)' },
+                { fraga:'I punkten (5, 2) – vilket tal talar om hur många steg du ska gå uppåt?', svar:'2 (det är y-koordinaten)' },
+                { fraga:'Klicka i punkten (3, 4) i rutnätet. Skriv ner koordinaten du klickade i – blev det rätt?', svar:'Kolla i listan under rutnätet att det blev (3, 4)' },
+                { fraga:'Klicka i punkterna (2,2), (2,6), (6,6) och (6,2) i tur och ordning, med "Koppla punkter" och "Stäng figuren" ikryssat. Vilken form bildas?', svar:'En kvadrat' },
+                { fraga:'Klicka i punkterna (1,1), (5,1) och (3,5) i tur och ordning. Vilken form bildas?', svar:'En triangel' },
+                { fraga:'Du står i punkten (4, 4) och går 3 steg åt höger. Vilken punkt hamnar du i?', svar:'(7, 4)' },
+                { fraga:'Du står i punkten (5, 6) och går 2 steg neråt. Vilken punkt hamnar du i?', svar:'(5, 4)' },
+                { fraga:'Du står i punkten (6, 3) och går 4 steg åt vänster. Vilken punkt hamnar du i?', svar:'(2, 3)' },
+                { fraga:'Vilken av punkterna (3, 7) och (7, 3) ligger högst upp i rutnätet?', svar:'(3, 7) – den har störst y-koordinat' }
+            ];
+
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent='🎯 Övningsuppgifter – Koordinatsystem';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const sub=document.createElement('p'); sub.className='figx-sub'; sub.textContent='Uppgifter om koordinatsystem för åk 4 – en uppgift i taget. Klicka på svaret för att se facit. Testa gärna i rutnätet samtidigt!';
+            box.appendChild(sub);
+
+            const lista=document.createElement('div'); lista.className='su-lista';
+            box.appendChild(lista);
+            const raknare=document.createElement('div'); raknare.className='figx-sub'; raknare.style.textAlign='center'; raknare.style.fontWeight='700'; raknare.style.color='#0369a1';
+            box.appendChild(raknare);
+            const navRad=document.createElement('div'); navRad.style.display='flex'; navRad.style.gap='8px'; navRad.style.marginTop='14px';
+            const foregBtn=document.createElement('button'); foregBtn.className='btn btn-secondary'; foregBtn.style.flex='1'; foregBtn.textContent='◀ Föregående';
+            const nastaBtn=document.createElement('button'); nastaBtn.className='btn btn-primary'; nastaBtn.style.flex='1'; nastaBtn.textContent='Nästa uppgift ▶';
+            navRad.appendChild(foregBtn); navRad.appendChild(nastaBtn);
+            box.appendChild(navRad);
+
+            let idx=0;
+            function renderaUppgift(){
+                raknare.textContent='Uppgift '+(idx+1)+' av '+UPPGIFTER.length;
+                lista.innerHTML='';
+                const u=UPPGIFTER[idx];
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
+                const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
+                const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
+                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
+                rad2.appendChild(fr); rad2.appendChild(sv);
+                rad.appendChild(rad2);
+                lista.appendChild(rad);
+                foregBtn.disabled = idx===0;
+                nastaBtn.textContent = idx===UPPGIFTER.length-1 ? '🔄 Börja om' : 'Nästa uppgift ▶';
+            }
+            foregBtn.onclick=()=>{ if(idx>0){ idx--; renderaUppgift(); } };
+            nastaBtn.onclick=()=>{ idx = (idx+1)%UPPGIFTER.length; renderaUppgift(); };
+            renderaUppgift();
+
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
 
         let points=[];
 
@@ -14256,6 +14669,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const zeroX = toScreenX(0), zeroY = toScreenY(0);
             svg += `<line x1='${pad}' y1='${zeroY}' x2='${pad+size}' y2='${zeroY}' stroke='#1f2937' stroke-width='2'/>`;
             svg += `<line x1='${zeroX}' y1='${pad}' x2='${zeroX}' y2='${pad+size}' stroke='#1f2937' stroke-width='2'/>`;
+            // axelbeteckningar: x längst till höger på x-axeln, y längst upp på y-axeln
+            svg += `<text x='${pad+size+10}' y='${zeroY+4}' text-anchor='middle' font-size='13' font-weight='800' font-style='italic' fill='#1f2937'>x</text>`;
+            svg += `<text x='${zeroX}' y='${pad-8}' text-anchor='middle' font-size='13' font-weight='800' font-style='italic' fill='#1f2937'>y</text>`;
             // siffror
             const stepLbl = range>16 ? 2 : 1;
             const lo = fyra ? -n : 0;
@@ -14314,6 +14730,594 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         render(); syncData();
     }
     window.createKoordinatsystem = createKoordinatsystem;
+
+    // ---- KROPPEN ----
+    // Fyra flikar: Kroppsdelar, Kroppsorgan, Begrepp, Quiz. Kort med bild (ikon) + namn,
+    // klick öppnar en popup med större bild och förklaring. Quiz-svar/förklaring visas också i popup.
+    function createKroppen(config){
+        if(config===undefined) config=null;
+        const body = createWidget('KROPPEN', 760, 'kroppen-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '680px'; }
+
+        const KROPP_FARGER = ['#fde2e4','#e2f0cb','#d0e8f2','#fff1c1','#e6dbf7','#ffe0d1','#d7f0e3'];
+        const kroppFarg = i => KROPP_FARGER[i % KROPP_FARGER.length];
+
+        function iconSvg(emoji, bg){
+            return `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${bg}"/><text x="60" y="79" font-size="54" text-anchor="middle">${emoji}</text></svg>`;
+        }
+        function shapeSvg(pathHtml, bg){
+            return `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${bg}"/>${pathHtml}</svg>`;
+        }
+
+        // ---- KROPPSDELAR (yttre) ----
+        const KROPPSDELAR = [
+            { namn:'Huvud', emoji:'🙂', text:'Huvudet sitter överst på kroppen. Där finns hjärnan, ögonen, öronen, näsan och munnen.' },
+            { namn:'Öga', emoji:'👁️', text:'Ögonen använder vi för att se. Vi har två ögon, ett på varje sida av näsan.' },
+            { namn:'Öra', emoji:'👂', text:'Öronen använder vi för att höra ljud. De hjälper oss också att hålla balansen.' },
+            { namn:'Näsa', emoji:'👃', text:'Näsan använder vi för att andas och känna lukter.' },
+            { namn:'Mun', emoji:'👄', text:'Munnen använder vi för att äta, dricka, prata och le.' },
+            { namn:'Hals', emoji:'🧣', text:'Halsen förbinder huvudet med resten av kroppen.' },
+            { namn:'Arm', emoji:'💪', text:'Armarna sitter på sidorna av bålen. Vi använder dem för att lyfta, bära och greppa saker.' },
+            { namn:'Hand', emoji:'✋', text:'Handen sitter längst ut på armen och har fem fingrar som gör att vi kan greppa saker.' },
+            { namn:'Finger', emoji:'👆', text:'Fingrarna använder vi för att peka, greppa och känna hur saker känns.' },
+            { namn:'Mage', emoji:'🫃', text:'Magen är den mjuka framsidan av bålen, ovanför höften och under bröstet.' },
+            { namn:'Rygg', emoji:'🦴', text:'Ryggen är baksidan av bålen. Den hålls upp av ryggraden, en lång rad av ben.' },
+            { namn:'Ben', emoji:'🦵', text:'Benen bär upp hela kroppen och använder vi för att gå, springa och hoppa.' },
+            { namn:'Knä', emoji:'🦿', text:'Knät är leden mitt på benet som gör att vi kan böja benet.' },
+            { namn:'Fot', emoji:'🦶', text:'Foten sitter längst ner på benet och bär upp kroppens hela vikt när vi står.' }
+        ];
+
+        // ---- KROPPSORGAN (inre) ----
+        const KROPPSORGAN = [
+            { namn:'Hjärna', emoji:'🧠', text:'Hjärnan styr hela kroppen. Den gör att vi kan tänka, känna, minnas och röra oss.' },
+            { namn:'Hjärta', emoji:'🫀', text:'Hjärtat är en muskel som pumpar blod runt i hela kroppen. Det slår ungefär 60–100 gånger i minuten i vila.' },
+            { namn:'Lungor', emoji:'🫁', text:'Lungorna tar in syre när vi andas in och släpper ut koldioxid när vi andas ut.' },
+            { namn:'Magsäck', emoji:'', svg:'<path d="M42 28 Q80 22 86 55 Q92 92 55 96 Q22 98 18 65 Q15 40 42 28 Z" fill="#f6a6c1" stroke="#c9527a" stroke-width="4"/>', text:'Magsäcken bryter ner maten vi äter med hjälp av magsyra, som en del av matspjälkningen.' },
+            { namn:'Lever', emoji:'', svg:'<path d="M18 42 Q28 16 68 20 Q100 24 96 54 Q92 86 58 92 Q22 94 14 66 Q10 52 18 42 Z" fill="#c17a52" stroke="#8a4f2c" stroke-width="4"/>', text:'Levern renar blodet från gifter och hjälper till att bryta ner maten vi ätit.' },
+            { namn:'Njurar', emoji:'', svg:'<path d="M32 30 Q46 26 46 46 Q46 66 32 66 Q18 66 20 48 Q20 32 32 30 Z" fill="#a8375e" stroke="#6e1f3c" stroke-width="3"/><path d="M88 30 Q74 26 74 46 Q74 66 88 66 Q102 66 100 48 Q100 32 88 30 Z" fill="#a8375e" stroke="#6e1f3c" stroke-width="3"/>', text:'Njurarna filtrerar blodet och gör sig av med avfallsämnen genom urinen. Vi har två njurar.' },
+            { namn:'Tarmar', emoji:'', svg:'<path d="M20 30 Q42 12 60 30 Q78 48 60 62 Q42 76 58 90 Q74 100 96 90" fill="none" stroke="#e08a5c" stroke-width="11" stroke-linecap="round"/>', text:'Tarmarna tar upp näring från maten vi ätit och för bort det som kroppen inte behöver.' },
+            { namn:'Skelett', emoji:'🦴', text:'Skelettet är alla ben i kroppen tillsammans. Det ger kroppen dess form och skyddar de inre organen.' },
+            { namn:'Muskler', emoji:'💪', text:'Musklerna sitter fästa vid skelettet. När de drar ihop sig kan vi röra på kroppen.' },
+            { namn:'Hud', emoji:'', svg:'<rect x="16" y="16" width="88" height="88" rx="20" fill="#f4c9a0" stroke="#c98f5c" stroke-width="4"/>', text:'Huden är kroppens största organ. Den skyddar oss mot bakterier, håller kvar värme och känner beröring.' }
+        ];
+
+        // ---- SINNEN ----
+        const SINNEN = [
+            { namn:'Synen', emoji:'👁️', text:'Synen gör att vi kan se former, färger och hur långt bort saker är. Ögonen fångar upp ljus och skickar signaler till hjärnan via synnerven.' },
+            { namn:'Hörseln', emoji:'👂', text:'Hörseln gör att vi kan uppfatta ljud, till exempel musik, prat och larm. Örat fångar upp ljudvågor och skickar signaler till hjärnan.' },
+            { namn:'Luktsinnet', emoji:'👃', text:'Luktsinnet gör att vi kan känna dofter, till exempel mat eller blommor. Näsan känner av doftämnen i luften och skickar signaler till hjärnan.' },
+            { namn:'Smaksinnet', emoji:'👅', text:'Smaksinnet gör att vi kan känna smaker som sött, salt, surt, beskt och umami. Smaklökarna på tungan känner av smaken i det vi äter.' },
+            { namn:'Känseln', emoji:'✋', text:'Känseln gör att vi kan känna beröring, tryck, värme, kyla och smärta. Huden är fylld av känselreceptorer över hela kroppen.' }
+        ];
+
+        // ---- BEGREPP ----
+        const KROPP_BEGREPP = [
+            { ord:'Organ', def:'En kroppsdel som har en särskild uppgift i kroppen, till exempel hjärtat eller lungorna.' },
+            { ord:'Skelett', def:'Alla ben i kroppen tillsammans. Ger kroppen form och skyddar de inre organen.' },
+            { ord:'Muskel', def:'Sitter fäst vid skelettet och gör att vi kan röra oss när den drar ihop sig.' },
+            { ord:'Cell', def:'Den minsta byggstenen i kroppen. Allt levande är uppbyggt av celler.' },
+            { ord:'Blodomlopp', def:'Systemet som pumpar blod runt i hela kroppen, med hjärtat som pump.' },
+            { ord:'Nervsystem', def:'Skickar signaler mellan hjärnan och resten av kroppen, till exempel när vi känner smärta.' },
+            { ord:'Andning', def:'När vi andas in syre genom lungorna och andas ut koldioxid.' },
+            { ord:'Matspjälkning', def:'När kroppen bryter ner maten vi äter till energi och näring som kroppen kan använda.' },
+            { ord:'Puls', def:'Antalet gånger hjärtat slår per minut.' },
+            { ord:'Immunförsvar', def:'Kroppens försvar mot bakterier och virus som kan göra oss sjuka.' },
+            { ord:'Sinne', def:'Ett sätt för kroppen att uppfatta omvärlden. Vi har fem huvudsinnen: syn, hörsel, lukt, smak och känsel.' },
+            { ord:'Sinnesorgan', def:'Den kroppsdel som tar emot information till ett sinne, till exempel ögat (syn) eller örat (hörsel).' },
+            { ord:'Receptor', def:'En liten "mottagare" i kroppen som känner av till exempel ljus, ljud, doft, smak eller beröring och skickar signalen vidare till hjärnan.' }
+        ];
+
+        // ---- QUIZ ----
+        const KROPP_QUIZ = [
+            { fraga:'Vilket organ pumpar blod runt i kroppen?', alt:['Hjärtat','Lungorna','Magsäcken','Levern'], ratt:0, forklaring:'Hjärtat är en muskel som pumpar blod runt i hela kroppen via blodkärlen.' },
+            { fraga:'Vilket organ använder vi för att andas?', alt:['Lungorna','Hjärnan','Njurarna','Magsäcken'], ratt:0, forklaring:'Lungorna tar in syre från luften och släpper ut koldioxid.' },
+            { fraga:'Vad styr hela kroppen och gör att vi kan tänka?', alt:['Hjärnan','Hjärtat','Skelettet','Huden'], ratt:0, forklaring:'Hjärnan skickar signaler via nervsystemet till resten av kroppen.' },
+            { fraga:'Vad kallas alla ben i kroppen tillsammans?', alt:['Skelettet','Muskler','Organ','Celler'], ratt:0, forklaring:'Skelettet ger kroppen form och skyddar de inre organen.' },
+            { fraga:'Vad gör musklerna?', alt:['Gör att vi kan röra oss','Pumpar blod','Andas in syre','Tänker tankar'], ratt:0, forklaring:'Muskler sitter fästa vid skelettet och drar ihop sig för att skapa rörelse.' },
+            { fraga:'Hur många ögon har en människa oftast?', alt:['2','1','3','4'], ratt:0, forklaring:'Vi har två ögon som tillsammans ger oss djupseende.' },
+            { fraga:'Vilket organ bryter ner maten vi äter?', alt:['Magsäcken','Hjärtat','Lungorna','Hjärnan'], ratt:0, forklaring:'Magsäcken är en del av matspjälkningen och bryter ner maten med hjälp av magsyra.' },
+            { fraga:'Vad kallas kroppens största organ?', alt:['Huden','Levern','Hjärnan','Skelettet'], ratt:0, forklaring:'Huden täcker hela kroppen och skyddar oss mot bland annat bakterier.' },
+            { fraga:'Vad mäter man när man tar pulsen?', alt:['Hur många gånger hjärtat slår per minut','Hur mycket man väger','Hur länge man sovit','Hur varmt det är ute'], ratt:0, forklaring:'Pulsen visar hur snabbt hjärtat slår, vanligtvis 60–100 slag per minut i vila.' },
+            { fraga:'Vilka organ renar blodet och bildar urin?', alt:['Njurarna','Lungorna','Hjärnan','Musklerna'], ratt:0, forklaring:'Njurarna filtrerar blodet och gör sig av med avfallsämnen genom urinen.' },
+            { fraga:'Hur många huvudsinnen har människan?', alt:['5','3','7','10'], ratt:0, forklaring:'Vi har fem huvudsinnen: syn, hörsel, lukt, smak och känsel.' },
+            { fraga:'Vilket sinnesorgan använder vi för hörseln?', alt:['Örat','Ögat','Näsan','Tungan'], ratt:0, forklaring:'Örat fångar upp ljudvågor och skickar signaler till hjärnan som tolkar dem som ljud.' },
+            { fraga:'Vilket sinne använder smaklökarna på tungan?', alt:['Smaksinnet','Synen','Hörseln','Luktsinnet'], ratt:0, forklaring:'Smaklökarna känner av smaker som sött, salt, surt, beskt och umami.' },
+            { fraga:'Vilket sinne gör att vi kan känna beröring, värme och smärta?', alt:['Känseln','Synen','Luktsinnet','Hörseln'], ratt:0, forklaring:'Känseln sitter i huden, som är fylld av receptorer över hela kroppen.' }
+        ];
+
+        body.innerHTML = `<div class='figx-tabs kropp-tabs'></div><div class='kropp-illu'></div><div class='figx-grid kropp-grid'></div><div class='kropp-begrepp'></div><div class='kropp-quiz'></div>`;
+        const tabsEl = body.querySelector('.kropp-tabs');
+        const illuEl = body.querySelector('.kropp-illu');
+        const gridEl = body.querySelector('.kropp-grid');
+        const begreppEl = body.querySelector('.kropp-begrepp');
+        const quizEl = body.querySelector('.kropp-quiz');
+
+        function ritaKort(item, i){
+            const card=document.createElement('div'); card.className='figx-card kropp-card';
+            const fig=document.createElement('div'); fig.className='figx-fig';
+            fig.innerHTML = item.svg ? shapeSvg(item.svg, kroppFarg(i)) : iconSvg(item.emoji, kroppFarg(i));
+            const namn=document.createElement('div'); namn.className='kropp-namn'; namn.textContent = item.namn;
+            const btn=document.createElement('button'); btn.className='figx-reveal'; btn.textContent='❓ Visa förklaring';
+            btn.onclick = ()=> openKroppPopup(item, kroppFarg(i));
+            card.appendChild(fig); card.appendChild(namn); card.appendChild(btn);
+            return card;
+        }
+
+        function openKroppPopup(item, bg){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(440px,94vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent = item.namn;
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const bild=document.createElement('div'); bild.style.width='150px'; bild.style.margin='6px auto 14px';
+            bild.innerHTML = item.svg ? shapeSvg(item.svg, bg) : iconSvg(item.emoji, bg);
+            box.appendChild(bild);
+            const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = item.text;
+            box.appendChild(txt);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        function openKroppSvar(ratt, forklaring, valdIndex, rattIndex){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(460px,94vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent = ratt ? '✔ Rätt!' : '✘ Fel svar';
+            h2.style.color = ratt ? '#1f7a37' : '#c2261c';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = forklaring;
+            box.appendChild(txt);
+            const nastaBtn=document.createElement('button'); nastaBtn.className='btn btn-primary'; nastaBtn.style.width='100%'; nastaBtn.style.marginTop='10px'; nastaBtn.textContent='Nästa fråga ▶';
+            nastaBtn.onclick = ()=>{ stang(); nyKroppFraga(); };
+            box.appendChild(nastaBtn);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        let kroppQuizIdx = 0, kroppPoang = 0, kroppAntal = 0;
+        function nyKroppFraga(){
+            quizEl.innerHTML='';
+            kroppQuizIdx = Math.floor(Math.random()*KROPP_QUIZ.length);
+            const q = KROPP_QUIZ[kroppQuizIdx];
+            const ordn = q.alt.map((a,i)=>({text:a, ratt:i===q.ratt}));
+            for(let i=ordn.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ordn[i],ordn[j]]=[ordn[j],ordn[i]]; }
+
+            const poangEl=document.createElement('div'); poangEl.className='kropp-quiz-poang'; poangEl.textContent = 'Poäng: '+kroppPoang+' av '+kroppAntal;
+            const frEl=document.createElement('div'); frEl.className='kropp-quiz-fraga'; frEl.textContent = q.fraga;
+            const svEl=document.createElement('div'); svEl.className='kropp-quiz-svar';
+            ordn.forEach(o=>{
+                const b=document.createElement('button'); b.className='genre-svar-btn'; b.textContent=o.text;
+                b.onclick=()=>{
+                    svEl.querySelectorAll('.genre-svar-btn').forEach(x=>x.disabled=true);
+                    kroppAntal++;
+                    if(o.ratt) kroppPoang++;
+                    b.classList.add(o.ratt ? 'ratt' : 'fel');
+                    if(!o.ratt){ svEl.querySelectorAll('.genre-svar-btn').forEach(x=>{ if(x.textContent===q.alt[q.ratt]) x.classList.add('ratt'); }); }
+                    openKroppSvar(o.ratt, q.forklaring);
+                };
+                svEl.appendChild(b);
+            });
+            quizEl.appendChild(poangEl); quizEl.appendChild(frEl); quizEl.appendChild(svEl);
+        }
+
+        function renderKroppIllustration(){
+            illuEl.innerHTML = `
+<svg viewBox="0 0 420 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:380px;height:auto;display:block;margin:0 auto;">
+  <!-- Hår -->
+  <path d="M178,30 Q210,10 244,30 Q252,45 246,58 Q240,40 210,36 Q180,40 174,58 Q168,45 178,30 Z" fill="#8a5a34"/>
+  <!-- Huvud -->
+  <circle cx="210" cy="58" r="33" fill="#f4c9a0" stroke="#3a3a3a" stroke-width="2.5"/>
+  <circle cx="198" cy="58" r="2.6" fill="#3a3a3a"/>
+  <circle cx="222" cy="58" r="2.6" fill="#3a3a3a"/>
+  <path d="M204,74 Q210,78 216,74" stroke="#3a3a3a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Hals -->
+  <rect x="199" y="86" width="22" height="20" fill="#f4c9a0" stroke="#3a3a3a" stroke-width="2"/>
+  <!-- Bål -->
+  <path d="M163,105 L257,105 C270,140 264,188 250,222 L253,258 L167,258 L170,222 C156,188 150,140 163,105 Z" fill="#f4c9a0" stroke="#3a3a3a" stroke-width="2.5"/>
+  <!-- Armar -->
+  <path d="M166,110 Q128,155 112,215 Q106,240 108,262" stroke="#f4c9a0" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M166,110 Q128,155 112,215 Q106,240 108,262" stroke="#3a3a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M254,110 Q292,155 308,215 Q314,240 312,262" stroke="#f4c9a0" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M254,110 Q292,155 308,215 Q314,240 312,262" stroke="#3a3a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <circle cx="108" cy="268" r="15" fill="#f4c9a0" stroke="#3a3a3a" stroke-width="2.5"/>
+  <circle cx="312" cy="268" r="15" fill="#f4c9a0" stroke="#3a3a3a" stroke-width="2.5"/>
+  <!-- Navel -->
+  <ellipse cx="210" cy="196" rx="2.4" ry="3.4" fill="#c98f5c"/>
+  <!-- Shorts -->
+  <path d="M167,256 L253,256 L246,318 L212,318 L210,300 L208,318 L174,318 Z" fill="#7d8fa8" stroke="#3a3a3a" stroke-width="2.5"/>
+  <!-- Ben -->
+  <path d="M197,316 Q192,380 190,440 Q189,468 192,494" stroke="#f4c9a0" stroke-width="34" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M197,316 Q192,380 190,440 Q189,468 192,494" stroke="#3a3a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M223,316 Q228,380 230,440 Q231,468 228,494" stroke="#f4c9a0" stroke-width="34" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M223,316 Q228,380 230,440 Q231,468 228,494" stroke="#3a3a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Fötter -->
+  <ellipse cx="180" cy="502" rx="28" ry="13" fill="#f4c9a0" stroke="#3a3a3a" stroke-width="2.5"/>
+  <ellipse cx="242" cy="502" rx="28" ry="13" fill="#f4c9a0" stroke="#3a3a3a" stroke-width="2.5"/>
+
+  <!-- Etiketter + ledlinjer -->
+  <g font-family="'Comic Sans MS','Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#2c2c3a">
+    <!-- Vänster kolumn -->
+    <line x1="95" y1="36" x2="188" y2="80" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="188" cy="80" r="3" fill="#5a5a68"/>
+    <text x="90" y="40" text-anchor="end">en käke</text>
+
+    <line x1="80" y1="104" x2="164" y2="112" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="164" cy="112" r="3" fill="#5a5a68"/>
+    <text x="75" y="108" text-anchor="end">en axel</text>
+
+    <line x1="70" y1="158" x2="186" y2="150" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="186" cy="150" r="3" fill="#5a5a68"/>
+    <text x="65" y="162" text-anchor="end">ett bröst</text>
+
+    <line x1="70" y1="212" x2="204" y2="198" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="204" cy="198" r="3" fill="#5a5a68"/>
+    <text x="65" y="216" text-anchor="end">en navel</text>
+
+    <line x1="60" y1="262" x2="172" y2="252" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="172" cy="252" r="3" fill="#5a5a68"/>
+    <text x="55" y="266" text-anchor="end">en höft</text>
+
+    <line x1="55" y1="312" x2="196" y2="290" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="196" cy="290" r="3" fill="#5a5a68"/>
+    <text x="50" y="316" text-anchor="end">en ljumske</text>
+
+    <line x1="65" y1="418" x2="188" y2="430" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="188" cy="430" r="3" fill="#5a5a68"/>
+    <text x="60" y="422" text-anchor="end">en vad</text>
+
+    <line x1="60" y1="490" x2="170" y2="500" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="170" cy="500" r="3" fill="#5a5a68"/>
+    <text x="55" y="494" text-anchor="end">en fot</text>
+
+    <!-- Höger kolumn -->
+    <line x1="330" y1="20" x2="222" y2="52" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="222" cy="52" r="3" fill="#5a5a68"/>
+    <text x="335" y="24" text-anchor="start">en näsa</text>
+
+    <line x1="330" y1="68" x2="216" y2="74" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="216" cy="74" r="3" fill="#5a5a68"/>
+    <text x="335" y="72" text-anchor="start">en mun</text>
+
+    <line x1="340" y1="120" x2="252" y2="132" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="252" cy="132" r="3" fill="#5a5a68"/>
+    <text x="345" y="124" text-anchor="start">en armhåla</text>
+
+    <line x1="355" y1="180" x2="304" y2="192" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="304" cy="192" r="3" fill="#5a5a68"/>
+    <text x="360" y="184" text-anchor="start">en arm</text>
+
+    <line x1="350" y1="228" x2="248" y2="220" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="248" cy="220" r="3" fill="#5a5a68"/>
+    <text x="355" y="232" text-anchor="start">en midja</text>
+
+    <line x1="345" y1="332" x2="240" y2="320" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="240" cy="320" r="3" fill="#5a5a68"/>
+    <text x="350" y="336" text-anchor="start">ett lår</text>
+
+    <line x1="345" y1="400" x2="230" y2="410" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="230" cy="410" r="3" fill="#5a5a68"/>
+    <text x="350" y="404" text-anchor="start">ett ben</text>
+  </g>
+</svg>`;
+        }
+
+        let läge = 'illustration';
+        function render(){
+            gridEl.innerHTML=''; begreppEl.style.display='none'; quizEl.style.display='none'; illuEl.style.display='none'; gridEl.style.display='';
+            if(läge==='illustration'){
+                gridEl.style.display='none'; illuEl.style.display='';
+                renderKroppIllustration();
+            }
+            else if(läge==='delar'){ KROPPSDELAR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='organ'){ KROPPSORGAN.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='sinnen'){ SINNEN.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='begrepp'){
+                gridEl.style.display='none'; begreppEl.style.display='';
+                begreppEl.innerHTML='';
+                const lista=document.createElement('div'); lista.className='su-lista';
+                KROPP_BEGREPP.forEach(b=>{
+                    const rad=document.createElement('div'); rad.className='su-rad';
+                    const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=b.ord;
+                    const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=b.def;
+                    rad.appendChild(ordEl); rad.appendChild(defEl);
+                    lista.appendChild(rad);
+                });
+                begreppEl.appendChild(lista);
+            }
+            else if(läge==='quiz'){
+                gridEl.style.display='none'; quizEl.style.display='';
+                nyKroppFraga();
+            }
+        }
+        const TAB_DEFS = [ ['illustration','🧑 Illustration'], ['delar','🧍 Kroppsdelar'], ['organ','🫀 Kroppsorgan'], ['sinnen','👀 Sinnen'], ['begrepp','📖 Begrepp'], ['quiz','❓ Quiz'] ];
+        const tabBtns = TAB_DEFS.map(([key,label],i)=>{
+            const t=document.createElement('button'); t.className='figx-tab'+(i===0?' active':''); t.textContent=label;
+            t.onclick=()=>{ läge=key; tabBtns.forEach(x=>x.classList.remove('active')); t.classList.add('active'); render(); };
+            tabsEl.appendChild(t);
+            return t;
+        });
+        render();
+    }
+    window.createKroppen = createKroppen;
+
+    // ---- SVERIGES NATUR ----
+    // Sju flikar: Skogen, Träd, Väder, Blommor, Djur, Begrepp, Quiz. Kort med bild (ikon) + namn,
+    // klick öppnar en popup med större bild och förklaring. Quiz-svar/förklaring visas i popup.
+    function createSverigesNatur(config){
+        if(config===undefined) config=null;
+        const body = createWidget('SVERIGES NATUR', 1100, 'natur-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '600px'; }
+
+        const NATUR_FARGER = ['#e2f0cb','#d0e8f2','#fff1c1','#e6dbf7','#ffe0d1','#d7f0e3','#fde2e4'];
+        const naturFarg = i => NATUR_FARGER[i % NATUR_FARGER.length];
+        function iconSvg(emoji, bg){
+            return `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${bg}"/><text x="60" y="79" font-size="54" text-anchor="middle">${emoji}</text></svg>`;
+        }
+        function shapeSvg(pathHtml, bg){
+            return `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${bg}"/>${pathHtml}</svg>`;
+        }
+        // Ritar en stjärnformad blomma (kronblad i cirkel runt en mitt) - återanvänds för flera blommor
+        function flowerStar(petalColor, centerColor, petalCount, rx, ry, petalStroke){
+            let petals='';
+            for(let i=0;i<petalCount;i++){
+                const angle = i*(360/petalCount);
+                petals += `<ellipse cx="60" cy="45" rx="${rx}" ry="${ry}" fill="${petalColor}"${petalStroke?` stroke="${petalStroke}" stroke-width="1"`:''} transform="rotate(${angle} 60 58)"/>`;
+            }
+            return `<line x1="60" y1="74" x2="58" y2="106" stroke="#3d7a3d" stroke-width="4" stroke-linecap="round"/>${petals}<circle cx="60" cy="58" r="7" fill="${centerColor}"/>`;
+        }
+
+        // ---- SKOGEN ----
+        const NATUR_SKOGEN = [
+            { namn:'Barrskog', emoji:'🌲', text:'En skog med träd som har barr istället för löv, till exempel gran och tall. Barren sitter kvar på trädet året runt.' },
+            { namn:'Lövskog', emoji:'🍃', text:'En skog med träd som har löv, till exempel björk och ek. Löven faller av på hösten.' },
+            { namn:'Blandskog', emoji:'🌳', text:'En skog med både barrträd och lövträd blandat. Den vanligaste skogstypen i Sverige.' },
+            { namn:'Kalhygge', emoji:'🪵', text:'Ett område i skogen där alla träd har avverkats (huggits ner) för att få virke.' },
+            { namn:'Mossa', emoji:'🍀', text:'En mjuk, grön växt som täcker marken, stenar och trädstammar i skogen. Håller kvar fukt.' },
+            { namn:'Myr', emoji:'💧', text:'Ett blött, sankt markområde i skogen, ofta med mossa och speciella växter som klarar mycket vatten.' }
+        ];
+
+        // ---- TRÄD ----
+        const NATUR_TRAD = [
+            { namn:'Gran', svg:'<rect x="55" y="90" width="10" height="16" fill="#7a5230"/><polygon points="60,26 41,54 79,54" fill="#2f6b3c"/><polygon points="60,42 37,70 83,70" fill="#357a44"/><polygon points="60,58 33,92 87,92" fill="#3d8a4d"/>', text:'Ett barrträd med korta, vassa barr och kottar som hänger nedåt. Ett av de vanligaste träden i svenska skogar.' },
+            { namn:'Tall', svg:'<rect x="56" y="60" width="9" height="46" fill="#a05a35"/><ellipse cx="60" cy="40" rx="27" ry="16" fill="#5a9a52"/><ellipse cx="40" cy="58" rx="16" ry="10" fill="#5a9a52"/><ellipse cx="82" cy="58" rx="16" ry="10" fill="#5a9a52"/>', text:'Ett barrträd med längre barr än granen och en rödbrun, fjällig bark. Trivs på torr och mager mark.' },
+            { namn:'Björk', svg:'<rect x="57" y="52" width="7" height="54" fill="#f2f2f0" stroke="#333" stroke-width="1"/><rect x="57" y="58" width="7" height="3" fill="#333"/><rect x="57" y="72" width="7" height="3" fill="#333"/><rect x="57" y="88" width="7" height="3" fill="#333"/><ellipse cx="60" cy="38" rx="30" ry="24" fill="#8fc76b"/>', text:'Ett lövträd med vit bark och gröna löv som gulnar på hösten. Lätt att känna igen på barken.' },
+            { namn:'Ek', svg:'<rect x="52" y="70" width="16" height="36" fill="#6b4423"/><circle cx="43" cy="50" r="17" fill="#2e5e2e"/><circle cx="77" cy="50" r="17" fill="#2e5e2e"/><circle cx="60" cy="33" r="20" fill="#356b35"/><circle cx="60" cy="58" r="18" fill="#2e5e2e"/>', text:'Ett stort lövträd som kan bli mycket gammalt. Har flikiga löv och bär ollon (ekollon).' },
+            { namn:'Bok', svg:'<rect x="55" y="64" width="10" height="42" fill="#9a9184"/><ellipse cx="60" cy="40" rx="28" ry="26" fill="#4f8f4a"/>', text:'Ett lövträd med släta, ovala löv. Bildar ofta täta, skuggiga bokskogar, vanligast i södra Sverige.' },
+            { namn:'Asp', svg:'<rect x="58" y="55" width="5" height="51" fill="#c9c2b0"/><circle cx="44" cy="45" r="11" fill="#8fbf5a"/><circle cx="60" cy="33" r="13" fill="#a3d16b"/><circle cx="76" cy="45" r="11" fill="#8fbf5a"/><circle cx="53" cy="56" r="10" fill="#93c060"/><circle cx="68" cy="56" r="10" fill="#93c060"/>', text:'Ett lövträd vars löv skakar och prasslar i minsta vindpust, tack vare de platta bladskaften.' },
+            { namn:'Rönn', svg:'<rect x="57" y="55" width="7" height="51" fill="#7a5230"/><ellipse cx="60" cy="40" rx="27" ry="21" fill="#4a8a4a"/><circle cx="47" cy="42" r="3" fill="#c62828"/><circle cx="55" cy="49" r="3" fill="#c62828"/><circle cx="66" cy="45" r="3" fill="#c62828"/><circle cx="73" cy="39" r="3" fill="#c62828"/><circle cx="60" cy="34" r="3" fill="#c62828"/>', text:'Ett mindre träd med klasar av röda bär som är mycket omtyckta av fåglar på hösten.' },
+            { namn:'Al', svg:'<rect x="56" y="55" width="8" height="45" fill="#5c4020"/><ellipse cx="60" cy="40" rx="25" ry="22" fill="#2f5d3a"/><path d="M22,104 Q40,97 55,104 Q70,97 85,104 Q97,97 102,104" stroke="#6fb3e0" stroke-width="4" fill="none" stroke-linecap="round"/>', text:'Ett lövträd som ofta växer nära vatten, bäckar och våtmarker.' }
+        ];
+
+        // ---- VÄDER (årstider och väderfenomen) ----
+        const NATUR_VADER = [
+            { namn:'Vår', emoji:'🌱', text:'Årstiden då snön smälter, träden knoppas och de första blommorna slår ut. Djuren vaknar upp efter vintern.' },
+            { namn:'Sommar', emoji:'☀️', text:'Årstiden med varmast väder och längst dagsljus. Skogen är full av grönska och liv.' },
+            { namn:'Höst', emoji:'🍂', text:'Årstiden då löven byter färg och faller av träden, och djuren förbereder sig för vintern.' },
+            { namn:'Vinter', emoji:'❄️', text:'Årstiden med kallast väder, ofta med snö. Många djur går i ide medan andra är aktiva trots kylan.' },
+            { namn:'Frost', emoji:'🧊', text:'Ett tunt lager is som bildas på marken, grenar och löv när det är kallt och fuktigt.' },
+            { namn:'Dagg', emoji:'💧', text:'Små vattendroppar som bildas på gräs och löv tidigt på morgonen när luften kyls av.' }
+        ];
+
+        // ---- BLOMMOR ----
+        const NATUR_BLOMMOR = [
+            { namn:'Blåsippa', svg:flowerStar('#4a68c9','#f4d35e',7,7,17), text:'En av de allra första vårblommorna. Blommar blått i skogen redan innan träden fått löv.' },
+            { namn:'Vitsippa', svg:flowerStar('#ffffff','#f4d35e',7,7,17,'#d8d8d8'), text:'En vit vårblomma som ofta täcker skogsmarken i stora, vita mattor.' },
+            { namn:'Liljekonvalj', svg:'<path d="M60,18 Q51,45 56,100" stroke="#3d7a3d" stroke-width="3" fill="none"/><g fill="#ffffff" stroke="#ddd" stroke-width="1"><ellipse cx="45" cy="40" rx="7" ry="6"/><ellipse cx="50" cy="55" rx="7" ry="6"/><ellipse cx="54" cy="70" rx="7" ry="6"/><ellipse cx="58" cy="85" rx="7" ry="6"/></g>', text:'En doftande blomma med små, vita klockformade blommor. Hela växten är giftig att äta.' },
+            { namn:'Smörblomma', svg:flowerStar('#ffd60a','#8a6a1a',5,9,15), text:'En blank, gul blomma som växer på ängar och i gräsmarker under sommaren.' },
+            { namn:'Prästkrage', svg:flowerStar('#ffffff','#f4c542',12,4,17,'#e2e2e2'), text:'En vit blomma med gult mittparti, ser ut som en liten sol. Vanlig på ängar.' },
+            { namn:'Blåklocka', svg:'<line x1="60" y1="25" x2="60" y2="100" stroke="#3d7a3d" stroke-width="3"/><path d="M48,55 Q48,82 60,90 Q72,82 72,55 Q60,68 48,55 Z" fill="#5a6fd6"/>', text:'En blå, klockformad blomma som växer på ängar, vägkanter och backar.' },
+            { namn:'Skogsviol', svg:flowerStar('#8b5cf6','#f4d35e',5,7,13), text:'En liten lila blomma som växer i skogen och på ängar under våren.' },
+            { namn:'Ljung', svg:'<line x1="60" y1="15" x2="55" y2="106" stroke="#5c7a4a" stroke-width="2"/><g fill="#c96fb0"><circle cx="50" cy="30" r="4"/><circle cx="62" cy="35" r="4"/><circle cx="48" cy="48" r="4"/><circle cx="63" cy="52" r="4"/><circle cx="47" cy="66" r="4"/><circle cx="61" cy="70" r="4"/><circle cx="46" cy="84" r="4"/><circle cx="59" cy="88" r="4"/></g>', text:'En lila-rosa risväxt som täcker stora delar av skogsmark och hedar, blommar på sensommaren och hösten.' }
+        ];
+
+        // ---- BÄR ----
+        const NATUR_BAR = [
+            { namn:'Blåbär', svg:'<path d="M35,95 Q40,50 60,48 Q80,50 85,95" stroke="#4a7a3d" stroke-width="3" fill="none"/><ellipse cx="45" cy="58" rx="9" ry="5" fill="#5a9a4a" transform="rotate(-30 45 58)"/><ellipse cx="75" cy="58" rx="9" ry="5" fill="#5a9a4a" transform="rotate(30 75 58)"/><circle cx="50" cy="63" r="6" fill="#3d3d7a"/><circle cx="63" cy="55" r="6" fill="#4a4a8f"/><circle cx="73" cy="66" r="6" fill="#3d3d7a"/><circle cx="58" cy="74" r="6" fill="#4a4a8f"/><circle cx="45" cy="76" r="6" fill="#3d3d7a"/>', text:'Ett litet, mörkblått bär som växer lågt i barrskogen. Färgar tungan blålila när man äter dem. Används i sylt, saft och bakverk.' },
+            { namn:'Lingon', svg:'<path d="M35,95 Q45,55 60,50 Q75,55 85,95" stroke="#3d6b2e" stroke-width="3" fill="none"/><ellipse cx="45" cy="60" rx="7" ry="4" fill="#2f6b3c" transform="rotate(-20 45 60)"/><ellipse cx="75" cy="60" rx="7" ry="4" fill="#2f6b3c" transform="rotate(20 75 60)"/><circle cx="50" cy="68" r="6" fill="#c62828"/><circle cx="63" cy="60" r="6" fill="#e53935"/><circle cx="71" cy="73" r="6" fill="#c62828"/><circle cx="55" cy="81" r="6" fill="#e53935"/>', text:'Ett litet, syrligt rött bär som växer på låga buskar med blanka, mörkgröna blad. Vanligt i barrskog. Används ofta till lingonsylt.' },
+            { namn:'Hallon', svg:'<line x1="60" y1="95" x2="60" y2="60" stroke="#4a7a3d" stroke-width="3"/><g fill="#e0435c"><circle cx="55" cy="45" r="4"/><circle cx="65" cy="45" r="4"/><circle cx="50" cy="53" r="4"/><circle cx="60" cy="53" r="4"/><circle cx="70" cy="53" r="4"/><circle cx="55" cy="61" r="4"/><circle cx="65" cy="61" r="4"/></g><ellipse cx="40" cy="70" rx="10" ry="6" fill="#4a7a3d" transform="rotate(-30 40 70)"/><ellipse cx="80" cy="70" rx="10" ry="6" fill="#4a7a3d" transform="rotate(30 80 70)"/>', text:'Ett rött, sammansatt bär (många små delar tillsammans) som växer på taggiga buskar. Söt smak, populärt i sylt, saft och bakverk.' },
+            { namn:'Smultron', svg:'<line x1="60" y1="95" x2="60" y2="75" stroke="#3d7a3d" stroke-width="3"/><path d="M60,42 Q48,55 52,72 Q56,82 60,84 Q64,82 68,72 Q72,55 60,42 Z" fill="#e0342f"/><circle cx="55" cy="58" r="1.4" fill="#f4d35e"/><circle cx="63" cy="55" r="1.4" fill="#f4d35e"/><circle cx="58" cy="68" r="1.4" fill="#f4d35e"/><circle cx="64" cy="66" r="1.4" fill="#f4d35e"/><ellipse cx="42" cy="75" rx="9" ry="6" fill="#4a8a3d" transform="rotate(-40 42 75)"/><ellipse cx="78" cy="75" rx="9" ry="6" fill="#4a8a3d" transform="rotate(40 78 75)"/>', text:'Ett litet, rött, mycket sött bär format som en liten jordgubbe. Växer nära marken på soliga platser i skogsbrynet.' },
+            { namn:'Hjortron', svg:'<line x1="60" y1="95" x2="60" y2="60" stroke="#4a7a3d" stroke-width="3"/><g fill="#e8a33d"><circle cx="55" cy="45" r="4"/><circle cx="65" cy="45" r="4"/><circle cx="50" cy="53" r="4"/><circle cx="60" cy="53" r="4"/><circle cx="70" cy="53" r="4"/><circle cx="55" cy="61" r="4"/><circle cx="65" cy="61" r="4"/></g><ellipse cx="40" cy="72" rx="12" ry="8" fill="#4a8a3d" transform="rotate(-20 40 72)"/><ellipse cx="80" cy="72" rx="12" ry="8" fill="#4a8a3d" transform="rotate(20 80 72)"/>', text:'Ett gyllengult, sammansatt bär som växer på myrar och våtmarker, vanligast i norra Sverige. Mycket uppskattat, bland annat till sylt.' },
+            { namn:'Björnbär', svg:'<line x1="60" y1="95" x2="60" y2="58" stroke="#4a7a3d" stroke-width="3"/><g fill="#2a2035"><circle cx="54" cy="42" r="4"/><circle cx="66" cy="42" r="4"/><circle cx="48" cy="50" r="4"/><circle cx="60" cy="50" r="4"/><circle cx="72" cy="50" r="4"/><circle cx="54" cy="58" r="4"/><circle cx="66" cy="58" r="4"/><circle cx="60" cy="66" r="4"/></g><ellipse cx="40" cy="72" rx="10" ry="6" fill="#3d6b2e" transform="rotate(-30 40 72)"/><ellipse cx="80" cy="72" rx="10" ry="6" fill="#3d6b2e" transform="rotate(30 80 72)"/>', text:'Ett mörklila-svart, sammansatt bär som växer på taggiga, klängande buskar. Söt-syrlig smak, används i sylt och bakverk.' },
+            { namn:'Odon', svg:'<path d="M35,95 Q42,55 60,50 Q78,55 85,95" stroke="#5a8a5a" stroke-width="3" fill="none"/><ellipse cx="45" cy="60" rx="8" ry="4" fill="#6aa15a" transform="rotate(-25 45 60)"/><ellipse cx="75" cy="60" rx="8" ry="4" fill="#6aa15a" transform="rotate(25 75 60)"/><circle cx="50" cy="67" r="6" fill="#7a7ab5"/><circle cx="63" cy="59" r="6" fill="#8a8ac0"/><circle cx="73" cy="69" r="6" fill="#7a7ab5"/>', text:'Ett blågrått bär som liknar blåbär men växer på fuktiga myrmarker. Har en mildare, mindre söt smak än blåbär.' }
+        ];
+
+        // ---- DJUR ----
+        const NATUR_DJUR = [
+            { namn:'Älg', emoji:'🦌', text:'Sveriges största hjortdjur, kan väga över 500 kg. Äter kvistar, blad och bark.' },
+            { namn:'Rådjur', emoji:'🦌', text:'Ett mindre, smidigt hjortdjur som är vanligt i svenska skogar och på åkrar.' },
+            { namn:'Räv', emoji:'🦊', text:'Ett litet rovdjur med rödbrun päls och yvig svans. Jagar smådjur som möss och fåglar.' },
+            { namn:'Varg', emoji:'🐺', text:'Ett stort rovdjur som lever och jagar i flock. Sällsynt i den svenska naturen.' },
+            { namn:'Björn', emoji:'🐻', text:'Sveriges största rovdjur. Går i ide och sover under vintern.' },
+            { namn:'Lodjur', emoji:'🐈', text:'Ett vilt kattdjur med tofsöron och kort svans. Jagar bland annat rådjur.' },
+            { namn:'Igelkott', emoji:'🦔', text:'Ett litet djur täckt av taggar. Rullar ihop sig som skydd och går i ide på vintern.' },
+            { namn:'Ekorre', emoji:'🐿️', text:'Ett litet, rödbrunt gnagardjur som klättrar smidigt i träd och samlar nötter och kottar.' },
+            { namn:'Hare', emoji:'🐇', text:'Ett djur som liknar en kanin men är större. Byter till vit päls på vintern i norra Sverige.' },
+            { namn:'Uggla', emoji:'🦉', text:'En rovfågel som jagar på natten. Har mycket bra hörsel och syn i mörker.' },
+            { namn:'Hackspett', emoji:'🐦', text:'En fågel som hackar hål i trädstammar med näbben för att hitta insekter eller bygga bo.' }
+        ];
+
+        // ---- SVAMPAR ----
+        const NATUR_SVAMPAR = [
+            { namn:'Kantarell', svg:'<path d="M60,30 C40,45 35,70 45,95 L75,95 C85,70 80,45 60,30 Z" fill="#f0a93a" stroke="#c9862a" stroke-width="2"/><path d="M45,45 Q60,55 75,45" stroke="#c9862a" stroke-width="1.5" fill="none"/>', text:'En gul, tratformad matsvamp med fruktig doft. En av de mest omtyckta svamparna att plocka i svenska skogar, ofta under lövträd.' },
+            { namn:'Stensopp (Karl-Johan)', svg:'<ellipse cx="60" cy="45" rx="26" ry="17" fill="#8a5a2e"/><path d="M48,50 Q60,58 72,50 L72,60 Q60,68 48,60 Z" fill="#c9a96e"/><path d="M52,55 L52,95 Q60,100 68,95 L68,55 Z" fill="#e8d9b0" stroke="#c9a96e" stroke-width="1.5"/>', text:'En stor, brun matsvamp med tjock, vitaktig stjälk. Räknas som en av de allra godaste matsvamparna i svensk skog.' },
+            { namn:'Trattkantarell', svg:'<path d="M60,32 C42,48 38,72 48,96 L72,96 C82,72 78,48 60,32 Z" fill="#8a4a2e" stroke="#6b3620" stroke-width="2"/>', text:'En mörkare, tratformad släkting till kantarellen. Växer ofta i stora mängder på hösten i barr- och lövskog.' },
+            { namn:'Champinjon', svg:'<ellipse cx="60" cy="42" rx="24" ry="16" fill="#f5f0e6" stroke="#d8cfc0" stroke-width="1.5"/><path d="M40,48 Q60,58 80,48" stroke="#c98a7a" stroke-width="3" fill="none"/><rect x="52" y="52" width="16" height="44" rx="6" fill="#f8f4ea" stroke="#d8cfc0" stroke-width="1.5"/>', text:'En vit till ljusbrun matsvamp med rosa till bruna skivor under hatten. Vanlig både vild i naturen och odlad i affärer.' },
+            { namn:'Röd flugsvamp', svg:'<path d="M30,50 Q60,15 90,50 Q60,60 30,50 Z" fill="#d32f2f"/><circle cx="45" cy="38" r="3" fill="#fff"/><circle cx="60" cy="30" r="3.5" fill="#fff"/><circle cx="75" cy="38" r="3" fill="#fff"/><circle cx="55" cy="45" r="2.5" fill="#fff"/><circle cx="68" cy="45" r="2.5" fill="#fff"/><rect x="52" y="50" width="16" height="46" rx="6" fill="#fdf6ec"/><path d="M48,62 Q60,68 72,62" stroke="#e8dcc4" stroke-width="2" fill="none"/>', text:'En röd svamp med vita prickar - mycket giftig! Välkänd från sagor och bilder, men ska ALDRIG plockas för att ätas.' },
+            { namn:'Fjällskivling', svg:'<path d="M28,50 Q60,12 92,50 Q60,62 28,50 Z" fill="#c9a06a"/><circle cx="45" cy="35" r="2.5" fill="#8a6a3d"/><circle cx="60" cy="28" r="2.5" fill="#8a6a3d"/><circle cx="75" cy="35" r="2.5" fill="#8a6a3d"/><circle cx="52" cy="42" r="2" fill="#8a6a3d"/><circle cx="68" cy="42" r="2" fill="#8a6a3d"/><rect x="54" y="50" width="12" height="46" rx="5" fill="#e8d9b8"/><ellipse cx="60" cy="68" rx="10" ry="3" fill="#c9a06a"/>', text:'En stor svamp med fjällig hatt som liknar ett litet parasoll. God matsvamp när den är rätt tillagad, till exempel panerad och stekt.' },
+            { namn:'Björksopp', svg:'<ellipse cx="60" cy="45" rx="25" ry="16" fill="#6b5a45"/><path d="M48,50 Q60,58 72,50 L72,60 Q60,68 48,60 Z" fill="#b8a888"/><path d="M52,55 L52,95 Q60,100 68,95 L68,55 Z" fill="#e0d5c0" stroke="#c0b090" stroke-width="1.5"/>', text:'En brunaktig matsvamp som växer i symbios med björkar, med ett svampigt utseende som liknar stensoppen.' }
+        ];
+
+        // ---- INSEKTER ----
+        const NATUR_INSEKTER = [
+            { namn:'Nyckelpiga', svg:'<ellipse cx="60" cy="60" rx="26" ry="22" fill="#e0342f"/><line x1="60" y1="38" x2="60" y2="82" stroke="#1a1a1a" stroke-width="2"/><circle cx="60" cy="42" r="14" fill="#1a1a1a"/><circle cx="45" cy="55" r="3" fill="#1a1a1a"/><circle cx="50" cy="70" r="3" fill="#1a1a1a"/><circle cx="70" cy="55" r="3" fill="#1a1a1a"/><circle cx="65" cy="72" r="3" fill="#1a1a1a"/><circle cx="60" cy="62" r="3" fill="#1a1a1a"/>', text:'En liten röd skalbagge med svarta prickar. Äter bladlöss och räknas som en trädgårdsmästares bästa vän.' },
+            { namn:'Humla', svg:'<ellipse cx="55" cy="70" rx="12" ry="18" fill="#fff" opacity="0.55" transform="rotate(-20 55 70)"/><ellipse cx="70" cy="70" rx="12" ry="18" fill="#fff" opacity="0.55" transform="rotate(20 70 70)"/><ellipse cx="60" cy="65" rx="20" ry="26" fill="#f2c230"/><path d="M42,55 Q60,55 78,55 L78,62 Q60,62 42,62 Z" fill="#1a1a1a"/><path d="M44,70 Q60,70 76,70 L76,77 Q60,77 44,77 Z" fill="#1a1a1a"/><circle cx="60" cy="42" r="10" fill="#1a1a1a"/>', text:'Ett runt, luddigt bi-släkte med gula och svarta ränder. Mycket viktig pollinerare som klarar av att flyga även vid kallare väder än andra bin.' },
+            { namn:'Bi', svg:'<ellipse cx="55" cy="62" rx="10" ry="16" fill="#fff" opacity="0.55" transform="rotate(-25 55 62)"/><ellipse cx="68" cy="62" rx="10" ry="16" fill="#fff" opacity="0.55" transform="rotate(25 68 62)"/><ellipse cx="60" cy="62" rx="16" ry="24" fill="#e8a93a"/><path d="M46,52 L74,52 L74,58 L46,58 Z" fill="#1a1a1a"/><path d="M46,66 L74,66 L74,72 L46,72 Z" fill="#1a1a1a"/><circle cx="60" cy="40" r="8" fill="#3a2a1a"/>', text:'En pälsad, flygande insekt som samlar nektar och pollen från blommor. Bin pollinerar växter och tillverkar honung.' },
+            { namn:'Geting', svg:'<ellipse cx="60" cy="50" rx="12" ry="10" fill="#f2c230"/><path d="M55,58 Q60,62 65,58 L65,64 Q60,68 55,64 Z" fill="#1a1a1a"/><ellipse cx="60" cy="80" rx="14" ry="18" fill="#f2c230"/><path d="M48,72 L72,72 L72,78 L48,78 Z" fill="#1a1a1a"/><path d="M50,84 L70,84 L70,90 L50,90 Z" fill="#1a1a1a"/><circle cx="60" cy="32" r="7" fill="#1a1a1a"/>', text:'En smal, gulsvart insekt med tydlig midja. Kan sticka flera gånger och jagar ofta andra småinsekter som föda.' },
+            { namn:'Fjäril', svg:'<path d="M60,35 C40,20 15,30 20,55 C25,75 45,65 58,55 Z" fill="#e0672e"/><path d="M60,35 C80,20 105,30 100,55 C95,75 75,65 62,55 Z" fill="#e0672e"/><path d="M60,55 C42,55 22,68 25,88 C30,100 48,90 58,75 Z" fill="#e0672e" opacity="0.85"/><path d="M60,55 C78,55 98,68 95,88 C90,100 72,90 62,75 Z" fill="#e0672e" opacity="0.85"/><circle cx="30" cy="42" r="4" fill="#1a1a1a"/><circle cx="90" cy="42" r="4" fill="#1a1a1a"/><line x1="60" y1="30" x2="60" y2="95" stroke="#1a1a1a" stroke-width="3"/>', text:'En insekt med stora, ofta färgglada vingar täckta av mikroskopiska fjäll. Börjar livet som en larv innan den förvandlas till fjäril i en puppa.' },
+            { namn:'Myra', svg:'<circle cx="42" cy="55" r="9" fill="#2a1f14"/><ellipse cx="58" cy="60" rx="9" ry="7" fill="#2a1f14"/><ellipse cx="78" cy="66" rx="15" ry="11" fill="#2a1f14"/><line x1="50" y1="58" x2="67" y2="63" stroke="#2a1f14" stroke-width="2"/><line x1="45" y1="47" x2="35" y2="35" stroke="#2a1f14" stroke-width="2"/><line x1="52" y1="45" x2="46" y2="32" stroke="#2a1f14" stroke-width="2"/><line x1="58" y1="66" x2="48" y2="80" stroke="#2a1f14" stroke-width="2"/><line x1="65" y1="70" x2="60" y2="86" stroke="#2a1f14" stroke-width="2"/>', text:'En liten insekt som lever i stora samhällen (myrstackar) med tydlig arbetsfördelning. Mycket stark i förhållande till sin egen storlek.' },
+            { namn:'Trollslända', svg:'<line x1="28" y1="55" x2="96" y2="55" stroke="#3aa15a" stroke-width="6" stroke-linecap="round"/><ellipse cx="38" cy="45" rx="22" ry="6" fill="#bfe8d0" opacity="0.75" transform="rotate(-10 38 45)"/><ellipse cx="38" cy="63" rx="22" ry="6" fill="#bfe8d0" opacity="0.75" transform="rotate(10 38 63)"/><ellipse cx="62" cy="42" rx="22" ry="6" fill="#bfe8d0" opacity="0.6" transform="rotate(-6 62 42)"/><ellipse cx="62" cy="66" rx="22" ry="6" fill="#bfe8d0" opacity="0.6" transform="rotate(6 62 66)"/><circle cx="22" cy="55" r="9" fill="#2a6b3d"/>', text:'En rovinsekt med lång kropp och två par genomskinliga vingar. Flyger mycket snabbt och jagar andra insekter nära vatten.' },
+            { namn:'Skalbagge', svg:'<ellipse cx="60" cy="62" rx="24" ry="28" fill="#2f5233"/><line x1="60" y1="38" x2="60" y2="88" stroke="#1a3320" stroke-width="2"/><circle cx="60" cy="36" r="10" fill="#1a3320"/>', text:'En insekt med hårda, skyddande vingtäcken som skyddar de bakre flygvingarna. Den absolut största insektsgruppen i världen.' }
+        ];
+
+        // ---- BEGREPP ----
+        const NATUR_BEGREPP = [
+            { ord:'Fotosyntes', def:'Processen där växter använder solljus, vatten och koldioxid för att skapa energi och syre.' },
+            { ord:'Ekosystem', def:'Allt levande och icke-levande i ett område som påverkar varandra, till exempel en skog eller en sjö.' },
+            { ord:'Näringskedja', def:'Visar vem som äter vem i naturen, från växter till växtätare och rovdjur.' },
+            { ord:'Nedbrytare', def:'Organismer som bryter ner döda växter och djur till näring, till exempel svampar och maskar.' },
+            { ord:'Biologisk mångfald', def:'Variationen av olika växt- och djurarter och livsmiljöer i naturen.' },
+            { ord:'Livsmiljö', def:'Den plats där en växt eller ett djur naturligt lever och trivs, även kallat habitat.' },
+            { ord:'Rovdjur', def:'Ett djur som jagar och äter andra djur, till exempel varg och lodjur.' },
+            { ord:'Växtätare', def:'Ett djur som äter växter, till exempel älg och rådjur.' }
+        ];
+
+        // ---- QUIZ ----
+        const NATUR_QUIZ = [
+            { fraga:'Vilket träd har barr som sitter kvar året runt och kottar som hänger nedåt?', alt:['Gran','Björk','Ek','Asp'], ratt:0, forklaring:'Granen är ett barrträd med barr året runt och kottar som hänger nedåt.' },
+            { fraga:'Vilket träd känns igen på sin vita bark?', alt:['Björk','Tall','Ek','Al'], ratt:0, forklaring:'Björken har en vit, tunn bark som gör den lätt att känna igen.' },
+            { fraga:'Vad kallas en skog med både barrträd och lövträd blandat?', alt:['Blandskog','Kalhygge','Urskog','Myr'], ratt:0, forklaring:'Blandskog innehåller både barrträd och lövträd och är vanlig i Sverige.' },
+            { fraga:'Vilket är Sveriges största rovdjur?', alt:['Björnen','Räven','Lodjuret','Igelkotten'], ratt:0, forklaring:'Björnen är Sveriges största rovdjur och går i ide och sover under vintern.' },
+            { fraga:'Vilket djur byter till vit päls på vintern i norra Sverige?', alt:['Haren','Räven','Älgen','Ekorren'], ratt:0, forklaring:'Haren byter päls efter årstid, vilket gör att den smälter in bättre i snön.' },
+            { fraga:'Vilken blomma är ofta en av de allra första att blomma på våren, med blå färg?', alt:['Blåsippa','Smörblomma','Ljung','Prästkrage'], ratt:0, forklaring:'Blåsippan blommar tidigt på våren, ofta innan träden hunnit få löv.' },
+            { fraga:'Vad kallas processen där växter skapar energi med hjälp av solljus?', alt:['Fotosyntes','Nedbrytning','Näringskedja','Pollinering'], ratt:0, forklaring:'Fotosyntes använder solljus, vatten och koldioxid för att skapa energi och syre.' },
+            { fraga:'Under vilken årstid faller löven av träden?', alt:['Höst','Vår','Sommar','Vinter'], ratt:0, forklaring:'På hösten byter löven färg och faller av träden inför vintern.' },
+            { fraga:'Vad äter en växtätare?', alt:['Växter','Andra djur','Bara insekter','Ingenting'], ratt:0, forklaring:'En växtätare äter växter, till exempel gräs, blad och bark.' },
+            { fraga:'Vad kallas organismer som bryter ner döda växter och djur till näring?', alt:['Nedbrytare','Rovdjur','Växtätare','Pollinerare'], ratt:0, forklaring:'Nedbrytare, som svampar och maskar, bryter ner dött material till näring i marken.' },
+            { fraga:'Vilket bär är gyllengult och växer på myrar, vanligast i norra Sverige?', alt:['Hjortron','Blåbär','Lingon','Smultron'], ratt:0, forklaring:'Hjortron är ett gyllengult, sammansatt bär som växer på myrar och våtmarker.' },
+            { fraga:'Vilket bär färgar tungan blålila när man äter det?', alt:['Blåbär','Lingon','Hallon','Björnbär'], ratt:0, forklaring:'Blåbär är mörkblå och färgar tungan blålila.' },
+            { fraga:'Vilken svamp är röd med vita prickar och mycket giftig?', alt:['Röd flugsvamp','Kantarell','Champinjon','Stensopp'], ratt:0, forklaring:'Röd flugsvamp är välkänd från sagor men är mycket giftig och ska aldrig ätas.' },
+            { fraga:'Vilken gul, tratformad svamp är en av de mest populära matsvamparna i Sverige?', alt:['Kantarell','Fjällskivling','Champinjon','Björksopp'], ratt:0, forklaring:'Kantarellen är gul, tratformad och en mycket omtyckt matsvamp med fruktig doft.' },
+            { fraga:'Vilken insekt lever i stora samhällen som kallas stackar?', alt:['Myra','Trollslända','Fjäril','Nyckelpiga'], ratt:0, forklaring:'Myror lever i stora samhällen, myrstackar, med tydlig arbetsfördelning.' },
+            { fraga:'Vilken insekt äter bladlöss och är röd med svarta prickar?', alt:['Nyckelpiga','Humla','Geting','Skalbagge'], ratt:0, forklaring:'Nyckelpigan är röd med svarta prickar och äter bladlöss, vilket gör den populär i trädgårdar.' }
+        ];
+
+        body.innerHTML = `<div class='figx-tabs natur-tabs'></div><div class='figx-grid natur-grid'></div><div class='natur-begrepp'></div><div class='natur-quiz'></div>`;
+        const tabsEl = body.querySelector('.natur-tabs');
+        const gridEl = body.querySelector('.natur-grid');
+        const begreppEl = body.querySelector('.natur-begrepp');
+        const quizEl = body.querySelector('.natur-quiz');
+
+        function ritaKort(item, i){
+            const card=document.createElement('div'); card.className='figx-card natur-card';
+            const fig=document.createElement('div'); fig.className='figx-fig';
+            fig.innerHTML = item.svg ? shapeSvg(item.svg, naturFarg(i)) : iconSvg(item.emoji, naturFarg(i));
+            const namn=document.createElement('div'); namn.className='kropp-namn'; namn.textContent = item.namn;
+            const btn=document.createElement('button'); btn.className='figx-reveal'; btn.textContent='❓ Visa förklaring';
+            btn.onclick = ()=> openNaturPopup(item, naturFarg(i));
+            card.appendChild(fig); card.appendChild(namn); card.appendChild(btn);
+            return card;
+        }
+
+        function openNaturPopup(item, bg){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(440px,94vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent = item.namn;
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const bild=document.createElement('div'); bild.style.width='150px'; bild.style.margin='6px auto 14px';
+            bild.innerHTML = item.svg ? shapeSvg(item.svg, bg) : iconSvg(item.emoji, bg);
+            box.appendChild(bild);
+            const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = item.text;
+            box.appendChild(txt);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        function openNaturSvar(ratt, forklaring){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(460px,94vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent = ratt ? '✔ Rätt!' : '✘ Fel svar';
+            h2.style.color = ratt ? '#1f7a37' : '#c2261c';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = forklaring;
+            box.appendChild(txt);
+            const nastaBtn=document.createElement('button'); nastaBtn.className='btn btn-primary'; nastaBtn.style.width='100%'; nastaBtn.style.marginTop='10px'; nastaBtn.textContent='Nästa fråga ▶';
+            nastaBtn.onclick = ()=>{ stang(); nyNaturFraga(); };
+            box.appendChild(nastaBtn);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        let naturQuizIdx = 0, naturPoang = 0, naturAntal = 0;
+        function nyNaturFraga(){
+            quizEl.innerHTML='';
+            naturQuizIdx = Math.floor(Math.random()*NATUR_QUIZ.length);
+            const q = NATUR_QUIZ[naturQuizIdx];
+            const ordn = q.alt.map((a,i)=>({text:a, ratt:i===q.ratt}));
+            for(let i=ordn.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ordn[i],ordn[j]]=[ordn[j],ordn[i]]; }
+
+            const poangEl=document.createElement('div'); poangEl.className='kropp-quiz-poang'; poangEl.textContent = 'Poäng: '+naturPoang+' av '+naturAntal;
+            const frEl=document.createElement('div'); frEl.className='kropp-quiz-fraga'; frEl.textContent = q.fraga;
+            const svEl=document.createElement('div'); svEl.className='kropp-quiz-svar';
+            ordn.forEach(o=>{
+                const b=document.createElement('button'); b.className='genre-svar-btn'; b.textContent=o.text;
+                b.onclick=()=>{
+                    svEl.querySelectorAll('.genre-svar-btn').forEach(x=>x.disabled=true);
+                    naturAntal++;
+                    if(o.ratt) naturPoang++;
+                    b.classList.add(o.ratt ? 'ratt' : 'fel');
+                    if(!o.ratt){ svEl.querySelectorAll('.genre-svar-btn').forEach(x=>{ if(x.textContent===q.alt[q.ratt]) x.classList.add('ratt'); }); }
+                    openNaturSvar(o.ratt, q.forklaring);
+                };
+                svEl.appendChild(b);
+            });
+            quizEl.appendChild(poangEl); quizEl.appendChild(frEl); quizEl.appendChild(svEl);
+        }
+
+        let läge = 'skogen';
+        function render(){
+            gridEl.innerHTML=''; begreppEl.style.display='none'; quizEl.style.display='none'; gridEl.style.display='';
+            if(läge==='skogen'){ NATUR_SKOGEN.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='trad'){ NATUR_TRAD.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='vader'){ NATUR_VADER.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='blommor'){ NATUR_BLOMMOR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='bar'){ NATUR_BAR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='djur'){ NATUR_DJUR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='svampar'){ NATUR_SVAMPAR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='insekter'){ NATUR_INSEKTER.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='begrepp'){
+                gridEl.style.display='none'; begreppEl.style.display='';
+                begreppEl.innerHTML='';
+                const lista=document.createElement('div'); lista.className='su-lista';
+                NATUR_BEGREPP.forEach(b=>{
+                    const rad=document.createElement('div'); rad.className='su-rad';
+                    const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=b.ord;
+                    const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=b.def;
+                    rad.appendChild(ordEl); rad.appendChild(defEl);
+                    lista.appendChild(rad);
+                });
+                begreppEl.appendChild(lista);
+            }
+            else if(läge==='quiz'){
+                gridEl.style.display='none'; quizEl.style.display='';
+                nyNaturFraga();
+            }
+        }
+        const TAB_DEFS = [ ['skogen','🌲 Skogen'], ['trad','🌳 Träd'], ['vader','🌦️ Väder'], ['blommor','🌸 Blommor'], ['bar','🫐 Bär'], ['djur','🦌 Djur'], ['svampar','🍄 Svampar'], ['insekter','🐝 Insekter'], ['begrepp','📖 Begrepp'], ['quiz','❓ Quiz'] ];
+        const tabBtns = TAB_DEFS.map(([key,label],i)=>{
+            const t=document.createElement('button'); t.className='figx-tab'+(i===0?' active':''); t.textContent=label;
+            t.onclick=()=>{ läge=key; tabBtns.forEach(x=>x.classList.remove('active')); t.classList.add('active'); render(); };
+            tabsEl.appendChild(t);
+            return t;
+        });
+        render();
+    }
+    window.createSverigesNatur = createSverigesNatur;
 
     // ---- SANNOLIKHET-SIMULATOR ----
     // Läraren väljer tärning eller slant, kastar ett antal gånger med en snabb
@@ -14628,9 +15632,96 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const body = createWidget('ÖVNINGSKLOCKA', 420, 'practice-clock-widget', config);
         const widgetEl = body.parentElement.parentElement;
         if(!config){ widgetEl.style.width='420px'; widgetEl.style.height='560px'; }
-        body.innerHTML = `<div class='pclock-toolbar'><button type='button' class='pclock-btn pclock-random-btn' title='Slumpa en ny tid som klassen ska läsa av'>🎲 Slumpa tid</button><button type='button' class='pclock-btn pclock-facit-btn' title='Visa rätt klockslag' style='display:none;'>👁️ Visa facit</button></div><div class='pclock-legend'><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-hour'></span>Timme</span><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-min'></span>Minut</span></div><div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital-wrap'><div class='pclock-digital pclock-digital-am'>08:00</div><div class='pclock-digital pclock-digital-pm'>20:00</div></div><div class='pclock-analog'></div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
+        body.innerHTML = `<div class='pclock-toolbar'><button type='button' class='pclock-btn pclock-random-btn' title='Slumpa en ny tid som klassen ska läsa av'>🎲 Slumpa tid</button><button type='button' class='pclock-btn pclock-facit-btn' title='Visa rätt klockslag' style='display:none;'>👁️ Visa facit</button><button type='button' class='pclock-btn pclock-rakna-btn' title='Öppna textuppgifter om tid och tidsräkning'>🧮 Räkna tid</button></div><div class='pclock-legend'><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-hour'></span>Timme</span><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-min'></span>Minut</span></div><div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital-wrap'><div class='pclock-digital pclock-digital-am'>08:00</div><div class='pclock-digital pclock-digital-pm'>20:00</div></div><div class='pclock-analog'></div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
         const inner=body.querySelector('.pclock-inner'), cf=body.querySelector('.pclock-face'), hh=body.querySelector('.pclock-hh'), mh=body.querySelector('.pclock-mh'), digAM=body.querySelector('.pclock-digital-am'), digPM=body.querySelector('.pclock-digital-pm'), ana=body.querySelector('.pclock-analog');
-        const randomBtn=body.querySelector('.pclock-random-btn'), facitBtn=body.querySelector('.pclock-facit-btn');
+        const randomBtn=body.querySelector('.pclock-random-btn'), facitBtn=body.querySelector('.pclock-facit-btn'), raknaBtn=body.querySelector('.pclock-rakna-btn');
+        raknaBtn.addEventListener('click',(e)=>{ e.stopPropagation(); openRaknaTid(); });
+
+        // ---- RÄKNA TID: popup med slumpade textuppgifter om tid & tidsräkning ----
+        function openRaknaTid(){
+            const ri=(min,max)=> min+Math.floor(Math.random()*(max-min+1));
+            const pad2=n=>String(n).padStart(2,'0');
+            const NAMN=['Alex','Ebba','Noa','Wilma','Elias','Saga','Leo','Iris','Melvin','Elsa','Vincent','Alva'];
+            const namn=()=>NAMN[ri(0,NAMN.length-1)];
+            const MIN_STEG=[0,5,10,15,20,25,30,35,40,45,50,55];
+            const slumpTid=()=>({ h:ri(0,23), m:MIN_STEG[ri(0,MIN_STEG.length-1)] });
+            const tidStr=t=>pad2(t.h)+':'+pad2(t.m);
+            const addMin=(t,mins)=>{ let tot=((t.h*60+t.m+mins)%1440+1440)%1440; return { h:Math.floor(tot/60), m:tot%60 }; };
+            const langdText=mins=>{ const h=Math.floor(mins/60), m=mins%60; if(h===0) return m+' minuter'; if(m===0) return h+' timme'+(h!==1?'r':''); return h+' timme'+(h!==1?'r':'')+' och '+m+' minuter'; };
+
+            const MALLAR = [
+                // Skillnad mellan två klockslag
+                function(){ const t1=slumpTid(); const mins=ri(1,9)*15; const t2=addMin(t1,mins); return { fraga:'Hur mycket tid har det gått mellan kl. '+tidStr(t1)+' och kl. '+tidStr(t2)+'?', svar:langdText(mins) }; },
+                // X timmar senare
+                function(){ const t1=slumpTid(); const h=ri(1,8); const t2=addMin(t1,h*60); return { fraga:'Klockan är '+tidStr(t1)+'. Vad blir klockan om '+h+' timme'+(h!==1?'r':'')+'?', svar:tidStr(t2) }; },
+                // X timmar sedan
+                function(){ const t1=slumpTid(); const h=ri(1,8); const t0=addMin(t1,-h*60); return { fraga:'Klockan är '+tidStr(t1)+'. Vad var klockan för '+h+' timme'+(h!==1?'r':'')+' sedan?', svar:tidStr(t0) }; },
+                // X minuter senare
+                function(){ const t1=slumpTid(); const m=[10,15,20,25,30,35,40,45,50][ri(0,8)]; const t2=addMin(t1,m); return { fraga:'Klockan är '+tidStr(t1)+'. Vad blir klockan om '+m+' minuter?', svar:tidStr(t2) }; },
+                // X minuter sedan
+                function(){ const t1=slumpTid(); const m=[10,15,20,25,30,35,40,45,50][ri(0,8)]; const t0=addMin(t1,-m); return { fraga:'Klockan är '+tidStr(t1)+'. Vad var klockan för '+m+' minuter sedan?', svar:tidStr(t0) }; },
+                // Timmar + minuter senare
+                function(){ const t1=slumpTid(); const h=ri(1,4), m=[15,30,45][ri(0,2)]; const t2=addMin(t1,h*60+m); return { fraga:'Klockan är '+tidStr(t1)+'. Vad blir klockan om '+h+' timme'+(h!==1?'r':'')+' och '+m+' minuter?', svar:tidStr(t2) }; },
+                // Tåg/buss - ankomsttid
+                function(){ const t1=slumpTid(); const mins=ri(2,9)*15; const t2=addMin(t1,mins); const namnP=namn(); return { fraga:namnP+'s tåg avgår kl. '+tidStr(t1)+' och resan tar '+langdText(mins)+'. Vad är klockan när tåget kommer fram?', svar:tidStr(t2) }; },
+                // Film/lektion - hur lång tid
+                function(){ const t1=slumpTid(); const mins=ri(30,150); const t2=addMin(t1,mins); return { fraga:'En film börjar kl. '+tidStr(t1)+' och slutar kl. '+tidStr(t2)+'. Hur lång är filmen?', svar:langdText(mins) }; },
+                // Baklänges: om X minuter är klockan Y, vad är klockan nu?
+                function(){ const t2=slumpTid(); const m=[10,15,20,25,30,40,45][ri(0,6)]; const t1=addMin(t2,-m); return { fraga:'Om '+m+' minuter är klockan '+tidStr(t2)+'. Vad är klockan nu?', svar:tidStr(t1) }; },
+                // Möte/aktivitet - sluttid
+                function(){ const t1=slumpTid(); const h=ri(1,3), m=[0,15,30,45][ri(0,3)]; const t2=addMin(t1,h*60+m); const namnP=namn(); return { fraga:namnP+' börjar träna kl. '+tidStr(t1)+'. Träningen tar '+langdText(h*60+m)+'. Vad är klockan när '+namnP+' är klar?', svar:tidStr(t2) }; },
+                // Skillnad mellan tider (två aktiviteter samma dag)
+                function(){ const t1=slumpTid(); const mins=ri(3,12)*10; const t2=addMin(t1,mins); const namnP=namn(); return { fraga:namnP+' börjar läxan kl. '+tidStr(t1)+' och blir klar kl. '+tidStr(t2)+'. Hur lång tid tog läxan?', svar:langdText(mins) }; },
+                // Väckarklocka - för X sedan
+                function(){ const t1=slumpTid(); const h=ri(1,10); const t0=addMin(t1,-h*60); const namnP=namn(); return { fraga:namnP+' vaknade för '+h+' timme'+(h!==1?'r':'')+' sedan och det är nu klockan '+tidStr(t1)+'. Hur dags vaknade '+namnP+'?', svar:tidStr(t0) }; }
+            ];
+
+            function nyaUppgifter(antal){
+                const valda=[]; const kopia=MALLAR.slice();
+                for(let i=0;i<antal;i++){ const idx=ri(0,kopia.length-1); valda.push(kopia[idx]()); }
+                return valda;
+            }
+
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent='🧮 Räkna tid';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const sub=document.createElement('p'); sub.className='figx-sub'; sub.textContent='Textuppgifter om klockslag och tidsräkning – en uppgift i taget. Klicka på svaret för att se facit.';
+            box.appendChild(sub);
+
+            const lista=document.createElement('div'); lista.className='su-lista';
+            box.appendChild(lista);
+            const raknare=document.createElement('div'); raknare.className='figx-sub'; raknare.style.textAlign='center'; raknare.style.fontWeight='700'; raknare.style.color='#0369a1';
+            box.appendChild(raknare);
+            const nyBtn=document.createElement('button'); nyBtn.className='btn btn-primary'; nyBtn.style.width='100%'; nyBtn.style.marginTop='14px'; nyBtn.textContent='Nästa uppgift ▶';
+
+            let nr=0;
+            function rendera(){
+                nr++;
+                raknare.textContent='Uppgift '+nr;
+                lista.innerHTML='';
+                const u=nyaUppgifter(1)[0];
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
+                const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
+                const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
+                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
+                rad2.appendChild(fr); rad2.appendChild(sv);
+                rad.appendChild(rad2);
+                lista.appendChild(rad);
+            }
+            box.appendChild(nyBtn);
+            nyBtn.onclick=rendera;
+            rendera();
+
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
         for(let i=0;i<60;i++){ const tk=document.createElement('div'); tk.className='clock-tick '+(i%15===0?'big':(i%5===0?'major':'minor')); tk.style.transform=`rotate(${i*6}deg)`; cf.appendChild(tk); }
         // Siffror runt urtavlan: 12-timmarssiffror (röda, stora), 24-timmarssiffror (röda, små, innanför) och minutsiffror (blå, ytterst)
         const rHour=50, r24=26, rMin=68;
@@ -15420,9 +16511,38 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         };
 
         fragaBlock.querySelector('.exit-atk-slump-fraga').onclick=()=>{
-            const f = EXIT_ATK_FRAGOR[Math.floor(Math.random()*EXIT_ATK_FRAGOR.length)];
-            fragaBox.textContent = f;
+            openExitAtkFragaPopup();
         };
+
+        // ---- Popup som visar en slumpad återkopplingsfråga, med möjlighet att slumpa fler ----
+        function openExitAtkFragaPopup(){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(520px,96vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent='💬 Återkopplingsfråga';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+
+            const fragaVisning=document.createElement('div'); fragaVisning.className='exit-atk-fraga-box'; fragaVisning.style.fontSize='19px'; fragaVisning.style.margin='18px 0';
+            box.appendChild(fragaVisning);
+
+            const nyBtn=document.createElement('button'); nyBtn.type='button'; nyBtn.className='btn btn-primary'; nyBtn.style.width='100%'; nyBtn.textContent='🎲 Slumpa ny fråga';
+            box.appendChild(nyBtn);
+
+            const nyFraga=()=>{
+                const f = EXIT_ATK_FRAGOR[Math.floor(Math.random()*EXIT_ATK_FRAGOR.length)];
+                fragaVisning.textContent = f;
+                fragaBox.textContent = f; // hålls i synk med widgeten i bakgrunden
+            };
+            nyBtn.onclick = nyFraga;
+            nyFraga();
+
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
 
         const loadAtkLists=()=>{
             const valt = atkListSel.value || atkListVald;
@@ -16217,40 +17337,72 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // ---- SVENSKA ALFABETET ----
     function createAlphabetWidget(config){
         if(config===undefined)config=null;
-        const body = createWidget('SVENSKA ALFABETET', 720, 'alphabet-widget', config);
+        const body = createWidget('SVENSKA ALFABETET', 1180, 'alphabet-widget', config);
         const widget = body.parentElement.parentElement;
-        // Ny widget (ej laddad från sparat läge): ta hela skärmens bredd automatiskt
+        // Ny widget: centrera horisontellt på skärmen (appens generella placeringslogik
+        // centrerar inte exakt, utan förskjuter widgetar i en kaskad)
         if(!config){
-            const margin = 24;
-            widget.style.left = margin + 'px';
+            const w = 1180;
+            const left = Math.max(8, Math.round((window.innerWidth - w) / 2));
+            widget.style.left = left + 'px';
             widget.style.top = '60px';
-            widget.style.width = (window.innerWidth - margin*2) + 'px';
         }
         const cont = document.createElement('div'); cont.className='alphabet-container';
         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ'.split('');
         const colors = ['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5856d6','#af52de'];
-        // Talsyntes: uttala bokstaven på svenska
+        // Bokstavsnamn (t.ex. "be", "se") – det som uttalas när man hovrar/klickar på en bokstav
+        const NAMN = { A:'a',B:'be',C:'se',D:'de',E:'e',F:'äff',G:'ge',H:'hå',I:'i',J:'ji',K:'kå',L:'ell',M:'ämm',N:'änn',O:'o',P:'pe',Q:'ku',R:'ärr',S:'äss',T:'te',U:'u',V:'ve',W:'dubbelve',X:'äcks',Y:'y',Z:'säta',Å:'å',Ä:'ä',Ö:'ö' };
+        // Skydd mot att namnet läses upp flera gånger under samma hovring, ifall webbläsaren
+        // av någon anledning skulle trigga mouseenter mer än en gång.
+        let hoverBokstav = null;
         const speak = (ch)=>{
             try {
                 if(!('speechSynthesis' in window)) return;
                 window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(ch);
-                u.lang = 'sv-SE'; u.rate = 0.75; u.pitch = 1.1;
-                const sv = window.speechSynthesis.getVoices().find(v=>/sv|swed/i.test(v.lang+v.name));
-                if(sv) u.voice = sv;
-                window.speechSynthesis.speak(u);
+                // Liten fördröjning innan nästa utsaga köas – vissa webbläsare kan annars
+                // "hänga kvar" på den avbrutna utsagan och spela upp den ändå, vilket låter
+                // som att bokstaven sägs två gånger.
+                setTimeout(()=>{
+                    const text = NAMN[ch]||ch;
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'sv-SE'; u.rate = 0.75; u.pitch = 1.1;
+                    const sv = window.speechSynthesis.getVoices().find(v=>/sv|swed/i.test(v.lang+v.name));
+                    if(sv) u.voice = sv;
+                    window.speechSynthesis.speak(u);
+                }, 40);
             } catch(e){}
         };
         letters.forEach((L,i)=>{
+            // Statisk wrapper (rör sig aldrig) tar emot hover – bokstaven inuti kan dansa fritt
+            // utan att flytta hit-ytan som musen hovrar över. Detta är den egentliga fixen mot
+            // att bokstaven namnges dubbelt (den gamla dansanimationen flyttade annars hela
+            // hit-ytan under musen och triggade nya mouseenter-händelser upprepade gånger).
+            const wrap=document.createElement('span'); wrap.className='alpha-letter-wrap';
             const el=document.createElement('span'); el.className='alpha-letter';
             el.innerText = L + L.toLowerCase();
             el.style.color = colors[i%colors.length];
-            // Hover: dansa (via CSS) + uttala. Klick: uttala igen.
-            el.addEventListener('mouseenter', ()=> speak(L));
-            el.addEventListener('click', ()=> speak(L));
-            cont.appendChild(el);
+            wrap.appendChild(el);
+            wrap.addEventListener('mouseenter', ()=>{
+                if(hoverBokstav===L) return;
+                hoverBokstav = L;
+                speak(L);
+            });
+            wrap.addEventListener('mouseleave', ()=>{
+                if(hoverBokstav===L) hoverBokstav=null;
+            });
+            cont.appendChild(wrap);
         });
         body.appendChild(cont);
+        // Ny widget: mät den faktiskt renderade höjden på de två bokstavsraderna och sätt
+        // widgetens höjd exakt efter det (istället för att gissa ett fast pixelvärde) –
+        // fungerar korrekt oavsett skärmstorlek, typsnitt och webbläsare.
+        if(!config){
+            requestAnimationFrame(()=>{
+                const padding = 20; // widget-body har 10px padding upptill och nedtill
+                const h = Math.ceil(cont.getBoundingClientRect().height) + padding;
+                widget.style.height = h + 'px';
+            });
+        }
         // Vissa webbläsare laddar röster asynkront – trigga en laddning
         try { if('speechSynthesis' in window) window.speechSynthesis.getVoices(); } catch(e){}
     }
