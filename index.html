@@ -132,6 +132,7 @@
             <button class="tool-btn" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
             <button class="tool-btn" onclick="createKroppen()"><div class="icon">🧍</div><div class="label">Kroppen</div></button>
             <button class="tool-btn" onclick="createSverigesNatur()"><div class="icon">🌲</div><div class="label">Sveriges natur</div></button>
+            <button class="tool-btn" onclick="createMatteBegrepp()"><div class="icon">🔢</div><div class="label">MatteBegrepp</div></button>
             <button class="tool-btn" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
             <button class="tool-btn" onclick="createWordSearch()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2' y='2' width='15' height='15' rx='1.5' fill='none' stroke='#3a3a3c' stroke-width='1.4'/><line x1='2' y1='6.75' x2='17' y2='6.75' stroke='#3a3a3c' stroke-width='0.8'/><line x1='2' y1='11.5' x2='17' y2='11.5' stroke='#3a3a3c' stroke-width='0.8'/><line x1='6.75' y1='2' x2='6.75' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><line x1='11.5' y1='2' x2='11.5' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><circle cx='17.3' cy='17.3' r='4.3' fill='#fff' stroke='#3a3a3c' stroke-width='1.6'/><line x1='20.4' y1='20.4' x2='23' y2='23' stroke='#3a3a3c' stroke-width='1.8' stroke-linecap='round'/></svg></div><div class="label">Ordgömma</div></button>
             <button class="tool-btn" onclick="createWhiteboard()"><div class="icon">🖍️</div><div class="label">Rita</div></button>
@@ -634,8 +635,8 @@
     /* RYMDEN */
     .ry-emoji{ font-size:64px; text-align:center; line-height:1.1; margin-bottom:4px; }
     .ry-typbadge{ display:block; text-align:center; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.5px; color:#5856d6; background:#eeeefb; border-radius:999px; padding:4px 12px; margin:0 auto 12px; width:fit-content; }
-    .ry-tabs{ display:flex; gap:6px; }
-    .ry-tabs .btn{ flex:1; font-size:12.5px; padding:8px 6px; }
+    .ry-tabs{ display:flex; gap:6px; flex-wrap:wrap; }
+    .ry-tabs .btn{ flex:1 1 auto; font-size:12.5px; padding:8px 6px; min-width:110px; }
     .ry-planet-row{ display:flex; align-items:flex-end; justify-content:center; gap:10px; flex-wrap:wrap; padding:14px 6px 10px; background:radial-gradient(circle at 50% 0%,#1b1035,#0a0a1a); border-radius:14px; margin-bottom:12px; }
     .ry-planet-col{ display:flex; flex-direction:column; align-items:center; gap:6px; width:52px; }
     .ry-planet-circle{ border-radius:50%; cursor:pointer; transition:transform .15s, box-shadow .15s; box-shadow:0 2px 8px rgba(0,0,0,0.4); flex-shrink:0; }
@@ -775,7 +776,7 @@
     .ry-planet-rad:first-of-type{ border-top:none; margin-top:6px; padding-top:0; }
     .ry-widget .widget-body{ overflow-y:auto; overflow-x:hidden; min-height:0; }
     .ry-widget .widget-inner{ min-height:0; }
-    .ry-content{ overflow-y:auto; overflow-x:hidden; max-height:100%; }
+    .ry-content{ overflow-x:hidden; }
     /* ---- GOOD: dra en sur min till glasburken, den blir glad ---- */
     .good-widget .widget-body{ padding:18px 18px 16px; }
     .good-intro{ font-size:14px; color:#8e8e93; text-align:center; margin-bottom:14px; }
@@ -3300,6 +3301,7 @@
             else if (w.type === 'KOORDINATSYSTEM') createKoordinatsystem(w);
             else if (w.type === 'KROPPEN') createKroppen(w);
             else if (w.type === 'SVERIGES NATUR') createSverigesNatur(w);
+            else if (w.type === 'MATTEBEGREPP') createMatteBegrepp(w);
             else if (w.type === 'SANNOLIKHET') createSannolikhet(w);
             else if (w.type === 'MATTEKAMP') createMathBattle(w);
             else if (w.type === 'VERB') createVerbWidget(w);
@@ -4495,6 +4497,7 @@
         { namn:'Neptunus', typ:'Planet', emoji:'🪐', beskrivning:'Den planet som ligger längst bort från solen och har de starkaste vindarna i solsystemet.', skillnad:'Neptunus har enormt starka vindar, mycket starkare än några stormar på jorden, och är extremt kall.' },
         { namn:'Pluto', typ:'Dvärgplanet', emoji:'🪐', beskrivning:'En dvärgplanet långt ute i solsystemets ytterkant, som förr räknades som den nionde planeten.', skillnad:'Pluto är mycket mindre än jorden, och det tar den hela 248 år att åka ett varv runt solen.' },
         { namn:'Månen', typ:'Måne', emoji:'🌙', beskrivning:'Jordens enda naturliga måne, och den himlakropp som ligger närmast oss.', skillnad:'Månen har ingen luft att andas och inget flytande vatten på ytan, till skillnad från jorden som har både atmosfär och hav.' },
+        { namn:'Jorden', typ:'Planet', emoji:'🌍', beskrivning:'Vår egen planet, den tredje planeten räknat från solen och den enda kända planeten med flytande vatten och liv.', skillnad:'Jorden är den planet vi jämför alla andra himlakroppar med - den har en syrerik atmosfär, flytande vatten och miljontals arter av liv.' },
         { namn:'Europa', typ:'Måne', emoji:'🧊', beskrivning:'En av Jupiters månar, täckt av ett tjockt lager is.', skillnad:'Under Europas isiga yta kan det finnas ett hav av flytande vatten, men det är helt fruset ovanpå – till skillnad från jordens öppna hav.' },
         { namn:'Titan', typ:'Måne', emoji:'🌫️', beskrivning:'Saturnus största måne, och den enda månen i solsystemet med en tjock atmosfär.', skillnad:'Titan har sjöar, men de är fyllda med flytande metan istället för vatten som på jorden.' },
         { namn:'Phobos', typ:'Måne', emoji:'🪨', beskrivning:'En av Mars två små månar, formad som en oval potatis.', skillnad:'Phobos är mycket mindre och har en ojämn form, till skillnad från jordens runda måne.' },
@@ -4541,10 +4544,63 @@
         { fraga:'Vilken planet ligger mellan Venus och Mars, räknat från solen?', alt:['Merkurius','Jorden','Jupiter','Saturnus'], ratt:1, forklaring:'Ordningen från solen är: Merkurius, Venus, Jorden, Mars ...' },
         { fraga:'Vilken planet skulle flyta på vatten (om det fanns ett hav stort nog) eftersom den är så lätt för sin storlek?', alt:['Jupiter','Saturnus','Uranus','Neptunus'], ratt:1, forklaring:'Saturnus har så låg densitet att den skulle flyta på vatten, om det bara funnits ett tillräckligt stort hav.' }
     ];
+    // Begrepp - grundläggande rymdbegrepp med förklaring.
+    // Solen - grundfakta.
+    const RYMDEN_SOLEN = [
+        { emoji:'☀️', t:'Vad är solen?', txt:'Solen är en stjärna, ett enormt klot av het gas som lyser med sitt eget ljus. Den ligger i mitten av vårt solsystem och allt annat - planeter, månar, asteroider och kometer - kretsar runt den.' },
+        { emoji:'🌱', t:'Solens betydelse för livet på jorden', txt:'Utan solens ljus och värme skulle det inte finnas något liv på jorden. Växter använder solljuset för att skapa energi genom fotosyntes, vilket i sin tur ger mat och syre åt djur och människor.' },
+        { emoji:'⭐', t:'Solen som en stjärna', txt:'Solen är faktiskt en helt vanlig stjärna, precis som miljontals andra på natthimlen. Men den ligger så mycket närmare oss än alla andra stjärnor att den ser mycket större och starkare ut.' },
+        { emoji:'🔥', t:'Ljus och värme från solen', txt:'Solens ljus tar ungefär 8 minuter att nå jorden, trots att det färdas i ljusets hastighet. Värmen från solen gör att jorden har en temperatur där vatten kan vara flytande.' }
+    ];
+    // Jorden - grundfakta.
+    const RYMDEN_JORDEN = [
+        { emoji:'🌐', t:'Jordens form', txt:'Jorden är formad som ett klot, en så kallad sfär, fast lite tillplattad vid nord- och sydpolen. Det beror på att jorden snurrar runt sin egen axel.' },
+        { emoji:'🔄', t:'Jordens rörelse runt solen', txt:'Jorden rör sig i en bana (omloppsbana) runt solen. Ett helt varv tar ungefär 365 dagar, vilket är det vi kallar ett år.' },
+        { emoji:'🌗', t:'Jordens rotation', txt:'Samtidigt som jorden kretsar runt solen snurrar den runt sin egen axel. Ett helt varv tar ungefär 24 timmar, vilket skapar dag och natt.' },
+        { emoji:'📐', t:'Jordens axel', txt:'Jordens axel är den tänkta linjen genom nord- och sydpolen som jorden snurrar runt. Den lutar cirka 23 grader, vilket är anledningen till att vi har olika årstider.' },
+        { emoji:'🗺️', t:'Kontinenter och hav (översikt)', txt:'Jordens yta består av sju stora landmassor, kontinenter (Afrika, Antarktis, Asien, Europa, Nordamerika, Oceanien och Sydamerika), och stora vattenmassor, hav, som täcker mer än 70% av jordens yta.' }
+    ];
+    // Månen - grundfakta.
+    const RYMDEN_MANEN = [
+        { emoji:'🌙', t:'Vad är månen?', txt:'Månen är jordens enda naturliga måne, en stor stenklump som kretsar runt jorden. Den är den himlakropp som ligger allra närmast oss.' },
+        { emoji:'🌓', t:'Månens faser', txt:'Månen ser olika ut på himlen beroende på hur mycket av dess solbelysta sida vi kan se från jorden. De vanligaste faserna är nymåne, halvmåne och fullmåne.' },
+        { emoji:'❓', t:'Varför ser månen olika ut?', txt:'Månen lyser inte med eget ljus, utan reflekterar solens ljus. När månen rör sig runt jorden ändras vinkeln mot solen, vilket gör att olika mycket av den upplysta sidan syns för oss.' },
+        { emoji:'🌊', t:'Månens betydelse för jorden', txt:'Månens tyngdkraft påverkar bland annat jordens tidvatten (hur havet stiger och sjunker). Månen bidrar också till att stabilisera jordens lutning, vilket gör vårt klimat mer stabilt över tid.' },
+        { emoji:'🌑', t:'Sol- och månförmörkelse (enkel nivå)', txt:'En solförmörkelse sker när månen skymmer solen sedd från jorden. En månförmörkelse sker när jorden hamnar mellan solen och månen, så att jordens skugga faller på månen.' }
+    ];
+
+    // Stjärnor - grundfakta om stjärnor.
+    const RYMDEN_STJARNOR = [
+        { emoji:'⭐', t:'Vad är en stjärna?', txt:'En stjärna är ett enormt klot av het gas som lyser med sitt eget ljus. Stjärnor skapar sin egen energi genom reaktioner djupt inuti sig, vilket får dem att lysa och avge värme. Vår sol är en stjärna - den som ligger allra närmast oss.' },
+        { emoji:'🔭', t:'Stjärnbilder', txt:'Ett mönster av stjärnor på himlen som människor i alla tider har gett namn och kopplat till figurer, till exempel djur eller gestalter. Karlavagnen och Orion är kända exempel på stjärnbilder som syns från Sverige.' },
+        { emoji:'🧭', t:'Polstjärnan', txt:'En stjärna som nästan alltid ligger rakt i norr på natthimlen, oavsett tid på dygnet eller årstid. Den har använts för att navigera i tusentals år, eftersom den visar vilket håll som är norr.' },
+        { emoji:'🌌', t:'Vintergatan (enkel nivå)', txt:'Den galax där vårt solsystem finns. Den innehåller hundratals miljarder stjärnor och syns som ett ljust, dimmigt band över natthimlen på en mörk plats utan störande ljus.' }
+    ];
+
+    // Vad är ett solsystem? - sex delfrågor med kort fakta.
+    const RYMDEN_SOLSYSTEM = [
+        { emoji:'☀️', t:'Solen i centrum', txt:'Solsystemet har solen som medelpunkt. Allt annat i solsystemet - planeter, månar, asteroider och kometer - kretsar runt solen på grund av dess tyngdkraft. Solen står för mer än 99% av hela solsystemets massa.' },
+        { emoji:'🪐', t:'Planeternas ordning', txt:'De åtta planeterna kretsar runt solen i denna ordning, räknat från närmast till längst bort: Merkurius, Venus, Jorden, Mars, Jupiter, Saturnus, Uranus, Neptunus.' },
+        { emoji:'🌑', t:'Dvärgplaneter (kort fakta)', txt:'En dvärgplanet liknar en vanlig planet men har inte rensat sin bana från andra objekt. Pluto och Ceres är kända dvärgplaneter i vårt solsystem.' },
+        { emoji:'🪨', t:'Asteroider', txt:'Steniga objekt som kretsar runt solen, mindre än en planet. De flesta finns samlade i asteroidbältet mellan Mars och Jupiter.' },
+        { emoji:'☄️', t:'Kometer', txt:'Isiga objekt som får en lysande svans av gas och stoft när de kommer nära solen. En känd komet är Halleys komet, som syns från jorden ungefär vart 76:e år.' },
+        { emoji:'🌠', t:'Meteorer', txt:'En meteor, ibland kallad "stjärnfall", är ljuset som syns när en liten stenbit brinner upp i jordens atmosfär. Om en bit överlever hela vägen ner till marken kallas den istället en meteorit.' }
+    ];
+    const RYMDEN_BEGREPP = [
+        { ord:'Solen', def:'Den stjärna som ligger i mitten av vårt solsystem och ger jorden ljus och värme. Utan solen skulle det inte finnas något liv på jorden.' },
+        { ord:'Månen', def:'Jordens enda naturliga måne. Den lyser inte med eget ljus utan reflekterar solens ljus, och den ändrar skepnad (månfaser) under en dryg månad.' },
+        { ord:'Jorden', def:'Vår egen planet, den tredje planeten räknat från solen. Den enda kända planeten med flytande vatten på ytan och liv.' },
+        { ord:'Planet', def:'En stor himlakropp som kretsar runt en stjärna, har tillräckligt med tyngdkraft för att vara rund, och har rensat sin bana från andra objekt. Vårt solsystem har åtta planeter.' },
+        { ord:'Stjärna', def:'Ett enormt klot av het gas som lyser av sitt eget ljus, till exempel vår sol. Stjärnor skapar sin energi genom reaktioner inuti sig själva.' },
+        { ord:'Solsystem', def:'Solen tillsammans med allt som kretsar runt den: planeter, månar, asteroider och kometer. Vårt solsystem har åtta planeter, varav jorden är en.' },
+        { ord:'Dygn', def:'Den tid det tar för jorden att snurra ett helt varv runt sin egen axel, ungefär 24 timmar. Det är det som skapar dag och natt.' },
+        { ord:'År', def:'Den tid det tar för jorden att åka ett helt varv runt solen, ungefär 365 dagar.' },
+        { ord:'Årstider', def:'De fyra perioderna vår, sommar, höst och vinter, som uppstår för att jordens axel lutar medan den kretsar runt solen.' }
+    ];
     function createRymden(config){
-        const body = createWidget('RYMDEN', 480, 'word-widget ry-widget', config);
+        const body = createWidget('RYMDEN', 620, 'word-widget ry-widget', config);
         const widget = body.parentElement.parentElement;
-        if(!config){ widget.style.height = '440px'; }
+        if(!config){ widget.style.height = '560px'; }
         let idx = (config && config.data && typeof config.data.idx==='number') ? config.data.idx : Math.floor(Math.random()*RYMDEN_BANK.length);
         if(idx<0 || idx>=RYMDEN_BANK.length) idx = 0;
         let mode = (config && config.data && config.data.mode) || 'slumpa';
@@ -4558,7 +4614,13 @@
         const tabSlumpa=document.createElement('button'); tabSlumpa.type='button'; tabSlumpa.className='btn'; tabSlumpa.textContent='🎲 Slumpa objekt';
         const tabPlaneter=document.createElement('button'); tabPlaneter.type='button'; tabPlaneter.className='btn'; tabPlaneter.textContent='🪐 Planeter';
         const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🧠 Quiz';
-        tabRow.appendChild(tabSlumpa); tabRow.appendChild(tabPlaneter); tabRow.appendChild(tabQuiz);
+        const tabBegrepp=document.createElement('button'); tabBegrepp.type='button'; tabBegrepp.className='btn'; tabBegrepp.textContent='📖 Begrepp';
+        const tabSolsystem=document.createElement('button'); tabSolsystem.type='button'; tabSolsystem.className='btn'; tabSolsystem.textContent='☀️ Vad är ett solsystem?';
+        const tabStjarnor=document.createElement('button'); tabStjarnor.type='button'; tabStjarnor.className='btn'; tabStjarnor.textContent='⭐ Stjärnor';
+        const tabSolen=document.createElement('button'); tabSolen.type='button'; tabSolen.className='btn'; tabSolen.textContent='🌞 Solen';
+        const tabJorden=document.createElement('button'); tabJorden.type='button'; tabJorden.className='btn'; tabJorden.textContent='🌍 Jorden';
+        const tabManen=document.createElement('button'); tabManen.type='button'; tabManen.className='btn'; tabManen.textContent='🌙 Månen';
+        tabRow.appendChild(tabSlumpa); tabRow.appendChild(tabPlaneter); tabRow.appendChild(tabSolsystem); tabRow.appendChild(tabStjarnor); tabRow.appendChild(tabSolen); tabRow.appendChild(tabJorden); tabRow.appendChild(tabManen); tabRow.appendChild(tabQuiz); tabRow.appendChild(tabBegrepp);
         body.appendChild(tabRow);
 
         const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
@@ -4631,6 +4693,41 @@
                     <div class='ry-planet-rad'><b>📍 Avstånd jämfört med jorden:</b> ${gotdEsc(avstandJmf)}</div>`;
                 kortWrap.appendChild(info);
             }
+
+            // Introtexten (vad är en planet? / skillnad mot stjärna / jordens plats) öppnas i en
+            // popup-ruta istället för att ta plats direkt i fliken.
+            const introBtn=document.createElement('button'); introBtn.type='button'; introBtn.className='btn btn-secondary';
+            introBtn.style.width='100%'; introBtn.style.marginTop='12px';
+            introBtn.textContent='ℹ️ Vad är en planet?';
+            introBtn.onclick=()=>openPlanetIntroPopup();
+            kortWrap.appendChild(introBtn);
+        }
+
+        function openPlanetIntroPopup(){
+            const RY_PLANET_INTRO = [
+                { ord:'Vad är en planet?', def:'En stor himlakropp som kretsar runt en stjärna, har tillräckligt med tyngdkraft för att vara rund, och har rensat sin bana från andra objekt. Vårt solsystem har åtta planeter.' },
+                { ord:'Skillnaden mellan en planet och en stjärna', def:'En stjärna, som solen, lyser med sitt eget ljus och skapar energi inuti sig själv. En planet lyser inte själv - den syns bara för att den reflekterar ljus från en stjärna, och den kretsar runt stjärnan istället för tvärtom.' },
+                { ord:'Jordens plats i solsystemet', def:'Jorden är den tredje planeten räknat från solen, efter Merkurius och Venus. Det är precis rätt avstånd för att vatten ska kunna vara flytande, vilket gör jorden till den enda kända planeten med liv.' }
+            ];
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(480px,94vw)';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent='ℹ️ Vad är en planet?';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const lista=document.createElement('div'); lista.className='su-lista';
+            RY_PLANET_INTRO.forEach(b=>{
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=b.ord;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=b.def;
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            box.appendChild(lista);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
         }
 
         function renderQuiz(){
@@ -4674,6 +4771,89 @@
             kortWrap.appendChild(resetBtn);
         }
 
+        function renderBegrepp(){
+            kortWrap.innerHTML='';
+            const lista=document.createElement('div'); lista.className='su-lista';
+            RYMDEN_BEGREPP.forEach(b=>{
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=b.ord;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=b.def;
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            kortWrap.appendChild(lista);
+        }
+
+        function renderSolsystem(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Vad är ett solsystem? Här är sex viktiga delar!'; kortWrap.appendChild(hint);
+            const lista=document.createElement('div'); lista.className='su-lista';
+            RYMDEN_SOLSYSTEM.forEach(item=>{
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            kortWrap.appendChild(lista);
+        }
+
+        function renderStjarnor(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Lite grundfakta om stjärnorna på himlen!'; kortWrap.appendChild(hint);
+            const lista=document.createElement('div'); lista.className='su-lista';
+            RYMDEN_STJARNOR.forEach(item=>{
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            kortWrap.appendChild(lista);
+        }
+
+        function renderSolen(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Lite grundfakta om solen!'; kortWrap.appendChild(hint);
+            const lista=document.createElement('div'); lista.className='su-lista';
+            RYMDEN_SOLEN.forEach(item=>{
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            kortWrap.appendChild(lista);
+        }
+
+        function renderJorden(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Lite grundfakta om jorden!'; kortWrap.appendChild(hint);
+            const lista=document.createElement('div'); lista.className='su-lista';
+            RYMDEN_JORDEN.forEach(item=>{
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            kortWrap.appendChild(lista);
+        }
+
+        function renderManen(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Lite grundfakta om månen!'; kortWrap.appendChild(hint);
+            const lista=document.createElement('div'); lista.className='su-lista';
+            RYMDEN_MANEN.forEach(item=>{
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            kortWrap.appendChild(lista);
+        }
+
         function render(){
             tabSlumpa.classList.toggle('btn-primary', mode==='slumpa');
             tabSlumpa.classList.toggle('btn-secondary', mode!=='slumpa');
@@ -4681,11 +4861,29 @@
             tabPlaneter.classList.toggle('btn-secondary', mode!=='planeter');
             tabQuiz.classList.toggle('btn-primary', mode==='quiz');
             tabQuiz.classList.toggle('btn-secondary', mode!=='quiz');
-            if(mode==='planeter') renderPlaneter(); else if(mode==='quiz') renderQuiz(); else renderSlumpa();
+            tabBegrepp.classList.toggle('btn-primary', mode==='begrepp');
+            tabBegrepp.classList.toggle('btn-secondary', mode!=='begrepp');
+            tabSolsystem.classList.toggle('btn-primary', mode==='solsystem');
+            tabSolsystem.classList.toggle('btn-secondary', mode!=='solsystem');
+            tabStjarnor.classList.toggle('btn-primary', mode==='stjarnor');
+            tabStjarnor.classList.toggle('btn-secondary', mode!=='stjarnor');
+            tabSolen.classList.toggle('btn-primary', mode==='solen');
+            tabSolen.classList.toggle('btn-secondary', mode!=='solen');
+            tabJorden.classList.toggle('btn-primary', mode==='jorden');
+            tabJorden.classList.toggle('btn-secondary', mode!=='jorden');
+            tabManen.classList.toggle('btn-primary', mode==='manen');
+            tabManen.classList.toggle('btn-secondary', mode!=='manen');
+            if(mode==='planeter') renderPlaneter(); else if(mode==='quiz') renderQuiz(); else if(mode==='begrepp') renderBegrepp(); else if(mode==='solsystem') renderSolsystem(); else if(mode==='stjarnor') renderStjarnor(); else if(mode==='solen') renderSolen(); else if(mode==='jorden') renderJorden(); else if(mode==='manen') renderManen(); else renderSlumpa();
         }
         tabSlumpa.onclick=()=>{ mode='slumpa'; render(); persist(); };
         tabPlaneter.onclick=()=>{ mode='planeter'; render(); persist(); };
         tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
+        tabBegrepp.onclick=()=>{ mode='begrepp'; render(); persist(); };
+        tabSolsystem.onclick=()=>{ mode='solsystem'; render(); persist(); };
+        tabStjarnor.onclick=()=>{ mode='stjarnor'; render(); persist(); };
+        tabSolen.onclick=()=>{ mode='solen'; render(); persist(); };
+        tabJorden.onclick=()=>{ mode='jorden'; render(); persist(); };
+        tabManen.onclick=()=>{ mode='manen'; render(); persist(); };
         render();
         if(!config) persist();
     }
@@ -5094,7 +5292,9 @@
     const KEMI_BL_SEKTIONER = [
         { titel:'Rent ämne', emoji:'🔵', forklaring:'Ett ämne som bara består av en sorts byggstenar. Går inte att separera i olika delar.', exempel:['Rent guld','Syrgas','Destillerat vatten','Socker (kristaller)'] },
         { titel:'Blandning', emoji:'🥣', forklaring:'När två eller flera ämnen blandas utan att reagera kemiskt med varandra. Går ofta att separera igen, t.ex. genom att sila eller sortera.', exempel:['Sallad','Grus (sten + sand)','Luft (flera gaser)','Saft med fruktbitar','Müsli'] },
-        { titel:'Lösning', emoji:'💧', forklaring:'En särskild sorts blandning där ett ämne är helt upplöst i ett annat (oftast vatten) så att de olika delarna inte längre syns eller går att sila bort.', exempel:['Saltvatten','Sockervatten','Läsk (socker + koldioxid i vatten)','Havsvatten','Ättika (syra i vatten)'] }
+        { titel:'Lösning', emoji:'💧', forklaring:'En särskild sorts blandning där ett ämne är helt upplöst i ett annat (oftast vatten) så att de olika delarna inte längre syns eller går att sila bort.', exempel:['Saltvatten','Sockervatten','Läsk (socker + koldioxid i vatten)','Havsvatten','Ättika (syra i vatten)'] },
+        { titel:'Separera blandningar', emoji:'🧫', forklaring:'Det finns flera sätt att separera (dela upp) en blandning i sina beståndsdelar, beroende på vilka ämnen blandningen innehåller.', exempel:['Silning – skiljer stora bitar från vätska','Sortering för hand – t.ex. sortera olika färgade knappar','Sedimentering – tunga partiklar sjunker till botten','Avdunstning – vätskan avdunstar, fast ämne blir kvar (t.ex. salt)','Magnet – drar till sig järnhaltiga föremål'] },
+        { titel:'Ta bort en fläck', emoji:'🧽', forklaring:'Olika fläckar innehåller olika typer av ämnen, och därför krävs ofta olika medel för att få bort dem.', exempel:['Fettfläck → diskmedel','Bläckfläck → T-sprit','Gräsfläck → tvättmedel + blötläggning','Rödvinsfläck → salt + kallt vatten','Rostfläck → citronsyra','Chokladfläck → kallt vatten + tvättmedel'] }
     ];
     // Material omkring oss - klicka på ett föremål, se vad det är gjort av och varför.
     const KEMI_MATERIAL_BANK = [
@@ -5143,35 +5343,59 @@
         { fraga:'Vilket ämne finns det mest av i luften vi andas?', alt:['Syre','Koldioxid','Kväve','Väte'], ratt:2, fork:'Luften består till största delen (ca 78%) av kväve.' },
         { fraga:'Vad kallas det när ett fast ämne blir flytande?', alt:['Frysa','Smälta','Koka','Kondensera'], ratt:1, fork:'Smälta är när ett ämne går från fast till flytande form.' }
     ];
+    // Materia - grundläggande vad allt runt omkring oss är uppbyggt av.
+    const KEMI_MATERIA_BANK = [
+        { namn:'Vad är materia?', emoji:'⚫', besk:'Ett samlingsord för allt som har massa och tar plats i rymden. Allt du kan se, känna och väga - fast, flytande eller gas - är materia.' },
+        { namn:'Allt omkring oss består av materia', emoji:'🌍', besk:'Bordet, luften, vattnet, din kropp och till och med stjärnorna på himlen - allting runt omkring oss är uppbyggt av materia.' },
+        { namn:'Ämnen och material', emoji:'🧱', besk:'Materia kan delas in i olika ämnen (till exempel vatten eller järn) och material (det ett föremål är gjort av, till exempel trä eller plast).' },
+        { namn:'Atomer (mycket enkel nivå)', emoji:'⚛️', besk:'De minsta byggstenarna som materia är uppbyggd av. Atomer är så små att man inte kan se dem, inte ens med ett vanligt mikroskop.' },
+        { namn:'Molekyler (mycket enkel nivå)', emoji:'🔗', besk:'När flera atomer sitter ihop bildas en molekyl. Till exempel består en vattenmolekyl av två väteatomer och en syreatom.' }
+    ];
+    // Kemiska reaktioner - grundläggande exempel från vardagen.
+    const KEMI_REAKTIONER_BANK = [
+        { namn:'Vad är en kemisk reaktion?', emoji:'🔥', besk:'När ämnen möts och omvandlas till helt nya ämnen med andra egenskaper. Det går oftast inte att göra en kemisk reaktion ogjord.' },
+        { namn:'Förbränning', emoji:'🕯️', besk:'En kemisk reaktion där ett ämne reagerar med syre och bildar värme och ofta ljus, till exempel när ett stearinljus brinner eller ved eldas.' },
+        { namn:'Rost', emoji:'🟤', besk:'En kemisk reaktion där järn reagerar med syre och fukt i luften och bildar järnoxid (rost), som är rödbrun och gör att metallen bryts ner.' },
+        { namn:'Oxidation (enkel nivå)', emoji:'⚡', besk:'När ett ämne reagerar med syre. Både rostbildning och förbränning är exempel på oxidation.' },
+        { namn:'Neutralisation (introduktion)', emoji:'⚖️', besk:'När en syra och en bas reagerar med varandra och "tar ut" varandras egenskaper. Ofta bildas då vatten och salt.' },
+        { namn:'Bakning som kemisk förändring', emoji:'🍞', besk:'När man bakar sker kemiska reaktioner, till exempel när bakpulver eller jäst bildar gasbubblor som får degen att jäsa, och när degen blir gyllenbrun i ugnen.' },
+        { namn:'Matlagning', emoji:'🍳', besk:'Många kemiska reaktioner sker när man lagar mat, till exempel när ett ägg stelnar när det steks eller när kött blir brunt och får smak vid stekning.' },
+        { namn:'Syror och baser i vardagen (mycket enkel nivå)', emoji:'🍋', besk:'Syror smakar surt, till exempel citron och vinäger. Baser känns ofta hala, till exempel tvål. Både syror och baser finns i många vardagliga produkter.' }
+    ];
     // Gaser - kända gaser med beskrivning, funktion och användning.
     const KEMI_GASER_BANK = [
-        { namn:'Syre (O₂)', emoji:'🫧', besk:'En osynlig gas som utgör ungefär 21% av luften.', funktion:'Behövs för att levande varelser ska kunna andas och för att saker ska kunna brinna.', anvandning:'Används inom sjukvården för patienter som har svårt att andas, och i rymddräkter.' },
-        { namn:'Kväve (N₂)', emoji:'💨', besk:'Den vanligaste gasen i luften, cirka 78%.', funktion:'Är ganska overksam (reagerar inte lätt) och späder ut syret så att saker inte brinner för snabbt.', anvandning:'Används för att förpacka mat så den håller längre, och för att fylla bildäck.' },
-        { namn:'Koldioxid (CO₂)', emoji:'🌫️', besk:'En gas som bildas bland annat när vi andas ut och när saker brinner.', funktion:'Växter använder koldioxid vid fotosyntesen för att skapa energi.', anvandning:'Får läsk att bubbla och används i brandsläckare.' },
-        { namn:'Väte (H₂)', emoji:'🎈', besk:'Den lättaste gasen som finns och den vanligaste i hela universum.', funktion:'Kan brinna eller reagera kraftigt tillsammans med syre.', anvandning:'Används som bränsle i vätgasbilar och för att skjuta upp raketer.' },
-        { namn:'Helium', emoji:'🎈', besk:'En mycket lätt, osynlig gas som inte reagerar med andra ämnen.', funktion:'Är lättare än luft, vilket gör att ballonger fyllda med helium flyter uppåt.', anvandning:'Fyller ballonger och används för att kyla ner till exempel MR-kameror.' },
-        { namn:'Ozon (O₃)', emoji:'☂️', besk:'En gas som bildas av tre syreatomer tillsammans.', funktion:'Ozonlagret högt uppe i atmosfären skyddar jorden från farlig UV-strålning från solen.', anvandning:'Används ibland för att rena vatten från bakterier.' },
-        { namn:'Metan (CH₄)', emoji:'🔥', besk:'En brännbar gas som bland annat bildas när organiskt material bryts ner.', funktion:'Är en så kallad växthusgas som bidrar till uppvärmning av jorden.', anvandning:'Är huvudbeståndsdelen i naturgas, som används för uppvärmning och matlagning.' },
-        { namn:'Klor (Cl₂)', emoji:'🧪', besk:'En giftig, gulgrön gas med stark, stickande lukt.', funktion:'Dödar bakterier och andra mikroorganismer.', anvandning:'Används för att rena dricksvatten och simbassänger.' }
+        { namn:'Syre – Oxygen (O₂)', emoji:'🫧', besk:'En osynlig gas som utgör ungefär 21% av luften.', funktion:'Behövs för att levande varelser ska kunna andas och för att saker ska kunna brinna.', anvandning:'Används inom sjukvården för patienter som har svårt att andas, och i rymddräkter.' },
+        { namn:'Kväve – Nitrogen (N₂)', emoji:'💨', besk:'Den vanligaste gasen i luften, cirka 78%.', funktion:'Är ganska overksam (reagerar inte lätt) och späder ut syret så att saker inte brinner för snabbt.', anvandning:'Används för att förpacka mat så den håller längre, och för att fylla bildäck.' },
+        { namn:'Koldioxid – Carbon dioxide (CO₂)', emoji:'🌫️', besk:'En gas som bildas bland annat när vi andas ut och när saker brinner.', funktion:'Växter använder koldioxid vid fotosyntesen för att skapa energi.', anvandning:'Får läsk att bubbla och används i brandsläckare.' },
+        { namn:'Väte – Hydrogen (H₂)', emoji:'🎈', besk:'Den lättaste gasen som finns och den vanligaste i hela universum.', funktion:'Kan brinna eller reagera kraftigt tillsammans med syre.', anvandning:'Används som bränsle i vätgasbilar och för att skjuta upp raketer.' },
+        { namn:'Helium (Helium)', emoji:'🎈', besk:'En mycket lätt, osynlig gas som inte reagerar med andra ämnen.', funktion:'Är lättare än luft, vilket gör att ballonger fyllda med helium flyter uppåt.', anvandning:'Fyller ballonger och används för att kyla ner till exempel MR-kameror.' },
+        { namn:'Ozon – Ozone (O₃)', emoji:'☂️', besk:'En gas som bildas av tre syreatomer tillsammans.', funktion:'Ozonlagret högt uppe i atmosfären skyddar jorden från farlig UV-strålning från solen.', anvandning:'Används ibland för att rena vatten från bakterier.' },
+        { namn:'Metan – Methane (CH₄)', emoji:'🔥', besk:'En brännbar gas som bland annat bildas när organiskt material bryts ner.', funktion:'Är en så kallad växthusgas som bidrar till uppvärmning av jorden.', anvandning:'Är huvudbeståndsdelen i naturgas, som används för uppvärmning och matlagning.' },
+        { namn:'Klor – Chlorine (Cl₂)', emoji:'🧪', besk:'En giftig, gulgrön gas med stark, stickande lukt.', funktion:'Dödar bakterier och andra mikroorganismer.', anvandning:'Används för att rena dricksvatten och simbassänger.' }
     ];
     // Mineraler - kända mineraler med beskrivning, funktion och användning.
     const KEMI_MINERALER_BANK = [
-        { namn:'Kvarts', emoji:'💎', besk:'Ett av de vanligaste mineralerna i jordskorpan, ofta genomskinligt eller vitt.', funktion:'Bygger upp berg och sand.', anvandning:'Används för att tillverka glas och i elektronik, till exempel klockor.' },
-        { namn:'Fältspat', emoji:'🪨', besk:'Det allra vanligaste mineralet i jordskorpan, finns i de flesta bergarter.', funktion:'En viktig byggsten i bergarter som granit.', anvandning:'Används vid tillverkning av porslin och keramik.' },
-        { namn:'Glimmer', emoji:'✨', besk:'Ett mineral som bildar tunna, blanka flagor som glittrar i solljus.', funktion:'Går att dela upp i tunna, böjliga skivor.', anvandning:'Används i elektronik och kosmetika för att ge glitter.' },
-        { namn:'Salt (Halit)', emoji:'🧂', besk:'Ett mineral uppbyggt av natrium och klor, känt som vanligt bordssalt.', funktion:'Kroppen behöver salt för att nerver och muskler ska fungera.', anvandning:'Används för att smaksätta och konservera mat, och för att smälta is på vintern.' },
-        { namn:'Guld', emoji:'🥇', besk:'En sällsynt, mjuk och tung metall med gul glans som inte rostar.', funktion:'Leder elektricitet mycket bra och är mycket beständigt.', anvandning:'Används i smycken, elektronik och som värdeförvaring.' },
-        { namn:'Silver', emoji:'🥈', besk:'En blank, vit metall som leder elektricitet och värme bäst av alla metaller.', funktion:'Har en naturlig förmåga att döda bakterier.', anvandning:'Används i smycken, bestick och elektronik.' },
-        { namn:'Diamant', emoji:'💎', besk:'Det hårdaste mineralet som finns naturligt, bildat av kol under enormt tryck.', funktion:'Är extremt hårt och slitstarkt.', anvandning:'Används i smycken samt för att skära och slipa andra hårda material.' },
-        { namn:'Kalcit', emoji:'⚪', besk:'Ett vanligt mineral som bygger upp bergarter som kalksten och marmor.', funktion:'Bubblar när det möter syra, vilket gör det lätt att känna igen.', anvandning:'Används i cement, byggmaterial och som krita.' },
-        { namn:'Magnetit', emoji:'🧲', besk:'Ett svart mineral som är naturligt magnetiskt.', funktion:'Dras till och kan dra andra järnhaltiga föremål.', anvandning:'Används för att utvinna järn och har historiskt använts i kompasser.' }
+        { namn:'Kvarts (Quartz)', emoji:'💎', besk:'Ett av de vanligaste mineralerna i jordskorpan, ofta genomskinligt eller vitt.', funktion:'Bygger upp berg och sand.', anvandning:'Används för att tillverka glas och i elektronik, till exempel klockor.' },
+        { namn:'Fältspat (Feldspar)', emoji:'🪨', besk:'Det allra vanligaste mineralet i jordskorpan, finns i de flesta bergarter.', funktion:'En viktig byggsten i bergarter som granit.', anvandning:'Används vid tillverkning av porslin och keramik.' },
+        { namn:'Glimmer (Mica)', emoji:'✨', besk:'Ett mineral som bildar tunna, blanka flagor som glittrar i solljus.', funktion:'Går att dela upp i tunna, böjliga skivor.', anvandning:'Används i elektronik och kosmetika för att ge glitter.' },
+        { namn:'Salt – Halite (Sodium chloride)', emoji:'🧂', besk:'Ett mineral uppbyggt av natrium och klor, känt som vanligt bordssalt.', funktion:'Kroppen behöver salt för att nerver och muskler ska fungera.', anvandning:'Används för att smaksätta och konservera mat, och för att smälta is på vintern.' },
+        { namn:'Guld (Gold)', emoji:'🥇', besk:'En sällsynt, mjuk och tung metall med gul glans som inte rostar.', funktion:'Leder elektricitet mycket bra och är mycket beständigt.', anvandning:'Används i smycken, elektronik och som värdeförvaring.' },
+        { namn:'Silver (Silver)', emoji:'🥈', besk:'En blank, vit metall som leder elektricitet och värme bäst av alla metaller.', funktion:'Har en naturlig förmåga att döda bakterier.', anvandning:'Används i smycken, bestick och elektronik.' },
+        { namn:'Diamant (Diamond)', emoji:'💎', besk:'Det hårdaste mineralet som finns naturligt, bildat av kol under enormt tryck.', funktion:'Är extremt hårt och slitstarkt.', anvandning:'Används i smycken samt för att skära och slipa andra hårda material.' },
+        { namn:'Kalcit (Calcite)', emoji:'⚪', besk:'Ett vanligt mineral som bygger upp bergarter som kalksten och marmor.', funktion:'Bubblar när det möter syra, vilket gör det lätt att känna igen.', anvandning:'Används i cement, byggmaterial och som krita.' },
+        { namn:'Magnetit (Magnetite)', emoji:'🧲', besk:'Ett svart mineral som är naturligt magnetiskt.', funktion:'Dras till och kan dra andra järnhaltiga föremål.', anvandning:'Används för att utvinna järn och har historiskt använts i kompasser.' }
     ];
     // Lexikon - klickbara kemibegrepp med popup-förklaring.
     const KEMI_LEX_BANK = [
+        { namn:'Materia', emoji:'⚫', besk:'Ett annat ord för allt som har massa och tar plats i rymden, till exempel fast, flytande och gasformiga ämnen. All materia är uppbyggd av atomer.' },
+        { namn:'Syror', emoji:'🍋', besk:'Ämnen som ofta smakar surt, till exempel citronsyra i citron och ättiksyra i vinäger. Syror kan fräta och göra ont om man får dem på huden eller i ögonen.' },
+        { namn:'Baser', emoji:'🧼', besk:'Ämnen som ofta känns hala eller såpiga, till exempel tvål och bakpulver. Starka baser kan liksom starka syror vara frätande och farliga.' },
         { namn:'Ämne', emoji:'🔵', besk:'Allt som har en massa och tar plats, till exempel vatten, järn eller luft.' },
         { namn:'Material', emoji:'🧱', besk:'Det ämne eller den blandning av ämnen som ett föremål är gjort av, till exempel trä, plast eller metall.' },
         { namn:'Blandning', emoji:'🥣', besk:'När två eller flera ämnen blandas utan att reagera kemiskt - de kan ofta separeras igen.' },
         { namn:'Lösning', emoji:'💧', besk:'En blandning där ett ämne är helt upplöst i ett annat, ofta vatten, så det inte längre syns.' },
+        { namn:'Atom (enkel nivå)', emoji:'⚛️', besk:'Den minsta byggstenen som ett grundämne är uppbyggt av. Atomer är så små att man inte kan se dem, inte ens med ett vanligt mikroskop.' },
+        { namn:'Molekyl (enkel nivå)', emoji:'🔗', besk:'Två eller flera atomer som sitter ihop, till exempel består en vattenmolekyl av två väteatomer och en syreatom.' },
         { namn:'Partikel', emoji:'⚛️', besk:'En mycket liten byggsten som ämnen är uppbyggda av.' },
         { namn:'Fast form', emoji:'🧊', besk:'Ett tillstånd där ämnets partiklar sitter tätt och stilla - ämnet har en bestämd form, t.ex. is.' },
         { namn:'Flytande form', emoji:'💦', besk:'Ett tillstånd där partiklarna kan glida förbi varandra - ämnet tar formen av sin behållare, t.ex. vatten.' },
@@ -5245,9 +5469,11 @@
         const tabLex=document.createElement('button'); tabLex.type='button'; tabLex.className='btn'; tabLex.textContent='🧪 Lexikon';
         const tabGaser=document.createElement('button'); tabGaser.type='button'; tabGaser.className='btn'; tabGaser.textContent='💨 Gaser';
         const tabMineraler=document.createElement('button'); tabMineraler.type='button'; tabMineraler.className='btn'; tabMineraler.textContent='💎 Mineraler';
+        const tabMateria=document.createElement('button'); tabMateria.type='button'; tabMateria.className='btn'; tabMateria.textContent='⚛️ Materia';
+        const tabReaktioner=document.createElement('button'); tabReaktioner.type='button'; tabReaktioner.className='btn'; tabReaktioner.textContent='🔥 Kemiska reaktioner';
         const tabHitta=document.createElement('button'); tabHitta.type='button'; tabHitta.className='btn'; tabHitta.textContent='🔎 Hitta materialet';
         const tabVardag=document.createElement('button'); tabVardag.type='button'; tabVardag.className='btn'; tabVardag.textContent='🌍 Kemi i vardagen';
-        [tabFraga,tabAgg,tabVh,tabBl,tabMat,tabSf,tabQuiz,tabLex,tabGaser,tabMineraler,tabHitta,tabVardag].forEach(t=>{ t.style.flex='1 1 auto'; tabRow.appendChild(t); });
+        [tabFraga,tabAgg,tabVh,tabBl,tabMat,tabSf,tabGaser,tabMineraler,tabMateria,tabReaktioner,tabHitta,tabVardag,tabLex,tabQuiz].forEach(t=>{ t.style.flex='1 1 auto'; tabRow.appendChild(t); });
         body.appendChild(tabRow);
 
         const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
@@ -5492,6 +5718,32 @@
             kortWrap.appendChild(grid);
         }
 
+        function renderMateria(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Klicka på en rubrik för att läsa mer om materia!'; kortWrap.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='vd-lex-grid';
+            KEMI_MATERIA_BANK.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> kmOpenPopup(v.emoji+' '+gotdEsc(v.namn), `<div class='vd-lex-modal-besk'>${gotdEsc(v.besk)}</div>`);
+                grid.appendChild(c);
+            });
+            kortWrap.appendChild(grid);
+        }
+
+        function renderReaktioner(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Klicka på en rubrik för att läsa mer om kemiska reaktioner!'; kortWrap.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='vd-lex-grid';
+            KEMI_REAKTIONER_BANK.forEach(v=>{
+                const c=document.createElement('div'); c.className='vd-lex-card vd-lex-klickbar';
+                c.innerHTML = `<div class='vd-lex-emoji'>${v.emoji}</div><div class='vd-lex-namn'>${gotdEsc(v.namn)}</div>`;
+                c.onclick=()=> kmOpenPopup(v.emoji+' '+gotdEsc(v.namn), `<div class='vd-lex-modal-besk'>${gotdEsc(v.besk)}</div>`);
+                grid.appendChild(c);
+            });
+            kortWrap.appendChild(grid);
+        }
+
         function renderHitta(){
             kortWrap.innerHTML='';
             const o = KEMI_HITTA_BANK[hittaIdx];
@@ -5549,7 +5801,7 @@
         }
 
         function render(){
-            [[tabFraga,'fraga'],[tabAgg,'agg'],[tabVh,'vh'],[tabBl,'bl'],[tabMat,'mat'],[tabSf,'sf'],[tabQuiz,'quiz'],[tabLex,'lex'],[tabGaser,'gaser'],[tabMineraler,'mineraler'],[tabHitta,'hitta'],[tabVardag,'vardag']].forEach(([btn,m])=>{
+            [[tabFraga,'fraga'],[tabAgg,'agg'],[tabVh,'vh'],[tabBl,'bl'],[tabMat,'mat'],[tabSf,'sf'],[tabQuiz,'quiz'],[tabLex,'lex'],[tabGaser,'gaser'],[tabMineraler,'mineraler'],[tabMateria,'materia'],[tabReaktioner,'reaktioner'],[tabHitta,'hitta'],[tabVardag,'vardag']].forEach(([btn,m])=>{
                 btn.classList.toggle('btn-primary', mode===m); btn.classList.toggle('btn-secondary', mode!==m);
             });
             if(mode==='agg') renderAgg();
@@ -5561,6 +5813,8 @@
             else if(mode==='lex') renderLex();
             else if(mode==='gaser') renderGaser();
             else if(mode==='mineraler') renderMineraler();
+            else if(mode==='materia') renderMateria();
+            else if(mode==='reaktioner') renderReaktioner();
             else if(mode==='hitta') renderHitta();
             else if(mode==='vardag') renderVardag();
             else renderFraga();
@@ -5575,6 +5829,8 @@
         tabLex.onclick=()=>{ mode='lex'; render(); persist(); };
         tabGaser.onclick=()=>{ mode='gaser'; render(); persist(); };
         tabMineraler.onclick=()=>{ mode='mineraler'; render(); persist(); };
+        tabMateria.onclick=()=>{ mode='materia'; render(); persist(); };
+        tabReaktioner.onclick=()=>{ mode='reaktioner'; render(); persist(); };
         tabHitta.onclick=()=>{ mode='hitta'; render(); persist(); };
         tabVardag.onclick=()=>{ mode='vardag'; render(); persist(); };
         render();
@@ -10284,7 +10540,15 @@
                 {e:"🔍", t:"Naturvetenskap", txt:"I naturvetenskap undersöker man naturen genom att titta noga, ställa frågor, göra experiment och dra slutsatser av det man ser."},
                 {e:"♻️", t:"Återvinning", txt:"Genom att återvinna papper, plast, glas och metall sparar vi naturens resurser och minskar mängden avfall."},
                 {e:"🌳", t:"Naturvård", txt:"Naturvård handlar om att skydda djur, växter och naturmiljöer, till exempel genom naturreservat och nationalparker."},
-                {e:"🐾", t:"Biologisk mångfald", txt:"Biologisk mångfald betyder att det finns många olika arter av växter och djur. En stor mångfald gör naturen starkare och mer motståndskraftig."}
+                {e:"🐾", t:"Biologisk mångfald", txt:"Biologisk mångfald betyder att det finns många olika arter av växter och djur. En stor mångfald gör naturen starkare och mer motståndskraftig."},
+                {e:"🚯", t:"Nedskräpning", txt:"Nedskräpning är när skräp, till exempel plast och annat avfall, hamnar i naturen istället för i en soptunna. Det kan skada djur och växter och förstöra vackra platser."},
+                {e:"🐼", t:"Hotade arter", txt:"En hotad art är en växt- eller djurart som riskerar att dö ut, till exempel för att dess livsmiljö förstörs eller för att den jagas för mycket. Man arbetar på många håll för att skydda hotade arter."},
+                {e:"🌱", t:"Hållbar utveckling", txt:"Hållbar utveckling betyder att vi använder jordens resurser på ett sätt som gör att även framtida generationer ska kunna leva bra, till exempel genom att inte förbruka mer än naturen hinner återskapa."},
+                {e:"🏭", t:"Föroreningar", txt:"Föroreningar är ämnen som skadar naturen, till exempel avgaser, kemikalier eller skräp som hamnar i luft, vatten eller mark och gör dem smutsiga eller giftiga."},
+                {e:"🌡️", t:"Klimatförändring", txt:"Klimatförändring betyder att jordens klimat blir varmare över tid. Det kan påverka väder, isar och havsnivåer över hela jorden."},
+                {e:"🌫️", t:"Växthuseffekten", txt:"Växthuseffekten är när vissa gaser i atmosfären fångar upp värme från solen, vilket gör jorden varmare. För mycket växthusgaser bidrar till klimatförändringar."},
+                {e:"🛢️", t:"Naturresurser", txt:"Naturresurser är sådant vi hämtar från naturen och använder, till exempel vatten, skog, olja och metaller. Vissa resurser kan ta slut om vi använder för mycket av dem."},
+                {e:"💀", t:"Utrotning", txt:"Utrotning betyder att en hel art dör ut och aldrig mer finns kvar på jorden. Det kan bero på till exempel jakt, föroreningar eller att livsmiljön förstörs."}
             ]
         };
         return window._bioBank;
@@ -14736,7 +15000,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // klick öppnar en popup med större bild och förklaring. Quiz-svar/förklaring visas också i popup.
     function createKroppen(config){
         if(config===undefined) config=null;
-        const body = createWidget('KROPPEN', 760, 'kroppen-widget', config);
+        const body = createWidget('KROPPEN', 900, 'kroppen-widget', config);
         const widget = body.parentElement.parentElement;
         if(!config){ widget.style.height = '680px'; }
 
@@ -14752,43 +15016,62 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
         // ---- KROPPSDELAR (yttre) ----
         const KROPPSDELAR = [
-            { namn:'Huvud', emoji:'🙂', text:'Huvudet sitter överst på kroppen. Där finns hjärnan, ögonen, öronen, näsan och munnen.' },
-            { namn:'Öga', emoji:'👁️', text:'Ögonen använder vi för att se. Vi har två ögon, ett på varje sida av näsan.' },
-            { namn:'Öra', emoji:'👂', text:'Öronen använder vi för att höra ljud. De hjälper oss också att hålla balansen.' },
-            { namn:'Näsa', emoji:'👃', text:'Näsan använder vi för att andas och känna lukter.' },
-            { namn:'Mun', emoji:'👄', text:'Munnen använder vi för att äta, dricka, prata och le.' },
-            { namn:'Hals', emoji:'🧣', text:'Halsen förbinder huvudet med resten av kroppen.' },
-            { namn:'Arm', emoji:'💪', text:'Armarna sitter på sidorna av bålen. Vi använder dem för att lyfta, bära och greppa saker.' },
-            { namn:'Hand', emoji:'✋', text:'Handen sitter längst ut på armen och har fem fingrar som gör att vi kan greppa saker.' },
-            { namn:'Finger', emoji:'👆', text:'Fingrarna använder vi för att peka, greppa och känna hur saker känns.' },
-            { namn:'Mage', emoji:'🫃', text:'Magen är den mjuka framsidan av bålen, ovanför höften och under bröstet.' },
-            { namn:'Rygg', emoji:'🦴', text:'Ryggen är baksidan av bålen. Den hålls upp av ryggraden, en lång rad av ben.' },
-            { namn:'Ben', emoji:'🦵', text:'Benen bär upp hela kroppen och använder vi för att gå, springa och hoppa.' },
-            { namn:'Knä', emoji:'🦿', text:'Knät är leden mitt på benet som gör att vi kan böja benet.' },
-            { namn:'Fot', emoji:'🦶', text:'Foten sitter längst ner på benet och bär upp kroppens hela vikt när vi står.' }
+            { namn:'Huvud', emoji:'🙂', text:'Huvudet sitter överst på kroppen. Där finns hjärnan, ögonen, öronen, näsan och munnen. Fakta: Ett nyfött barns huvud är proportionellt mycket större jämfört med resten av kroppen än en vuxens.' },
+            { namn:'Öga', emoji:'👁️', text:'Ögonen använder vi för att se. Vi har två ögon, ett på varje sida av näsan. Fakta: Ögat kan skilja på flera miljoner olika färgnyanser.' },
+            { namn:'Öra', emoji:'👂', text:'Öronen använder vi för att höra ljud. De hjälper oss också att hålla balansen. Fakta: Öronen slutar aldrig växa under hela livet, till skillnad från många andra kroppsdelar.' },
+            { namn:'Näsa', emoji:'👃', text:'Näsan använder vi för att andas och känna lukter. Fakta: Näsan kan känna igen tusentals olika dofter.' },
+            { namn:'Mun', emoji:'👄', text:'Munnen använder vi för att äta, dricka, prata och le. Fakta: En vuxen människa har normalt 32 tänder, medan barn har 20 mjölktänder.' },
+            { namn:'Hals', emoji:'🧣', text:'Halsen förbinder huvudet med resten av kroppen. Fakta: Inuti halsen finns både matstrupen (för mat) och luftstrupen (för luft), som leder till olika håll i kroppen.' },
+            { namn:'Arm', emoji:'💪', text:'Armarna sitter på sidorna av bålen. Vi använder dem för att lyfta, bära och greppa saker. Fakta: Armen har tre stora ben - överarmsbenet samt två underarmsben som heter strålben och armbågsben.' },
+            { namn:'Hand', emoji:'✋', text:'Handen sitter längst ut på armen och har fem fingrar som gör att vi kan greppa saker. Fakta: Varje hand innehåller 27 små ben, vilket gör att händerna kan röra sig på väldigt många olika sätt.' },
+            { namn:'Finger', emoji:'👆', text:'Fingrarna använder vi för att peka, greppa och känna hur saker känns. Fakta: Fingeravtrycket är unikt för varje människa - inte ens enäggstvillingar har exakt samma mönster.' },
+            { namn:'Mage', emoji:'🫃', text:'Magen är den mjuka framsidan av bålen, ovanför höften och under bröstet. Fakta: Under magens hud och muskler ligger flera viktiga organ skyddade, bland annat magsäcken och tarmarna.' },
+            { namn:'Rygg', emoji:'🦴', text:'Ryggen är baksidan av bålen. Den hålls upp av ryggraden, en lång rad av ben. Fakta: Ryggraden består av 33 småben (kotor) som tillsammans skyddar ryggmärgen.' },
+            { namn:'Ben', emoji:'🦵', text:'Benen bär upp hela kroppen och använder vi för att gå, springa och hoppa. Fakta: Lårbenet är det längsta och starkaste benet i hela kroppen.' },
+            { namn:'Knä', emoji:'🦿', text:'Knät är leden mitt på benet som gör att vi kan böja benet. Fakta: Knäskålen (patella) är kroppens största sesamben, ett ben som ligger inuti en sena.' },
+            { namn:'Fot', emoji:'🦶', text:'Foten sitter längst ner på benet och bär upp kroppens hela vikt när vi står. Fakta: Varje fot innehåller 26 ben - tillsammans har fötterna nästan en fjärdedel av kroppens alla ben.' }
         ];
 
         // ---- KROPPSORGAN (inre) ----
         const KROPPSORGAN = [
-            { namn:'Hjärna', emoji:'🧠', text:'Hjärnan styr hela kroppen. Den gör att vi kan tänka, känna, minnas och röra oss.' },
-            { namn:'Hjärta', emoji:'🫀', text:'Hjärtat är en muskel som pumpar blod runt i hela kroppen. Det slår ungefär 60–100 gånger i minuten i vila.' },
-            { namn:'Lungor', emoji:'🫁', text:'Lungorna tar in syre när vi andas in och släpper ut koldioxid när vi andas ut.' },
-            { namn:'Magsäck', emoji:'', svg:'<path d="M42 28 Q80 22 86 55 Q92 92 55 96 Q22 98 18 65 Q15 40 42 28 Z" fill="#f6a6c1" stroke="#c9527a" stroke-width="4"/>', text:'Magsäcken bryter ner maten vi äter med hjälp av magsyra, som en del av matspjälkningen.' },
-            { namn:'Lever', emoji:'', svg:'<path d="M18 42 Q28 16 68 20 Q100 24 96 54 Q92 86 58 92 Q22 94 14 66 Q10 52 18 42 Z" fill="#c17a52" stroke="#8a4f2c" stroke-width="4"/>', text:'Levern renar blodet från gifter och hjälper till att bryta ner maten vi ätit.' },
-            { namn:'Njurar', emoji:'', svg:'<path d="M32 30 Q46 26 46 46 Q46 66 32 66 Q18 66 20 48 Q20 32 32 30 Z" fill="#a8375e" stroke="#6e1f3c" stroke-width="3"/><path d="M88 30 Q74 26 74 46 Q74 66 88 66 Q102 66 100 48 Q100 32 88 30 Z" fill="#a8375e" stroke="#6e1f3c" stroke-width="3"/>', text:'Njurarna filtrerar blodet och gör sig av med avfallsämnen genom urinen. Vi har två njurar.' },
-            { namn:'Tarmar', emoji:'', svg:'<path d="M20 30 Q42 12 60 30 Q78 48 60 62 Q42 76 58 90 Q74 100 96 90" fill="none" stroke="#e08a5c" stroke-width="11" stroke-linecap="round"/>', text:'Tarmarna tar upp näring från maten vi ätit och för bort det som kroppen inte behöver.' },
-            { namn:'Skelett', emoji:'🦴', text:'Skelettet är alla ben i kroppen tillsammans. Det ger kroppen dess form och skyddar de inre organen.' },
-            { namn:'Muskler', emoji:'💪', text:'Musklerna sitter fästa vid skelettet. När de drar ihop sig kan vi röra på kroppen.' },
-            { namn:'Hud', emoji:'', svg:'<rect x="16" y="16" width="88" height="88" rx="20" fill="#f4c9a0" stroke="#c98f5c" stroke-width="4"/>', text:'Huden är kroppens största organ. Den skyddar oss mot bakterier, håller kvar värme och känner beröring.' }
+            { namn:'Hjärna', emoji:'🧠', text:'Hjärnan styr hela kroppen. Den gör att vi kan tänka, känna, minnas och röra oss. Fakta: Hjärnan väger bara omkring 1,3-1,4 kg men använder ändå ungefär en femtedel av kroppens hela energi.' },
+            { namn:'Hjärta', emoji:'🫀', text:'Hjärtat är en muskel som pumpar blod runt i hela kroppen. Det slår ungefär 60–100 gånger i minuten i vila. Fakta: Hjärtat slår omkring 100 000 gånger varje dygn, utan att vi behöver tänka på det.' },
+            { namn:'Lungor', emoji:'🫁', text:'Lungorna tar in syre när vi andas in och släpper ut koldioxid när vi andas ut. Fakta: Om man vecklade ut alla luftsäckar i lungorna skulle ytan täcka ungefär en halv tennisbana.' },
+            { namn:'Magsäck', emoji:'', svg:'<path d="M42 28 Q80 22 86 55 Q92 92 55 96 Q22 98 18 65 Q15 40 42 28 Z" fill="#f6a6c1" stroke="#c9527a" stroke-width="4"/>', text:'Magsäcken bryter ner maten vi äter med hjälp av magsyra, som en del av matspjälkningen. Fakta: Magsäckens slemhinna byts ut helt ungefär var tredje dag, annars skulle den starka magsyran skada magsäcken själv.' },
+            { namn:'Lever', emoji:'', svg:'<path d="M18 42 Q28 16 68 20 Q100 24 96 54 Q92 86 58 92 Q22 94 14 66 Q10 52 18 42 Z" fill="#c17a52" stroke="#8a4f2c" stroke-width="4"/>', text:'Levern renar blodet från gifter och hjälper till att bryta ner maten vi ätit. Fakta: Levern är kroppens största inre organ och kan återbilda sig själv även om en del av den skadas.' },
+            { namn:'Njurar', emoji:'', svg:'<path d="M32 30 Q46 26 46 46 Q46 66 32 66 Q18 66 20 48 Q20 32 32 30 Z" fill="#a8375e" stroke="#6e1f3c" stroke-width="3"/><path d="M88 30 Q74 26 74 46 Q74 66 88 66 Q102 66 100 48 Q100 32 88 30 Z" fill="#a8375e" stroke="#6e1f3c" stroke-width="3"/>', text:'Njurarna filtrerar blodet och gör sig av med avfallsämnen genom urinen. Vi har två njurar. Fakta: Njurarna renar tillsammans hela kroppens blodmängd omkring 40 gånger varje dygn.' },
+            { namn:'Tarmar', emoji:'', svg:'<path d="M20 30 Q42 12 60 30 Q78 48 60 62 Q42 76 58 90 Q74 100 96 90" fill="none" stroke="#e08a5c" stroke-width="11" stroke-linecap="round"/>', text:'Tarmarna tar upp näring från maten vi ätit och för bort det som kroppen inte behöver. Fakta: Tarmarna är flera meter långa och skulle, om man rullade ut dem, kunna täcka en hel volleybollplan.' },
+            { namn:'Skelett', emoji:'🦴', text:'Skelettet är alla ben i kroppen tillsammans. Det ger kroppen dess form och skyddar de inre organen. Fakta: Ett nyfött barn har omkring 300 ben, men flera av dem växer ihop med tiden så en vuxen har bara cirka 206 ben.' },
+            { namn:'Muskler', emoji:'💪', text:'Musklerna sitter fästa vid skelettet. När de drar ihop sig kan vi röra på kroppen. Fakta: Ögats muskler är några av kroppens mest aktiva - de rör sig tusentals gånger varje dag.' },
+            { namn:'Hud', emoji:'', svg:'<rect x="16" y="16" width="88" height="88" rx="20" fill="#f4c9a0" stroke="#c98f5c" stroke-width="4"/>', text:'Huden är kroppens största organ. Den skyddar oss mot bakterier, håller kvar värme och känner beröring. Fakta: Huden byts hela tiden ut - varje minut faller tusentals döda hudceller av, och man får en helt ny hud ungefär var fjärde vecka.' }
         ];
 
         // ---- SINNEN ----
         const SINNEN = [
-            { namn:'Synen', emoji:'👁️', text:'Synen gör att vi kan se former, färger och hur långt bort saker är. Ögonen fångar upp ljus och skickar signaler till hjärnan via synnerven.' },
-            { namn:'Hörseln', emoji:'👂', text:'Hörseln gör att vi kan uppfatta ljud, till exempel musik, prat och larm. Örat fångar upp ljudvågor och skickar signaler till hjärnan.' },
-            { namn:'Luktsinnet', emoji:'👃', text:'Luktsinnet gör att vi kan känna dofter, till exempel mat eller blommor. Näsan känner av doftämnen i luften och skickar signaler till hjärnan.' },
-            { namn:'Smaksinnet', emoji:'👅', text:'Smaksinnet gör att vi kan känna smaker som sött, salt, surt, beskt och umami. Smaklökarna på tungan känner av smaken i det vi äter.' },
-            { namn:'Känseln', emoji:'✋', text:'Känseln gör att vi kan känna beröring, tryck, värme, kyla och smärta. Huden är fylld av känselreceptorer över hela kroppen.' }
+            { namn:'Synen', emoji:'👁️', text:'Synen gör att vi kan se former, färger och hur långt bort saker är. Ögonen fångar upp ljus och skickar signaler till hjärnan via synnerven. Fakta: Synen är det sinne som hjärnan lägger mest kraft på att tolka - en stor del av hjärnan används just för att bearbeta det vi ser.' },
+            { namn:'Hörseln', emoji:'👂', text:'Hörseln gör att vi kan uppfatta ljud, till exempel musik, prat och larm. Örat fångar upp ljudvågor och skickar signaler till hjärnan. Fakta: Örats innersta del innehåller mikroskopiskt små hårceller som böjs av ljudvågor och gör om dem till nervsignaler.' },
+            { namn:'Luktsinnet', emoji:'👃', text:'Luktsinnet gör att vi kan känna dofter, till exempel mat eller blommor. Näsan känner av doftämnen i luften och skickar signaler till hjärnan. Fakta: Luktsinnet är starkt kopplat till minnet - en doft kan ibland väcka minnen som suttit kvar i många år.' },
+            { namn:'Smaksinnet', emoji:'👅', text:'Smaksinnet gör att vi kan känna smaker som sött, salt, surt, beskt och umami. Smaklökarna på tungan känner av smaken i det vi äter. Fakta: Smak och lukt hänger ihop - därför känns maten ofta smaklös när man är förkyld och har täppt näsa.' },
+            { namn:'Känseln', emoji:'✋', text:'Känseln gör att vi kan känna beröring, tryck, värme, kyla och smärta. Huden är fylld av känselreceptorer över hela kroppen. Fakta: Fingertopparna och läpparna hör till de känsligaste delarna av kroppen, med väldigt många känselreceptorer på en liten yta.' }
+        ];
+
+        // ---- KROPPENS SYSTEM ----
+        const KROPP_SYSTEM = [
+            { namn:'Skelettet', svg:'<path d="M60,15 A8,8 0 1,0 60,31 A8,8 0 1,0 60,15 Z M55,31 L48,50 M65,31 L72,50 M50,50 L45,70 M70,50 L75,70 M52,50 L68,50 M60,31 L60,80 M45,90 L60,80 L75,90 M48,70 L38,85 M72,70 L82,85" stroke="#e8e2d0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>', text:'Skelettet består av mer än 200 ben som ger kroppen dess form, skyddar de inre organen och gör att vi kan röra oss tillsammans med musklerna. Fakta: Det minsta benet i kroppen sitter i örat och är mindre än ett riskorn, medan lårbenet är det längsta och starkaste benet. Skelettet tillverkar dessutom nya blodkroppar inuti benmärgen.' },
+            { namn:'Muskler', emoji:'💪', text:'Muskler sitter fästa vid skelettet med senor. När en muskel drar ihop sig kan den flytta en kroppsdel. Fakta: Kroppen har omkring 600 muskler, och några av de starkaste i förhållande till sin storlek finns i käken. Hjärtat är också en muskel, fast en som aldrig behöver vila.' },
+            { namn:'Matspjälkning', emoji:'🍽️', text:'Matspjälkningen börjar i munnen där maten tuggas och blandas med saliv. Den fortsätter genom matstrupen till magsäcken och tarmarna, där näringen tas upp av kroppen. Fakta: Matspjälkningskanalen är cirka 9 meter lång hos en vuxen person, och det tar oftast mellan 1 och 3 dygn för maten att passera genom hela systemet.' },
+            { namn:'Blodomlopp', emoji:'❤️', text:'(Mycket enkelt förklarat) Hjärtat pumpar blod genom blodkärlen ut till hela kroppen. Blodet för med sig syre och näring till alla celler, och tar med sig avfallsämnen tillbaka. Fakta: Om man lade alla blodkärl i kroppen efter varandra skulle de nå runt jorden mer än två gånger. Blodet hinner runda hela kroppen ungefär en gång i minuten.' },
+            { namn:'Andning', emoji:'🫁', text:'När vi andas in fylls lungorna med luft och tar upp syre som förs vidare ut i blodet. När vi andas ut släpper vi ut koldioxid. Fakta: Vi andas i genomsnitt cirka 20 000 gånger per dygn, oftast utan att ens tänka på det. Ett nyfött barn andas mycket snabbare än en vuxen.' },
+            { namn:'Hälsa', emoji:'❤️‍🩹', text:'Att må bra både i kroppen och i huvudet kallas hälsa. Det handlar om att äta bra, röra på sig, sova tillräckligt och sköta sin hygien. Fakta: Att skratta, leka och umgås med andra är också viktigt för hälsan - inte bara mat och motion. Även känslor och tankar påverkar hur kroppen mår.' }
+        ];
+
+        // ---- MAT OCH HÄLSA ----
+        const KROPP_MAT_HALSA = [
+            { namn:'Tallriksmodellen', svg:'<circle cx="60" cy="60" r="48" fill="#fff" stroke="#333" stroke-width="2.5"/><path d="M60,60 L60,12 A48,48 0 0,0 60,108 Z" fill="#8fbf5a"/><path d="M60,60 L60,12 A48,48 0 0,1 108,60 Z" fill="#f4c542"/><path d="M60,60 L108,60 A48,48 0 0,1 60,108 Z" fill="#e0672e"/>', text:'En modell som visar hur en bra måltid kan se ut: hälften grönsaker och frukt, en fjärdedel kolhydrater (som ris, pasta eller potatis) och en fjärdedel protein (som kött, fisk, bönor eller ägg). Fakta: Tallriksmodellen hjälper en att äta varierat och få i sig det kroppen behöver. Den finns i olika varianter för olika åldrar och aktivitetsnivåer.' },
+            { namn:'Näringsämnen', emoji:'🥦', text:'Maten vi äter innehåller olika näringsämnen som kroppen behöver: kolhydrater och fett ger energi, protein bygger upp kroppen, och vitaminer och mineraler hjälper kroppen att fungera som den ska. Fakta: Vatten räknas också som ett livsnödvändigt näringsämne, även om det inte innehåller någon energi. Kroppen består faktiskt till största delen av vatten.' },
+            { namn:'Motion', emoji:'🏃', text:'Att röra på kroppen regelbundet, till exempel genom lek, idrott eller promenader. Motion stärker muskler, hjärta och skelett, och gör att man mår bättre. Fakta: Barn rekommenderas att röra på sig minst 60 minuter varje dag. Motion gör dessutom att hjärnan fungerar bättre, inte bara kroppen.' },
+            { namn:'Sömn', emoji:'😴', text:'Under sömnen vilar och återhämtar sig kroppen och hjärnan. Sömnen är viktig för minnet, humöret och för att kroppen ska växa och läka skador. Fakta: Barn i skolåldern behöver ofta mellan 9 och 11 timmars sömn per natt. Under djupsömnen frisätts ett tillväxthormon som hjälper kroppen att växa.' },
+            { namn:'Hygien', emoji:'🧼', text:'Att hålla sig ren, till exempel genom att tvätta händerna, borsta tänderna och duscha, för att må bra och undvika att sprida bakterier och bli sjuk. Fakta: Att tvätta händerna ordentligt i minst 20 sekunder är ett av de bästa sätten att undvika att sprida förkylningar och andra sjukdomar. Man bör borsta tänderna minst två gånger om dagen för att förebygga hål i tänderna.' }
         ];
 
         // ---- BEGREPP ----
@@ -14844,6 +15127,19 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             return card;
         }
 
+        // Gör kända underrubriker (t.ex. "Fakta:", "Beskrivning:") feta i popup-texten, med
+        // en radbrytning innan om de inte redan står allra först i texten.
+        const KROPP_LABELS = ['Fakta','Beskrivning','Egenskaper','Funktion','Användning','Livnär sig på','Vatten'];
+        function boldLabels(text){
+            let escaped = gotdEsc(text);
+            KROPP_LABELS.forEach(lbl=>{
+                const re = new RegExp('(^|\\s)('+lbl.replace(/\s/g,'\\s')+':)', 'g');
+                escaped = escaped.replace(re, (m, pre, label, offset) => {
+                    return (offset===0 ? '' : '<br><br>') + '<b>'+label+'</b>';
+                });
+            });
+            return escaped;
+        }
         function openKroppPopup(item, bg){
             const ov=document.createElement('div'); ov.className='figx-overlay';
             const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(440px,94vw)'; box.style.textAlign='center';
@@ -14856,7 +15152,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const bild=document.createElement('div'); bild.style.width='150px'; bild.style.margin='6px auto 14px';
             bild.innerHTML = item.svg ? shapeSvg(item.svg, bg) : iconSvg(item.emoji, bg);
             box.appendChild(bild);
-            const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = item.text;
+            const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.style.textAlign='left'; txt.innerHTML = boldLabels(item.text);
             box.appendChild(txt);
             ov.appendChild(box);
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
@@ -14977,8 +15273,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     <text x="55" y="494" text-anchor="end">en fot</text>
 
     <!-- Höger kolumn -->
-    <line x1="330" y1="20" x2="222" y2="52" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
-    <circle cx="222" cy="52" r="3" fill="#5a5a68"/>
+    <line x1="330" y1="20" x2="210" y2="65" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="210" cy="65" r="3" fill="#5a5a68"/>
     <text x="335" y="24" text-anchor="start">en näsa</text>
 
     <line x1="330" y1="68" x2="216" y2="74" stroke="#5a5a68" stroke-width="1.5" stroke-dasharray="3 3"/>
@@ -15017,7 +15313,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             }
             else if(läge==='delar'){ KROPPSDELAR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='organ'){ KROPPSORGAN.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='system'){ KROPP_SYSTEM.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='sinnen'){ SINNEN.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='mathalsa'){ KROPP_MAT_HALSA.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='begrepp'){
                 gridEl.style.display='none'; begreppEl.style.display='';
                 begreppEl.innerHTML='';
@@ -15036,7 +15334,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 nyKroppFraga();
             }
         }
-        const TAB_DEFS = [ ['illustration','🧑 Illustration'], ['delar','🧍 Kroppsdelar'], ['organ','🫀 Kroppsorgan'], ['sinnen','👀 Sinnen'], ['begrepp','📖 Begrepp'], ['quiz','❓ Quiz'] ];
+        const TAB_DEFS = [ ['illustration','🧑 Illustration'], ['delar','🧍 Kroppsdelar'], ['organ','🫀 Kroppsorgan'], ['system','🦴 Kroppens system'], ['sinnen','👀 Sinnen'], ['mathalsa','🍎 Mat och hälsa'], ['begrepp','📖 Begrepp'], ['quiz','❓ Quiz'] ];
         const tabBtns = TAB_DEFS.map(([key,label],i)=>{
             const t=document.createElement('button'); t.className='figx-tab'+(i===0?' active':''); t.textContent=label;
             t.onclick=()=>{ läge=key; tabBtns.forEach(x=>x.classList.remove('active')); t.classList.add('active'); render(); };
@@ -15052,7 +15350,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // klick öppnar en popup med större bild och förklaring. Quiz-svar/förklaring visas i popup.
     function createSverigesNatur(config){
         if(config===undefined) config=null;
-        const body = createWidget('SVERIGES NATUR', 1100, 'natur-widget', config);
+        const body = createWidget('SVERIGES NATUR', 1250, 'natur-widget', config);
         const widget = body.parentElement.parentElement;
         if(!config){ widget.style.height = '600px'; }
 
@@ -15131,17 +15429,27 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
         // ---- DJUR ----
         const NATUR_DJUR = [
-            { namn:'Älg', emoji:'🦌', text:'Sveriges största hjortdjur, kan väga över 500 kg. Äter kvistar, blad och bark.' },
-            { namn:'Rådjur', emoji:'🦌', text:'Ett mindre, smidigt hjortdjur som är vanligt i svenska skogar och på åkrar.' },
-            { namn:'Räv', emoji:'🦊', text:'Ett litet rovdjur med rödbrun päls och yvig svans. Jagar smådjur som möss och fåglar.' },
-            { namn:'Varg', emoji:'🐺', text:'Ett stort rovdjur som lever och jagar i flock. Sällsynt i den svenska naturen.' },
-            { namn:'Björn', emoji:'🐻', text:'Sveriges största rovdjur. Går i ide och sover under vintern.' },
-            { namn:'Lodjur', emoji:'🐈', text:'Ett vilt kattdjur med tofsöron och kort svans. Jagar bland annat rådjur.' },
-            { namn:'Igelkott', emoji:'🦔', text:'Ett litet djur täckt av taggar. Rullar ihop sig som skydd och går i ide på vintern.' },
-            { namn:'Ekorre', emoji:'🐿️', text:'Ett litet, rödbrunt gnagardjur som klättrar smidigt i träd och samlar nötter och kottar.' },
-            { namn:'Hare', emoji:'🐇', text:'Ett djur som liknar en kanin men är större. Byter till vit päls på vintern i norra Sverige.' },
-            { namn:'Uggla', emoji:'🦉', text:'En rovfågel som jagar på natten. Har mycket bra hörsel och syn i mörker.' },
-            { namn:'Hackspett', emoji:'🐦', text:'En fågel som hackar hål i trädstammar med näbben för att hitta insekter eller bygga bo.' }
+            { namn:'Älg', emoji:'🦌', besk:'Sveriges största hjortdjur, kan väga över 500 kg.', livnar:'Kvistar, blad, bark och vattenväxter - en växtätare.', fakta:'En fullvuxen älgtjurs horn kan väga över 20 kg, och älgen är dessutom en mycket duktig simmare.' },
+            { namn:'Rådjur', emoji:'🦌', besk:'Ett mindre, smidigt hjortdjur som är vanligt i svenska skogar och på åkrar.', livnar:'Gräs, örter, knoppar och blad - en växtätare.', fakta:'Rådjur kan hoppa upp till 6 meter långt i ett enda skutt när de blir skrämda.' },
+            { namn:'Räv', emoji:'🦊', besk:'Ett litet rovdjur med rödbrun päls och yvig svans.', livnar:'Möss, fåglar, kaniner, bär och matrester - en allätare.', fakta:'Räven har extremt bra hörsel och kan höra en mus röra sig under ett tjockt lager snö.' },
+            { namn:'Varg', emoji:'🐺', besk:'Ett stort rovdjur som lever och jagar i flock. Sällsynt i den svenska naturen.', livnar:'Älg, rådjur och andra hovdjur - ett rovdjur.', fakta:'Vargar kommunicerar genom att yla, ett ljud som kan höras flera kilometer bort.' },
+            { namn:'Björn', emoji:'🐻', besk:'Sveriges största rovdjur.', livnar:'Bär, växter, insekter, fisk och ibland smådjur - en allätare, trots att den räknas som rovdjur.', fakta:'Björnen går i ide och sover under stora delar av vintern, en period som kallas vinterdvala.' },
+            { namn:'Lodjur', emoji:'🐈', besk:'Ett vilt kattdjur med tofsöron och kort svans.', livnar:'Rådjur, harar och fåglar - ett rovdjur.', fakta:'Lodjuret smyger tyst inpå sitt byte och slår till med ett kort, mycket snabbt språng.' },
+            { namn:'Igelkott', emoji:'🦔', besk:'Ett litet djur täckt av taggar.', livnar:'Insekter, larver, snäckor och maskar - en insektsätare.', fakta:'Igelkotten har uppåt 5 000-7 000 taggar och rullar ihop sig till ett stickigt klot när den känner sig hotad.' },
+            { namn:'Ekorre', emoji:'🐿️', besk:'Ett litet, rödbrunt gnagardjur som klättrar smidigt i träd.', livnar:'Nötter, kottar, frön, svamp och bär - en växtätare.', fakta:'Ekorren gömmer mat på flera olika ställen inför vintern men glömmer ofta bort en del gömställen - vilket faktiskt hjälper nya träd att gro.' },
+            { namn:'Hare', emoji:'🐇', besk:'Ett djur som liknar en kanin men är större. Byter till vit päls på vintern i norra Sverige.', livnar:'Gräs, örter, kvistar och bark - en växtätare.', fakta:'Haren är mycket snabb och kan springa i uppemot 70 km/h för att undkomma rovdjur.' },
+            { namn:'Uggla', emoji:'🦉', besk:'En rovfågel som jagar på natten. Har mycket bra hörsel och syn i mörker.', livnar:'Möss, sorkar och andra smådjur - ett rovdjur.', fakta:'Ugglans fjädrar är speciellt utformade för att göra flykten nästintill helt ljudlös, vilket gör den till en mycket effektiv jägare.' },
+            { namn:'Hackspett', emoji:'🐦', besk:'En fågel som hackar hål i trädstammar med sin kraftiga näbb.', livnar:'Insekter och larver som lever under barken, samt nötter och frön - en insektsätare.', fakta:'Hackspetten kan hacka flera hundra gånger i minuten utan att skada sin hjärna, tack vare en särskild stötdämpande skallkonstruktion.' },
+            { namn:'Ryggradsdjur', emoji:'🦴', besk:'Djur som har ett inre skelett med ryggrad. Ryggradsdjur delas in i fem grupper: däggdjur, fåglar, fiskar, groddjur och kräldjur.', livnar:'Varierar mycket mellan grupperna - vissa är växtätare, andra rovdjur eller allätare.', fakta:'De flesta djur vi ser i vardagen, som fåglar, fiskar och däggdjur, är ryggradsdjur.' },
+            { namn:'Däggdjur', emoji:'🦌', besk:'Ryggradsdjur som föder levande ungar och ger dem di (mjölk). De flesta har päls.', livnar:'Varierar - kan vara växtätare (t.ex. älg), rovdjur (t.ex. varg) eller allätare (t.ex. björn).', fakta:'Människan är också ett däggdjur! Blåvalen, som lever i havet, är världens största däggdjur.' },
+            { namn:'Fåglar', emoji:'🐦', besk:'Ryggradsdjur med fjädrar och näbb som lägger ägg. De flesta kan flyga.', livnar:'Insekter, frön, fisk eller smådjur, beroende på art.', fakta:'Fåglar har ihåliga ben som gör dem lättare, vilket hjälper dem att flyga.' },
+            { namn:'Fiskar', emoji:'🐟', besk:'Ryggradsdjur som lever i vatten och andas med gälar. De flesta har fenor och är täckta av fjäll.', livnar:'Växtplankton, smådjur eller andra fiskar, beroende på art.', fakta:'Vill du lära dig mer om kända svenska fiskar, som gädda, abborre och lax? Kolla in fliken 🐟 Fiskar!' },
+            { namn:'Groddjur', emoji:'🐸', besk:'Djur som lever både i vatten och på land, till exempel grodor och salamandrar. De föds ofta i vatten med gälar och utvecklas sedan till luftandande vuxna.', livnar:'Insekter och andra småkryp.', fakta:'Groddjurens hud är tunn och fuktig, vilket gör dem extra känsliga för föroreningar i naturen.' },
+            { namn:'Kräldjur', emoji:'🦎', besk:'Fjällklädda ryggradsdjur som lägger ägg, till exempel ormar och ödlor. I Sverige finns bland annat huggorm, snok och kopparödla.', livnar:'Insekter, smådjur eller andra kräldjur, beroende på art.', fakta:'Kräldjur är växelvarma, vilket betyder att kroppstemperaturen beror på omgivningen - därför gillar de att sola sig.' },
+            { namn:'Småkryp', emoji:'🐛', besk:'Ett vardagligt namn för små, ofta krypande djur utan ryggrad, till exempel maskar, spindlar, sniglar och insekter.', livnar:'Varierar mycket - vissa äter växter, andra är rovdjur eller nedbrytare.', fakta:'Småkryp är otroligt viktiga för naturen, bland annat genom att bryta ner dött material och vara mat åt större djur.' },
+            { namn:'Insekter', emoji:'🐝', besk:'Småkryp med sex ben och ofta vingar, till exempel bin, myror och fjärilar.', livnar:'Nektar, växter, andra insekter eller organiskt material, beroende på art.', fakta:'Vill du lära dig mer om kända svenska insekter, som nyckelpiga, humla och trollslända? Kolla in fliken 🐝 Insekter!' },
+            { namn:'Livscykler', emoji:'🔄', besk:'Många djur genomgår stora förändringar under sitt liv, till exempel från ägg till larv till vuxen (som hos fjärilar och grodor). Detta kallas en livscykel.', livnar:'Vad djuret äter kan skilja sig mycket mellan de olika stadierna i livscykeln.', fakta:'En fjärils livscykel med fyra stadier - ägg, larv, puppa och vuxen fjäril - kallas fullständig metamorfos.' },
+            { namn:'Djurspår', emoji:'🐾', besk:'Avtryck eller spår som ett djur lämnar efter sig, till exempel fotavtryck i snö eller lera. Genom att studera djurspår kan man se vilket djur som varit på en plats, även om man inte såg djuret själv.', fakta:'Älgspår är stora och kluvna, medan rävspår är smala och nästan liknar en rak linje, eftersom räven ofta sätter bakfoten nästan exakt där framfoten var.' }
         ];
 
         // ---- SVAMPAR ----
@@ -15167,16 +15475,70 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             { namn:'Skalbagge', svg:'<ellipse cx="60" cy="62" rx="24" ry="28" fill="#2f5233"/><line x1="60" y1="38" x2="60" y2="88" stroke="#1a3320" stroke-width="2"/><circle cx="60" cy="36" r="10" fill="#1a3320"/>', text:'En insekt med hårda, skyddande vingtäcken som skyddar de bakre flygvingarna. Den absolut största insektsgruppen i världen.' }
         ];
 
+        // ---- FISKAR ----
+        const NATUR_FISKAR = [
+            { namn:'Gädda', svg:'<path d="M18,60 Q30,42 60,42 L100,50 Q108,55 108,60 Q108,65 100,70 L60,78 Q30,78 18,60 Z" fill="#5a7a3d"/><path d="M18,60 L4,48 L4,72 Z" fill="#3d5a28"/><path d="M55,42 L48,28 L66,40 Z" fill="#3d5a28"/><circle cx="90" cy="58" r="9" fill="#e8dfc0"/><circle cx="70" cy="65" r="5" fill="#e8dfc0"/><circle cx="50" cy="55" r="6" fill="#e8dfc0"/><circle cx="98" cy="58" r="3.5" fill="#1a1a1a"/>', besk:'Långsmal rovfisk med ett brett, näbbliknande huvud fullt av vassa tänder.', egenskaper:'Grönbrun kropp med ljusa fläckar som ger bra kamouflage, kan bli mycket stor (över en meter).', vatten:'Lever i sjöar, älvar och Östersjöns kustvatten.', fakta:'Gäddan ligger ofta helt stilla bland vattenväxter och väntar in sitt byte, för att sedan attackera blixtsnabbt.' },
+            { namn:'Abborre', svg:'<path d="M25,60 Q35,35 70,38 Q95,40 100,60 Q95,80 70,82 Q35,85 25,60 Z" fill="#8fae4a"/><line x1="40" y1="40" x2="35" y2="80" stroke="#3d5a28" stroke-width="4"/><line x1="52" y1="38" x2="48" y2="82" stroke="#3d5a28" stroke-width="4"/><line x1="64" y1="39" x2="62" y2="81" stroke="#3d5a28" stroke-width="4"/><line x1="76" y1="41" x2="76" y2="79" stroke="#3d5a28" stroke-width="4"/><path d="M25,60 L10,48 L10,72 Z" fill="#e0672e"/><path d="M55,38 L48,20 L68,33 Z" fill="#3d5a28"/><circle cx="82" cy="55" r="4" fill="#1a1a1a"/>', besk:'Randig rovfisk med taggiga ryggfenor och orangeröda bukfenor.', egenskaper:'Grön-gul kropp med mörka tvärband, lever ofta i stim.', vatten:'Mycket vanlig i svenska sjöar, älvar och i Östersjön.', fakta:'En av Sveriges mest fångade fiskar bland sportfiskare, både som matfisk och för fiskets nöjes skull.' },
+            { namn:'Gös', svg:'<path d="M20,60 Q32,40 65,40 Q95,42 102,60 Q95,78 65,80 Q32,80 20,60 Z" fill="#9aa3ab"/><path d="M20,60 L6,48 L6,72 Z" fill="#6a747c"/><path d="M52,40 L45,25 L64,37 Z" fill="#6a747c"/><line x1="45" y1="42" x2="42" y2="78" stroke="#7a848c" stroke-width="3" opacity="0.6"/><line x1="60" y1="41" x2="58" y2="79" stroke="#7a848c" stroke-width="3" opacity="0.6"/><circle cx="90" cy="56" r="6" fill="#e8eef2"/><circle cx="90" cy="56" r="3" fill="#1a1a1a"/>', besk:'Långsmal rovfisk som liknar en blandning av gädda och abborre.', egenskaper:'Silvergrå kropp och stora ögon som gör den skicklig på att jaga i grumligt eller mörkt vatten.', vatten:'Lever i näringsrika sjöar och i Östersjön.', fakta:'Anses vara en av de allra godaste matfiskarna i svenska vatten.' },
+            { namn:'Lax', svg:'<path d="M22,60 Q32,38 65,40 Q95,42 102,60 Q95,78 65,80 Q32,82 22,60 Z" fill="#c9ccd6"/><path d="M22,60 L8,48 L8,72 Z" fill="#8a8fa0"/><path d="M52,40 L45,24 L64,37 Z" fill="#8a8fa0"/><circle cx="55" cy="48" r="2" fill="#5a5a6a"/><circle cx="65" cy="45" r="2" fill="#5a5a6a"/><circle cx="75" cy="50" r="2" fill="#5a5a6a"/><circle cx="60" cy="55" r="2" fill="#5a5a6a"/><circle cx="90" cy="56" r="4" fill="#1a1a1a"/>', besk:'Stor, silverfärgad fisk med kraftig kropp.', egenskaper:'Vandringsfisk - föds i älvar, simmar sedan ut i havet för att växa och återvänder till samma älv för att leka.', vatten:'Lever i havet men leker i strömmande älvar och åar.', fakta:'Laxen kan simma och hoppa uppför forsar och till och med vattenfall på väg till sina lekplatser.' },
+            { namn:'Öring', svg:'<path d="M22,60 Q32,38 65,40 Q95,42 102,60 Q95,78 65,80 Q32,82 22,60 Z" fill="#c9a15a"/><path d="M22,60 L8,48 L8,72 Z" fill="#8a6a35"/><path d="M52,40 L45,24 L64,37 Z" fill="#8a6a35"/><circle cx="50" cy="48" r="2.5" fill="#c62828"/><circle cx="62" cy="44" r="2.5" fill="#1a1a1a"/><circle cx="74" cy="50" r="2.5" fill="#c62828"/><circle cx="58" cy="58" r="2.5" fill="#1a1a1a"/><circle cx="70" cy="62" r="2.5" fill="#c62828"/><circle cx="90" cy="56" r="4" fill="#1a1a1a"/>', besk:'Nära släkting till laxen med mörka och röda fläckar på en silver- eller brunaktig kropp.', egenskaper:'Finns i flera varianter - havsöring, sjööring och bäcköring - beroende på var den lever.', vatten:'Trivs i kallt, syrerikt vatten i bäckar, åar, sjöar och hav.', fakta:'Öringen är känslig för föroreningar och används därför ofta som ett tecken på att ett vattendrag mår bra.' },
+            { namn:'Röding', svg:'<path d="M22,60 Q32,38 65,40 Q95,42 102,60 Q95,78 65,80 Q32,82 22,60 Z" fill="#4a5a6a"/><path d="M25,72 Q50,84 90,74 Q95,78 65,80 Q32,82 22,60 Q22,66 25,72 Z" fill="#c9524a"/><circle cx="55" cy="50" r="2" fill="#e8eef2"/><circle cx="70" cy="48" r="2" fill="#e8eef2"/><circle cx="62" cy="60" r="2" fill="#e8eef2"/><path d="M22,60 L8,48 L8,72 Z" fill="#33404a"/><circle cx="90" cy="56" r="4" fill="#1a1a1a"/>', besk:'Laxfisk med små fjäll och ofta en rödaktig buk, särskilt hos hanar under lektiden.', egenskaper:'Trivs i kallt, klart vatten och simmar ofta djupt.', vatten:'Lever i kalla fjällsjöar och djupa, klara sjöar i norra Sverige.', fakta:'Röding är en av de fiskar som lever längst norrut och högst upp i fjällen av alla svenska sötvattensfiskar.' },
+            { namn:'Mört', svg:'<path d="M28,60 Q38,42 62,44 Q88,46 94,60 Q88,74 62,76 Q38,78 28,60 Z" fill="#c5cdd6"/><path d="M28,60 L14,50 L14,70 Z" fill="#e0672e"/><path d="M50,44 L45,32 L60,42 Z" fill="#c5cdd6"/><circle cx="82" cy="57" r="3.5" fill="#1a1a1a"/>', besk:'Liten, silverglänsande fredsfisk med rödaktiga fenor.', egenskaper:'Lever i stora stim och äter växtplankton, smådjur och växtdelar.', vatten:'Mycket vanlig i svenska sjöar, åar och i Östersjön.', fakta:'Mörten är en viktig bytesfisk för många rovfiskar, som gädda och abborre.' },
+            { namn:'Torsk', svg:'<path d="M20,60 Q30,38 65,40 Q98,42 105,60 Q98,78 65,80 Q30,82 20,60 Z" fill="#8a9a6a"/><path d="M20,60 L6,48 L6,72 Z" fill="#5a6a45"/><path d="M52,40 L45,25 L64,37 Z" fill="#5a6a45"/><circle cx="50" cy="50" r="2.5" fill="#3d4a2e"/><circle cx="62" cy="46" r="2.5" fill="#3d4a2e"/><circle cx="72" cy="53" r="2.5" fill="#3d4a2e"/><circle cx="58" cy="60" r="2.5" fill="#3d4a2e"/><line x1="95" y1="70" x2="97" y2="78" stroke="#3d4a2e" stroke-width="2"/><circle cx="90" cy="55" r="4" fill="#1a1a1a"/>', besk:'Stor saltvattensfisk med en tydlig skäggtöm under hakan.', egenskaper:'Gråbrun eller grönaktig kropp med mörka fläckar och en kraftig kropp.', vatten:'Lever i saltvatten, bland annat i Östersjön och Västerhavet.', fakta:'Torskbestånden i Östersjön har minskat kraftigt, vilket har lett till att fisket begränsats för att skydda arten.' }
+        ];
+
+        // ---- VÄXTER (växtens delar, fotosyntes, behov) ----
+        const NATUR_VAXTER = [
+            { namn:'Rot', svg:'<line x1="60" y1="35" x2="60" y2="60" stroke="#5c7a4a" stroke-width="6"/><path d="M60,60 Q45,75 38,95 M60,60 Q60,80 60,100 M60,60 Q75,75 82,95 M60,60 Q50,85 45,102 M60,60 Q70,85 75,102" stroke="#a0764a" stroke-width="4" fill="none" stroke-linecap="round"/>', text:'Roten sitter under jorden. Den suger upp vatten och näring ur marken och håller samtidigt fast växten så den inte blåser omkull.' },
+            { namn:'Stam', svg:'<rect x="55" y="20" width="10" height="85" rx="4" fill="#7a9a4a"/><ellipse cx="45" cy="45" rx="12" ry="7" fill="#4a8a3d" transform="rotate(-30 45 45)"/><ellipse cx="75" cy="65" rx="12" ry="7" fill="#4a8a3d" transform="rotate(30 75 65)"/>', text:'Stammen (eller stjälken) håller upp växten och transporterar vatten och näring mellan roten och bladen.' },
+            { namn:'Blad', svg:'<path d="M60,20 Q30,35 35,65 Q40,95 60,100 Q80,95 85,65 Q90,35 60,20 Z" fill="#4a8a3d"/><line x1="60" y1="25" x2="60" y2="96" stroke="#2f5e2f" stroke-width="2"/>', text:'Bladen fångar upp solljus. Där sker fotosyntesen, som gör att växten kan skapa sin egen energi.' },
+            { namn:'Blomma', svg: flowerStar('#e05a8a','#f4d35e',6,8,18), text:'Blomman lockar till sig insekter som pollinerar den. Efter pollinering kan blomman utvecklas till frukt med frön.' },
+            { namn:'Frö', svg:'<ellipse cx="60" cy="60" rx="16" ry="22" fill="#a0764a" stroke="#6b4a2c" stroke-width="2"/><path d="M60,40 Q64,50 60,60" stroke="#6b4a2c" stroke-width="1.5" fill="none"/>', text:'Fröet innehåller en liten groddväxt och näring att växa av. Under rätt förhållanden kan det gro och bli en ny planta.' },
+            { namn:'Fotosyntes (förenklad)', svg:'<circle cx="60" cy="35" r="14" fill="#f4c542"/><path d="M60,15 L60,7 M78,53 L84,59 M42,53 L36,59 M40,35 L32,35 M80,35 L88,35" stroke="#f4c542" stroke-width="3" stroke-linecap="round"/><path d="M60,60 Q40,68 40,90 Q40,105 60,108 Q80,105 80,90 Q80,68 60,60 Z" fill="#4a8a3d"/>', text:'Växter tar upp koldioxid ur luften, vatten från roten och energi från solljuset. Med hjälp av det skapar de energi (socker) och syre - syret som alla djur och människor behöver för att andas.' },
+            { namn:'Vad behöver växter för att leva?', svg:'<circle cx="42" cy="30" r="12" fill="#f4c542"/><path d="M70,40 Q78,52 70,62 Q62,52 70,40 Z" fill="#5aa9dc"/><path d="M45,70 Q30,80 32,98 Q34,108 50,108 Q66,108 68,98 Q70,80 55,70 Z" fill="#4a8a3d"/>', text:'Växter behöver solljus, vatten, koldioxid från luften och näring från jorden för att kunna växa, må bra och göra fotosyntes.' }
+        ];
+
+        // ---- NATUREN (svenska livsmiljöer/naturtyper) ----
+        const NATUR_LIVSMILJOER = [
+            { namn:'Skogen', emoji:'🌲', text:'Ett stort område täckt av träd - Sveriges vanligaste naturtyp. Hem för älg, rådjur, svamp och mängder av växter och insekter.' },
+            { namn:'Sjön', emoji:'🏞️', text:'En insjö med sötvatten. Hem för fiskar som abborre och gädda, och växter som näckrosor och vass.' },
+            { namn:'Havet', emoji:'🌊', text:'Sverige gränsar till Östersjön och Västerhavet. Här lever saltvattensfiskar som torsk och sill, samt växter och djur anpassade för salt vatten.' },
+            { namn:'Ängen', emoji:'🌼', text:'Öppen mark med gräs, örter och blommor. En mycket viktig livsmiljö för insekter som bin och fjärilar.' },
+            { namn:'Fjället', emoji:'🏔️', text:'Höga, karga bergsområden i norra Sverige med kallt klimat. Hem för djur som fjällräv, ren och lämmel, och växter som klarar korta somrar.' }
+        ];
+
         // ---- BEGREPP ----
         const NATUR_BEGREPP = [
+            { ord:'Organism', def:'Ett samlingsnamn för allt levande, till exempel växter, djur, svampar och bakterier.' },
+            { ord:'Art', def:'En grupp organismer som liknar varandra och kan skaffa ungar tillsammans, till exempel "gran" eller "räv".' },
+            { ord:'Livscykel', def:'De olika stadier en organism går igenom under sitt liv, till exempel från ägg eller frö till vuxen individ.' },
             { ord:'Fotosyntes', def:'Processen där växter använder solljus, vatten och koldioxid för att skapa energi och syre.' },
-            { ord:'Ekosystem', def:'Allt levande och icke-levande i ett område som påverkar varandra, till exempel en skog eller en sjö.' },
             { ord:'Näringskedja', def:'Visar vem som äter vem i naturen, från växter till växtätare och rovdjur.' },
+            { ord:'Producent', def:'En organism, oftast en växt, som skapar sin egen energi genom fotosyntes och utgör basen i näringskedjan.' },
+            { ord:'Konsument', def:'En organism som äter andra organismer för att få energi, till exempel växtätare och rovdjur.' },
             { ord:'Nedbrytare', def:'Organismer som bryter ner döda växter och djur till näring, till exempel svampar och maskar.' },
-            { ord:'Biologisk mångfald', def:'Variationen av olika växt- och djurarter och livsmiljöer i naturen.' },
-            { ord:'Livsmiljö', def:'Den plats där en växt eller ett djur naturligt lever och trivs, även kallat habitat.' },
+            { ord:'Ekosystem', def:'Allt levande och icke-levande i ett område som påverkar varandra, till exempel en skog eller en sjö.' },
+            { ord:'Habitat (livsmiljö)', def:'Den plats där en växt eller ett djur naturligt lever och trivs.' },
             { ord:'Rovdjur', def:'Ett djur som jagar och äter andra djur, till exempel varg och lodjur.' },
-            { ord:'Växtätare', def:'Ett djur som äter växter, till exempel älg och rådjur.' }
+            { ord:'Bytesdjur', def:'Ett djur som jagas och äts av ett rovdjur, till exempel hare och rådjur.' },
+            { ord:'Växt', def:'En organism som oftast är grön, växer på en fast plats och gör sin egen energi genom fotosyntes.' },
+            { ord:'Djur', def:'En organism som kan röra på sig själv och som måste äta andra organismer (växter eller djur) för att få energi.' },
+            { ord:'Svamp', def:'En egen grupp av organismer, varken växt eller djur, som bland annat bryter ner dött material i naturen.' },
+            { ord:'Bakterie', def:'En mycket liten organism, osynlig för blotta ögat, som finns nästan överallt i naturen.' },
+            { ord:'Cell', def:'Den minsta byggstenen som allt levande är uppbyggt av. Vissa organismer består av en enda cell, andra av miljarder.' },
+            { ord:'Biologisk mångfald', def:'Variationen av olika växt- och djurarter och livsmiljöer i naturen.' },
+            { ord:'Växtätare', def:'Ett djur som äter växter, till exempel älg och rådjur.' },
+            { ord:'Ryggradsdjur', def:'Djur som har ett inre skelett med ryggrad, till exempel däggdjur, fåglar, fiskar, groddjur och kräldjur.' },
+            { ord:'Däggdjur', def:'Ryggradsdjur som föder levande ungar och ger dem di (mjölk), till exempel älg, räv och människan.' },
+            { ord:'Fåglar', def:'Ryggradsdjur med fjädrar och näbb som lägger ägg, och de flesta kan flyga.' },
+            { ord:'Groddjur', def:'Djur som lever både i vatten och på land, till exempel grodor och salamandrar. Föds ofta i vatten med gälar.' },
+            { ord:'Kräldjur', def:'Fjällklädda ryggradsdjur som lägger ägg, till exempel ormar och ödlor.' },
+            { ord:'Pollinering', def:'När insekter, till exempel bin och humlor, för pollen mellan blommor så att nya frön och frukter kan bildas.' },
+            { ord:'Vandringsfisk', def:'En fisk som föds i sötvatten, växer upp i havet och sedan återvänder till sötvatten för att leka, till exempel lax.' },
+            { ord:'Giftig', def:'Något som kan göra en sjuk eller skada en om man äter eller rör vid det, till exempel den röda flugsvampen.' },
+            { ord:'Årstid', def:'En av de fyra perioderna på året - vår, sommar, höst och vinter - med olika väder och olika natur.' },
+            { ord:'Kamouflage', def:'När ett djurs färg eller mönster gör att det smälter in i omgivningen och blir svårt att upptäcka.' },
+            { ord:'Djurspår', def:'Avtryck eller spår som ett djur lämnar efter sig, till exempel fotavtryck i snö eller lera, som man kan använda för att se vilket djur som varit där.' }
         ];
 
         // ---- QUIZ ----
@@ -15196,7 +15558,19 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             { fraga:'Vilken svamp är röd med vita prickar och mycket giftig?', alt:['Röd flugsvamp','Kantarell','Champinjon','Stensopp'], ratt:0, forklaring:'Röd flugsvamp är välkänd från sagor men är mycket giftig och ska aldrig ätas.' },
             { fraga:'Vilken gul, tratformad svamp är en av de mest populära matsvamparna i Sverige?', alt:['Kantarell','Fjällskivling','Champinjon','Björksopp'], ratt:0, forklaring:'Kantarellen är gul, tratformad och en mycket omtyckt matsvamp med fruktig doft.' },
             { fraga:'Vilken insekt lever i stora samhällen som kallas stackar?', alt:['Myra','Trollslända','Fjäril','Nyckelpiga'], ratt:0, forklaring:'Myror lever i stora samhällen, myrstackar, med tydlig arbetsfördelning.' },
-            { fraga:'Vilken insekt äter bladlöss och är röd med svarta prickar?', alt:['Nyckelpiga','Humla','Geting','Skalbagge'], ratt:0, forklaring:'Nyckelpigan är röd med svarta prickar och äter bladlöss, vilket gör den populär i trädgårdar.' }
+            { fraga:'Vilken insekt äter bladlöss och är röd med svarta prickar?', alt:['Nyckelpiga','Humla','Geting','Skalbagge'], ratt:0, forklaring:'Nyckelpigan är röd med svarta prickar och äter bladlöss, vilket gör den populär i trädgårdar.' },
+            { fraga:'Vilken fisk är en vandringsfisk som föds i älvar men växer upp i havet?', alt:['Lax','Abborre','Mört','Gös'], ratt:0, forklaring:'Laxen föds i älvar, simmar ut i havet för att växa, och återvänder sedan till samma älv för att leka.' },
+            { fraga:'Vilken rovfisk har ett brett, näbbliknande huvud fullt av vassa tänder?', alt:['Gädda','Röding','Torsk','Öring'], ratt:0, forklaring:'Gäddan känns igen på sitt breda, näbbliknande huvud och sina vassa tänder.' },
+            { fraga:'Vilken årstid har varmast väder och längst dagsljus?', alt:['Sommar','Vår','Höst','Vinter'], ratt:0, forklaring:'Sommaren har varmast väder och längst dagsljus av årstiderna.' },
+            { fraga:'Vad kallas ett område i skogen där alla träd har huggits ner?', alt:['Kalhygge','Blandskog','Myr','Urskog'], ratt:0, forklaring:'Ett kalhygge är ett område där alla träd har avverkats för att få virke.' },
+            { fraga:'Vad kallas det när insekter för pollen mellan blommor?', alt:['Pollinering','Fotosyntes','Nedbrytning','Näringskedja'], ratt:0, forklaring:'Pollinering gör att nya frön och frukter kan bildas hos växter.' },
+            { fraga:'Vad kallas en fisk som föds i sötvatten men växer upp i havet, som laxen?', alt:['Vandringsfisk','Rovfisk','Fredsfisk','Bottenfisk'], ratt:0, forklaring:'En vandringsfisk föds i sötvatten, växer upp i havet och återvänder sedan för att leka.' },
+            { fraga:'Vilken del av växten suger upp vatten och näring ur jorden?', alt:['Roten','Bladet','Blomman','Fröet'], ratt:0, forklaring:'Roten suger upp vatten och näring och håller samtidigt fast växten i marken.' },
+            { fraga:'Vilken del av växten gör fotosyntes?', alt:['Bladet','Roten','Stammen','Fröet'], ratt:0, forklaring:'Bladen fångar upp solljus, vilket gör att fotosyntesen kan ske där.' },
+            { fraga:'Vad kallas djur som föder levande ungar och ger dem mjölk?', alt:['Däggdjur','Kräldjur','Groddjur','Fåglar'], ratt:0, forklaring:'Däggdjur föder levande ungar och ger dem di (mjölk), till exempel älg och räv.' },
+            { fraga:'Vilka djur lever både i vatten och på land, till exempel grodor?', alt:['Groddjur','Kräldjur','Fåglar','Däggdjur'], ratt:0, forklaring:'Groddjur, som grodor och salamandrar, lever både i vatten och på land.' },
+            { fraga:'Vilken svensk naturtyp är öppen mark med gräs och blommor, viktig för bin och fjärilar?', alt:['Ängen','Fjället','Havet','Sjön'], ratt:0, forklaring:'Ängen är en öppen mark med gräs, örter och blommor - en viktig livsmiljö för pollinerande insekter.' },
+            { fraga:'Vad kallas höga, karga bergsområden i norra Sverige?', alt:['Fjället','Ängen','Myren','Kusten'], ratt:0, forklaring:'Fjället har ett kallt klimat och är hem för djur som fjällräv, ren och lämmel.' }
         ];
 
         body.innerHTML = `<div class='figx-tabs natur-tabs'></div><div class='figx-grid natur-grid'></div><div class='natur-begrepp'></div><div class='natur-quiz'></div>`;
@@ -15228,8 +15602,20 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const bild=document.createElement('div'); bild.style.width='150px'; bild.style.margin='6px auto 14px';
             bild.innerHTML = item.svg ? shapeSvg(item.svg, bg) : iconSvg(item.emoji, bg);
             box.appendChild(bild);
-            const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = item.text;
-            box.appendChild(txt);
+            if(item.text){
+                const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.style.textAlign='left'; txt.textContent = item.text;
+                box.appendChild(txt);
+            } else {
+                const FALT = [ ['besk','Beskrivning'], ['livnar','Livnär sig på'], ['egenskaper','Egenskaper'], ['vatten','Vatten'], ['fakta','Fakta'] ];
+                const lista=document.createElement('div'); lista.style.textAlign='left';
+                FALT.forEach(([key,rubrik])=>{
+                    if(!item[key]) return;
+                    const rad=document.createElement('p'); rad.style.fontSize='16px'; rad.style.color='#333'; rad.style.lineHeight='1.5'; rad.style.margin='0 0 10px';
+                    rad.innerHTML = `<b>${gotdEsc(rubrik)}:</b> ${gotdEsc(item[key])}`;
+                    lista.appendChild(rad);
+                });
+                box.appendChild(lista);
+            }
             ov.appendChild(box);
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
         }
@@ -15282,14 +15668,17 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         let läge = 'skogen';
         function render(){
             gridEl.innerHTML=''; begreppEl.style.display='none'; quizEl.style.display='none'; gridEl.style.display='';
-            if(läge==='skogen'){ NATUR_SKOGEN.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            if(läge==='naturmiljoer'){ NATUR_LIVSMILJOER.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='skogen'){ NATUR_SKOGEN.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='trad'){ NATUR_TRAD.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='vaxter'){ NATUR_VAXTER.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='vader'){ NATUR_VADER.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='blommor'){ NATUR_BLOMMOR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='bar'){ NATUR_BAR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='djur'){ NATUR_DJUR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='svampar'){ NATUR_SVAMPAR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='insekter'){ NATUR_INSEKTER.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
+            else if(läge==='fiskar'){ NATUR_FISKAR.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i))); }
             else if(läge==='begrepp'){
                 gridEl.style.display='none'; begreppEl.style.display='';
                 begreppEl.innerHTML='';
@@ -15308,7 +15697,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 nyNaturFraga();
             }
         }
-        const TAB_DEFS = [ ['skogen','🌲 Skogen'], ['trad','🌳 Träd'], ['vader','🌦️ Väder'], ['blommor','🌸 Blommor'], ['bar','🫐 Bär'], ['djur','🦌 Djur'], ['svampar','🍄 Svampar'], ['insekter','🐝 Insekter'], ['begrepp','📖 Begrepp'], ['quiz','❓ Quiz'] ];
+        const TAB_DEFS = [ ['naturmiljoer','🌍 Naturen'], ['skogen','🌲 Skogen'], ['trad','🌳 Träd'], ['vaxter','🌱 Växter'], ['vader','🌦️ Väder'], ['blommor','🌸 Blommor'], ['bar','🫐 Bär'], ['djur','🦌 Djur'], ['svampar','🍄 Svampar'], ['insekter','🐝 Insekter'], ['fiskar','🐟 Fiskar'], ['begrepp','📖 Begrepp'], ['quiz','❓ Quiz'] ];
         const tabBtns = TAB_DEFS.map(([key,label],i)=>{
             const t=document.createElement('button'); t.className='figx-tab'+(i===0?' active':''); t.textContent=label;
             t.onclick=()=>{ läge=key; tabBtns.forEach(x=>x.classList.remove('active')); t.classList.add('active'); render(); };
@@ -15318,6 +15707,151 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         render();
     }
     window.createSverigesNatur = createSverigesNatur;
+
+    // ---- MATTEBEGREPP ----
+    // Sju flikar med matematiska begrepp. Varje begrepp är ett klickbart kort som öppnar
+    // en popup-ruta med förklaringen.
+    function createMatteBegrepp(config){
+        if(config===undefined) config=null;
+        const body = createWidget('MATTEBEGREPP', 800, 'mattebegrepp-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '620px'; }
+
+        const MB_FARGER = ['#e2f0cb','#d0e8f2','#fff1c1','#e6dbf7','#ffe0d1','#d7f0e3','#fde2e4'];
+        const mbFarg = i => MB_FARGER[i % MB_FARGER.length];
+
+        // ---- TAL ----
+        const MB_TAL = [
+            { namn:'Siffra', emoji:'🔢', def:'Ett tecken som används för att skriva tal, till exempel 0, 1, 2, 3 ... 9. Genom att kombinera siffror kan man skriva alla tal.' },
+            { namn:'Tal', emoji:'🔢', def:'Ett värde som visar hur mycket eller hur många. Tal byggs upp av en eller flera siffror, till exempel 7 eller 42.' },
+            { namn:'Talsystem', emoji:'🧮', def:'Ett sätt att skriva och ordna tal. Vi använder oftast tiosystemet (decimalsystemet), som bygger på talet 10.' },
+            { namn:'Tallinje', emoji:'📏', def:'En linje där tal placeras i ordning, oftast med mindre tal till vänster och större tal till höger.' },
+            { namn:'Positionssystem', emoji:'🏷️', def:'Ett talsystem där en siffras värde beror på vilken plats (position) den står på i talet, till exempel att siffran 3 i talet 300 betyder tre hundra.' },
+            { namn:'Ental', emoji:'1️⃣', def:'Den sista siffran i ett tal, som visar hur många ental (0-9) talet har utöver hela tiotal.' },
+            { namn:'Tiotal', emoji:'🔟', def:'En position i ett tal som visar hur många grupper om tio talet innehåller.' },
+            { namn:'Hundratal', emoji:'💯', def:'En position i ett tal som visar hur många grupper om hundra talet innehåller.' },
+            { namn:'Tusental', emoji:'🔢', def:'En position i ett tal som visar hur många grupper om tusen talet innehåller.' },
+            { namn:'Decimaltal', emoji:'🔟', def:'Ett tal som har en decimalkomma och därmed innehåller delar av en enhet, till exempel 2,5.' },
+            { namn:'Bråk', emoji:'½', def:'Ett tal som visar en del av en helhet, skrivet som täljare genom nämnare, till exempel 1/2 (en halv).' },
+            { namn:'Procent (introduktion)', emoji:'%', def:'Ett sätt att ange en andel av hundra, skrivet med tecknet %. Till exempel betyder 50% samma sak som hälften.' }
+        ];
+
+        // ---- RÄKNESÄTT ----
+        const MB_RAKNESATT = [
+            { namn:'Addition', emoji:'➕', def:'Räknesättet som handlar om att lägga ihop tal, till exempel 3 + 4 = 7. Kallas ofta "plus".' },
+            { namn:'Subtraktion', emoji:'➖', def:'Räknesättet som handlar om att ta bort eller jämföra tal, till exempel 7 - 3 = 4. Kallas ofta "minus".' },
+            { namn:'Multiplikation', emoji:'✖️', def:'Räknesättet som handlar om upprepad addition, till exempel 3 × 4 betyder 3 fyra gånger = 12. Kallas ofta "gånger".' },
+            { namn:'Division', emoji:'➗', def:'Räknesättet som handlar om att dela upp ett tal i lika stora delar, till exempel 12 ÷ 3 = 4. Kallas ofta "delat med".' },
+            { namn:'Prioriteringsregler (introduktion)', emoji:'📋', def:'Regler för i vilken ordning man ska räkna ut ett tal med flera räknesätt, till exempel att multiplikation och division räknas före addition och subtraktion.' }
+        ];
+
+        // ---- GEOMETRI ----
+        const MB_GEOMETRI = [
+            { namn:'Punkt', emoji:'📍', def:'En exakt plats utan storlek, ofta markerad med en liten prick.' },
+            { namn:'Linje', emoji:'📏', def:'En rak sträcka som fortsätter i oändlighet åt båda hållen.' },
+            { namn:'Linjesegment', emoji:'📏', def:'En del av en linje mellan två bestämda punkter.' },
+            { namn:'Sträcka', emoji:'📏', def:'Den kortaste vägen mellan två punkter, med en bestämd längd.' },
+            { namn:'Vinkel', emoji:'📐', def:'Det utrymme som bildas mellan två linjer som möts i en punkt, mätt i grader.' },
+            { namn:'Rät vinkel', emoji:'📐', def:'En vinkel som är exakt 90 grader, som ett hörn på en fyrkant.' },
+            { namn:'Triangel', emoji:'🔺', def:'En figur med tre sidor och tre hörn.' },
+            { namn:'Fyrhörning', emoji:'🟦', def:'En figur med fyra sidor och fyra hörn, till exempel en kvadrat eller rektangel.' },
+            { namn:'Kvadrat', emoji:'⬛', def:'En fyrhörning där alla fyra sidor är lika långa och alla vinklar är räta.' },
+            { namn:'Rektangel', emoji:'▬', def:'En fyrhörning med fyra räta vinklar, där motstående sidor är lika långa.' },
+            { namn:'Parallellogram', emoji:'▱', def:'En fyrhörning där motstående sidor är parallella och lika långa.' },
+            { namn:'Cirkel', emoji:'⭕', def:'En rund figur där alla punkter på kanten ligger lika långt från mittpunkten.' },
+            { namn:'Diameter', emoji:'⭕', def:'Den längsta sträckan tvärs över en cirkel, genom mittpunkten.' },
+            { namn:'Radie', emoji:'⭕', def:'Sträckan från cirkelns mittpunkt till kanten - hälften så lång som diametern.' },
+            { namn:'Omkrets', emoji:'🔁', def:'Längden runt en figur, till exempel runt en cirkel eller fyrhörning.' },
+            { namn:'Area', emoji:'🟩', def:'Hur stor yta en figur täcker, mätt i till exempel kvadratcentimeter (cm²).' },
+            { namn:'Symmetri', emoji:'🦋', def:'När en figur ser likadan ut på båda sidor om en tänkt linje (symmetrilinje), som en spegelbild.' }
+        ];
+
+        // ---- MÄTNING ----
+        const MB_MATNING = [
+            { namn:'Längd', emoji:'📏', def:'Hur lång eller kort något är, mäts till exempel i millimeter, centimeter, meter eller kilometer.' },
+            { namn:'Massa', emoji:'⚖️', def:'Hur mycket något väger, mäts till exempel i gram eller kilogram. Kallas ofta vardagligt för "vikt".' },
+            { namn:'Volym', emoji:'🧴', def:'Hur mycket något rymmer eller tar upp för plats, mäts till exempel i milliliter eller liter.' },
+            { namn:'Tid', emoji:'⏰', def:'Hur länge något varar eller när något sker, mäts i till exempel sekunder, minuter, timmar, dygn eller år.' },
+            { namn:'Temperatur', emoji:'🌡️', def:'Hur varmt eller kallt något är, mäts oftast i grader Celsius (°C).' },
+            { namn:'Skala', emoji:'🗺️', def:'Förhållandet mellan storleken på en ritning eller karta och verkligheten, till exempel att 1 cm på kartan kan motsvara 1 km i verkligheten.' }
+        ];
+
+        // ---- STATISTIK ----
+        const MB_STATISTIK = [
+            { namn:'Tabell', emoji:'📋', def:'Ett sätt att ordna information i rader och kolumner, så det blir lättare att jämföra och läsa av.' },
+            { namn:'Diagram', emoji:'📊', def:'Ett sätt att visa information med hjälp av bilder, staplar eller linjer istället för bara siffror.' },
+            { namn:'Stapeldiagram', emoji:'📊', def:'Ett diagram där information visas med staplar av olika höjd - ju högre stapel, desto större värde.' },
+            { namn:'Cirkeldiagram', emoji:'🥧', def:'Ett diagram format som en cirkel, uppdelad i bitar (som en tårta) som visar hur stor andel varje del utgör av helheten.' },
+            { namn:'Medelvärde', emoji:'➗', def:'Ett genomsnittligt värde man räknar ut genom att lägga ihop alla tal och dela med hur många tal det är.' },
+            { namn:'Typvärde', emoji:'🔁', def:'Det värde som förekommer flest gånger i en samling data.' }
+        ];
+
+        // ---- EKONOMI ----
+        const MB_EKONOMI = [
+            { namn:'Pengar', emoji:'💰', def:'Det vi använder för att köpa och sälja saker, till exempel sedlar och mynt, eller pengar på ett kort eller konto.' },
+            { namn:'Sedlar', emoji:'💵', def:'Papperspengar (eller plastpengar) med olika värden, till exempel 20-, 50-, 100-, 200- och 500-kronorssedlar.' },
+            { namn:'Mynt', emoji:'🪙', def:'Runda metallpengar med olika värden, till exempel 1-, 2-, 5- och 10-kronor.' },
+            { namn:'Växel', emoji:'💱', def:'De pengar man får tillbaka om man betalar mer än det något kostar.' },
+            { namn:'Pris', emoji:'🏷️', def:'Hur mycket pengar något kostar.' },
+            { namn:'Rabatt (enkel nivå)', emoji:'🔖', def:'En sänkning av priset, så att något blir billigare än det ursprungliga priset.' }
+        ];
+
+        // ---- PROBLEMLÖSNING ----
+        const MB_PROBLEMLOSNING = [
+            { namn:'Strategi', emoji:'🧩', def:'Ett sätt eller en plan för hur man löser ett problem eller en uppgift.' },
+            { namn:'Rimlighet', emoji:'✅', def:'Att kontrollera om ett svar verkar vettigt och stämmer med vad man kan förvänta sig, till exempel att ett svar inte är orimligt stort eller litet.' },
+            { namn:'Uppskattning', emoji:'🤔', def:'Att göra en ungefärlig gissning av ett antal eller värde, utan att räkna exakt.' },
+            { namn:'Mönster', emoji:'🔁', def:'Något som upprepar sig på ett förutsägbart sätt, till exempel en talföljd eller ett mönster av former och färger.' }
+        ];
+
+        body.innerHTML = `<div class='figx-tabs mb-tabs'></div><div class='figx-grid mb-grid'></div>`;
+        const tabsEl = body.querySelector('.mb-tabs');
+        const gridEl = body.querySelector('.mb-grid');
+
+        function ritaKort(item, i){
+            const card=document.createElement('div'); card.className='figx-card mb-card'; card.style.cursor='pointer';
+            const fig=document.createElement('div'); fig.className='figx-fig';
+            fig.innerHTML = `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${mbFarg(i)}"/><text x="60" y="79" font-size="50" text-anchor="middle">${item.emoji}</text></svg>`;
+            const namn=document.createElement('div'); namn.className='kropp-namn'; namn.textContent = item.namn;
+            card.appendChild(fig); card.appendChild(namn);
+            card.onclick = ()=> openMbPopup(item, mbFarg(i));
+            return card;
+        }
+
+        function openMbPopup(item, bg){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(440px,94vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent = item.namn;
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const bild=document.createElement('div'); bild.style.width='120px'; bild.style.margin='6px auto 14px';
+            bild.innerHTML = `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${bg}"/><text x="60" y="79" font-size="50" text-anchor="middle">${item.emoji}</text></svg>`;
+            box.appendChild(bild);
+            const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = item.def;
+            box.appendChild(txt);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        let läge = 'tal';
+        function render(){
+            gridEl.innerHTML='';
+            const BANK = { tal:MB_TAL, raknesatt:MB_RAKNESATT, geometri:MB_GEOMETRI, matning:MB_MATNING, statistik:MB_STATISTIK, ekonomi:MB_EKONOMI, problemlosning:MB_PROBLEMLOSNING }[läge];
+            BANK.forEach((it,i)=>gridEl.appendChild(ritaKort(it,i)));
+        }
+        const TAB_DEFS = [ ['tal','🔢 Tal'], ['raknesatt','➕ Räknesätt'], ['geometri','📐 Geometri'], ['matning','📏 Mätning'], ['statistik','📊 Statistik'], ['ekonomi','💰 Ekonomi'], ['problemlosning','🧩 Problemlösning'] ];
+        const tabBtns = TAB_DEFS.map(([key,label],i)=>{
+            const t=document.createElement('button'); t.className='figx-tab'+(i===0?' active':''); t.textContent=label;
+            t.onclick=()=>{ läge=key; tabBtns.forEach(x=>x.classList.remove('active')); t.classList.add('active'); render(); };
+            tabsEl.appendChild(t);
+            return t;
+        });
+        render();
+    }
+    window.createMatteBegrepp = createMatteBegrepp;
 
     // ---- SANNOLIKHET-SIMULATOR ----
     // Läraren väljer tärning eller slant, kastar ett antal gånger med en snabb
@@ -15329,7 +15863,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(config===undefined) config=null;
         const body = createWidget('SANNOLIKHET', 340, 'sim-widget', config);
         const widget = body.parentElement.parentElement;
-        if(!config) widget.style.height = '480px';
+        if(!config) widget.style.height = '580px';
         body.innerHTML = `
             <div class='hover-menu sim-ctrl'>
                 <select class='editor-select sim-typ'>
@@ -15364,7 +15898,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         function renderChart(){
             const oc = outcomes();
             const maxV = Math.max(1, ...oc.map(o=>counts[o]||0));
-            const w=280, h=170, padBottom=28, padTop=14, barGap=12;
+            const w=280, h=195, padBottom=48, padTop=14, barGap=12;
             const n=oc.length;
             const barW = Math.max(24, Math.min(56, (w-barGap*(n+1))/n));
             const forvantat = total>0 ? total/n : 0;
@@ -15381,7 +15915,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 const y = h-padBottom-barH;
                 svg += `<g class='sim-bar-g'><rect x='${x}' y='${y}' width='${barW}' height='${barH}' rx='6' fill='#007aff'/>`;
                 svg += `<text x='${x+barW/2}' y='${y-6}' text-anchor='middle' font-size='13' font-weight='800' fill='#1f2937'>${c}</text>`;
-                svg += `<text x='${x+barW/2}' y='${h-padBottom+16}' text-anchor='middle' font-size='12' fill='#666'>${typSel.value==='tarning'?SIM_DICE_FACES[Number(o)]:o}</text></g>`;
+                svg += `<text x='${x+barW/2}' y='${h-padBottom+34}' text-anchor='middle' font-size='26' fill='#333'>${typSel.value==='tarning'?SIM_DICE_FACES[Number(o)]:o}</text></g>`;
             });
             svg += `</svg>`;
             chartEl.innerHTML = svg;
