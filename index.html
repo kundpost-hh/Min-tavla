@@ -673,6 +673,16 @@
     .vd-karta-temp{ font-size:10px; font-weight:900; color:#1d1d1f; background:rgba(255,255,255,0.9); border-radius:6px; padding:0 4px; margin-top:1px; display:inline-block; }
     .vd-karta-namn{ font-size:8px; font-weight:800; color:#1d3d1d; margin-top:2px; white-space:nowrap; text-shadow:0 1px 2px rgba(255,255,255,0.8); }
     .vd-karta-pin.vd-karta-huvudstad .vd-karta-namn{ font-size:10px; color:#5856d6; }
+    .vd-karta-vind{ font-size:8px; font-weight:800; color:#0a4fa8; background:rgba(255,255,255,0.9); border-radius:6px; padding:0 4px; margin-top:1px; display:inline-flex; align-items:center; gap:2px; white-space:nowrap; }
+    .vd-karta-vindpil{ display:inline-block; font-weight:900; transition:transform .2s; }
+    .vd-karta-tryck{ font-size:10px; font-weight:900; border-radius:50%; width:15px; height:15px; line-height:15px; margin-top:1px; display:inline-flex; align-items:center; justify-content:center; }
+    .vd-karta-tryck.vd-tryck-hog{ background:#ffe3d1; color:#b5490a; }
+    .vd-karta-tryck.vd-tryck-lag{ background:#d6ecff; color:#0a5cb5; }
+    .vd-karta-tryck.vd-tryck-normal{ background:#eee; color:#555; }
+    .vd-karta-forklaring{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; font-size:10px; color:#666; margin-top:8px; }
+    .vd-tryck-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:3px; vertical-align:middle; }
+    .vd-tryck-dot.vd-tryck-hog{ background:#e0672e; }
+    .vd-tryck-dot.vd-tryck-lag{ background:#2e7de0; }
     /* KEMIVÄRLDEN */
     .km-widget{ min-width:360px; }
     .km-widget .widget-body{ overflow-y:auto; overflow-x:hidden; min-height:0; }
@@ -5005,7 +5015,7 @@
     async function vadretFetchKarta(){
         const lats = VADER_ORTER.map(o=>o.lat).join(',');
         const lons = VADER_ORTER.map(o=>o.lon).join(',');
-        const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons+'&current=temperature_2m,weather_code&timezone=Europe%2FBerlin';
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons+'&current=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure&timezone=Europe%2FBerlin';
         const r = await fetch(url);
         if(!r.ok) throw new Error('Kartdata kunde inte hämtas');
         return await r.json();
@@ -5028,7 +5038,8 @@
         const tabJamfor=document.createElement('button'); tabJamfor.type='button'; tabJamfor.className='btn'; tabJamfor.textContent='📅 Jämför igår'; tabJamfor.style.flex='1 1 auto';
         const tabLexikon=document.createElement('button'); tabLexikon.type='button'; tabLexikon.className='btn'; tabLexikon.textContent='📖 Lexikon'; tabLexikon.style.flex='1 1 auto';
         const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🧠 Quiz'; tabQuiz.style.flex='1 1 auto';
-        [tabIdag,tabJamfor,tabLexikon,tabQuiz].forEach(t=>tabRow.appendChild(t));
+        const tabVind=document.createElement('button'); tabVind.type='button'; tabVind.className='btn'; tabVind.textContent='🌬️ Hur vindar bildas'; tabVind.style.flex='1 1 auto';
+        [tabIdag,tabJamfor,tabLexikon,tabVind,tabQuiz].forEach(t=>tabRow.appendChild(t));
         body.appendChild(tabRow);
 
         const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
@@ -5058,12 +5069,24 @@
             VADER_ORTER.forEach((o,i)=>{
                 const res = kartaData[i];
                 const info = vadretKodInfo(res.current.weather_code);
+                const vind = Math.round(res.current.wind_speed_10m);
+                const vindRiktning = res.current.wind_direction_10m;
+                const tryck = Math.round(res.current.surface_pressure);
+                // Enkel klassificering: <1010 hPa = lågtryck, >1015 hPa = högtryck, annars normalt.
+                const tryckTyp = tryck < 1010 ? {lbl:'L', namn:'Lågtryck', cls:'vd-tryck-lag'} : (tryck > 1015 ? {lbl:'H', namn:'Högtryck', cls:'vd-tryck-hog'} : {lbl:'~', namn:'Normalt tryck', cls:'vd-tryck-normal'});
                 const pin=document.createElement('div'); pin.className='vd-karta-pin'+(o.huvudstad?' vd-karta-huvudstad':'');
                 pin.style.left=o.x+'%'; pin.style.top=o.y+'%';
-                pin.innerHTML = `<div class='vd-karta-emoji'>${info.e}</div><div class='vd-karta-temp'>${Math.round(res.current.temperature_2m)}°</div><div class='vd-karta-namn'>${gotdEsc(o.namn)}</div>`;
+                pin.title = 'Vind: '+vind+' m/s, riktning '+Math.round(vindRiktning)+'°  |  Lufttryck: '+tryck+' hPa ('+tryckTyp.namn+')';
+                pin.innerHTML = `<div class='vd-karta-emoji'>${info.e}</div><div class='vd-karta-temp'>${Math.round(res.current.temperature_2m)}°</div>
+                    <div class='vd-karta-vind'><span class='vd-karta-vindpil' style='transform:rotate(${Math.round(vindRiktning)}deg)'>↓</span>${vind} m/s</div>
+                    ${tryckTyp.lbl !== '~' ? `<div class='vd-karta-tryck ${tryckTyp.cls}'>${tryckTyp.lbl}</div>` : ''}
+                    <div class='vd-karta-namn'>${gotdEsc(o.namn)}</div>`;
                 inner.appendChild(pin);
             });
             wrap.appendChild(inner);
+            const forklaring=document.createElement('div'); forklaring.className='vd-karta-forklaring';
+            forklaring.innerHTML = `<span><span class='vd-tryck-dot vd-tryck-hog'></span> H = Högtryck (över 1015 hPa)</span> <span><span class='vd-tryck-dot vd-tryck-lag'></span> L = Lågtryck (under 1010 hPa)</span> <span>↓ = vindriktning, m/s = vindstyrka</span>`;
+            wrap.appendChild(forklaring);
             return wrap;
         }
         function renderIdag(){
@@ -5217,18 +5240,78 @@
             kortWrap.appendChild(resetBtn);
         }
 
+        function renderVind(){
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🌬️ Så här bildas vind, steg för steg!'; kortWrap.appendChild(hint);
+
+            const illu=document.createElement('div'); illu.style.marginBottom='14px';
+            illu.innerHTML = `<svg viewBox="0 0 320 170" style="width:100%;height:auto;display:block;">
+                <rect x="0" y="0" width="320" height="170" rx="14" fill="#eaf6fb"/>
+                <!-- Sol -->
+                <circle cx="55" cy="35" r="20" fill="#f6c343" stroke="#e0a92c" stroke-width="2"/>
+                <line x1="55" y1="6" x2="55" y2="-2" stroke="#f6c343" stroke-width="3"/>
+                <line x1="30" y1="15" x2="24" y2="9" stroke="#f6c343" stroke-width="3"/>
+                <line x1="80" y1="15" x2="86" y2="9" stroke="#f6c343" stroke-width="3"/>
+                <!-- Mark -->
+                <rect x="0" y="140" width="320" height="30" fill="#4a8a3d"/>
+                <rect x="0" y="140" width="130" height="30" fill="#e0672e" opacity="0.35"/>
+                <!-- Varm luft stiger (vänster) -->
+                <path d="M60,138 Q52,110 62,85 Q70,65 60,40" stroke="#e0672e" stroke-width="5" fill="none" stroke-linecap="round" marker-end="url(#pilRod)"/>
+                <text x="60" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#b5490a">L</text>
+                <text x="60" y="128" text-anchor="middle" font-size="9" fill="#8a3a10" font-weight="700">Varm luft stiger</text>
+                <!-- Kall luft sjunker (höger) -->
+                <path d="M260,45 Q268,75 258,100 Q250,120 260,138" stroke="#2e7de0" stroke-width="5" fill="none" stroke-linecap="round" marker-end="url(#pilBla)"/>
+                <text x="260" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#0a5cb5">H</text>
+                <text x="260" y="128" text-anchor="middle" font-size="9" fill="#0a3d7a" font-weight="700">Kall luft sjunker</text>
+                <!-- Vind vid marken, från högtryck till lågtryck -->
+                <path d="M235,152 L95,152" stroke="#1d1d1f" stroke-width="4" fill="none" marker-end="url(#pilVind)"/>
+                <text x="165" y="167" text-anchor="middle" font-size="10" font-weight="800" fill="#1d1d1f">VIND</text>
+                <defs>
+                    <marker id="pilRod" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#e0672e"/></marker>
+                    <marker id="pilBla" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#2e7de0"/></marker>
+                    <marker id="pilVind" markerWidth="9" markerHeight="9" refX="4" refY="4" orient="auto"><path d="M0,0 L9,4 L0,9 Z" fill="#1d1d1f"/></marker>
+                </defs>
+            </svg>`;
+            kortWrap.appendChild(illu);
+
+            const STEG = [
+                { emoji:'☀️', titel:'1. Solen värmer marken olika mycket', text:'Solen värmer upp jordens yta, men olika mycket på olika platser. Till exempel värms mörk mark och land upp snabbare än vatten.' },
+                { emoji:'🔺', titel:'2. Varm luft stiger uppåt', text:'Luften ovanför den uppvärmda marken blir varm. Varm luft är lättare än kall luft, så den stiger uppåt.' },
+                { emoji:'🔻', titel:'3. Ett lågtryck bildas', text:'När den varma luften stiger uppåt blir det mindre luft kvar nära marken. Det gör att lufttrycket sjunker där - ett lågtryck bildas.' },
+                { emoji:'❄️', titel:'4. Kall luft sjunker - ett högtryck bildas', text:'På ett annat ställe är luften kallare och tyngre. Den sjunker neråt och pressas ihop nära marken - ett högtryck bildas.' },
+                { emoji:'➡️', titel:'5. Luften strömmar från högtryck till lågtryck', text:'Luft vill alltid utjämna skillnader i tryck. Därför strömmar luften från platsen med högtryck till platsen med lågtryck.' },
+                { emoji:'💨', titel:'6. Vind bildas', text:'Den strömmande luften är det vi känner som vind. Ju större skillnad i tryck mellan högtrycket och lågtrycket, desto starkare blåser vinden.' }
+            ];
+            STEG.forEach((s,i)=>{
+                const stage=document.createElement('div'); stage.className='vk-stage';
+                const num=document.createElement('div'); num.className='vk-stage-num'; num.textContent=(i+1);
+                const emoji=document.createElement('div'); emoji.className='vk-stage-emoji'; emoji.textContent=s.emoji;
+                const bodyDiv=document.createElement('div'); bodyDiv.className='vk-stage-body';
+                const titel=document.createElement('div'); titel.className='vk-stage-title'; titel.textContent=s.titel;
+                const text=document.createElement('div'); text.className='vk-stage-text'; text.textContent=s.text;
+                bodyDiv.appendChild(titel); bodyDiv.appendChild(text);
+                stage.appendChild(num); stage.appendChild(emoji); stage.appendChild(bodyDiv);
+                kortWrap.appendChild(stage);
+                if(i<STEG.length-1){ const arrow=document.createElement('div'); arrow.className='vk-arrow'; arrow.textContent='⬇️'; kortWrap.appendChild(arrow); }
+            });
+            const loop=document.createElement('div'); loop.className='vk-loop'; loop.textContent='🔁 Processen upprepas hela tiden, överallt på jorden - det är därför det alltid blåser någonstans!';
+            kortWrap.appendChild(loop);
+        }
+
         function render(){
-            [[tabIdag,'idag'],[tabJamfor,'jamfor'],[tabLexikon,'lexikon'],[tabQuiz,'quiz']].forEach(([btn,m])=>{
+            [[tabIdag,'idag'],[tabJamfor,'jamfor'],[tabLexikon,'lexikon'],[tabVind,'vind'],[tabQuiz,'quiz']].forEach(([btn,m])=>{
                 btn.classList.toggle('btn-primary', mode===m); btn.classList.toggle('btn-secondary', mode!==m);
             });
             if(mode==='jamfor'){ renderJamfor(); sakerstallData(); }
             else if(mode==='lexikon') renderLexikon();
+            else if(mode==='vind') renderVind();
             else if(mode==='quiz') renderQuiz();
             else { renderIdag(); sakerstallData(); }
         }
         tabIdag.onclick=()=>{ mode='idag'; render(); persist(); };
         tabJamfor.onclick=()=>{ mode='jamfor'; render(); persist(); };
         tabLexikon.onclick=()=>{ mode='lexikon'; render(); persist(); };
+        tabVind.onclick=()=>{ mode='vind'; render(); persist(); };
         tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
         render();
         if(!config) persist();
@@ -15739,9 +15822,19 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         // ---- RÄKNESÄTT ----
         const MB_RAKNESATT = [
             { namn:'Addition', emoji:'➕', def:'Räknesättet som handlar om att lägga ihop tal, till exempel 3 + 4 = 7. Kallas ofta "plus".' },
+            { namn:'Term', emoji:'🔹', def:'Ett tal som ingår i en addition eller subtraktion. I 3 + 4 = 7 är 3 och 4 termer.' },
+            { namn:'Summa', emoji:'🟰', def:'Svaret man får vid addition, alltså resultatet när man lägger ihop tal. I 3 + 4 = 7 är 7 summan.' },
             { namn:'Subtraktion', emoji:'➖', def:'Räknesättet som handlar om att ta bort eller jämföra tal, till exempel 7 - 3 = 4. Kallas ofta "minus".' },
+            { namn:'Differens', emoji:'🔻', def:'Svaret man får vid subtraktion, alltså resultatet när man tar bort ett tal från ett annat. I 7 - 3 = 4 är 4 differensen.' },
             { namn:'Multiplikation', emoji:'✖️', def:'Räknesättet som handlar om upprepad addition, till exempel 3 × 4 betyder 3 fyra gånger = 12. Kallas ofta "gånger".' },
+            { namn:'Faktor', emoji:'🔢', def:'Ett tal som ingår i en multiplikation. I 3 × 4 = 12 är 3 och 4 faktorer.' },
+            { namn:'Produkt', emoji:'🟰', def:'Svaret man får vid multiplikation, alltså resultatet när man multiplicerar tal. I 3 × 4 = 12 är 12 produkten.' },
             { namn:'Division', emoji:'➗', def:'Räknesättet som handlar om att dela upp ett tal i lika stora delar, till exempel 12 ÷ 3 = 4. Kallas ofta "delat med".' },
+            { namn:'Dividend', emoji:'🔢', def:'Det tal som delas vid division. I 12 ÷ 3 = 4 är 12 dividenden.' },
+            { namn:'Divisor', emoji:'🔢', def:'Det tal man delar med vid division. I 12 ÷ 3 = 4 är 3 divisorn.' },
+            { namn:'Kvot', emoji:'🟰', def:'Svaret man får vid division, alltså resultatet när man delar ett tal med ett annat. I 12 ÷ 3 = 4 är 4 kvoten.' },
+            { namn:'Täljare', emoji:'🔼', def:'Talet högst upp i ett bråk, som visar hur många delar man har. I bråket 3/4 är 3 täljaren.' },
+            { namn:'Nämnare', emoji:'🔽', def:'Talet längst ner i ett bråk, som visar hur många delar det hela är delat i. I bråket 3/4 är 4 nämnaren.' },
             { namn:'Prioriteringsregler (introduktion)', emoji:'📋', def:'Regler för i vilken ordning man ska räkna ut ett tal med flera räknesätt, till exempel att multiplikation och division räknas före addition och subtraktion.' }
         ];
 
@@ -15763,7 +15856,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             { namn:'Radie', emoji:'⭕', def:'Sträckan från cirkelns mittpunkt till kanten - hälften så lång som diametern.' },
             { namn:'Omkrets', emoji:'🔁', def:'Längden runt en figur, till exempel runt en cirkel eller fyrhörning.' },
             { namn:'Area', emoji:'🟩', def:'Hur stor yta en figur täcker, mätt i till exempel kvadratcentimeter (cm²).' },
-            { namn:'Symmetri', emoji:'🦋', def:'När en figur ser likadan ut på båda sidor om en tänkt linje (symmetrilinje), som en spegelbild.' }
+            { namn:'Symmetri', emoji:'🦋', def:'När en figur ser likadan ut på båda sidor om en tänkt linje (symmetrilinje), som en spegelbild.' },
+            { namn:'Passare', svg:'<circle cx="60" cy="24" r="5" fill="#8a8a8a" stroke="#5a5a5a" stroke-width="1.5"/><line x1="60" y1="24" x2="36" y2="98" stroke="#6a6a6a" stroke-width="6" stroke-linecap="round"/><line x1="60" y1="24" x2="84" y2="98" stroke="#6a6a6a" stroke-width="6" stroke-linecap="round"/><circle cx="36" cy="100" r="3" fill="#2a2a2a"/><polygon points="79,90 91,90 85,104" fill="#f4c542" stroke="#8a6a1a" stroke-width="1.5"/><path d="M18,100 A42,42 0 0,1 102,100" stroke="#9a9a9a" stroke-width="2" fill="none" stroke-dasharray="3 4"/>', def:'Ett ritverktyg med två ben, ett med en spets och ett med en penna, som används för att rita cirklar och mäta ut lika långa sträckor.' },
+            { namn:'Gradskiva', emoji:'📐', def:'Ett verktyg format som en halvcirkel med gradmarkeringar, som används för att mäta och rita vinklar.' }
         ];
 
         // ---- MÄTNING ----
@@ -15783,6 +15878,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             { namn:'Stapeldiagram', emoji:'📊', def:'Ett diagram där information visas med staplar av olika höjd - ju högre stapel, desto större värde.' },
             { namn:'Cirkeldiagram', emoji:'🥧', def:'Ett diagram format som en cirkel, uppdelad i bitar (som en tårta) som visar hur stor andel varje del utgör av helheten.' },
             { namn:'Medelvärde', emoji:'➗', def:'Ett genomsnittligt värde man räknar ut genom att lägga ihop alla tal och dela med hur många tal det är.' },
+            { namn:'Median', emoji:'📍', def:'Det mittersta värdet i en samling tal som sorterats i storleksordning. Om det är jämnt antal tal räknar man ut medelvärdet av de två mittersta talen.' },
             { namn:'Typvärde', emoji:'🔁', def:'Det värde som förekommer flest gånger i en samling data.' }
         ];
 
@@ -15811,7 +15907,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         function ritaKort(item, i){
             const card=document.createElement('div'); card.className='figx-card mb-card'; card.style.cursor='pointer';
             const fig=document.createElement('div'); fig.className='figx-fig';
-            fig.innerHTML = `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${mbFarg(i)}"/><text x="60" y="79" font-size="50" text-anchor="middle">${item.emoji}</text></svg>`;
+            fig.innerHTML = item.svg
+                ? `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${mbFarg(i)}"/>${item.svg}</svg>`
+                : `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${mbFarg(i)}"/><text x="60" y="79" font-size="50" text-anchor="middle">${item.emoji}</text></svg>`;
             const namn=document.createElement('div'); namn.className='kropp-namn'; namn.textContent = item.namn;
             card.appendChild(fig); card.appendChild(namn);
             card.onclick = ()=> openMbPopup(item, mbFarg(i));
@@ -15828,7 +15926,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
             head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
             const bild=document.createElement('div'); bild.style.width='120px'; bild.style.margin='6px auto 14px';
-            bild.innerHTML = `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${bg}"/><text x="60" y="79" font-size="50" text-anchor="middle">${item.emoji}</text></svg>`;
+            bild.innerHTML = item.svg
+                ? `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${bg}"/>${item.svg}</svg>`
+                : `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="${bg}"/><text x="60" y="79" font-size="50" text-anchor="middle">${item.emoji}</text></svg>`;
             box.appendChild(bild);
             const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = item.def;
             box.appendChild(txt);
