@@ -2593,15 +2593,18 @@
     }
 
     /* EN BRA KOMPIS! */
-    .kompis-widget .widget-body { display:flex; flex-direction:column; align-items:center; padding:14px; }
+    .kompis-widget .widget-body { display:flex; flex-direction:column; align-items:center; padding:14px; position:relative; overflow-x:hidden; }
+    .kompis-widget .widget-inner { border:2.5px solid #e5233d !important; }
+    .kompis-print-btn { position:absolute; left:50%; bottom:4px; transform:translateX(-50%); background:none; border:none; font-size:20px; cursor:pointer; opacity:0.1; transition:opacity .2s ease; padding:4px 10px; }
+    .kompis-print-btn:hover { opacity:1; }
     .kompis-ring-wrap { position:relative; width:380px; height:270px; max-width:100%; }
     .kompis-heart-guide { position:absolute; inset:0; width:100%; height:100%; }
-    .kompis-face-svg { position:absolute; left:50%; top:47%; transform:translate(-50%,-50%); filter:drop-shadow(0 3px 6px rgba(0,0,0,0.15)); transition:filter .3s ease; }
+    .kompis-face-svg { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); filter:drop-shadow(0 3px 6px rgba(0,0,0,0.15)); transition:filter .3s ease; }
     .kompis-chip { position:absolute; transform:translate(-50%,-50%); background:#fff0f5; border:1.5px solid #ff8fab; color:#c2185b; font-weight:800; font-size:10.5px; padding:3px 8px; border-radius:13px; white-space:nowrap; box-shadow:0 2px 5px rgba(0,0,0,0.12); animation:kompisPop .35s ease; }
     @keyframes kompisPop { from{ transform:translate(-50%,-50%) scale(0); opacity:0; } to{ transform:translate(-50%,-50%) scale(1); opacity:1; } }
     .kompis-complete .kompis-face-svg { animation:kompisGlow 1.1s ease infinite alternate; }
     @keyframes kompisGlow { from{ filter:drop-shadow(0 0 2px #ff8fab); } to{ filter:drop-shadow(0 0 16px #ff8fab); } }
-    .kompis-kiss-burst { position:absolute; left:207px; top:160px; transform:translate(-50%,-50%) scale(1); font-size:26px; opacity:0; pointer-events:none; z-index:5; }
+    .kompis-kiss-burst { position:absolute; left:190px; top:135px; transform:translate(-50%,-50%) scale(1); font-size:26px; opacity:0; pointer-events:none; z-index:5; }
     .kompis-complete .kompis-kiss-burst { animation:kompisKissBurst 2.4s ease-out 1 forwards; }
     @keyframes kompisKissBurst {
         0% { opacity:0.95; transform:translate(-50%,-50%) scale(1); }
@@ -2610,6 +2613,10 @@
     }
     .kompis-btn, .kompis-reset { max-width:340px; }
     .kompis-samtal { max-width:340px; font-size:12px; color:#7a7a86; text-align:center; margin-top:8px; line-height:1.5; }
+    .kompis-hint { position:absolute; left:50%; bottom:calc(100% + 10px); transform:translateX(-50%) translateY(4px); width:250px; font-size:12px; color:#fff; background:#3a3a44; text-align:center; line-height:1.5; padding:8px 12px; border-radius:10px; opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease; box-shadow:0 4px 10px rgba(0,0,0,0.18); z-index:6; }
+    .kompis-hint::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:#3a3a44; }
+    .kompis-hint.kompis-hint-show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .kompis-btn-wrap { position:relative; width:100%; max-width:340px; }
 
 </style>
 
@@ -16003,7 +16010,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         // Hjärtformad kurva (klassisk parameterform). Byggs upp av många täta punkter så att vi
         // kan placera ut orden jämnt efter faktisk båglängd (avstånd längs kurvan) istället för
         // jämna vinkelsteg - annars klumpar punkterna ihop sig vid hjärtats spets och överlappar.
-        const CX=190, CY=125, SCALE=8.1;
+        const CX=190, CY=114, SCALE=8.1;
         const rawHeart = t => ({ x: 16*Math.pow(Math.sin(t),3), y: 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t) });
         const SAMPLES=480, sampPts=[], cum=[0];
         for(let i=0;i<=SAMPLES;i++) sampPts.push(rawHeart((i/SAMPLES)*Math.PI*2));
@@ -16041,14 +16048,26 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 <div class="kompis-kiss-burst">❤️</div>
                 <div class="kompis-chips"></div>
             </div>
-            <button type="button" class="btn btn-primary kompis-btn" style="width:100%;margin-top:8px;">💬 Min kompis är..</button>
+            <div class="kompis-btn-wrap">
+                <button type="button" class="btn btn-primary kompis-btn" style="width:100%;margin-top:8px;">💬 Min kompis är..</button>
+                <span class="kompis-hint">Klicka här för att skapa ord som beskriver en bra kompis. ⭐</span>
+            </div>
             <button type="button" class="btn btn-secondary kompis-reset" style="width:100%;margin-top:6px;">↺ Börja om</button>
             <p class="kompis-samtal">Samtala kring orden, förklara vad det betyder för dig och ge ett exempel.</p>
+            <button type="button" class="kompis-print-btn" title="Skriv ut hjärtat med orden">🖨️</button>
         `;
         const wrap = body.querySelector('.kompis-ring-wrap');
         const chipsEl = body.querySelector('.kompis-chips');
         const btn = body.querySelector('.kompis-btn');
         const resetBtn = body.querySelector('.kompis-reset');
+        const printBtn = body.querySelector('.kompis-print-btn');
+        const hintEl = body.querySelector('.kompis-hint');
+        let hintTimer = null;
+        btn.addEventListener('mouseenter', ()=>{
+            if(hintTimer) return; // redan igång - låt den befintliga timern styra
+            hintEl.classList.add('kompis-hint-show');
+            hintTimer = setTimeout(()=>{ hintEl.classList.remove('kompis-hint-show'); hintTimer=null; }, 2500);
+        });
         const mouth = body.querySelector('.kompis-mouth');
         const MOUTH_NORMAL = 'M58,120 Q90,148 122,120';
         const MOUTH_GLAD = 'M52,116 Q90,162 128,116';
@@ -16081,6 +16100,49 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             order = kompisShuffle();
             count = 0;
             persist(); render(); saveBoardState();
+        };
+        printBtn.onclick=()=>{
+            const scaleFactor = 2.15;
+            const pw = Math.round(380*scaleFactor), ph = Math.round(270*scaleFactor);
+            let heartPathPrint = '';
+            for(let i=0;i<sampPts.length;i++){ const p=toPixel(sampPts[i]); heartPathPrint += (i===0?'M':'L')+(p.x*scaleFactor).toFixed(1)+','+(p.y*scaleFactor).toFixed(1)+' '; }
+            heartPathPrint += 'Z';
+            const kompisFargar = ['#e63946','#f4a261','#2a9d8f','#457b9d','#9b5de5','#f15bb5','#00b4d8','#ff7f51','#43aa8b','#f9844a'];
+            let wordsHtml = '';
+            for(let i=0;i<count;i++){
+                const p = heartPointForIndex(i);
+                const c = kompisFargar[i % kompisFargar.length];
+                wordsHtml += `<div class="pw-word" style="left:${(p.x*scaleFactor).toFixed(1)}px;top:${(p.y*scaleFactor).toFixed(1)}px;color:${c};border-color:${c};">${KOMPIS_ORD[order[i]]}</div>`;
+            }
+            const faceW = Math.round(150*scaleFactor*0.72);
+            const html = `<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>En bra kompis</title><style>
+                @page{ size:A4; margin:10mm; }
+                *{ box-sizing:border-box; }
+                html,body{ height:100%; margin:0; }
+                body{ font-family:'Comic Sans MS','Segoe UI',sans-serif; display:flex; flex-direction:column; align-items:center; padding-top:4mm; }
+                h1{ font-size:26px; color:#c2185b; margin:0 0 8mm; text-align:center; }
+                .pw-wrap{ position:relative; width:${pw}px; height:${ph}px; }
+                .pw-heart{ position:absolute; inset:0; }
+                .pw-face{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+                .pw-word{ position:absolute; transform:translate(-50%,-50%); background:#fff; border:2.5px solid; border-radius:16px; padding:6px 15px; font-weight:800; font-size:16px; white-space:nowrap; }
+            </style></head><body>
+                <h1>💛 Min kompis är... 💛</h1>
+                <div class="pw-wrap">
+                    <svg class="pw-heart" viewBox="0 0 ${pw} ${ph}" width="${pw}" height="${ph}"><path d="${heartPathPrint}" fill="none" stroke="#ffb3c6" stroke-width="4"/></svg>
+                    <svg class="pw-face" viewBox="0 0 180 180" width="${faceW}" height="${faceW}">
+                        <circle cx="90" cy="92" r="66" fill="#ffce54" stroke="#e0a92c" stroke-width="3"/>
+                        <path d="M28,58 Q90,10 152,58 Q140,74 90,66 Q40,74 28,58 Z" fill="#7a5230"/>
+                        <circle cx="63" cy="88" r="7" fill="#3a3a3a"/><circle cx="117" cy="88" r="7" fill="#3a3a3a"/>
+                        <circle cx="42" cy="108" r="9" fill="#ff8fa0" opacity="0.4"/><circle cx="138" cy="108" r="9" fill="#ff8fa0" opacity="0.4"/>
+                        <path d="M58,120 Q90,148 122,120" stroke="#3a3a3a" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+                    </svg>
+                    ${wordsHtml}
+                </div>
+                <script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script>
+            </body></html>`;
+            const w = window.open('', 'kompisprint'+Date.now(), 'width=900,height=1000');
+            if(!w){ try{ customAlert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.','🖨️'); }catch(e){ alert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.'); } return; }
+            w.document.open(); w.document.write(html); w.document.close();
         };
         render();
         if(!config) persist();
