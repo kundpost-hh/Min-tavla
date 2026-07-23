@@ -143,7 +143,6 @@
             <button class="tool-btn" onclick="createBegreppskort()"><div class="icon">🌱</div><div class="label">Begreppskort</div></button>
             <button class="tool-btn" onclick="createNoFraga()"><div class="icon">🔬</div><div class="label">Dagens NO-fråga</div></button>
             <button class="tool-btn" onclick="createSantFalskt()"><div class="icon">🧠</div><div class="label">Sant eller falskt</div></button>
-            <button class="tool-btn" onclick="createReadingSpeed()"><div class="icon">📖</div><div class="label">Läshastighet</div></button>
             <button class="tool-btn" onclick="createTextGenres()"><div class="icon">📚</div><div class="label">Textgenrer</div></button>
             <button class="tool-btn" onclick="createLasforstaelse()"><div class="icon">🧐</div><div class="label">Läsförståelse</div></button>
             <button class="tool-btn" onclick="createTalaWidget()"><div class="icon">🗣️</div><div class="label">Tala</div></button>
@@ -179,14 +178,13 @@
             <button class="tool-btn" onclick="createFormlerWidget()"><div class="icon">🔣</div><div class="label">Formler</div></button>
             <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
             <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">⚡</div><div class="label">Verb</div></button>
-            <button class="tool-btn" onclick="createNounWidget()"><div class="icon">🅰️</div><div class="label">En/Ett</div></button>
             <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder/Invånare</div></button>
+            <button class="tool-btn" onclick="createYrkenWidget()"><div class="icon">👩‍🏫</div><div class="label">Yrken</div></button>
             <button class="tool-btn" onclick="createComparisonWidget()"><div class="icon">🆚</div><div class="label">Jämföra</div></button>
             <button class="tool-btn" onclick="createSpellingBattle()"><div class="icon">✏️</div><div class="label">Stavningskamp</div></button>
             <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
             <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
             <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
-            <button class="tool-btn" onclick="createSeatingChart()"><div class="icon">🪑</div><div class="label">Bordsplacering</div></button>
             <button class="tool-btn" onclick="createExitTicket()"><div class="icon">🎯</div><div class="label">Exit ticket</div></button>
             <button class="tool-btn" onclick="createQuizPoll()"><div class="icon">🗳️</div><div class="label">Omröstning</div></button>
             <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
@@ -1054,7 +1052,15 @@
     .tala-tabs { display:flex; gap:6px; margin-bottom:8px; }
     .tala-tab-btn { flex:1 1 auto; font-size:11.5px; }
     .tala-pane { animation: mathtool-fade .2s ease; }
-    .ord-tabs { display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap; }
+    .ord-tabs-wrap { margin-bottom:4px; border:1.5px solid #ff3b30; border-radius:10px; padding:4px; }
+    .ord-tabs-handle { display:flex; align-items:center; justify-content:center; height:12px; cursor:pointer; }
+    .ord-tabs-handle::before { content:''; width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:6px solid #b8b8c0; transition:border-top-color .2s ease; }
+    .ord-tabs-wrap:hover .ord-tabs-handle::before { border-top-color:#8e8e93; }
+    .ord-tabs-wrap:hover .ord-tabs-handle, .ord-tabs-wrap:focus-within .ord-tabs-handle { opacity:0; height:0; overflow:hidden; }
+    .ord-tabs { display:flex; gap:5px; flex-wrap:wrap; max-height:0; opacity:0; margin-bottom:0; overflow:hidden; transition:max-height .25s ease, opacity .2s ease, margin-bottom .25s ease; }
+    .ord-tabs-wrap.expanded .ord-tabs { max-height:200px; opacity:1; margin-bottom:8px; overflow:visible; }
+    .ord-tabs-wrap.expanded .ord-tabs-handle { opacity:0; height:0; overflow:hidden; }
+    .ord-tabs-wrap:hover .ord-tabs, .ord-tabs-wrap:focus-within .ord-tabs { max-height:200px; opacity:1; margin-bottom:8px; overflow:visible; }
     .ord-tab-btn { flex:1 1 auto; font-size:11px; min-width:80px; }
     .ord-pane { animation: mathtool-fade .2s ease; }
     .meningar-tabs { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
@@ -3247,6 +3253,7 @@
                 else if (type === 'FRÅN FRÖ TILL FRÖ') { state.data.cat = w.dataset.froCat || 'Fröet'; }
                 else if (type === 'BIOLOGI') { state.data.tab = w.dataset.biologiTab || 'bio'; }
                 else if (type === 'KEMI ÅK 4') { state.data.cat = w.dataset.kemiCat || 'Materia & material'; }
+                else if (type === 'YRKEN') { state.data.cat = w.dataset.yrkeCat || 'Skola & Vård'; }
                 else if (type === 'FYSIK ÅK 4') { state.data.cat = w.dataset.fysikCat || 'Ljus & syn'; }
                 else if (type === 'TEKNIK ÅK 4') { state.data.cat = w.dataset.teknikCat || 'Tekniska lösningar'; }
                 else if (type === 'EN / ETT') { try{ state.data = JSON.parse(w.dataset.substantiv || '{}'); }catch(e){ state.data={}; } }
@@ -3374,6 +3381,7 @@
             else if (w.type === 'VERB') createVerbWidget(w);
             else if (w.type === 'EN / ETT') createNounWidget(w);
             else if (w.type === 'LÄNDER' || w.type === 'MEDBORGARE') createCountryWidget(w);
+            else if (w.type === 'YRKEN') createYrkenWidget(w);
             else if (w.type === 'ORDKLASSER') createWordClassWidget(w);
             else if (w.type === 'JÄMFÖRA') createComparisonWidget(w);
             else if (w.type === 'SYNONYMJAKTEN') createSynonymWidget(w);
@@ -7458,24 +7466,31 @@
         if(config===undefined) config=null;
         const body = createWidget('ORD', 390, 'ok-widget syn-widget sam-widget ord-widget', config);
         const widget = body.parentElement.parentElement;
-        if(!config){ widget.style.height = '560px'; }
 
-        body.innerHTML = `<div class='hover-menu ord-tabs'>
-                <button type='button' class='btn ord-tab-btn' data-tab='poker'>🃏 Ordklasspoker</button>
-                <button type='button' class='btn ord-tab-btn' data-tab='rim'>🎵 Rimord</button>
-                <button type='button' class='btn ord-tab-btn' data-tab='mot'>↔️ Motsatsord</button>
-                <button type='button' class='btn ord-tab-btn' data-tab='sam'>🧩 Sammansatt ord</button>
-                <button type='button' class='btn ord-tab-btn' data-tab='syn'>🔎 Synonymer</button>
+        body.innerHTML = `<div class='ord-tabs-wrap${config?'':' expanded'}'>
+                <div class='ord-tabs-handle'></div>
+                <div class='ord-tabs'>
+                    <button type='button' class='btn ord-tab-btn' data-tab='poker'>🃏 Ordklasspoker</button>
+                    <button type='button' class='btn ord-tab-btn' data-tab='rim'>🎵 Rimord</button>
+                    <button type='button' class='btn ord-tab-btn' data-tab='mot'>↔️ Motsatsord</button>
+                    <button type='button' class='btn ord-tab-btn' data-tab='sam'>🧩 Sammansatt ord</button>
+                    <button type='button' class='btn ord-tab-btn' data-tab='syn'>🔎 Synonymer</button>
+                    <button type='button' class='btn ord-tab-btn' data-tab='enett'>🅰️ En/Ett</button>
+                    <button type='button' class='btn ord-tab-btn' data-tab='lasteknik'>📖 Lästeknik</button>
+                </div>
             </div>
             <div class='ord-pane ord-pane-poker'></div>
             <div class='ord-pane ord-pane-rim' style='display:none;'></div>
             <div class='ord-pane ord-pane-mot' style='display:none;'></div>
             <div class='ord-pane ord-pane-sam' style='display:none;'></div>
-            <div class='ord-pane ord-pane-syn' style='display:none;'></div>`;
+            <div class='ord-pane ord-pane-syn' style='display:none;'></div>
+            <div class='ord-pane ord-pane-enett' style='display:none;'></div>
+            <div class='ord-pane ord-pane-lasteknik' style='display:none;'></div>`;
 
         const tabBtns = [...body.querySelectorAll('.ord-tab-btn')];
-        const panePoker = body.querySelector('.ord-pane-poker'), paneRim = body.querySelector('.ord-pane-rim'), paneMot = body.querySelector('.ord-pane-mot'), paneSam = body.querySelector('.ord-pane-sam'), paneSyn = body.querySelector('.ord-pane-syn');
+        const panePoker = body.querySelector('.ord-pane-poker'), paneRim = body.querySelector('.ord-pane-rim'), paneMot = body.querySelector('.ord-pane-mot'), paneSam = body.querySelector('.ord-pane-sam'), paneSyn = body.querySelector('.ord-pane-syn'), paneEnEtt = body.querySelector('.ord-pane-enett'), paneLasteknik = body.querySelector('.ord-pane-lasteknik');
         let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'poker';
+        const ORD_TAB_WIDTH = { poker:390, rim:390, mot:390, sam:390, syn:390, enett:390, lasteknik:390 };
         function renderTabs(){
             tabBtns.forEach(b=>{ const on=b.dataset.tab===activeTab; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); });
             panePoker.style.display = activeTab==='poker' ? 'block' : 'none';
@@ -7483,11 +7498,15 @@
             paneMot.style.display = activeTab==='mot' ? 'block' : 'none';
             paneSam.style.display = activeTab==='sam' ? 'block' : 'none';
             paneSyn.style.display = activeTab==='syn' ? 'block' : 'none';
+            paneEnEtt.style.display = activeTab==='enett' ? 'block' : 'none';
+            paneLasteknik.style.display = activeTab==='lasteknik' ? 'block' : 'none';
+            widget.style.width = (ORD_TAB_WIDTH[activeTab]||390) + 'px';
         }
         const persist = ()=>{
             widget.dataset.ord = JSON.stringify({ tab: activeTab, poker: pokerState, rim: rimState, mot: motState, sam: samState, syn: synState });
         };
-        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); persist(); saveBoardState(); });
+        const ordTabsWrap = body.querySelector('.ord-tabs-wrap');
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; ordTabsWrap.classList.remove('expanded'); renderTabs(); persist(); saveBoardState(); });
 
         // ==== Flik: Ordklasspoker (oförändrad logik) ====
         const pokerRoot=document.createElement('div'); pokerRoot.className='poll-root ok-root'; panePoker.appendChild(pokerRoot);
@@ -7749,6 +7768,22 @@
         const anvandEgenSyn=()=>{ const t=synEgenEl.value.trim(); if(!t) return; synState.word=t; synState.facit=[]; synState.syns=[]; synState.egen=true; synState.visaForslag=false; synEgenEl.value=''; renderSyn(); saveBoardState(); };
         paneSyn.querySelector('.syn-egen-btn').onclick=anvandEgenSyn;
         synEgenEl.onkeydown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); anvandEgenSyn(); } };
+
+        // ==== Flik: En/Ett och Lästeknik (oförändrad logik, inbäddad via createWidget-shim) ====
+        function embedSubWidget(fn, pane){
+            const realCreateWidget = createWidget;
+            createWidget = function(title, width, customClass, cfg){
+                const fake = document.createElement('div'); fake.className = customClass||''; fake.style.cssText='width:'+width+'px;max-width:100%;margin:0 auto;';
+                const innerEl = document.createElement('div'); innerEl.className='widget-inner'; innerEl.style.cssText='position:static;width:100%;height:auto;';
+                const bodyEl = document.createElement('div'); bodyEl.className='widget-body'; bodyEl.style.cssText='position:static;height:auto;overflow:visible;';
+                innerEl.appendChild(bodyEl); fake.appendChild(innerEl);
+                pane.appendChild(fake);
+                return bodyEl;
+            };
+            try { fn(null); } finally { createWidget = realCreateWidget; }
+        }
+        embedSubWidget(createNounWidget, paneEnEtt);
+        embedSubWidget(createReadingSpeed, paneLasteknik);
 
         renderTabs();
         renderPoker(); renderRim(); renderMot(); renderSam(); renderSyn();
@@ -11588,6 +11623,162 @@
         const M=('Den/p snabba/a hunden/s jagar/v en/p liten/a katt/s|Min/p bästa/a kompis/s äter/v ett/p rött/a äpple/s|Solen/s lyser/v över/r det/p blåa/a havet/s|Farmor/s bakar/v goda/a bullar/s i/r köket/s|Den/p trötta/a läraren/s dricker/v varmt/a kaffe/s|Barnen/s leker/v glatt/o på/r den/p stora/a gården/s|En/p gammal/a gubbe/s målar/v sitt/p gula/a hus/s|Katten/s sover/v djupt/o i/r den/p mjuka/a soffan/s|Vi/p läser/v spännande/a böcker/s varje/p dag/s|Den/p modiga/a riddaren/s red/v genom/r den/p mörka/a skogen/s|Flickan/s sjunger/v en/p vacker/a sång/s|Regnet/s faller/v mot/r det/p kalla/a fönstret/s|Pappa/s lagar/v god/a mat/s till/r hungriga/a barn/s|Eleverna/s skriver/v långa/a berättelser/s i/r skolan/s|En/p rolig/a clown/s gör/v konstiga/a trick/s|Hästen/s hoppar/v över/r det/p höga/a hindret/s').split('|');
         return M.map(m=>m.split(' ').map(t=>{ const i=t.lastIndexOf('/'); return { w:t.slice(0,i), k:t.slice(i+1) }; }));
     }
+    // ---- YRKEN: förklarar namn på personer som utför olika yrken ----
+    function yrkenBank(){
+        return {
+            'Skola & Vård': [
+                { namn:'Lärare', emoji:'👩‍🏫', besk:'En person som undervisar och hjälper elever att lära sig nya saker i skolan.' },
+                { namn:'Rektor', emoji:'🏫', besk:'Den person som leder en skola och ansvarar för att allt fungerar bra där.' },
+                { namn:'Förskollärare', emoji:'🧸', besk:'En person som arbetar med och lär de allra yngsta barnen på förskolan.' },
+                { namn:'Läkare', emoji:'🩺', besk:'En person som undersöker, ställer diagnos och behandlar sjuka eller skadade människor.' },
+                { namn:'Sjuksköterska', emoji:'💉', besk:'En person som vårdar patienter, ger medicin och hjälper läkare på sjukhus eller vårdcentraler.' },
+                { namn:'Tandläkare', emoji:'🦷', besk:'En person som undersöker och lagar tänder, och hjälper till att hålla munnen frisk.' },
+                { namn:'Veterinär', emoji:'🐾', besk:'En person som undersöker och behandlar sjuka eller skadade djur.' },
+                { namn:'Psykolog', emoji:'🧠', besk:'En person som hjälper människor må bättre genom att prata om tankar och känslor.' },
+                { namn:'Undersköterska', emoji:'🏥', besk:'En person som hjälper patienter med vård och omsorg på sjukhus eller äldreboenden.' },
+                { namn:'Barnmorska', emoji:'👶', besk:'En person som hjälper till vid graviditet och förlossning, och tar hand om nyfödda barn.' },
+                { namn:'Skolsköterska', emoji:'🩹', besk:'En person som sköter elevers hälsa i skolan, till exempel genom hälsokontroller och första hjälpen.' },
+                { namn:'Logoped', emoji:'🗣️', besk:'En person som hjälper människor som har svårt att prata, svälja eller kommunicera.' },
+                { namn:'Kurator', emoji:'💬', besk:'En person som stöttar och hjälper elever eller patienter med sociala eller personliga svårigheter.' }
+            ],
+            'Mat & Service': [
+                { namn:'Kock', emoji:'👨‍🍳', besk:'En person som lagar mat, ofta på restaurang eller i ett storkök.' },
+                { namn:'Servitör', emoji:'🍽️', besk:'En person som tar emot beställningar och serverar mat och dryck på en restaurang.' },
+                { namn:'Bagare', emoji:'🥖', besk:'En person som bakar bröd och andra bakverk, ofta i ett bageri.' },
+                { namn:'Konditor', emoji:'🎂', besk:'En person som bakar och dekorerar tårtor, bakelser och andra söta bakverk.' },
+                { namn:'Frisör', emoji:'💇', besk:'En person som klipper, färgar och stylar hår.' },
+                { namn:'Butiksbiträde', emoji:'🛒', besk:'En person som arbetar i en affär, hjälper kunder och fyller på varor.' },
+                { namn:'Florist', emoji:'💐', besk:'En person som binder buketter och säljer blommor och växter.' },
+                { namn:'Slaktare', emoji:'🥩', besk:'En person som styckar och säljer kött, ofta i en butik eller ett slakteri.' },
+                { namn:'Städare', emoji:'🧹', besk:'En person som städar och håller rent i till exempel kontor, skolor eller hem.' },
+                { namn:'Hovmästare', emoji:'🥂', besk:'Den person som leder personalen och ansvarar för servicen i matsalen på en finare restaurang.' },
+                { namn:'Sommelier', emoji:'🍷', besk:'En person som är expert på vin och hjälper gäster att välja vin till maten.' }
+            ],
+            'Säkerhet & Räddning': [
+                { namn:'Polis', emoji:'👮', besk:'En person vars uppgift är att skydda människor, upprätthålla lagen och stoppa brott.' },
+                { namn:'Brandman', emoji:'🚒', besk:'En person som släcker bränder och räddar människor och djur i nödsituationer.' },
+                { namn:'Ambulanspersonal', emoji:'🚑', besk:'En person som ger första hjälpen och kör sjuka eller skadade till sjukhus.' },
+                { namn:'Väktare', emoji:'🛡️', besk:'En person som vaktar och bevakar platser eller byggnader för att förhindra brott.' },
+                { namn:'Domare', emoji:'⚖️', besk:'En person som leder rättegångar i domstol och beslutar om straff.' },
+                { namn:'Advokat', emoji:'💼', besk:'En person som hjälper och företräder människor i juridiska frågor och i domstol.' },
+                { namn:'Kriminaltekniker', emoji:'🔬', besk:'En person som undersöker spår och bevis från en brottsplats för att hjälpa polisen lösa brott.' },
+                { namn:'Livräddare', emoji:'🏊', besk:'En person som vakar över badande och räddar människor som håller på att drunkna.' },
+                { namn:'Soldat', emoji:'🎖️', besk:'En person som arbetar inom försvaret och är utbildad för att skydda sitt land.' },
+                { namn:'Tulltjänsteman', emoji:'🛃', besk:'En person som kontrollerar varor och resenärer vid en gräns, till exempel på flygplatser och hamnar.' }
+            ],
+            'Bygg & Teknik': [
+                { namn:'Snickare', emoji:'🪚', besk:'En person som bygger och reparerar saker i trä, till exempel möbler eller hus.' },
+                { namn:'Elektriker', emoji:'🔌', besk:'En person som installerar och reparerar elektriska system, till exempel i hus.' },
+                { namn:'Rörmokare', emoji:'🔧', besk:'En person som installerar och lagar vattenledningar och avlopp.' },
+                { namn:'Målare', emoji:'🎨', besk:'En person som målar väggar, hus och andra ytor.' },
+                { namn:'Mekaniker', emoji:'🚗', besk:'En person som lagar och underhåller bilar och andra fordon.' },
+                { namn:'Ingenjör', emoji:'📐', besk:'En person som använder teknik och matematik för att designa och lösa problem, till exempel bygga broar eller maskiner.' },
+                { namn:'Programmerare', emoji:'💻', besk:'En person som skriver kod för att skapa datorprogram och appar.' },
+                { namn:'Arkitekt', emoji:'🏛️', besk:'En person som ritar och planerar hur byggnader ska se ut och fungera.' },
+                { namn:'Svetsare', emoji:'🔥', besk:'En person som fogar samman metall genom att smälta och svetsa ihop delarna.' },
+                { namn:'Murare', emoji:'🧱', besk:'En person som bygger med tegel, sten eller betong, till exempel väggar och grunder.' },
+                { namn:'Glasmästare', emoji:'🪟', besk:'En person som tillverkar, monterar och lagar glas, till exempel fönster.' },
+                { namn:'IT-tekniker', emoji:'🖥️', besk:'En person som installerar, sköter och lagar datorer och datasystem.' }
+            ],
+            'Natur & Transport': [
+                { namn:'Bonde', emoji:'🚜', besk:'En person som odlar mark och/eller sköter djur för att producera mat.' },
+                { namn:'Fiskare', emoji:'🎣', besk:'En person som fångar fisk, ofta för att sälja eller äta.' },
+                { namn:'Pilot', emoji:'✈️', besk:'En person som flyger flygplan och ansvarar för att föra passagerare säkert till sin destination.' },
+                { namn:'Chaufför', emoji:'🚌', besk:'En person som kör ett fordon, till exempel en buss, taxi eller lastbil.' },
+                { namn:'Sjökapten', emoji:'🚢', besk:'En person som leder och ansvarar för ett fartyg och dess besättning.' },
+                { namn:'Skogsarbetare', emoji:'🌲', besk:'En person som arbetar i skogen, till exempel med att plantera eller avverka träd.' },
+                { namn:'Biodlare', emoji:'🐝', besk:'En person som sköter bikupor och samlar in honung som binas producerar.' },
+                { namn:'Trädgårdsmästare', emoji:'🌻', besk:'En person som planerar, planterar och sköter om trädgårdar och parker.' },
+                { namn:'Lokförare', emoji:'🚆', besk:'En person som kör tåg och ansvarar för att passagerarna kommer fram säkert.' },
+                { namn:'Hamnarbetare', emoji:'⚓', besk:'En person som lastar och lossar fartyg, och arbetar med gods i en hamn.' }
+            ],
+            'Kultur & Media': [
+                { namn:'Skådespelare', emoji:'🎭', besk:'En person som spelar roller i film, tv eller på teater.' },
+                { namn:'Musiker', emoji:'🎸', besk:'En person som spelar ett instrument eller sjunger, ofta som yrke.' },
+                { namn:'Journalist', emoji:'📰', besk:'En person som undersöker och skriver nyheter för tidningar, tv eller internet.' },
+                { namn:'Författare', emoji:'✍️', besk:'En person som skriver böcker, till exempel romaner eller faktaböcker.' },
+                { namn:'Konstnär', emoji:'🖌️', besk:'En person som skapar konst, till exempel målningar eller skulpturer.' },
+                { namn:'Fotograf', emoji:'📷', besk:'En person som tar bilder, ofta som yrke, till exempel på bröllop eller för tidningar.' },
+                { namn:'Regissör', emoji:'🎬', besk:'En person som leder inspelningen av en film, tv-serie eller teaterföreställning.' },
+                { namn:'Dansare', emoji:'💃', besk:'En person som dansar som yrke, till exempel på scen, i tv eller i en dansgrupp.' },
+                { namn:'Bibliotekarie', emoji:'📚', besk:'En person som arbetar på ett bibliotek och hjälper besökare att hitta böcker och information.' },
+                { namn:'Översättare', emoji:'🌐', besk:'En person som översätter texter eller tal från ett språk till ett annat.' }
+            ],
+            'Ovanliga yrken': [
+                { namn:'Taxidermist', emoji:'🦉', besk:'En person som stoppar upp döda djur så de kan ställas ut, till exempel på museum.' },
+                { namn:'Urmakare', emoji:'⌚', besk:'En person som tillverkar och lagar klockor och ur.' },
+                { namn:'Teckenspråkstolk', emoji:'🤟', besk:'En person som tolkar mellan teckenspråk och talat språk, så att döva och hörande kan förstå varandra.' },
+                { namn:'Ostmästare', emoji:'🧀', besk:'En person som tillverkar ost, ofta med gamla hantverksmetoder.' },
+                { namn:'Modedesigner', emoji:'👗', besk:'En person som designar och skapar kläder och mode.' },
+                { namn:'Illusionist', emoji:'🎩', besk:'En person som underhåller publik med trolleri och illusioner.' },
+                { namn:'Dockmakare', emoji:'🪆', besk:'En person som tillverkar dockor för hand, ofta som konsthantverk.' },
+                { namn:'Parfymör', emoji:'🌸', besk:'En person som skapar nya dofter och blandar ihop dem till parfymer.' },
+                { namn:'Falkenerare', emoji:'🦅', besk:'En person som tränar och arbetar med rovfåglar, till exempel för att skrämma bort andra fåglar.' },
+                { namn:'Vulkanolog', emoji:'🌋', besk:'En forskare som studerar vulkaner och varför de får utbrott.' },
+                { namn:'Lindansare', emoji:'🎪', besk:'En cirkusartist som balanserar och går på en tunn lina högt ovanför marken.' },
+                { namn:'Guldsmed', emoji:'💍', besk:'En person som tillverkar smycken av guld, silver och andra ädla metaller.' },
+                { namn:'Skomakare', emoji:'👞', besk:'En person som tillverkar och lagar skor.' },
+                { namn:'Korgmakare', emoji:'🧺', besk:'En person som flätar korgar för hand, ofta av vide.' },
+                { namn:'Bryggmästare', emoji:'🍺', besk:'En person som ansvarar för att brygga öl på ett bryggeri.' },
+                { namn:'Astronaut', emoji:'🧑‍🚀', besk:'En person som reser och arbetar i rymden, till exempel ombord på en rymdstation.' },
+                { namn:'Meteorolog', emoji:'🌦️', besk:'En person som studerar vädret och gör väderprognoser.' }
+            ]
+        };
+    }
+    function createYrkenWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('YRKEN', 560, 'kemi-widget yrke-widget', config);
+        const widget = body.parentElement.parentElement;
+        const bank = yrkenBank();
+        const cats = Object.keys(bank);
+        let currentCat = (config && config.data && cats.indexOf(config.data.cat) !== -1) ? config.data.cat : cats[0];
+        widget.dataset.yrkeCat = currentCat;
+
+        const tabsEl = document.createElement('div'); tabsEl.className = 'kemi-tabs';
+        const gridEl = document.createElement('div'); gridEl.className = 'kemi-grid';
+        const footEl = document.createElement('div'); footEl.className = 'kemi-footnote';
+        body.appendChild(tabsEl); body.appendChild(gridEl); body.appendChild(footEl);
+
+        function renderTabs(){
+            tabsEl.innerHTML = '';
+            cats.forEach(cat=>{
+                const b = document.createElement('button');
+                b.className = 'kemi-tab' + (cat===currentCat ? ' active' : '');
+                b.textContent = cat; b.type = 'button';
+                b.onclick = ()=>{ currentCat = cat; widget.dataset.yrkeCat = cat; renderTabs(); renderGrid(); saveBoardState(); };
+                tabsEl.appendChild(b);
+            });
+        }
+        function renderGrid(){
+            footEl.style.display='block'; footEl.textContent='Klicka på ett yrke för att se förklaringen';
+            gridEl.innerHTML = '';
+            bank[currentCat].forEach(item=>{
+                const tile = document.createElement('div'); tile.className='kemi-tile';
+                tile.innerHTML = `<span class="kemi-emoji">${item.emoji}</span><span class="kemi-lbl">${item.namn}</span>`;
+                tile.onclick = ()=> openYrkePopup(item);
+                gridEl.appendChild(tile);
+            });
+        }
+        function openYrkePopup(item){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(420px,94vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent = item.namn;
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const emoji=document.createElement('div'); emoji.style.cssText='font-size:48px;margin:6px 0 4px;'; emoji.textContent=item.emoji;
+            const txt=document.createElement('p'); txt.style.cssText='font-size:15px;color:#333;line-height:1.55;text-align:left;'; txt.textContent=item.besk;
+            box.appendChild(emoji); box.appendChild(txt);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        renderTabs(); renderGrid();
+    }
+    window.createYrkenWidget = createYrkenWidget;
+
     function createWordClassWidget(config){
         if(config===undefined) config=null;
         const body = createWidget('ORDKLASSER', 430, 'ok-widget', config);
@@ -17667,6 +17858,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 <button type='button' class='btn elev-tab-btn' data-tab='slumpa'>🎲 Slumpa namn</button>
                 <button type='button' class='btn elev-tab-btn' data-tab='grupper'>👥 Skapa grupper</button>
                 <button type='button' class='btn elev-tab-btn' data-tab='narvaro'>🙋 Närvaro</button>
+                <button type='button' class='btn elev-tab-btn' data-tab='bord'>🪑 Bordsplacering</button>
             </div>
             <div class='elev-pane elev-pane-slumpa'>
                 <div class='list-selector-area hover-menu'><select class='editor-select'></select><button class='btn btn-danger btn-del'>Ta bort</button></div>
@@ -17688,16 +17880,20 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 <div class='att-count'>0 / 0 här</div>
                 <div class='att-grid'></div>
                 <div class='hover-menu' style='margin-top:8px;'><button class='btn btn-secondary att-all' style='width:100%;'>Markera alla som här</button></div>
-            </div>`;
+            </div>
+            <div class='elev-pane elev-pane-bord' style='display:none;'></div>`;
 
         const tabBtns = [...body.querySelectorAll('.elev-tab-btn')];
-        const paneSlumpa = body.querySelector('.elev-pane-slumpa'), paneGrupper = body.querySelector('.elev-pane-grupper'), paneNarvaro = body.querySelector('.elev-pane-narvaro');
+        const paneSlumpa = body.querySelector('.elev-pane-slumpa'), paneGrupper = body.querySelector('.elev-pane-grupper'), paneNarvaro = body.querySelector('.elev-pane-narvaro'), paneBord = body.querySelector('.elev-pane-bord');
         let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'slumpa';
+        const ELEV_TAB_WIDTH = { slumpa:380, grupper:380, narvaro:380, bord:480 };
         function renderTabs(){
             tabBtns.forEach(b=>{ const on=b.dataset.tab===activeTab; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); });
             paneSlumpa.style.display = activeTab==='slumpa' ? 'block' : 'none';
             paneGrupper.style.display = activeTab==='grupper' ? 'block' : 'none';
             paneNarvaro.style.display = activeTab==='narvaro' ? 'block' : 'none';
+            paneBord.style.display = activeTab==='bord' ? 'block' : 'none';
+            widget.style.width = (ELEV_TAB_WIDTH[activeTab]||380) + 'px';
         }
         const persist = ()=>{
             widget.dataset.elever = JSON.stringify({
@@ -17772,6 +17968,21 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         txtN.oninput=()=>{ renderN(); persist(); saveBoardState(); };
         paneNarvaro.querySelector('.att-all').onclick=()=>{ absent.clear(); persist(); renderN(); saveBoardState(); };
         if(config && config.data && config.data.narvaro){ const d=config.data.narvaro; if(d.text) txtN.value=d.text; if(d.list) setTimeout(()=>{ selN.value=d.list; },50); }
+
+        // ==== Flik: Bordsplacering (oförändrad logik, inbäddad via createWidget-shim) ====
+        function embedSubWidget(fn, pane){
+            const realCreateWidget = createWidget;
+            createWidget = function(title, width, customClass, cfg){
+                const fake = document.createElement('div'); fake.className = customClass||''; fake.style.cssText='width:'+width+'px;max-width:100%;margin:0 auto;';
+                const innerEl = document.createElement('div'); innerEl.className='widget-inner'; innerEl.style.cssText='position:static;width:100%;height:auto;';
+                const bodyEl = document.createElement('div'); bodyEl.className='widget-body'; bodyEl.style.cssText='position:static;height:auto;overflow:visible;';
+                innerEl.appendChild(bodyEl); fake.appendChild(innerEl);
+                pane.appendChild(fake);
+                return bodyEl;
+            };
+            try { fn(null); } finally { createWidget = realCreateWidget; }
+        }
+        embedSubWidget(createSeatingChart, paneBord);
 
         renderTabs(); renderN(); persist();
         if(!config) persist();
@@ -20795,7 +21006,17 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // INITIALISERING & BOOTSTRAP
     // ---- FLYTTBAR VERKTYGSRAD: dra om knapparna, byt plats & flytta mellan raderna ----
     function toolbarOrderKey(){ return 'mintavla_toolbarOrder_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
-    function toolBtnId(btn){ return (btn.getAttribute('onclick') || btn.id || (btn.querySelector('.label')?.textContent||'')).trim(); }
+    // FIX: identiteten byggs i första hand på knappens SYNLIGA text (etiketten), inte på
+    // onclick-attributet. Anledningen är att när en widget byggs om eller slås samman med en
+    // annan (t.ex. "Biologi" som numera pekar på en annan funktion internt) ändras
+    // onclick-strängen, vilket annars gjorde att den sparade positionen för just den knappen
+    // "glömdes bort" och knappen hoppade längst bak - även om etiketten (namnet man ser) var
+    // exakt densamma som förut. Etikett-texten är mycket stabilare över den typen av ändringar.
+    function toolBtnId(btn){
+        const lbl = (btn.querySelector('.label')?.textContent || '').trim();
+        if (lbl) return lbl;
+        return (btn.getAttribute('onclick') || btn.id || '').trim();
+    }
     function saveToolbarOrder(){
         const tc=document.getElementById('toolbar-container'); if(!tc) return;
         const fav=[...tc.querySelectorAll('.tool-fav .tool-btn')].map(toolBtnId);
