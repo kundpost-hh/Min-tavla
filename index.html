@@ -17900,7 +17900,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 tab: activeTab,
                 slumpa: { list: selS.value, text: txtS.value, removeCb: cbS.checked },
                 grupper: { list: selG.value, text: txtG.value, count: ciG.value, result: resG.innerHTML },
-                narvaro: { text: txtN.value, list: selN.value, absent: [...absent].map(([name,v])=>({ name, note:v.note||'' })) }
+                narvaro: { text: txtN.value, list: selN.value, absentByList: Object.fromEntries(Object.keys(absentByList).map(k=>[k, [...absentByList[k]].map(([name,v])=>({ name, note:v.note||'' }))])) }
             });
         };
         tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); persist(); saveBoardState(); });
@@ -17923,13 +17923,33 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         paneGrupper.querySelector('.btn-roll').onclick=()=>{ let n=txtG.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); let ng=parseInt(ciG.value)||2; if(n.length===0)return; for(let i=n.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=n[i];n[i]=n[j];n[j]=t;} let g=[]; for(let i=0;i<ng;i++)g.push([]); n.forEach((x,i)=>g[i%ng].push(x)); resG.innerHTML=''; g.forEach((x,i)=>{ if(x.length===0)return; let card=document.createElement('div'); card.className='group-card'; card.innerHTML=`<div class='group-title'>Grupp ${i+1}</div>`+x.map(y=>`<div>${y}</div>`).join(''); resG.appendChild(card); }); persist(); saveBoardState(); };
         txtG.oninput=()=>{ persist(); saveBoardState(); };
 
-        // ---- Flik: Närvaro (oförändrad logik) ----
+        // ---- Flik: Närvaro ----
+        // FIX: frånvaro och noteringar sparas nu PER ELEVLISTA (i minnet, i en Map per lista),
+        // så att byter man lista och sedan byter tillbaka finns anteckningarna kvar - de rensas
+        // inte längre bort automatiskt. De försvinner först om man stänger/tar bort widgeten.
         const selN=paneNarvaro.querySelector('.att-sel'), txtN=paneNarvaro.querySelector('.att-names'), gridN=paneNarvaro.querySelector('.att-grid'), countN=paneNarvaro.querySelector('.att-count');
-        const absent = new Map();
-        ((config && config.data && config.data.narvaro && config.data.narvaro.absent)||[]).forEach(a=>{
-            if(typeof a === 'string') absent.set(a, { note:'', open:false });
-            else if(a && a.name) absent.set(a.name, { note:a.note||'', open:false });
-        });
+        const absentByList = {}; // listnyckel -> Map(namn -> {note, open})
+        function absentMapFor(key){ if(!absentByList[key]) absentByList[key] = new Map(); return absentByList[key]; }
+        let currentListKey = (config && config.data && config.data.narvaro && config.data.narvaro.list) || '';
+        if(config && config.data && config.data.narvaro){
+            const d = config.data.narvaro;
+            if(d.absentByList && typeof d.absentByList === 'object'){
+                Object.keys(d.absentByList).forEach(key=>{
+                    const m = absentMapFor(key);
+                    (d.absentByList[key]||[]).forEach(a=>{
+                        if(typeof a === 'string') m.set(a, { note:'', open:false });
+                        else if(a && a.name) m.set(a.name, { note:a.note||'', open:false });
+                    });
+                });
+            } else if(Array.isArray(d.absent)){ // bakåtkompatibelt med det gamla, odelade formatet
+                const m = absentMapFor(currentListKey);
+                d.absent.forEach(a=>{
+                    if(typeof a === 'string') m.set(a, { note:'', open:false });
+                    else if(a && a.name) m.set(a.name, { note:a.note||'', open:false });
+                });
+            }
+        }
+        let absent = absentMapFor(currentListKey);
         const loadN=()=>{ selN.innerHTML='<option value="">-- Välj klass --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;selN.appendChild(o);}); }; loadN();
         let focusName=null;
         const renderN=()=>{
@@ -17964,7 +17984,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
             countN.textContent = present+' / '+names.length+' här';
         };
-        selN.onchange=()=>{ if(!selN.value)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txtN.value=l[selN.value]||''; absent.clear(); persist(); renderN(); saveBoardState(); };
+        selN.onchange=()=>{
+            if(!selN.value)return;
+            let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{};
+            txtN.value=l[selN.value]||'';
+            currentListKey = selN.value;
+            absent = absentMapFor(currentListKey); // hämtar (eller skapar) just den listans egna frånvaroanteckningar
+            persist(); renderN(); saveBoardState();
+        };
         txtN.oninput=()=>{ renderN(); persist(); saveBoardState(); };
         paneNarvaro.querySelector('.att-all').onclick=()=>{ absent.clear(); persist(); renderN(); saveBoardState(); };
         if(config && config.data && config.data.narvaro){ const d=config.data.narvaro; if(d.text) txtN.value=d.text; if(d.list) setTimeout(()=>{ selN.value=d.list; },50); }
