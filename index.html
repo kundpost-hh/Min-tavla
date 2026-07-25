@@ -154,9 +154,7 @@
             <button class="tool-btn" onclick="createFractionVisualizer()"><div class="icon">🔢</div><div class="label">Talformer</div></button>
             <button class="tool-btn" onclick="createBrakjamforelse()"><div class="icon">🍕</div><div class="label">Bråkjämförelse</div></button>
             <button class="tool-btn" onclick="createTableWidget()"><div class="icon">📊</div><div class="label">Tabell</div></button>
-            <button class="tool-btn" onclick="createRealTimeClock()"><div class="icon">🕰️</div><div class="label">Klocka</div></button>
-            <button class="tool-btn" onclick="createAnalogTimer()"><div class="icon">⏲️</div><div class="label">A. Timer</div></button>
-            <button class="tool-btn" onclick="createTimer()"><div class="icon">⏱️</div><div class="label">D. Timer</div></button>
+            <button class="tool-btn" onclick="createTidMegaWidget()"><div class="icon">🕰️</div><div class="label">Tid</div></button>
             <button class="tool-btn" onclick="createReminderWidget()"><div class="icon">⏰</div><div class="label">Reminder</div></button>
             <button class="tool-btn" onclick="createMultiplicationTable()"><div class="icon">✖️</div><div class="label">Multiplikation</div></button>
             <button class="tool-btn" onclick="createUppstallning()"><div class="icon">🧾</div><div class="label">Uppställning</div></button>
@@ -208,8 +206,6 @@
             <button class="tool-btn" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
             <button class="tool-btn" onclick="createGoodWidget()"><div class="icon">👍</div><div class="label">Good</div></button>
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
-            <button class="tool-btn" onclick="createStopwatch()"><div class="icon">⌚</div><div class="label">Stoppur</div></button>
-            <button class="tool-btn" onclick="createPracticeClock()"><div class="icon">🕐</div><div class="label">Övningsklocka</div></button>
             <button class="tool-btn" onclick="createRimlighet()"><div class="icon">🤔</div><div class="label">Rimlighet</div></button>
             <button class="tool-btn" onclick="createBiologiMegaWidget()"><div class="icon">🧬</div><div class="label">Biologi</div></button>
             <button class="tool-btn" onclick="createKemiMegaWidget()"><div class="icon">⚗️</div><div class="label">Kemi</div></button>
@@ -1073,6 +1069,9 @@
     .km-tabs { max-height:0; opacity:0; margin-bottom:0 !important; overflow:hidden; transition:max-height .25s ease, opacity .2s ease, margin-bottom .25s ease; }
     .km-tabs-wrap.expanded .km-tabs { max-height:420px; opacity:1; margin-bottom:8px !important; overflow:visible; }
     .km-tabs-wrap:hover .km-tabs, .km-tabs-wrap:focus-within .km-tabs { max-height:420px; opacity:1; margin-bottom:8px !important; overflow:visible; }
+    .tid-mega-tabs { display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap; }
+    .tid-mega-tab-btn { flex:1 1 auto; font-size:11.5px; }
+    .tid-mega-pane { animation: mathtool-fade .2s ease; }
     .ord-tab-btn { flex:1 1 auto; font-size:11px; min-width:80px; }
     .ord-pane { animation: mathtool-fade .2s ease; }
     .meningar-tabs { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
@@ -3227,6 +3226,7 @@
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ÖVNINGSKLOCKA') { let _ph=parseInt(w.dataset.pclockH), _pm=parseInt(w.dataset.pclockM); if(isNaN(_ph)||isNaN(_pm)){ const t=(w.querySelector('.pclock-digital-am')?.textContent.replace(/[^\d:]/g,'')||'08:00').split(':'); _ph=(parseInt(t[0])||0)%24; _pm=parseInt(t[1])||0; } state.data.h = _ph; state.data.m = _pm; state.data.hidden = w.dataset.pclockHidden === 'true'; }
+                else if (type === 'TID') { state.data.tab = w.dataset.tidTab || 'klocka'; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VIDEO') { state.data.kind = w.dataset.videoKind || ''; state.data.src = w.dataset.videoSrc || ''; }
@@ -3324,6 +3324,7 @@
             else if (w.type === 'KAMERA') createCamera(w);
             else if (w.type === 'STOPPUR') createStopwatch(w);
             else if (w.type === 'ÖVNINGSKLOCKA') createPracticeClock(w);
+            else if (w.type === 'TID') createTidMegaWidget(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
             else if (w.type === 'BILD') createImageWidget(w);
             else if (w.type === 'VIDEO') createVideoWidget(w);
@@ -18043,6 +18044,64 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const ld=()=>{ sel.innerHTML='<option value="">-- Välj lista --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;sel.appendChild(o);}); }; ld();
         if(config&&config.data){ if(config.data.list) setTimeout(()=>sel.value=config.data.list,100); if(config.data.text) txt.value=config.data.text; if(config.data.count) ci.value=config.data.count; if(config.data.result) res.innerHTML=config.data.result; }
         body.querySelector('.btn-roll').onclick=()=>{ let n=txt.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); let ng=parseInt(ci.value)||2; if(n.length===0)return; for(let i=n.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=n[i];n[i]=n[j];n[j]=t;} let g=[]; for(let i=0;i<ng;i++)g.push([]); n.forEach((x,i)=>g[i%ng].push(x)); res.innerHTML=''; g.forEach((x,i)=>{ if(x.length===0)return; let card=document.createElement('div'); card.className='group-card'; card.innerHTML=`<div class='group-title'>Grupp ${i+1}</div>`+x.map(y=>`<div>${y}</div>`).join(''); res.appendChild(card); }); saveBoardState(); };
+    }
+
+    // ---- TID (sammanslagning av Klocka, Stoppur, Övningsklocka, A. Timer och D. Timer) ----
+    // Varje flik bäddar in en av de FEM URSPRUNGLIGA, OFÖRÄNDRADE widget-funktionerna rakt av,
+    // genom att tillfälligt byta ut den delade createWidget-funktionen mot en lättviktsversion
+    // som bygger in innehållet i flikpanelen istället för att öppna en ny flytande widget.
+    function createTidMegaWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('TID', 260, 'tid-mega-widget', config);
+        const widget = body.parentElement.parentElement;
+
+        body.innerHTML = `<div class='hover-menu tid-mega-tabs'>
+                <button type='button' class='btn tid-mega-tab-btn' data-tab='klocka'>🕰️ Klocka</button>
+                <button type='button' class='btn tid-mega-tab-btn' data-tab='dtimer'>⏱️ Timer</button>
+                <button type='button' class='btn tid-mega-tab-btn' data-tab='atimer'>⏲️ A. Timer</button>
+                <button type='button' class='btn tid-mega-tab-btn' data-tab='stoppur'>⌚ Stoppur</button>
+                <button type='button' class='btn tid-mega-tab-btn' data-tab='ovning'>🕐 Övningsklocka</button>
+            </div>
+            <div class='tid-mega-pane tid-mega-pane-klocka'></div>
+            <div class='tid-mega-pane tid-mega-pane-dtimer' style='display:none;'></div>
+            <div class='tid-mega-pane tid-mega-pane-atimer' style='display:none;'></div>
+            <div class='tid-mega-pane tid-mega-pane-stoppur' style='display:none;'></div>
+            <div class='tid-mega-pane tid-mega-pane-ovning' style='display:none;'></div>`;
+
+        const tabBtns = [...body.querySelectorAll('.tid-mega-tab-btn')];
+        const paneKlocka = body.querySelector('.tid-mega-pane-klocka'), paneDT = body.querySelector('.tid-mega-pane-dtimer'), paneAT = body.querySelector('.tid-mega-pane-atimer'), paneSw = body.querySelector('.tid-mega-pane-stoppur'), paneOv = body.querySelector('.tid-mega-pane-ovning');
+        let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'klocka';
+        const TID_TAB_WIDTH = { klocka:220, dtimer:240, atimer:200, stoppur:220, ovning:420 };
+        function renderTabs(){
+            tabBtns.forEach(b=>{ const on=b.dataset.tab===activeTab; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); });
+            paneKlocka.style.display = activeTab==='klocka' ? 'block' : 'none';
+            paneDT.style.display = activeTab==='dtimer' ? 'block' : 'none';
+            paneAT.style.display = activeTab==='atimer' ? 'block' : 'none';
+            paneSw.style.display = activeTab==='stoppur' ? 'block' : 'none';
+            paneOv.style.display = activeTab==='ovning' ? 'block' : 'none';
+            widget.style.width = (TID_TAB_WIDTH[activeTab]||260) + 'px';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); widget.dataset.tidTab=activeTab; saveBoardState(); });
+
+        function embedSubWidget(fn, pane){
+            const realCreateWidget = createWidget;
+            createWidget = function(title, width, customClass, cfg){
+                const fake = document.createElement('div'); fake.className = customClass||''; fake.style.cssText='width:'+width+'px;max-width:100%;margin:0 auto;';
+                const innerEl = document.createElement('div'); innerEl.className='widget-inner'; innerEl.style.cssText='position:static;width:100%;height:auto;';
+                const bodyEl = document.createElement('div'); bodyEl.className='widget-body'; bodyEl.style.cssText='position:static;height:auto;overflow:visible;';
+                innerEl.appendChild(bodyEl); fake.appendChild(innerEl);
+                pane.appendChild(fake);
+                return bodyEl;
+            };
+            try { fn(null); } finally { createWidget = realCreateWidget; }
+        }
+        embedSubWidget(createRealTimeClock, paneKlocka);
+        embedSubWidget(createTimer, paneDT);
+        embedSubWidget(createAnalogTimer, paneAT);
+        embedSubWidget(createStopwatch, paneSw);
+        embedSubWidget(createPracticeClock, paneOv);
+
+        renderTabs();
     }
 
     function createTimer(config) {
