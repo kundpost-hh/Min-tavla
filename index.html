@@ -1030,7 +1030,10 @@
     .formler-cat-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #007aff; margin: 12px 0 6px; }
     .formler-cat-title:first-child { margin-top: 0; }
     .formler-card { background: #f7f7fa; border: 1px solid #e5e5ea; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+    .formler-card-btn { display: block; width: 100%; text-align: left; cursor: pointer; font-family: inherit; transition: background .12s ease, border-color .12s ease; }
+    .formler-card-btn:hover { background: #ede9fe; border-color: #c7bdf5; }
     .formler-name { font-weight: 800; font-size: 14px; color: #1f2937; margin-bottom: 3px; }
+    .formler-card-btn .formler-name::after { content: ' →'; color: #7048e8; font-weight: 700; }
     .formler-expr { font-family: 'SF Mono', Consolas, monospace; font-size: 15px; font-weight: 700; color: #7048e8; background: #ede9fe; display: inline-block; padding: 2px 9px; border-radius: 7px; margin-bottom: 6px; }
     .formler-example { font-size: 12.5px; color: #555; line-height: 1.5; }
     .formler-example b { color: #333; }
@@ -4757,21 +4760,29 @@
 
         function embedSubWidget(fn, pane){
             const realCreateWidget = createWidget;
+            let fakeRef = null;
             createWidget = function(title, width, customClass, cfg){
                 const fake = document.createElement('div'); fake.className = customClass||''; fake.style.cssText='width:'+width+'px;max-width:100%;margin:0 auto;';
                 const innerEl = document.createElement('div'); innerEl.className='widget-inner'; innerEl.style.cssText='position:static;width:100%;height:auto;';
                 const bodyEl = document.createElement('div'); bodyEl.className='widget-body'; bodyEl.style.cssText='position:static;height:auto;overflow:visible;';
                 innerEl.appendChild(bodyEl); fake.appendChild(innerEl);
                 pane.appendChild(fake);
+                fakeRef = fake;
                 return bodyEl;
             };
             try { fn(null); } finally { createWidget = realCreateWidget; }
+            return fakeRef;
         }
 
         embedSubWidget(createFysikWidget, paneFysik);
-        embedSubWidget(createVadret, paneVadret);
-        embedSubWidget(createVattenkretslopp, paneVkl);
-        embedSubWidget(createRymden, paneRymden);
+        const vadretFake = embedSubWidget(createVadret, paneVadret);
+        const vklFake = embedSubWidget(createVattenkretslopp, paneVkl);
+        const rymdenFake = embedSubWidget(createRymden, paneRymden);
+        // FIX: Vädret, Vattenkretsloppet och Rymden sätter annars en hårdkodad höjd på sig själva,
+        // vilket skapade tomma områden nedanför innehållet när de byggdes in här.
+        if(vadretFake){ vadretFake.style.height='auto'; vadretFake.style.maxHeight='600px'; vadretFake.style.overflowY='auto'; vadretFake.style.overflowX='hidden'; }
+        if(vklFake){ vklFake.style.height='auto'; vklFake.style.maxHeight='600px'; vklFake.style.overflowY='auto'; vklFake.style.overflowX='hidden'; }
+        if(rymdenFake){ rymdenFake.style.height='auto'; rymdenFake.style.maxHeight='600px'; rymdenFake.style.overflowY='auto'; rymdenFake.style.overflowX='hidden'; }
 
         renderTabs();
     }
@@ -4950,21 +4961,24 @@
             kortWrap.appendChild(resetBtn);
         }
 
-        function openRyBegreppPopup(b){
+        // Gemensam popup-ruta för korta faktatexter (begrepp, solen, jorden, stjärnor, månen ...).
+        // Tar emot en titel, en emoji (visas stort överst) och själva förklaringstexten.
+        function openRyInfoPopup(titel, emoji, txt){
             const ov=document.createElement('div'); ov.className='figx-overlay';
             const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(420px,94vw)'; box.style.textAlign='center';
             const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
             ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
             const head=document.createElement('div'); head.className='figx-head';
-            const h2=document.createElement('h2'); h2.textContent = b.ord;
+            const h2=document.createElement('h2'); h2.textContent = titel;
             const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
             head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
-            const emoji=document.createElement('div'); emoji.style.cssText='font-size:40px;margin:6px 0 4px;'; emoji.textContent='📖';
-            const txt=document.createElement('p'); txt.style.cssText='font-size:15px;color:#333;line-height:1.55;text-align:left;'; txt.textContent=b.def;
-            box.appendChild(emoji); box.appendChild(txt);
+            const emojiEl=document.createElement('div'); emojiEl.style.cssText='font-size:40px;margin:6px 0 4px;'; emojiEl.textContent=emoji||'📖';
+            const txtEl=document.createElement('p'); txtEl.style.cssText='font-size:15px;color:#333;line-height:1.55;text-align:left;'; txtEl.textContent=txt;
+            box.appendChild(emojiEl); box.appendChild(txtEl);
             ov.appendChild(box);
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
         }
+        function openRyBegreppPopup(b){ openRyInfoPopup(b.ord, '📖', b.def); }
         function renderBegrepp(){
             kortWrap.innerHTML='';
             const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Klicka på ett begrepp för att se dess förklaring!'; kortWrap.appendChild(hint);
@@ -4977,74 +4991,38 @@
             kortWrap.appendChild(pills);
         }
 
-        function renderSolsystem(){
+        // Gemensam vy för Solsystem/Stjärnor/Solen/Jorden/Månen: en rad klickbara pills med
+        // rubriker, där varje klick öppnar förklaringen i en poppupruta (samma mönster som Begrepp).
+        function renderRyPillLista(bank, hintTxt){
             kortWrap.innerHTML='';
-            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Vad är ett solsystem? Här är sex viktiga delar!'; kortWrap.appendChild(hint);
-            const lista=document.createElement('div'); lista.className='su-lista';
-            RYMDEN_SOLSYSTEM.forEach(item=>{
-                const rad=document.createElement('div'); rad.className='su-rad';
-                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
-                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
-                rad.appendChild(ordEl); rad.appendChild(defEl);
-                lista.appendChild(rad);
+            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent=hintTxt; kortWrap.appendChild(hint);
+            const pills=document.createElement('div'); pills.className='ry-begrepp-pills';
+            bank.forEach(item=>{
+                const pill=document.createElement('button'); pill.type='button'; pill.className='ry-begrepp-pill'; pill.textContent=item.emoji+' '+item.t;
+                pill.onclick=()=> openRyInfoPopup(item.t, item.emoji, item.txt);
+                pills.appendChild(pill);
             });
-            kortWrap.appendChild(lista);
+            kortWrap.appendChild(pills);
+        }
+
+        function renderSolsystem(){
+            renderRyPillLista(RYMDEN_SOLSYSTEM, 'Vad är ett solsystem? Klicka på en rubrik för att läsa mer!');
         }
 
         function renderStjarnor(){
-            kortWrap.innerHTML='';
-            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Lite grundfakta om stjärnorna på himlen!'; kortWrap.appendChild(hint);
-            const lista=document.createElement('div'); lista.className='su-lista';
-            RYMDEN_STJARNOR.forEach(item=>{
-                const rad=document.createElement('div'); rad.className='su-rad';
-                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
-                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
-                rad.appendChild(ordEl); rad.appendChild(defEl);
-                lista.appendChild(rad);
-            });
-            kortWrap.appendChild(lista);
+            renderRyPillLista(RYMDEN_STJARNOR, 'Lite grundfakta om stjärnorna på himlen! Klicka på en rubrik för att läsa mer.');
         }
 
         function renderSolen(){
-            kortWrap.innerHTML='';
-            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Lite grundfakta om solen!'; kortWrap.appendChild(hint);
-            const lista=document.createElement('div'); lista.className='su-lista';
-            RYMDEN_SOLEN.forEach(item=>{
-                const rad=document.createElement('div'); rad.className='su-rad';
-                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
-                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
-                rad.appendChild(ordEl); rad.appendChild(defEl);
-                lista.appendChild(rad);
-            });
-            kortWrap.appendChild(lista);
+            renderRyPillLista(RYMDEN_SOLEN, 'Lite grundfakta om solen! Klicka på en rubrik för att läsa mer.');
         }
 
         function renderJorden(){
-            kortWrap.innerHTML='';
-            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Lite grundfakta om jorden!'; kortWrap.appendChild(hint);
-            const lista=document.createElement('div'); lista.className='su-lista';
-            RYMDEN_JORDEN.forEach(item=>{
-                const rad=document.createElement('div'); rad.className='su-rad';
-                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
-                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
-                rad.appendChild(ordEl); rad.appendChild(defEl);
-                lista.appendChild(rad);
-            });
-            kortWrap.appendChild(lista);
+            renderRyPillLista(RYMDEN_JORDEN, 'Lite grundfakta om jorden! Klicka på en rubrik för att läsa mer.');
         }
 
         function renderManen(){
-            kortWrap.innerHTML='';
-            const hint=document.createElement('p'); hint.className='kw-edit-hint'; hint.textContent='Lite grundfakta om månen!'; kortWrap.appendChild(hint);
-            const lista=document.createElement('div'); lista.className='su-lista';
-            RYMDEN_MANEN.forEach(item=>{
-                const rad=document.createElement('div'); rad.className='su-rad';
-                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=item.emoji+' '+item.t;
-                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=item.txt;
-                rad.appendChild(ordEl); rad.appendChild(defEl);
-                lista.appendChild(rad);
-            });
-            kortWrap.appendChild(lista);
+            renderRyPillLista(RYMDEN_MANEN, 'Lite grundfakta om månen! Klicka på en rubrik för att läsa mer.');
         }
 
         function render(){
@@ -5289,7 +5267,8 @@
             const c = vaderData.current;
             const info = vadretKodInfo(c.weather_code);
             const card=document.createElement('div'); card.className='vd-live-card';
-            card.innerHTML = `<div class='vd-live-plats'>📍 Linköping – idag</div>
+            let idagDatum = new Date().toLocaleDateString('sv-SE', {day:'numeric', month:'long'});
+            card.innerHTML = `<div class='vd-live-plats'>📍 Linköping – idag, ${idagDatum}</div>
                 <div class='vd-live-emoji'>${info.e}</div>
                 <div class='vd-live-text'>${info.t}</div>
                 <div class='vd-live-temp'>${Math.round(c.temperature_2m)}°C</div>
@@ -5732,19 +5711,25 @@
 
         function embedSubWidget(fn, pane){
             const realCreateWidget = createWidget;
+            let fakeRef = null;
             createWidget = function(title, width, customClass, cfg){
                 const fake = document.createElement('div'); fake.className = customClass||''; fake.style.cssText='width:'+width+'px;max-width:100%;margin:0 auto;';
                 const innerEl = document.createElement('div'); innerEl.className='widget-inner'; innerEl.style.cssText='position:static;width:100%;height:auto;';
                 const bodyEl = document.createElement('div'); bodyEl.className='widget-body'; bodyEl.style.cssText='position:static;height:auto;overflow:visible;';
                 innerEl.appendChild(bodyEl); fake.appendChild(innerEl);
                 pane.appendChild(fake);
+                fakeRef = fake;
                 return bodyEl;
             };
             try { fn(null); } finally { createWidget = realCreateWidget; }
+            return fakeRef;
         }
 
         embedSubWidget(createKemiWidget, paneKemi4);
-        embedSubWidget(createKemi, paneVarlden);
+        const varldenFake = embedSubWidget(createKemi, paneVarlden);
+        // FIX: Kemivärlden sätter annars en hårdkodad höjd på sig själv, vilket skapade ett
+        // tomt område nedanför innehållet när den byggdes in här.
+        if(varldenFake){ varldenFake.style.height='auto'; }
 
         renderTabs();
     }
@@ -6412,7 +6397,7 @@
     // automatiskt). Bra för lästräning och uttal.
     function createReadingSpeed(config){
         if(config===undefined) config=null;
-        const body = createWidget('LÄSHASTIGHET', 360, 'lash-widget', config);
+        const body = createWidget('LÄSHASTIGHET', 480, 'lash-widget', config);
         const widget = body.parentElement.parentElement;
         const ORDBANK = {
             latt: ['solros','fotboll','skolväska','tandborste','regnbåge','mjölkpaket','vinterjacka','cykelhjälm','äppelträd','snögubbe','brevlåda','ryggsäck','handduk','glasstrut','sandlåda','trädgård','fönster','morgonmål','lekplats','saftflaska','badrock','tavelram','husvagn','skogsstig','vattenpöl'],
@@ -6420,7 +6405,7 @@
             svar: ['naturvetenskapligt','sjukhuspersonalen','återvinningsstation','helikopterplatta','järnvägsövergång','sommarlovsaktivitet','trafiksäkerheten','väderobservation','flygplatsterminalen','befolkningsstatistik','klimatförändringar','yrkeshögskoleutbildning','samhällsinformation','miljövänligt','ansvarsfördelning','koncentrationsförmåga','överraskningsfest','ursäktande','trädgårdsredskapen','elektricitetsledning','ordbehandlingsprogram','undervisningsmaterial','laboratorieutrustning','kommunikationssystem','experimentverkstad']
         };
         body.innerHTML = `<div class='hover-menu' style='display:flex;gap:6px;margin-bottom:10px;'><select class='editor-select lash-niva' style='flex:1;'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select></div>`
-            + `<div class='lash-ord' style='min-height:80px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 10px;background:#f7f8fb;border-radius:14px;margin-bottom:12px;'><span style='color:#8a8a95;font-size:15px;'>Tryck på 🎲 för att få ett ord</span></div>`
+            + `<div class='lash-ord' style='min-height:80px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 10px;background:#f7f8fb;border-radius:14px;margin-bottom:12px;min-width:0;box-sizing:border-box;overflow-wrap:break-word;'><span style='color:#8a8a95;font-size:15px;'>Tryck på 🎲 för att få ett ord</span></div>`
             + `<div style='display:flex;gap:8px;'><button class='btn btn-secondary lash-lasupp' style='flex:1;'>🔊 Läs upp</button><button class='btn btn-primary lash-slumpa' style='flex:1;'>🎲 Slumpa ord</button></div>`
             + `<div class='pengar-tips'>Slumpa fram ett ord och tryck på 🔊 för att höra hur det uttalas.</div>`;
         const nivaSel=body.querySelector('.lash-niva'), ordEl=body.querySelector('.lash-ord');
@@ -6432,7 +6417,7 @@
         widget.dataset.lashNiva = nivaSel.value;
         function syncData(){ widget.dataset.lashNiva = nivaSel.value; widget.dataset.lashOrd = aktuelltOrd; }
         function visaOrd(ord){
-            ordEl.innerHTML = `<span style='color:#1a1a2e;font-weight:900;font-size:30px;line-height:1.2;word-break:normal; overflow-wrap:break-word;'>${ord}</span>`;
+            ordEl.innerHTML = `<span style='color:#1a1a2e;font-weight:900;font-size:30px;line-height:1.2;word-break:normal;overflow-wrap:break-word;min-width:0;max-width:100%;display:inline-block;'>${ord}</span>`;
         }
         function slumpaOrd(){
             const lista = ORDBANK[nivaSel.value] || ORDBANK.latt;
@@ -7554,7 +7539,7 @@
         const tabBtns = [...body.querySelectorAll('.ord-tab-btn')];
         const panePoker = body.querySelector('.ord-pane-poker'), paneRim = body.querySelector('.ord-pane-rim'), paneMot = body.querySelector('.ord-pane-mot'), paneSam = body.querySelector('.ord-pane-sam'), paneSyn = body.querySelector('.ord-pane-syn'), paneEnEtt = body.querySelector('.ord-pane-enett'), paneLasteknik = body.querySelector('.ord-pane-lasteknik');
         let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'poker';
-        const ORD_TAB_WIDTH = { poker:390, rim:390, mot:390, sam:390, syn:390, enett:390, lasteknik:390 };
+        const ORD_TAB_WIDTH = { poker:390, rim:390, mot:390, sam:390, syn:390, enett:390, lasteknik:480 };
         function renderTabs(){
             tabBtns.forEach(b=>{ const on=b.dataset.tab===activeTab; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); });
             panePoker.style.display = activeTab==='poker' ? 'block' : 'none';
@@ -11703,7 +11688,14 @@
                 { namn:'Barnmorska', emoji:'👶', besk:'En person som hjälper till vid graviditet och förlossning, och tar hand om nyfödda barn.' },
                 { namn:'Skolsköterska', emoji:'🩹', besk:'En person som sköter elevers hälsa i skolan, till exempel genom hälsokontroller och första hjälpen.' },
                 { namn:'Logoped', emoji:'🗣️', besk:'En person som hjälper människor som har svårt att prata, svälja eller kommunicera.' },
-                { namn:'Kurator', emoji:'💬', besk:'En person som stöttar och hjälper elever eller patienter med sociala eller personliga svårigheter.' }
+                { namn:'Kurator', emoji:'💬', besk:'En person som stöttar och hjälper elever eller patienter med sociala eller personliga svårigheter.' },
+                { namn:'Kirurg', emoji:'⚕️', besk:'En läkare som är specialiserad på att operera patienter, till exempel för att laga skador inuti kroppen.' },
+                { namn:'Anestesiolog', emoji:'💤', besk:'En läkare som ser till att patienter sover eller är smärtfria under en operation.' },
+                { namn:'Kardiolog', emoji:'🫀', besk:'En läkare som är specialiserad på hjärtat och blodkärlen.' },
+                { namn:'Farmaceut', emoji:'💊', besk:'En person med kunskap om läkemedel som arbetar på apotek och hjälper till att ge rätt medicin.' },
+                { namn:'Fysioterapeut', emoji:'🤸', besk:'En person som hjälper människor att röra sig bättre och bli av med smärta, till exempel efter en skada.' },
+                { namn:'Studie- och yrkesvägledare', emoji:'🧭', besk:'En person som hjälper elever att välja utbildning och yrke i framtiden.' },
+                { namn:'Biomedicinsk analytiker', emoji:'🧪', besk:'En person som analyserar blodprover och andra tester på laboratorium för att hjälpa läkare ställa diagnoser.' }
             ],
             'Mat & Service': [
                 { namn:'Kock', emoji:'👨‍🍳', besk:'En person som lagar mat, ofta på restaurang eller i ett storkök.' },
@@ -11716,7 +11708,12 @@
                 { namn:'Slaktare', emoji:'🥩', besk:'En person som styckar och säljer kött, ofta i en butik eller ett slakteri.' },
                 { namn:'Städare', emoji:'🧹', besk:'En person som städar och håller rent i till exempel kontor, skolor eller hem.' },
                 { namn:'Hovmästare', emoji:'🥂', besk:'Den person som leder personalen och ansvarar för servicen i matsalen på en finare restaurang.' },
-                { namn:'Sommelier', emoji:'🍷', besk:'En person som är expert på vin och hjälper gäster att välja vin till maten.' }
+                { namn:'Sommelier', emoji:'🍷', besk:'En person som är expert på vin och hjälper gäster att välja vin till maten.' },
+                { namn:'Köksmästare', emoji:'⭐', besk:'Den mest erfarna kocken som leder hela köket på en restaurang och bestämmer maträtterna.' },
+                { namn:'Matkritiker', emoji:'🧐', besk:'En person som besöker restauranger och skriver recensioner om maten och upplevelsen.' },
+                { namn:'Cateringchef', emoji:'🍱', besk:'En person som planerar och ansvarar för mat till fester, konferenser och andra stora tillställningar.' },
+                { namn:'Hotelldirektör', emoji:'🏨', besk:'Den person som leder ett hotell och ansvarar för att gästerna trivs och allt fungerar.' },
+                { namn:'Kafferostare', emoji:'☕', besk:'En person som rostar kaffebönor för att ge kaffet dess smak och doft.' }
             ],
             'Säkerhet & Räddning': [
                 { namn:'Polis', emoji:'👮', besk:'En person vars uppgift är att skydda människor, upprätthålla lagen och stoppa brott.' },
@@ -11728,7 +11725,12 @@
                 { namn:'Kriminaltekniker', emoji:'🔬', besk:'En person som undersöker spår och bevis från en brottsplats för att hjälpa polisen lösa brott.' },
                 { namn:'Livräddare', emoji:'🏊', besk:'En person som vakar över badande och räddar människor som håller på att drunkna.' },
                 { namn:'Soldat', emoji:'🎖️', besk:'En person som arbetar inom försvaret och är utbildad för att skydda sitt land.' },
-                { namn:'Tulltjänsteman', emoji:'🛃', besk:'En person som kontrollerar varor och resenärer vid en gräns, till exempel på flygplatser och hamnar.' }
+                { namn:'Tulltjänsteman', emoji:'🛃', besk:'En person som kontrollerar varor och resenärer vid en gräns, till exempel på flygplatser och hamnar.' },
+                { namn:'Åklagare', emoji:'📜', besk:'En jurist som för statens talan i domstol och försöker bevisa att någon är skyldig till ett brott.' },
+                { namn:'Kriminalinspektör', emoji:'🕵️', besk:'En polis som leder utredningar av grövre brott och samordnar arbetet på en brottsplats.' },
+                { namn:'Räddningsledare', emoji:'🚨', besk:'Den person som leder och fattar beslut vid stora räddningsinsatser, till exempel bränder eller olyckor.' },
+                { namn:'Bombtekniker', emoji:'💣', besk:'En person som är specialutbildad för att oskadliggöra bomber och andra farliga föremål.' },
+                { namn:'Livvakt', emoji:'🕶️', besk:'En person vars uppgift är att skydda en annan person, till exempel en kändis eller politiker, från fara.' }
             ],
             'Bygg & Teknik': [
                 { namn:'Snickare', emoji:'🪚', besk:'En person som bygger och reparerar saker i trä, till exempel möbler eller hus.' },
@@ -11742,7 +11744,12 @@
                 { namn:'Svetsare', emoji:'🔥', besk:'En person som fogar samman metall genom att smälta och svetsa ihop delarna.' },
                 { namn:'Murare', emoji:'🧱', besk:'En person som bygger med tegel, sten eller betong, till exempel väggar och grunder.' },
                 { namn:'Glasmästare', emoji:'🪟', besk:'En person som tillverkar, monterar och lagar glas, till exempel fönster.' },
-                { namn:'IT-tekniker', emoji:'🖥️', besk:'En person som installerar, sköter och lagar datorer och datasystem.' }
+                { namn:'IT-tekniker', emoji:'🖥️', besk:'En person som installerar, sköter och lagar datorer och datasystem.' },
+                { namn:'Systemarkitekt', emoji:'🧩', besk:'En person som planerar hur stora datasystem och program ska byggas upp och fungera ihop.' },
+                { namn:'Cybersäkerhetsexpert', emoji:'🔒', besk:'En person som skyddar datorer och datasystem från hackare och intrång.' },
+                { namn:'Robotingenjör', emoji:'🤖', besk:'En person som designar, bygger och programmerar robotar.' },
+                { namn:'Flygtekniker', emoji:'🛠️', besk:'En person som kontrollerar, underhåller och reparerar flygplan så att de är säkra att flyga.' },
+                { namn:'Automationsingenjör', emoji:'⚙️', besk:'En person som designar maskiner och system som kan utföra arbete automatiskt, utan att en människa styr varje steg.' }
             ],
             'Natur & Transport': [
                 { namn:'Bonde', emoji:'🚜', besk:'En person som odlar mark och/eller sköter djur för att producera mat.' },
@@ -11754,7 +11761,12 @@
                 { namn:'Biodlare', emoji:'🐝', besk:'En person som sköter bikupor och samlar in honung som binas producerar.' },
                 { namn:'Trädgårdsmästare', emoji:'🌻', besk:'En person som planerar, planterar och sköter om trädgårdar och parker.' },
                 { namn:'Lokförare', emoji:'🚆', besk:'En person som kör tåg och ansvarar för att passagerarna kommer fram säkert.' },
-                { namn:'Hamnarbetare', emoji:'⚓', besk:'En person som lastar och lossar fartyg, och arbetar med gods i en hamn.' }
+                { namn:'Hamnarbetare', emoji:'⚓', besk:'En person som lastar och lossar fartyg, och arbetar med gods i en hamn.' },
+                { namn:'Marinbiolog', emoji:'🐋', besk:'En forskare som studerar djur och växter som lever i havet.' },
+                { namn:'Klimatforskare', emoji:'🌡️', besk:'En forskare som studerar jordens klimat och hur det förändras över tid.' },
+                { namn:'Flygledare', emoji:'🛫', besk:'En person som leder flygtrafiken från marken och ser till att flygplan tar av, landar och flyger säkert.' },
+                { namn:'Agronom', emoji:'🌾', besk:'En person med akademisk utbildning inom lantbruk, som forskar kring och utvecklar hur mat odlas.' },
+                { namn:'Jägmästare', emoji:'🌳', besk:'En person med akademisk utbildning som planerar och ansvarar för hur stora skogsområden ska skötas.' }
             ],
             'Kultur & Media': [
                 { namn:'Skådespelare', emoji:'🎭', besk:'En person som spelar roller i film, tv eller på teater.' },
@@ -11766,7 +11778,12 @@
                 { namn:'Regissör', emoji:'🎬', besk:'En person som leder inspelningen av en film, tv-serie eller teaterföreställning.' },
                 { namn:'Dansare', emoji:'💃', besk:'En person som dansar som yrke, till exempel på scen, i tv eller i en dansgrupp.' },
                 { namn:'Bibliotekarie', emoji:'📚', besk:'En person som arbetar på ett bibliotek och hjälper besökare att hitta böcker och information.' },
-                { namn:'Översättare', emoji:'🌐', besk:'En person som översätter texter eller tal från ett språk till ett annat.' }
+                { namn:'Översättare', emoji:'🌐', besk:'En person som översätter texter eller tal från ett språk till ett annat.' },
+                { namn:'Filmproducent', emoji:'🎥', besk:'En person som organiserar och finansierar en film, från idé till färdig produktion.' },
+                { namn:'Manusförfattare', emoji:'📝', besk:'En person som skriver berättelsen och replikerna till en film, tv-serie eller pjäs.' },
+                { namn:'Dirigent', emoji:'🎼', besk:'Den person som leder en orkester eller kör och bestämmer hur musiken ska framföras.' },
+                { namn:'Kompositör', emoji:'🎹', besk:'En person som skapar och skriver ny musik.' },
+                { namn:'Konstintendent', emoji:'🖼️', besk:'En person som väljer ut och sätter samman konstverk till utställningar på till exempel museum.' }
             ],
             'Ovanliga yrken': [
                 { namn:'Taxidermist', emoji:'🦉', besk:'En person som stoppar upp döda djur så de kan ställas ut, till exempel på museum.' },
@@ -11785,7 +11802,12 @@
                 { namn:'Korgmakare', emoji:'🧺', besk:'En person som flätar korgar för hand, ofta av vide.' },
                 { namn:'Bryggmästare', emoji:'🍺', besk:'En person som ansvarar för att brygga öl på ett bryggeri.' },
                 { namn:'Astronaut', emoji:'🧑‍🚀', besk:'En person som reser och arbetar i rymden, till exempel ombord på en rymdstation.' },
-                { namn:'Meteorolog', emoji:'🌦️', besk:'En person som studerar vädret och gör väderprognoser.' }
+                { namn:'Meteorolog', emoji:'🌦️', besk:'En person som studerar vädret och gör väderprognoser.' },
+                { namn:'Astrofysiker', emoji:'🔭', besk:'En forskare som studerar stjärnor, planeter och universum med hjälp av fysik.' },
+                { namn:'Paleontolog', emoji:'🦴', besk:'En forskare som studerar fossil för att lära sig mer om djur och växter som levde för mycket länge sedan.' },
+                { namn:'Entomolog', emoji:'🐛', besk:'En forskare som studerar insekter.' },
+                { namn:'Kryptoanalytiker', emoji:'🔐', besk:'En person som knäcker och skapar hemliga koder för att skydda eller avslöja information.' },
+                { namn:'Konservator', emoji:'🏺', besk:'En person som lagar och bevarar gamla föremål och konstverk så att de håller länge, till exempel på museum.' }
             ]
         };
     }
@@ -15886,6 +15908,27 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(!config) body.parentElement.parentElement.style.height = '420px';
         body.innerHTML = `<input type='text' class='formler-search' placeholder='🔎 Sök en formel... t.ex. area'><div class='formler-list'></div>`;
         const searchEl = body.querySelector('.formler-search'), listEl = body.querySelector('.formler-list');
+        // Själva formeln och beskrivningen/exemplet visas i en poppupruta när man klickar på ett namn.
+        function openFormelPopup(item){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(440px,94vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent = item.namn;
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const sub=document.createElement('p'); sub.className='figx-sub'; sub.textContent = item.kat;
+            box.appendChild(sub);
+            const exprEl=document.createElement('div'); exprEl.className='formler-expr'; exprEl.style.cssText='font-size:18px;margin:2px 0 14px;';
+            exprEl.textContent = item.expr;
+            box.appendChild(exprEl);
+            const exEl=document.createElement('div'); exEl.className='formler-example'; exEl.style.cssText='text-align:left;font-size:14px;line-height:1.6;';
+            exEl.innerHTML = item.ex.replace(/\n/g,'<br>');
+            box.appendChild(exEl);
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
         function render(filter){
             const f = (filter||'').trim().toLowerCase();
             listEl.innerHTML = '';
@@ -15897,8 +15940,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     const h = document.createElement('div'); h.className='formler-cat-title'; h.textContent = item.kat; listEl.appendChild(h);
                     lastKat = item.kat;
                 }
-                const card = document.createElement('div'); card.className='formler-card';
-                card.innerHTML = `<div class='formler-name'>${item.namn}</div><div class='formler-expr'>${item.expr}</div><div class='formler-example'>${item.ex.replace(/\n/g,'<br>')}</div>`;
+                const card = document.createElement('button'); card.type='button'; card.className='formler-card formler-card-btn';
+                card.innerHTML = `<div class='formler-name'>${item.namn}</div>`;
+                card.onclick = ()=> openFormelPopup(item);
                 listEl.appendChild(card);
             });
             if(!any){ listEl.innerHTML = `<div class='formler-empty'>Ingen formel hittades. Prova ett annat sökord.</div>`; }
@@ -16377,6 +16421,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         begreppBtn.onclick=()=>openKoordBegrepp();
 
         // ---- BEGREPP: förklaringar av ord inom koordinatsystem, anpassade för åk 4 ----
+        // Listan visas som klickbara begrepp (pills) - varje klick öppnar förklaringen i en egen poppupruta.
         function openKoordBegrepp(){
             const BEGREPP = [
                 { ord:'Koordinatsystem', def:'Ett rutnät med två linjer (axlar) som du kan använda för att visa exakt var en punkt är.' },
@@ -16399,19 +16444,33 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const h2=document.createElement('h2'); h2.textContent='📖 Begrepp – Koordinatsystem';
             const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
             head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
-            const sub=document.createElement('p'); sub.className='figx-sub'; sub.textContent='Viktiga ord och begrepp inom koordinatsystem, förklarade på ett enkelt sätt.';
+            const sub=document.createElement('p'); sub.className='figx-sub'; sub.textContent='Klicka på ett begrepp för att se dess förklaring!';
             box.appendChild(sub);
 
-            const lista=document.createElement('div'); lista.className='su-lista';
+            const pills=document.createElement('div'); pills.className='ry-begrepp-pills';
             BEGREPP.forEach(b=>{
-                const rad=document.createElement('div'); rad.className='su-rad';
-                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=b.ord;
-                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500'; defEl.textContent=b.def;
-                rad.appendChild(ordEl); rad.appendChild(defEl);
-                lista.appendChild(rad);
+                const pill=document.createElement('button'); pill.type='button'; pill.className='ry-begrepp-pill'; pill.textContent=b.ord;
+                pill.onclick=()=> openKoordBegreppDetail(b);
+                pills.appendChild(pill);
             });
-            box.appendChild(lista);
+            box.appendChild(pills);
 
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+        // Förklaringen för ett enskilt begrepp, öppnas ovanpå begreppslistans poppupruta.
+        function openKoordBegreppDetail(b){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(420px,94vw)'; box.style.textAlign='center';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent = b.ord;
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const emoji=document.createElement('div'); emoji.style.cssText='font-size:40px;margin:6px 0 4px;'; emoji.textContent='📖';
+            const txt=document.createElement('p'); txt.style.cssText='font-size:15px;color:#333;line-height:1.55;text-align:left;'; txt.textContent=b.def;
+            box.appendChild(emoji); box.appendChild(txt);
             ov.appendChild(box);
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
         }
@@ -16524,11 +16583,15 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 if(stangCb.checked && points.length>2) d += ` ${toScreenX(points[0].x)},${toScreenY(points[0].y)}`;
                 svg += `<polyline points='${d}' fill='none' stroke='#007aff' stroke-width='2.5' stroke-linejoin='round'/>`;
             }
-            // punkter
+            // punkter - visar ordningsnummer samt koordinatvärdet (x och y var för sig) vid punkten
             points.forEach((p,i)=>{
                 const sx=toScreenX(p.x), sy=toScreenY(p.y);
                 svg += `<circle cx='${sx}' cy='${sy}' r='6' fill='#ff3b30' stroke='#fff' stroke-width='2'/>`;
-                svg += `<text x='${sx+9}' y='${sy-8}' font-size='11' font-weight='800' fill='#ff3b30'>${i+1}</text>`;
+                const naraHoger = sx > pad+size-44;
+                const ankare = naraHoger ? 'end' : 'start';
+                const lx = naraHoger ? sx-9 : sx+9;
+                svg += `<text x='${lx}' y='${sy-16}' text-anchor='${ankare}' font-size='11' font-weight='800' fill='#ff3b30'>${i+1}</text>`;
+                svg += `<text x='${lx}' y='${sy-4}' text-anchor='${ankare}' font-size='9' font-weight='700' fill='#1f2937'>x=${p.x}, y=${p.y}</text>`;
             });
             svg += `</svg>`;
             gridWrap.innerHTML = svg;
