@@ -11,6 +11,7 @@
 
 <div id="cb-app-wrapper">
     <div id="watermark"></div>
+    <div id="cloud-sync-status" class="cloud-sync-status" style="display:none;"></div>
     <div id="custom-confirm-overlay" style="display: none;">
         <div class="custom-confirm-box">
             <div id="custom-confirm-text" class="custom-confirm-text">Är du säker?</div>
@@ -122,6 +123,7 @@
     <button id="mobile-tool-toggle" onclick="toggleMobileToolbar()" title="Verktyg" aria-label="Öppna verktyg">☰</button>
 
     <div id="toolbar-container">
+        <input type="text" id="toolbar-search" class="toolbar-search" placeholder="🔍 Sök widget…" autocomplete="off">
         <!-- RAD 1: favoriter (alltid synliga) -->
         <div class="tool-group tool-fav">
             <button class="tool-btn" onclick="createLessonPlan()"><div class="icon">📋</div><div class="label">Lektion</div></button>
@@ -212,6 +214,7 @@
             <button class="tool-btn" onclick="createFysikMegaWidget()"><div class="icon">🔭</div><div class="label">Fysik</div></button>
             <button class="tool-btn" onclick="createTeknikWidget()"><div class="icon">⚙️</div><div class="label">Teknik</div></button>
             <button class="tool-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
+            <button class="tool-btn" onclick="showMinaResultat()"><div class="icon">📊</div><div class="label">Mina resultat</div></button>
             <button class="tool-btn" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
             <button class="tool-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
             <button class="tool-btn" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
@@ -230,6 +233,31 @@
             }
             if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initToolbarTab);
             else initToolbarTab();
+        })();
+        // ---- Sökfält i verktygsfältet: filtrerar widget-knapparna medan man skriver ----
+        (function setupToolbarSearch(){
+            function init(){
+                const input = document.getElementById('toolbar-search');
+                const tc = document.getElementById('toolbar-container');
+                if (!input || !tc) return;
+                input.addEventListener('input', function(){
+                    const q = input.value.trim().toLowerCase();
+                    const btns = tc.querySelectorAll('.tool-btn');
+                    if (!q){
+                        btns.forEach(function(b){ b.style.display=''; });
+                        tc.classList.remove('tb-force-extra');
+                        return;
+                    }
+                    tc.classList.add('tb-force-extra');
+                    btns.forEach(function(b){
+                        const lblEl = b.querySelector('.label');
+                        const lbl = (lblEl ? lblEl.textContent : '').toLowerCase();
+                        b.style.display = lbl.indexOf(q) !== -1 ? '' : 'none';
+                    });
+                });
+                input.addEventListener('click', function(e){ e.stopPropagation(); });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
         })();
     </script>
 </div>
@@ -300,6 +328,9 @@
     /* Andra raden - dold tills man hovrar pilen */
     .tool-extra { max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; margin-top: -3px; transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.35s ease; }
     #toolbar-container.show-extra .tool-extra { max-height: 220px; opacity: 1; pointer-events: auto; margin-top: 2px; }
+    #toolbar-container.tb-force-extra .tool-extra { max-height: 220px; opacity: 1; pointer-events: auto; margin-top: 2px; }
+    .toolbar-search { width: 220px; max-width: 90%; padding: 6px 12px; border-radius: 14px; border: 1px solid #d8dbe8; font-size: 13px; margin-bottom: 4px; outline: none; font-family: inherit; }
+    .toolbar-search:focus { border-color: #8b5cf6; }
     .tool-btn { display: flex; flex-direction: column; align-items: center; background: none; border: none; cursor: grab; transition: transform 0.12s, background 0.2s; padding: 4px 6px; border-radius: 10px; min-width: 50px; touch-action: none; }
     .tool-btn.tool-dragging { cursor: grabbing; background: #e7f0ff; box-shadow: 0 6px 16px rgba(0,0,0,0.18); transform: scale(1.12); opacity: 0.95; }
     .tool-btn:hover { background-color: #f2f2f7; transform: translateY(-3px); }
@@ -2685,6 +2716,22 @@
     .kompis-hint.kompis-hint-show { opacity:1; transform:translateX(-50%) translateY(0); }
     .kompis-btn-wrap { position:relative; width:100%; max-width:340px; }
 
+    /* Tydligare, temafärgad scrollbar för flikpaneler med intern scroll (Vädret, Vattenkretslopp,
+       Rymden, Kemivärlden, Sveriges natur, Kroppen m.fl.). Höjden styrs av CSS-variabeln
+       --mega-pane-h (satt per widget i JS där så behövs) med 600px som standardvärde. */
+    .mega-scroll-pane { height:auto !important; max-height: var(--mega-pane-h, 600px); overflow-y:auto; overflow-x:hidden; scrollbar-width: thin; scrollbar-color: #8b5cf6 #eef0f8; }
+    .mega-scroll-pane::-webkit-scrollbar { width: 10px; }
+    .mega-scroll-pane::-webkit-scrollbar-track { background: #eef0f8; border-radius: 8px; }
+    .mega-scroll-pane::-webkit-scrollbar-thumb { background: #8b5cf6; border-radius: 8px; border: 2px solid #eef0f8; }
+    .mega-scroll-pane::-webkit-scrollbar-thumb:hover { background: #6d28d9; }
+
+    /* Molnsynk-statusindikator: visar tyst om ändringar sparats i molnet, håller på att
+       sparas, eller om något gick fel (visas bara när molnsynk är konfigurerad/aktiv). */
+    .cloud-sync-status { position:fixed; bottom:14px; right:14px; z-index:9999; background:#fff; border-radius:20px; padding:7px 16px; font-size:12.5px; font-weight:700; box-shadow:0 2px 10px rgba(0,0,0,0.16); pointer-events:none; }
+    .cloud-sync-status.status-saving { color:#8b5cf6; }
+    .cloud-sync-status.status-saved { color:#22c55e; }
+    .cloud-sync-status.status-error { color:#ef4444; pointer-events:auto; }
+
 </style>
 
 <!-- Firebase (central inloggning + lagring så att admin kan se och hantera användare) -->
@@ -2771,6 +2818,51 @@
                 (e.metaKey && e.altKey && (k === 'i' || k === 'j' || k === 'c' || k === 'u')); // Mac
             if (blockCombo){ e.preventDefault(); e.stopPropagation(); }
         });
+    })();
+    // ---- Tillgänglighet för popup-rutor (figx-overlay): fungerar automatiskt för ALLA popuprutor
+    // i appen (Begrepp, Planet-info, Kemi, m.fl.) eftersom de alla delar samma figx-overlay/figx-box/figx-close-klasser. ----
+    (function setupPopupAccessibility(){
+        function topOverlay(){
+            const overlays = document.querySelectorAll('.figx-overlay');
+            return overlays.length ? overlays[overlays.length-1] : null;
+        }
+        function focusableEls(container){
+            return [...container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+                .filter(el => !el.disabled && el.offsetParent !== null);
+        }
+        document.addEventListener('keydown', function(e){
+            const ov = topOverlay();
+            if (!ov) return;
+            if (e.key === 'Escape'){
+                const closeBtn = ov.querySelector('.figx-close');
+                if (closeBtn) closeBtn.click(); else ov.parentNode && ov.parentNode.removeChild(ov);
+                e.stopPropagation();
+                return;
+            }
+            if (e.key === 'Tab'){
+                const box = ov.querySelector('.figx-box') || ov;
+                const els = focusableEls(box);
+                if (!els.length) return;
+                const first = els[0], last = els[els.length-1];
+                if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+            }
+        }, true);
+        // Flytta in fokus i popupen när den öppnas, så tangentbordsanvändare hamnar rätt.
+        const mo = new MutationObserver(function(mutations){
+            mutations.forEach(function(m){
+                m.addedNodes.forEach(function(node){
+                    if (node.nodeType===1 && node.classList && node.classList.contains('figx-overlay')){
+                        const box = node.querySelector('.figx-box') || node;
+                        const els = focusableEls(box);
+                        const target = els[0] || box;
+                        if (!els.length) box.setAttribute('tabindex','-1');
+                        setTimeout(function(){ target.focus(); }, 0);
+                    }
+                });
+            });
+        });
+        mo.observe(document.body, { childList:true, subtree:true });
     })();
     (function initCloud(){
         try {
@@ -2859,13 +2951,26 @@
 
     // Spara upp till molnet (fördröjt så vi inte skickar vid varje tangenttryck)
     let cloudSyncTimer = null;
+    let _cloudStatusHideTimer = null;
+    function setCloudSyncStatus(state){
+        const el = document.getElementById('cloud-sync-status');
+        if(!el) return;
+        if(!window.cloudReady){ el.style.display='none'; return; } // ingen molnsynk konfigurerad/aktiv – visa aldrig
+        clearTimeout(_cloudStatusHideTimer);
+        el.style.display='block';
+        if(state==='saving'){ el.className='cloud-sync-status status-saving'; el.textContent='⏳ Sparar…'; }
+        else if(state==='saved'){ el.className='cloud-sync-status status-saved'; el.textContent='☁️ Sparat'; _cloudStatusHideTimer=setTimeout(()=>{ el.style.display='none'; }, 2500); }
+        else if(state==='error'){ el.className='cloud-sync-status status-error'; el.textContent='⚠️ Kunde inte spara i molnet'; }
+    }
     function syncToCloud(){
         if (!window.cloudReady || !currentUser) return;
         clearTimeout(cloudSyncTimer);
+        setCloudSyncStatus('saving');
         cloudSyncTimer = setTimeout(()=>{
             const payload = cloudGatherData(); payload.updatedAt = Date.now();
             fbDB.collection('boards').doc(emailKey(currentUser)).set(payload, { merge:true })
-                .catch(err => console.warn('[MinTavla] Molnsparning misslyckades:', err));
+                .then(()=> setCloudSyncStatus('saved'))
+                .catch(err => { console.warn('[MinTavla] Molnsparning misslyckades:', err); setCloudSyncStatus('error'); });
         }, 1200);
     }
     // FIX: direkt (odämpad) molnsparning – för sällanintraffande, medvetna ändringar
@@ -2875,9 +2980,11 @@
     function syncToCloudImmediate(){
         if (!window.cloudReady || !currentUser) return Promise.resolve();
         clearTimeout(cloudSyncTimer);
+        setCloudSyncStatus('saving');
         const payload = cloudGatherData(); payload.updatedAt = Date.now();
         return fbDB.collection('boards').doc(emailKey(currentUser)).set(payload, { merge:true })
-            .catch(err => console.warn('[MinTavla] Molnsparning misslyckades:', err));
+            .then(()=> setCloudSyncStatus('saved'))
+            .catch(err => { console.warn('[MinTavla] Molnsparning misslyckades:', err); setCloudSyncStatus('error'); });
     }
 
     // ---- ADMINENS VERKTYGSLÅDA GÄLLER ALLA ----
@@ -3462,6 +3569,70 @@
         syncToCloud();
     }
 
+    // ---- Samlad resultat-/poängvy: visar poäng från alla quiz-widgetar som finns på tavlan ----
+    function showMinaResultat(){
+        const KALLOR = [
+            { key:'vadret', namn:'⛅ Vädret (Fysik)' },
+            { key:'vkl', namn:'💧 Vattenkretsloppet (Fysik)' },
+            { key:'rymden', namn:'🔭 Rymden (Fysik)' },
+            { key:'kemi', namn:'⚗️ Kemi' }
+        ];
+        const resultat = [];
+        document.querySelectorAll('.widget').forEach(function(w){
+            KALLOR.forEach(function(k){
+                const raw = w.dataset[k.key];
+                if(!raw) return;
+                try {
+                    const data = JSON.parse(raw);
+                    if (typeof data.quizTotal === 'number' && data.quizTotal > 0){
+                        resultat.push({ namn:k.namn, score:data.quizScore||0, total:data.quizTotal });
+                    }
+                } catch(e){}
+            });
+        });
+
+        const ov=document.createElement('div'); ov.className='figx-overlay';
+        const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(420px,94vw)';
+        const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+        const head=document.createElement('div'); head.className='figx-head';
+        const h2=document.createElement('h2'); h2.textContent='📊 Mina resultat';
+        const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+        head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+
+        if(!resultat.length){
+            const tom=document.createElement('p'); tom.style.cssText='font-size:14px;color:#666;text-align:center;padding:10px 0;';
+            tom.textContent='Inga quiz är påbörjade än på de widgetar som finns på tavlan just nu. Öppna en Quiz-flik (t.ex. i Fysik eller Kemi) och svara på några frågor, så visas resultatet här!';
+            box.appendChild(tom);
+        } else {
+            const lista=document.createElement('div'); lista.className='su-lista';
+            resultat.forEach(function(r){
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=r.namn;
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500';
+                const proc = r.total ? Math.round((r.score/r.total)*100) : 0;
+                defEl.textContent = 'Poäng: '+r.score+' / '+r.total+' ('+proc+'%)';
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                lista.appendChild(rad);
+            });
+            box.appendChild(lista);
+        }
+        ov.appendChild(box);
+        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+    }
+
+    // ---- Duplicera en enskild widget: återanvänder samma serialize/spawn-mönster som redan
+    // används för att duplicera hela sidor (serializeWidget + spawnWidgetFromState). ----
+    function duplicateWidget(widgetEl){
+        try {
+            const state = serializeWidget(widgetEl);
+            state.x = (state.x || 0) + 24;
+            state.y = (state.y || 0) + 24;
+            spawnWidgetFromState(state);
+            saveBoardState();
+        } catch(e){ console.warn('[MinTavla] Kunde inte duplicera widgeten:', e); }
+    }
+
     // BASE DRAG ENGINE
     function createWidget(title, width, customClass, config) {
         if(!customClass) customClass = ''; widgetCount++;
@@ -3496,7 +3667,7 @@
         const inner = document.createElement('div'); inner.className = 'widget-inner';
         const header = document.createElement('div'); header.className = 'widget-header';
         
-        header.innerHTML = `<span>${title}</span><div class='widget-controls'><span class='widget-ctrl-icon btn-min'>➖</span><span class='widget-ctrl-icon btn-lck'>🔓</span><span class='widget-ctrl-icon widget-close-icon'>✖</span></div>`;
+        header.innerHTML = `<span>${title}</span><div class='widget-controls'><span class='widget-ctrl-icon widget-dup-icon' title='Duplicera'>⧉</span><span class='widget-ctrl-icon btn-min'>➖</span><span class='widget-ctrl-icon btn-lck'>🔓</span><span class='widget-ctrl-icon widget-close-icon'>✖</span></div>`;
         const lockIcon = header.querySelector('.btn-lck'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓';
         
         inner.appendChild(body); widget.appendChild(header); widget.appendChild(inner);
@@ -3504,6 +3675,7 @@
         getActiveCanvasV6().appendChild(widget); makeDraggable(widget, header); makeBodyDraggable(widget, inner); makeResizable(widget, resizer);
         
         header.querySelector('.widget-close-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; customConfirm("Vill du stänga rutan?", () => { widget.remove(); saveBoardState(); }); };
+        header.querySelector('.widget-dup-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; duplicateWidget(widget); };
         header.querySelector('.btn-min').onclick = (e) => {
             e.stopPropagation();
             if(typeof canEditBoard === 'function' && !canEditBoard()) return;
@@ -4780,9 +4952,9 @@
         const rymdenFake = embedSubWidget(createRymden, paneRymden);
         // FIX: Vädret, Vattenkretsloppet och Rymden sätter annars en hårdkodad höjd på sig själva,
         // vilket skapade tomma områden nedanför innehållet när de byggdes in här.
-        if(vadretFake){ vadretFake.style.height='auto'; vadretFake.style.maxHeight='600px'; vadretFake.style.overflowY='auto'; vadretFake.style.overflowX='hidden'; }
-        if(vklFake){ vklFake.style.height='auto'; vklFake.style.maxHeight='600px'; vklFake.style.overflowY='auto'; vklFake.style.overflowX='hidden'; }
-        if(rymdenFake){ rymdenFake.style.height='auto'; rymdenFake.style.maxHeight='600px'; rymdenFake.style.overflowY='auto'; rymdenFake.style.overflowX='hidden'; }
+        if(vadretFake){ vadretFake.classList.add('mega-scroll-pane'); }
+        if(vklFake){ vklFake.classList.add('mega-scroll-pane'); }
+        if(rymdenFake){ rymdenFake.classList.add('mega-scroll-pane'); }
 
         renderTabs();
     }
@@ -5729,7 +5901,7 @@
         const varldenFake = embedSubWidget(createKemi, paneVarlden);
         // FIX: Kemivärlden sätter annars en hårdkodad höjd på sig själv, vilket skapade ett
         // tomt område nedanför innehållet när den byggdes in här.
-        if(varldenFake){ varldenFake.style.height='auto'; }
+        if(varldenFake){ varldenFake.classList.add('mega-scroll-pane'); varldenFake.style.setProperty('--mega-pane-h','540px'); }
 
         renderTabs();
     }
@@ -14098,12 +14270,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         embedSubWidget(createBiologiWidget, paneBio);
         embedSubWidget(createFroWidget, paneFro);
         const naturFake = embedSubWidget(createSverigesNatur, paneNatur);
-        if(naturFake){ naturFake.style.height='auto'; }
+        if(naturFake){ naturFake.classList.add('mega-scroll-pane'); }
         const kroppFake = embedSubWidget(createKroppen, paneKropp);
         // FIX: Kroppen sätter annars en hårdkodad höjd (680px) på sig själv, vilket skapade ett
         // stort tomt område nedanför innehållet när den byggdes in här. Nollställer den så den
         // bara tar den plats den faktiskt behöver.
-        if(kroppFake){ kroppFake.style.height='auto'; }
+        if(kroppFake){ kroppFake.classList.add('mega-scroll-pane'); kroppFake.style.setProperty('--mega-pane-h','680px'); }
 
         renderTabs();
     }
