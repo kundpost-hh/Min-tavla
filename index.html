@@ -3055,15 +3055,19 @@
         else if(state==='saved'){ el.className='cloud-sync-status status-saved'; el.textContent='☁️ Sparat'; _cloudStatusHideTimer=setTimeout(()=>{ el.style.display='none'; }, 2500); }
         else if(state==='error'){ el.className='cloud-sync-status status-error'; el.textContent='⚠️ Kunde inte spara i molnet'; }
     }
+    let _pendingCloudWrites = 0; // FIX: räknar PÅGÅENDE nätverksbegäranden (inte bara väntande timers),
+    // så vi kan varna innan sidan stängs/laddas om medan en sparning fortfarande är på väg till molnet.
     function syncToCloud(){
         if (!window.cloudReady || !currentUser) return;
         clearTimeout(cloudSyncTimer);
         setCloudSyncStatus('saving');
         cloudSyncTimer = setTimeout(()=>{
             const payload = cloudGatherData(); payload.updatedAt = Date.now();
+            _pendingCloudWrites++;
             fbDB.collection('boards').doc(emailKey(currentUser)).set(payload, { merge:true })
                 .then(()=> setCloudSyncStatus('saved'))
-                .catch(err => { console.warn('[MinTavla] Molnsparning misslyckades:', err); setCloudSyncStatus('error'); });
+                .catch(err => { console.warn('[MinTavla] Molnsparning misslyckades:', err); setCloudSyncStatus('error'); })
+                .finally(()=>{ _pendingCloudWrites--; });
         }, 1200);
     }
     // FIX: direkt (odämpad) molnsparning – för sällanintraffande, medvetna ändringar
@@ -3075,9 +3079,11 @@
         clearTimeout(cloudSyncTimer);
         setCloudSyncStatus('saving');
         const payload = cloudGatherData(); payload.updatedAt = Date.now();
+        _pendingCloudWrites++;
         return fbDB.collection('boards').doc(emailKey(currentUser)).set(payload, { merge:true })
             .then(()=> setCloudSyncStatus('saved'))
-            .catch(err => { console.warn('[MinTavla] Molnsparning misslyckades:', err); setCloudSyncStatus('error'); });
+            .catch(err => { console.warn('[MinTavla] Molnsparning misslyckades:', err); setCloudSyncStatus('error'); })
+            .finally(()=>{ _pendingCloudWrites--; });
     }
 
     // ---- ADMINENS VERKTYGSLÅDA GÄLLER ALLA ----
@@ -3171,8 +3177,10 @@
             uppdateradAv: currentUser
         };
         if (!payload.toolbarOrder && !payload.toolPocketLayout) return Promise.resolve(); // inget att dela ännu
+        _pendingCloudWrites++;
         return fbDB.collection('config').doc('toolbar').set(payload, { merge:true })
-            .catch(err => console.warn('[MinTavla] Kunde inte dela verktygslådans ordning (kontrollera Firestore-reglerna för config/toolbar):', err));
+            .catch(err => console.warn('[MinTavla] Kunde inte dela verktygslådans ordning (kontrollera Firestore-reglerna för config/toolbar):', err))
+            .finally(()=>{ _pendingCloudWrites--; });
     }
 
     // Registrera/uppdatera användaren i den centrala listan
@@ -21904,10 +21912,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         // (se pointerup-hanteraren nedan) samt lägg till/ta bort kedja (addToolPocketDivider / tpd-remove).
     }
     window.rebuildToolPocketGrid = rebuildToolPocketGrid;
-    // FIX: varna vid stängning/omladdning om en molnsparning fortfarande väntar,
-    // så man inte råkar ladda om sidan innan ändringen hunnit sparas.
+    // FIX: varna vid stängning/omladdning om en molnsparning fortfarande väntar ELLER pågår just nu,
+    // så man inte råkar ladda om sidan innan ändringen hunnit nå molnet. Tidigare varnades bara för
+    // väntande TIMERS - men "syncToCloudImmediate"/"pushSharedToolbarImmediate" skickas direkt utan
+    // timer, så en pågående (men ännu inte bekräftad) sparning varnades aldrig för. Det var precis
+    // det som gjorde att en snabb sidladdning direkt efter en ändring kunde tappa den ändringen.
     window.addEventListener('beforeunload', function(e){
-        if (cloudSyncTimer || _sharedToolbarPushTimer){
+        if (cloudSyncTimer || _sharedToolbarPushTimer || _pendingCloudWrites > 0){
             e.preventDefault(); e.returnValue = '';
         }
     });
