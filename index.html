@@ -3072,9 +3072,16 @@
     // I lokalt/offline-läge finns bara en användare, då behövs ingen delning.
     let _sharedToolbarUnsub = null;
     let _sharedToolbarPushTimer = null;
+    let _lastAppliedToolbarUpdate = 0;
     function applySharedToolbar(d){
         if (!d || !currentUser) return;
         try {
+            // FIX: hoppa över om det här bara är en eko av vår EGEN nyss sparade ändring.
+            // Annars kunde flera snabba egna sparningar (t.ex. skapa flera kategori-rutor i rad)
+            // komma fram i fel ordning över nätet och skriva över den senaste med en äldre version,
+            // vilket gjorde att nyss tillagda rutor/widgetar "försvann" igen.
+            if (d.uppdateradAv === currentUser) return;
+            if (typeof d.updatedAt === 'number' && d.updatedAt < _lastAppliedToolbarUpdate) return; // äldre än det vi redan tillämpat
             let andrat = false;
             if (typeof d.toolbarOrder === 'string' && d.toolbarOrder && d.toolbarOrder !== localStorage.getItem('mintavla_toolbarOrder_' + currentUser)){
                 localStorage.setItem('mintavla_toolbarOrder_' + currentUser, d.toolbarOrder); andrat = true;
@@ -3082,6 +3089,7 @@
             if (typeof d.toolPocketLayout === 'string' && d.toolPocketLayout && d.toolPocketLayout !== localStorage.getItem('mintavla_toolPocketLayout_' + currentUser)){
                 localStorage.setItem('mintavla_toolPocketLayout_' + currentUser, d.toolPocketLayout); andrat = true;
             }
+            if (typeof d.updatedAt === 'number') _lastAppliedToolbarUpdate = d.updatedAt;
             if (!andrat) return; // samma ordning som redan visas – rita inte om i onödan
             if (typeof restoreToolbarOrder === 'function') restoreToolbarOrder();
             if (typeof window.rebuildToolPocketGrid === 'function') window.rebuildToolPocketGrid();
