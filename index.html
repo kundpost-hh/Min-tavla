@@ -124,70 +124,78 @@
 
     <div id="toolbar-container">
         <input type="text" id="toolbar-search" class="toolbar-search" placeholder="🔍 Sök widget…" autocomplete="off">
+        <div class="toolbar-catlegend" id="toolbar-catlegend">
+            <span class="toolbar-catchip" data-catchip="klassrum"><span class="dot" style="background:#64748b"></span>Klassrum</span>
+            <span class="toolbar-catchip" data-catchip="svenska"><span class="dot" style="background:#f59e0b"></span>Svenska</span>
+            <span class="toolbar-catchip" data-catchip="matte"><span class="dot" style="background:#3b82f6"></span>Matte</span>
+            <span class="toolbar-catchip" data-catchip="no-teknik"><span class="dot" style="background:#10b981"></span>NO/Teknik</span>
+            <span class="toolbar-catchip" data-catchip="so"><span class="dot" style="background:#ec4899"></span>SO</span>
+            <span class="toolbar-catchip" data-catchip="lek"><span class="dot" style="background:#a855f7"></span>Lek</span>
+        </div>
         <!-- RAD 1: favoriter (alltid synliga) -->
         <div class="tool-group tool-fav">
-            <button class="tool-btn" onclick="createLessonPlan()"><div class="icon">📋</div><div class="label">Lektion</div></button>
-            <button class="tool-btn" onclick="createDailySchedule()"><div class="icon">📆</div><div class="label">Schema</div></button>
-            <button class="tool-btn" onclick="createCalendarWidget()"><div class="icon">📅</div><div class="label">Kalender</div></button>
-            <button class="tool-btn" onclick="createLunchWidget()"><div class="icon">🍽️</div><div class="label">Lunch</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createLessonPlan()"><div class="icon">📋</div><div class="label">Lektion</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createDailySchedule()"><div class="icon">📆</div><div class="label">Schema</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createCalendarWidget()"><div class="icon">📅</div><div class="label">Kalender</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createLunchWidget()"><div class="icon">🍽️</div><div class="label">Lunch</div></button>
             <button class="tool-btn" onclick="createTextEditor()"><div class="icon">📝</div><div class="label">Text</div></button>
-            <button class="tool-btn" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
-            <button class="tool-btn" onclick="createMatteBegrepp()"><div class="icon">🔢</div><div class="label">MatteBegrepp</div></button>
-            <button class="tool-btn" onclick="createKompisWidget()"><div class="icon">💛</div><div class="label">En bra kompis!</div></button>
-            <button class="tool-btn" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
-            <button class="tool-btn" onclick="createWordSearch()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2' y='2' width='15' height='15' rx='1.5' fill='none' stroke='#3a3a3c' stroke-width='1.4'/><line x1='2' y1='6.75' x2='17' y2='6.75' stroke='#3a3a3c' stroke-width='0.8'/><line x1='2' y1='11.5' x2='17' y2='11.5' stroke='#3a3a3c' stroke-width='0.8'/><line x1='6.75' y1='2' x2='6.75' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><line x1='11.5' y1='2' x2='11.5' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><circle cx='17.3' cy='17.3' r='4.3' fill='#fff' stroke='#3a3a3c' stroke-width='1.6'/><line x1='20.4' y1='20.4' x2='23' y2='23' stroke='#3a3a3c' stroke-width='1.8' stroke-linecap='round'/></svg></div><div class="label">Ordgömma</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createMatteBegrepp()"><div class="icon">🔢</div><div class="label">MatteBegrepp</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createKompisWidget()"><div class="icon">💛</div><div class="label">En bra kompis!</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createWordSearch()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2' y='2' width='15' height='15' rx='1.5' fill='none' stroke='#3a3a3c' stroke-width='1.4'/><line x1='2' y1='6.75' x2='17' y2='6.75' stroke='#3a3a3c' stroke-width='0.8'/><line x1='2' y1='11.5' x2='17' y2='11.5' stroke='#3a3a3c' stroke-width='0.8'/><line x1='6.75' y1='2' x2='6.75' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><line x1='11.5' y1='2' x2='11.5' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><circle cx='17.3' cy='17.3' r='4.3' fill='#fff' stroke='#3a3a3c' stroke-width='1.6'/><line x1='20.4' y1='20.4' x2='23' y2='23' stroke='#3a3a3c' stroke-width='1.8' stroke-linecap='round'/></svg></div><div class="label">Ordgömma</div></button>
             <button class="tool-btn" onclick="createWhiteboard()"><div class="icon">🖍️</div><div class="label">Rita</div></button>
-            <button class="tool-btn" onclick="createWorkSymbols()"><div class="icon">🤫</div><div class="label">Arbetssätt</div></button>
-            <button class="tool-btn" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
-            <button class="tool-btn" onclick="createStickyNote()"><div class="icon">🗒️</div><div class="label">Lapp</div></button>
-            <button class="tool-btn" onclick="createElevWidget()"><div class="icon">🧑‍🎓</div><div class="label">Elever</div></button>
-            <button class="tool-btn" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
-            <button class="tool-btn" onclick="createBegreppskort()"><div class="icon">🌱</div><div class="label">Begreppskort</div></button>
-            <button class="tool-btn" onclick="createNoFraga()"><div class="icon">🔬</div><div class="label">Dagens NO-fråga</div></button>
-            <button class="tool-btn" onclick="createSantFalskt()"><div class="icon">🧠</div><div class="label">Sant eller falskt</div></button>
-            <button class="tool-btn" onclick="createTextGenres()"><div class="icon">📚</div><div class="label">Textgenrer</div></button>
-            <button class="tool-btn" onclick="createLasforstaelse()"><div class="icon">🧐</div><div class="label">Läsförståelse</div></button>
-            <button class="tool-btn" onclick="createTalaWidget()"><div class="icon">🗣️</div><div class="label">Tala</div></button>
-            <button class="tool-btn" onclick="createSkrivstart()"><div class="icon">✍️</div><div class="label">Skrivstart</div></button>
-            <button class="tool-btn" onclick="createMeningarWidget()"><div class="icon">🧱</div><div class="label">Meningar</div></button>
-            <button class="tool-btn" onclick="createOrdWidget()"><div class="icon">🃏</div><div class="label">Ord</div></button>
-            <button class="tool-btn" onclick="createKallkritik()"><div class="icon">🔍</div><div class="label">Källkritik</div></button>
-            <button class="tool-btn" onclick="createGOTD()"><div class="icon">🧠</div><div class="label">Grej of the day</div></button>
-            <button class="tool-btn" onclick="createFractionVisualizer()"><div class="icon">🔢</div><div class="label">Talformer</div></button>
-            <button class="tool-btn" onclick="createBrakjamforelse()"><div class="icon">🍕</div><div class="label">Bråkjämförelse</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createWorkSymbols()"><div class="icon">🤫</div><div class="label">Arbetssätt</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createStickyNote()"><div class="icon">🗒️</div><div class="label">Lapp</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createElevWidget()"><div class="icon">🧑‍🎓</div><div class="label">Elever</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
+            <button class="tool-btn" data-cat="no-teknik" onclick="createBegreppskort()"><div class="icon">🌱</div><div class="label">Begreppskort</div></button>
+            <button class="tool-btn" data-cat="no-teknik" onclick="createNoFraga()"><div class="icon">🔬</div><div class="label">Dagens NO-fråga</div></button>
+            <button class="tool-btn" data-cat="lek" onclick="createSantFalskt()"><div class="icon">🧠</div><div class="label">Sant eller falskt</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createTextGenres()"><div class="icon">📚</div><div class="label">Textgenrer</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createLasforstaelse()"><div class="icon">🧐</div><div class="label">Läsförståelse</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createTalaWidget()"><div class="icon">🗣️</div><div class="label">Tala</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createSkrivstart()"><div class="icon">✍️</div><div class="label">Skrivstart</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createMeningarWidget()"><div class="icon">🧱</div><div class="label">Meningar</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createOrdWidget()"><div class="icon">🃏</div><div class="label">Ord</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createKallkritik()"><div class="icon">🔍</div><div class="label">Källkritik</div></button>
+            <button class="tool-btn" data-cat="lek" onclick="createGOTD()"><div class="icon">🧠</div><div class="label">Grej of the day</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createFractionVisualizer()"><div class="icon">🔢</div><div class="label">Talformer</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createBrakjamforelse()"><div class="icon">🍕</div><div class="label">Bråkjämförelse</div></button>
             <button class="tool-btn" onclick="createTableWidget()"><div class="icon">📊</div><div class="label">Tabell</div></button>
-            <button class="tool-btn" onclick="createTidMegaWidget()"><div class="icon">🕰️</div><div class="label">Tid</div></button>
-            <button class="tool-btn" onclick="createReminderWidget()"><div class="icon">⏰</div><div class="label">Reminder</div></button>
-            <button class="tool-btn" onclick="createMultiplicationTable()"><div class="icon">✖️</div><div class="label">Multiplikation</div></button>
-            <button class="tool-btn" onclick="createUppstallning()"><div class="icon">🧾</div><div class="label">Uppställning</div></button>
-            <button class="tool-btn" onclick="createTalfoljder()"><div class="icon">🔗</div><div class="label">Talföljder</div></button>
-            <button class="tool-btn" onclick="createDiagramWidget()"><div class="icon">📈</div><div class="label">Diagram</div></button>
-            <button class="tool-btn" onclick="createKoordinatsystem()"><div class="icon">📍</div><div class="label">Koordinatsystem</div></button>
-            <button class="tool-btn" onclick="createSannolikhet()"><div class="icon">🪙</div><div class="label">Sannolikhet</div></button>
-            <button class="tool-btn" onclick="createHundredChart()"><div class="icon">💯</div><div class="label">Hundraruta</div></button>
-            <button class="tool-btn" onclick="createSudoku()"><div class="icon">9️⃣</div><div class="label">Sudoku</div></button>
-            <button class="tool-btn" onclick="createPositionssystemet()"><div class="icon">🧊</div><div class="label">Positionssystemet</div></button>
-            <button class="tool-btn" onclick="createOverslagsrakning()"><div class="icon">🧭</div><div class="label">Överslagsräkning</div></button>
-            <button class="tool-btn" onclick="createAvrundning()"><div class="icon">🎚️</div><div class="label">Avrundning</div></button>
-            <button class="tool-btn" onclick="createMathChallenge()"><div class="icon"><svg viewBox="0 0 24 24" width="22" height="22" style="display:block;margin:0 auto;"><text x="6" y="10" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">+</text><text x="18" y="10" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">−</text><text x="6" y="21" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">×</text><text x="18" y="21" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">÷</text></svg></div><div class="label">Räkna</div></button>
-            <button class="tool-btn" onclick="createStartuppgift()"><div class="icon">🎯</div><div class="label">Startuppgift</div></button>
-            <button class="tool-btn" onclick="createNumberLine()"><div class="icon">📏</div><div class="label">Tallinje</div></button>
-            <button class="tool-btn" onclick="createMoneyWidget()"><div class="icon">💰</div><div class="label">Pengar</div></button>
-            <button class="tool-btn" onclick="createGeometryWidget()"><div class="icon">📐</div><div class="label">Geometri</div></button>
-            <button class="tool-btn" onclick="createUnitConverter()"><div class="icon">⚖️</div><div class="label">Enheter</div></button>
-            <button class="tool-btn" onclick="createFormlerWidget()"><div class="icon">🔣</div><div class="label">Formler</div></button>
-            <button class="tool-btn" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
-            <button class="tool-btn" onclick="createVerbWidget()"><div class="icon">⚡</div><div class="label">Verb</div></button>
-            <button class="tool-btn" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder/Invånare</div></button>
-            <button class="tool-btn" onclick="createYrkenWidget()"><div class="icon">👩‍🏫</div><div class="label">Yrken</div></button>
-            <button class="tool-btn" onclick="createComparisonWidget()"><div class="icon">🆚</div><div class="label">Jämföra</div></button>
-            <button class="tool-btn" onclick="createSpellingBattle()"><div class="icon">✏️</div><div class="label">Stavningskamp</div></button>
-            <button class="tool-btn" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
-            <button class="tool-btn" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
-            <button class="tool-btn" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
-            <button class="tool-btn" onclick="createExitTicket()"><div class="icon">🎯</div><div class="label">Exit ticket</div></button>
-            <button class="tool-btn" onclick="createQuizPoll()"><div class="icon">🗳️</div><div class="label">Omröstning</div></button>
-            <button class="tool-btn" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createTidMegaWidget()"><div class="icon">🕰️</div><div class="label">Tid</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createReminderWidget()"><div class="icon">⏰</div><div class="label">Reminder</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createMultiplicationTable()"><div class="icon">✖️</div><div class="label">Multiplikation</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createUppstallning()"><div class="icon">🧾</div><div class="label">Uppställning</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createTalfoljder()"><div class="icon">🔗</div><div class="label">Talföljder</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createDiagramWidget()"><div class="icon">📈</div><div class="label">Diagram</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createKoordinatsystem()"><div class="icon">📍</div><div class="label">Koordinatsystem</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createSannolikhet()"><div class="icon">🪙</div><div class="label">Sannolikhet</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createHundredChart()"><div class="icon">💯</div><div class="label">Hundraruta</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createSudoku()"><div class="icon">9️⃣</div><div class="label">Sudoku</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createPositionssystemet()"><div class="icon">🧊</div><div class="label">Positionssystemet</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createOverslagsrakning()"><div class="icon">🧭</div><div class="label">Överslagsräkning</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createAvrundning()"><div class="icon">🎚️</div><div class="label">Avrundning</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createMathChallenge()"><div class="icon"><svg viewBox="0 0 24 24" width="22" height="22" style="display:block;margin:0 auto;"><text x="6" y="10" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">+</text><text x="18" y="10" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">−</text><text x="6" y="21" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">×</text><text x="18" y="21" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">÷</text></svg></div><div class="label">Räkna</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createStartuppgift()"><div class="icon">🎯</div><div class="label">Startuppgift</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createNumberLine()"><div class="icon">📏</div><div class="label">Tallinje</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createMoneyWidget()"><div class="icon">💰</div><div class="label">Pengar</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createGeometryWidget()"><div class="icon">📐</div><div class="label">Geometri</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createUnitConverter()"><div class="icon">⚖️</div><div class="label">Enheter</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createFormlerWidget()"><div class="icon">🔣</div><div class="label">Formler</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createVerbWidget()"><div class="icon">⚡</div><div class="label">Verb</div></button>
+            <button class="tool-btn" data-cat="so" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder/Invånare</div></button>
+            <button class="tool-btn" data-cat="so" onclick="createYrkenWidget()"><div class="icon">👩‍🏫</div><div class="label">Yrken</div></button>
+            <button class="tool-btn" data-cat="lek" onclick="createComparisonWidget()"><div class="icon">🆚</div><div class="label">Jämföra</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createSpellingBattle()"><div class="icon">✏️</div><div class="label">Stavningskamp</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createTrafficLight()"><div class="icon">🚦</div><div class="label">Ljuset</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createNoiseMeter()"><div class="icon">🔊</div><div class="label">Ljudnivå</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createExitTicket()"><div class="icon">🎯</div><div class="label">Exit ticket</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createQuizPoll()"><div class="icon">🗳️</div><div class="label">Omröstning</div></button>
+            <button class="tool-btn" data-cat="lek" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="21" height="21" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
         </div>
 
@@ -199,25 +207,29 @@
         <!-- RAD 2: övriga widgetar (dolda tills man hovrar pilen) -->
         <div class="tool-group tool-extra" id="tool-extra">
             <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
-            <button class="tool-btn" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
             <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
             <button class="tool-btn" onclick="createVideoWidget()"><div class="icon">🎬</div><div class="label">Video</div></button>
-            <button class="tool-btn" onclick="createWeekSchedule()"><div class="icon">🗓️</div><div class="label">Veckoschema</div></button>
-            <button class="tool-btn" onclick="createChecklist()"><div class="icon">✅</div><div class="label">Checklista</div></button>
-            <button class="tool-btn" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
-            <button class="tool-btn" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
-            <button class="tool-btn" onclick="createGoodWidget()"><div class="icon">👍</div><div class="label">Good</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createWeekSchedule()"><div class="icon">🗓️</div><div class="label">Veckoschema</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createChecklist()"><div class="icon">✅</div><div class="label">Checklista</div></button>
+            <button class="tool-btn" data-cat="lek" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createGoodWidget()"><div class="icon">👍</div><div class="label">Good</div></button>
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
-            <button class="tool-btn" onclick="createRimlighet()"><div class="icon">🤔</div><div class="label">Rimlighet</div></button>
-            <button class="tool-btn" onclick="createBiologiMegaWidget()"><div class="icon">🧬</div><div class="label">Biologi</div></button>
-            <button class="tool-btn" onclick="createKemiMegaWidget()"><div class="icon">⚗️</div><div class="label">Kemi</div></button>
-            <button class="tool-btn" onclick="createFysikMegaWidget()"><div class="icon">🔭</div><div class="label">Fysik</div></button>
-            <button class="tool-btn" onclick="createTeknikWidget()"><div class="icon">⚙️</div><div class="label">Teknik</div></button>
-            <button class="tool-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
-            <button class="tool-btn" onclick="showMinaResultat()"><div class="icon">📊</div><div class="label">Mina resultat</div></button>
-            <button class="tool-btn" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
-            <button class="tool-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
-            <button class="tool-btn" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createRimlighet()"><div class="icon">🤔</div><div class="label">Rimlighet</div></button>
+            <button class="tool-btn" data-cat="no-teknik" onclick="createBiologiMegaWidget()"><div class="icon">🧬</div><div class="label">Biologi</div></button>
+            <button class="tool-btn" data-cat="no-teknik" onclick="createKemiMegaWidget()"><div class="icon">⚗️</div><div class="label">Kemi</div></button>
+            <button class="tool-btn" data-cat="no-teknik" onclick="createFysikMegaWidget()"><div class="icon">🔭</div><div class="label">Fysik</div></button>
+            <button class="tool-btn" data-cat="no-teknik" onclick="createTeknikWidget()"><div class="icon">⚙️</div><div class="label">Teknik</div></button>
+        </div>
+
+        <!-- ADMIN: separat, visuellt avskild grupp för verktyg som inte lägger till en widget -->
+        <div class="tool-group tool-admin" id="tool-admin">
+            <button class="admin-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
+            <button class="admin-btn" onclick="showMinaResultat()"><div class="icon">📊</div><div class="label">Mina resultat</div></button>
+            <button class="admin-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
+            <button class="admin-btn admin-btn-danger" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
+            <button class="admin-btn admin-btn-danger" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
         </div>
     </div>
     <script>
@@ -236,14 +248,16 @@
         })();
         // ---- Sökfält i verktygsfältet: filtrerar widget-knapparna medan man skriver ----
         (function setupToolbarSearch(){
+            let activeCat = null;
             function init(){
                 const input = document.getElementById('toolbar-search');
                 const tc = document.getElementById('toolbar-container');
+                const legend = document.getElementById('toolbar-catlegend');
                 if (!input || !tc) return;
-                input.addEventListener('input', function(){
+                function applyFilter(){
                     const q = input.value.trim().toLowerCase();
                     const btns = tc.querySelectorAll('.tool-btn');
-                    if (!q){
+                    if (!q && !activeCat){
                         btns.forEach(function(b){ b.style.display=''; });
                         tc.classList.remove('tb-force-extra');
                         return;
@@ -252,10 +266,28 @@
                     btns.forEach(function(b){
                         const lblEl = b.querySelector('.label');
                         const lbl = (lblEl ? lblEl.textContent : '').toLowerCase();
-                        b.style.display = lbl.indexOf(q) !== -1 ? '' : 'none';
+                        const matchesText = !q || lbl.indexOf(q) !== -1;
+                        const matchesCat = !activeCat || b.dataset.cat === activeCat;
+                        b.style.display = (matchesText && matchesCat) ? '' : 'none';
                     });
-                });
+                }
+                input.addEventListener('input', applyFilter);
                 input.addEventListener('click', function(e){ e.stopPropagation(); });
+                if (legend){
+                    legend.querySelectorAll('.toolbar-catchip').forEach(function(chip){
+                        chip.addEventListener('click', function(e){
+                            e.stopPropagation();
+                            const cat = chip.dataset.catchip;
+                            if (activeCat === cat){
+                                activeCat = null; chip.classList.remove('active');
+                            } else {
+                                legend.querySelectorAll('.toolbar-catchip').forEach(c=>c.classList.remove('active'));
+                                activeCat = cat; chip.classList.add('active');
+                            }
+                            applyFilter();
+                        });
+                    });
+                }
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
         })();
@@ -331,6 +363,32 @@
     #toolbar-container.tb-force-extra .tool-extra { max-height: 220px; opacity: 1; pointer-events: auto; margin-top: 2px; }
     .toolbar-search { width: 220px; max-width: 90%; padding: 6px 12px; border-radius: 14px; border: 1px solid #d8dbe8; font-size: 13px; margin-bottom: 4px; outline: none; font-family: inherit; }
     .toolbar-search:focus { border-color: #8b5cf6; }
+
+    /* ADMIN: egen, visuellt avskild grupp (inte del av dra-och-släpp-systemet för widgetar) */
+    .tool-admin { display: flex; gap: 4px; justify-content: center; width: 100%; flex-wrap: wrap; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 6px; margin-top: 2px; }
+    .admin-btn { display: flex; flex-direction: column; align-items: center; background: #f5f5f8; border: none; cursor: pointer; transition: transform 0.12s, background 0.2s; padding: 4px 8px; border-radius: 10px; min-width: 54px; }
+    .admin-btn:hover { background-color: #e9e9f0; transform: translateY(-2px); }
+    .admin-btn:active { transform: translateY(0); }
+    .admin-btn .icon { font-size: 20px; margin-bottom: 2px; height: 24px; display: flex; align-items: center; justify-content: center; }
+    .admin-btn .label { font-size: 10px; font-weight: 600; color: #5a5a62; text-align: center; }
+    .admin-btn-danger { background: #fff1f0; }
+    .admin-btn-danger:hover { background: #ffe1df; }
+    .admin-btn-danger .label { color: #d9362b; }
+
+    /* Kategorifärger: liten prick i hörnet på widget-knappar så man snabbt kan se ämne/typ */
+    .tool-btn[data-cat] { position: relative; }
+    .tool-btn[data-cat]::after { content:''; position:absolute; top:4px; right:6px; width:6px; height:6px; border-radius:50%; }
+    .tool-btn[data-cat="klassrum"]::after { background:#64748b; }
+    .tool-btn[data-cat="svenska"]::after { background:#f59e0b; }
+    .tool-btn[data-cat="matte"]::after { background:#3b82f6; }
+    .tool-btn[data-cat="no-teknik"]::after { background:#10b981; }
+    .tool-btn[data-cat="so"]::after { background:#ec4899; }
+    .tool-btn[data-cat="lek"]::after { background:#a855f7; }
+    .toolbar-catlegend { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:3px; }
+    .toolbar-catchip { display:flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700; color:#5a5a62; background:#f2f2f7; border:1px solid transparent; border-radius:999px; padding:3px 9px; cursor:pointer; user-select:none; transition: background .15s, border-color .15s; }
+    .toolbar-catchip:hover { background:#e9e9f0; }
+    .toolbar-catchip.active { border-color:#8b5cf6; background:#f3e8ff; color:#6d28d9; }
+    .toolbar-catchip .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
     .tool-btn { display: flex; flex-direction: column; align-items: center; background: none; border: none; cursor: grab; transition: transform 0.12s, background 0.2s; padding: 4px 6px; border-radius: 10px; min-width: 50px; touch-action: none; }
     .tool-btn.tool-dragging { cursor: grabbing; background: #e7f0ff; box-shadow: 0 6px 16px rgba(0,0,0,0.18); transform: scale(1.12); opacity: 0.95; }
     .tool-btn:hover { background-color: #f2f2f7; transform: translateY(-3px); }
@@ -3061,11 +3119,22 @@
         } catch(err){ console.warn('[MinTavla] Kunde inte registrera användare:', err); }
     }
 
+    // ---- Endast tillåtna e-postdomäner får logga in (extra skyddslager utöver Firestore-reglerna).
+    // Lägg till fler domäner i listan om kommunen har flera skoldomäner, t.ex. ['utb.linkoping.se','linkoping.se'].
+    const ALLOWED_EMAIL_DOMAINS = ['utb.linkoping.se'];
+    function isAllowedEmailDomain(email){
+        if (!ALLOWED_EMAIL_DOMAINS.length) return true; // ingen begränsning konfigurerad – tillåt alla
+        const parts = (email||'').toLowerCase().split('@');
+        const domain = parts.length > 1 ? parts[1] : '';
+        return ALLOWED_EMAIL_DOMAINS.some(d => domain === d.toLowerCase());
+    }
+
     // Logga in med Google (öppet för alla). Resten sköts av onAuthStateChanged.
     async function signInWithGoogle(){
         if (!window.cloudReady){ customAlert('Google-inloggning är inte tillgänglig just nu (molnet kunde inte kopplas upp). Använd "Fortsätt lokalt" nedan så länge.', '⚠️'); return; }
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
+            if (ALLOWED_EMAIL_DOMAINS.length === 1) provider.setCustomParameters({ hd: ALLOWED_EMAIL_DOMAINS[0] }); // hintar Google att bara visa rätt organisation
             await fbAuth.signInWithPopup(provider);
         } catch(err){
             if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) return;
@@ -3079,6 +3148,11 @@
         if (_handlingSignIn) return; _handlingSignIn = true;
         try {
             const email = user.email; const name = user.displayName || '';
+            if (!isAllowedEmailDomain(email)){
+                await fbAuth.signOut();
+                customAlert('Endast konton med e-postadress @' + ALLOWED_EMAIL_DOMAINS.join(', @') + ' kan logga in i Min Tavla. Kontakta administratören om du tycker detta är fel.', '🔒');
+                return;
+            }
             await loadAdminEmails();
             if(typeof applyAdminUIMode === 'function') applyAdminUIMode(); // rätt ej-admin/viewer-klasser så fort listan finns
             // Borttagen/blockerad av admin?
