@@ -3225,6 +3225,10 @@
         if(btn){ btn.style.opacity=''; btn.style.pointerEvents=''; }
         if(lbl) lbl.textContent = 'Logga in med Google';
     }
+    // FIX: bytt från signInWithPopup till signInWithRedirect. Popup-metoden misslyckades ofta tyst
+    // (fastnade på en tom sida och gick tillbaka utan felmeddelande) eftersom moderna webbläsare i
+    // allt högre grad blockerar den tredjeparts-cookie-kommunikation som popup-fönstret behöver för
+    // att prata med huvudfönstret. En helsides-omdirigering till Google har inte det problemet.
     async function signInWithGoogle(){
         if (_signingInWithGoogle) return;
         if (!window.cloudReady){ customAlert('Google-inloggning är inte tillgänglig just nu (molnet kunde inte kopplas upp). Använd "Fortsätt lokalt" nedan så länge.', '⚠️'); return; }
@@ -3232,19 +3236,15 @@
         const btn = document.getElementById('google-signin-btn'), lbl = document.getElementById('google-signin-btn-label');
         if(btn){ btn.style.opacity='0.6'; btn.style.pointerEvents='none'; }
         if(lbl) lbl.textContent = 'Loggar in…';
-        // FIX: säkerhetsgräns - om popup-fönstrets löfte av någon anledning ALDRIG löses ut eller
-        // avvisas (t.ex. pga tredjeparts-cookie-blockering eller en webbläsarkonstighet), skulle
-        // knappen annars kunna fastna permanent inaktiverad tills sidan laddas om. Efter 12 sekunder
-        // återställs den alltid, oavsett vad som händer, så man aldrig blir helt utestängd.
         _signInSafetyTimer = setTimeout(_resetGoogleSignInUI, 12000);
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             if (ALLOWED_EMAIL_DOMAINS.length === 1) provider.setCustomParameters({ hd: ALLOWED_EMAIL_DOMAINS[0] }); // hintar Google att bara visa rätt organisation
-            await fbAuth.signInWithPopup(provider);
+            await fbAuth.signInWithRedirect(provider);
+            // Sidan navigerar nu bort till Google - koden nedan (finally) hinner inte köras förrän
+            // efter att man skickats tillbaka hit igen, vilket sköts av getRedirectResult() i checkLogin().
         } catch(err){
-            if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) return;
-            console.warn(err); customAlert('Inloggningen kunde inte slutföras. Försök igen.', '⚠️');
-        } finally {
+            console.warn(err); customAlert('Inloggningen kunde inte startas. Försök igen.', '⚠️');
             _resetGoogleSignInUI();
         }
     }
@@ -3506,6 +3506,13 @@
         // laddade pga nätverksproblem) faller vi tillbaka till lokalt läge.
         if (window.cloudReady && fbAuth){
             document.getElementById('login-overlay').style.display = 'flex';
+            // Fångar upp eventuella fel från signInWithRedirect (t.ex. om användaren avbröt
+            // eller valde fel konto) - onAuthStateChanged sköter själva den lyckade inloggningen.
+            fbAuth.getRedirectResult().catch(err => {
+                if (err && err.code === 'auth/user-cancelled') return;
+                console.warn('[MinTavla] Inloggningsomdirigeringen misslyckades:', err);
+                customAlert('Inloggningen kunde inte slutföras. Försök igen.', '⚠️');
+            });
             fbAuth.onAuthStateChanged(user => {
                 if (user){ handleSignedIn(user); }
                 else { _boardInitializedForUser = null; showLocalLoginOption(); document.getElementById('login-overlay').style.display = 'flex'; }
