@@ -3130,17 +3130,24 @@
     }
     // FIX: hämtar bara EN GÅNG per inloggning/sidladdning (ingen live-lyssnare - det var källan
     // till tidigare "rutorna försvinner"-buggar). VIKTIGT: admin läser ALDRIG tillbaka sin egen
-    // delade kopia - admins lokala data ÄR källan till sanningen, och att läsa tillbaka sin egen
-    // nyss skrivna kopia (som kan vara en bråkdels sekund gammal på grund av nätverksfördröjning)
-    // var precis det som fick adminens EGEN ordning att "försvinna" vid varje siduppdatering.
-    // Bara icke-admin-användare hämtar och tillämpar adminens delade ordning.
+    // delade kopia OM den redan har egen lokal data på den här enheten - admins lokala data ÄR
+    // källan till sanningen så snart den finns, och att läsa tillbaka sin egen nyss skrivna kopia
+    // (som kan vara en bråkdels sekund gammal på grund av nätverksfördröjning) var precis det som
+    // fick adminens EGEN ordning att "försvinna" vid varje siduppdatering. MEN: om admin loggar in
+    // på en HELT NY enhet (tom lokal lagring där, t.ex. en annan dator) hämtas den senast sparade
+    // ordningen som en startpunkt, så man slipper börja om från noll varje gång man byter enhet.
+    // Bara icke-admin-användare hämtar och tillämpar adminens delade ordning varje gång (som avsett).
     async function startSharedToolbarSync(){
         if (!window.cloudReady || !fbDB) return;
         try {
             if (typeof isBoardAdmin === 'function' && isBoardAdmin()){
                 const snap = await fbDB.collection('config').doc('toolbar').get();
-                if (!snap.exists) pushSharedToolbar(); // dela ut adminens ordning första gången
-                else if (typeof snap.data().locked === 'boolean'){ toolbarOrderLocked = snap.data().locked; updateToolbarLockUI(); }
+                if (!snap.exists){ pushSharedToolbar(); return; } // dela ut adminens ordning första gången
+                const d = snap.data();
+                if (typeof d.locked === 'boolean'){ toolbarOrderLocked = d.locked; updateToolbarLockUI(); }
+                const hasOwnToolbar = !!localStorage.getItem('mintavla_toolbarOrder_' + currentUser);
+                const hasOwnPocket = !!localStorage.getItem('mintavla_toolPocketLayout_' + currentUser);
+                if (!hasOwnToolbar && !hasOwnPocket) applySharedToolbar(d); // ny enhet - hämta senast sparade som startpunkt
                 return;
             }
             const snap = await fbDB.collection('config').doc('toolbar').get();
