@@ -115,7 +115,6 @@
                 <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketDivider()" title="Lägg till en ny kedja som du kan dra dit du vill">🔗 Lägg till kedja</button>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketCategory()" title="Skapa en kategori-ruta att samla t.ex. Svenska eller Matte-verktyg i">🗂️ Ny kategori-ruta</button>
-                <button type="button" class="tool-pocket-add-chain" onclick="resetToolPocketLayout()" title="Nollställ till en jämnt utspridd standardordning för alla">🧹 Städa fickan</button>
             </div>
             <div class="tool-pocket-admin" id="tool-pocket-admin">
                 <button class="admin-btn lock-toggle-btn" id="lock-board-btn-pocket" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
@@ -21608,17 +21607,23 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
     function saveToolPocketLayout(){
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
-        const layout = [...grid.children].map(el=>{
-            if(el.classList.contains('tool-pocket-divider')) return { type:'div', h: el.offsetHeight };
-            if(el.classList.contains('tool-pocket-category')){
-                const titleEl = el.querySelector('.tpc-title');
-                const label = titleEl ? titleEl.value : 'Kategori';
-                const ids = [...el.querySelectorAll('.tpc-items > .tool-btn')].map(toolBtnId);
-                return { type:'cat', label, ids };
-            }
-            if(el.classList.contains('tool-btn')) return { type:'btn', id: toolBtnId(el) };
-            return null;
-        }).filter(Boolean);
+        let layout;
+        try {
+            layout = [...grid.children].map(el=>{
+                if(el.classList.contains('tool-pocket-divider')) return { type:'div', h: el.offsetHeight };
+                if(el.classList.contains('tool-pocket-category')){
+                    const titleEl = el.querySelector('.tpc-title');
+                    const label = titleEl ? titleEl.value : 'Kategori';
+                    const ids = [...el.querySelectorAll('.tpc-items > .tool-btn')].map(toolBtnId);
+                    return { type:'cat', label, ids };
+                }
+                if(el.classList.contains('tool-btn')) return { type:'btn', id: toolBtnId(el) };
+                return null;
+            }).filter(Boolean);
+        } catch(e){
+            console.warn('[MinTavla] Kunde inte läsa av verktygsfickans layout - sparar inte denna gång:', e);
+            return;
+        }
         try { localStorage.setItem(toolPocketLayoutKey(), JSON.stringify(layout)); } catch(e){}
         if(typeof syncToCloudImmediate==='function') syncToCloudImmediate();
         else if(typeof syncToCloud==='function') syncToCloud();
@@ -21713,55 +21718,55 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         saveToolPocketLayout();
     }
     window.addToolPocketDivider = addToolPocketDivider;
-    function resetToolPocketLayout(){
-        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
-        if(typeof customConfirm !== 'function'){ return; }
-        customConfirm('Städa verktygsfickan och sprida ut kedjorna jämnt? Detta delas ut till alla användare.', () => {
-            try { localStorage.removeItem(toolPocketLayoutKey()); } catch(e){}
-            rebuildToolPocketGrid();
-            saveToolPocketLayout(); // medveten, engångs-sparning - sprids nu permanent till alla
-        });
-    }
-    window.resetToolPocketLayout = resetToolPocketLayout;
     function rebuildToolPocketGrid(){
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
-        grid.innerHTML='';
-        const btns = [...document.querySelectorAll('#toolbar-container .tool-btn')];
-        const btnMap = {}; btns.forEach(b=>{ btnMap[toolBtnId(b)] = b; });
-        let layout = loadToolPocketLayout();
-        if(!layout) layout = buildDefaultToolPocketLayout(btns.map(toolBtnId));
-        const used = new Set();
-        layout.forEach(entry=>{
-            if(!entry) return;
-            if(entry.type === 'btn'){
-                const real = btnMap[entry.id];
-                if(real && !used.has(entry.id)){
-                    const c = real.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); grid.appendChild(c);
-                    used.add(entry.id);
-                }
-            } else if(entry.type === 'div'){
-                grid.appendChild(makeChainDividerEl(entry.h));
-            } else if(entry.type === 'cat'){
-                const box = makeCategoryBoxEl(entry.label);
-                const itemsEl = box.querySelector('.tpc-items');
-                (entry.ids||[]).forEach(id=>{
-                    const real = btnMap[id];
-                    if(real && !used.has(id)){
-                        const c = real.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); itemsEl.appendChild(c);
-                        used.add(id);
+        try {
+            const btns = [...document.querySelectorAll('#toolbar-container .tool-btn')];
+            const btnMap = {}; btns.forEach(b=>{ btnMap[toolBtnId(b)] = b; });
+            let layout = loadToolPocketLayout();
+            if(!layout) layout = buildDefaultToolPocketLayout(btns.map(toolBtnId));
+            const used = new Set();
+            // FIX: bygg upp allt i en lös (odockad) fragment-behållare FÖRST, och töm/byt bara ut
+            // det riktiga innehållet i fickan om HELA uppbyggnaden lyckades utan fel. Innan gjordes
+            // grid.innerHTML='' direkt, vilket gjorde att ETT fel mitt i uppbyggnaden (t.ex. vid
+            // kategori-rutor) kunde lämna hela fickan helt tom.
+            const frag = document.createDocumentFragment();
+            layout.forEach(entry=>{
+                if(!entry) return;
+                if(entry.type === 'btn'){
+                    const real = btnMap[entry.id];
+                    if(real && !used.has(entry.id)){
+                        const c = real.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); frag.appendChild(c);
+                        used.add(entry.id);
                     }
-                });
-                grid.appendChild(box);
-            }
-        });
-        // Nya verktyg som saknas i den sparade layouten läggs sist
-        btns.forEach(b=>{
-            const id = toolBtnId(b);
-            if(!used.has(id)){
-                const c = b.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); grid.appendChild(c);
-                used.add(id);
-            }
-        });
+                } else if(entry.type === 'div'){
+                    frag.appendChild(makeChainDividerEl(entry.h));
+                } else if(entry.type === 'cat'){
+                    const box = makeCategoryBoxEl(entry.label);
+                    const itemsEl = box.querySelector('.tpc-items');
+                    (entry.ids||[]).forEach(id=>{
+                        const real = btnMap[id];
+                        if(real && !used.has(id)){
+                            const c = real.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); itemsEl.appendChild(c);
+                            used.add(id);
+                        }
+                    });
+                    frag.appendChild(box);
+                }
+            });
+            // Nya verktyg som saknas i den sparade layouten läggs sist
+            btns.forEach(b=>{
+                const id = toolBtnId(b);
+                if(!used.has(id)){
+                    const c = b.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); frag.appendChild(c);
+                    used.add(id);
+                }
+            });
+            grid.innerHTML = '';
+            grid.appendChild(frag);
+        } catch(e){
+            console.warn('[MinTavla] Kunde inte rita om verktygsfickan - lämnar den orörd så inget försvinner:', e);
+        }
         // OBS: sparar INTE här längre - det gjorde att en gammal/inaktuell lokal layout på VILKEN SOM HELST
         // admin-enhet automatiskt skrev över och delade ut sig till alla, bara av att öppna appen (utan att
         // något faktiskt ändrats). Sparning sker numera bara vid riktiga användarhandlingar: drag-och-släpp
