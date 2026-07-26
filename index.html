@@ -115,6 +115,7 @@
                 <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketDivider()" title="Lägg till en ny kedja som du kan dra dit du vill">🔗 Lägg till kedja</button>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketCategory()" title="Skapa en kategori-ruta att samla t.ex. Svenska eller Matte-verktyg i">🗂️ Ny kategori-ruta</button>
+                <button type="button" class="tool-pocket-add-chain" onclick="showToolPocketHistory()" title="Se tidigare sparade versioner av fickan och återställ en av dem">🕓 Historik</button>
             </div>
             <div class="tool-pocket-admin" id="tool-pocket-admin">
                 <button class="admin-btn lock-toggle-btn" id="lock-board-btn-pocket" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
@@ -545,6 +546,7 @@
     .viewer-mode .widget .widget-header { cursor: default !important; }
     /* Verktygslådans kedje-funktioner är adminens möblering – göms för övriga */
     .ej-admin .tool-pocket-add-chain, .viewer-mode .tool-pocket-add-chain { display: none !important; }
+    .ej-admin .toolbar-lock-toggle-btn, .viewer-mode .toolbar-lock-toggle-btn { display: none !important; }
     .ej-admin .tool-pocket-divider .tpd-handle, .ej-admin .tool-pocket-divider .tpd-remove,
     .viewer-mode .tool-pocket-divider .tpd-handle, .viewer-mode .tool-pocket-divider .tpd-remove { display: none !important; }
     .ej-admin .tool-pocket-divider, .viewer-mode .tool-pocket-divider { cursor: default !important; }
@@ -3201,6 +3203,7 @@
 
     // Körs när någon är inloggad (både vid nytt klick och vid auto-återställd session)
     let _handlingSignIn = false;
+    let _boardInitializedForUser = null; // FIX: håller reda på vilken användare tavlan redan är uppbyggd för
     async function handleSignedIn(user){
         if (_handlingSignIn) return; _handlingSignIn = true;
         try {
@@ -3208,6 +3211,21 @@
             if (!isAllowedEmailDomain(email)){
                 await fbAuth.signOut();
                 customAlert('Endast konton med e-postadress @' + ALLOWED_EMAIL_DOMAINS.join(', @') + ' kan logga in i Min Tavla. Kontakta administratören om du tycker detta är fel.', '🔒');
+                return;
+            }
+            // FIX: Firebase kan trigga "inloggad"-händelsen fler gånger under SAMMA session
+            // (t.ex. vid automatisk token-förnyelse, ungefär varje timme, eller när fliken växlas
+            // till/från). Tidigare kördes då HELA ombyggnadsflödet om - hämta tavlan från molnet och
+            // bygg om allt - vilket i värsta fall kunde skriva över helt nyss gjorda, ännu inte färdigt
+            // synkade ändringar (t.ex. att man precis organiserat widgetar i en kategori-ruta) med en
+            // bråkdels sekund äldre molnversion. Det var den verkliga orsaken till att arbete "försvann"
+            // utan förvarning. Nu körs den fullständiga, tavla-ombyggande delen bara EN gång per
+            // inloggad session/användare - upprepade "inloggad"-händelser för SAMMA användare uppdaterar
+            // bara admin-relaterat UI, utan att röra tavlan eller verktygsfickan alls.
+            if (_boardInitializedForUser === email){
+                await loadAdminEmails();
+                if(typeof applyAdminUIMode === 'function') applyAdminUIMode();
+                if(typeof updateAdminButton === 'function') updateAdminButton();
                 return;
             }
             await loadAdminEmails();
@@ -3231,6 +3249,7 @@
             migrateOldLists(currentUser); initBoard();
             updateAdminButton();
             startSharedToolbarSync(); // adminens ordning i verktygslådan gäller alla användare
+            _boardInitializedForUser = email;
         } finally { _handlingSignIn = false; }
     }
 
@@ -3441,7 +3460,7 @@
             document.getElementById('login-overlay').style.display = 'flex';
             fbAuth.onAuthStateChanged(user => {
                 if (user){ handleSignedIn(user); }
-                else { showLocalLoginOption(); document.getElementById('login-overlay').style.display = 'flex'; }
+                else { _boardInitializedForUser = null; showLocalLoginOption(); document.getElementById('login-overlay').style.display = 'flex'; }
             });
         } else {
             enterLocalMode();
@@ -18148,10 +18167,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 };
                 cell.appendChild(b);
                 if(entry && entry.open){
-                    const inp=document.createElement('input'); inp.className='att-note-input'; inp.value=entry.note||''; inp.placeholder='Varför borta?'; inp.title='Skriv orsak. Enter sparar och stänger rutan. Klick på namnet = närvarande igen.';
+                    const inp=document.createElement('input'); inp.className='att-note-input'; inp.value=entry.note||''; inp.placeholder='Varför borta?'; inp.title='Skriv orsak. Enter eller klick utanför sparar och stänger rutan. Klick på namnet = närvarande igen.';
                     inp.onclick=(ev)=>ev.stopPropagation();
                     inp.oninput=()=>{ entry.note=inp.value; syncData(); saveBoardState(); };
                     inp.onkeydown=(ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); entry.open=false; syncData(); render(); saveBoardState(); } };
+                    inp.onblur=()=>{ entry.open=false; syncData(); render(); saveBoardState(); };
                     cell.appendChild(inp);
                     if(focusName===nm){ setTimeout(()=>{ try{ inp.focus(); inp.select(); }catch(e){} }, 0); focusName=null; }
                 } else if(entry && entry.note){
@@ -18370,10 +18390,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 };
                 cell.appendChild(b);
                 if(entry && entry.open){
-                    const inp=document.createElement('input'); inp.className='att-note-input'; inp.value=entry.note||''; inp.placeholder='Varför borta?'; inp.title='Skriv orsak. Enter sparar och stänger rutan. Klick på namnet = närvarande igen.';
+                    const inp=document.createElement('input'); inp.className='att-note-input'; inp.value=entry.note||''; inp.placeholder='Varför borta?'; inp.title='Skriv orsak. Enter eller klick utanför sparar och stänger rutan. Klick på namnet = närvarande igen.';
                     inp.onclick=(ev)=>ev.stopPropagation();
                     inp.oninput=()=>{ entry.note=inp.value; persist(); saveBoardState(); };
                     inp.onkeydown=(ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); entry.open=false; persist(); renderN(); saveBoardState(); } };
+                    inp.onblur=()=>{ entry.open=false; persist(); renderN(); saveBoardState(); };
                     cell.appendChild(inp);
                     if(focusName===nm){ setTimeout(()=>{ try{ inp.focus(); inp.select(); }catch(e){} }, 0); focusName=null; }
                 } else if(entry && entry.note){
@@ -21643,6 +21664,64 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         try { const raw = localStorage.getItem(toolPocketLayoutKey()); if(raw){ const arr = JSON.parse(raw); if(Array.isArray(arr)) return arr; } } catch(e){}
         return null;
     }
+    // ---- Säkerhetskopia: sparar automatiskt en historik av de senaste versionerna av
+    // verktygsfickans layout, så man kan återställa manuellt om något oväntat råkar
+    // skriva över den aktuella layouten (t.ex. efter ett fel eller en synkkrock). ----
+    function toolPocketHistoryKey(){ return 'mintavla_toolPocketLayoutHistory_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
+    function backupToolPocketLayout(layout){
+        try {
+            const key = toolPocketHistoryKey();
+            let hist = [];
+            try { hist = JSON.parse(localStorage.getItem(key)) || []; } catch(e){ hist = []; }
+            if (!Array.isArray(hist)) hist = [];
+            hist.push({ t: Date.now(), layout });
+            if (hist.length > 8) hist = hist.slice(hist.length - 8);
+            localStorage.setItem(key, JSON.stringify(hist));
+        } catch(e){ /* säkerhetskopia är en extra förmån, får aldrig störa själva sparningen */ }
+    }
+    function showToolPocketHistory(){
+        let hist = [];
+        try { hist = JSON.parse(localStorage.getItem(toolPocketHistoryKey())) || []; } catch(e){}
+        const ov=document.createElement('div'); ov.className='figx-overlay';
+        const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(420px,94vw)';
+        const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+        const head=document.createElement('div'); head.className='figx-head';
+        const h2=document.createElement('h2'); h2.textContent='🕓 Historik – verktygsfickan';
+        const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+        head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+        if(!hist.length){
+            const tom=document.createElement('p'); tom.style.cssText='font-size:14px;color:#666;text-align:center;padding:10px 0;';
+            tom.textContent='Ingen historik sparad ännu. Så fort du ändrar något i verktygsfickan (t.ex. skapar en kategori-ruta) sparas en säkerhetskopia här automatiskt.';
+            box.appendChild(tom);
+        } else {
+            const info=document.createElement('p'); info.style.cssText='font-size:12.5px;color:#666;text-align:center;margin:0 0 10px;';
+            info.textContent='Klicka på en tidigare version för att återställa den (delas ut till alla).';
+            box.appendChild(info);
+            const lista=document.createElement('div'); lista.className='su-lista';
+            [...hist].reverse().forEach(entry=>{
+                const rad=document.createElement('div'); rad.className='su-rad'; rad.style.cursor='pointer';
+                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=new Date(entry.t).toLocaleString('sv-SE');
+                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500';
+                const antal = Array.isArray(entry.layout) ? entry.layout.length : 0;
+                defEl.textContent = antal + ' objekt i fickan – klicka för att återställa';
+                rad.appendChild(ordEl); rad.appendChild(defEl);
+                rad.onclick = ()=>{
+                    customConfirm('Återställ verktygsfickan till versionen från ' + new Date(entry.t).toLocaleString('sv-SE') + '?', ()=>{
+                        try { localStorage.setItem(toolPocketLayoutKey(), JSON.stringify(entry.layout)); } catch(e){}
+                        rebuildToolPocketGrid();
+                        saveToolPocketLayout();
+                        stang();
+                    });
+                };
+                lista.appendChild(rad);
+            });
+            box.appendChild(lista);
+        }
+        ov.appendChild(box);
+        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+    }
+    window.showToolPocketHistory = showToolPocketHistory;
     function saveToolPocketLayout(){
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
         let layout;
@@ -21663,6 +21742,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             return;
         }
         try { localStorage.setItem(toolPocketLayoutKey(), JSON.stringify(layout)); } catch(e){}
+        backupToolPocketLayout(layout);
         if(typeof syncToCloudImmediate==='function') syncToCloudImmediate();
         else if(typeof syncToCloud==='function') syncToCloud();
         if(typeof pushSharedToolbarImmediate==='function') pushSharedToolbarImmediate(); // adminens ordning delas till alla
