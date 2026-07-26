@@ -114,11 +114,11 @@
                 <div class="tool-pocket-title">Verktyg</div>
                 <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketDivider()" title="Lägg till en ny kedja som du kan dra dit du vill">🔗 Lägg till kedja</button>
+                <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketCategory()" title="Skapa en kategori-ruta att samla t.ex. Svenska eller Matte-verktyg i">🗂️ Ny kategori-ruta</button>
                 <button type="button" class="tool-pocket-add-chain" onclick="resetToolPocketLayout()" title="Nollställ till en jämnt utspridd standardordning för alla">🧹 Städa fickan</button>
             </div>
             <div class="tool-pocket-admin" id="tool-pocket-admin">
                 <button class="admin-btn lock-toggle-btn" id="lock-board-btn-pocket" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
-                <button class="admin-btn" onclick="showMinaResultat()"><div class="icon">📊</div><div class="label">Mina resultat</div></button>
                 <button class="admin-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
                 <button class="admin-btn admin-btn-danger" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
                 <button class="admin-btn admin-btn-danger" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
@@ -234,7 +234,6 @@
         <!-- ADMIN: separat, visuellt avskild grupp för verktyg som inte lägger till en widget -->
         <div class="tool-group tool-admin" id="tool-admin">
             <button class="admin-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
-            <button class="admin-btn" onclick="showMinaResultat()"><div class="icon">📊</div><div class="label">Mina resultat</div></button>
             <button class="admin-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
             <button class="admin-btn admin-btn-danger" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
             <button class="admin-btn admin-btn-danger" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
@@ -384,6 +383,18 @@
     .admin-btn-danger .label { color: #d9362b; }
     .tool-pocket-admin { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 8px; margin-top: 8px; }
     .tool-pocket-admin .admin-btn { flex: 1 1 auto; min-width: 70px; }
+
+    /* Kategori-rutor i verktygsfickan: ljusblå, rundade, sträcker sig över båda kolumnerna,
+       och växer automatiskt med antalet widgetar som dras in i dem. */
+    .tool-pocket-category { grid-column: 1 / -1; background: #e3f2ff; border: 1px solid #cfe6fb; border-radius: 16px; padding: 8px 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+    .tool-pocket-category.tpc-moving { opacity: 0.5; }
+    .tpc-header { display: flex; align-items: center; gap: 6px; padding: 0 2px; }
+    .tpc-handle { cursor: grab; color: #5a8fc7; font-size: 15px; user-select: none; touch-action: none; }
+    .tpc-title { flex: 1; font-size: 12.5px; font-weight: 800; color: #2f5f8a; background: transparent; border: none; outline: none; min-width: 0; }
+    .tpc-title:focus { text-decoration: underline; }
+    .tpc-remove { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1px solid rgba(0,0,0,0.1); color: #9a4a4a; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+    .tpc-items { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 44px; }
+    .tpc-items:empty::before { content: 'Släpp verktyg här'; grid-column: 1 / -1; font-size: 11px; color: #7ba3c9; text-align: center; padding: 12px 0; border: 1px dashed #aacbe8; border-radius: 10px; }
 
     /* Kategorifärger: liten prick i hörnet på widget-knappar så man snabbt kan se ämne/typ */
     .tool-btn[data-cat] { position: relative; }
@@ -3671,58 +3682,6 @@
         let nyaWK = []; try { nyaWK = JSON.parse(localStorage.getItem('nyaWidgetKnappar')) || []; } catch(e){ nyaWK = []; }
         localStorage.setItem('boardStateV6_' + currentUser, JSON.stringify({ pages: pages, activePage: currentPageIndexV6, activePageId: activeId, bodyClass: document.getElementById('cb-app-wrapper').className, nyaWidgetKnappar: nyaWK }));
         syncToCloud();
-    }
-
-    // ---- Samlad resultat-/poängvy: visar poäng från alla quiz-widgetar som finns på tavlan ----
-    function showMinaResultat(){
-        const KALLOR = [
-            { key:'vadret', namn:'⛅ Vädret (Fysik)' },
-            { key:'vkl', namn:'💧 Vattenkretsloppet (Fysik)' },
-            { key:'rymden', namn:'🔭 Rymden (Fysik)' },
-            { key:'kemi', namn:'⚗️ Kemi' }
-        ];
-        const resultat = [];
-        document.querySelectorAll('.widget').forEach(function(w){
-            KALLOR.forEach(function(k){
-                const raw = w.dataset[k.key];
-                if(!raw) return;
-                try {
-                    const data = JSON.parse(raw);
-                    if (typeof data.quizTotal === 'number' && data.quizTotal > 0){
-                        resultat.push({ namn:k.namn, score:data.quizScore||0, total:data.quizTotal });
-                    }
-                } catch(e){}
-            });
-        });
-
-        const ov=document.createElement('div'); ov.className='figx-overlay';
-        const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(420px,94vw)';
-        const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
-        ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
-        const head=document.createElement('div'); head.className='figx-head';
-        const h2=document.createElement('h2'); h2.textContent='📊 Mina resultat';
-        const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
-        head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
-
-        if(!resultat.length){
-            const tom=document.createElement('p'); tom.style.cssText='font-size:14px;color:#666;text-align:center;padding:10px 0;';
-            tom.textContent='Inga quiz är påbörjade än på de widgetar som finns på tavlan just nu. Öppna en Quiz-flik (t.ex. i Fysik eller Kemi) och svara på några frågor, så visas resultatet här!';
-            box.appendChild(tom);
-        } else {
-            const lista=document.createElement('div'); lista.className='su-lista';
-            resultat.forEach(function(r){
-                const rad=document.createElement('div'); rad.className='su-rad';
-                const ordEl=document.createElement('div'); ordEl.className='su-tagg'; ordEl.textContent=r.namn;
-                const defEl=document.createElement('div'); defEl.className='su-fraga'; defEl.style.fontWeight='500';
-                const proc = r.total ? Math.round((r.score/r.total)*100) : 0;
-                defEl.textContent = 'Poäng: '+r.score+' / '+r.total+' ('+proc+'%)';
-                rad.appendChild(ordEl); rad.appendChild(defEl);
-                lista.appendChild(rad);
-            });
-            box.appendChild(lista);
-        }
-        ov.appendChild(box);
-        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
     }
 
     // ---- Duplicera en enskild widget: återanvänder samma serialize/spawn-mönster som redan
@@ -21651,6 +21610,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
         const layout = [...grid.children].map(el=>{
             if(el.classList.contains('tool-pocket-divider')) return { type:'div', h: el.offsetHeight };
+            if(el.classList.contains('tool-pocket-category')){
+                const titleEl = el.querySelector('.tpc-title');
+                const label = titleEl ? titleEl.value : 'Kategori';
+                const ids = [...el.querySelectorAll('.tpc-items > .tool-btn')].map(toolBtnId);
+                return { type:'cat', label, ids };
+            }
             if(el.classList.contains('tool-btn')) return { type:'btn', id: toolBtnId(el) };
             return null;
         }).filter(Boolean);
@@ -21701,6 +21666,45 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         });
         return div;
     }
+    // Skapar en kategori-ruta (t.ex. "Svenska", "Matte") som widgetar kan dras in i.
+    function makeCategoryBoxEl(label, admin){
+        const isAdmin = (admin !== undefined) ? admin : (typeof isBoardAdmin === 'function' ? isBoardAdmin() : true);
+        const box = document.createElement('div');
+        box.className = 'tool-pocket-category';
+        const safeLabel = (label||'Kategori').replace(/"/g,'&quot;');
+        box.innerHTML = `<div class="tpc-header">
+                <span class="tpc-handle" title="Dra för att flytta rutan">⠿</span>
+                <input type="text" class="tpc-title" value="${safeLabel}" placeholder="Kategorinamn" ${isAdmin ? '' : 'readonly'}>
+                <span class="tpc-remove" title="Ta bort rutan (verktygen läggs tillbaka i listan)">✕</span>
+            </div>
+            <div class="tpc-items"></div>`;
+        const removeBtn = box.querySelector('.tpc-remove');
+        const handle = box.querySelector('.tpc-handle');
+        const titleInput = box.querySelector('.tpc-title');
+        if(!isAdmin){ removeBtn.style.display='none'; handle.style.display='none'; }
+        removeBtn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); e.stopPropagation(); });
+        removeBtn.addEventListener('click', (e)=>{
+            e.preventDefault(); e.stopPropagation();
+            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
+            const grid = document.getElementById('tool-pocket-grid');
+            const items = box.querySelector('.tpc-items');
+            // Flytta ut verktygen till huvudlistan innan rutan tas bort, så inget försvinner
+            [...items.children].forEach(child => grid.insertBefore(child, box));
+            box.remove();
+            saveToolPocketLayout();
+        });
+        titleInput.addEventListener('pointerdown', (e)=> e.stopPropagation());
+        titleInput.addEventListener('change', ()=> saveToolPocketLayout());
+        return box;
+    }
+    // Lägg till en ny, tom kategori-ruta sist i verktygsfickan – dra sedan dit du vill ha den
+    function addToolPocketCategory(){
+        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får lägga till kategori-rutor
+        const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
+        grid.appendChild(makeCategoryBoxEl('Ny kategori'));
+        saveToolPocketLayout();
+    }
+    window.addToolPocketCategory = addToolPocketCategory;
     // Lägg till en ny kedja sist i verktygsfickan – dra den sedan dit du vill ha den
     function addToolPocketDivider(){
         if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får lägga till kedjor
@@ -21737,6 +21741,17 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 }
             } else if(entry.type === 'div'){
                 grid.appendChild(makeChainDividerEl(entry.h));
+            } else if(entry.type === 'cat'){
+                const box = makeCategoryBoxEl(entry.label);
+                const itemsEl = box.querySelector('.tpc-items');
+                (entry.ids||[]).forEach(id=>{
+                    const real = btnMap[id];
+                    if(real && !used.has(id)){
+                        const c = real.cloneNode(true); c.removeAttribute('id'); c.classList.remove('tool-dragging'); itemsEl.appendChild(c);
+                        used.add(id);
+                    }
+                });
+                grid.appendChild(box);
             }
         });
         // Nya verktyg som saknas i den sparade layouten läggs sist
@@ -21766,7 +21781,25 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         function placeDragged(x, y, item){
             const el=document.elementFromPoint(x, y); if(!el) return;
             if(!grid.contains(el) && el!==grid) return;
-            const over=el.closest('.tool-btn, .tool-pocket-divider');
+            const isBtn = item.classList.contains('tool-btn');
+            if(isBtn){
+                const catItems = el.closest('.tpc-items');
+                if(catItems && grid.contains(catItems)){
+                    const overBtn = el.closest('.tool-btn');
+                    if(overBtn && overBtn!==item && catItems.contains(overBtn)){
+                        const r=overBtn.getBoundingClientRect();
+                        const after = x > r.left + r.width/2;
+                        catItems.insertBefore(item, after ? overBtn.nextSibling : overBtn);
+                    } else if(el===catItems || catItems.contains(el)){
+                        catItems.appendChild(item);
+                    }
+                    return;
+                }
+            }
+            const over=el.closest('.tool-btn, .tool-pocket-divider, .tool-pocket-category');
+            if(over && over.closest('.tpc-items')){
+                return; // en hel kedja/kategori-ruta kan inte hamna inuti en annan kategori-ruta
+            }
             if(over && over!==item){
                 const r=over.getBoundingClientRect();
                 const bothBtns = over.classList.contains('tool-btn') && item.classList.contains('tool-btn');
@@ -21779,10 +21812,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         }
         grid.addEventListener('pointerdown', (e)=>{
             if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får ändra i verktygslådan (fickan)
-            if(e.target.closest('.tpd-handle, .tpd-remove')) return;
-            const item=e.target.closest('.tool-btn, .tool-pocket-divider'); if(!item) return;
+            if(e.target.closest('.tpd-handle, .tpd-remove, .tpc-remove, .tpc-title')) return;
+            const catHandle = e.target.closest('.tpc-handle');
+            const item = catHandle ? catHandle.closest('.tool-pocket-category') : e.target.closest('.tool-btn, .tool-pocket-divider');
+            if(!item) return;
             if(e.button && e.button!==0) return;
             const isChain = item.classList.contains('tool-pocket-divider');
+            const isCategory = item.classList.contains('tool-pocket-category');
             const startX=e.clientX, startY=e.clientY;
             let started=false;
             const move=(ev)=>{
@@ -21790,7 +21826,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 if(!started){
                     if(Math.abs(dx)+Math.abs(dy) < 6) return;
                     started=true;
-                    item.classList.add(isChain ? 'tpd-moving' : 'tool-dragging');
+                    item.classList.add(isChain ? 'tpd-moving' : (isCategory ? 'tpc-moving' : 'tool-dragging'));
                     item.style.pointerEvents='none';
                     try{ grid.setPointerCapture(ev.pointerId); }catch(_){}
                 }
@@ -21802,7 +21838,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 grid.removeEventListener('pointerup',up);
                 grid.removeEventListener('pointercancel',up);
                 if(started){
-                    item.classList.remove('tool-dragging','tpd-moving');
+                    item.classList.remove('tool-dragging','tpd-moving','tpc-moving');
                     item.style.pointerEvents='';
                     syncToolbarButtonOrderFromGrid(grid);
                     saveToolPocketLayout();
