@@ -3114,6 +3114,12 @@
         if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara admin får låsa/låsa upp
         toolbarOrderLocked = !toolbarOrderLocked;
         updateToolbarLockUI();
+        // FIX: spara EXAKT det aktuella läget i verktygsfältet/fickan just nu, innan låsningen sker.
+        // Annars kunde "Lås ordning" bara frysa vad som RÅKADE vara sparat sedan en tidigare, separat
+        // åtgärd - vilket i värsta fall kunde vara en äldre version om den allra senaste ändringen
+        // inte hunnit sparas ännu. Nu fångas alltid precis det du ser på skärmen i samma stund du låser.
+        if(typeof saveToolbarOrder === 'function') saveToolbarOrder();
+        if(typeof saveToolPocketLayout === 'function') saveToolPocketLayout();
         if(!window.cloudReady || !fbDB || !currentUser) return;
         fbDB.collection('config').doc('toolbar').set({ locked: toolbarOrderLocked, updatedAt: Date.now(), uppdateradAv: currentUser }, { merge:true })
             .catch(err=> console.warn('[MinTavla] Kunde inte spara låst/upplåst verktygsordning:', err));
