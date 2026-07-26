@@ -2988,9 +2988,14 @@
             wordLists:  localStorage.getItem('savedWordLists_') || '',
             templates:  localStorage.getItem('mintavla_templates_' + currentUser) || '',
             links:      localStorage.getItem('mintavla_links_' + currentUser) || '',
-            calNotes:   localStorage.getItem('mintavla_calNotes_' + currentUser) || '',
-            toolbarOrder: localStorage.getItem('mintavla_toolbarOrder_' + currentUser) || '',
-            toolPocketLayout: localStorage.getItem('mintavla_toolPocketLayout_' + currentUser) || ''
+            calNotes:   localStorage.getItem('mintavla_calNotes_' + currentUser) || ''
+            // OBS: toolbarOrder/toolPocketLayout sparas MEDVETET inte längre här. De hade tidigare
+            // en EGEN, redundant kopia i det här dokumentet (boards/{email}) - helt separat från den
+            // riktiga, avsedda platsen (config/toolbar). Den kopian kunde bli inaktuell (t.ex. om en
+            // sparning hann bli avbruten av en snabb sidladdning), och eftersom den lästes tillbaka
+            // och skrev över allt vid VARJE inloggning/sidladdning, gjorde det att en gammal ordning
+            // kunde återkomma "varje gång man uppdaterade sidan" - även långt efter att den riktiga
+            // ordningen redan var korrekt sparad i config/toolbar. Nu finns bara EN sanning för detta.
         };
     }
 
@@ -3004,8 +3009,7 @@
         if (typeof d.templates === 'string') localStorage.setItem('mintavla_templates_' + currentUser, d.templates);
         if (typeof d.links === 'string') localStorage.setItem('mintavla_links_' + currentUser, d.links);
         if (typeof d.calNotes === 'string' && d.calNotes) localStorage.setItem('mintavla_calNotes_' + currentUser, d.calNotes);
-        if (typeof d.toolbarOrder === 'string' && d.toolbarOrder) localStorage.setItem('mintavla_toolbarOrder_' + currentUser, d.toolbarOrder);
-        if (typeof d.toolPocketLayout === 'string' && d.toolPocketLayout) localStorage.setItem('mintavla_toolPocketLayout_' + currentUser, d.toolPocketLayout);
+        // toolbarOrder/toolPocketLayout hanteras inte längre här - se kommentar i cloudGatherData().
     }
 
     // Gör om e-post till en säker dokument-nyckel (Firestore tillåter inte vissa tecken)
