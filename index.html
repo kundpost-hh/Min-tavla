@@ -119,7 +119,6 @@
             </div>
             <div class="tool-pocket-admin" id="tool-pocket-admin">
                 <button class="admin-btn lock-toggle-btn" id="lock-board-btn-pocket" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
-                <button class="admin-btn toolbar-lock-toggle-btn" onclick="toggleToolbarOrderLock()" title="Lås/lås upp ordningen på verktygslådan och fickan för alla"><div class="icon">🔓</div><div class="label">Lås ordning</div></button>
                 <button class="admin-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
                 <button class="admin-btn admin-btn-danger" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
                 <button class="admin-btn admin-btn-danger" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
@@ -235,7 +234,6 @@
         <!-- ADMIN: separat, visuellt avskild grupp för verktyg som inte lägger till en widget -->
         <div class="tool-group tool-admin" id="tool-admin">
             <button class="admin-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
-            <button class="admin-btn toolbar-lock-toggle-btn" onclick="toggleToolbarOrderLock()" title="Lås/lås upp ordningen på verktygslådan och fickan för alla"><div class="icon">🔓</div><div class="label">Lås ordning</div></button>
             <button class="admin-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
             <button class="admin-btn admin-btn-danger" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
             <button class="admin-btn admin-btn-danger" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
@@ -398,14 +396,6 @@
     .tpc-items { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 44px; }
     .tpc-items:empty::before { content: 'Släpp verktyg här'; grid-column: 1 / -1; font-size: 11px; color: #7ba3c9; text-align: center; padding: 12px 0; border: 1px dashed #aacbe8; border-radius: 10px; }
 
-    /* När ordningen är låst för alla (även admin): dölj redigeringskontroller och visa vanlig muspekare */
-    .toolbar-order-locked .tpd-remove,
-    .toolbar-order-locked .tpc-remove,
-    .toolbar-order-locked .tpc-handle { display: none !important; }
-    .toolbar-order-locked #tool-pocket-scroll > .tool-pocket-add-chain { display: none !important; }
-    .toolbar-order-locked .tool-btn,
-    .toolbar-order-locked .tool-pocket-divider,
-    .toolbar-order-locked .tool-pocket-category { cursor: default !important; }
 
     /* Kategorifärger: liten prick i hörnet på widget-knappar så man snabbt kan se ämne/typ */
     .tool-btn[data-cat] { position: relative; }
@@ -544,12 +534,10 @@
     .viewer-mode .widget .widget-controls { display: none !important; }
     .viewer-mode .widget .widget-resizer { display: none !important; }
     .viewer-mode .widget .widget-header { cursor: default !important; }
-    /* Verktygslådans kedje-funktioner är adminens möblering – göms för övriga */
-    .ej-admin .tool-pocket-add-chain, .viewer-mode .tool-pocket-add-chain { display: none !important; }
-    .ej-admin .toolbar-lock-toggle-btn, .viewer-mode .toolbar-lock-toggle-btn { display: none !important; }
-    .ej-admin .tool-pocket-divider .tpd-handle, .ej-admin .tool-pocket-divider .tpd-remove,
+    /* Verktygslådans kedje-/kategori-funktioner är numera personliga per lärare - göms bara om man inte kan redigera tavlan alls */
+    .viewer-mode .tool-pocket-add-chain { display: none !important; }
     .viewer-mode .tool-pocket-divider .tpd-handle, .viewer-mode .tool-pocket-divider .tpd-remove { display: none !important; }
-    .ej-admin .tool-pocket-divider, .viewer-mode .tool-pocket-divider { cursor: default !important; }
+    .viewer-mode .tool-pocket-divider { cursor: default !important; }
 
     .widget-inner { background: white; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid #e5e5ea; overflow: hidden; display: flex; flex-direction: column; width: 100%; height: 100%; transition: all 0.3s ease-in-out; position: relative; z-index: 2; }
     .widget:not(.locked) .widget-inner { cursor: move; }
@@ -3081,76 +3069,54 @@
     // ---- ADMINENS VERKTYGSLÅDA GÄLLER ALLA ----
     // Adminens ordning och sortering (verktygsraden överst + verktygsfickan till vänster)
     // sparas i ETT delat dokument i molnet (config/toolbar). Alla användare hämtar den
-    // vid inloggning och lyssnar live på ändringar – så ser hela skolan samma verktygslåda.
+    // vid inloggning – ENDAST för HELT NYA konton som ännu inte har någon egen ordning alls.
     // I lokalt/offline-läge finns bara en användare, då behövs ingen delning.
     let _sharedToolbarUnsub = null;
     let _sharedToolbarPushTimer = null;
-    // Går att låsa hela verktygslådans/fickans ordning för ALLA (admin inkluderad), så att ingen
-    // av misstag rubbar en färdigställd layout under en lektion. Sparas delat i config/toolbar.locked.
-    let toolbarOrderLocked = false;
-    function isToolbarOrderLocked(){ return !!toolbarOrderLocked; }
-    function updateToolbarLockUI(){
-        document.querySelectorAll('.toolbar-lock-toggle-btn').forEach(btn=>{
-            const ic=btn.querySelector('.icon'), lb=btn.querySelector('.label');
-            if(ic) ic.innerText = toolbarOrderLocked ? '🔒' : '🔓';
-            if(lb) lb.innerText = toolbarOrderLocked ? 'Ordning låst' : 'Lås ordning';
-        });
-        const wrap = document.getElementById('cb-app-wrapper');
-        if(wrap) wrap.classList.toggle('toolbar-order-locked', !!toolbarOrderLocked);
-    }
-    function toggleToolbarOrderLock(){
-        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara admin får låsa/låsa upp
-        toolbarOrderLocked = !toolbarOrderLocked;
-        updateToolbarLockUI();
-        if(!window.cloudReady || !fbDB || !currentUser) return;
-        fbDB.collection('config').doc('toolbar').set({ locked: toolbarOrderLocked, updatedAt: Date.now(), uppdateradAv: currentUser }, { merge:true })
-            .catch(err=> console.warn('[MinTavla] Kunde inte spara låst/upplåst verktygsordning:', err));
-    }
-    window.toggleToolbarOrderLock = toggleToolbarOrderLock;
+    // FIX: verktygslådan/fickan är nu helt PERSONLIG per lärare. Varje lärare kan fritt möblera
+    // om sin egen verktygslåda och ficka utan att det påverkar någon annan, och ingen annans
+    // ändringar kan någonsin skriva över det du själv byggt upp. Adminens ordning används bara
+    // EN GÅNG, som en startmall, för konton som ALDRIG haft en egen ordning tidigare (helt nya
+    // lärare). Detta tar bort hela den tidigare, sköra "delas live till alla"-mekaniken som låg
+    // bakom flera upprepade buggar där nyligen gjorda ändringar försvann utan förvarning.
     function applySharedToolbar(d){
         if (!d || !currentUser) return;
         try {
-            if (typeof d.locked === 'boolean' && d.locked !== toolbarOrderLocked){
-                toolbarOrderLocked = d.locked;
-                updateToolbarLockUI();
-            }
             let andrat = false;
-            if (typeof d.toolbarOrder === 'string' && d.toolbarOrder && d.toolbarOrder !== localStorage.getItem('mintavla_toolbarOrder_' + currentUser)){
+            if (typeof d.toolbarOrder === 'string' && d.toolbarOrder && !localStorage.getItem('mintavla_toolbarOrder_' + currentUser)){
                 localStorage.setItem('mintavla_toolbarOrder_' + currentUser, d.toolbarOrder); andrat = true;
             }
-            if (typeof d.toolPocketLayout === 'string' && d.toolPocketLayout && d.toolPocketLayout !== localStorage.getItem('mintavla_toolPocketLayout_' + currentUser)){
+            if (typeof d.toolPocketLayout === 'string' && d.toolPocketLayout && !localStorage.getItem('mintavla_toolPocketLayout_' + currentUser)){
                 localStorage.setItem('mintavla_toolPocketLayout_' + currentUser, d.toolPocketLayout); andrat = true;
             }
-            if (!andrat) return; // samma ordning som redan visas – rita inte om i onödan
+            if (!andrat) return; // du har redan en egen ordning – rör den inte
             if (typeof restoreToolbarOrder === 'function') restoreToolbarOrder();
             if (typeof window.rebuildToolPocketGrid === 'function') window.rebuildToolPocketGrid();
-        } catch(e){ console.warn('[MinTavla] Kunde inte tillämpa den delade verktygslådan:', e); }
+        } catch(e){ console.warn('[MinTavla] Kunde inte hämta startmallen för verktygslådan:', e); }
     }
-    // FIX: hämtar nu bara den delade layouten EN GÅNG, vid inloggning/sidladdning - lyssnar INTE
-    // längre live under tiden appen används. Den tidigare live-lyssnaren var källan till upprepade
-    // "rutorna försvinner"-buggar: om man gjorde flera ändringar snabbt efter varandra (skapa/dra
-    // kategori-rutor) kunde molnets bekräftelser komma tillbaka i fel ordning och skriva över den
-    // senaste versionen mitt i en pågående session. Nu kan ingenting skriva över din session efter
-    // att sidan väl laddats - nästa gång sidan laddas om hämtas dock alltid senaste sparade layout.
     async function startSharedToolbarSync(){
         if (!window.cloudReady || !fbDB) return;
         try {
+            // Har du redan en egen ordning (oavsett hur enkel)? Hämta då ingenting - din ordning är din.
+            const hasOwnToolbar = !!localStorage.getItem('mintavla_toolbarOrder_' + currentUser);
+            const hasOwnPocket = !!localStorage.getItem('mintavla_toolPocketLayout_' + currentUser);
+            if (hasOwnToolbar || hasOwnPocket) return;
             const snap = await fbDB.collection('config').doc('toolbar').get();
             if (!snap.exists){
                 if (typeof isBoardAdmin === 'function' && isBoardAdmin()) pushSharedToolbar();
                 return;
             }
             applySharedToolbar(snap.data());
-        } catch(e){ console.warn('[MinTavla] Delad verktygslåda kunde inte hämtas:', e); }
+        } catch(e){ console.warn('[MinTavla] Startmallen för verktygslådan kunde inte hämtas:', e); }
     }
+    // Adminens ordning sparas som en mall som nya konton kan ärva - påverkar aldrig konton som
+    // redan har en egen ordning.
     function pushSharedToolbar(){
         if (!window.cloudReady || !fbDB || !currentUser) return;
-        if (typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara ADMINENS ordning delas till alla
+        if (typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminens ordning blir startmall
         clearTimeout(_sharedToolbarPushTimer);
         _sharedToolbarPushTimer = setTimeout(()=>{ pushSharedToolbarImmediate(); }, 1200);
     }
-    // FIX: odämpad variant, används vid medvetna ordningsändringar så en snabb
-    // sidladdning inte hinner före sparningen till det delade admin-dokumentet.
     function pushSharedToolbarImmediate(){
         if (!window.cloudReady || !fbDB || !currentUser) return Promise.resolve();
         if (typeof isBoardAdmin === 'function' && !isBoardAdmin()) return Promise.resolve();
@@ -3163,7 +3129,7 @@
         };
         if (!payload.toolbarOrder && !payload.toolPocketLayout) return Promise.resolve(); // inget att dela ännu
         return fbDB.collection('config').doc('toolbar').set(payload, { merge:true })
-            .catch(err => console.warn('[MinTavla] Kunde inte dela verktygslådans ordning (kontrollera Firestore-reglerna för config/toolbar):', err));
+            .catch(err => console.warn('[MinTavla] Kunde inte spara startmallen (kontrollera Firestore-reglerna för config/toolbar):', err));
     }
 
     // Registrera/uppdatera användaren i den centrala listan
@@ -21615,8 +21581,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             }
         }
         tc.addEventListener('pointerdown', (e)=>{
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får ändra i verktygslådan
-            if(typeof isToolbarOrderLocked === 'function' && isToolbarOrderLocked()) return; // ordningen är låst för alla
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return; // bara inloggade får ändra sin egen verktygslåda
             const btn=e.target.closest('.tool-btn'); if(!btn) return;
             if(e.button && e.button!==0) return;
             const startX=e.clientX, startY=e.clientY;
@@ -21780,19 +21745,18 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         // Kedjans storlek är fast – storleksändring borttagen för ALLA (även admin)
         div.innerHTML = `<div class="chain-strip"></div><div class="tpd-remove" title="Ta bort kedjan">✕</div>`;
         const removeBtn = div.querySelector('.tpd-remove');
-        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) removeBtn.style.display='none'; // icke-admin ska aldrig se X:et
+        if(typeof canEditBoard === 'function' && !canEditBoard()) removeBtn.style.display='none'; // syns bara om man kan redigera
         removeBtn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); e.stopPropagation(); });
         removeBtn.addEventListener('click', (e)=>{
             e.preventDefault(); e.stopPropagation();
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // dubbel säkring i logiken
-            if(typeof isToolbarOrderLocked === 'function' && isToolbarOrderLocked()) return;
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return; // dubbel säkring i logiken
             div.remove(); saveToolPocketLayout();
         });
         return div;
     }
     // Skapar en kategori-ruta (t.ex. "Svenska", "Matte") som widgetar kan dras in i.
     function makeCategoryBoxEl(label, admin){
-        const isAdmin = (admin !== undefined) ? admin : (typeof isBoardAdmin === 'function' ? isBoardAdmin() : true);
+        const isAdmin = (admin !== undefined) ? admin : (typeof canEditBoard === 'function' ? canEditBoard() : true);
         const box = document.createElement('div');
         box.className = 'tool-pocket-category';
         const safeLabel = (label||'Kategori').replace(/"/g,'&quot;');
@@ -21809,8 +21773,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         removeBtn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); e.stopPropagation(); });
         removeBtn.addEventListener('click', (e)=>{
             e.preventDefault(); e.stopPropagation();
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
-            if(typeof isToolbarOrderLocked === 'function' && isToolbarOrderLocked()) return;
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return;
             const grid = document.getElementById('tool-pocket-grid');
             const items = box.querySelector('.tpc-items');
             // Flytta ut verktygen till huvudlistan innan rutan tas bort, så inget försvinner
@@ -21824,8 +21787,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
     // Lägg till en ny, tom kategori-ruta sist i verktygsfickan – dra sedan dit du vill ha den
     function addToolPocketCategory(){
-        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får lägga till kategori-rutor
-        if(typeof isToolbarOrderLocked === 'function' && isToolbarOrderLocked()) return; // ordningen är låst för alla
+        if(typeof canEditBoard === 'function' && !canEditBoard()) return; // bara inloggade får lägga till kategori-rutor
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
         grid.appendChild(makeCategoryBoxEl('Ny kategori'));
         saveToolPocketLayout();
@@ -21833,8 +21795,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     window.addToolPocketCategory = addToolPocketCategory;
     // Lägg till en ny kedja sist i verktygsfickan – dra den sedan dit du vill ha den
     function addToolPocketDivider(){
-        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får lägga till kedjor
-        if(typeof isToolbarOrderLocked === 'function' && isToolbarOrderLocked()) return; // ordningen är låst för alla
+        if(typeof canEditBoard === 'function' && !canEditBoard()) return; // bara inloggade får lägga till kedjor
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
         grid.appendChild(makeChainDividerEl(16));
         saveToolPocketLayout();
@@ -21938,8 +21899,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             }
         }
         grid.addEventListener('pointerdown', (e)=>{
-            if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får ändra i verktygslådan (fickan)
-            if(typeof isToolbarOrderLocked === 'function' && isToolbarOrderLocked()) return; // ordningen är låst för alla
+            if(typeof canEditBoard === 'function' && !canEditBoard()) return; // bara inloggade får ändra sin egen ficka
             if(e.target.closest('.tpd-handle, .tpd-remove, .tpc-remove, .tpc-title')) return;
             const catHandle = e.target.closest('.tpc-handle');
             const item = catHandle ? catHandle.closest('.tool-pocket-category') : e.target.closest('.tool-btn, .tool-pocket-divider');
@@ -22013,6 +21973,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             } catch(e) { document.getElementById('cb-app-wrapper').className = 'theme-img-summer no-watermark'; document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
         } else { document.getElementById('cb-app-wrapper').className = 'theme-img-summer no-watermark'; document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
         window.isLoadingBoard = false;
+        // FIX: koden ovan skriver av misstag över HELA className på #cb-app-wrapper (för att sätta
+        // rätt bakgrundstema), vilket rensade bort klasser som .ej-admin/.viewer-mode som redan hunnit
+        // sättas tidigare i inloggningsflödet. Sätt tillbaka rätt klasser igen här.
+        if(typeof applyAdminUIMode === 'function') applyAdminUIMode();
         restorePresentationLock(); // om tavlan var låst före omladdning: lås igen och visa rätt ikon/etikett
         refreshPocketData();
         if(newDays > 0) saveBoardState();
