@@ -3105,7 +3105,6 @@
             .catch(err=> console.warn('[MinTavla] Kunde inte spara låst/upplåst verktygsordning:', err));
     }
     window.toggleToolbarOrderLock = toggleToolbarOrderLock;
-    let _lastAppliedToolbarUpdate = 0;
     function applySharedToolbar(d){
         if (!d || !currentUser) return;
         try {
@@ -3113,12 +3112,6 @@
                 toolbarOrderLocked = d.locked;
                 updateToolbarLockUI();
             }
-            // FIX: hoppa över om det här bara är en eko av vår EGEN nyss sparade ändring.
-            // Annars kunde flera snabba egna sparningar (t.ex. skapa flera kategori-rutor i rad)
-            // komma fram i fel ordning över nätet och skriva över den senaste med en äldre version,
-            // vilket gjorde att nyss tillagda rutor/widgetar "försvann" igen.
-            if (d.uppdateradAv === currentUser) return;
-            if (typeof d.updatedAt === 'number' && d.updatedAt < _lastAppliedToolbarUpdate) return; // äldre än det vi redan tillämpat
             let andrat = false;
             if (typeof d.toolbarOrder === 'string' && d.toolbarOrder && d.toolbarOrder !== localStorage.getItem('mintavla_toolbarOrder_' + currentUser)){
                 localStorage.setItem('mintavla_toolbarOrder_' + currentUser, d.toolbarOrder); andrat = true;
@@ -3126,32 +3119,27 @@
             if (typeof d.toolPocketLayout === 'string' && d.toolPocketLayout && d.toolPocketLayout !== localStorage.getItem('mintavla_toolPocketLayout_' + currentUser)){
                 localStorage.setItem('mintavla_toolPocketLayout_' + currentUser, d.toolPocketLayout); andrat = true;
             }
-            if (typeof d.updatedAt === 'number') _lastAppliedToolbarUpdate = d.updatedAt;
             if (!andrat) return; // samma ordning som redan visas – rita inte om i onödan
             if (typeof restoreToolbarOrder === 'function') restoreToolbarOrder();
             if (typeof window.rebuildToolPocketGrid === 'function') window.rebuildToolPocketGrid();
         } catch(e){ console.warn('[MinTavla] Kunde inte tillämpa den delade verktygslådan:', e); }
     }
+    // FIX: hämtar nu bara den delade layouten EN GÅNG, vid inloggning/sidladdning - lyssnar INTE
+    // längre live under tiden appen används. Den tidigare live-lyssnaren var källan till upprepade
+    // "rutorna försvinner"-buggar: om man gjorde flera ändringar snabbt efter varandra (skapa/dra
+    // kategori-rutor) kunde molnets bekräftelser komma tillbaka i fel ordning och skriva över den
+    // senaste versionen mitt i en pågående session. Nu kan ingenting skriva över din session efter
+    // att sidan väl laddats - nästa gång sidan laddas om hämtas dock alltid senaste sparade layout.
     async function startSharedToolbarSync(){
         if (!window.cloudReady || !fbDB) return;
         try {
-            if (_sharedToolbarUnsub){ try{ _sharedToolbarUnsub(); }catch(e){} _sharedToolbarUnsub = null; }
-            // Finns inget delat dokument ännu (första gången)? Låt adminen så det med sin nuvarande ordning.
-            try {
-                const snap = await fbDB.collection('config').doc('toolbar').get();
-                if (!snap.exists && typeof isBoardAdmin === 'function' && isBoardAdmin()) pushSharedToolbar();
-                else if (snap.exists){
-                    const d = snap.data();
-                    if (typeof d.locked === 'boolean'){ toolbarOrderLocked = d.locked; updateToolbarLockUI(); }
-                }
-            } catch(e){ /* läsning misslyckades – lyssnaren nedan försöker ändå */ }
-            _sharedToolbarUnsub = fbDB.collection('config').doc('toolbar').onSnapshot(snap => {
-                if (!snap.exists) return;
-                const tc = document.getElementById('toolbar-container');
-                if (tc && tc.classList.contains('tb-reordering')) return; // stör inte ett pågående drag
-                applySharedToolbar(snap.data());
-            }, err => console.warn('[MinTavla] Kunde inte lyssna på den delade verktygslådan:', err));
-        } catch(e){ console.warn('[MinTavla] Delad verktygslåda kunde inte startas:', e); }
+            const snap = await fbDB.collection('config').doc('toolbar').get();
+            if (!snap.exists){
+                if (typeof isBoardAdmin === 'function' && isBoardAdmin()) pushSharedToolbar();
+                return;
+            }
+            applySharedToolbar(snap.data());
+        } catch(e){ console.warn('[MinTavla] Delad verktygslåda kunde inte hämtas:', e); }
     }
     function pushSharedToolbar(){
         if (!window.cloudReady || !fbDB || !currentUser) return;
@@ -21982,8 +21970,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             if(typeof window.initToolPocketSortable === 'function') window.initToolPocketSortable();
         }
         build();
-        // bygg om när verktygsordningen återställts (per användare)
-        setTimeout(build, 1500);
+        // OBS: den tidigare "setTimeout(build, 1500)" som körde en andra ombyggnad 1,5 sekunder
+        // efter sidladdning är borttagen. initBoard() bygger redan om fickan vid RÄTT tillfälle
+        // (precis efter att inloggningen är klar och rätt användare är känd) - den gamla, blinda
+        // tidsstyrda ombyggnaden riskerade att skriva över pågående ändringar (t.ex. mitt i att man
+        // organiserade widgetar i en kategori-ruta), vilket gjorde att de "försvann" utan förvarning.
         const setIcon = ()=>{ tab.textContent = zone.classList.contains('open') ? '❮' : '❯'; };
         setIcon();
         let t = null;
