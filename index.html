@@ -115,6 +115,13 @@
                 <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketDivider()" title="Lägg till en ny kedja som du kan dra dit du vill">🔗 Lägg till kedja</button>
             </div>
+            <div class="tool-pocket-admin" id="tool-pocket-admin">
+                <button class="admin-btn lock-toggle-btn" id="lock-board-btn-pocket" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
+                <button class="admin-btn" onclick="showMinaResultat()"><div class="icon">📊</div><div class="label">Mina resultat</div></button>
+                <button class="admin-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
+                <button class="admin-btn admin-btn-danger" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
+                <button class="admin-btn admin-btn-danger" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
+            </div>
             <div class="sp-copyright" id="tool-pocket-copyright">© 2026 Hussein Hirori. Alla rättigheter förbehållna.</div>
         </div>
     </div>
@@ -374,6 +381,8 @@
     .admin-btn-danger { background: #fff1f0; }
     .admin-btn-danger:hover { background: #ffe1df; }
     .admin-btn-danger .label { color: #d9362b; }
+    .tool-pocket-admin { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 8px; margin-top: 8px; }
+    .tool-pocket-admin .admin-btn { flex: 1 1 auto; min-width: 70px; }
 
     /* Kategorifärger: liten prick i hörnet på widget-knappar så man snabbt kan se ämne/typ */
     .tool-btn[data-cat] { position: relative; }
