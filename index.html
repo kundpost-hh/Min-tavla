@@ -114,6 +114,7 @@
                 <div class="tool-pocket-title">Verktyg</div>
                 <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketDivider()" title="Lägg till en ny kedja som du kan dra dit du vill">🔗 Lägg till kedja</button>
+                <button type="button" class="tool-pocket-add-chain" onclick="resetToolPocketLayout()" title="Nollställ till en jämnt utspridd standardordning för alla">🧹 Städa fickan</button>
             </div>
             <div class="tool-pocket-admin" id="tool-pocket-admin">
                 <button class="admin-btn lock-toggle-btn" id="lock-board-btn-pocket" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
@@ -21651,6 +21652,16 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         saveToolPocketLayout();
     }
     window.addToolPocketDivider = addToolPocketDivider;
+    function resetToolPocketLayout(){
+        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
+        if(typeof customConfirm !== 'function'){ return; }
+        customConfirm('Städa verktygsfickan och sprida ut kedjorna jämnt? Detta delas ut till alla användare.', () => {
+            try { localStorage.removeItem(toolPocketLayoutKey()); } catch(e){}
+            rebuildToolPocketGrid();
+            saveToolPocketLayout(); // medveten, engångs-sparning - sprids nu permanent till alla
+        });
+    }
+    window.resetToolPocketLayout = resetToolPocketLayout;
     function rebuildToolPocketGrid(){
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
         grid.innerHTML='';
@@ -21679,7 +21690,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 used.add(id);
             }
         });
-        saveToolPocketLayout();
+        // OBS: sparar INTE här längre - det gjorde att en gammal/inaktuell lokal layout på VILKEN SOM HELST
+        // admin-enhet automatiskt skrev över och delade ut sig till alla, bara av att öppna appen (utan att
+        // något faktiskt ändrats). Sparning sker numera bara vid riktiga användarhandlingar: drag-och-släpp
+        // (se pointerup-hanteraren nedan) samt lägg till/ta bort kedja (addToolPocketDivider / tpd-remove).
     }
     window.rebuildToolPocketGrid = rebuildToolPocketGrid;
     // FIX: varna vid stängning/omladdning om en molnsparning fortfarande väntar,
