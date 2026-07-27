@@ -3667,13 +3667,25 @@
             + "<div style='font-size:13px;color:#8e8e93;margin-bottom:16px;'>Version 1.0</div>"
             + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;'>Ett lärarverktyg utvecklat av <b>Hussein Hirori</b>.</div>"
             + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;margin-top:14px;'>För synpunkter och förslag:</div>"
-            + "<a href='mailto:kundbox@gmail.com' style='display:inline-block;font-size:14px;color:#007aff;font-weight:700;text-decoration:none;margin-top:2px;'>kundbox@gmail.com</a>";
+            + "<a href='mailto:mintavla.se@gmail.com' id='about-email-link' style='display:inline-block;font-size:14px;color:#007aff;font-weight:700;text-decoration:none;margin-top:2px;'>mintavla.se@gmail.com</a>";
         const btnWrap=document.createElement('div'); btnWrap.style.marginTop='18px';
         const close=document.createElement('button'); close.textContent='Stäng'; close.style.cssText='border:none;background:#007aff;color:#fff;font-weight:700;font-size:14px;padding:8px 24px;border-radius:20px;cursor:pointer;';
         const closeFn=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
         close.onclick=closeFn; btnWrap.appendChild(close); box.appendChild(btnWrap);
         ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) closeFn(); };
         (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        // FIX: en vanlig mailto:-länk öppnar bara skrivrutan om enheten har en skrivbordsmejlklient
+        // inställd som standard - det saknas ofta på skolans Chromebooks/delade datorer, så länken
+        // verkade "inte göra något". Öppnar nu istället direkt Gmails webbaserade skrivruta
+        // (förifylld till mintavla.se@gmail.com) i en ny flik, vilket funkar oavsett enhet så länge man
+        // är inloggad på sitt Google-konto - vilket alla användare redan är, eftersom appen kräver det.
+        const emailLink = box.querySelector('#about-email-link');
+        if (emailLink){
+            emailLink.onclick = (e) => {
+                e.preventDefault();
+                window.open('https://mail.google.com/mail/?view=cm&fs=1&to=mintavla.se@gmail.com', '_blank', 'noopener');
+            };
+        }
     }
 
     function toggleFullScreen() {
