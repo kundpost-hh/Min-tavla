@@ -62,7 +62,13 @@
             </button>
             <div id="login-local-note" style="margin-top: 18px; font-size: 12px; color: #aaa;"></div>
         </div>
+        <div class="login-box" id="login-processing-view" style="display:none;text-align:center;">
+            <h1 class="login-title">Min Tavla 👋</h1>
+            <div style="margin:22px auto;width:34px;height:34px;border:4px solid #dbe4f5;border-top-color:#1a73e8;border-radius:50%;animation:mtSpin 0.8s linear infinite;"></div>
+            <p class="login-desc" id="login-processing-text">Loggar in, vänta ett ögonblick…</p>
+        </div>
     </div>
+    <style>@keyframes mtSpin{ to { transform: rotate(360deg); } }</style>
 
     <button id="fullscreen-btn" onclick="toggleFullScreen()" title="Helskärm">⛶</button>
     <div id="canvas-container-v6"></div>
@@ -3259,6 +3265,7 @@
             if (!isAllowedEmailDomain(email)){
                 await fbAuth.signOut();
                 customAlert('Endast konton med e-postadress @' + ALLOWED_EMAIL_DOMAINS.join(', @') + ' kan logga in i Min Tavla. Kontakta administratören om du tycker detta är fel.', '🔒');
+                showLoginButton();
                 return;
             }
             // FIX: Firebase kan trigga "inloggad"-händelsen fler gånger under SAMMA session
@@ -3284,6 +3291,7 @@
                 if (usnap.exists && usnap.data().blocked && !isAdminEmail(email)){
                     await fbAuth.signOut();
                     customAlert('Din åtkomst till Min Tavla har tagits bort. Kontakta administratören om det är fel.', '🔒');
+                    showLoginButton();
                     return;
                 }
             } catch(e){ /* om kontrollen inte går, släpp ändå in */ }
@@ -3298,6 +3306,12 @@
             updateAdminButton();
             startSharedToolbarSync(); // adminens ordning i verktygslådan gäller alla användare
             _boardInitializedForUser = email;
+        } catch(err){
+            // FIX: om något oväntat går fel här, visa knappen igen istället för att tyst lämna
+            // laddningsvyn ("Loggar in, vänta...") stående för evigt utan att man kan göra något.
+            console.warn('[MinTavla] Fel vid inloggning:', err);
+            customAlert('Något gick fel vid inloggningen. Försök igen.', '⚠️');
+            showLoginButton();
         } finally { _handlingSignIn = false; }
     }
 
@@ -3500,22 +3514,35 @@
         btn.onclick = enterLocalMode;
         note.appendChild(info); note.appendChild(btn);
     }
+    function showLoginProcessing(text){
+        const std = document.getElementById('standard-login-view'), proc = document.getElementById('login-processing-view'), txt = document.getElementById('login-processing-text');
+        if(std) std.style.display = 'none';
+        if(proc) proc.style.display = 'block';
+        if(txt && text) txt.textContent = text;
+    }
+    function showLoginButton(){
+        const std = document.getElementById('standard-login-view'), proc = document.getElementById('login-processing-view');
+        if(proc) proc.style.display = 'none';
+        if(std) std.style.display = 'block';
+    }
     function checkLogin() {
         // ONLINE-VERSION: om molnet (Firebase) är konfigurerat och redo, vänta på
         // inloggningsstatus via onAuthStateChanged. Annars (t.ex. om SDK:n inte
         // laddade pga nätverksproblem) faller vi tillbaka till lokalt läge.
         if (window.cloudReady && fbAuth){
             document.getElementById('login-overlay').style.display = 'flex';
+            showLoginProcessing('Kontrollerar inloggning…'); // visas direkt tills vi vet om man redan är/blir inloggad
             // Fångar upp eventuella fel från signInWithRedirect (t.ex. om användaren avbröt
             // eller valde fel konto) - onAuthStateChanged sköter själva den lyckade inloggningen.
             fbAuth.getRedirectResult().catch(err => {
                 if (err && err.code === 'auth/user-cancelled') return;
                 console.warn('[MinTavla] Inloggningsomdirigeringen misslyckades:', err);
                 customAlert('Inloggningen kunde inte slutföras. Försök igen.', '⚠️');
+                showLoginButton();
             });
             fbAuth.onAuthStateChanged(user => {
-                if (user){ handleSignedIn(user); }
-                else { _boardInitializedForUser = null; showLocalLoginOption(); document.getElementById('login-overlay').style.display = 'flex'; }
+                if (user){ showLoginProcessing('Loggar in, vänta ett ögonblick…'); handleSignedIn(user); }
+                else { _boardInitializedForUser = null; showLocalLoginOption(); showLoginButton(); document.getElementById('login-overlay').style.display = 'flex'; }
             });
         } else {
             enterLocalMode();
