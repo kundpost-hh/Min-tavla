@@ -2794,14 +2794,15 @@
         }
         .tool-fav, .tool-extra {
             flex-wrap: wrap; justify-content: flex-start; gap: 6px;
-            max-height: none; overflow: visible;
         }
-        /* Extra-raden alltid utfälld på mobil så inga verktyg göms */
-        #toolbar-container .tool-extra {
-            max-height: none !important; opacity: 1 !important; pointer-events: auto !important;
-            margin-top: 6px !important;
-        }
-        #toolbar-container .toolbar-tab { display: none !important; }
+        /* FIX: extra-raden tvingades tidigare alltid utfälld på mobil (så inga verktyg skulle gömmas
+           bakom hover, som inte finns på touch). Det gjorde att mobil/surfplatte-användare såg HELA
+           listan med alla widgetar två gånger: en gång utfälld direkt i verktygsfältet, och en gång
+           till i den nya, organiserade sidofickan. Nu är extra-raden ihopfälld som standard även på
+           mobil (precis som på dator), och pil-fliken är tillbaka som ett tryckbart sätt att fälla ut
+           den vid behov. Sidofickan är den rekommenderade, organiserade vägen till alla verktyg. */
+        #toolbar-container .toolbar-tab { display: flex !important; }
+        #toolbar-container.show-extra .tool-extra { max-height: 1000px; }
         .tool-btn { min-width: 64px; padding: 8px 6px; }
         .tool-btn .icon { font-size: 22px; }
         .tool-btn .label { font-size: 10px; }
