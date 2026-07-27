@@ -210,6 +210,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createStickerPicker()"><div class="icon">🏷️</div><div class="label">Klistermärken</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createExitTicket()"><div class="icon">🎯</div><div class="label">Exit ticket</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createQuizPoll()"><div class="icon">🗳️</div><div class="label">Omröstning</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createQuizTavling()"><div class="icon">🏆</div><div class="label">Quiztävling</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="21" height="21" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
         </div>
@@ -222,6 +223,7 @@
         <!-- RAD 2: övriga widgetar (dolda tills man hovrar pilen) -->
         <div class="tool-group tool-extra" id="tool-extra">
             <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
+            <button class="tool-btn" onclick="toggleBoxLayout()"><div class="icon">🗂️</div><div class="label">Rutlayout</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
             <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
             <button class="tool-btn" onclick="createVideoWidget()"><div class="icon">🎬</div><div class="label">Video</div></button>
@@ -357,6 +359,39 @@
     #cb-app-wrapper.theme-cork .canvas-page { background-color: #f7e6d2; background-image: radial-gradient(rgba(0,0,0,0.06) 2px, transparent 2px); background-size: 10px 10px; }
     #cb-app-wrapper.theme-blank .canvas-page { background-color: #ffffff; background-image: none; }
     #cb-app-wrapper.no-watermark #watermark { display: none !important; }
+
+    /* RUTLAYOUT: valfritt bakgrundslager per sida med 7 fasta, mjuka rutor som widgetar kan
+       placeras ovanpå. Rent dekorativt (pointer-events:none) så det stör inte drag/skapa-flödet. */
+    .box-layout-grid {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        display: grid; gap: 18px; padding: 22px;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: 84px 1fr 1fr;
+        grid-template-areas:
+            "lektion lektion lektion lektion"
+            "matte svenska no teknik"
+            "verktyg verktyg beloning beloning";
+        pointer-events: none; z-index: 1;
+    }
+    .box-layout-cell {
+        background: #dceeff; border-radius: 26px; position: relative;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+    }
+    .box-layout-cell .box-layout-label {
+        position: absolute; top: 14px; left: 20px; font-size: 14px; font-weight: 800;
+        color: #2a72c4; letter-spacing: 0.3px;
+    }
+    .box-layout-cell[data-box="lektion"] { grid-area: lektion; }
+    .box-layout-cell[data-box="matte"] { grid-area: matte; }
+    .box-layout-cell[data-box="svenska"] { grid-area: svenska; }
+    .box-layout-cell[data-box="no"] { grid-area: no; }
+    .box-layout-cell[data-box="teknik"] { grid-area: teknik; }
+    .box-layout-cell[data-box="verktyg"] { grid-area: verktyg; }
+    .box-layout-cell[data-box="beloning"] { grid-area: beloning; }
+    @media (max-width: 1024px) {
+        .box-layout-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: 64px 1fr 1fr 1fr; grid-template-areas: "lektion lektion" "matte svenska" "no teknik" "verktyg beloning"; gap: 10px; padding: 12px; }
+        .box-layout-cell .box-layout-label { font-size: 12px; top: 8px; left: 12px; }
+    }
     
     #fullscreen-btn { position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); cursor: pointer; font-size: 18px; color: #333; transition: opacity 0.25s ease, background-color 0.2s, transform 0.2s; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; font-weight: bold; opacity: 0.3; }
     #fullscreen-btn:hover { background-color: #e5e5ea; transform: scale(1.05); opacity: 1; }
@@ -922,7 +957,21 @@
         100%{ transform:translateY(0) scale(1) rotate(var(--r,0deg)); opacity:1; }
     }
     .good-footer{ display:flex; align-items:center; justify-content:center; margin-top:16px; }
-    .good-count{ font-weight:800; color:#3c463f; font-size:18px; }
+    .good-count{ font-weight:800; color:#3c463f; font-size:18px; display:inline-block; }
+    .good-count.pop{ animation: goodCountPop .35s ease; }
+    @keyframes goodCountPop{
+        0%{ transform:scale(1); }
+        40%{ transform:scale(1.28); color:#34c759; }
+        100%{ transform:scale(1); }
+    }
+    .good-jar-wrap.wobble{ animation: goodJarWobble .4s ease; }
+    @keyframes goodJarWobble{
+        0%{ transform:rotate(0deg); }
+        25%{ transform:rotate(-3deg); }
+        55%{ transform:rotate(2.5deg); }
+        80%{ transform:rotate(-1deg); }
+        100%{ transform:rotate(0deg); }
+    }
     .good-drag-ghost{ position:fixed; font-size:56px; pointer-events:none; z-index:99999; will-change:left,top; }
     .group-result { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 10px; font-size: 13px; overflow-y: auto; }
     .group-card { background: #f9f9fb; padding: 6px; border-radius: 6px; border: 1px solid #d1d1d6; }
@@ -1246,7 +1295,24 @@
     .classreward-widget .widget-resizer::after { border-color: #999; }
     .classreward-widget .cr-count { text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
     .cr-reward { width: 100%; text-align: center; font-weight: 800; border: none; border-bottom: 2px solid #e5e5ea; outline: none; font-family: inherit; font-size: 14px; padding: 4px; background: transparent; color: #7c3aed; margin-bottom: 6px; text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
-    .cr-jar { width: 92px; height: 112px; margin: 4px auto; border: 4px solid #1f2937; border-top-width: 7px; border-radius: 10px 10px 18px 18px; position: relative; overflow: hidden; background: rgba(255,255,255,0.55); box-shadow: inset 0 -2px 6px rgba(0,0,0,0.08); }
+    .cr-jar-wrap{ position:relative; width:92px; margin:4px auto 0; }
+    .cr-jar { width: 92px; height: 112px; margin: 0 auto; border: 4px solid #1f2937; border-top-width: 7px; border-radius: 10px 10px 18px 18px; position: relative; overflow: hidden; background: rgba(255,255,255,0.55); box-shadow: inset 0 -2px 6px rgba(0,0,0,0.08); }
+    .cr-jar.pop{ animation: crJarPop .38s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes crJarPop{
+        0%{ transform:scale(1); }
+        45%{ transform:scale(1.1) rotate(-2deg); }
+        75%{ transform:scale(0.97) rotate(1.5deg); }
+        100%{ transform:scale(1) rotate(0deg); }
+    }
+    .cr-float{ position:absolute; left:50%; top:0; transform:translateX(-50%); font-weight:900; font-size:18px; pointer-events:none; animation: crFloatUp .8s ease forwards; z-index:5; }
+    .cr-float.plus{ color:#34c759; }
+    .cr-float.minus{ color:#ff3b30; }
+    @keyframes crFloatUp{
+        0%{ transform:translate(-50%,0); opacity:0; }
+        15%{ opacity:1; }
+        100%{ transform:translate(-50%,-46px); opacity:0; }
+    }
+    .cr-count.pop{ animation: goodCountPop .35s ease; }
     .cr-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: #5ac8fa; transition: height 0.45s ease, background 0.45s ease; }
     .cr-jar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 36px; pointer-events: none; }
     .cr-count { text-align: center; font-weight: 800; font-size: 20px; color: #333; margin-top: 4px; }
@@ -1932,6 +1998,33 @@
     .poll-opt-content { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:center; gap:8px; }
     .poll-opt-correct { background:#d2f8dc !important; border-color:#34c759 !important; }
     .poll-opt-pct { font-weight:800; color:#555; font-size:13px; flex-shrink:0; }
+    /* QUIZTÄVLING */
+    .qt-widget .widget-inner { background:#fff; }
+    .qt-root { display:flex; flex-direction:column; width:100%; gap:10px; }
+    .qt-section-title { font-size:12px; font-weight:800; color:#8e8e93; letter-spacing:0.5px; text-transform:uppercase; margin:2px 0; }
+    .qt-team-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+    .qt-team-dot { width:14px; height:14px; border-radius:50%; flex-shrink:0; }
+    .qt-team-input { flex:1; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; font-weight:700; outline:none; font-family:inherit; background:#fff; }
+    .qt-team-input:focus { border-color:#007aff; }
+    .qt-points-row { display:flex; align-items:center; gap:8px; justify-content:center; font-size:13px; font-weight:700; color:#48484a; }
+    .qt-points-row input { width:64px; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; text-align:center; outline:none; font-family:inherit; }
+    .qt-round-block { background:#f7f7f9; border-radius:12px; padding:10px 12px; margin-bottom:8px; box-sizing:border-box; }
+    .qt-round-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .qt-round-label { font-size:11px; font-weight:800; color:#8e8e93; }
+    .qt-scoreboard { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; width:100%; }
+    .qt-chip { display:flex; align-items:center; gap:6px; background:#f2f2f7; border-radius:999px; padding:5px 12px 5px 8px; font-size:12.5px; font-weight:800; color:#1d1d1f; }
+    .qt-chip.leader { background:#fff6da; box-shadow:0 0 0 1.5px #ffcc00 inset; }
+    .qt-round-badge { text-align:center; font-size:12px; font-weight:800; color:#8e8e93; letter-spacing:0.5px; text-transform:uppercase; }
+    .qt-q-text { font-size:17px; font-weight:800; color:#1d1d1f; text-align:center; margin:2px 0 6px; }
+    .qt-opt-static { position:relative; width:100%; text-align:left; padding:10px 14px; border-radius:12px; border:1px solid #e0e0e5; background:#f7f7f9; margin-bottom:8px; font-size:14px; font-weight:700; color:#1d1d1f; }
+    .qt-award-row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; width:100%; margin-top:4px; }
+    .qt-award-btn { border:1.5px solid #e0e0e5; background:#fff; border-radius:10px; padding:8px 12px; font-weight:800; font-size:13px; cursor:pointer; color:#1d1d1f; transition:filter .15s, background .15s; }
+    .qt-award-btn.picked { background:#d2f8dc; border-color:#34c759; }
+    .qt-podium { display:flex; align-items:flex-end; justify-content:center; gap:10px; width:100%; margin:10px 0 4px; }
+    .qt-podium-place { display:flex; flex-direction:column; align-items:center; gap:4px; font-weight:800; }
+    .qt-podium-bar { width:64px; border-radius:10px 10px 0 0; display:flex; align-items:flex-start; justify-content:center; padding-top:6px; color:#fff; font-size:20px; }
+    .qt-podium-name { font-size:12.5px; text-align:center; max-width:76px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .qt-podium-score { font-size:11px; color:#8e8e93; font-weight:700; }
     /* RIMLIGHET */
     .rml-widget .widget-inner { background:#fff; }
     .rml-textarea { width:100%; border:1px solid #d1d1d6; border-radius:10px; padding:8px 10px; font-size:14px; font-family:inherit; resize:vertical; outline:none; background:#fff; margin-bottom:8px; box-sizing:border-box; line-height:1.4; }
@@ -3640,6 +3733,7 @@
                 else if (type === 'BORDSPLACERING') { try{ state.data.items = JSON.parse(w.dataset.seating || '[]'); }catch(e){ state.data.items=[]; } }
                 else if (type === 'EXIT TICKET') { try{ state.data = JSON.parse(w.dataset.exitTicket || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'OMRÖSTNING') { try{ state.data = JSON.parse(w.dataset.poll || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'QUIZTÄVLING') { try{ state.data = JSON.parse(w.dataset.quiztavling || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'RIMLIGHET') { try{ state.data = JSON.parse(w.dataset.rimlighet || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'SKILJETECKEN') { try{ state.data = JSON.parse(w.dataset.skiljetecken || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'MENINGAR') { try{ state.data = JSON.parse(w.dataset.meningar || '{}'); }catch(e){ state.data={}; } }
@@ -3761,6 +3855,7 @@
             else if (w.type === 'BORDSPLACERING') createSeatingChart(w);
             else if (w.type === 'EXIT TICKET') createExitTicket(w);
             else if (w.type === 'OMRÖSTNING') createQuizPoll(w);
+            else if (w.type === 'QUIZTÄVLING') createQuizTavling(w);
             else if (w.type === 'RIMLIGHET') createRimlighet(w);
             else if (w.type === 'SKILJETECKEN') createSkiljetecken(w);
             else if (w.type === 'MENINGAR') createMeningarWidget(w);
@@ -3809,7 +3904,7 @@
         if(window.isLoadingBoard || !currentUser) return;
         const pages = []; const canvasPages = document.querySelectorAll('.canvas-page');
         canvasPages.forEach(page => {
-            const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, widgets: [] };
+            const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, boxLayout: page.classList.contains('has-box-layout'), widgets: [] };
             if(page.dataset.day !== undefined && page.dataset.day !== '') pageData.day = parseInt(page.dataset.day);
             if(page.dataset.lesson !== undefined && page.dataset.lesson !== '') pageData.lesson = parseInt(page.dataset.lesson);
             page.querySelectorAll('.widget').forEach(w => { pageData.widgets.push(serializeWidget(w)); });
@@ -4252,6 +4347,40 @@
     }
 
     function getActiveCanvasV6() { let canvas = document.querySelector('.canvas-page.active'); if (!canvas) { createPageV6(true); canvas = document.querySelector('.canvas-page.active'); } return canvas; }
+
+    // ---- RUTLAYOUT: 7 fasta, mjuka, ljusblå rutor med fasta rubriker som bakgrund på en sida.
+    // Rent visuellt lager (pointer-events:none) – rör inte widgetarnas egna x/y-positioner eller
+    // sparlogik. Varje ruta har en egen fast nyckel (data-box) så ordningen aldrig kan rubbas. ----
+    const BOX_LAYOUT_BOXES = [
+        { key:'lektion', label:'Lektion' },
+        { key:'matte', label:'Matematik' },
+        { key:'svenska', label:'Svenska' },
+        { key:'no', label:'NO' },
+        { key:'teknik', label:'Teknik' },
+        { key:'verktyg', label:'Verktyg' },
+        { key:'beloning', label:'Belöning' }
+    ];
+    function renderBoxLayoutGrid(canvasPage){
+        if(!canvasPage) return;
+        let grid = canvasPage.querySelector(':scope > .box-layout-grid');
+        if(!canvasPage.classList.contains('has-box-layout')){ if(grid) grid.remove(); return; }
+        if(!grid){
+            grid = document.createElement('div'); grid.className = 'box-layout-grid';
+            BOX_LAYOUT_BOXES.forEach(b=>{
+                const cell=document.createElement('div'); cell.className='box-layout-cell'; cell.dataset.box=b.key;
+                const lbl=document.createElement('div'); lbl.className='box-layout-label'; lbl.textContent=b.label;
+                cell.appendChild(lbl); grid.appendChild(cell);
+            });
+            canvasPage.insertBefore(grid, canvasPage.firstChild);
+        }
+    }
+    function toggleBoxLayout(){
+        const page = getActiveCanvasV6();
+        if(!page) return;
+        page.classList.toggle('has-box-layout');
+        renderBoxLayoutGrid(page);
+        saveBoardState();
+    }
     function clearCurrentPage() { customConfirm("Rensa sidan?", () => { const ac = getActiveCanvasV6(); if(ac) { ac.querySelectorAll('.widget').forEach(w => w.remove()); saveBoardState(); } }); }
     function arrangeWidgets() { const canvas = getActiveCanvasV6(); const appWrapper = document.getElementById('cb-app-wrapper'); if (!canvas) return; const widgets = Array.prototype.slice.call(canvas.querySelectorAll('.widget')); const gap = 8; let currentX = gap; let currentY = gap + 40; let maxRowHeight = 0; const canvasWidth = appWrapper.offsetWidth; for(let i=0; i<widgets.length; i++) { const w = widgets[i]; const wWidth = w.offsetWidth; const wHeight = w.offsetHeight; if (currentX + wWidth + gap > canvasWidth && currentX > gap) { currentX = gap; currentY += maxRowHeight + gap + 40; maxRowHeight = 0; } w.style.transition = 'top 0.3s ease, left 0.3s ease'; w.style.left = currentX + 'px'; w.style.top = currentY + 'px'; setTimeout(() => { w.style.transition = ''; }, 300); currentX += wWidth + gap; if (wHeight > maxRowHeight) maxRowHeight = wHeight; } setTimeout(saveBoardState, 350); }
 
@@ -18276,10 +18405,18 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     function createClassReward(config){
         if(config===undefined)config=null;
         const body = createWidget('KLASSPOÄNG', 230, 'classreward-widget', config);
-        body.innerHTML = `<input class='cr-reward hover-menu' placeholder='Belöning (t.ex. Filmfredag)'><div class='cr-jar'><div class='cr-fill'></div><div class='cr-jar-text'></div></div><div class='cr-count'>0 / 20</div><div class='hover-menu' style='display:flex;gap:6px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap;'><button class='btn btn-danger cr-minus'>➖</button><button class='btn btn-primary cr-plus' style='flex:1;'>⭐ Poäng</button><span style='font-size:12px;font-weight:bold;'>Mål</span><input type='number' class='cr-goal' min='1' value='20' style='width:48px;'></div>`;
-        const reward=body.querySelector('.cr-reward'), fill=body.querySelector('.cr-fill'), jarText=body.querySelector('.cr-jar-text'), countEl=body.querySelector('.cr-count'), goalInp=body.querySelector('.cr-goal');
+        body.innerHTML = `<input class='cr-reward hover-menu' placeholder='Belöning (t.ex. Filmfredag)'><div class='cr-jar-wrap'><div class='cr-jar'><div class='cr-fill'></div><div class='cr-jar-text'></div></div></div><div class='cr-count'>0 / 20</div><div class='hover-menu' style='display:flex;gap:6px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap;'><button class='btn btn-danger cr-minus'>➖</button><button class='btn btn-primary cr-plus' style='flex:1;'>⭐ Poäng</button><span style='font-size:12px;font-weight:bold;'>Mål</span><input type='number' class='cr-goal' min='1' value='20' style='width:48px;'></div>`;
+        const reward=body.querySelector('.cr-reward'), jarWrap=body.querySelector('.cr-jar-wrap'), jar=body.querySelector('.cr-jar'), fill=body.querySelector('.cr-fill'), jarText=body.querySelector('.cr-jar-text'), countEl=body.querySelector('.cr-count'), goalInp=body.querySelector('.cr-goal');
         let points = (config&&config.data&&config.data.points)||0;
         if(config&&config.data){ if(config.data.reward) reward.value=config.data.reward; if(config.data.goal) goalInp.value=config.data.goal; }
+        // Liten "wow"-mikroanimation: burken studsar till och en +1/-1 flyter uppåt och tonar bort,
+        // helt kosmetiskt och stör inte sparning/logik för poäng.
+        const bump=(delta)=>{
+            jar.classList.remove('pop'); void jar.offsetWidth; jar.classList.add('pop');
+            countEl.classList.remove('pop'); void countEl.offsetWidth; countEl.classList.add('pop');
+            const f=document.createElement('div'); f.className='cr-float '+(delta>0?'plus':'minus'); f.textContent=(delta>0?'+':'')+delta;
+            jarWrap.appendChild(f); setTimeout(()=>f.remove(), 850);
+        };
         const upd=(celebrate)=>{
             let goal=Math.max(1,parseInt(goalInp.value)||20);
             points=Math.max(0,Math.min(points,goal));
@@ -18292,8 +18429,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         };
         reward.oninput=()=> saveBoardState();
         goalInp.oninput=()=>{ upd(false); saveBoardState(); };
-        body.querySelector('.cr-plus').onclick=()=>{ const goal=Math.max(1,parseInt(goalInp.value)||20); const was=points; points++; upd(points>=goal && was<goal); saveBoardState(); };
-        body.querySelector('.cr-minus').onclick=()=>{ if(points>0)points--; upd(false); saveBoardState(); };
+        body.querySelector('.cr-plus').onclick=()=>{ const goal=Math.max(1,parseInt(goalInp.value)||20); const was=points; points++; bump(1); upd(points>=goal && was<goal); saveBoardState(); };
+        body.querySelector('.cr-minus').onclick=()=>{ if(points>0){ points--; bump(-1); } upd(false); saveBoardState(); };
         upd(false);
     }
 
@@ -19026,6 +19163,253 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         render();
     }
 
+    // ---- QUIZTÄVLING (Kahoot-liknande lagtävling: flera frågor i rond, lag samlar poäng, byggd på samma fråga/alternativ-mönster som Omröstning) ----
+    const QT_TEAM_COLORS = ['#ff3b30','#007aff','#34c759','#ff9500','#5856d6','#ff2d55'];
+    function qtEmptyRound(){ return { question:'', options:[{text:''},{text:''}], correctIndex:-1 }; }
+    function qtEmptyTeam(i){ return { name:'Lag '+(i+1), score:0 }; }
+
+    function createQuizTavling(config){
+        const body = createWidget('QUIZTÄVLING', 380, 'qt-widget', config);
+        const widgetElRef = body.parentElement.parentElement;
+        if(!config){ widgetElRef.style.height = '440px'; }
+        const root=document.createElement('div'); root.className='qt-root'; body.appendChild(root);
+
+        let state = {
+            mode:'setup', // 'setup' | 'play' | 'results'
+            teams:[qtEmptyTeam(0), qtEmptyTeam(1)],
+            points:10,
+            rounds:[qtEmptyRound()],
+            currentRound:0,
+            revealed:false
+        };
+        if(config && config.data && config.data.teams){ try{ Object.assign(state, config.data); }catch(e){} }
+        if(!Array.isArray(state.teams) || state.teams.length<2) state.teams=[qtEmptyTeam(0), qtEmptyTeam(1)];
+        if(!Array.isArray(state.rounds) || state.rounds.length<1) state.rounds=[qtEmptyRound()];
+
+        let selectedForPoint = new Set();
+        let saveTimer=null;
+        const stamp=()=>{ widgetElRef.dataset.quiztavling = JSON.stringify(state); };
+        const persist=()=>{ stamp(); saveBoardState(); };
+        const persistSoon=()=>{ stamp(); clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveBoardState(),700); };
+
+        function renderScoreboard(container){
+            const board=document.createElement('div'); board.className='qt-scoreboard';
+            const max = Math.max(...state.teams.map(t=>t.score));
+            state.teams.forEach((t,i)=>{
+                const chip=document.createElement('div'); chip.className='qt-chip'+((t.score===max && max>0)?' leader':'');
+                chip.innerHTML = `<span class='qt-team-dot' style='width:10px;height:10px;background:${QT_TEAM_COLORS[i%QT_TEAM_COLORS.length]}'></span>${t.name||('Lag '+(i+1))}: ${t.score}`;
+                board.appendChild(chip);
+            });
+            container.appendChild(board);
+        }
+
+        // ---- SETUP: lägg till lag och bygg quiz-frågor (samma mönster som Omröstningens redigeringsläge) ----
+        function renderSetup(){
+            root.innerHTML='';
+            const titleEl=document.createElement('div'); titleEl.className='kw-title'; titleEl.textContent='🏆 Klassens quiztävling'; root.appendChild(titleEl);
+
+            const teamTitle=document.createElement('div'); teamTitle.className='qt-section-title'; teamTitle.textContent='Lag'; root.appendChild(teamTitle);
+            const teamList=document.createElement('div'); root.appendChild(teamList);
+            state.teams.forEach((team,i)=>{
+                const row=document.createElement('div'); row.className='qt-team-row';
+                const dot=document.createElement('div'); dot.className='qt-team-dot'; dot.style.background=QT_TEAM_COLORS[i%QT_TEAM_COLORS.length];
+                const inp=document.createElement('input'); inp.className='qt-team-input'; inp.value=team.name; inp.placeholder='Lag '+(i+1);
+                inp.oninput=()=>{ team.name=inp.value; persistSoon(); };
+                row.appendChild(dot); row.appendChild(inp);
+                if(state.teams.length>2){
+                    const del=document.createElement('button'); del.className='kw-del'; del.innerHTML='✕';
+                    del.onclick=()=>{ state.teams.splice(i,1); renderSetup(); persist(); };
+                    row.appendChild(del);
+                }
+                teamList.appendChild(row);
+            });
+            const teamBtns=document.createElement('div'); teamBtns.className='kw-btnrow';
+            const addTeamBtn=document.createElement('button'); addTeamBtn.className='kw-btn kw-btn-ghost'; addTeamBtn.textContent='+ Lag';
+            addTeamBtn.onclick=()=>{ if(state.teams.length<6){ state.teams.push(qtEmptyTeam(state.teams.length)); renderSetup(); persist(); } };
+            if(state.teams.length>=6) addTeamBtn.disabled=true;
+            teamBtns.appendChild(addTeamBtn); root.appendChild(teamBtns);
+
+            const pointsRow=document.createElement('div'); pointsRow.className='qt-points-row';
+            const pLabel=document.createElement('span'); pLabel.textContent='Poäng per rätt svar:';
+            const pInput=document.createElement('input'); pInput.type='number'; pInput.min='1'; pInput.value=state.points;
+            pInput.oninput=()=>{ state.points = parseInt(pInput.value)||10; persistSoon(); };
+            pointsRow.appendChild(pLabel); pointsRow.appendChild(pInput); root.appendChild(pointsRow);
+
+            const qTitle=document.createElement('div'); qTitle.className='qt-section-title'; qTitle.textContent='Frågor'; root.appendChild(qTitle);
+            const roundsList=document.createElement('div'); root.appendChild(roundsList);
+            state.rounds.forEach((rnd,ri)=>{
+                const block=document.createElement('div'); block.className='qt-round-block';
+                const head=document.createElement('div'); head.className='qt-round-head';
+                const lbl=document.createElement('span'); lbl.className='qt-round-label'; lbl.textContent='FRÅGA '+(ri+1);
+                head.appendChild(lbl);
+                if(state.rounds.length>1){
+                    const delRound=document.createElement('button'); delRound.className='kw-del'; delRound.innerHTML='🗑';
+                    delRound.onclick=()=>{ state.rounds.splice(ri,1); renderSetup(); persist(); };
+                    head.appendChild(delRound);
+                }
+                block.appendChild(head);
+
+                const qIn=document.createElement('input'); qIn.className='kw-title-in'; qIn.style.marginBottom='6px'; qIn.placeholder='Skriv frågan...'; qIn.value=rnd.question;
+                qIn.oninput=()=>{ rnd.question=qIn.value; persistSoon(); };
+                block.appendChild(qIn);
+
+                const radioName='qt-correct-'+ri+'-'+Math.random().toString(36).slice(2);
+                rnd.options.forEach((opt,oi)=>{
+                    const row=document.createElement('div'); row.className='kw-edit-row';
+                    const radio=document.createElement('input'); radio.type='radio'; radio.name=radioName; radio.checked=rnd.correctIndex===oi; radio.style.flexShrink='0';
+                    radio.onchange=()=>{ rnd.correctIndex=oi; persist(); };
+                    const inp=document.createElement('input'); inp.className='poll-opt-input'; inp.value=opt.text; inp.placeholder='Alternativ '+String.fromCharCode(65+oi);
+                    inp.oninput=()=>{ opt.text=inp.value; persistSoon(); };
+                    row.appendChild(radio); row.appendChild(inp);
+                    if(rnd.options.length>2){
+                        const del=document.createElement('button'); del.className='kw-del'; del.innerHTML='✕';
+                        del.onclick=()=>{ rnd.options.splice(oi,1); if(rnd.correctIndex===oi) rnd.correctIndex=-1; else if(rnd.correctIndex>oi) rnd.correctIndex--; renderSetup(); persist(); };
+                        row.appendChild(del);
+                    }
+                    block.appendChild(row);
+                });
+                const addOptBtn=document.createElement('button'); addOptBtn.className='kw-btn kw-btn-ghost'; addOptBtn.style.marginTop='4px'; addOptBtn.textContent='+ Alternativ';
+                addOptBtn.onclick=()=>{ if(rnd.options.length<6){ rnd.options.push({text:''}); renderSetup(); persist(); } };
+                if(rnd.options.length>=6) addOptBtn.disabled=true;
+                block.appendChild(addOptBtn);
+
+                roundsList.appendChild(block);
+            });
+
+            const roundBtns=document.createElement('div'); roundBtns.className='kw-btnrow hover-menu';
+            const addRoundBtn=document.createElement('button'); addRoundBtn.className='kw-btn kw-btn-ghost'; addRoundBtn.textContent='+ Fråga';
+            addRoundBtn.onclick=()=>{ if(state.rounds.length<20){ state.rounds.push(qtEmptyRound()); renderSetup(); persist(); } };
+            const startBtn=document.createElement('button'); startBtn.className='kw-btn kw-btn-primary'; startBtn.textContent='🚀 Starta tävling';
+            startBtn.onclick=()=>{
+                if(state.teams.some(t=>!t.name.trim())){ customAlert('Ge alla lag ett namn.', '✏️'); return; }
+                for(const rnd of state.rounds){
+                    if(!rnd.question.trim()){ customAlert('Skriv alla frågor färdigt.', '✏️'); return; }
+                    if(rnd.options.some(o=>!o.text.trim())){ customAlert('Fyll i text för alla alternativ.', '✏️'); return; }
+                    if(rnd.correctIndex<0){ customAlert('Markera rätt svar på varje fråga.', '✏️'); return; }
+                }
+                state.teams.forEach(t=>t.score=0);
+                state.currentRound=0; state.revealed=false; state.mode='play'; selectedForPoint=new Set();
+                render(); persist();
+            };
+            roundBtns.appendChild(addRoundBtn); roundBtns.appendChild(startBtn); root.appendChild(roundBtns);
+        }
+
+        // ---- PLAY: visa en fråga i taget, avslöja rätt svar, dela ut poäng, gå vidare ----
+        function renderPlay(){
+            root.innerHTML='';
+            renderScoreboard(root);
+
+            const badge=document.createElement('div'); badge.className='qt-round-badge'; badge.textContent='Fråga '+(state.currentRound+1)+' av '+state.rounds.length; root.appendChild(badge);
+
+            const rnd = state.rounds[state.currentRound];
+            const qEl=document.createElement('div'); qEl.className='qt-q-text'; qEl.textContent=rnd.question; root.appendChild(qEl);
+
+            rnd.options.forEach((opt,oi)=>{
+                const optEl=document.createElement('div'); optEl.className='qt-opt-static';
+                if(state.revealed && rnd.correctIndex===oi) optEl.classList.add('poll-opt-correct');
+                optEl.textContent = opt.text + (state.revealed && rnd.correctIndex===oi ? ' ✅' : '');
+                root.appendChild(optEl);
+            });
+
+            if(!state.revealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.style.width='100%'; revealBtn.textContent='✅ Visa rätt svar';
+                revealBtn.onclick=()=>{ state.revealed=true; selectedForPoint=new Set(); renderPlay(); persist(); };
+                root.appendChild(revealBtn);
+            } else {
+                const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Vilka lag svarade rätt? Klicka för att välja, klicka igen för att avmarkera.'; root.appendChild(hint);
+                const awardRow=document.createElement('div'); awardRow.className='qt-award-row';
+                state.teams.forEach((t,i)=>{
+                    const b=document.createElement('button'); b.type='button'; b.className='qt-award-btn'+(selectedForPoint.has(i)?' picked':'');
+                    b.textContent=(selectedForPoint.has(i)?'✅ ':'')+t.name;
+                    b.onclick=()=>{ if(selectedForPoint.has(i)) selectedForPoint.delete(i); else selectedForPoint.add(i); renderPlay(); };
+                    awardRow.appendChild(b);
+                });
+                root.appendChild(awardRow);
+
+                const nextBtns=document.createElement('div'); nextBtns.className='kw-btnrow';
+                const giveBtn=document.createElement('button'); giveBtn.className='kw-btn kw-btn-primary';
+                giveBtn.textContent = state.currentRound < state.rounds.length-1 ? '➕ Ge poäng & nästa fråga' : '➕ Ge poäng & se resultat';
+                giveBtn.onclick=()=>{
+                    selectedForPoint.forEach(i=>{ state.teams[i].score += state.points; });
+                    goToNextRound();
+                };
+                const skipBtn=document.createElement('button'); skipBtn.className='kw-btn kw-btn-ghost';
+                skipBtn.textContent = state.currentRound < state.rounds.length-1 ? '➡️ Nästa fråga (utan poäng)' : '🏁 Se resultat (utan poäng)';
+                skipBtn.onclick=()=>{ goToNextRound(); };
+                nextBtns.appendChild(giveBtn); nextBtns.appendChild(skipBtn); root.appendChild(nextBtns);
+            }
+
+            const footBtns=document.createElement('div'); footBtns.className='kw-btnrow hover-menu';
+            const editBtn=document.createElement('button'); editBtn.className='kw-btn kw-btn-ghost'; editBtn.textContent='✏️ Redigera frågor'; editBtn.onclick=()=>{ state.mode='setup'; render(); persist(); };
+            const restartBtn=document.createElement('button'); restartBtn.className='kw-btn kw-btn-warn'; restartBtn.textContent='🔄 Börja om';
+            restartBtn.onclick=()=>{ customConfirm('Nollställ poängen och börja om från fråga 1?', ()=>{ state.teams.forEach(t=>t.score=0); state.currentRound=0; state.revealed=false; selectedForPoint=new Set(); renderPlay(); persist(); }); };
+            footBtns.appendChild(editBtn); footBtns.appendChild(restartBtn); root.appendChild(footBtns);
+        }
+
+        function goToNextRound(){
+            if(state.currentRound < state.rounds.length-1){
+                state.currentRound++; state.revealed=false; selectedForPoint=new Set();
+                renderPlay(); persist();
+            } else {
+                state.mode='results';
+                render(); persist();
+            }
+        }
+
+        // ---- RESULTS: podium med de tre bästa lagen + konfetti ----
+        function renderResults(){
+            root.innerHTML='';
+            const titleEl=document.createElement('div'); titleEl.className='kw-title'; titleEl.textContent='🏁 Resultat'; root.appendChild(titleEl);
+
+            const sorted = state.teams.map((t,i)=>({...t, colorIdx:i})).sort((a,b)=>b.score-a.score);
+            const podiumOrder = sorted.slice(0,3);
+            // Mittenpallen (1:a) i mitten, 2:a till vänster, 3:a till höger – klassiskt podium
+            const order = podiumOrder.length===3 ? [podiumOrder[1],podiumOrder[0],podiumOrder[2]] : podiumOrder;
+            const heights = podiumOrder.length===3 ? [70,96,52] : podiumOrder.map((_,i)=> i===0?96:70);
+            const medals = ['🥈','🥇','🥉'];
+
+            const podium=document.createElement('div'); podium.className='qt-podium';
+            order.forEach((t,i)=>{
+                const place=document.createElement('div'); place.className='qt-podium-place';
+                const name=document.createElement('div'); name.className='qt-podium-name'; name.textContent=t.name;
+                const bar=document.createElement('div'); bar.className='qt-podium-bar';
+                bar.style.height=(podiumOrder.length===3?heights[i]:heights[i])+'px';
+                bar.style.background=QT_TEAM_COLORS[t.colorIdx%QT_TEAM_COLORS.length];
+                bar.textContent = podiumOrder.length===3 ? medals[i] : '🥇';
+                const score=document.createElement('div'); score.className='qt-podium-score'; score.textContent=t.score+' poäng';
+                place.appendChild(name); place.appendChild(bar); place.appendChild(score);
+                podium.appendChild(place);
+            });
+            root.appendChild(podium);
+
+            if(sorted.length>3){
+                const restList=document.createElement('div'); restList.className='qt-scoreboard';
+                sorted.slice(3).forEach(t=>{
+                    const chip=document.createElement('div'); chip.className='qt-chip'; chip.textContent=t.name+': '+t.score;
+                    restList.appendChild(chip);
+                });
+                root.appendChild(restList);
+            }
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow';
+            const againBtn=document.createElement('button'); againBtn.className='kw-btn kw-btn-primary'; againBtn.textContent='🔁 Spela igen (samma frågor)';
+            againBtn.onclick=()=>{ state.teams.forEach(t=>t.score=0); state.currentRound=0; state.revealed=false; selectedForPoint=new Set(); state.mode='play'; render(); persist(); };
+            const newBtn=document.createElement('button'); newBtn.className='kw-btn kw-btn-ghost'; newBtn.textContent='✏️ Nya frågor';
+            newBtn.onclick=()=>{ customConfirm('Rensa frågorna och gå tillbaka till redigering? Lagen behålls.', ()=>{ state.rounds=[qtEmptyRound()]; state.teams.forEach(t=>t.score=0); state.currentRound=0; state.revealed=false; state.mode='setup'; render(); persist(); }); };
+            btns.appendChild(againBtn); btns.appendChild(newBtn); root.appendChild(btns);
+
+            setTimeout(()=>spawnPopupConfetti(root, 60), 50);
+        }
+
+        function render(){
+            stamp();
+            if(state.mode==='play') renderPlay();
+            else if(state.mode==='results') renderResults();
+            else renderSetup();
+        }
+        render();
+    }
+
     // ---- RIMLIGHET (vardagsproblem med givet svar, klassen röstar rimligt/ej rimligt, sen facit+motivering) ----
     const RIMLIGHET_BANK = [
         { text:'Pappa är 35 år och hans dotter är 8 år. Om 10 år är pappa 45 år.', correct:true, motivering:'Om 10 år ökar allas ålder med 10 år: 35 + 10 = 45. Det stämmer.' },
@@ -19471,7 +19855,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const options = EXIT_TICKET_DEFAULT_OPTIONS;
         let question = 'Hur kändes lektionen idag?';
         let counts = options.map(()=>0);
-        let läge = 'utv';
+        let läge = 'atk';
         let atkListVald = '';
         if(config && config.data){
             if(typeof config.data.question === 'string') question = config.data.question;
@@ -19709,6 +20093,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 <button class='btn btn-secondary good-clear' type='button'>🗑️ Töm burken</button>
             </div>`;
         const pileEl = body.querySelector('.good-pile');
+        const jarWrap = body.querySelector('.good-jar-wrap');
         const jarDrop = body.querySelector('.good-jar-drop');
         const jarContents = body.querySelector('.good-jar-contents');
         const countEl = body.querySelector('.good-count');
@@ -19718,6 +20103,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         let visualN = 0; // hur många glada miner som faktiskt ritats i burken just nu
 
         const syncData = ()=>{ widget.dataset.good = JSON.stringify({ count: count }); };
+        // Liten "wow"-mikroanimation vid varje ny mun: burken vickar till och antalet studsar - rent kosmetiskt.
+        function celebrateBump(){
+            jarWrap.classList.remove('wobble'); void jarWrap.offsetWidth; jarWrap.classList.add('wobble');
+            countEl.classList.remove('pop'); void countEl.offsetWidth; countEl.classList.add('pop');
+        }
         function updateCount(){ countEl.textContent = count + ' st i burken'; syncData(); }
         // Slumpad position + rotation inom en yta så att de sura minerna i högen ligger huller om buller.
         function slumpaHög(el, w, h, size){
@@ -19789,7 +20179,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     cleanup();
                     if(success){
                         tile.remove();
-                        count++; updateCount(); addHappyToJar(true);
+                        count++; updateCount(); addHappyToJar(true); celebrateBump();
                         addSourTile();
                         saveBoardState();
                     }
@@ -22082,6 +22472,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 s.pages.forEach((p) => {
                     const pageId = p.id || Date.now() + '-' + Math.random().toString(16).slice(2);
                     const cp = document.createElement('div'); cp.className = 'canvas-page'; cp.id = pageId; if(p.bgImage) cp.style.backgroundImage = p.bgImage; if(p.name) cp.dataset.pageName = p.name;
+                    if(p.boxLayout) { cp.classList.add('has-box-layout'); renderBoxLayoutGrid(cp); }
                     const hasDay = (p.day!==undefined && p.day!==null);
                     const hasLesson = (p.lesson!==undefined && p.lesson!==null);
                     if(hasDay) cp.dataset.day = String(p.day);
