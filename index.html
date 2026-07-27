@@ -60,6 +60,9 @@
                 <svg width="20" height="20" viewBox="0 0 48 48" style="background:white;border-radius:3px;padding:1px;"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                 <span id="google-signin-btn-label">Logga in med Google</span>
             </button>
+            <div id="google-signin-alt-wrap" style="margin-top:10px;">
+                <a href="#" id="google-signin-alt-link" onclick="signInWithGooglePopup(); return false;" style="font-size:12px;color:#8e8e93;text-decoration:underline;">Fungerar det inte? Testa en annan inloggningsmetod</a>
+            </div>
             <div id="login-local-note" style="margin-top: 18px; font-size: 12px; color: #aaa;"></div>
         </div>
         <div class="login-box" id="login-processing-view" style="display:none;text-align:center;">
@@ -3323,6 +3326,32 @@
         }
     }
 
+    // ALTERNATIV INLOGGNING (popup-fönster): sidan navigerar aldrig bort, så den kringgår problemet
+    // med att webbläsare (t.ex. Safaris ITP) rensar lagring vid "studsande" navigering till Google och
+    // tillbaka - vilket annars kan få signInWithRedirect ovan att tyst misslyckas i vissa webbläsare/
+    // sekretessinställningar. Popup-metoden kräver att webbläsaren tillåter popup-fönster för sidan.
+    async function signInWithGooglePopup(){
+        if (_signingInWithGoogle) return;
+        if (!window.cloudReady){ customAlert('Google-inloggning är inte tillgänglig just nu (molnet kunde inte kopplas upp). Använd "Fortsätt lokalt" nedan så länge.', '⚠️'); return; }
+        _signingInWithGoogle = true;
+        const btn = document.getElementById('google-signin-btn'), lbl = document.getElementById('google-signin-btn-label');
+        if(btn){ btn.style.opacity='0.6'; btn.style.pointerEvents='none'; }
+        if(lbl) lbl.textContent = 'Loggar in…';
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            if (ALLOWED_EMAIL_DOMAINS.length === 1) provider.setCustomParameters({ hd: ALLOWED_EMAIL_DOMAINS[0] });
+            const result = await fbAuth.signInWithPopup(provider);
+            _resetGoogleSignInUI();
+            if (result && result.user) await handleSignedIn(result.user);
+        } catch(err){
+            _resetGoogleSignInUI();
+            console.warn('[MinTavla] Popup-inloggning misslyckades:', err);
+            if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) return; // användaren avbröt själv - inget felmeddelande behövs
+            if (err && err.code === 'auth/popup-blocked'){ customAlert('Webbläsaren blockerade popup-fönstret. Tillåt popup-fönster för den här sidan och försök igen.', '⚠️'); return; }
+            customAlert('Inloggningen kunde inte slutföras. Försök igen, eller kontrollera webbläsarens sekretess-/cookie-inställningar.', '⚠️');
+        }
+    }
+
     // Körs när någon är inloggad (både vid nytt klick och vid auto-återställd session)
     let _handlingSignIn = false;
     let _boardInitializedForUser = null; // FIX: håller reda på vilken användare tavlan redan är uppbyggd för
@@ -3622,7 +3651,7 @@
                     if (_wasPendingGoogleRedirect){
                         _wasPendingGoogleRedirect = false;
                         console.warn('[MinTavla] Inloggningsomdirigeringen returnerade utan inloggad användare (troligen blockerad tredjepartslagring).');
-                        customAlert('Inloggningen slutfördes inte. Det beror oftast på att webbläsaren blockerar den lagring som Google-inloggningen behöver (vanligt i inkognito-/privat läge eller med strikta cookie-inställningar). Prova att logga in i ett vanligt fönster, eller kontrollera webbläsarens sekretessinställningar för tredjepartscookies/lagring. Du kan också använda "Fortsätt lokalt" nedan så länge.', '⚠️');
+                        customAlert('Inloggningen slutfördes inte. Det beror oftast på att webbläsaren blockerar den lagring som Google-inloggningen behöver (vanligt i inkognito-/privat läge eller med strikta cookie-inställningar). Prova länken "Testa en annan inloggningsmetod" under knappen, eller kontrollera webbläsarens sekretessinställningar för tredjepartscookies/lagring. Du kan också använda "Fortsätt lokalt" nedan så länge.', '⚠️');
                     }
                 }
             });
