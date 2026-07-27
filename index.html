@@ -8833,6 +8833,7 @@
             html += '<h2>✎ Typiska ord &amp; fraser</h2><div class="chips">'+g.ord.map(o=>'<span class="chip">'+esc(o)+'</span>').join('')+'</div>';
             if(g.exempel){ html += '<h2>📄 Exempeltext</h2><div class="exempel">'+esc(g.exempel)+'</div>'; }
             html += '<div class="noprint" style="margin-top:20px;"><button onclick="window.print()" style="padding:10px 18px;font-size:14px;cursor:pointer;">🖨️ Skriv ut</button></div>';
+            html += '<div style="margin-top:24px;text-align:center;font-size:11px;color:#999;"><a href="https://www.min-tavla.se" style="color:#999;text-decoration:none;">www.min-tavla.se</a></div>';
             html += '</body></html>';
             const w = window.open('', 'genreUtskrift', 'width=780,height=900,scrollbars=yes,resizable=yes');
             if(!w){ if(typeof customAlert==='function') customAlert('Webbläsaren blockerade utskriftsfönstret. Tillåt popup-fönster och försök igen.', 'ℹ️'); return; }
@@ -9640,7 +9641,7 @@
             });
             html += '</div>';
         });
-        html += '</div></body></html>';
+        html += '</div><div style="margin-top:24px;text-align:center;font-size:11px;color:#999;"><a href="https://www.min-tavla.se" style="color:#999;text-decoration:none;">www.min-tavla.se</a></div></body></html>';
         w.document.write(html); w.document.close();
         setTimeout(()=>{ try{ w.print(); }catch(e){} }, 300);
     }
@@ -13767,6 +13768,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             html += '<h2>📝 Sammanfatta texten med egna ord</h2><div class="linje"></div><div class="linje"></div><div class="linje"></div><div class="linje"></div>';
             html += '<h2>⭐ Självskattning</h2><div class="fr"><span class="ruta"></span>Jag förstod texten.</div><div class="fr"><span class="ruta"></span>Jag lärde mig nya ord.</div><div class="fr"><span class="ruta"></span>Jag kunde svara på frågorna.</div><div class="fr"><span class="ruta"></span>Jag behöver läsa en gång till.</div>';
             html += '<div class="noprint" style="margin-top:20px;"><button onclick="window.print()" style="padding:10px 18px;font-size:14px;cursor:pointer;">🖨️ Skriv ut</button></div>';
+            html += '<div style="margin-top:24px;text-align:center;font-size:11px;color:#999;"><a href="https://www.min-tavla.se" style="color:#999;text-decoration:none;">www.min-tavla.se</a></div>';
             html += '</body></html>';
             const w = window.open('', 'lasfUtskrift', 'width=840,height=920,scrollbars=yes,resizable=yes');
             if(!w){ customAlert('Webbläsaren blockerade utskriftsfönstret. Tillåt popup-fönster och försök igen.', 'ℹ️'); return; }
@@ -18195,6 +18197,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     </svg>
                     ${wordsHtml}
                 </div>
+                <div style="margin-top:auto;padding-top:16px;text-align:center;font-size:10px;color:#999;"><a href="https://www.min-tavla.se" style="color:#999;text-decoration:none;">www.min-tavla.se</a></div>
                 <script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script>
             </body></html>`;
             const w = window.open('', 'kompisprint'+Date.now(), 'width=900,height=1000');
@@ -20409,7 +20412,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 ".seat-name-label.tom{display:none;} .seat-del{display:none;} .seat-rot{display:none;}"+
                 "@media print { body{margin:8mm;} }";
             const datum=new Date().toLocaleDateString('sv-SE',{year:'numeric',month:'long',day:'numeric'});
-            pw.document.write('<html><head><title>Bordsplacering</title><style>'+css+'</style></head><body><h2>Bordsplacering'+(listSel.value?(' – '+listSel.value):'')+'</h2><div class="sub">'+datum+'</div><div class="seat-canvas" style="width:'+(maxX+40)+'px;height:'+(maxY+40)+'px;">'+canvas.innerHTML+'</div></body></html>');
+            pw.document.write('<html><head><title>Bordsplacering</title><style>'+css+'</style></head><body><h2>Bordsplacering'+(listSel.value?(' – '+listSel.value):'')+'</h2><div class="sub">'+datum+'</div><div class="seat-canvas" style="width:'+(maxX+40)+'px;height:'+(maxY+40)+'px;">'+canvas.innerHTML+'</div><div style="margin-top:24px;text-align:center;font-size:11px;color:#999;"><a href="https://www.min-tavla.se" style="color:#999;text-decoration:none;">www.min-tavla.se</a></div></body></html>');
             pw.document.close();
             setTimeout(()=>{ try{ pw.focus(); pw.print(); }catch(e){} }, 500);
         };
@@ -21137,6 +21140,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const imgW = canvas.width*scale, imgH = canvas.height*scale;
             const x = (pageW-imgW)/2, y = (pageH-imgH)/2;
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgW, imgH);
+            // Liten länk längst ner i mitten på varje utskriven/exporterad PDF-sida.
+            try {
+                pdf.setFontSize(9); pdf.setTextColor(150);
+                const linkY = pageH - 14;
+                if (typeof pdf.textWithLink === 'function') pdf.textWithLink('www.min-tavla.se', pageW/2, linkY, { url: 'https://www.min-tavla.se', align: 'center' });
+                else pdf.text('www.min-tavla.se', pageW/2, linkY, { align: 'center' });
+            } catch(_){}
             pdf.save(filename);
         } catch(e){ customAlert('Kunde inte spara PDF:en. Försök igen.', '⚠️'); }
     }
@@ -21184,6 +21194,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             +"<h1>"+kwEsc(title||'Korsord')+(withFacit?' – facit':'')+"</h1>"
             +"<div class='grid'>"+cells+"</div>"
             +"<div class='clues'><div><h2>Vågrätt</h2><ol>"+mk('A')+"</ol></div><div><h2>Lodrätt</h2><ol>"+mk('D')+"</ol></div></div>"
+            +"<div style='margin-top:auto;padding-top:16px;text-align:center;font-size:10px;color:#999;'><a href='https://www.min-tavla.se' style='color:#999;text-decoration:none;'>www.min-tavla.se</a></div>"
             +"<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body></html>";
         const w=window.open('','kwprint'+Date.now(),'width=820,height=920');
         if(!w){ customAlert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.','🖨️'); return; }
@@ -21536,6 +21547,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             +"<div class='dirnote'>"+kwEsc(dirText)+"</div>"
             +"<div class='grid'>"+cells+"</div>"
             +"<div class='words'><ul>"+wordsList+"</ul></div>"
+            +"<div style='margin-top:auto;padding-top:16px;text-align:center;font-size:10px;color:#999;'><a href='https://www.min-tavla.se' style='color:#999;text-decoration:none;'>www.min-tavla.se</a></div>"
             +"<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body></html>";
         const w=window.open('','ogprint'+Date.now(),'width=820,height=920');
         if(!w){ customAlert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.','🖨️'); return; }
