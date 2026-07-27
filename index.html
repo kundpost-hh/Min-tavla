@@ -67,7 +67,8 @@
                 <div style="flex:1;height:1px;background:#e5e5ea;"></div>eller<div style="flex:1;height:1px;background:#e5e5ea;"></div>
             </div>
             <div id="email-auth-form">
-                <input type="email" id="email-auth-email" class="login-input" placeholder="E-postadress" autocomplete="email">
+                <div id="email-auth-domain-hint" style="font-size:12px;color:#8e8e93;margin-bottom:8px;">Endast för konton med e-postadress som slutar på <b>@utb.linkoping.se</b></div>
+                <input type="email" id="email-auth-email" class="login-input" placeholder="namn@utb.linkoping.se" autocomplete="email">
                 <input type="password" id="email-auth-password" class="login-input" placeholder="Lösenord" autocomplete="current-password">
                 <button class="login-btn" id="email-auth-submit" style="background:#34495e;" onclick="submitEmailAuth()">Logga in</button>
                 <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px;">
@@ -3290,6 +3291,16 @@
     // ---- Endast tillåtna e-postdomäner får logga in (extra skyddslager utöver Firestore-reglerna).
     // Lägg till fler domäner i listan om kommunen har flera skoldomäner, t.ex. ['utb.linkoping.se','linkoping.se'].
     const ALLOWED_EMAIL_DOMAINS = ['utb.linkoping.se'];
+    (function syncEmailAuthDomainHint(){
+        try {
+            const hint = document.getElementById('email-auth-domain-hint');
+            const emailInp = document.getElementById('email-auth-email');
+            if (!ALLOWED_EMAIL_DOMAINS.length){ if(hint) hint.style.display = 'none'; return; }
+            const list = ALLOWED_EMAIL_DOMAINS.map(d => '@' + d).join(', ');
+            if (hint) hint.innerHTML = 'Endast för konton med e-postadress som slutar på <b>' + list + '</b>';
+            if (emailInp) emailInp.placeholder = 'namn' + '@' + ALLOWED_EMAIL_DOMAINS[0];
+        } catch(_){}
+    })();
     function isAllowedEmailDomain(email){
         if (!ALLOWED_EMAIL_DOMAINS.length) return true; // ingen begränsning konfigurerad – tillåt alla
         const parts = (email||'').toLowerCase().split('@');
