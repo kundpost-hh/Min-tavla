@@ -661,7 +661,7 @@
     .pclock-legend-hour { background: #d32f2f; }
     .pclock-legend-min { background: #1565c0; }
     /* Förfinad urtavla: färgkodade visare som matchar siffer-ringarna (röd timme, blå minut) för tydligare avläsning */
-    .practice-clock-widget .real-clock-face { width: 180px; height: 180px; background: radial-gradient(circle at 50% 36%, #ffffff 0%, #eef1f5 100%); border-color: #546e7a; }
+    .practice-clock-widget .real-clock-face { width: 180px; height: 180px; box-sizing: border-box; border: 5px solid #546e7a; background: radial-gradient(circle at 50% 36%, #ffffff 0%, #eef1f5 100%); }
     .practice-clock-widget .real-clock-face::after { background: #263238; border: 2.5px solid #ffffff; box-shadow: 0 0 0 1.5px rgba(38,50,56,0.35); width: 12px; height: 12px; }
     .practice-clock-widget .hand { box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
     .practice-clock-widget .hand.hour { background: #d32f2f !important; width: 7.5px; height: 46px; margin-left: -3.75px; border-radius: 4px 4px 2px 2px; z-index: 4; }
@@ -3307,6 +3307,13 @@
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             if (ALLOWED_EMAIL_DOMAINS.length === 1) provider.setCustomParameters({ hd: ALLOWED_EMAIL_DOMAINS[0] }); // hintar Google att bara visa rätt organisation
+            // FIX: sätt en flagga precis innan sidan navigerar bort, så vi efter återkomsten kan se
+            // att ett inloggningsförsök faktiskt pågick. Vissa webbläsare (Safari, inkognito, Chrome med
+            // "storage partitioning") blockerar den tredjepartslagring som signInWithRedirect behöver för
+            // att komma ihåg försöket - då kommer man tillbaka helt tyst UTAN inloggning och UTAN fel,
+            // och hamnar bara på samma inloggningsruta igen. Flaggan gör att vi kan upptäcka just det
+            // fallet i checkLogin() och visa en begriplig förklaring istället för att bara visa rutan igen.
+            try { sessionStorage.setItem('mintavla_pendingGoogleRedirect', '1'); } catch(_){}
             await fbAuth.signInWithRedirect(provider);
             // Sidan navigerar nu bort till Google - koden nedan (finally) hinner inte köras förrän
             // efter att man skickats tillbaka hit igen, vilket sköts av getRedirectResult() i checkLogin().
@@ -3601,9 +3608,23 @@
                 customAlert('Inloggningen kunde inte slutföras. Försök igen.', '⚠️');
                 showLoginButton();
             });
+            let _wasPendingGoogleRedirect = false;
+            try { _wasPendingGoogleRedirect = sessionStorage.getItem('mintavla_pendingGoogleRedirect') === '1'; sessionStorage.removeItem('mintavla_pendingGoogleRedirect'); } catch(_){}
             fbAuth.onAuthStateChanged(user => {
                 if (user){ showLoginProcessing('Loggar in, vänta ett ögonblick…'); handleSignedIn(user); }
-                else { _boardInitializedForUser = null; showLocalLoginOption(); showLoginButton(); document.getElementById('login-overlay').style.display = 'flex'; }
+                else {
+                    _boardInitializedForUser = null; showLocalLoginOption(); showLoginButton(); document.getElementById('login-overlay').style.display = 'flex';
+                    // FIX: om vi precis skickades till Google för att logga in men kommer hit UTAN
+                    // inloggad användare och UTAN fel från getRedirectResult(), berodde det med stor
+                    // sannolikhet på att webbläsaren blockerade den tredjepartslagring inloggnings-
+                    // omdirigeringen behöver (vanligt i Safari/inkognito/Chrome med "storage partitioning").
+                    // Tidigare visades bara samma inloggningsruta igen utan förklaring - nu berättar vi varför.
+                    if (_wasPendingGoogleRedirect){
+                        _wasPendingGoogleRedirect = false;
+                        console.warn('[MinTavla] Inloggningsomdirigeringen returnerade utan inloggad användare (troligen blockerad tredjepartslagring).');
+                        customAlert('Inloggningen slutfördes inte. Det beror oftast på att webbläsaren blockerar den lagring som Google-inloggningen behöver (vanligt i inkognito-/privat läge eller med strikta cookie-inställningar). Prova att logga in i ett vanligt fönster, eller kontrollera webbläsarens sekretessinställningar för tredjepartscookies/lagring. Du kan också använda "Fortsätt lokalt" nedan så länge.', '⚠️');
+                    }
+                }
             });
         } else {
             enterLocalMode();
@@ -4002,8 +4023,20 @@
             if(typeof presentationLocked !== 'undefined' && presentationLocked) return;
             if(e.button && e.button !== 0) return;
             const t = e.target;
-            // Element med egen interaktion – starta INTE flytt där
-            if(t.closest && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], canvas, .pclock-face, .real-clock-face, .analog-clock-face, .hand, .schedule-color-strip, .sched-top-strip, .widget-resizer, .widget-controls')) return;
+            // Element med egen interaktion – starta INTE flytt där.
+            // OBS: 'button' måste vara med här, annars tolkas ett klick på t.ex. en
+            // 'Visa facit'-knapp (eller Start/Nollställ m.fl.) som en dragning av hela
+            // widgeten så fort musen rör sig det minsta – knappen "hänger" på pekaren
+            // istället för att klicket når fram.
+            if(t.closest && t.closest('input, textarea, select, button, [contenteditable=""], [contenteditable="true"], canvas, .pclock-face, .real-clock-face, .analog-clock-face, .hand, .schedule-color-strip, .sched-top-strip, .widget-resizer, .widget-controls')) return;
+            // Generellt skydd: många widgetar (t.ex. "Visa svar"-rutorna i Startuppgift/Räkna,
+            // mynt/sedlar i Pengar m.fl.) använder klickbara <div>-element med en egen onclick
+            // istället för <button>. Utan detta skydd tolkas minsta musrörelse vid klick som att
+            // man vill dra iväg HELA widgeten, så att den känns som att den "flyr" undan pekaren
+            // och klicket aldrig når fram. Vi letar uppåt efter ett element med egen onclick och
+            // avbryter dragningen där, precis som för input/knappar ovan.
+            let _clickEl = t;
+            while(_clickEl && _clickEl !== inner){ if(typeof _clickEl.onclick === 'function') return; _clickEl = _clickEl.parentElement; }
             const startX = e.clientX, startY = e.clientY;
             const origLeft = el.offsetLeft, origTop = el.offsetTop;
             let dragging = false;
@@ -18657,7 +18690,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             <div class='tid-mega-pane tid-mega-pane-ovning' style='display:none;'></div>`;
 
         const tidTabsWrap = body.querySelector('.tid-tabs-wrap');
-        if(!config) tidTabsWrap.classList.add('expanded');
+        // Widgeten startar ihopfälld (bara den lilla rullgardins-pilen syns) precis som när man
+        // klickar runt annars, så klockan syns direkt utan att menyn ligger i vägen.
         const tabBtns = [...body.querySelectorAll('.tid-mega-tab-btn')];
         const paneKlocka = body.querySelector('.tid-mega-pane-klocka'), paneDT = body.querySelector('.tid-mega-pane-dtimer'), paneAT = body.querySelector('.tid-mega-pane-atimer'), paneSw = body.querySelector('.tid-mega-pane-stoppur'), paneOv = body.querySelector('.tid-mega-pane-ovning');
         let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'klocka';
@@ -18672,6 +18706,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             widget.style.width = (TID_TAB_WIDTH[activeTab]||260) + 'px';
         }
         tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; tidTabsWrap.classList.remove('expanded'); renderTabs(); widget.dataset.tidTab=activeTab; saveBoardState(); });
+        // FIX: menyn ska vara ihopfälld (bara den lilla pilen syns) både när widgeten just skapats
+        // och så fort man klickar någonstans i innehållet (t.ex. på urtavlan) som INTE är fliklisten
+        // själv – samma beteende oavsett vilken flik (Klocka, Timer, m.fl.) som är vald.
+        body.addEventListener('pointerdown', (e)=>{ if(!tidTabsWrap.contains(e.target)) tidTabsWrap.classList.remove('expanded'); });
 
         function embedSubWidget(fn, pane){
             const realCreateWidget = createWidget;
