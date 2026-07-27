@@ -3348,7 +3348,10 @@
             console.warn('[MinTavla] Popup-inloggning misslyckades:', err);
             if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) return; // användaren avbröt själv - inget felmeddelande behövs
             if (err && err.code === 'auth/popup-blocked'){ customAlert('Webbläsaren blockerade popup-fönstret. Tillåt popup-fönster för den här sidan och försök igen.', '⚠️'); return; }
-            customAlert('Inloggningen kunde inte slutföras. Försök igen, eller kontrollera webbläsarens sekretess-/cookie-inställningar.', '⚠️');
+            // FIX: visa den faktiska felkoden i meddelandet (t.ex. auth/unauthorized-domain) istället för
+            // en generisk text, så det går att se exakt vad Firebase klagar på utan att öppna konsolen.
+            const _code = (err && err.code) ? (' (' + err.code + ')') : '';
+            customAlert('Inloggningen kunde inte slutföras' + _code + '. Försök igen, eller kontrollera webbläsarens sekretess-/cookie-inställningar.', '⚠️');
         }
     }
 
@@ -3634,7 +3637,8 @@
             fbAuth.getRedirectResult().catch(err => {
                 if (err && err.code === 'auth/user-cancelled') return;
                 console.warn('[MinTavla] Inloggningsomdirigeringen misslyckades:', err);
-                customAlert('Inloggningen kunde inte slutföras. Försök igen.', '⚠️');
+                const _code = (err && err.code) ? (' (' + err.code + ')') : '';
+                customAlert('Inloggningen kunde inte slutföras' + _code + '. Försök igen.', '⚠️');
                 showLoginButton();
             });
             let _wasPendingGoogleRedirect = false;
