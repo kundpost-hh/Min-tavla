@@ -4664,6 +4664,13 @@
         const pb = document.createElement('div'); pb.className='lesson-timer-progress-bg'; pb.style.display='none'; const pf = document.createElement('div'); pf.className='lesson-timer-progress-fill'; const pt = document.createElement('div'); pt.className='lesson-timer-text'; pb.appendChild(pf); pb.appendChild(pt); tw.appendChild(tin); tw.appendChild(tb); tw.appendChild(pb);
         const nowClock=document.createElement('div'); nowClock.className='lesson-nowclock'; const updNow=()=>{ nowClock.textContent=new Date().toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',hour12:false}); }; updNow(); const nowTimer=setInterval(()=>{ if(!document.body.contains(nowClock)){ clearInterval(nowTimer); return; } updNow(); },1000);
         fr.appendChild(la); fr.appendChild(nowClock); fr.appendChild(tw); body.appendChild(tr); body.appendChild(gr); body.appendChild(cr); body.appendChild(fr);
+        // FIX: dessa fält (ämne/klass/datum, mål, de tre rutornas rubrik+innehåll och länkfältet)
+        // saknade koppling till saveBoardState - texten sparades aldrig automatiskt när man skrev,
+        // bara när man startade timern eller drog klockvisarna. Skrev man här och laddade om sidan
+        // (eller bytte dag) utan att röra timern försvann det man skrivit. Nu sparas allt löpande,
+        // precis som i övriga widgetar (t.ex. Klisterlapp).
+        body.querySelectorAll('.lesson-header-input, .lesson-goal-input, .lesson-card-title, .lesson-link-input, .lesson-timer-input').forEach(el=>{ el.oninput = saveBoardState; });
+        body.querySelectorAll('.lesson-card-content').forEach(el=>{ el.addEventListener('input', saveBoardState); });
         let lT=null, lTot=0, lLeft=0;
         tb.onclick=()=>{
             if(lT){ clearInterval(lT); lT=null; tb.innerText='Start'; tin.style.display='block'; pb.style.display='none'; }
