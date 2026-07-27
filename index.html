@@ -63,6 +63,18 @@
             <div id="google-signin-alt-wrap" style="margin-top:10px;">
                 <a href="#" id="google-signin-alt-link" onclick="signInWithGoogle(); return false;" style="font-size:12px;color:#8e8e93;text-decoration:underline;">Fungerar det inte? Testa en annan inloggningsmetod</a>
             </div>
+            <div id="email-auth-divider" style="display:flex;align-items:center;gap:10px;margin:22px 0 16px;color:#c7c7cc;font-size:12px;">
+                <div style="flex:1;height:1px;background:#e5e5ea;"></div>eller<div style="flex:1;height:1px;background:#e5e5ea;"></div>
+            </div>
+            <div id="email-auth-form">
+                <input type="email" id="email-auth-email" class="login-input" placeholder="E-postadress" autocomplete="email">
+                <input type="password" id="email-auth-password" class="login-input" placeholder="Lösenord" autocomplete="current-password">
+                <button class="login-btn" id="email-auth-submit" style="background:#34495e;" onclick="submitEmailAuth()">Logga in</button>
+                <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px;">
+                    <a href="#" id="email-auth-toggle" onclick="toggleEmailAuthMode(); return false;" style="color:#8e8e93;text-decoration:underline;">Har du inget konto? Skapa ett</a>
+                    <a href="#" id="email-auth-forgot" onclick="forgotEmailPassword(); return false;" style="color:#8e8e93;text-decoration:underline;">Glömt lösenord?</a>
+                </div>
+            </div>
             <div id="login-local-note" style="margin-top: 18px; font-size: 12px; color: #aaa;"></div>
         </div>
         <div class="login-box" id="login-processing-view" style="display:none;text-align:center;">
@@ -3353,6 +3365,76 @@
             const _code = (err && err.code) ? (' (' + err.code + ')') : '';
             customAlert('Inloggningen kunde inte slutföras' + _code + '. Försök igen, eller kontrollera webbläsarens sekretess-/cookie-inställningar.', '⚠️');
         }
+    }
+
+    // ---- E-POST + LÖSENORD (enklaste vägen in för nya användare - ingen omdirigering/popup alls) ----
+    // OBS: kräver att "Email/Password" är aktiverat under Firebase-konsolen -> Authentication ->
+    // Sign-in method. Annars misslyckas det med felkoden auth/operation-not-allowed (visas nedan).
+    let _emailAuthMode = 'login'; // 'login' eller 'signup'
+    function toggleEmailAuthMode(){
+        _emailAuthMode = (_emailAuthMode === 'login') ? 'signup' : 'login';
+        const submitBtn = document.getElementById('email-auth-submit');
+        const toggleLink = document.getElementById('email-auth-toggle');
+        if (_emailAuthMode === 'signup'){
+            if (submitBtn) submitBtn.textContent = 'Skapa konto';
+            if (toggleLink) toggleLink.textContent = 'Har du redan ett konto? Logga in';
+        } else {
+            if (submitBtn) submitBtn.textContent = 'Logga in';
+            if (toggleLink) toggleLink.textContent = 'Har du inget konto? Skapa ett';
+        }
+    }
+    function _emailAuthErrorText(err){
+        const code = err && err.code;
+        switch(code){
+            case 'auth/invalid-email': return 'Det där ser inte ut som en giltig e-postadress.';
+            case 'auth/email-already-in-use': return 'Det finns redan ett konto med den e-postadressen. Logga in istället.';
+            case 'auth/weak-password': return 'Lösenordet är för kort - använd minst 6 tecken.';
+            case 'auth/user-not-found': return 'Vi hittar inget konto med den e-postadressen. Klicka på "Skapa ett" om du är ny.';
+            case 'auth/wrong-password': return 'Fel lösenord. Försök igen, eller klicka på "Glömt lösenord?".';
+            case 'auth/invalid-credential': return 'Fel e-postadress eller lösenord.';
+            case 'auth/too-many-requests': return 'För många felaktiga försök. Vänta en stund och försök igen.';
+            case 'auth/operation-not-allowed': return 'E-post/lösenord-inloggning är inte aktiverad än. Kontakta administratören.';
+            default: return 'Något gick fel' + (code ? (' (' + code + ')') : '') + '. Försök igen.';
+        }
+    }
+    async function submitEmailAuth(){
+        if (!window.cloudReady){ customAlert('Inloggning är inte tillgänglig just nu (molnet kunde inte kopplas upp). Använd "Fortsätt lokalt" nedan så länge.', '⚠️'); return; }
+        const emailInp = document.getElementById('email-auth-email'), pwInp = document.getElementById('email-auth-password');
+        const email = ((emailInp && emailInp.value) || '').trim();
+        const password = (pwInp && pwInp.value) || '';
+        if (!email || !password){ customAlert('Fyll i både e-postadress och lösenord.', 'ℹ️'); return; }
+        if (_emailAuthMode === 'signup' && !isAllowedEmailDomain(email)){
+            customAlert('Endast konton med e-postadress @' + ALLOWED_EMAIL_DOMAINS.join(', @') + ' kan skapa konto i Min Tavla.', '🔒');
+            return;
+        }
+        const btn = document.getElementById('email-auth-submit');
+        if (btn){ btn.disabled = true; btn.style.opacity = '0.6'; }
+        try {
+            const cred = (_emailAuthMode === 'signup')
+                ? await fbAuth.createUserWithEmailAndPassword(email, password)
+                : await fbAuth.signInWithEmailAndPassword(email, password);
+            if (cred && cred.user) await handleSignedIn(cred.user);
+        } catch(err){
+            console.warn('[MinTavla] E-postinloggning misslyckades:', err);
+            customAlert(_emailAuthErrorText(err), '⚠️');
+        } finally {
+            if (btn){ btn.disabled = false; btn.style.opacity = ''; }
+        }
+    }
+    function forgotEmailPassword(){
+        if (!window.cloudReady){ customAlert('Den här funktionen kräver internetuppkoppling.', '⚠️'); return; }
+        const emailInp = document.getElementById('email-auth-email');
+        const prefill = ((emailInp && emailInp.value) || '').trim();
+        customPrompt('Ange din e-postadress så skickar vi en länk för att återställa lösenordet.', prefill, (email)=>{
+            email = (email || '').trim();
+            if (!email) return;
+            fbAuth.sendPasswordResetEmail(email).then(()=>{
+                customAlert('Om det finns ett konto med den adressen har ett e-postmeddelande med instruktioner skickats.', '📧');
+            }).catch(err=>{
+                console.warn('[MinTavla] Kunde inte skicka återställningslänk:', err);
+                customAlert(_emailAuthErrorText(err), '⚠️');
+            });
+        }, 'din.epost@exempel.se');
     }
 
     // Körs när någon är inloggad (både vid nytt klick och vid auto-återställd session)
