@@ -121,6 +121,7 @@
                 <div class="tool-pocket-grid" id="tool-pocket-grid"></div>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketDivider()" title="Lägg till en ny kedja som du kan dra dit du vill">🔗 Lägg till kedja</button>
                 <button type="button" class="tool-pocket-add-chain" onclick="addToolPocketCategory()" title="Skapa en kategori-ruta att samla t.ex. Svenska eller Matte-verktyg i">🗂️ Ny kategori-ruta</button>
+                <button type="button" class="tool-pocket-add-chain" onclick="createMinaRutor()" title="Skapar dina fasta rutor och lägger in de widgetar du bestämt i respektive ruta">📦 Skapa & sortera mina rutor</button>
                 <button type="button" class="tool-pocket-add-chain" onclick="showToolPocketHistory()" title="Se tidigare sparade versioner av fickan och återställ en av dem">🕓 Historik</button>
             </div>
             <div class="tool-pocket-admin" id="tool-pocket-admin">
@@ -223,7 +224,6 @@
         <!-- RAD 2: övriga widgetar (dolda tills man hovrar pilen) -->
         <div class="tool-group tool-extra" id="tool-extra">
             <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
-            <button class="tool-btn" onclick="toggleBoxLayout()"><div class="icon">🗂️</div><div class="label">Rutlayout</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
             <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
             <button class="tool-btn" onclick="createVideoWidget()"><div class="icon">🎬</div><div class="label">Video</div></button>
@@ -359,39 +359,6 @@
     #cb-app-wrapper.theme-cork .canvas-page { background-color: #f7e6d2; background-image: radial-gradient(rgba(0,0,0,0.06) 2px, transparent 2px); background-size: 10px 10px; }
     #cb-app-wrapper.theme-blank .canvas-page { background-color: #ffffff; background-image: none; }
     #cb-app-wrapper.no-watermark #watermark { display: none !important; }
-
-    /* RUTLAYOUT: valfritt bakgrundslager per sida med 7 fasta, mjuka rutor som widgetar kan
-       placeras ovanpå. Rent dekorativt (pointer-events:none) så det stör inte drag/skapa-flödet. */
-    .box-layout-grid {
-        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-        display: grid; gap: 18px; padding: 22px;
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: 84px 1fr 1fr;
-        grid-template-areas:
-            "lektion lektion lektion lektion"
-            "matte svenska no teknik"
-            "verktyg verktyg beloning beloning";
-        pointer-events: none; z-index: 1;
-    }
-    .box-layout-cell {
-        background: #dceeff; border-radius: 26px; position: relative;
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
-    }
-    .box-layout-cell .box-layout-label {
-        position: absolute; top: 14px; left: 20px; font-size: 14px; font-weight: 800;
-        color: #2a72c4; letter-spacing: 0.3px;
-    }
-    .box-layout-cell[data-box="lektion"] { grid-area: lektion; }
-    .box-layout-cell[data-box="matte"] { grid-area: matte; }
-    .box-layout-cell[data-box="svenska"] { grid-area: svenska; }
-    .box-layout-cell[data-box="no"] { grid-area: no; }
-    .box-layout-cell[data-box="teknik"] { grid-area: teknik; }
-    .box-layout-cell[data-box="verktyg"] { grid-area: verktyg; }
-    .box-layout-cell[data-box="beloning"] { grid-area: beloning; }
-    @media (max-width: 1024px) {
-        .box-layout-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: 64px 1fr 1fr 1fr; grid-template-areas: "lektion lektion" "matte svenska" "no teknik" "verktyg beloning"; gap: 10px; padding: 12px; }
-        .box-layout-cell .box-layout-label { font-size: 12px; top: 8px; left: 12px; }
-    }
     
     #fullscreen-btn { position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); cursor: pointer; font-size: 18px; color: #333; transition: opacity 0.25s ease, background-color 0.2s, transform 0.2s; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; font-weight: bold; opacity: 0.3; }
     #fullscreen-btn:hover { background-color: #e5e5ea; transform: scale(1.05); opacity: 1; }
@@ -3904,7 +3871,7 @@
         if(window.isLoadingBoard || !currentUser) return;
         const pages = []; const canvasPages = document.querySelectorAll('.canvas-page');
         canvasPages.forEach(page => {
-            const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, boxLayout: page.classList.contains('has-box-layout'), widgets: [] };
+            const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, widgets: [] };
             if(page.dataset.day !== undefined && page.dataset.day !== '') pageData.day = parseInt(page.dataset.day);
             if(page.dataset.lesson !== undefined && page.dataset.lesson !== '') pageData.lesson = parseInt(page.dataset.lesson);
             page.querySelectorAll('.widget').forEach(w => { pageData.widgets.push(serializeWidget(w)); });
@@ -4347,40 +4314,6 @@
     }
 
     function getActiveCanvasV6() { let canvas = document.querySelector('.canvas-page.active'); if (!canvas) { createPageV6(true); canvas = document.querySelector('.canvas-page.active'); } return canvas; }
-
-    // ---- RUTLAYOUT: 7 fasta, mjuka, ljusblå rutor med fasta rubriker som bakgrund på en sida.
-    // Rent visuellt lager (pointer-events:none) – rör inte widgetarnas egna x/y-positioner eller
-    // sparlogik. Varje ruta har en egen fast nyckel (data-box) så ordningen aldrig kan rubbas. ----
-    const BOX_LAYOUT_BOXES = [
-        { key:'lektion', label:'Lektion' },
-        { key:'matte', label:'Matematik' },
-        { key:'svenska', label:'Svenska' },
-        { key:'no', label:'NO' },
-        { key:'teknik', label:'Teknik' },
-        { key:'verktyg', label:'Verktyg' },
-        { key:'beloning', label:'Belöning' }
-    ];
-    function renderBoxLayoutGrid(canvasPage){
-        if(!canvasPage) return;
-        let grid = canvasPage.querySelector(':scope > .box-layout-grid');
-        if(!canvasPage.classList.contains('has-box-layout')){ if(grid) grid.remove(); return; }
-        if(!grid){
-            grid = document.createElement('div'); grid.className = 'box-layout-grid';
-            BOX_LAYOUT_BOXES.forEach(b=>{
-                const cell=document.createElement('div'); cell.className='box-layout-cell'; cell.dataset.box=b.key;
-                const lbl=document.createElement('div'); lbl.className='box-layout-label'; lbl.textContent=b.label;
-                cell.appendChild(lbl); grid.appendChild(cell);
-            });
-            canvasPage.insertBefore(grid, canvasPage.firstChild);
-        }
-    }
-    function toggleBoxLayout(){
-        const page = getActiveCanvasV6();
-        if(!page) return;
-        page.classList.toggle('has-box-layout');
-        renderBoxLayoutGrid(page);
-        saveBoardState();
-    }
     function clearCurrentPage() { customConfirm("Rensa sidan?", () => { const ac = getActiveCanvasV6(); if(ac) { ac.querySelectorAll('.widget').forEach(w => w.remove()); saveBoardState(); } }); }
     function arrangeWidgets() { const canvas = getActiveCanvasV6(); const appWrapper = document.getElementById('cb-app-wrapper'); if (!canvas) return; const widgets = Array.prototype.slice.call(canvas.querySelectorAll('.widget')); const gap = 8; let currentX = gap; let currentY = gap + 40; let maxRowHeight = 0; const canvasWidth = appWrapper.offsetWidth; for(let i=0; i<widgets.length; i++) { const w = widgets[i]; const wWidth = w.offsetWidth; const wHeight = w.offsetHeight; if (currentX + wWidth + gap > canvasWidth && currentX > gap) { currentX = gap; currentY += maxRowHeight + gap + 40; maxRowHeight = 0; } w.style.transition = 'top 0.3s ease, left 0.3s ease'; w.style.left = currentX + 'px'; w.style.top = currentY + 'px'; setTimeout(() => { w.style.transition = ''; }, 300); currentX += wWidth + gap; if (wHeight > maxRowHeight) maxRowHeight = wHeight; } setTimeout(saveBoardState, 350); }
 
@@ -22044,10 +21977,17 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // onclick-strängen, vilket annars gjorde att den sparade positionen för just den knappen
     // "glömdes bort" och knappen hoppade längst bak - även om etiketten (namnet man ser) var
     // exakt densamma som förut. Etikett-texten är mycket stabilare över den typen av ändringar.
+    // FIX (rot-orsak till att widgetar kunde "tappa" sin ruta): id:t byggdes tidigare på den SYNLIGA
+    // etikett-texten. Så fort en knapps text ändrades (nytt namn, stavning, emoji) matchade den inte
+    // längre mot den sparade layouten, och widgeten föll ur sin kategori-ruta och hamnade sist i listan.
+    // Onclick-anropet (t.ex. "createQuizTavling()") är en stabil identitet som inte ändras även om
+    // etiketten gör det, så det används nu i första hand. Etikett-text är kvar som reservmatchning
+    // enbart för bakåtkompatibilitet med redan sparade layouter från innan denna fix.
     function toolBtnId(btn){
+        const oc = (btn.getAttribute('onclick') || '').trim();
+        if (oc) return oc;
         const lbl = (btn.querySelector('.label')?.textContent || '').trim();
-        if (lbl) return lbl;
-        return (btn.getAttribute('onclick') || btn.id || '').trim();
+        return lbl || (btn.id || '').trim();
     }
     function saveToolbarOrder(){
         const tc=document.getElementById('toolbar-container'); if(!tc) return;
@@ -22303,6 +22243,134 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         saveToolPocketLayout();
     }
     window.addToolPocketCategory = addToolPocketCategory;
+    // Skapar alla 7 fasta rutor (Lektion, Matematik, Svenska, NO, Teknik, Verktyg, Belöning) och
+    // placerar sedan in de widgetar du bestämt i respektive ruta. RUTOR_MAPPNING fylls på allt
+    // eftersom du berättar vilka widgetar som hör hemma var - byggs bara ut, aldrig om, så gamla
+    // rutor du redan gett mig innehåll för rörs inte av att fler rutor läggs till senare.
+    // Widgetar matchas på sin onclick-funktion (stabil, se toolBtnId-fixen ovan), inte på text.
+    const MINA_RUTOR_NAMN = ['Lektion','Matematik','Svenska','NO','Teknik','Verktyg','Belöning'];
+    const RUTOR_MAPPNING = {
+        'Lektion': [
+            "createLessonPlan()",      // Lektion
+            "createDailySchedule()",   // Schema
+            "createWeekSchedule()",    // Veckoschema
+            "createCalendarWidget()",  // Kalender
+            "createLunchWidget()",     // Lunch
+            "createElevWidget()",      // Elever
+            "createGOTD()",            // Grej of the day
+            "createBrainBreak()",      // Brain Break
+            "createWordOfTheDay()"     // Dagens ord
+        ],
+        'Matematik': [
+            "createStartuppgift()",        // Startuppgift
+            "createMathChallenge()",        // Räkna
+            "createUppstallning()",         // Uppställning
+            "createBrakjamforelse()",       // Bråkjämförelse
+            "createMultiplicationTable()",  // Multiplikation
+            "createHundredChart()",         // Hundraruta
+            "createRimlighet()",            // Rimlighet
+            "createFractionVisualizer()",   // Talformer
+            "createTalfoljder()",           // Talföljder
+            "createMathBattle()",           // Mattekamp
+            "createDiagramWidget()",        // Diagram
+            "createSudoku()",               // Sudoku
+            "createSannolikhet()",          // Sannolikhet
+            "createUnitConverter()",        // Enheter
+            "createPositionssystemet()",    // Positionssystemet
+            "createNumberLine()",           // Tallinje
+            "createGeometryWidget()",       // Geometri
+            "createFormlerWidget()",        // Formler
+            "createMoneyWidget()",          // Pengar
+            "createOverslagsrakning()",     // Överslagsräkning
+            "createKoordinatsystem()",      // Koordinatsystem
+            "createAvrundning()",           // Avrundning
+            "createMatteBegrepp()"          // MatteBegrepp
+        ],
+        'Svenska': [
+            "createAlphabetWidget()",   // Alfabet
+            "createTalaWidget()",       // Tala
+            "createOrdWidget()",        // Ord
+            "createMeningarWidget()",   // Meningar
+            "createVerbWidget()",       // Verb
+            "createComparisonWidget()", // Jämföra
+            "createTextGenres()",       // Textgenrer
+            "createLasforstaelse()",    // Läsförståelse
+            "createSkrivstart()",       // Skrivstart
+            "createSpellingBattle()",   // Stavningskamp
+            "createCountryWidget()",    // Länder/Invånare
+            "createKallkritik()",       // Källkritik
+            "createYrkenWidget()"       // Yrken
+        ],
+        'NO': [
+            "createBiologiMegaWidget()", // Biologi
+            "createFysikMegaWidget()",   // Fysik
+            "createKemiMegaWidget()",    // Kemi
+            "createNoFraga()",           // Dagens NO-fråga
+            "createBegreppskort()",      // Begreppskort
+            "createSantFalskt()",        // Sant eller falskt
+            "createTeknikWidget()"       // Teknik (widgeten, ligger i NO-rutan enligt din bild)
+        ],
+        'Verktyg': [
+            "createStickyNote()",     // Lapp
+            "createTextEditor()",     // Text
+            "createTableWidget()",    // Tabell
+            "createChecklist()",      // Checklista
+            "createTrafficLight()",   // Ljuset
+            "createNoiseMeter()",     // Ljudnivå
+            "createReminderWidget()", // Reminder
+            "createTidMegaWidget()",  // Tid
+            "createWordSearch()",     // Ordgömma
+            "createCrossword()",      // Korsord
+            "createQuizPoll()",       // Omröstning
+            "createStickerPicker()",  // Klistermärken
+            "createWhiteboard()",     // Rita
+            "createWheel()",          // Hjul
+            "createKompisWidget()",   // En bra kompis!
+            "createWorkSymbols()",    // Arbetssätt
+            "createBirthdayWidget()", // Grattis
+            "createBgSelector()"      // Bakgrund
+        ],
+        'Belöning': [
+            "createClassReward()",  // Klasspoäng
+            "createGoodWidget()",   // Good
+            "createRewardSystem()", // Poäng
+            "createExitTicket()"    // Exit ticket
+        ],
+        'Teknik': [
+            "createCamera()",      // Kamera
+            "createVideoWidget()", // Video
+            "createQRCode()",      // QR-Kod
+            "createImageWidget()"  // Bild
+        ]
+    };
+    function getRutaBox(grid, namn){
+        return [...grid.querySelectorAll('.tool-pocket-category')].find(box=>{
+            const t = box.querySelector('.tpc-title');
+            return t && t.value.trim().toLowerCase() === namn.toLowerCase();
+        });
+    }
+    function createMinaRutor(){
+        if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
+        if(typeof isToolbarOrderLocked === 'function' && isToolbarOrderLocked()) return;
+        const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
+        // 1) Skapa de rutor som saknas (rör inte de som redan finns).
+        const finns = new Set([...grid.querySelectorAll('.tool-pocket-category .tpc-title')].map(el=>el.value.trim().toLowerCase()));
+        MINA_RUTOR_NAMN.forEach(namn=>{
+            if(finns.has(namn.toLowerCase())) return;
+            grid.appendChild(makeCategoryBoxEl(namn));
+        });
+        // 2) Flytta in de widgetar som bestämts för varje ruta, i bestämd ordning.
+        Object.keys(RUTOR_MAPPNING).forEach(namn=>{
+            const box = getRutaBox(grid, namn); if(!box) return;
+            const itemsEl = box.querySelector('.tpc-items');
+            RUTOR_MAPPNING[namn].forEach(onclickId=>{
+                const btn = grid.querySelector(`.tool-btn[onclick="${onclickId}"]`);
+                if(btn) itemsEl.appendChild(btn); // append flyttar automatiskt bort knappen från sin gamla plats
+            });
+        });
+        saveToolPocketLayout();
+    }
+    window.createMinaRutor = createMinaRutor;
     // Lägg till en ny kedja sist i verktygsfickan – dra den sedan dit du vill ha den
     function addToolPocketDivider(){
         if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return; // bara adminen får lägga till kedjor
@@ -22316,7 +22384,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const grid=document.getElementById('tool-pocket-grid'); if(!grid) return;
         try {
             const btns = [...document.querySelectorAll('#toolbar-container .tool-btn')];
-            const btnMap = {}; btns.forEach(b=>{ btnMap[toolBtnId(b)] = b; });
+            const btnMap = {};
+            btns.forEach(b=>{
+                btnMap[toolBtnId(b)] = b; // nya, stabila id:t (onclick i första hand)
+                const lbl = (b.querySelector('.label')?.textContent || '').trim();
+                if(lbl && !btnMap[lbl]) btnMap[lbl] = b; // bakåtkompatibilitet med äldre sparade layouter (etikett-baserade id:n)
+            });
             let layout = loadToolPocketLayout();
             if(!layout) layout = buildDefaultToolPocketLayout(btns.map(toolBtnId));
             const used = new Set();
@@ -22472,7 +22545,6 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 s.pages.forEach((p) => {
                     const pageId = p.id || Date.now() + '-' + Math.random().toString(16).slice(2);
                     const cp = document.createElement('div'); cp.className = 'canvas-page'; cp.id = pageId; if(p.bgImage) cp.style.backgroundImage = p.bgImage; if(p.name) cp.dataset.pageName = p.name;
-                    if(p.boxLayout) { cp.classList.add('has-box-layout'); renderBoxLayoutGrid(cp); }
                     const hasDay = (p.day!==undefined && p.day!==null);
                     const hasLesson = (p.lesson!==undefined && p.lesson!==null);
                     if(hasDay) cp.dataset.day = String(p.day);
