@@ -18717,18 +18717,23 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(config===undefined) config=null;
         const body = createWidget('ELEVER', 380, 'name-widget elever-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu elev-tabs'>
-                <button type='button' class='btn elev-tab-btn' data-tab='slumpa'>🎲 Slumpa namn</button>
-                <button type='button' class='btn elev-tab-btn' data-tab='turordning'>🔢 Turordning</button>
-                <button type='button' class='btn elev-tab-btn' data-tab='grupper'>👥 Skapa grupper</button>
-                <button type='button' class='btn elev-tab-btn' data-tab='narvaro'>🙋 Närvaro</button>
-                <button type='button' class='btn elev-tab-btn' data-tab='bord'>🪑 Bordsplacering</button>
+        body.innerHTML = `<div class='km-tabs-wrap elev-menu-wrap'>
+                <div class='km-tabs-handle'></div>
+                <div class='km-tabs'>
+                    <div class='elev-tabs'>
+                        <button type='button' class='btn elev-tab-btn' data-tab='slumpa'>🎲 Slumpa namn</button>
+                        <button type='button' class='btn elev-tab-btn' data-tab='turordning'>🔢 Turordning</button>
+                        <button type='button' class='btn elev-tab-btn' data-tab='grupper'>👥 Skapa grupper</button>
+                        <button type='button' class='btn elev-tab-btn' data-tab='narvaro'>🙋 Närvaro</button>
+                        <button type='button' class='btn elev-tab-btn' data-tab='bord'>🪑 Bordsplacering</button>
+                    </div>
+                    <div class='elev-privacy-row' style='display:flex;gap:6px;margin:2px 0 4px;'>
+                        <button type='button' class='btn btn-secondary btn-export-elever' style='flex:1;font-size:11px;padding:4px 6px;' title='Ladda ner alla sparade elevnamn/listor från den här widgeten som en textfil'>📤 Exportera elevdata</button>
+                        <button type='button' class='btn btn-danger btn-radera-elever' style='flex:1;font-size:11px;padding:4px 6px;' title='Radera alla elevnamn i den här widgeten permanent (går inte att ångra)'>🗑️ Radera alla elevnamn</button>
+                    </div>
+                    <div style='font-size:10.5px;color:#8a8a92;text-align:center;margin-bottom:6px;'>💡 Tips: rensa elevlistor vid terminsslut eller när klassen slutar</div>
+                </div>
             </div>
-            <div class='hover-menu elev-privacy-row' style='display:flex;gap:6px;margin:2px 0 4px;'>
-                <button type='button' class='btn btn-secondary btn-export-elever' style='flex:1;font-size:11px;padding:4px 6px;' title='Ladda ner alla sparade elevnamn/listor från den här widgeten som en textfil'>📤 Exportera elevdata</button>
-                <button type='button' class='btn btn-danger btn-radera-elever' style='flex:1;font-size:11px;padding:4px 6px;' title='Radera alla elevnamn i den här widgeten permanent (går inte att ångra)'>🗑️ Radera alla elevnamn</button>
-            </div>
-            <div class='hover-menu' style='font-size:10.5px;color:#8a8a92;text-align:center;margin-bottom:6px;'>💡 Tips: rensa elevlistor vid terminsslut eller när klassen slutar</div>
             <div class='elev-pane elev-pane-slumpa'>
                 <div class='list-selector-area hover-menu'><select class='editor-select'></select><button class='btn btn-danger btn-del'>Ta bort</button></div>
                 <div class='save-list-area hover-menu'><input type='text' class='list-name-input' placeholder='Klassnamn...'><button class='btn btn-secondary btn-save'>Spara</button></div>
@@ -18767,6 +18772,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             <div class='elev-pane elev-pane-bord' style='display:none;'></div>`;
 
         const tabBtns = [...body.querySelectorAll('.elev-tab-btn')];
+        const elevMenuWrap = body.querySelector('.elev-menu-wrap');
+        // FIX: menyn (flikar, exportera/radera, tips) ligger nu i en EGEN ihopfällbar ruta, inte
+        // längre kopplad till om musen hovrar över HELA widgeten. Det gör att man kan hovra/klicka
+        // fritt i själva listan (t.ex. bocka av namn i Turordning) utan att menyn dyker upp - den
+        // visas bara när man faktiskt hovrar eller klickar på den lilla pilen/menyn själv.
+        if(!config) elevMenuWrap.classList.add('expanded');
+        body.addEventListener('pointerdown', (e)=>{ if(!elevMenuWrap.contains(e.target)) elevMenuWrap.classList.remove('expanded'); });
         // FIX: en klickad knapp behåller webbläsarens fokus efteråt, vilket håller hela menydelen
         // (flikrad, exportera/radera-raden, tipset) synlig via :focus-within även när musen inte
         // längre är kvar i widgeten - man ser bara att den "fastnar" öppen. Istället för att lappa
@@ -18796,7 +18808,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 narvaro: { text: txtN.value, list: selN.value, absentByList: Object.fromEntries(Object.keys(absentByList).map(k=>[k, [...absentByList[k]].map(([name,v])=>({ name, note:v.note||'' }))])) }
             });
         };
-        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); persist(); saveBoardState(); b.blur(); });
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); persist(); saveBoardState(); b.blur(); elevMenuWrap.classList.remove('expanded'); });
 
         // ---- Flik: Slumpa namn (oförändrad logik) ----
         const selS=paneSlumpa.querySelector('select'), txtS=paneSlumpa.querySelector('textarea'), resS=paneSlumpa.querySelector('.name-result'), niS=paneSlumpa.querySelector('.list-name-input'), cbS=paneSlumpa.querySelector('input[type="checkbox"]');
