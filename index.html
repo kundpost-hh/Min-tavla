@@ -223,6 +223,7 @@
             <button class="tool-btn" data-cat="matte" onclick="createAvrundning()"><div class="icon">🎚️</div><div class="label">Avrundning</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createMathChallenge()"><div class="icon"><svg viewBox="0 0 24 24" width="22" height="22" style="display:block;margin:0 auto;"><text x="6" y="10" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">+</text><text x="18" y="10" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">−</text><text x="6" y="21" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">×</text><text x="18" y="21" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">÷</text></svg></div><div class="label">Räkna</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createStartuppgift()"><div class="icon">🎯</div><div class="label">Startuppgift</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createStartuppgiftSvenska()"><div class="icon">📖</div><div class="label">Startuppgift Sv</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createNumberLine()"><div class="icon">📏</div><div class="label">Tallinje</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createMoneyWidget()"><div class="icon">💰</div><div class="label">Pengar</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createGeometryWidget()"><div class="icon">📐</div><div class="label">Geometri</div></button>
@@ -3943,6 +3944,7 @@
                 else if (type === 'HUNDRARUTA') { try{ state.data = JSON.parse(w.dataset.hundra || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'RÄKNA') { try{ state.data = JSON.parse(w.dataset.rakna || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'STARTUPPGIFT') { try{ state.data = JSON.parse(w.dataset.startuppgift || '[]'); }catch(e){ state.data=[]; } }
+                else if (type === 'STARTUPPGIFT SVENSKA') { try{ state.data = JSON.parse(w.dataset.startuppgiftSve || '[]'); }catch(e){ state.data=[]; } }
                 else if (type === 'TALLINJE') { try{ state.data = JSON.parse(w.dataset.tallinje || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'PENGAR') { try{ state.data = JSON.parse(w.dataset.pengar || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'GEOMETRI') { try{ state.data = JSON.parse(w.dataset.geo || '{}'); }catch(e){ state.data={}; } }
@@ -4073,6 +4075,7 @@
             else if (w.type === 'HUNDRARUTA') createHundredChart(w);
             else if (w.type === 'RÄKNA') createMathChallenge(w);
             else if (w.type === 'STARTUPPGIFT') createStartuppgift(w);
+            else if (w.type === 'STARTUPPGIFT SVENSKA') createStartuppgiftSvenska(w);
             else if (w.type === 'TALLINJE') createNumberLine(w);
             else if (w.type === 'PENGAR') createMoneyWidget(w);
             else if (w.type === 'GEOMETRI') createGeometryWidget(w);
@@ -10870,6 +10873,114 @@
         if(config && config.data && Array.isArray(config.data) && config.data.length){ renderUppgifter(config.data); }
         else { renderUppgifter(dagensUppgifter()); }
     }
+
+    // ---- STARTUPPGIFT SVENSKA (åk 4) ----
+    // Samma upplägg och CSS-klasser (su-*) som matte-varianten ovan, återanvända rakt av för att
+    // se enhetlig ut. Fyra grundområden roterar + en extra klurig gåta sist.
+    function createStartuppgiftSvenska(config){
+        if(config===undefined) config=null;
+        const body = createWidget('STARTUPPGIFT SVENSKA', 400, 'startuppgift-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är en klurig gåta!</div><button class='btn btn-primary su-btn' style='width:100%'>📖 Dagens uppgift</button><div class='su-lista'></div>`;
+        const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista');
+        const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
+        const val = (arr)=> arr[ri(0, arr.length-1)];
+
+        const ORDKLASS_ORD = [
+            { ord:'hund', klass:'Substantiv' }, { ord:'springa', klass:'Verb' }, { ord:'glad', klass:'Adjektiv' },
+            { ord:'bil', klass:'Substantiv' }, { ord:'äta', klass:'Verb' }, { ord:'snabb', klass:'Adjektiv' },
+            { ord:'bok', klass:'Substantiv' }, { ord:'sova', klass:'Verb' }, { ord:'blå', klass:'Adjektiv' },
+            { ord:'lärare', klass:'Substantiv' }, { ord:'hoppa', klass:'Verb' }, { ord:'stor', klass:'Adjektiv' },
+            { ord:'skola', klass:'Substantiv' }, { ord:'läsa', klass:'Verb' }, { ord:'liten', klass:'Adjektiv' },
+            { ord:'katt', klass:'Substantiv' }, { ord:'skratta', klass:'Verb' }, { ord:'kall', klass:'Adjektiv' }
+        ];
+        const STAVNING_PAR = [
+            { ratt:'kyckling', fel:'kykling' }, { ratt:'restaurang', fel:'restorang' }, { ratt:'choklad', fel:'sjoklad' },
+            { ratt:'känguru', fel:'kenguru' }, { ratt:'stjärna', fel:'sjärna' }, { ratt:'tjugo', fel:'kjugo' },
+            { ratt:'misstag', fel:'mistag' }, { ratt:'äpple', fel:'äple' }, { ratt:'flicka', fel:'flika' },
+            { ratt:'skjorta', fel:'sjorta' }, { ratt:'gungar', fel:'gunggar' }, { ratt:'sjuksköterska', fel:'sjuksköterksa' }
+        ];
+        const SYNONYM_PAR = [
+            { ord:'glad', typ:'motsats', svar:'ledsen' }, { ord:'stor', typ:'motsats', svar:'liten' },
+            { ord:'snabb', typ:'motsats', svar:'långsam' }, { ord:'varm', typ:'motsats', svar:'kall' },
+            { ord:'ny', typ:'motsats', svar:'gammal' }, { ord:'hoppa', typ:'synonym', svar:'skutta' },
+            { ord:'titta', typ:'synonym', svar:'se / kolla' }, { ord:'fin', typ:'synonym', svar:'vacker / snygg' },
+            { ord:'rädd', typ:'synonym', svar:'skraj / skrämd' }, { ord:'prata', typ:'synonym', svar:'tala / snacka' }
+        ];
+        const MENING_BAS = [
+            'det regnar ute', 'jag gillar att spela fotboll', 'min bästa kompis heter alex',
+            'vi ska åka till mormor i helgen', 'skolan börjar klockan åtta', 'hunden heter bella',
+            'imorgon ska vi ha idrott', 'katten sitter i fönstret', 'vi läser en bok om rymden'
+        ];
+        const KLURIG_ORD = [
+            { del1:'fot', del2:'boll', ledtrad:'Ett spel du sparkar på.' },
+            { del1:'regn', del2:'båge', ledtrad:'Syns på himlen efter att det regnat.' },
+            { del1:'sol', del2:'glasögon', ledtrad:'Skyddar ögonen på sommaren.' },
+            { del1:'bok', del2:'hylla', ledtrad:'Där man förvarar böcker.' },
+            { del1:'köks', del2:'bord', ledtrad:'Man äter frukost vid det.' },
+            { del1:'sim', del2:'bassäng', ledtrad:'Där man badar inomhus.' },
+            { del1:'brand', del2:'bil', ledtrad:'Kommer när det brinner.' },
+            { del1:'glass', del2:'strut', ledtrad:'Håller i glassen så den inte smetar ner handen.' },
+            { del1:'snö', del2:'gubbe', ledtrad:'Bygger man på vintern av snö.' }
+        ];
+
+        const OMRADEN = {
+            ordklass: {
+                namn:'Ordklasser', emoji:'🔤',
+                gen: function(){ const o = val(ORDKLASS_ORD); return { fraga:'Vilken ordklass tillhör ordet "'+o.ord+'"?', svar:o.klass }; }
+            },
+            stavning: {
+                namn:'Stavning', emoji:'✏️',
+                gen: function(){ const p = val(STAVNING_PAR); const omvant = Math.random()<0.5; const a = omvant ? p.ratt : p.fel, b = omvant ? p.fel : p.ratt; return { fraga:'Vilket är rätt stavat: "'+a+'" eller "'+b+'"?', svar:p.ratt }; }
+            },
+            synonym: {
+                namn:'Synonymer & motsatsord', emoji:'🔁',
+                gen: function(){ const s = val(SYNONYM_PAR); const fraga = s.typ==='motsats' ? ('Vad är motsatsen till "'+s.ord+'"?') : ('Ge ett ord med samma betydelse som "'+s.ord+'" (synonym).'); return { fraga:fraga, svar:s.svar }; }
+            },
+            mening: {
+                namn:'Meningsbyggnad', emoji:'✍️',
+                gen: function(){ const m = val(MENING_BAS); const ratt = m.charAt(0).toUpperCase() + m.slice(1) + '.'; return { fraga:'Skriv om meningen med stor bokstav och punkt: "'+m+'"', svar:ratt }; }
+            },
+            klurig: {
+                namn:'Ordgåta', emoji:'🧩',
+                gen: function(){ const k = val(KLURIG_ORD); return { fraga:'Gåta: Jag är ett sammansatt ord. '+k.ledtrad+' Jag börjar på "'+k.del1+'" och slutar på "'+k.del2+'". Vad är jag?', svar:k.del1+k.del2 }; }
+            }
+        };
+        const GRUNDOMRADEN = ['ordklass','stavning','synonym','mening'];
+
+        function dagensUppgifter(){
+            const uppgifter = blandaSU(GRUNDOMRADEN).map(key=>{
+                const u = OMRADEN[key].gen();
+                return { omrade:OMRADEN[key].namn, emoji:OMRADEN[key].emoji, klurig:false, fraga:u.fraga, svar:u.svar };
+            });
+            const k = OMRADEN.klurig.gen();
+            uppgifter.push({ omrade:OMRADEN.klurig.namn, emoji:OMRADEN.klurig.emoji, klurig:true, fraga:k.fraga, svar:k.svar });
+            return uppgifter;
+        }
+        function blandaSU(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+        function renderUppgifter(uppgifter){
+            lista.innerHTML='';
+            uppgifter.forEach((u)=>{
+                const rad=document.createElement('div'); rad.className='su-rad'+(u.klurig?' su-klurig':'');
+                const tagg=document.createElement('div'); tagg.className='su-tagg'; tagg.innerHTML=`<span>${u.emoji}</span>${u.omrade}${u.klurig?' <span class="su-klurig-lbl">✨ Extra klurig</span>':''}`;
+                const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
+                const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
+                const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
+                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
+                rad2.appendChild(fr); rad2.appendChild(sv);
+                rad.appendChild(tagg); rad.appendChild(rad2);
+                lista.appendChild(rad);
+            });
+            widget.dataset.startuppgiftSve = JSON.stringify(uppgifter);
+        }
+
+        btn.onclick=()=>{ renderUppgifter(dagensUppgifter()); saveBoardState(); };
+
+        if(config && config.data && Array.isArray(config.data) && config.data.length){ renderUppgifter(config.data); }
+        else { renderUppgifter(dagensUppgifter()); }
+    }
+    window.createStartuppgiftSvenska = createStartuppgiftSvenska;
 
     // ---- TALLINJE ----
     // Valfritt intervall (även negativa tal). Klicka på linjen för att sätta ut
@@ -18992,19 +19103,25 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
         // ---- GDPR: exportera eller radera all elevdata i den här widgeten ----
         body.querySelector('.btn-export-elever').onclick = () => {
+            // FIX: exporterades tidigare som en .json-fil - tekniskt korrekt men jobbig att öppna
+            // och läsa för den som inte är van vid sånt. Bygger nu istället en vanlig, läsbar
+            // textfil (.txt) med samma innehåll, som går att öppna direkt i Anteckningar/Word.
             const savedLists = JSON.parse(localStorage.getItem('savedClassLists_'+currentUser)) || {};
-            const exportData = {
-                exporteradAv: currentUser,
-                exporteradDatum: new Date().toISOString(),
-                sparadeElevlistor: savedLists,
-                slumpaNamn_aktuellText: txtS.value,
-                skapaGrupper_aktuellText: txtG.value,
-                narvaro_aktuellText: txtN.value
-            };
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            let out = 'ELEVDATA - EXPORT\n';
+            out += 'Exporterad av: ' + currentUser + '\n';
+            out += 'Exporterad: ' + new Date().toLocaleString('sv-SE') + '\n';
+            out += '\n==================== SPARADE KLASSLISTOR ====================\n';
+            const listNamn = Object.keys(savedLists);
+            if(listNamn.length === 0){ out += '(inga sparade listor)\n'; }
+            listNamn.forEach(namn=>{ out += '\n--- ' + namn + ' ---\n' + (savedLists[namn] || '(tom)') + '\n'; });
+            out += '\n==================== AKTUELLT INNEHÅLL I FLIKARNA ====================\n';
+            out += '\n--- Slumpa namn (nuvarande text) ---\n' + (txtS.value || '(tomt)') + '\n';
+            out += '\n--- Skapa grupper (nuvarande text) ---\n' + (txtG.value || '(tomt)') + '\n';
+            out += '\n--- Närvaro (nuvarande text) ---\n' + (txtN.value || '(tomt)') + '\n';
+            const blob = new Blob([out], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = 'elevdata-export-' + new Date().toISOString().slice(0,10) + '.json';
+            a.href = url; a.download = 'elevdata-export-' + new Date().toISOString().slice(0,10) + '.txt';
             document.body.appendChild(a); a.click(); a.remove();
             setTimeout(()=> URL.revokeObjectURL(url), 1000);
         };
