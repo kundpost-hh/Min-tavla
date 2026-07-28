@@ -4411,6 +4411,7 @@
         const today = (_dow>=1 && _dow<=5) ? _dow-1 : -1; // vardag -> 0..4, helg -> -1 (ingen)
         pagesListV6.forEach((pg, i)=>{
             if(pg.day===undefined || pg.day===null) return;
+            if(pg.lesson!==undefined && pg.lesson!==null) return; // lektionssidor har nu också "day" satt, men ska bara synas i L-raden, inte här
             const d = DAY_DEFS[pg.day]; if(!d) return;
             const chip = document.createElement('button'); chip.className='sp-day-chip' + (i===currentPageIndexV6 ? ' current' : '') + (pg.day===today ? ' today' : '');
             chip.textContent = d.label; chip.style.background = d.color; chip.title = d.name + ' ' + weekdayDate(pg.day);
