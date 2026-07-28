@@ -77,8 +77,9 @@
                     <a href="#" id="email-auth-forgot" onclick="forgotEmailPassword(); return false;" style="color:#8e8e93;text-decoration:underline;">Glömt lösenord?</a>
                 </div>
             </div>
-            <div id="guest-mode-wrap" style="margin-top:20px;padding-top:16px;border-top:1px solid #f2f2f7;text-align:center;">
-                <a href="#" id="guest-mode-link" onclick="enterGuestMode(); return false;" style="font-size:12px;color:#8e8e93;text-decoration:underline;">👀 Prova appen utan konto (öppen demo, inget sparas)</a>
+            <div id="guest-mode-wrap" style="margin-top:20px;padding-top:16px;border-top:1px solid #f2f2f7;">
+                <button type="button" id="guest-mode-link" onclick="enterGuestMode();" style="display:block;width:100%;font-size:15px;font-weight:700;color:#48484a;background:#f2f2f7;border:1.5px solid #e5e5ea;border-radius:10px;padding:12px 20px;cursor:pointer;text-align:center;">👀 Prova appen utan konto</button>
+                <div style="font-size:11px;color:#aeaeb2;text-align:center;margin-top:6px;">Öppen demo - inget sparas</div>
             </div>
             <div id="login-local-note" style="margin-top: 18px; font-size: 12px; color: #aaa;"></div>
         </div>
@@ -3264,7 +3265,18 @@
             }
             const snap = await fbDB.collection('config').doc('toolbar').get();
             if (snap.exists) applySharedToolbar(snap.data());
-        } catch(e){ console.warn('[MinTavla] Delad verktygslåda kunde inte hämtas:', e); }
+        } catch(e){
+            // FIX: gäster loggar aldrig in mot Firebase, så om Firestore-reglerna kräver inloggning
+            // för att LÄSA config/toolbar nekas den här hämtningen tyst ("permission-denied") och
+            // gästen faller tillbaka på standardordningen. Logga tydligt i konsolen vad som hände,
+            // så det går att se direkt (F12 -> Console) istället för att bara undra varför ordningen
+            // ser fel ut i gästläget.
+            if (window.isGuestMode && e && e.code === 'permission-denied'){
+                console.warn('[MinTavla] Gästläget kunde inte hämta den delade verktygsordningen (config/toolbar) eftersom Firestore-reglerna kräver inloggning för att läsa. Lägg till en publik läs-regel för just config/toolbar i Firebase-konsolen (Firestore Database -> Rules) om gäster ska se samma ordning som inloggade användare.');
+            } else {
+                console.warn('[MinTavla] Delad verktygslåda kunde inte hämtas:', e);
+            }
+        }
     }
     function pushSharedToolbar(){
         if (!window.cloudReady || !fbDB || !currentUser) return;
@@ -4284,13 +4296,28 @@
     ];
     function todayDayIndex(){ const d = new Date().getDay(); return (d>=1 && d<=5) ? d-1 : 0; }
     function weekdayDate(idx){ try { const now=new Date(); const dow=now.getDay(); const off=(dow===0?-6:1-dow); const monday=new Date(now); monday.setDate(now.getDate()+off); const d=new Date(monday); d.setDate(monday.getDate()+idx); return d.toLocaleDateString('sv-SE',{day:'numeric',month:'short'}); } catch(e){ return ''; } }
+    // Vilken veckodags L1-L5-uppsättning som just nu visas i SIDOR-panelen. Uppdateras automatiskt
+    // i renderSidePocket() så fort man är inne på en dags- eller lektionssida, och står annars kvar
+    // på senaste dagen så länge man tittar på en vanlig/egen sida (t.ex. "Sida 1").
+    let currentDayContextV6 = todayDayIndex();
     function ensureFixedPages(){
         const container = document.getElementById('canvas-container-v6');
         const dayPages = {}, lessonPages = {}, regular = [];
         pagesListV6.forEach(pg => {
-            if(pg.day!==undefined && pg.day!==null && DAY_DEFS[pg.day]) dayPages[pg.day]=pg;
-            else if(pg.lesson!==undefined && pg.lesson!==null && LESSON_DEFS[pg.lesson]) lessonPages[pg.lesson]=pg;
-            else regular.push(pg);
+            const hasDay = pg.day!==undefined && pg.day!==null && DAY_DEFS[pg.day];
+            const hasLesson = pg.lesson!==undefined && pg.lesson!==null && LESSON_DEFS[pg.lesson];
+            if(hasLesson){
+                // FIX: lektionssidor tillhör nu en specifik veckodag (25 sidor: 5 dagar × L1-L5) istället
+                // för att vara 5 globala sidor delade av alla dagar. Gamla tavlor som sparades innan den
+                // här ändringen saknar day på sina lektionssidor - migrera dem till Måndag (dag 0) så
+                // inget innehåll försvinner, resten av veckans lektionssidor skapas tomma nedan.
+                if(!hasDay) pg.day = 0;
+                lessonPages[pg.day + '-' + pg.lesson] = pg;
+            } else if(hasDay){
+                dayPages[pg.day] = pg;
+            } else {
+                regular.push(pg);
+            }
         });
         let created = 0;
         DAY_DEFS.forEach(d => {
@@ -4300,14 +4327,21 @@
                 container.appendChild(cp); dayPages[d.idx] = { id: pageId, canvas: cp, name: d.name, day: d.idx }; created++;
             } else { const pg = dayPages[d.idx]; pg.day=d.idx; pg.canvas.dataset.day=String(d.idx); if(!pg.name) pg.name=d.name; }
         });
-        LESSON_DEFS.forEach(l => {
-            if(!lessonPages[l.idx]){
-                const pageId = 'lesson-'+l.idx+'-'+Math.random().toString(16).slice(2);
-                const cp = document.createElement('div'); cp.className='canvas-page'; cp.id=pageId; cp.dataset.lesson=String(l.idx); cp.dataset.pageName=l.name;
-                container.appendChild(cp); lessonPages[l.idx] = { id: pageId, canvas: cp, name: l.name, lesson: l.idx }; created++;
-            } else { const pg = lessonPages[l.idx]; pg.lesson=l.idx; pg.canvas.dataset.lesson=String(l.idx); if(!pg.name) pg.name=l.name; }
+        DAY_DEFS.forEach(d => {
+            LESSON_DEFS.forEach(l => {
+                const key = d.idx + '-' + l.idx;
+                if(!lessonPages[key]){
+                    const pageId = 'lesson-'+d.idx+'-'+l.idx+'-'+Math.random().toString(16).slice(2);
+                    const cp = document.createElement('div'); cp.className='canvas-page'; cp.id=pageId; cp.dataset.day=String(d.idx); cp.dataset.lesson=String(l.idx); cp.dataset.pageName=d.name+' – '+l.name;
+                    container.appendChild(cp); lessonPages[key] = { id: pageId, canvas: cp, name: l.name, day: d.idx, lesson: l.idx }; created++;
+                } else {
+                    const pg = lessonPages[key]; pg.day=d.idx; pg.lesson=l.idx; pg.canvas.dataset.day=String(d.idx); pg.canvas.dataset.lesson=String(l.idx); if(!pg.name) pg.name=l.name;
+                }
+            });
         });
-        pagesListV6 = [0,1,2,3,4].map(i=>dayPages[i]).concat([0,1,2,3,4].map(i=>lessonPages[i])).concat(regular);
+        let lessonList = [];
+        DAY_DEFS.forEach(d => { LESSON_DEFS.forEach(l => { lessonList.push(lessonPages[d.idx + '-' + l.idx]); }); });
+        pagesListV6 = [0,1,2,3,4].map(i=>dayPages[i]).concat(lessonList).concat(regular);
         pagesListV6.forEach(pg => container.appendChild(pg.canvas)); // synka DOM-ordning med listan
         return created;
     }
@@ -4321,8 +4355,8 @@
     function renamePageV6(index, name){ if(!pagesListV6[index]) return; pagesListV6[index].name = name; pagesListV6[index].canvas.dataset.pageName = name; updatePagesNavV6(); saveBoardState(); }
     function activePageLabel(){
         const pg = pagesListV6[currentPageIndexV6]; if(!pg) return 'denna sida';
-        if(pg.day!=null && DAY_DEFS[pg.day]) return DAY_DEFS[pg.day].name;
-        if(pg.lesson!=null && LESSON_DEFS[pg.lesson]) return LESSON_DEFS[pg.lesson].name;
+        if(pg.day!=null && DAY_DEFS[pg.day] && (pg.lesson===undefined || pg.lesson===null)) return DAY_DEFS[pg.day].name;
+        if(pg.lesson!=null && LESSON_DEFS[pg.lesson]) return (pg.day!=null && DAY_DEFS[pg.day] ? DAY_DEFS[pg.day].name + ' – ' : '') + LESSON_DEFS[pg.lesson].name;
         if(pg.name) return pg.name;
         let n=0; for(let i=0;i<pagesListV6.length;i++){ const p=pagesListV6[i]; if(p.day==null && p.lesson==null){ n++; if(i===currentPageIndexV6) return 'Sida '+n; } }
         return 'denna sida';
@@ -4384,15 +4418,25 @@
             dayRow.appendChild(chip);
         });
         pagesEl.appendChild(dayRow);
+        // Håll koll på vilken veckodags L1-L5 som ska visas: om man just nu står på en dags- eller
+        // lektionssida uppdateras kontexten till den dagen, annars behålls senaste kända dag (t.ex.
+        // när man tittar på en egen/vanlig sida ska L1-L5 fortfarande visa rätt veckas lektioner).
+        const _activePg = pagesListV6[currentPageIndexV6];
+        if(_activePg && _activePg.day!=null && DAY_DEFS[_activePg.day]) currentDayContextV6 = _activePg.day;
         // LINJE under veckodagarna
         const fixedDivider = document.createElement('div'); fixedDivider.className='sp-fixed-divider'; pagesEl.appendChild(fixedDivider);
-        // LEKTIONER (fasta) – chip-rad
+        // Liten etikett så det är tydligt vilken dags lektioner som visas
+        const lessonLbl = document.createElement('div'); lessonLbl.style.cssText='font-size:10.5px;color:#8e8e93;font-weight:700;text-align:center;margin:2px 0 4px;';
+        lessonLbl.textContent = (DAY_DEFS[currentDayContextV6] ? DAY_DEFS[currentDayContextV6].name : '') + 's lektioner';
+        pagesEl.appendChild(lessonLbl);
+        // LEKTIONER (fasta) – chip-rad, bara aktuell veckodags egna L1-L5
         const lessonRow = document.createElement('div'); lessonRow.className='sp-day-row sp-lesson-row';
         pagesListV6.forEach((pg, i)=>{
             if(pg.lesson===undefined || pg.lesson===null) return;
+            if(pg.day !== currentDayContextV6) return;
             const l = LESSON_DEFS[pg.lesson]; if(!l) return;
             const chip = document.createElement('button'); chip.className='sp-day-chip sp-lesson-chip' + (i===currentPageIndexV6 ? ' current' : '');
-            chip.textContent = l.label; chip.style.background = l.color; chip.title = l.name;
+            chip.textContent = l.label; chip.style.background = (DAY_DEFS[currentDayContextV6] ? DAY_DEFS[currentDayContextV6].color : l.color); chip.title = (DAY_DEFS[currentDayContextV6] ? DAY_DEFS[currentDayContextV6].name + ' – ' : '') + l.name;
             chip.onclick=()=>{ goToPageByIndexV6(i); saveBoardState(); };
             lessonRow.appendChild(chip);
         });
