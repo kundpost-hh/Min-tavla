@@ -18805,7 +18805,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 slumpa: { list: selS.value, text: txtS.value, removeCb: cbS.checked },
                 turordning: { list: selTur.value, text: txtTur.value, queue: turQueue },
                 grupper: { list: selG.value, text: txtG.value, count: ciG.value, result: resG.innerHTML },
-                narvaro: { text: txtN.value, list: selN.value, absentByList: Object.fromEntries(Object.keys(absentByList).map(k=>[k, [...absentByList[k]].map(([name,v])=>({ name, note:v.note||'' }))])) }
+                narvaro: { text: txtN.value, list: selN.value, absentByList: Object.fromEntries(Object.keys(absentByList).map(k=>[k, [...absentByList[k]].map(([name,v])=>({ name, note:v.note||'' }))])) },
+                bord: (()=>{ try{ return JSON.parse(paneBord.dataset.seating || '[]'); }catch(e){ return []; } })()
             });
         };
         tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); persist(); saveBoardState(); b.blur(); elevMenuWrap.classList.remove('expanded'); });
@@ -18946,9 +18947,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(config && config.data && config.data.narvaro){ const d=config.data.narvaro; if(d.text) txtN.value=d.text; if(d.list) setTimeout(()=>{ selN.value=d.list; },50); }
 
         // ==== Flik: Bordsplacering (oförändrad logik, inbäddad via createWidget-shim) ====
-        function embedSubWidget(fn, pane){
+        function embedSubWidget(fn, pane, cfg){
             const realCreateWidget = createWidget;
-            createWidget = function(title, width, customClass, cfg){
+            createWidget = function(title, width, customClass, innerCfg){
                 const fake = document.createElement('div'); fake.className = customClass||''; fake.style.cssText='width:'+width+'px;max-width:100%;margin:0 auto;';
                 const innerEl = document.createElement('div'); innerEl.className='widget-inner'; innerEl.style.cssText='position:static;width:100%;height:auto;';
                 const bodyEl = document.createElement('div'); bodyEl.className='widget-body'; bodyEl.style.cssText='position:static;height:auto;overflow:visible;';
@@ -18956,9 +18957,28 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 pane.appendChild(fake);
                 return bodyEl;
             };
-            try { fn(null); } finally { createWidget = realCreateWidget; }
+            try { fn(cfg || null); } finally { createWidget = realCreateWidget; }
         }
-        embedSubWidget(createSeatingChart, paneBord);
+        // FIX: skicka med sparat innehåll (om det finns) så bordsplaceringen faktiskt återställs vid
+        // omladdning, istället för att alltid starta tom som förut (config skickades tidigare
+        // hårdkodat som null, så inget sparades eller lästes tillbaka).
+        const bordConfig = (config && config.data && Array.isArray(config.data.bord)) ? { data: { items: config.data.bord } } : null;
+        embedSubWidget(createSeatingChart, paneBord, bordConfig);
+        // FIX: createSeatingChart sätter (för sitt eget bruk som fristående widget) en fast höjd på
+        // "widgetEl" vid skapande. I den inbäddade kontexten här råkar "widgetEl" tolkas som själva
+        // fliken (paneBord) istället för ett eget flytande fönster - det tvingade panelen till en
+        // fast 460px-höjd oavsett tillgängligt utrymme, så bordsplaceringens innehåll (canvasen där
+        // man drar ut bänkar) stack ut utanför widgetens ram. Nollställ höjden och låt panelens egen
+        // scrollning (redan inbyggd i .seat-canvas-wrap) hantera det istället.
+        paneBord.style.height = '';
+        paneBord.style.minHeight = '0';
+        paneBord.style.overflow = 'hidden';
+        // FIX: createSeatingChart sparar sina placerade bänkar genom att skriva till "widgetEl.dataset
+        // .seating" - i den inbäddade kontexten hamnar det på paneBord istället för på själva ELEVER-
+        // widgeten, så det lästes aldrig tillbaka av Elevers egen serialisering (widget.dataset.elever)
+        // och försvann tyst vid varje omladdning. Bevaka den attributet och synka in det i Elevers
+        // egen persist() varje gång bordsplaceringen ändras, så det faktiskt sparas.
+        new MutationObserver(()=> persist()).observe(paneBord, { attributes:true, attributeFilter:['data-seating'] });
 
         // ---- GDPR: exportera eller radera all elevdata i den här widgeten ----
         body.querySelector('.btn-export-elever').onclick = () => {
