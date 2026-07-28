@@ -190,7 +190,6 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createStickyNote()"><div class="icon">🗒️</div><div class="label">Lapp</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createElevWidget()"><div class="icon">🧑‍🎓</div><div class="label">Elever</div></button>
-            <button class="tool-btn" data-cat="klassrum" onclick="createTurordningWidget()"><div class="icon">🔢</div><div class="label">Turordning</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createUppmarksamhetWidget()"><div class="icon">🤫</div><div class="label">Uppmärksamhet</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createBerattarWidget()"><div class="icon">🎲</div><div class="label">Berättartärning</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
@@ -18711,6 +18710,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const widget = body.parentElement.parentElement;
         body.innerHTML = `<div class='hover-menu elev-tabs'>
                 <button type='button' class='btn elev-tab-btn' data-tab='slumpa'>🎲 Slumpa namn</button>
+                <button type='button' class='btn elev-tab-btn' data-tab='turordning'>🔢 Turordning</button>
                 <button type='button' class='btn elev-tab-btn' data-tab='grupper'>👥 Skapa grupper</button>
                 <button type='button' class='btn elev-tab-btn' data-tab='narvaro'>🙋 Närvaro</button>
                 <button type='button' class='btn elev-tab-btn' data-tab='bord'>🪑 Bordsplacering</button>
@@ -18728,6 +18728,20 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 <button class='btn btn-primary hover-menu btn-roll' style='width:100%'>Slumpa!</button>
                 <div class='name-result'></div>
             </div>
+            <div class='elev-pane elev-pane-turordning' style='display:none;'>
+                <div class='km-tabs-wrap'>
+                    <div class='km-tabs-handle'></div>
+                    <div class='km-tabs'>
+                        <div class='list-selector-area hover-menu'><select class='editor-select tur-sel'></select><button class='btn btn-danger btn-del'>Ta bort</button></div>
+                        <div class='save-list-area hover-menu'><input type='text' class='list-name-input tur-listname' placeholder='Klassnamn...'><button class='btn btn-secondary btn-save'>Spara</button></div>
+                        <textarea class='name-input hover-menu tur-txt' placeholder='Skriv namn, ett per rad...'></textarea>
+                    </div>
+                </div>
+                <button type='button' class='btn btn-primary hover-menu tur-roll' style='width:100%;margin-bottom:10px;'>🎲 Slumpa ordning</button>
+                <div class='tur-status hover-menu' style='text-align:center;font-size:12px;color:#8e8e93;margin-bottom:8px;min-height:16px;'></div>
+                <div class='tur-queue' style='max-height:280px;overflow-y:auto;padding-right:4px;'></div>
+                <div class='hover-menu' style='margin-top:8px;'><button type='button' class='btn btn-secondary tur-reset' style='width:100%;'>↺ Bocka av alla igen</button></div>
+            </div>
             <div class='elev-pane elev-pane-grupper' style='display:none;'>
                 <div class='list-selector-area hover-menu'><select class='editor-select'></select></div>
                 <textarea class='name-input hover-menu' placeholder='Skriv namn...'></textarea>
@@ -18744,12 +18758,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             <div class='elev-pane elev-pane-bord' style='display:none;'></div>`;
 
         const tabBtns = [...body.querySelectorAll('.elev-tab-btn')];
-        const paneSlumpa = body.querySelector('.elev-pane-slumpa'), paneGrupper = body.querySelector('.elev-pane-grupper'), paneNarvaro = body.querySelector('.elev-pane-narvaro'), paneBord = body.querySelector('.elev-pane-bord');
+        const paneSlumpa = body.querySelector('.elev-pane-slumpa'), paneTurordning = body.querySelector('.elev-pane-turordning'), paneGrupper = body.querySelector('.elev-pane-grupper'), paneNarvaro = body.querySelector('.elev-pane-narvaro'), paneBord = body.querySelector('.elev-pane-bord');
         let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'slumpa';
-        const ELEV_TAB_WIDTH = { slumpa:380, grupper:380, narvaro:380, bord:480 };
+        const ELEV_TAB_WIDTH = { slumpa:380, turordning:380, grupper:380, narvaro:380, bord:480 };
         function renderTabs(){
             tabBtns.forEach(b=>{ const on=b.dataset.tab===activeTab; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); });
             paneSlumpa.style.display = activeTab==='slumpa' ? 'block' : 'none';
+            paneTurordning.style.display = activeTab==='turordning' ? 'block' : 'none';
             paneGrupper.style.display = activeTab==='grupper' ? 'block' : 'none';
             paneNarvaro.style.display = activeTab==='narvaro' ? 'block' : 'none';
             paneBord.style.display = activeTab==='bord' ? 'block' : 'none';
@@ -18759,6 +18774,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             widget.dataset.elever = JSON.stringify({
                 tab: activeTab,
                 slumpa: { list: selS.value, text: txtS.value, removeCb: cbS.checked },
+                turordning: { list: selTur.value, text: txtTur.value, queue: turQueue },
                 grupper: { list: selG.value, text: txtG.value, count: ciG.value, result: resG.innerHTML },
                 narvaro: { text: txtN.value, list: selN.value, absentByList: Object.fromEntries(Object.keys(absentByList).map(k=>[k, [...absentByList[k]].map(([name,v])=>({ name, note:v.note||'' }))])) }
             });
@@ -18769,11 +18785,51 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const selS=paneSlumpa.querySelector('select'), txtS=paneSlumpa.querySelector('textarea'), resS=paneSlumpa.querySelector('.name-result'), niS=paneSlumpa.querySelector('.list-name-input'), cbS=paneSlumpa.querySelector('input[type="checkbox"]');
         const loadS=()=>{ selS.innerHTML='<option value="">-- Välj lista --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;selS.appendChild(o);}); }; loadS();
         selS.onchange=()=>{ if(!selS.value)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txtS.value=l[selS.value]||''; resS.innerText=''; persist(); };
-        paneSlumpa.querySelector('.btn-save').onclick=()=>{ let t=niS.value.trim(), cn=txtS.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; l[t]=cn; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); niS.value=''; loadS(); selS.value=t; loadG(); loadN(); persist(); saveBoardState(); };
-        paneSlumpa.querySelector('.btn-del').onclick=()=>{ if(!selS.value)return; customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; delete l[selS.value]; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); txtS.value=''; resS.innerText=''; loadS(); loadG(); loadN(); persist(); saveBoardState(); }); };
+        paneSlumpa.querySelector('.btn-save').onclick=()=>{ let t=niS.value.trim(), cn=txtS.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; l[t]=cn; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); niS.value=''; loadS(); selS.value=t; loadTur(); loadG(); loadN(); persist(); saveBoardState(); };
+        paneSlumpa.querySelector('.btn-del').onclick=()=>{ if(!selS.value)return; customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; delete l[selS.value]; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); txtS.value=''; resS.innerText=''; loadS(); loadTur(); loadG(); loadN(); persist(); saveBoardState(); }); };
         if(config && config.data && config.data.slumpa){ const d=config.data.slumpa; if(d.list) setTimeout(()=>selS.value=d.list,100); if(d.text) txtS.value=d.text; if(d.removeCb!==undefined) cbS.checked=d.removeCb; }
         paneSlumpa.querySelector('.btn-roll').onclick=()=>{ let n=txtS.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0); if(n.length===0)return; resS.innerText='Väljer...'; let ct=0; let iv=setInterval(()=>{ resS.innerText=n[Math.floor(Math.random()*n.length)]; ct++; if(ct>10){ clearInterval(iv); let idx=Math.floor(Math.random()*n.length), w=n[idx]; resS.innerText=`⭐ ${w} ⭐`; if(cbS.checked){ n.splice(idx,1); txtS.value=n[Math.floor(Math.random()*n.length)]; } persist(); saveBoardState(); showWinnerPopup(w); } },80); };
         txtS.oninput=()=>{ persist(); saveBoardState(); };
+
+        // ---- Flik: Turordning - slumpar fram en HEL kö på en gång, läraren bockar av i egen takt ----
+        const turSetupWrap = paneTurordning.querySelector('.km-tabs-wrap');
+        const selTur = paneTurordning.querySelector('.tur-sel'), delTur = paneTurordning.querySelector('.btn-del'), niTur = paneTurordning.querySelector('.tur-listname'), saveTur = paneTurordning.querySelector('.btn-save'),
+              txtTur = paneTurordning.querySelector('.tur-txt'), rollTur = paneTurordning.querySelector('.tur-roll'), statusTur = paneTurordning.querySelector('.tur-status'),
+              queueTur = paneTurordning.querySelector('.tur-queue'), resetTur = paneTurordning.querySelector('.tur-reset');
+        body.addEventListener('pointerdown', (e)=>{ if(activeTab==='turordning' && !turSetupWrap.contains(e.target)) turSetupWrap.classList.remove('expanded'); });
+        const loadTur=()=>{ selTur.innerHTML='<option value="">-- Välj lista --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;selTur.appendChild(o);}); }; loadTur();
+        selTur.onchange=()=>{ if(!selTur.value)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txtTur.value=l[selTur.value]||''; persist(); saveBoardState(); };
+        saveTur.onclick=()=>{ let t=niTur.value.trim(), cn=txtTur.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; l[t]=cn; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); niTur.value=''; loadTur(); selTur.value=t; loadS(); loadG(); loadN(); persist(); saveBoardState(); };
+        delTur.onclick=()=>{ if(!selTur.value)return; customConfirm('Radera listan "'+selTur.value+'"?',()=>{ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; delete l[selTur.value]; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); loadTur(); loadS(); loadG(); loadN(); persist(); saveBoardState(); }); };
+        let turQueue = [];
+        function shuffleTur(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+        function renderTurQueue(){
+            queueTur.innerHTML='';
+            turQueue.forEach((item,i)=>{
+                const row=document.createElement('div');
+                row.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:5px;cursor:pointer;background:'+(item.done?'#f2f2f7':'#eef6ff')+';';
+                row.innerHTML='<span style="font-size:13px;font-weight:700;color:#8e8e93;min-width:20px;">'+(i+1)+'.</span>'
+                    +'<span style="font-size:15px;flex:1;'+(item.done?'text-decoration:line-through;color:#aeaeb2;':'color:#1d1d1f;font-weight:600;')+'">'+item.name+'</span>'
+                    +'<span style="font-size:18px;">'+(item.done?'✅':'⬜')+'</span>';
+                row.onclick=()=>{ item.done=!item.done; renderTurQueue(); persist(); saveBoardState(); };
+                queueTur.appendChild(row);
+            });
+            const doneCount = turQueue.filter(q=>q.done).length;
+            statusTur.textContent = turQueue.length ? (doneCount+' av '+turQueue.length+' avbockade') : 'Skriv namn och klicka "Slumpa ordning" för att komma igång.';
+        }
+        rollTur.onclick=()=>{
+            let names = txtTur.value.split('\n').map(x=>x.trim()).filter(x=>x.length>0);
+            if(names.length===0) return;
+            shuffleTur(names);
+            turQueue = names.map(n=>({ name:n, done:false }));
+            turSetupWrap.classList.remove('expanded');
+            renderTurQueue(); persist(); saveBoardState();
+        };
+        resetTur.onclick=()=>{ turQueue.forEach(q=>q.done=false); renderTurQueue(); persist(); saveBoardState(); };
+        txtTur.oninput=()=>{ persist(); saveBoardState(); };
+        if(config && config.data && config.data.turordning){ const d=config.data.turordning; if(d.list) setTimeout(()=>selTur.value=d.list,100); if(d.text) txtTur.value=d.text; if(Array.isArray(d.queue)) turQueue=d.queue; }
+        if(!turQueue.length) turSetupWrap.classList.add('expanded');
+        renderTurQueue();
 
         // ---- Flik: Skapa grupper (oförändrad logik) ----
         const selG=paneGrupper.querySelector('select'), txtG=paneGrupper.querySelector('textarea'), ciG=paneGrupper.querySelector('.num-g'), resG=paneGrupper.querySelector('.group-result');
@@ -18896,11 +18952,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             customConfirm('Radera ALLA elevnamn i den här widgeten (sparade listor, slumpa/grupper/närvaro)? Detta går inte att ångra, och tas även bort från molnet vid nästa sparning.', () => {
                 try { localStorage.removeItem('savedClassLists_'+currentUser); } catch(e){}
                 txtS.value=''; resS.innerText='';
+                txtTur.value=''; turQueue=[]; renderTurQueue();
                 txtG.value=''; resG.innerHTML='';
                 txtN.value='';
                 Object.keys(absentByList).forEach(k=> delete absentByList[k]);
                 absent = absentMapFor(currentListKey);
-                loadS(); loadG(); loadN();
+                loadS(); loadTur(); loadG(); loadN();
                 renderN(); persist(); saveBoardState();
                 if (typeof customAlert === 'function') customAlert('Alla elevnamn i den här widgeten har raderats.', '✅');
             });
@@ -18917,17 +18974,27 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(config===undefined) config=null;
         const body = createWidget('TURORDNING', 340, 'name-widget turordning-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='list-selector-area hover-menu'><select class='editor-select tur-sel'></select><button class='btn btn-danger btn-del'>Ta bort</button></div>
-            <div class='save-list-area hover-menu'><input type='text' class='list-name-input tur-listname' placeholder='Klassnamn...'><button class='btn btn-secondary btn-save'>Spara</button></div>
-            <textarea class='name-input hover-menu tur-txt' placeholder='Skriv namn, ett per rad...'></textarea>
+        body.innerHTML = `<div class='km-tabs-wrap'>
+                <div class='km-tabs-handle'></div>
+                <div class='km-tabs'>
+                    <div class='list-selector-area hover-menu'><select class='editor-select tur-sel'></select><button class='btn btn-danger btn-del'>Ta bort</button></div>
+                    <div class='save-list-area hover-menu'><input type='text' class='list-name-input tur-listname' placeholder='Klassnamn...'><button class='btn btn-secondary btn-save'>Spara</button></div>
+                    <textarea class='name-input hover-menu tur-txt' placeholder='Skriv namn, ett per rad...'></textarea>
+                </div>
+            </div>
             <button type='button' class='btn btn-primary hover-menu tur-roll' style='width:100%;margin-bottom:10px;'>🎲 Slumpa ordning</button>
             <div class='tur-status hover-menu' style='text-align:center;font-size:12px;color:#8e8e93;margin-bottom:8px;min-height:16px;'></div>
-            <div class='tur-queue'></div>
+            <div class='tur-queue' style='max-height:280px;overflow-y:auto;padding-right:4px;'></div>
             <div class='hover-menu' style='margin-top:8px;'><button type='button' class='btn btn-secondary tur-reset' style='width:100%;'>↺ Bocka av alla igen</button></div>`;
 
+        const setupWrap = body.querySelector('.km-tabs-wrap');
         const sel = body.querySelector('.tur-sel'), delBtn = body.querySelector('.btn-del'), listNameInp = body.querySelector('.tur-listname'), saveBtn = body.querySelector('.btn-save'),
               txt = body.querySelector('.tur-txt'), rollBtn = body.querySelector('.tur-roll'), statusEl = body.querySelector('.tur-status'),
               queueEl = body.querySelector('.tur-queue'), resetBtn = body.querySelector('.tur-reset');
+        // Fäll ihop inställningsdelen (klasslista/textarea) så fort man klickar någon annanstans i
+        // widgeten - samma "klicka utanför stänger"-princip som används i Tid-widgeten, så att bara
+        // själva kön syns i vardagsbruk. Hovrar/klickar man på den lilla pilen fälls den ut igen.
+        body.addEventListener('pointerdown', (e)=>{ if(!setupWrap.contains(e.target)) setupWrap.classList.remove('expanded'); });
 
         function persist(){ widget.dataset.turordning = JSON.stringify({ list: sel.value, text: txt.value, queue }); }
 
@@ -18958,6 +19025,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             if(names.length === 0) return;
             shuffleArr(names);
             queue = names.map(n => ({ name:n, done:false }));
+            setupWrap.classList.remove('expanded'); // dölj inställningarna automatiskt när en ny ordning är klar
             renderQueue(); persist(); saveBoardState();
         };
         resetBtn.onclick = ()=>{ queue.forEach(q => q.done = false); renderQueue(); persist(); saveBoardState(); };
@@ -18969,6 +19037,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             if(d.text) txt.value = d.text;
             if(Array.isArray(d.queue)) queue = d.queue;
         }
+        // Ny widget (ingen kö än) -> starta utfälld så man kan skriva/välja lista direkt.
+        // Redan har en kö (återskapad tavla) -> starta hopfälld, kön är det viktiga att se då.
+        if(!queue.length) setupWrap.classList.add('expanded');
         renderQueue();
     }
     window.createTurordningWidget = createTurordningWidget;
