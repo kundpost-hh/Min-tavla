@@ -233,6 +233,7 @@
             <button class="tool-btn" data-cat="so" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder/Invånare</div></button>
             <button class="tool-btn" data-cat="so" onclick="createSoMegaWidget()"><div class="icon">🛡️</div><div class="label">SO</div></button>
             <button class="tool-btn" data-cat="idrott" onclick="createIdrottMegaWidget()"><div class="icon">🏃</div><div class="label">Idrott</div></button>
+            <button class="tool-btn" data-cat="idrott" onclick="createLugnRoWidget()"><div class="icon">🌿</div><div class="label">Lugn &amp; ro</div></button>
             <button class="tool-btn" data-cat="musik" onclick="createMusikMegaWidget()"><div class="icon">🎵</div><div class="label">Musik</div></button>
             <button class="tool-btn" data-cat="bild" onclick="createBildMegaWidget()"><div class="icon">🎨</div><div class="label">Bild &amp; slöjd</div></button>
             <button class="tool-btn" data-cat="so" onclick="createYrkenWidget()"><div class="icon">👩‍🏫</div><div class="label">Yrken</div></button>
@@ -19190,6 +19191,81 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         }
     }
     window.createBerattarWidget = createBerattarWidget;
+
+    // ---- LUGN & RO: Andningspaus - lugn animerad cirkel att andas efter (in-håll-ut), valbar
+    // längd och andningsmönster. Motsatsen till Brain Break/Rörelsepaus - för att varva ner. ----
+    const ANDNING_MONSTER = {
+        enkel: { namn:'Enkel (in–ut)', steps:[ { label:'Andas in', sec:4, scale:1.35 }, { label:'Andas ut', sec:4, scale:0.75 } ] },
+        box: { namn:'Box (4-4-4-4)', steps:[ { label:'Andas in', sec:4, scale:1.35 }, { label:'Håll', sec:4, scale:1.35 }, { label:'Andas ut', sec:4, scale:0.75 }, { label:'Håll', sec:4, scale:0.75 } ] },
+        lugn478: { namn:'4-7-8 (lugnande)', steps:[ { label:'Andas in', sec:4, scale:1.35 }, { label:'Håll', sec:7, scale:1.35 }, { label:'Andas ut', sec:8, scale:0.75 } ] }
+    };
+    function createLugnRoWidget(config){
+        if(config === undefined) config = null;
+        const body = createWidget('LUGN & RO', 300, 'lugnro-widget', config);
+        body.innerHTML = `<div class='hover-menu' style='display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:10px;font-size:12px;flex-wrap:wrap;'>
+                <select class='lugn-monster' style='font-size:12px;padding:3px 6px;border-radius:6px;border:1.5px solid #e5e5ea;'>
+                    ${Object.keys(ANDNING_MONSTER).map(k => `<option value='${k}'>${ANDNING_MONSTER[k].namn}</option>`).join('')}
+                </select>
+                <select class='lugn-langd' style='font-size:12px;padding:3px 6px;border-radius:6px;border:1.5px solid #e5e5ea;'>
+                    <option value='60'>1 min</option>
+                    <option value='120' selected>2 min</option>
+                    <option value='300'>5 min</option>
+                    <option value='0'>Fritt (tills du stoppar)</option>
+                </select>
+            </div>
+            <div style='display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 0 10px;'>
+                <div class='lugn-circle' style='width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #cdeaff, #6fb8e8);transition:transform 1.2s ease-in-out;transform:scale(1);box-shadow:0 8px 24px rgba(111,184,232,0.4);'></div>
+                <div class='lugn-label' style='margin-top:16px;font-size:17px;font-weight:700;color:#2c6a91;'>Redo?</div>
+                <div class='lugn-timer' style='font-size:12px;color:#8e8e93;margin-top:4px;min-height:16px;'></div>
+            </div>
+            <button type='button' class='btn btn-primary lugn-start' style='width:100%;font-size:16px;padding:12px;'>🌿 Starta andningspaus</button>`;
+        const monsterSel = body.querySelector('.lugn-monster'), langdSel = body.querySelector('.lugn-langd'),
+              circle = body.querySelector('.lugn-circle'), label = body.querySelector('.lugn-label'), timerEl = body.querySelector('.lugn-timer'), startBtn = body.querySelector('.lugn-start');
+        let running = false, stepIndex = 0, stepTimer = null, sessionTimer = null, sessionLeft = 0;
+        function applyStep(step){
+            circle.style.transitionDuration = step.sec + 's';
+            circle.style.transform = 'scale(' + step.scale + ')';
+            label.textContent = step.label + '…';
+        }
+        function nextStep(){
+            const pattern = ANDNING_MONSTER[monsterSel.value].steps;
+            const step = pattern[stepIndex];
+            applyStep(step);
+            stepTimer = setTimeout(()=>{
+                stepIndex = (stepIndex + 1) % pattern.length;
+                if(running) nextStep();
+            }, step.sec * 1000);
+        }
+        function updateSessionTimer(){
+            if(sessionLeft <= 0){ timerEl.textContent = ''; return; }
+            const m = Math.floor(sessionLeft / 60), s = sessionLeft % 60;
+            timerEl.textContent = m + ':' + String(s).padStart(2, '0') + ' kvar';
+        }
+        function stop(){
+            running = false; clearTimeout(stepTimer); clearInterval(sessionTimer);
+            circle.style.transitionDuration = '1.2s'; circle.style.transform = 'scale(1)';
+            label.textContent = 'Redo?'; timerEl.textContent = '';
+            startBtn.textContent = '🌿 Starta andningspaus'; startBtn.classList.remove('btn-danger'); startBtn.classList.add('btn-primary');
+        }
+        function start(){
+            running = true; stepIndex = 0;
+            const total = parseInt(langdSel.value) || 0;
+            sessionLeft = total; updateSessionTimer();
+            nextStep();
+            if(total > 0){
+                sessionTimer = setInterval(()=>{
+                    sessionLeft--; updateSessionTimer();
+                    if(sessionLeft <= 0) stop();
+                }, 1000);
+            }
+            startBtn.textContent = '⏸ Avsluta'; startBtn.classList.remove('btn-primary'); startBtn.classList.add('btn-danger');
+        }
+        startBtn.onclick = ()=>{ if(running) stop(); else start(); startBtn.blur(); };
+        monsterSel.onchange = ()=>{ if(running) stop(); };
+        langdSel.onchange = ()=>{ if(running) stop(); };
+        stop();
+    }
+    window.createLugnRoWidget = createLugnRoWidget;
 
     function createGroupMaker(config){
         const body=createWidget('SKAPA GRUPPER',380,'name-widget',config); body.innerHTML=`<div class='list-selector-area hover-menu'><select class='editor-select'></select></div><textarea class='name-input hover-menu' placeholder='Skriv namn...'></textarea><div class='hover-menu' style='display:flex;gap:8px;align-items:center;margin-bottom:8px;'><span style='font-size:12px;font-weight:bold;'>Antal:</span><input type='number' min='2' max='12' value='4' class='editor-select num-g' style='width:60px;'><button class='btn btn-primary btn-roll' style='flex-grow:1;'>Slumpa grupper!</button></div><div class='group-result'></div>`;
