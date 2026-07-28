@@ -3746,6 +3746,15 @@
         applyAdminUIMode();
         document.getElementById('login-overlay').style.display = 'none';
         const badge = document.getElementById('guest-mode-badge'); if(badge) badge.style.display = 'block';
+        // Ge gästen en färdig exempel-klasslista att testa med direkt (t.ex. i Elever/Turordning),
+        // så man slipper skriva in namn själv bara för att prova. Sparas ENDAST i webbläsarens
+        // localStorage under gästens slumpade session-id (samma spärr som allt annat i gästläget) -
+        // rör aldrig molnet och är borta igen nästa besök.
+        try {
+            localStorage.setItem('savedClassLists_' + currentUser, JSON.stringify({
+                '7F': 'Alice\nViktor\nMaja\nOscar\nElin\nAnton\nNova\nLeo\nSaga\nAdrian'
+            }));
+        } catch(e){}
         // FIX: hämta adminens delade verktygsordning (samma read-only mekanism som alla vanliga,
         // icke-admin-inloggade användare redan använder) innan tavlan byggs, så gästen ser samma
         // ordning som riktiga användare - inte standardordningen. Detta är en läsning (inte en
