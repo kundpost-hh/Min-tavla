@@ -3725,13 +3725,19 @@
     // användares data, och nästa besök får ändå ett helt tomt ID. window.isGuestMode är den
     // egentliga spärren som stoppar saveBoardState()/syncToCloud() helt, så det belastar aldrig
     // Firebase-kvoten oavsett hur många som provar den öppna demot.
-    function enterGuestMode(){
+    async function enterGuestMode(){
         window.isGuestMode = true;
         currentUser = 'gast-' + Math.random().toString(36).slice(2, 10);
         currentUserName = 'Gäst';
         applyAdminUIMode();
         document.getElementById('login-overlay').style.display = 'none';
         const badge = document.getElementById('guest-mode-badge'); if(badge) badge.style.display = 'block';
+        // FIX: hämta adminens delade verktygsordning (samma read-only mekanism som alla vanliga,
+        // icke-admin-inloggade användare redan använder) innan tavlan byggs, så gästen ser samma
+        // ordning som riktiga användare - inte standardordningen. Detta är en läsning (inte en
+        // skrivning) från det redan delade config/toolbar-dokumentet, så det belastar inte skriv-
+        // kvoten och kostar i praktiken ingenting oavsett hur många som provar gästläget.
+        if (typeof startSharedToolbarSync === 'function'){ try { await startSharedToolbarSync(); } catch(e){} }
         initBoard();
     }
     window.enterGuestMode = enterGuestMode;
