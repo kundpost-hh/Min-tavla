@@ -18965,12 +18965,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         // hårdkodat som null, så inget sparades eller lästes tillbaka).
         const bordConfig = (config && config.data && Array.isArray(config.data.bord)) ? { data: { items: config.data.bord } } : null;
         embedSubWidget(createSeatingChart, paneBord, bordConfig);
-        // FIX: createSeatingChart sätter (för sitt eget bruk som fristående widget) en fast höjd på
-        // "widgetEl" vid skapande. I den inbäddade kontexten här råkar "widgetEl" tolkas som själva
-        // fliken (paneBord) istället för ett eget flytande fönster - det tvingade panelen till en
-        // fast 460px-höjd oavsett tillgängligt utrymme, så bordsplaceringens innehåll (canvasen där
-        // man drar ut bänkar) stack ut utanför widgetens ram. Nollställ höjden och låt panelens egen
-        // scrollning (redan inbyggd i .seat-canvas-wrap) hantera det istället.
+        // FIX (rättad): createSeatingChart sätter (för sitt eget bruk som fristående widget) en fast
+        // höjd PÅ SIG SJÄLV vid skapande - i den inbäddade kontexten är "sig själv" den lilla
+        // '.seating-widget'-behållaren som embedSubWidget skapar inuti fliken, INTE fliken (paneBord)
+        // själv som en tidigare version av den här fixen felaktigt trodde. Den kvarvarande fasta
+        // 460px-höjden på den behållaren tvingade hela Elever-widgeten att bli lika hög, vilket syntes
+        // som ett tomt utrymme/utanför ramen även på andra flikar efter att man besökt Bordsplacering.
+        const seatingFake = paneBord.querySelector('.seating-widget');
+        if(seatingFake){ seatingFake.style.height = ''; seatingFake.style.maxHeight = 'none'; }
         paneBord.style.height = '';
         paneBord.style.minHeight = '0';
         paneBord.style.overflow = 'hidden';
