@@ -190,6 +190,9 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createStickyNote()"><div class="icon">🗒️</div><div class="label">Lapp</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createElevWidget()"><div class="icon">🧑‍🎓</div><div class="label">Elever</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createTurordningWidget()"><div class="icon">🔢</div><div class="label">Turordning</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createUppmarksamhetWidget()"><div class="icon">🤫</div><div class="label">Uppmärksamhet</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createBerattarWidget()"><div class="icon">🎲</div><div class="label">Berättartärning</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
             <button class="tool-btn" data-cat="engelska" onclick="createEngelskaMegaWidget()"><div class="icon">🇬🇧</div><div class="label">Engelska</div></button>
             <button class="tool-btn" data-cat="no-teknik" onclick="createBegreppskort()"><div class="icon">🌱</div><div class="label">Begreppskort</div></button>
@@ -3889,6 +3892,9 @@
                 else if (type === 'GRATTIS') { state.data.name = w.querySelector('.grattis-name-input')?.value || ''; }
                 else if (type === 'NÄRVARO') { state.data.text = w.querySelector('.att-names')?.value || ''; state.data.list = w.querySelector('.att-sel')?.value || ''; try{ state.data.absent = JSON.parse(w.dataset.attAbsent || '[]'); }catch(e){ state.data.absent = [...w.querySelectorAll('.att-name.absent')].map(b=>b.textContent); } }
                 else if (type === 'ELEVER') { try{ state.data = JSON.parse(w.dataset.elever || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'TURORDNING') { try{ state.data = JSON.parse(w.dataset.turordning || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'UPPMÄRKSAMHETSSIGNAL') { try{ state.data = JSON.parse(w.dataset.uppmark || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'BERÄTTARTÄRNING') { try{ state.data = JSON.parse(w.dataset.berattar || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
@@ -3993,6 +3999,9 @@
             else if (w.type === 'GRATTIS') createBirthdayWidget(w);
             else if (w.type === 'NÄRVARO') createAttendance(w);
             else if (w.type === 'ELEVER') createElevWidget(w);
+            else if (w.type === 'TURORDNING') createTurordningWidget(w);
+            else if (w.type === 'UPPMÄRKSAMHETSSIGNAL') createUppmarksamhetWidget(w);
+            else if (w.type === 'BERÄTTARTÄRNING') createBerattarWidget(w);
             else if (w.type === 'KLASSPOÄNG') createClassReward(w);
             else if (w.type === 'KAMERA') createCamera(w);
             else if (w.type === 'STOPPUR') createStopwatch(w);
@@ -18900,6 +18909,166 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         renderTabs(); renderN(); persist();
         if(!config) persist();
     }
+
+    // ---- TURORDNING: slumpar fram en HEL kö av namn på en gång (inte ett i taget), som läraren
+    // sedan bockar av namn för namn i sin egen takt. Återanvänder samma sparade klasslistor
+    // (savedClassLists_) och samma CSS-klasser som Elever-widgeten, för att kännas enhetlig. ----
+    function createTurordningWidget(config){
+        if(config===undefined) config=null;
+        const body = createWidget('TURORDNING', 340, 'name-widget turordning-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='list-selector-area hover-menu'><select class='editor-select tur-sel'></select><button class='btn btn-danger btn-del'>Ta bort</button></div>
+            <div class='save-list-area hover-menu'><input type='text' class='list-name-input tur-listname' placeholder='Klassnamn...'><button class='btn btn-secondary btn-save'>Spara</button></div>
+            <textarea class='name-input hover-menu tur-txt' placeholder='Skriv namn, ett per rad...'></textarea>
+            <button type='button' class='btn btn-primary hover-menu tur-roll' style='width:100%;margin-bottom:10px;'>🎲 Slumpa ordning</button>
+            <div class='tur-status hover-menu' style='text-align:center;font-size:12px;color:#8e8e93;margin-bottom:8px;min-height:16px;'></div>
+            <div class='tur-queue'></div>
+            <div class='hover-menu' style='margin-top:8px;'><button type='button' class='btn btn-secondary tur-reset' style='width:100%;'>↺ Bocka av alla igen</button></div>`;
+
+        const sel = body.querySelector('.tur-sel'), delBtn = body.querySelector('.btn-del'), listNameInp = body.querySelector('.tur-listname'), saveBtn = body.querySelector('.btn-save'),
+              txt = body.querySelector('.tur-txt'), rollBtn = body.querySelector('.tur-roll'), statusEl = body.querySelector('.tur-status'),
+              queueEl = body.querySelector('.tur-queue'), resetBtn = body.querySelector('.tur-reset');
+
+        function persist(){ widget.dataset.turordning = JSON.stringify({ list: sel.value, text: txt.value, queue }); }
+
+        const loadLists = ()=>{ sel.innerHTML = '<option value="">-- Välj lista --</option>'; let l = JSON.parse(localStorage.getItem('savedClassLists_' + currentUser)) || {}; Object.keys(l).forEach(k=>{ let o = document.createElement('option'); o.value = k; o.innerText = k; sel.appendChild(o); }); };
+        loadLists();
+        sel.onchange = ()=>{ if(!sel.value) return; let l = JSON.parse(localStorage.getItem('savedClassLists_' + currentUser)) || {}; txt.value = l[sel.value] || ''; persist(); saveBoardState(); };
+        saveBtn.onclick = ()=>{ let t = listNameInp.value.trim(), cn = txt.value.trim(); if(!t || !cn) return; let l = JSON.parse(localStorage.getItem('savedClassLists_' + currentUser)) || {}; l[t] = cn; localStorage.setItem('savedClassLists_' + currentUser, JSON.stringify(l)); listNameInp.value = ''; loadLists(); sel.value = t; persist(); saveBoardState(); };
+        delBtn.onclick = ()=>{ if(!sel.value) return; customConfirm('Radera listan "' + sel.value + '"?', ()=>{ let l = JSON.parse(localStorage.getItem('savedClassLists_' + currentUser)) || {}; delete l[sel.value]; localStorage.setItem('savedClassLists_' + currentUser, JSON.stringify(l)); loadLists(); persist(); saveBoardState(); }); };
+
+        let queue = []; // [{name, done}] - hela ordningen syns hela tiden, läraren bockar av i egen takt
+        function shuffleArr(arr){ for(let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+        function renderQueue(){
+            queueEl.innerHTML = '';
+            queue.forEach((item, i)=>{
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:5px;cursor:pointer;background:' + (item.done ? '#f2f2f7' : '#eef6ff') + ';';
+                row.innerHTML = '<span style="font-size:13px;font-weight:700;color:#8e8e93;min-width:20px;">' + (i + 1) + '.</span>'
+                    + '<span style="font-size:15px;flex:1;' + (item.done ? 'text-decoration:line-through;color:#aeaeb2;' : 'color:#1d1d1f;font-weight:600;') + '">' + item.name + '</span>'
+                    + '<span style="font-size:18px;">' + (item.done ? '✅' : '⬜') + '</span>';
+                row.onclick = ()=>{ item.done = !item.done; renderQueue(); persist(); saveBoardState(); };
+                queueEl.appendChild(row);
+            });
+            const doneCount = queue.filter(q => q.done).length;
+            statusEl.textContent = queue.length ? (doneCount + ' av ' + queue.length + ' avbockade') : 'Skriv namn och klicka "Slumpa ordning" för att komma igång.';
+        }
+        rollBtn.onclick = ()=>{
+            let names = txt.value.split('\n').map(x => x.trim()).filter(x => x.length > 0);
+            if(names.length === 0) return;
+            shuffleArr(names);
+            queue = names.map(n => ({ name:n, done:false }));
+            renderQueue(); persist(); saveBoardState();
+        };
+        resetBtn.onclick = ()=>{ queue.forEach(q => q.done = false); renderQueue(); persist(); saveBoardState(); };
+        txt.oninput = ()=>{ persist(); saveBoardState(); };
+
+        if(config && config.data){
+            const d = config.data;
+            if(d.list) setTimeout(()=>{ sel.value = d.list; }, 100);
+            if(d.text) txt.value = d.text;
+            if(Array.isArray(d.queue)) queue = d.queue;
+        }
+        renderQueue();
+    }
+    window.createTurordningWidget = createTurordningWidget;
+
+    // ---- UPPMÄRKSAMHETSSIGNAL: stor knapp -> visuell nedräkning (färgen glider grön->röd) +
+    // valfritt ljud (tick per sekund, samt en avslutande ton), bra vid övergångar mellan aktiviteter. ----
+    function playUppTick(){
+        try { unlockAudio(); if(!_audioCtx) return; const ctx = _audioCtx, t = ctx.currentTime; const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = 520; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.22, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.13); } catch(e){}
+    }
+    function playUppChime(){
+        try {
+            unlockAudio(); if(!_audioCtx) return; const ctx = _audioCtx, t = ctx.currentTime;
+            [660, 880].forEach((f, i)=>{ const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f; const start = t + i * 0.18; g.gain.setValueAtTime(0.0001, start); g.gain.exponentialRampToValueAtTime(0.3, start + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, start + 0.5); o.connect(g); g.connect(ctx.destination); o.start(start); o.stop(start + 0.55); });
+        } catch(e){}
+    }
+    function createUppmarksamhetWidget(config){
+        if(config === undefined) config = null;
+        const body = createWidget('UPPMÄRKSAMHETSSIGNAL', 300, 'uppmarksamhet-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='hover-menu' style='display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:12px;font-size:12px;flex-wrap:wrap;'>
+                Nedräkning:
+                <select class='upp-dur' style='font-size:12px;padding:3px 6px;border-radius:6px;border:1.5px solid #e5e5ea;'>
+                    <option value='3'>3 sek</option>
+                    <option value='5' selected>5 sek</option>
+                    <option value='10'>10 sek</option>
+                </select>
+                <label style='display:flex;align-items:center;gap:4px;cursor:pointer;'><input type='checkbox' class='upp-sound' checked> 🔊 Ljud</label>
+            </div>
+            <div class='upp-display' style='text-align:center;font-size:60px;font-weight:900;min-height:96px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#f2f2f7;color:#1d1d1f;margin-bottom:14px;transition:background .25s,color .25s;'>🤫</div>
+            <button type='button' class='btn btn-primary upp-start' style='width:100%;font-size:19px;padding:16px;'>Nu är det tyst!</button>`;
+        const durSel = body.querySelector('.upp-dur'), soundCb = body.querySelector('.upp-sound'), disp = body.querySelector('.upp-display'), startBtn = body.querySelector('.upp-start');
+        let running = false;
+        function persist(){ widget.dataset.uppmark = JSON.stringify({ dur: durSel.value, sound: soundCb.checked }); }
+        function setColor(frac){ const hue = Math.round(frac * 120); disp.style.background = `hsl(${hue}, 70%, 90%)`; disp.style.color = `hsl(${hue}, 60%, 30%)`; }
+        startBtn.onclick = ()=>{
+            if(running) return;
+            running = true; startBtn.disabled = true; startBtn.style.opacity = '0.6';
+            const total = parseInt(durSel.value) || 5;
+            let left = total;
+            disp.textContent = left; setColor(1);
+            if(soundCb.checked) playUppTick();
+            const iv = setInterval(()=>{
+                left--;
+                if(left > 0){
+                    disp.textContent = left; setColor(left / total);
+                    if(soundCb.checked) playUppTick();
+                } else {
+                    clearInterval(iv);
+                    disp.textContent = '🤫'; disp.style.background = '#e8f8ee'; disp.style.color = '#1c7c3f';
+                    if(soundCb.checked) playUppChime();
+                    setTimeout(()=>{ running = false; startBtn.disabled = false; startBtn.style.opacity = ''; }, 800);
+                }
+            }, 1000);
+        };
+        durSel.onchange = ()=>{ persist(); saveBoardState(); };
+        soundCb.onchange = ()=>{ persist(); saveBoardState(); };
+        if(config && config.data){ if(config.data.dur) durSel.value = config.data.dur; if(config.data.sound !== undefined) soundCb.checked = config.data.sound; }
+        persist();
+    }
+    window.createUppmarksamhetWidget = createUppmarksamhetWidget;
+
+    // ---- BERÄTTARTÄRNING: fyra "tärningar" (Karaktär/Plats/Föremål/Problem) som slumpar fram
+    // ikoner - en gemensam startpunkt för muntlig eller skriftlig berättelse. ----
+    const BERATTAR_KATEGORIER = [
+        { namn:'Karaktär', ikon:'🎭', val:['🦸', '🧙', '🐉', '👸', '🤖', '👽', '🏴‍☠️', '🦹', '🧚', '👻', '🕵️', '🧛'] },
+        { namn:'Plats', ikon:'📍', val:['🏰', '🌋', '🏝️', '🌌', '🏚️', '🌲', '🏙️', '🕳️', '🚀', '🏔️', '🏜️', '🌊'] },
+        { namn:'Föremål', ikon:'🎒', val:['🗝️', '💎', '📜', '🔮', '⚔️', '🧭', '💰', '🕰️', '🪄', '📦', '🧪', '🪞'] },
+        { namn:'Problem', ikon:'⚡', val:['🔥', '🌊', '❄️', '🐍', '👹', '🌪️', '🕸️', '💥', '🚧', '🌑', '🧊', '☄️'] }
+    ];
+    function createBerattarWidget(config){
+        if(config === undefined) config = null;
+        const body = createWidget('BERÄTTARTÄRNING', 320, 'berattar-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = `<div class='ber-grid' style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;'></div>
+            <button type='button' class='btn btn-primary ber-roll-all' style='width:100%;font-size:16px;padding:12px;'>🎲 Kasta alla tärningarna</button>
+            <div class='hover-menu' style='text-align:center;font-size:11px;color:#8e8e93;margin-top:8px;'>Klicka på en enskild tärning för att bara slumpa om den</div>`;
+        const grid = body.querySelector('.ber-grid'), rollAllBtn = body.querySelector('.ber-roll-all');
+        const faces = [];
+        function persist(){ widget.dataset.berattar = JSON.stringify({ faces: faces.map(f => f.textContent) }); }
+        function rollOne(i){
+            const cat = BERATTAR_KATEGORIER[i];
+            faces[i].textContent = cat.val[Math.floor(Math.random() * cat.val.length)];
+            persist(); saveBoardState();
+        }
+        BERATTAR_KATEGORIER.forEach((cat, i)=>{
+            const card = document.createElement('div');
+            card.style.cssText = 'background:#f2f2f7;border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;user-select:none;';
+            card.innerHTML = `<div style="font-size:11px;color:#8e8e93;font-weight:700;margin-bottom:6px;">${cat.ikon} ${cat.namn}</div><div class='ber-die-face' style="font-size:42px;"></div>`;
+            faces.push(card.querySelector('.ber-die-face'));
+            card.onclick = ()=> rollOne(i);
+            grid.appendChild(card);
+        });
+        rollAllBtn.onclick = ()=>{ BERATTAR_KATEGORIER.forEach((_, i)=> rollOne(i)); };
+        if(config && config.data && Array.isArray(config.data.faces) && config.data.faces.length === BERATTAR_KATEGORIER.length){
+            config.data.faces.forEach((f, i)=>{ if(faces[i]) faces[i].textContent = f; });
+        } else {
+            BERATTAR_KATEGORIER.forEach((_, i)=> rollOne(i));
+        }
+    }
+    window.createBerattarWidget = createBerattarWidget;
 
     function createGroupMaker(config){
         const body=createWidget('SKAPA GRUPPER',380,'name-widget',config); body.innerHTML=`<div class='list-selector-area hover-menu'><select class='editor-select'></select></div><textarea class='name-input hover-menu' placeholder='Skriv namn...'></textarea><div class='hover-menu' style='display:flex;gap:8px;align-items:center;margin-bottom:8px;'><span style='font-size:12px;font-weight:bold;'>Antal:</span><input type='number' min='2' max='12' value='4' class='editor-select num-g' style='width:60px;'><button class='btn btn-primary btn-roll' style='flex-grow:1;'>Slumpa grupper!</button></div><div class='group-result'></div>`;
