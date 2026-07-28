@@ -12,6 +12,7 @@
 <div id="cb-app-wrapper">
     <div id="watermark"></div>
     <div id="cloud-sync-status" class="cloud-sync-status" style="display:none;"></div>
+    <div id="guest-mode-badge" style="display:none;position:fixed;bottom:14px;right:14px;z-index:9999;background:#1d1d1f;color:#fff;border-radius:20px;padding:7px 16px;font-size:12.5px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,0.16);">👀 Gästläge - inget sparas</div>
     <div id="custom-confirm-overlay" style="display: none;">
         <div class="custom-confirm-box">
             <div id="custom-confirm-text" class="custom-confirm-text">Är du säker?</div>
@@ -75,6 +76,9 @@
                     <a href="#" id="email-auth-toggle" onclick="toggleEmailAuthMode(); return false;" style="color:#8e8e93;text-decoration:underline;">Har du inget konto? Skapa ett</a>
                     <a href="#" id="email-auth-forgot" onclick="forgotEmailPassword(); return false;" style="color:#8e8e93;text-decoration:underline;">Glömt lösenord?</a>
                 </div>
+            </div>
+            <div id="guest-mode-wrap" style="margin-top:20px;padding-top:16px;border-top:1px solid #f2f2f7;text-align:center;">
+                <a href="#" id="guest-mode-link" onclick="enterGuestMode(); return false;" style="font-size:12px;color:#8e8e93;text-decoration:underline;">👀 Prova appen utan konto (öppen demo, inget sparas)</a>
             </div>
             <div id="login-local-note" style="margin-top: 18px; font-size: 12px; color: #aaa;"></div>
         </div>
@@ -3154,7 +3158,7 @@
     let _pendingCloudWrites = 0; // FIX: räknar PÅGÅENDE nätverksbegäranden (inte bara väntande timers),
     // så vi kan varna innan sidan stängs/laddas om medan en sparning fortfarande är på väg till molnet.
     function syncToCloud(){
-        if (!window.cloudReady || !currentUser) return;
+        if (!window.cloudReady || !currentUser || window.isGuestMode) return;
         clearTimeout(cloudSyncTimer);
         setCloudSyncStatus('saving');
         cloudSyncTimer = setTimeout(()=>{
@@ -3171,7 +3175,7 @@
     // (det sker bara när man släpper en drag eller trycker en knapp), så vi vill INTE
     // riskera att en snabb sidladdning hinner före den vanliga 1,2s-fördröjningen.
     function syncToCloudImmediate(){
-        if (!window.cloudReady || !currentUser) return Promise.resolve();
+        if (!window.cloudReady || !currentUser || window.isGuestMode) return Promise.resolve();
         clearTimeout(cloudSyncTimer);
         setCloudSyncStatus('saving');
         const payload = cloudGatherData(); payload.updatedAt = Date.now();
@@ -3714,6 +3718,23 @@
         document.getElementById('login-overlay').style.display = 'none';
         migrateOldLists(currentUser); initBoard();
     }
+    // Öppen gästdemo (ONLINE-versionen): ingen inloggning krävs, och absolut inget sparas - varken
+    // lokalt eller i molnet. Varje besök börjar helt blankt. currentUser sätts till ett SLUMPAT
+    // gäst-id (inte ett fast "gäst") som extra skyddsnät: även om något annat sparningsanrop skulle
+    // missa isGuestMode-spärren nedan, går det aldrig att skriva över en annan gästs eller riktig
+    // användares data, och nästa besök får ändå ett helt tomt ID. window.isGuestMode är den
+    // egentliga spärren som stoppar saveBoardState()/syncToCloud() helt, så det belastar aldrig
+    // Firebase-kvoten oavsett hur många som provar den öppna demot.
+    function enterGuestMode(){
+        window.isGuestMode = true;
+        currentUser = 'gast-' + Math.random().toString(36).slice(2, 10);
+        currentUserName = 'Gäst';
+        applyAdminUIMode();
+        document.getElementById('login-overlay').style.display = 'none';
+        const badge = document.getElementById('guest-mode-badge'); if(badge) badge.style.display = 'block';
+        initBoard();
+    }
+    window.enterGuestMode = enterGuestMode;
     function showLocalLoginOption(){
         const note = document.getElementById('login-local-note');
         if(!note || window.cloudReady) return;
@@ -3783,6 +3804,11 @@
     function logoutUser() {
         customConfirm('Vill du logga ut?', () => {
             saveBoardState();
+            // FIX: nollställ gästläget vid utloggning. Annars skulle en gäst som loggar ut och sedan
+            // loggar in på riktigt (Google/e-post) fastna i "inget sparas"-läget även på sitt riktiga
+            // konto, eftersom saveBoardState()/syncToCloud() annars fortsätter blockeras av flaggan.
+            window.isGuestMode = false;
+            const guestBadge = document.getElementById('guest-mode-badge'); if(guestBadge) guestBadge.style.display = 'none';
             if (_sharedToolbarUnsub){ try{ _sharedToolbarUnsub(); }catch(e){} _sharedToolbarUnsub = null; }
             currentUser = null; localStorage.removeItem('classboardzUser');
             document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
@@ -4048,6 +4074,8 @@
 
     function saveBoardState() {
         if(window.isLoadingBoard || !currentUser) return;
+        if(window.isGuestMode) return; // Gästläge: inget sparas alls, varken lokalt eller i molnet.
+
         const pages = []; const canvasPages = document.querySelectorAll('.canvas-page');
         canvasPages.forEach(page => {
             const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, widgets: [] };
