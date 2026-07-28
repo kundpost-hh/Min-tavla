@@ -159,6 +159,10 @@
         <div class="toolbar-catlegend" id="toolbar-catlegend">
             <span class="toolbar-catchip" data-catchip="klassrum"><span class="dot" style="background:#64748b"></span>Klassrum</span>
             <span class="toolbar-catchip" data-catchip="svenska"><span class="dot" style="background:#f59e0b"></span>Svenska</span>
+            <span class="toolbar-catchip" data-catchip="engelska"><span class="dot" style="background:#0ea5e9"></span>Engelska</span>
+            <span class="toolbar-catchip" data-catchip="idrott"><span class="dot" style="background:#22c55e"></span>Idrott</span>
+            <span class="toolbar-catchip" data-catchip="musik"><span class="dot" style="background:#f97316"></span>Musik</span>
+            <span class="toolbar-catchip" data-catchip="bild"><span class="dot" style="background:#d946ef"></span>Bild &amp; slöjd</span>
             <span class="toolbar-catchip" data-catchip="matte"><span class="dot" style="background:#3b82f6"></span>Matte</span>
             <span class="toolbar-catchip" data-catchip="no-teknik"><span class="dot" style="background:#10b981"></span>NO/Teknik</span>
             <span class="toolbar-catchip" data-catchip="so"><span class="dot" style="background:#ec4899"></span>SO</span>
@@ -182,6 +186,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createStickyNote()"><div class="icon">🗒️</div><div class="label">Lapp</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createElevWidget()"><div class="icon">🧑‍🎓</div><div class="label">Elever</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
+            <button class="tool-btn" data-cat="engelska" onclick="createEngelskaMegaWidget()"><div class="icon">🇬🇧</div><div class="label">Engelska</div></button>
             <button class="tool-btn" data-cat="no-teknik" onclick="createBegreppskort()"><div class="icon">🌱</div><div class="label">Begreppskort</div></button>
             <button class="tool-btn" data-cat="no-teknik" onclick="createNoFraga()"><div class="icon">🔬</div><div class="label">Dagens NO-fråga</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createSantFalskt()"><div class="icon">🧠</div><div class="label">Sant eller falskt</div></button>
@@ -219,6 +224,10 @@
             <button class="tool-btn" data-cat="matte" onclick="createMathBattle()"><div class="icon">🥇</div><div class="label">Mattekamp</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createVerbWidget()"><div class="icon">⚡</div><div class="label">Verb</div></button>
             <button class="tool-btn" data-cat="so" onclick="createCountryWidget()"><div class="icon">🌍</div><div class="label">Länder/Invånare</div></button>
+            <button class="tool-btn" data-cat="so" onclick="createSoMegaWidget()"><div class="icon">🛡️</div><div class="label">SO</div></button>
+            <button class="tool-btn" data-cat="idrott" onclick="createIdrottMegaWidget()"><div class="icon">🏃</div><div class="label">Idrott</div></button>
+            <button class="tool-btn" data-cat="musik" onclick="createMusikMegaWidget()"><div class="icon">🎵</div><div class="label">Musik</div></button>
+            <button class="tool-btn" data-cat="bild" onclick="createBildMegaWidget()"><div class="icon">🎨</div><div class="label">Bild &amp; slöjd</div></button>
             <button class="tool-btn" data-cat="so" onclick="createYrkenWidget()"><div class="icon">👩‍🏫</div><div class="label">Yrken</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createComparisonWidget()"><div class="icon">🆚</div><div class="label">Jämföra</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createSpellingBattle()"><div class="icon">✏️</div><div class="label">Stavningskamp</div></button>
@@ -3841,6 +3850,11 @@
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ÖVNINGSKLOCKA') { let _ph=parseInt(w.dataset.pclockH), _pm=parseInt(w.dataset.pclockM); if(isNaN(_ph)||isNaN(_pm)){ const t=(w.querySelector('.pclock-digital-am')?.textContent.replace(/[^\d:]/g,'')||'08:00').split(':'); _ph=(parseInt(t[0])||0)%24; _pm=parseInt(t[1])||0; } state.data.h = _ph; state.data.m = _pm; state.data.hidden = w.dataset.pclockHidden === 'true'; }
                 else if (type === 'TID') { state.data.tab = w.dataset.tidTab || 'klocka'; }
+                else if (type === 'ENGELSKA') { state.data.tab = w.dataset.engTab || 'ord'; }
+                else if (type === 'SO') { state.data.tab = w.dataset.soTab || 'karta'; }
+                else if (type === 'IDROTT') { state.data.tab = w.dataset.idrottTab || 'rorelse'; }
+                else if (type === 'MUSIK') { state.data.tab = w.dataset.musikTab || 'rytm'; }
+                else if (type === 'BILD & SLÖJD') { state.data.tab = w.dataset.bildTab || 'rittema'; }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VIDEO') { state.data.kind = w.dataset.videoKind || ''; state.data.src = w.dataset.videoSrc || ''; }
@@ -3940,6 +3954,11 @@
             else if (w.type === 'STOPPUR') createStopwatch(w);
             else if (w.type === 'ÖVNINGSKLOCKA') createPracticeClock(w);
             else if (w.type === 'TID') createTidMegaWidget(w);
+            else if (w.type === 'ENGELSKA') createEngelskaMegaWidget(w);
+            else if (w.type === 'SO') createSoMegaWidget(w);
+            else if (w.type === 'IDROTT') createIdrottMegaWidget(w);
+            else if (w.type === 'MUSIK') createMusikMegaWidget(w);
+            else if (w.type === 'BILD & SLÖJD') createBildMegaWidget(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
             else if (w.type === 'BILD') createImageWidget(w);
             else if (w.type === 'VIDEO') createVideoWidget(w);
@@ -18892,6 +18911,803 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         renderTabs();
     }
 
+    // ==== ENGELSKA (åk 4-nivå: vardagsord, inte grammatik) ====
+    // Samma flikmönster som TID-widgeten ovan: en ihopfällbar fliklist ('tid-tabs-wrap' m.fl.
+    // klasser återanvänds rakt av, de är generella och inte knutna till TID-widgeten specifikt).
+    const ENG_WORDS = [
+        // Djur
+        { sv:'hund', en:'dog', emoji:'🐶', cat:'Djur' },
+        { sv:'katt', en:'cat', emoji:'🐱', cat:'Djur' },
+        { sv:'häst', en:'horse', emoji:'🐴', cat:'Djur' },
+        { sv:'fisk', en:'fish', emoji:'🐟', cat:'Djur' },
+        { sv:'fågel', en:'bird', emoji:'🐦', cat:'Djur' },
+        { sv:'kanin', en:'rabbit', emoji:'🐰', cat:'Djur' },
+        { sv:'groda', en:'frog', emoji:'🐸', cat:'Djur' },
+        { sv:'mus', en:'mouse', emoji:'🐭', cat:'Djur' },
+        { sv:'björn', en:'bear', emoji:'🐻', cat:'Djur' },
+        { sv:'lejon', en:'lion', emoji:'🦁', cat:'Djur' },
+        { sv:'elefant', en:'elephant', emoji:'🐘', cat:'Djur' },
+        { sv:'get', en:'goat', emoji:'🐐', cat:'Djur' },
+        // Färger
+        { sv:'röd', en:'red', emoji:'🔴', cat:'Färger' },
+        { sv:'blå', en:'blue', emoji:'🔵', cat:'Färger' },
+        { sv:'gul', en:'yellow', emoji:'🟡', cat:'Färger' },
+        { sv:'grön', en:'green', emoji:'🟢', cat:'Färger' },
+        { sv:'orange', en:'orange', emoji:'🟠', cat:'Färger' },
+        { sv:'lila', en:'purple', emoji:'🟣', cat:'Färger' },
+        { sv:'svart', en:'black', emoji:'⚫', cat:'Färger' },
+        { sv:'vit', en:'white', emoji:'⚪', cat:'Färger' },
+        { sv:'rosa', en:'pink', emoji:'🌸', cat:'Färger' },
+        { sv:'brun', en:'brown', emoji:'🟤', cat:'Färger' },
+        // Mat
+        { sv:'äpple', en:'apple', emoji:'🍎', cat:'Mat' },
+        { sv:'banan', en:'banana', emoji:'🍌', cat:'Mat' },
+        { sv:'bröd', en:'bread', emoji:'🍞', cat:'Mat' },
+        { sv:'ost', en:'cheese', emoji:'🧀', cat:'Mat' },
+        { sv:'mjölk', en:'milk', emoji:'🥛', cat:'Mat' },
+        { sv:'ägg', en:'egg', emoji:'🥚', cat:'Mat' },
+        { sv:'pizza', en:'pizza', emoji:'🍕', cat:'Mat' },
+        { sv:'glass', en:'ice cream', emoji:'🍦', cat:'Mat' },
+        { sv:'kaka', en:'cookie', emoji:'🍪', cat:'Mat' },
+        { sv:'vatten', en:'water', emoji:'💧', cat:'Mat' },
+        // Familj
+        { sv:'mamma', en:'mom', emoji:'👩', cat:'Familj' },
+        { sv:'pappa', en:'dad', emoji:'👨', cat:'Familj' },
+        { sv:'syster', en:'sister', emoji:'👧', cat:'Familj' },
+        { sv:'bror', en:'brother', emoji:'👦', cat:'Familj' },
+        { sv:'mormor', en:'grandma', emoji:'👵', cat:'Familj' },
+        { sv:'morfar', en:'grandpa', emoji:'👴', cat:'Familj' },
+        { sv:'bebis', en:'baby', emoji:'👶', cat:'Familj' },
+        { sv:'familj', en:'family', emoji:'👪', cat:'Familj' }
+    ];
+    function speakEnglish(text){
+        try {
+            if(!('speechSynthesis' in window)){ customAlert('Uppläsning stöds inte i den här webbläsaren.', 'ℹ️'); return; }
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.9;
+            try { const en = window.speechSynthesis.getVoices().find(v => /^en/i.test(v.lang)); if(en) u.voice = en; } catch(e){}
+            window.speechSynthesis.speak(u);
+        } catch(e){}
+    }
+    function numberToEnglish(n){
+        const ones = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+        const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+        if(n < 20) return ones[n];
+        if(n < 100){ const t = Math.floor(n/10), o = n%10; return tens[t] + (o ? '-' + ones[o] : ''); }
+        if(n === 100) return 'one hundred';
+        return String(n);
+    }
+    function timeToEnglishPhrase(h, m){
+        const hourWord = (x)=> numberToEnglish(((x - 1) % 12) + 1);
+        if(m === 0) return hourWord(h) + " o'clock";
+        if(m === 15) return 'quarter past ' + hourWord(h);
+        if(m === 30) return 'half past ' + hourWord(h);
+        if(m === 45) return 'quarter to ' + hourWord(h + 1);
+        if(m < 30) return numberToEnglish(m) + ' past ' + hourWord(h);
+        return numberToEnglish(60 - m) + ' to ' + hourWord(h + 1);
+    }
+    function buildEngOrdPane(pane){
+        pane.innerHTML = `<div class='eng-ord-cat' style='font-size:11px;color:#8e8e93;text-align:center;margin-bottom:4px;font-weight:700;letter-spacing:.03em;'></div>
+            <div class='eng-ord-emoji' style='font-size:56px;text-align:center;line-height:1.1;'></div>
+            <div class='eng-ord-sv' style='font-size:20px;font-weight:800;text-align:center;color:#1d1d1f;margin:4px 0 12px;'></div>
+            <div class='eng-ord-answer' style='display:none;text-align:center;margin-bottom:12px;'>
+                <div class='eng-ord-en' style='font-size:22px;font-weight:800;color:#007aff;'></div>
+            </div>
+            <div class='hover-menu' style='display:flex;gap:8px;justify-content:center;flex-wrap:wrap;'>
+                <button type='button' class='btn btn-secondary eng-ord-speak'>🔊 Uttal</button>
+                <button type='button' class='btn btn-primary eng-ord-reveal'>Visa svar</button>
+                <button type='button' class='btn btn-secondary eng-ord-new'>🔄 Nytt ord</button>
+            </div>`;
+        const catEl = pane.querySelector('.eng-ord-cat'), emojiEl = pane.querySelector('.eng-ord-emoji'), svEl = pane.querySelector('.eng-ord-sv'),
+              answerBox = pane.querySelector('.eng-ord-answer'), enEl = pane.querySelector('.eng-ord-en'),
+              speakBtn = pane.querySelector('.eng-ord-speak'), revealBtn = pane.querySelector('.eng-ord-reveal'), newBtn = pane.querySelector('.eng-ord-new');
+        let current = ENG_WORDS[Math.floor(Math.random() * ENG_WORDS.length)];
+        function render(){
+            catEl.textContent = current.cat; emojiEl.textContent = current.emoji; svEl.textContent = current.sv;
+            answerBox.style.display = 'none'; enEl.textContent = current.en;
+        }
+        render();
+        speakBtn.onclick = ()=> speakEnglish(current.en);
+        revealBtn.onclick = ()=>{ answerBox.style.display = 'block'; };
+        newBtn.onclick = ()=>{
+            let next; do { next = ENG_WORDS[Math.floor(Math.random() * ENG_WORDS.length)]; } while(next.en === current.en && ENG_WORDS.length > 1);
+            current = next; render();
+        };
+    }
+    function buildEngMemoryPane(pane){
+        pane.innerHTML = `<div class='hover-menu' style='display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:10px;font-size:12px;flex-wrap:wrap;'>
+                Antal par:
+                <select class='eng-mem-count' style='font-size:12px;padding:3px 6px;border-radius:6px;border:1.5px solid #e5e5ea;'>
+                    <option value='4'>4</option>
+                    <option value='6' selected>6</option>
+                    <option value='8'>8</option>
+                </select>
+                <button type='button' class='btn btn-secondary eng-mem-new'>🔄 Ny omgång</button>
+            </div>
+            <div class='eng-mem-grid'></div>
+            <div class='eng-mem-status' style='text-align:center;font-size:12px;color:#8e8e93;margin-top:8px;min-height:16px;'></div>`;
+        const countSel = pane.querySelector('.eng-mem-count'), newBtn = pane.querySelector('.eng-mem-new'),
+              grid = pane.querySelector('.eng-mem-grid'), statusEl = pane.querySelector('.eng-mem-status');
+        let flipped = [], lock = false, matched = 0, totalPairs = 6;
+        function shuffle(arr){ for(let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+        function flip(card, c){
+            if(lock || card.classList.contains('matched') || flipped.find(f => f.card === card)) return;
+            card.textContent = c.text; card.style.background = '#eef1f5'; card.style.color = '#1d1d1f';
+            flipped.push({ card, c });
+            if(flipped.length === 2){
+                lock = true;
+                const [a, b] = flipped;
+                const isMatch = a.c.pairId === b.c.pairId && a.c.lang !== b.c.lang;
+                setTimeout(()=>{
+                    if(isMatch){
+                        a.card.classList.add('matched'); b.card.classList.add('matched');
+                        a.card.style.background = '#34c759'; b.card.style.background = '#34c759'; a.card.style.color = '#fff'; b.card.style.color = '#fff';
+                        matched++;
+                        if(matched === totalPairs){ statusEl.textContent = '🎉 Klart! Alla par hittade.'; showWinnerPopup('Bra jobbat!'); }
+                    } else {
+                        a.card.textContent = '?'; b.card.textContent = '?'; a.card.style.background = '#007aff'; b.card.style.background = '#007aff'; a.card.style.color = '#fff'; b.card.style.color = '#fff';
+                    }
+                    flipped = []; lock = false;
+                }, 700);
+            }
+        }
+        function deal(){
+            totalPairs = parseInt(countSel.value) || 6;
+            const pool = shuffle([...ENG_WORDS]).slice(0, totalPairs);
+            let cards = [];
+            pool.forEach((w, i)=>{ cards.push({ pairId:i, text:w.sv, lang:'sv' }); cards.push({ pairId:i, text:w.en, lang:'en' }); });
+            shuffle(cards);
+            flipped = []; lock = false; matched = 0; statusEl.textContent = '';
+            grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:6px;';
+            grid.innerHTML = '';
+            cards.forEach((c)=>{
+                const card = document.createElement('div');
+                card.style.cssText = 'aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#007aff;color:#fff;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;text-align:center;padding:4px;user-select:none;';
+                card.textContent = '?';
+                card.onclick = ()=> flip(card, c);
+                grid.appendChild(card);
+            });
+        }
+        newBtn.onclick = deal; countSel.onchange = deal;
+        deal();
+    }
+    function buildEngRaknaPane(pane){
+        pane.innerHTML = `<div class='hover-menu' style='display:flex;gap:6px;justify-content:center;margin-bottom:10px;'>
+                <button type='button' class='btn btn-primary eng-rk-mode-siffra'>🔢 Siffra</button>
+                <button type='button' class='btn btn-secondary eng-rk-mode-klocka'>🕐 Klocka</button>
+            </div>
+            <div class='eng-rk-siffra-box' style='text-align:center;'>
+                <div class='eng-rk-number' style='font-size:56px;font-weight:800;color:#1d1d1f;'></div>
+            </div>
+            <div class='eng-rk-klocka-box' style='display:none;text-align:center;'>
+                <svg class='eng-rk-clock-svg' viewBox='0 0 120 120' style='width:140px;height:140px;'>
+                    <circle cx='60' cy='60' r='56' fill='#fff' stroke='#546e7a' stroke-width='4'/>
+                    <line class='eng-rk-hour-hand' x1='60' y1='60' x2='60' y2='34' stroke='#1d1d1f' stroke-width='5' stroke-linecap='round'/>
+                    <line class='eng-rk-min-hand' x1='60' y1='60' x2='60' y2='20' stroke='#007aff' stroke-width='3.5' stroke-linecap='round'/>
+                    <circle cx='60' cy='60' r='4' fill='#ff3b30'/>
+                </svg>
+            </div>
+            <div class='eng-rk-answer' style='display:none;text-align:center;margin:12px 0;font-size:20px;font-weight:800;color:#007aff;'></div>
+            <div class='hover-menu' style='display:flex;gap:8px;justify-content:center;margin-top:4px;'>
+                <button type='button' class='btn btn-primary eng-rk-reveal'>Visa svar</button>
+                <button type='button' class='btn btn-secondary eng-rk-new'>🔄 Nytt</button>
+            </div>`;
+        const rkModeSiffra = pane.querySelector('.eng-rk-mode-siffra'), rkModeKlocka = pane.querySelector('.eng-rk-mode-klocka'),
+              siffraBox = pane.querySelector('.eng-rk-siffra-box'), klockaBox = pane.querySelector('.eng-rk-klocka-box'),
+              numberEl = pane.querySelector('.eng-rk-number'), hourHand = pane.querySelector('.eng-rk-hour-hand'), minHand = pane.querySelector('.eng-rk-min-hand'),
+              answerEl = pane.querySelector('.eng-rk-answer'), revealBtn = pane.querySelector('.eng-rk-reveal'), newBtn = pane.querySelector('.eng-rk-new');
+        let mode = 'siffra';
+        function newSiffra(){
+            const n = Math.floor(Math.random() * 101);
+            numberEl.textContent = n; answerEl.style.display = 'none'; answerEl.textContent = numberToEnglish(n);
+        }
+        function newKlocka(){
+            const h = 1 + Math.floor(Math.random() * 12), m = Math.floor(Math.random() * 12) * 5;
+            const hourDeg = ((h % 12) + m / 60) * 30, minDeg = m * 6;
+            hourHand.style.transformOrigin = '60px 60px'; hourHand.style.transform = 'rotate(' + hourDeg + 'deg)';
+            minHand.style.transformOrigin = '60px 60px'; minHand.style.transform = 'rotate(' + minDeg + 'deg)';
+            answerEl.style.display = 'none'; answerEl.textContent = timeToEnglishPhrase(h, m);
+        }
+        function setMode(m){
+            mode = m;
+            rkModeSiffra.classList.toggle('btn-primary', m === 'siffra'); rkModeSiffra.classList.toggle('btn-secondary', m !== 'siffra');
+            rkModeKlocka.classList.toggle('btn-primary', m === 'klocka'); rkModeKlocka.classList.toggle('btn-secondary', m !== 'klocka');
+            siffraBox.style.display = m === 'siffra' ? 'block' : 'none';
+            klockaBox.style.display = m === 'klocka' ? 'block' : 'none';
+            if(m === 'siffra') newSiffra(); else newKlocka();
+        }
+        rkModeSiffra.onclick = ()=> setMode('siffra');
+        rkModeKlocka.onclick = ()=> setMode('klocka');
+        revealBtn.onclick = ()=>{ answerEl.style.display = 'block'; };
+        newBtn.onclick = ()=>{ if(mode === 'siffra') newSiffra(); else newKlocka(); };
+        setMode('siffra');
+    }
+    function createEngelskaMegaWidget(config){
+        if(config === undefined) config = null;
+        const body = createWidget('ENGELSKA', 280, 'eng-mega-widget', config);
+        const widget = body.parentElement.parentElement;
+
+        body.innerHTML = `<div class='tid-tabs-wrap'>
+                <div class='tid-tabs-handle'></div>
+                <div class='tid-mega-tabs'>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='ord'>💡 Ordet idag</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='memory'>🧩 Memory</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='rakna'>🔢 Räkna</button>
+                </div>
+            </div>
+            <div class='tid-mega-pane eng-pane-ord'></div>
+            <div class='tid-mega-pane eng-pane-memory' style='display:none;'></div>
+            <div class='tid-mega-pane eng-pane-rakna' style='display:none;'></div>`;
+
+        const tidTabsWrap = body.querySelector('.tid-tabs-wrap');
+        const tabBtns = [...body.querySelectorAll('.tid-mega-tab-btn')];
+        const paneOrd = body.querySelector('.eng-pane-ord'), paneMem = body.querySelector('.eng-pane-memory'), paneRak = body.querySelector('.eng-pane-rakna');
+        let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'ord';
+        const ENG_TAB_WIDTH = { ord:260, memory:380, rakna:280 };
+        function renderTabs(){
+            tabBtns.forEach(b=>{ const on = b.dataset.tab === activeTab; b.classList.toggle('btn-primary', on); b.classList.toggle('btn-secondary', !on); });
+            paneOrd.style.display = activeTab === 'ord' ? 'block' : 'none';
+            paneMem.style.display = activeTab === 'memory' ? 'block' : 'none';
+            paneRak.style.display = activeTab === 'rakna' ? 'block' : 'none';
+            widget.style.width = (ENG_TAB_WIDTH[activeTab] || 280) + 'px';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab = b.dataset.tab; tidTabsWrap.classList.remove('expanded'); renderTabs(); widget.dataset.engTab = activeTab; saveBoardState(); });
+        body.addEventListener('pointerdown', (e)=>{ if(!tidTabsWrap.contains(e.target)) tidTabsWrap.classList.remove('expanded'); });
+
+        buildEngOrdPane(paneOrd);
+        buildEngMemoryPane(paneMem);
+        buildEngRaknaPane(paneRak);
+
+        renderTabs();
+    }
+    window.createEngelskaMegaWidget = createEngelskaMegaWidget;
+
+    // ==== SO (åk 4: Sverige, Norden, vikingatid, närsamhälle) ====
+    const SVERIGE_STADER = [
+        { stad:'Stockholm', landskap:'Uppland' },
+        { stad:'Göteborg', landskap:'Västergötland' },
+        { stad:'Malmö', landskap:'Skåne' },
+        { stad:'Uppsala', landskap:'Uppland' },
+        { stad:'Linköping', landskap:'Östergötland' },
+        { stad:'Örebro', landskap:'Närke' },
+        { stad:'Umeå', landskap:'Västerbotten' },
+        { stad:'Luleå', landskap:'Norrbotten' },
+        { stad:'Kalmar', landskap:'Småland' },
+        { stad:'Visby', landskap:'Gotland' },
+        { stad:'Karlstad', landskap:'Värmland' },
+        { stad:'Falun', landskap:'Dalarna' },
+        { stad:'Halmstad', landskap:'Halland' },
+        { stad:'Kristianstad', landskap:'Skåne' },
+        { stad:'Sundsvall', landskap:'Medelpad' },
+        { stad:'Östersund', landskap:'Jämtland' }
+    ];
+    const SOFRAGA_BANK = [
+        { fraga:'Vilken är Sveriges huvudstad?', svar:'Stockholm är Sveriges huvudstad.' },
+        { fraga:'Vilka tre landsdelar delas Sverige in i?', svar:'Sverige delas in i Norrland, Svealand och Götaland.' },
+        { fraga:'Vilka länder gränsar Sverige till på land?', svar:'Sverige gränsar till Norge i väster och Finland i nordost.' },
+        { fraga:'Vilket hav ligger öster om Sverige?', svar:'Östersjön ligger öster om Sverige.' },
+        { fraga:'Vilket datum firas Sveriges nationaldag?', svar:'Sveriges nationaldag firas den 6 juni.' },
+        { fraga:'Vad heter Sveriges kung?', svar:'Carl XVI Gustaf är Sveriges kung, han har varit det sedan 1973.' },
+        { fraga:'Vad kallas Sveriges lagstiftande församling?', svar:'Riksdagen är Sveriges lagstiftande församling, där riksdagsledamöterna beslutar om nya lagar.' },
+        { fraga:'Vad är skillnaden på en kommun och ett landskap?', svar:'En kommun är ett område med egen politisk styrning som bland annat ansvarar för skolor, medan ett landskap är en äldre, historisk indelning som fortfarande används för tradition och kultur.' },
+        { fraga:'Vilket är Sveriges till ytan största landskap?', svar:'Lappland är Sveriges till ytan största landskap.' },
+        { fraga:'Vad heter de fem nordiska länderna?', svar:'De nordiska länderna är Sverige, Norge, Danmark, Finland och Island.' },
+        { fraga:'Vad betyder det att Sverige är en demokrati?', svar:'Det betyder att medborgarna får rösta fram vilka som ska styra landet, till exempel i riksdagsval vart fjärde år.' },
+        { fraga:'Ungefär hur många invånare har Sverige?', svar:'Sverige har ungefär 10,5 miljoner invånare.' },
+        { fraga:'Vilken är Sveriges näst största stad?', svar:'Göteborg är Sveriges näst största stad.' },
+        { fraga:'Vad odlas ofta på gårdarna i Skånes bördiga jordar?', svar:'I Skåne odlas till exempel vete, sockerbetor och raps.' },
+        { fraga:'Vem beslutar om regler i din egen kommun, till exempel om skolan?', svar:'Det är kommunfullmäktige, som väljs av invånarna i kommunen, som beslutar om sådana saker.' },
+        { fraga:'Vilket år blev Sverige medlem i EU?', svar:'Sverige blev medlem i EU år 1995.' },
+        { fraga:'Vad kallas pengarna som kommunen tar in för att betala skolor, äldreomsorg och vägar?', svar:'Det kallas kommunalskatt.' }
+    ];
+    function soFragaDagensIndex(){
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now - start;
+        const dagensDagIÅret = Math.floor(diff / 86400000);
+        return dagensDagIÅret % SOFRAGA_BANK.length;
+    }
+    const VIKING_FACTS = [
+        { emoji:'⛵', title:'Långskeppen', text:'Vikingaskeppen kallades långskepp och kunde både segla på öppet hav och ros på grunda floder.' },
+        { emoji:'📜', title:'Runorna', text:'Vikingarna skrev med runor, ett alfabet med tecken som passade bra att rista i trä och sten.' },
+        { emoji:'🏺', title:'Handel', text:'Vikingarna handlade med varor ända bort till dagens Ryssland och Mellanöstern.' },
+        { emoji:'🌍', title:'Resor till Amerika', text:'Vikingarna seglade ända till Island, Grönland och till och med Nordamerika - långt före Columbus.' },
+        { emoji:'🏛️', title:'Tinget', text:'Vikingarna samlades på ting för att bestämma saker tillsammans, en tidig form av demokrati.' },
+        { emoji:'⚡', title:'Gudarna', text:'Thor och Oden var två av de nordiska gudarna som vikingarna trodde på.' },
+        { emoji:'🏘️', title:'Långhus', text:'Vikingarnas hus kallades långhus och hade ofta bara ett stort rum där hela familjen bodde.' },
+        { emoji:'👩', title:'Vikingakvinnor', text:'Vikingakvinnor kunde äga mark och skilja sig, vilket var ovanligt i andra delar av Europa på den tiden.' },
+        { emoji:'🌊', title:'Namnet "viking"', text:'Ordet viking kommer troligen från "vik", som betyder en skyddad bukt vid havet.' },
+        { emoji:'💍', title:'Smycken', text:'Vikingarna bar smycken av silver och brons, ofta formade som djur.' },
+        { emoji:'🏙️', title:'Birka', text:'Birka, nära Stockholm, var en av Sveriges viktigaste vikingastäder och handelsplatser.' },
+        { emoji:'⭐', title:'Navigation', text:'Man tror att vikingarna navigerade med hjälp av solen, stjärnorna och fåglars flygvägar.' },
+        { emoji:'🌾', title:'Bönder', text:'De flesta vikingar var bönder som odlade och hade djur, inte bara sjöfarare.' },
+        { emoji:'⏳', title:'Hur länge?', text:'Vikingatiden varade i ungefär 250 år, mellan år 793 och 1066.' },
+        { emoji:'✝️', title:'Vikingatidens slut', text:'Vikingatiden tog slut när kungar i Norden blev kristna och byggde upp starkare riken.' }
+    ];
+    function buildSoKartaPane(pane){
+        pane.innerHTML = `<div class='so-quiz-score' style='text-align:center;font-size:12px;color:#8e8e93;margin-bottom:6px;'>Rätt: <b class='so-quiz-ratt'>0</b> &nbsp; Fel: <b class='so-quiz-fel'>0</b></div>
+            <div class='so-quiz-fraga' style='text-align:center;font-size:16px;font-weight:800;color:#1d1d1f;margin-bottom:14px;'></div>
+            <div class='so-quiz-opts' style='display:grid;grid-template-columns:1fr 1fr;gap:8px;'></div>
+            <div class='hover-menu' style='display:flex;justify-content:center;margin-top:14px;'>
+                <button type='button' class='btn btn-secondary so-quiz-next'>🔄 Nästa fråga</button>
+            </div>`;
+        const scoreRattEl = pane.querySelector('.so-quiz-ratt'), scoreFelEl = pane.querySelector('.so-quiz-fel'),
+              fragaEl = pane.querySelector('.so-quiz-fraga'), optsEl = pane.querySelector('.so-quiz-opts'), nextBtn = pane.querySelector('.so-quiz-next');
+        let ratt = 0, fel = 0, answered = false;
+        const allaLandskap = [...new Set(SVERIGE_STADER.map(s => s.landskap))];
+        function shuffle(arr){ for(let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+        function nyFraga(){
+            answered = false;
+            const q = SVERIGE_STADER[Math.floor(Math.random() * SVERIGE_STADER.length)];
+            fragaEl.textContent = 'I vilket landskap ligger ' + q.stad + '?';
+            const fel3 = shuffle(allaLandskap.filter(l => l !== q.landskap)).slice(0, 3);
+            const opts = shuffle([q.landskap, ...fel3]);
+            optsEl.innerHTML = '';
+            opts.forEach(opt=>{
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'btn btn-secondary'; b.textContent = opt;
+                b.onclick = ()=>{
+                    if(answered) return; answered = true;
+                    const correct = opt === q.landskap;
+                    b.style.background = correct ? '#34c759' : '#ff3b30'; b.style.color = '#fff'; b.style.borderColor = 'transparent';
+                    if(!correct){
+                        [...optsEl.children].forEach(c=>{ if(c.textContent === q.landskap){ c.style.background = '#34c759'; c.style.color = '#fff'; c.style.borderColor = 'transparent'; } });
+                    }
+                    if(correct){ ratt++; scoreRattEl.textContent = ratt; } else { fel++; scoreFelEl.textContent = fel; }
+                };
+                optsEl.appendChild(b);
+            });
+        }
+        nextBtn.onclick = nyFraga;
+        nyFraga();
+    }
+    function buildSoFragaPane(pane){
+        pane.innerHTML = `<div class='kw-edit-hint'>🗺️ Dagens SO-fråga att fundera över tillsammans:</div>
+            <div class='nf-fraga so-fraga-text'></div>
+            <div class='nf-svar so-fraga-svarbox' style='display:none;'><div class='nf-svar-label'>✅ Svar</div><div class='nf-svar-text so-fraga-svartext'></div></div>
+            <div class='kw-btnrow hover-menu'>
+                <button type='button' class='kw-btn kw-btn-primary so-fraga-ny'>🎲 Ny fråga</button>
+                <button type='button' class='kw-btn kw-btn-green so-fraga-visa'>👁️ Visa svar</button>
+                <button type='button' class='kw-btn kw-btn-ghost so-fraga-dolj' style='display:none;'>🙈 Dölj svar</button>
+            </div>`;
+        const fragaEl = pane.querySelector('.so-fraga-text'), svarBox = pane.querySelector('.so-fraga-svarbox'), svarText = pane.querySelector('.so-fraga-svartext'),
+              nyBtn = pane.querySelector('.so-fraga-ny'), visaBtn = pane.querySelector('.so-fraga-visa'), doljBtn = pane.querySelector('.so-fraga-dolj');
+        let idx = soFragaDagensIndex();
+        function render(revealed){
+            const q = SOFRAGA_BANK[idx];
+            fragaEl.textContent = q.fraga; svarText.textContent = q.svar;
+            svarBox.style.display = revealed ? 'block' : 'none';
+            visaBtn.style.display = revealed ? 'none' : '';
+            doljBtn.style.display = revealed ? '' : 'none';
+        }
+        render(false);
+        nyBtn.onclick = ()=>{ let ny; do { ny = Math.floor(Math.random() * SOFRAGA_BANK.length); } while(SOFRAGA_BANK.length > 1 && ny === idx); idx = ny; render(false); };
+        visaBtn.onclick = ()=> render(true);
+        doljBtn.onclick = ()=> render(false);
+    }
+    function buildVikingPane(pane){
+        pane.innerHTML = `<div class='viking-emoji' style='font-size:52px;text-align:center;line-height:1.1;'></div>
+            <div class='viking-title' style='font-size:17px;font-weight:800;text-align:center;color:#1d1d1f;margin:6px 0 8px;'></div>
+            <div class='viking-text' style='font-size:13.5px;text-align:center;color:#3a3a3c;line-height:1.5;min-height:60px;'></div>
+            <div class='hover-menu' style='display:flex;justify-content:center;margin-top:12px;'>
+                <button type='button' class='btn btn-secondary viking-new'>🔄 Nästa fakta</button>
+            </div>`;
+        const emojiEl = pane.querySelector('.viking-emoji'), titleEl = pane.querySelector('.viking-title'), textEl = pane.querySelector('.viking-text'), newBtn = pane.querySelector('.viking-new');
+        let current = VIKING_FACTS[Math.floor(Math.random() * VIKING_FACTS.length)];
+        function render(){ emojiEl.textContent = current.emoji; titleEl.textContent = current.title; textEl.textContent = current.text; }
+        render();
+        newBtn.onclick = ()=>{
+            let next; do { next = VIKING_FACTS[Math.floor(Math.random() * VIKING_FACTS.length)]; } while(next.title === current.title && VIKING_FACTS.length > 1);
+            current = next; render();
+        };
+    }
+    function createSoMegaWidget(config){
+        if(config === undefined) config = null;
+        const body = createWidget('SO', 300, 'so-mega-widget', config);
+        const widget = body.parentElement.parentElement;
+
+        body.innerHTML = `<div class='tid-tabs-wrap'>
+                <div class='tid-tabs-handle'></div>
+                <div class='tid-mega-tabs'>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='karta'>🗺️ Sverigequiz</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='fraga'>❓ Dagens SO-fråga</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='viking'>⚔️ Vikingatid</button>
+                </div>
+            </div>
+            <div class='tid-mega-pane so-pane-karta'></div>
+            <div class='tid-mega-pane so-pane-fraga' style='display:none;'></div>
+            <div class='tid-mega-pane so-pane-viking' style='display:none;'></div>`;
+
+        const tidTabsWrap = body.querySelector('.tid-tabs-wrap');
+        const tabBtns = [...body.querySelectorAll('.tid-mega-tab-btn')];
+        const paneKarta = body.querySelector('.so-pane-karta'), paneFraga = body.querySelector('.so-pane-fraga'), paneViking = body.querySelector('.so-pane-viking');
+        let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'karta';
+        const SO_TAB_WIDTH = { karta:300, fraga:340, viking:300 };
+        function renderTabs(){
+            tabBtns.forEach(b=>{ const on = b.dataset.tab === activeTab; b.classList.toggle('btn-primary', on); b.classList.toggle('btn-secondary', !on); });
+            paneKarta.style.display = activeTab === 'karta' ? 'block' : 'none';
+            paneFraga.style.display = activeTab === 'fraga' ? 'block' : 'none';
+            paneViking.style.display = activeTab === 'viking' ? 'block' : 'none';
+            widget.style.width = (SO_TAB_WIDTH[activeTab] || 300) + 'px';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab = b.dataset.tab; tidTabsWrap.classList.remove('expanded'); renderTabs(); widget.dataset.soTab = activeTab; saveBoardState(); });
+        body.addEventListener('pointerdown', (e)=>{ if(!tidTabsWrap.contains(e.target)) tidTabsWrap.classList.remove('expanded'); });
+
+        buildSoKartaPane(paneKarta);
+        buildSoFragaPane(paneFraga);
+        buildVikingPane(paneViking);
+
+        renderTabs();
+    }
+    window.createSoMegaWidget = createSoMegaWidget;
+
+    // ==== IDROTT & HÄLSA (rörelse, inte prestation) ====
+    const IDROTT_OVNINGAR = [
+        { emoji:'🤸', text:'Gör 10 jumping jacks (hoppa med armar och ben ut och in).' },
+        { emoji:'🌀', text:'Snurra långsamt runt dig själv 5 varv, byt sedan håll.' },
+        { emoji:'🦩', text:'Balansera på ett ben i 20 sekunder, byt sedan ben.' },
+        { emoji:'🐸', text:'Gör 10 grodhopp (hoppa framåt som en groda).' },
+        { emoji:'🤾', text:'Spring på stället i 20 sekunder, lyft knäna högt.' },
+        { emoji:'🧘', text:'Sträck armarna mot taket och håll i 10 sekunder, andas lugnt.' },
+        { emoji:'🐻', text:'Gå som en björn (på händer och fötter) fem steg framåt och fem bakåt.' },
+        { emoji:'🦵', text:'Gör 10 utfallssteg, växelvis med höger och vänster ben.' },
+        { emoji:'🙆', text:'Gör 10 armcirklar framåt och 10 bakåt.' },
+        { emoji:'🐒', text:'Klappa händerna över huvudet 10 gånger medan du hoppar på stället.' },
+        { emoji:'🧎', text:'Gör 5 knäböj, håll ryggen rak.' },
+        { emoji:'🚶', text:'Gå på tå tvärs över rummet, och tillbaka på hälarna.' }
+    ];
+    const IDROTT_LEKAR = [
+        { emoji:'🏃', namn:'Kull', besk:'En person är "den" och ska försöka ta (kulla) de andra. Den som blir tagen blir ny "den".' },
+        { emoji:'🧊', namn:'Fryskull', besk:'Som vanlig kull, men den som blir tagen fryser till is och står stilla tills en kompis "tinar" upp genom att krypa under benen.' },
+        { emoji:'🐻', namn:'Björnen sover', besk:'En är björnen och låtsas sova. De andra smyger fram och ropar "Björnen sover, vågar vi väcka den?" - plötsligt vaknar björnen och jagar!' },
+        { emoji:'🪑', namn:'Hela havet stormar', besk:'Alla springer runt stolar/markeringar. När ledaren ropar "stopp" ska alla hitta en plats - en plats färre än antal spelare varje gång.' },
+        { emoji:'👮', namn:'Tjuv och polis', besk:'Dela in i två lag: tjuvar och poliser. Poliserna ska fånga tjuvarna och sätta dem i "fängelset", tjuvarna kan befria varandra.' },
+        { emoji:'🙈', namn:'Kurragömma', besk:'En räknar till 20 med ögonen stängda medan de andra gömmer sig. Sedan letar man reda på alla.' },
+        { emoji:'🔲', namn:'Fyra hörn', besk:'Planens fyra hörn numreras 1-4. En i mitten blundar och ropar en siffra - alla vid det hörnet måste snabbt byta till ett annat.' },
+        { emoji:'🦆', namn:'Följa John', besk:'En ledare gör rörelser (hoppa, snurra, gå som en anka) och alla andra ska göra likadant.' },
+        { emoji:'🪢', namn:'Knuten', besk:'Stå i en ring och håll händerna med två olika personer mitt emot dig. Nysta upp knuten tillsammans utan att släppa taget.' },
+        { emoji:'🏐', namn:'Linjebollen', besk:'Två lag på varsin sida om en linje. Kasta en mjuk boll över linjen och försök få den att landa på motståndarnas sida.' },
+        { emoji:'🩰', namn:'Gummitwist', besk:'Två personer håller ett gummiband runt benen medan en tredje hoppar olika mönster.' },
+        { emoji:'🐆', namn:'Djungelkull', besk:'Alla utom en är djungeldjur som rör sig som sitt djur. "Jägaren" ska kulla djuren, som fryser tills en kompis befriar dem.' }
+    ];
+    function buildIdrottRorelsePane(pane){
+        pane.innerHTML = `<div class='idr-ro-emoji' style='font-size:52px;text-align:center;'></div>
+            <div class='idr-ro-text' style='font-size:15px;text-align:center;color:#1d1d1f;font-weight:700;margin:8px 0 14px;min-height:44px;'></div>
+            <div class='timer-input-group hover-menu' style='justify-content:center;'><input class='timer-input idr-ro-min' value='00' type='number'>:<input class='timer-input idr-ro-sec' value='30' type='number'></div>
+            <div class='timer-display idr-ro-display'>00:30</div>
+            <div class='timer-controls hover-menu' style='margin-top:8px;'>
+                <button type='button' class='btn btn-primary idr-ro-start'>Start</button>
+                <button type='button' class='btn btn-danger idr-ro-reset'>Nollställ</button>
+            </div>
+            <div class='hover-menu' style='display:flex;justify-content:center;margin-top:10px;'>
+                <button type='button' class='btn btn-secondary idr-ro-new'>🔄 Ny övning</button>
+            </div>`;
+        const emojiEl = pane.querySelector('.idr-ro-emoji'), textEl = pane.querySelector('.idr-ro-text'),
+              ig = pane.querySelector('.timer-input-group'), mi = pane.querySelector('.idr-ro-min'), si = pane.querySelector('.idr-ro-sec'), disp = pane.querySelector('.idr-ro-display'),
+              startBtn = pane.querySelector('.idr-ro-start'), resetBtn = pane.querySelector('.idr-ro-reset'), newBtn = pane.querySelector('.idr-ro-new');
+        let current = IDROTT_OVNINGAR[Math.floor(Math.random() * IDROTT_OVNINGAR.length)];
+        function renderOvning(){ emojiEl.textContent = current.emoji; textEl.textContent = current.text; }
+        renderOvning();
+        let tLeft = 30, tTotal = 30, tId = null;
+        const setColor = ()=>{ const frac = tTotal > 0 ? Math.max(0, Math.min(1, tLeft / tTotal)) : 1; disp.style.background = `hsl(${Math.round(frac * 120)}, 72%, 47%)`; };
+        const upd = ()=>{ let m = Math.floor(tLeft / 60).toString().padStart(2, '0'), s = (tLeft % 60).toString().padStart(2, '0'); disp.innerText = `${m}:${s}`; setColor(); };
+        upd();
+        startBtn.onclick = ()=>{
+            if(tId){ clearInterval(tId); tId = null; startBtn.innerText = 'Start'; ig.style.display = 'flex'; }
+            else {
+                unlockAudio();
+                if(ig.style.display !== 'none'){ tLeft = (parseInt(mi.value) || 0) * 60 + (parseInt(si.value) || 0); tTotal = tLeft || 1; ig.style.display = 'none'; }
+                startBtn.innerText = 'Paus';
+                tId = setInterval(()=>{
+                    if(tLeft > 0){ tLeft--; upd(); }
+                    else { clearInterval(tId); tId = null; startBtn.innerText = 'Start'; ig.style.display = 'flex'; disp.style.background = '#ff3b30'; playTimerSound(); customAlert('Rörelsepausen är slut! 🎉', '🎉'); }
+                }, 1000);
+            }
+        };
+        resetBtn.onclick = ()=>{ clearInterval(tId); tId = null; tLeft = (parseInt(mi.value) || 0) * 60 + (parseInt(si.value) || 0); tTotal = tLeft || 1; startBtn.innerText = 'Start'; ig.style.display = 'flex'; upd(); };
+        newBtn.onclick = ()=>{
+            let next; do { next = IDROTT_OVNINGAR[Math.floor(Math.random() * IDROTT_OVNINGAR.length)]; } while(next.text === current.text && IDROTT_OVNINGAR.length > 1);
+            current = next; renderOvning();
+        };
+    }
+    function buildIdrottLekPane(pane){
+        pane.innerHTML = `<div class='idr-lek-emoji' style='font-size:44px;text-align:center;'></div>
+            <div class='idr-lek-namn' style='font-size:18px;font-weight:800;text-align:center;color:#1d1d1f;margin:6px 0 8px;'></div>
+            <div class='idr-lek-besk' style='font-size:13px;text-align:center;color:#3a3a3c;line-height:1.5;min-height:70px;'></div>
+            <div class='hover-menu' style='display:flex;justify-content:center;margin-top:12px;'>
+                <button type='button' class='btn btn-secondary idr-lek-new'>🔄 Ny lek</button>
+            </div>`;
+        const emojiEl = pane.querySelector('.idr-lek-emoji'), namnEl = pane.querySelector('.idr-lek-namn'), beskEl = pane.querySelector('.idr-lek-besk'), newBtn = pane.querySelector('.idr-lek-new');
+        let current = IDROTT_LEKAR[Math.floor(Math.random() * IDROTT_LEKAR.length)];
+        function render(){ emojiEl.textContent = current.emoji; namnEl.textContent = current.namn; beskEl.textContent = current.besk; }
+        render();
+        newBtn.onclick = ()=>{
+            let next; do { next = IDROTT_LEKAR[Math.floor(Math.random() * IDROTT_LEKAR.length)]; } while(next.namn === current.namn && IDROTT_LEKAR.length > 1);
+            current = next; render();
+        };
+    }
+    function createIdrottMegaWidget(config){
+        if(config === undefined) config = null;
+        const body = createWidget('IDROTT', 260, 'idrott-mega-widget', config);
+        const widget = body.parentElement.parentElement;
+
+        body.innerHTML = `<div class='tid-tabs-wrap'>
+                <div class='tid-tabs-handle'></div>
+                <div class='tid-mega-tabs'>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='rorelse'>🏃 Rörelsepaus</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='lek'>🎲 Lekstund</button>
+                </div>
+            </div>
+            <div class='tid-mega-pane idr-pane-rorelse'></div>
+            <div class='tid-mega-pane idr-pane-lek' style='display:none;'></div>`;
+
+        const tidTabsWrap = body.querySelector('.tid-tabs-wrap');
+        const tabBtns = [...body.querySelectorAll('.tid-mega-tab-btn')];
+        const paneRorelse = body.querySelector('.idr-pane-rorelse'), paneLek = body.querySelector('.idr-pane-lek');
+        let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'rorelse';
+        const IDROTT_TAB_WIDTH = { rorelse:260, lek:280 };
+        function renderTabs(){
+            tabBtns.forEach(b=>{ const on = b.dataset.tab === activeTab; b.classList.toggle('btn-primary', on); b.classList.toggle('btn-secondary', !on); });
+            paneRorelse.style.display = activeTab === 'rorelse' ? 'block' : 'none';
+            paneLek.style.display = activeTab === 'lek' ? 'block' : 'none';
+            widget.style.width = (IDROTT_TAB_WIDTH[activeTab] || 260) + 'px';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab = b.dataset.tab; tidTabsWrap.classList.remove('expanded'); renderTabs(); widget.dataset.idrottTab = activeTab; saveBoardState(); });
+        body.addEventListener('pointerdown', (e)=>{ if(!tidTabsWrap.contains(e.target)) tidTabsWrap.classList.remove('expanded'); });
+
+        buildIdrottRorelsePane(paneRorelse);
+        buildIdrottLekPane(paneLek);
+
+        renderTabs();
+    }
+    window.createIdrottMegaWidget = createIdrottMegaWidget;
+
+    // ==== MUSIK (grundläggande puls/rytm, inte notläsning) ====
+    // Instrumentljuden är syntetiserade med Web Audio (samma teknik som timer-ljuden ovan,
+    // inga ljudfiler behövs) - tydligt olika klangfärg per instrument så de går att särskilja.
+    const MUSIK_INSTRUMENT = [
+        { namn:'Trumma', emoji:'🥁', play(ctx){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='triangle'; o.frequency.value=90; const t=ctx.currentTime; g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(0.35,t+0.01); g.gain.exponentialRampToValueAtTime(0.001,t+0.22); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.25); } },
+        { namn:'Piano', emoji:'🎹', play(ctx){ const t=ctx.currentTime; [440,880].forEach((f,i)=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(i===0?0.28:0.06,t+0.015); g.gain.exponentialRampToValueAtTime(0.001,t+0.65); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.7); }); } },
+        { namn:'Gitarr', emoji:'🎸', play(ctx){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sawtooth'; o.frequency.value=220; const t=ctx.currentTime; g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.008); g.gain.exponentialRampToValueAtTime(0.001,t+0.4); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.42); } },
+        { namn:'Trumpet', emoji:'🎺', play(ctx){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sawtooth'; o.frequency.value=349; const t=ctx.currentTime; g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(0.24,t+0.04); g.gain.setValueAtTime(0.24,t+0.3); g.gain.exponentialRampToValueAtTime(0.001,t+0.45); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.47); } },
+        { namn:'Fiol', emoji:'🎻', play(ctx){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=392; const t=ctx.currentTime; g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(0.2,t+0.15); g.gain.exponentialRampToValueAtTime(0.001,t+0.6); o.connect(g); g.connect(ctx.destination); const lfo=ctx.createOscillator(), lfoGain=ctx.createGain(); lfo.frequency.value=5; lfoGain.gain.value=4; lfo.connect(lfoGain); lfoGain.connect(o.frequency); lfo.start(t); lfo.stop(t+0.6); o.start(t); o.stop(t+0.62); } },
+        { namn:'Klocka', emoji:'🔔', play(ctx){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=880; const t=ctx.currentTime; g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.001,t+1.1); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+1.15); } }
+    ];
+    function playMusikInstrument(instr){ try{ unlockAudio(); if(!_audioCtx) return; instr.play(_audioCtx); }catch(e){} }
+    function buildMusikRytmPane(pane){
+        pane.innerHTML = `<div class='hover-menu' style='display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:10px;font-size:12px;flex-wrap:wrap;'>
+                Tempo:
+                <select class='mus-rytm-tempo' style='font-size:12px;padding:3px 6px;border-radius:6px;border:1.5px solid #e5e5ea;'>
+                    <option value='600'>Långsamt</option>
+                    <option value='450' selected>Medel</option>
+                    <option value='320'>Snabbt</option>
+                </select>
+                <button type='button' class='btn btn-secondary mus-rytm-new'>🔄 Nytt mönster</button>
+            </div>
+            <div class='mus-rytm-grid' style='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;'></div>
+            <div class='hover-menu' style='display:flex;justify-content:center;'>
+                <button type='button' class='btn btn-primary mus-rytm-play'>▶️ Spela mönstret</button>
+            </div>`;
+        const tempoSel = pane.querySelector('.mus-rytm-tempo'), newBtn = pane.querySelector('.mus-rytm-new'), grid = pane.querySelector('.mus-rytm-grid'), playBtn = pane.querySelector('.mus-rytm-play');
+        let pattern = [], boxes = [], playing = false, playTimer = null;
+        function genPattern(){
+            pattern = Array.from({ length:8 }, ()=> Math.random() < 0.7);
+            if(!pattern.some(Boolean)) pattern[Math.floor(Math.random() * 8)] = true; // undvik ett helt tomt mönster
+        }
+        function renderGrid(){
+            grid.innerHTML = '';
+            boxes = pattern.map((on)=>{
+                const b = document.createElement('div');
+                b.style.cssText = 'aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;transition:outline .05s;' + (on ? 'background:#007aff;color:#fff;' : 'background:#f2f2f7;color:#c7c7cc;border:1.5px dashed #d1d1d6;');
+                b.textContent = on ? '👏' : '·';
+                grid.appendChild(b);
+                return b;
+            });
+        }
+        function stopPlayback(){ playing = false; clearInterval(playTimer); playTimer = null; playBtn.textContent = '▶️ Spela mönstret'; boxes.forEach(b=> b.style.outline = 'none'); }
+        function startPlayback(){
+            if(playing){ stopPlayback(); return; }
+            playing = true; playBtn.textContent = '⏸ Stoppa';
+            let i = 0;
+            const interval = parseInt(tempoSel.value) || 450;
+            const tick = ()=>{
+                boxes.forEach(b=> b.style.outline = 'none');
+                const b = boxes[i];
+                b.style.outline = '3px solid #ff9500';
+                if(pattern[i]) playMusikInstrument({ play(ctx){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=440; const t=ctx.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.09); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.1); } });
+                i = (i + 1) % pattern.length;
+            };
+            tick();
+            playTimer = setInterval(tick, interval);
+        }
+        newBtn.onclick = ()=>{ stopPlayback(); genPattern(); renderGrid(); };
+        playBtn.onclick = startPlayback;
+        genPattern(); renderGrid();
+    }
+    function buildMusikGissaPane(pane){
+        pane.innerHTML = `<div class='mus-score' style='text-align:center;font-size:12px;color:#8e8e93;margin-bottom:10px;'>Rätt: <b class='mus-ratt'>0</b> &nbsp; Fel: <b class='mus-fel'>0</b></div>
+            <div class='hover-menu' style='display:flex;justify-content:center;margin-bottom:14px;'>
+                <button type='button' class='btn btn-primary mus-play'>▶️ Spela ljudet</button>
+            </div>
+            <div class='mus-opts' style='display:grid;grid-template-columns:1fr 1fr;gap:8px;'></div>
+            <div class='hover-menu' style='display:flex;justify-content:center;margin-top:14px;'>
+                <button type='button' class='btn btn-secondary mus-next'>🔄 Nästa ljud</button>
+            </div>`;
+        const scoreRattEl = pane.querySelector('.mus-ratt'), scoreFelEl = pane.querySelector('.mus-fel'),
+              playBtn = pane.querySelector('.mus-play'), optsEl = pane.querySelector('.mus-opts'), nextBtn = pane.querySelector('.mus-next');
+        let ratt = 0, fel = 0, answered = false, current = null;
+        function shuffle(arr){ for(let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+        function nyttLjud(){
+            answered = false;
+            current = MUSIK_INSTRUMENT[Math.floor(Math.random() * MUSIK_INSTRUMENT.length)];
+            const fel3 = shuffle(MUSIK_INSTRUMENT.filter(i => i.namn !== current.namn)).slice(0, 3);
+            const opts = shuffle([current, ...fel3]);
+            optsEl.innerHTML = '';
+            opts.forEach(instr=>{
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'btn btn-secondary'; b.textContent = instr.emoji + ' ' + instr.namn;
+                b.onclick = ()=>{
+                    if(answered) return; answered = true;
+                    const correct = instr.namn === current.namn;
+                    b.style.background = correct ? '#34c759' : '#ff3b30'; b.style.color = '#fff'; b.style.borderColor = 'transparent';
+                    if(!correct){ [...optsEl.children].forEach(c=>{ if(c.textContent === current.emoji + ' ' + current.namn){ c.style.background = '#34c759'; c.style.color = '#fff'; c.style.borderColor = 'transparent'; } }); }
+                    if(correct){ ratt++; scoreRattEl.textContent = ratt; } else { fel++; scoreFelEl.textContent = fel; }
+                };
+                optsEl.appendChild(b);
+            });
+        }
+        playBtn.onclick = ()=> playMusikInstrument(current);
+        nextBtn.onclick = nyttLjud;
+        nyttLjud();
+    }
+    function createMusikMegaWidget(config){
+        if(config === undefined) config = null;
+        const body = createWidget('MUSIK', 280, 'musik-mega-widget', config);
+        const widget = body.parentElement.parentElement;
+
+        body.innerHTML = `<div class='tid-tabs-wrap'>
+                <div class='tid-tabs-handle'></div>
+                <div class='tid-mega-tabs'>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='rytm'>👏 Rytm-klapp</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='gissa'>🎧 Gissa ljudet</button>
+                </div>
+            </div>
+            <div class='tid-mega-pane mus-pane-rytm'></div>
+            <div class='tid-mega-pane mus-pane-gissa' style='display:none;'></div>`;
+
+        const tidTabsWrap = body.querySelector('.tid-tabs-wrap');
+        const tabBtns = [...body.querySelectorAll('.tid-mega-tab-btn')];
+        const paneRytm = body.querySelector('.mus-pane-rytm'), paneGissa = body.querySelector('.mus-pane-gissa');
+        let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'rytm';
+        const MUSIK_TAB_WIDTH = { rytm:280, gissa:280 };
+        function renderTabs(){
+            tabBtns.forEach(b=>{ const on = b.dataset.tab === activeTab; b.classList.toggle('btn-primary', on); b.classList.toggle('btn-secondary', !on); });
+            paneRytm.style.display = activeTab === 'rytm' ? 'block' : 'none';
+            paneGissa.style.display = activeTab === 'gissa' ? 'block' : 'none';
+            widget.style.width = (MUSIK_TAB_WIDTH[activeTab] || 280) + 'px';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab = b.dataset.tab; tidTabsWrap.classList.remove('expanded'); renderTabs(); widget.dataset.musikTab = activeTab; saveBoardState(); });
+        body.addEventListener('pointerdown', (e)=>{ if(!tidTabsWrap.contains(e.target)) tidTabsWrap.classList.remove('expanded'); });
+
+        buildMusikRytmPane(paneRytm);
+        buildMusikGissaPane(paneGissa);
+
+        renderTabs();
+    }
+    window.createMusikMegaWidget = createMusikMegaWidget;
+
+    // ==== BILD & SLÖJD (enkla tekniker, inte färgteori-djup) ====
+    const RITTEMAN = [
+        { emoji:'🦁', text:'Rita ditt favoritdjur - vad har det för färg och mönster?' },
+        { emoji:'🚀', text:'Rita hur du tror att rymden ser ut - planeter, stjärnor och kanske en rymdraket.' },
+        { emoji:'🍕', text:'Rita din favoritmat - gör den så aptitlig som möjligt!' },
+        { emoji:'🦸', text:'Rita din egen superhjälte - vilken superkraft har hen?' },
+        { emoji:'🐠', text:'Rita en undervattensvärld med fiskar och korallrev.' },
+        { emoji:'🏰', text:'Rita ditt drömhus - hur ser det ut både inuti och utanpå?' },
+        { emoji:'🐉', text:'Hitta på ett eget fantasidjur och rita det.' },
+        { emoji:'🍂', text:'Rita din favoritårstid - vad gör den speciell?' },
+        { emoji:'🧚', text:'Rita en scen ur en saga du känner till.' },
+        { emoji:'🚗', text:'Rita ett fordon från framtiden - hur tror du det ser ut?' },
+        { emoji:'😊', text:'Rita hur olika känslor kan se ut, till exempel glad, arg och ledsen.' },
+        { emoji:'🌍', text:'Rita en plats du skulle vilja resa till.' },
+        { emoji:'🎪', text:'Rita ett cirkus- eller tivolitema med färgglada detaljer.' },
+        { emoji:'🌳', text:'Rita samma träd genom alla fyra årstider.' },
+        { emoji:'🦕', text:'Rita hur du tror det såg ut på dinosauriernas tid.' }
+    ];
+    function buildRittemaPane(pane){
+        pane.innerHTML = `<div class='rit-emoji' style='font-size:52px;text-align:center;'></div>
+            <div class='rit-text' style='font-size:14.5px;text-align:center;color:#1d1d1f;font-weight:700;line-height:1.5;margin:8px 0 14px;min-height:60px;'></div>
+            <div class='hover-menu' style='display:flex;justify-content:center;'>
+                <button type='button' class='btn btn-secondary rit-new'>🔄 Nytt tema</button>
+            </div>`;
+        const emojiEl = pane.querySelector('.rit-emoji'), textEl = pane.querySelector('.rit-text'), newBtn = pane.querySelector('.rit-new');
+        let current = RITTEMAN[Math.floor(Math.random() * RITTEMAN.length)];
+        function render(){ emojiEl.textContent = current.emoji; textEl.textContent = current.text; }
+        render();
+        newBtn.onclick = ()=>{
+            let next; do { next = RITTEMAN[Math.floor(Math.random() * RITTEMAN.length)]; } while(next.text === current.text && RITTEMAN.length > 1);
+            current = next; render();
+        };
+    }
+    const MONSTER_ENHETER = [
+        ['🔴', '🔵'],
+        ['🟡', '🟢', '🔵'],
+        ['⭐', '⭐', '🌙'],
+        ['🔺', '⬜'],
+        ['🟦', '🟦', '🟨'],
+        ['🔴', '🟡', '🟢'],
+        ['🐢', '🐢', '🐇'],
+        ['🍎', '🍌'],
+        ['🌸', '🌸', '🍀']
+    ];
+    function buildMonsterPane(pane){
+        pane.innerHTML = `<div class='mon-hint' style='text-align:center;font-size:12px;color:#8e8e93;margin-bottom:12px;'>Vilket mönster kommer härnäst? Rita eller berätta vad som ska fylla i "?"-rutorna.</div>
+            <div class='mon-row' style='display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;'></div>
+            <div class='hover-menu' style='display:flex;gap:8px;justify-content:center;'>
+                <button type='button' class='btn btn-primary mon-facit'>Visa facit</button>
+                <button type='button' class='btn btn-secondary mon-new'>🔄 Nytt mönster</button>
+            </div>`;
+        const rowEl = pane.querySelector('.mon-row'), facitBtn = pane.querySelector('.mon-facit'), newBtn = pane.querySelector('.mon-new');
+        const visibleCount = 6, placeholderCount = 3;
+        let sequence = [];
+        function gen(){
+            const unit = MONSTER_ENHETER[Math.floor(Math.random() * MONSTER_ENHETER.length)];
+            sequence = Array.from({ length: visibleCount + placeholderCount }, (_, i)=> unit[i % unit.length]);
+        }
+        function render(revealed){
+            rowEl.innerHTML = '';
+            sequence.forEach((sym, i)=>{
+                const cell = document.createElement('div');
+                if(i < visibleCount || revealed){
+                    cell.style.cssText = 'width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:24px;border-radius:8px;background:#f2f2f7;';
+                    cell.textContent = sym;
+                } else {
+                    cell.style.cssText = 'width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:8px;background:#fff;border:2px dashed #c7c7cc;color:#c7c7cc;';
+                    cell.textContent = '?';
+                }
+                rowEl.appendChild(cell);
+            });
+        }
+        facitBtn.onclick = ()=> render(true);
+        newBtn.onclick = ()=>{ gen(); render(false); };
+        gen(); render(false);
+    }
+    function createBildMegaWidget(config){
+        if(config === undefined) config = null;
+        const body = createWidget('BILD & SLÖJD', 280, 'bild-mega-widget', config);
+        const widget = body.parentElement.parentElement;
+
+        body.innerHTML = `<div class='tid-tabs-wrap'>
+                <div class='tid-tabs-handle'></div>
+                <div class='tid-mega-tabs'>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='rittema'>🎨 Rittema</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='monster'>🧩 Mönster</button>
+                </div>
+            </div>
+            <div class='tid-mega-pane bild-pane-rittema'></div>
+            <div class='tid-mega-pane bild-pane-monster' style='display:none;'></div>`;
+
+        const tidTabsWrap = body.querySelector('.tid-tabs-wrap');
+        const tabBtns = [...body.querySelectorAll('.tid-mega-tab-btn')];
+        const paneRittema = body.querySelector('.bild-pane-rittema'), paneMonster = body.querySelector('.bild-pane-monster');
+        let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'rittema';
+        const BILD_TAB_WIDTH = { rittema:280, monster:320 };
+        function renderTabs(){
+            tabBtns.forEach(b=>{ const on = b.dataset.tab === activeTab; b.classList.toggle('btn-primary', on); b.classList.toggle('btn-secondary', !on); });
+            paneRittema.style.display = activeTab === 'rittema' ? 'block' : 'none';
+            paneMonster.style.display = activeTab === 'monster' ? 'block' : 'none';
+            widget.style.width = (BILD_TAB_WIDTH[activeTab] || 280) + 'px';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab = b.dataset.tab; tidTabsWrap.classList.remove('expanded'); renderTabs(); widget.dataset.bildTab = activeTab; saveBoardState(); });
+        body.addEventListener('pointerdown', (e)=>{ if(!tidTabsWrap.contains(e.target)) tidTabsWrap.classList.remove('expanded'); });
+
+        buildRittemaPane(paneRittema);
+        buildMonsterPane(paneMonster);
+
+        renderTabs();
+    }
+    window.createBildMegaWidget = createBildMegaWidget;
+
     function createTimer(config) {
         const body = createWidget('DIGITAL TIMER', 240, 'timer-widget', config); body.innerHTML = `<div class='timer-input-group hover-menu'><input class='timer-input min-i' value='05' type='number'>:<input class='timer-input sec-i' value='00' type='number'></div><div class='timer-display'>05:00</div><div class='timer-controls hover-menu'><button class='btn btn-primary btn-s'>Start</button><button class='btn btn-danger btn-r'>Nollställ</button></div>`;
         const ig=body.querySelector('.timer-input-group'), mi=body.querySelector('.min-i'), si=body.querySelector('.sec-i'), disp=body.querySelector('.timer-display'), btnS=body.querySelector('.btn-s'), btnR=body.querySelector('.btn-r');
@@ -22444,7 +23260,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // eftersom du berättar vilka widgetar som hör hemma var - byggs bara ut, aldrig om, så gamla
     // rutor du redan gett mig innehåll för rörs inte av att fler rutor läggs till senare.
     // Widgetar matchas på sin onclick-funktion (stabil, se toolBtnId-fixen ovan), inte på text.
-    const MINA_RUTOR_NAMN = ['Lektion','Matematik','Svenska','NO','Teknik','Verktyg','Belöning'];
+    const MINA_RUTOR_NAMN = ['Lektion','Matematik','Svenska','Engelska','NO','Teknik','Verktyg','Belöning'];
     const RUTOR_MAPPNING = {
         'Lektion': [
             "createLessonPlan()",      // Lektion
@@ -22537,6 +23353,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             "createVideoWidget()", // Video
             "createQRCode()",      // QR-Kod
             "createImageWidget()"  // Bild
+        ],
+        'Engelska': [
+            "createEngelskaMegaWidget()"  // Engelska (Ordet idag / Memory / Räkna)
         ]
     };
     function getRutaBox(grid, namn){
