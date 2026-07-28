@@ -18767,6 +18767,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             <div class='elev-pane elev-pane-bord' style='display:none;'></div>`;
 
         const tabBtns = [...body.querySelectorAll('.elev-tab-btn')];
+        // FIX: en klickad knapp behåller webbläsarens fokus efteråt, vilket håller hela menydelen
+        // (flikrad, exportera/radera-raden, tipset) synlig via :focus-within även när musen inte
+        // längre är kvar i widgeten - man ser bara att den "fastnar" öppen. Istället för att lappa
+        // varje enskild knapp (Slumpa, Spara, Ta bort, Markera alla här, osv. i alla fem flikarna)
+        // fångas ALLA knappklick i hela widgeten här på en gång, och släpper fokus direkt efteråt.
+        body.addEventListener('click', (e)=>{ const btn = e.target.closest('button'); if(btn) btn.blur(); });
+        // Samma sak för dropdown-menyerna (t.ex. "Välj klass") - de behåller annars fokus efter att man valt ett alternativ.
+        body.addEventListener('change', (e)=>{ if(e.target && e.target.tagName === 'SELECT') e.target.blur(); });
         const paneSlumpa = body.querySelector('.elev-pane-slumpa'), paneTurordning = body.querySelector('.elev-pane-turordning'), paneGrupper = body.querySelector('.elev-pane-grupper'), paneNarvaro = body.querySelector('.elev-pane-narvaro'), paneBord = body.querySelector('.elev-pane-bord');
         let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'slumpa';
         const ELEV_TAB_WIDTH = { slumpa:380, turordning:380, grupper:380, narvaro:380, bord:480 };
