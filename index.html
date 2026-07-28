@@ -18779,7 +18779,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 narvaro: { text: txtN.value, list: selN.value, absentByList: Object.fromEntries(Object.keys(absentByList).map(k=>[k, [...absentByList[k]].map(([name,v])=>({ name, note:v.note||'' }))])) }
             });
         };
-        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); persist(); saveBoardState(); });
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); persist(); saveBoardState(); b.blur(); });
 
         // ---- Flik: Slumpa namn (oförändrad logik) ----
         const selS=paneSlumpa.querySelector('select'), txtS=paneSlumpa.querySelector('textarea'), resS=paneSlumpa.querySelector('.name-result'), niS=paneSlumpa.querySelector('.list-name-input'), cbS=paneSlumpa.querySelector('input[type="checkbox"]');
@@ -18799,8 +18799,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         body.addEventListener('pointerdown', (e)=>{ if(activeTab==='turordning' && !turSetupWrap.contains(e.target)) turSetupWrap.classList.remove('expanded'); });
         const loadTur=()=>{ selTur.innerHTML='<option value="">-- Välj lista --</option>'; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;selTur.appendChild(o);}); }; loadTur();
         selTur.onchange=()=>{ if(!selTur.value)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; txtTur.value=l[selTur.value]||''; persist(); saveBoardState(); };
-        saveTur.onclick=()=>{ let t=niTur.value.trim(), cn=txtTur.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; l[t]=cn; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); niTur.value=''; loadTur(); selTur.value=t; loadS(); loadG(); loadN(); persist(); saveBoardState(); };
-        delTur.onclick=()=>{ if(!selTur.value)return; customConfirm('Radera listan "'+selTur.value+'"?',()=>{ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; delete l[selTur.value]; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); loadTur(); loadS(); loadG(); loadN(); persist(); saveBoardState(); }); };
+        saveTur.onclick=()=>{ let t=niTur.value.trim(), cn=txtTur.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; l[t]=cn; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); niTur.value=''; loadTur(); selTur.value=t; loadS(); loadG(); loadN(); persist(); saveBoardState(); saveTur.blur(); };
+        delTur.onclick=()=>{ delTur.blur(); if(!selTur.value)return; customConfirm('Radera listan "'+selTur.value+'"?',()=>{ let l=JSON.parse(localStorage.getItem('savedClassLists_'+currentUser))||{}; delete l[selTur.value]; localStorage.setItem('savedClassLists_'+currentUser,JSON.stringify(l)); loadTur(); loadS(); loadG(); loadN(); persist(); saveBoardState(); }); };
         let turQueue = [];
         function shuffleTur(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
         function renderTurQueue(){
@@ -18824,8 +18824,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             turQueue = names.map(n=>({ name:n, done:false }));
             turSetupWrap.classList.remove('expanded');
             renderTurQueue(); persist(); saveBoardState();
+            rollTur.blur();
         };
-        resetTur.onclick=()=>{ turQueue.forEach(q=>q.done=false); renderTurQueue(); persist(); saveBoardState(); };
+        resetTur.onclick=()=>{ turQueue.forEach(q=>q.done=false); renderTurQueue(); persist(); saveBoardState(); resetTur.blur(); };
         txtTur.oninput=()=>{ persist(); saveBoardState(); };
         if(config && config.data && config.data.turordning){ const d=config.data.turordning; if(d.list) setTimeout(()=>selTur.value=d.list,100); if(d.text) txtTur.value=d.text; if(Array.isArray(d.queue)) turQueue=d.queue; }
         if(!turQueue.length) turSetupWrap.classList.add('expanded');
