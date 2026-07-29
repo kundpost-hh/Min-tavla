@@ -11638,7 +11638,7 @@
             vikt:  { namn:'Vikt',   enheter:[ ['mg',0.001], ['g',1], ['hg',100], ['kg',1000], ['ton',1000000] ] },
             volym: { namn:'Volym',  enheter:[ ['ml',0.001], ['cl',0.01], ['dl',0.1], ['l',1] ] }
         };
-        body.innerHTML = `<div class='hover-menu enh-ctrl'><select class='editor-select enh-kat'><option value='langd'>📏 Längd</option><option value='vikt'>⚖️ Vikt</option><option value='volym'>🧴 Volym</option></select></div><div class='enh-collapse'><div class='enh-in-row'><input type='number' class='enh-varde-in' value='5' step='any'><select class='editor-select enh-enhet-sel'></select></div><input type='range' class='enh-slider' min='0' max='100' step='1'><div class='enh-rows'></div></div><div class='enh-tabs'><button class='enh-tab aktiv' data-tab='omvandla'>Omvandla</button><button class='enh-tab' data-tab='text'>Textuppgifter</button></div><div class='enh-panel enh-panel-omvandla'><div class='hover-menu' style='margin-top:0;'><button class='btn btn-primary enh-ova' style='width:100%;'>Ny uppgift ▶</button></div><div class='enh-uppgift' style='display:none;'></div></div><div class='enh-panel enh-panel-text' style='display:none;'><div class='hover-menu' style='margin-top:0;'><button class='btn btn-primary enh-text-ny' style='width:100%;'>Nya uppgifter ▶</button></div><div class='enh-text-lista'></div></div>`;
+        body.innerHTML = `<div class='hover-menu enh-ctrl'><select class='editor-select enh-kat'><option value='langd'>📏 Längd</option><option value='vikt'>⚖️ Vikt</option><option value='volym'>🧴 Volym</option></select></div><div class='enh-collapse'><div class='enh-in-row'><input type='number' class='enh-varde-in' value='5' step='any'><select class='editor-select enh-enhet-sel'></select></div><input type='range' class='enh-slider' min='0' max='100' step='1'><div class='enh-rows'></div></div><div class='enh-tabs'><button class='enh-tab aktiv' data-tab='omvandla'>Omvandla</button><button class='enh-tab' data-tab='text'>Textuppgifter</button></div><div class='enh-panel enh-panel-omvandla'><div class='hover-menu' style='margin-top:0;'><button class='btn btn-primary enh-ova' style='width:100%;'>Ny uppgift ▶</button></div><div class='enh-uppgift' style='display:none;'></div></div><div class='enh-panel enh-panel-text' style='display:none;'><div class='hover-menu' style='margin-top:0;'><button class='btn btn-primary enh-text-ny' style='width:100%;'>Ny uppgift ▶</button></div><div class='enh-text-lista'></div></div>`;
         const katSel=body.querySelector('.enh-kat'), valIn=body.querySelector('.enh-varde-in'), enhSel=body.querySelector('.enh-enhet-sel'), slider=body.querySelector('.enh-slider'), rows=body.querySelector('.enh-rows'), uppgEl=body.querySelector('.enh-uppgift'), tabs=body.querySelectorAll('.enh-tab'), panelOmvandla=body.querySelector('.enh-panel-omvandla'), panelText=body.querySelector('.enh-panel-text'), textLista=body.querySelector('.enh-text-lista'), collapseWrap=body.querySelector('.enh-collapse');
         let aktivFlik='omvandla';
         if(config && config.data){ if(config.data.cat) katSel.value=config.data.cat; if(config.data.value!==undefined) valIn.value=config.data.value; }
@@ -11863,20 +11863,15 @@
             const svar=(totalBas/n)/enheter[j][1];
             return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
         }
-        function genTextUppgifter(antal){
-            return slumpaTyper(antal).map(byggFraga);
-        }
         function renderTextUppgifter(){
-            const lista=genTextUppgifter(8);
+            const u=byggFraga(slumpaTyper(1)[0]);
             textLista.innerHTML='';
-            lista.forEach((u,idx)=>{
-                const rad=document.createElement('div'); rad.className='enh-text-rad';
-                const q=document.createElement('span'); q.className='enh-text-fraga'; q.textContent=(idx+1)+'. '+u.text+' ';
-                const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
-                a.onclick=()=>{ a.textContent=u.svar; a.classList.add('revealed'); a.onclick=null; };
-                rad.appendChild(q); rad.appendChild(a);
-                textLista.appendChild(rad);
-            });
+            const rad=document.createElement('div'); rad.className='enh-text-rad';
+            const q=document.createElement('span'); q.className='enh-text-fraga'; q.textContent=u.text+' ';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
+            a.onclick=()=>{ a.textContent=u.svar; a.classList.add('revealed'); a.onclick=null; };
+            rad.appendChild(q); rad.appendChild(a);
+            textLista.appendChild(rad);
         }
         function bytFlik(namn){
             aktivFlik=namn;
