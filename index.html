@@ -20907,6 +20907,69 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     function qtEmptyRound(){ return { question:'', options:[{text:''},{text:''}], correctIndex:-1 }; }
     function qtEmptyTeam(i){ return { name:'Lag '+(i+1), score:0 }; }
 
+    // ---- AI-generering av quizfrågor (samma mönster som korsordets AI-läge) ----
+    async function aiGenerateQuiz(userPrompt, apiKey){
+        const instruction = "Du är en lärarassistent som skapar frågor till en flervalsquiz för klassrummet. Returnera ENDAST giltig JSON i formen {\"questions\":[{\"question\":\"frågetext\",\"options\":[\"alt1\",\"alt2\",\"alt3\",\"alt4\"],\"correctIndex\":0}]}. Regler: varje question är en tydlig fråga på svenska anpassad till angiven årskurs/ämne. options är 3-4 korta, tydliga svarsalternativ. correctIndex är 0-baserat index för det rätta alternativet i options-listan. Skapa så många frågor som anges i uppgiften, annars 8 st. Ingen annan text, ingen markdown.";
+        const models = ["gemini-2.0-flash","gemini-1.5-flash-latest","gemini-1.5-flash"];
+        const bodyObj = { contents:[{ parts:[{ text: instruction + "\n\nUppgift: " + userPrompt }] }], generationConfig:{ temperature:0.8, responseMimeType:"application/json" } };
+        let lastErr='';
+        for(const m of models){
+            try{
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(apiKey);
+                const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(bodyObj) });
+                if(!r.ok){ const t=await r.text().catch(()=> ''); if(/API key not valid|API_KEY_INVALID|invalid.*key/i.test(t)) throw new Error('Ogiltig API-nyckel.'); lastErr='Servern svarade ' + r.status; continue; }
+                const data = await r.json();
+                const text = (((data.candidates||[])[0]||{}).content||{}).parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : '';
+                const qs = parseQuizList(text);
+                if(qs.length) return qs;
+                lastErr='AI gav inga användbara frågor.';
+            }catch(e){ if(e && e.message==='Ogiltig API-nyckel.') throw e; lastErr=(e&&e.message)||'nätverksfel'; }
+        }
+        throw new Error(lastErr || 'Kunde inte kontakta AI-tjänsten.');
+    }
+    function buildQuizChatPrompt(desc){
+        return desc.trim() + "\n\nSvara ENDAST med frågorna i exakt detta format, en fråga per block, separerade med en tom rad:\nFRÅGA: <frågetext>\nA) <alternativ 1>\nB) <alternativ 2>\nC) <alternativ 3>\nD) <alternativ 4>\nRÄTT: <bokstaven för det rätta alternativet, t.ex. B>\n\nRegler: 3-4 alternativ per fråga, på svenska, anpassade till angiven årskurs/ämne. Skriv ingen rubrik, ingen inledning och ingen annan text än frågeblocken.";
+    }
+    function parseQuizList(text){
+        if(!text) return [];
+        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        if(obj){
+            const arr = obj.questions || obj.fragor || obj['frågor'] || [];
+            if(Array.isArray(arr)){
+                const r = arr.map(q=>{
+                    const opts = (q.options||q.alternativ||[]).map(o=>String(o||'').trim()).filter(o=>o).slice(0,6);
+                    let ci = (typeof q.correctIndex==='number') ? q.correctIndex : (typeof q.correct==='number' ? q.correct : -1);
+                    if(ci<0 || ci>=opts.length) ci=-1;
+                    return { question:String(q.question||q.fraga||q['fråga']||'').trim(), options:opts, correctIndex:ci };
+                }).filter(q=>q.question && q.options.length>=2);
+                if(r.length) return r;
+            }
+        }
+        // Textformat (klistrat från chatten): FRÅGA: / A) B) C) ... / RÄTT: <bokstav>, block separerade av tomrad
+        const blocks = text.split(/\r?\n\s*\r?\n+/).map(b=>b.trim()).filter(Boolean);
+        const out=[];
+        blocks.forEach(block=>{
+            const lines = block.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+            if(!lines.length) return;
+            let question='', options=[], correctLetter='';
+            lines.forEach(line=>{
+                const qm = line.match(/^(?:FRÅGA|FRAGA|Q)\s*[:\-]\s*(.+)$/i);
+                if(qm){ question = qm[1].trim(); return; }
+                const om = line.match(/^([A-F])[\)\.\:]\s*(.+)$/i);
+                if(om){ options.push(om[2].trim()); return; }
+                const rm = line.match(/^(?:RÄTT|RATT|SVAR|CORRECT)\s*[:\-]\s*([A-F])/i);
+                if(rm){ correctLetter = rm[1].toUpperCase(); return; }
+                if(!question){ question = line.replace(/^\s*\d+[\.\)]\s*/,'').trim(); }
+            });
+            if(question && options.length>=2){
+                let ci=-1;
+                if(correctLetter){ ci = correctLetter.charCodeAt(0) - 'A'.charCodeAt(0); if(ci<0||ci>=options.length) ci=-1; }
+                out.push({ question:question, options:options.slice(0,6), correctIndex:ci });
+            }
+        });
+        return out;
+    }
+
     function createQuizTavling(config){
         const body = createWidget('QUIZTÄVLING', 380, 'qt-widget', config);
         const widgetElRef = body.parentElement.parentElement;
@@ -20974,7 +21037,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             pInput.oninput=()=>{ state.points = parseInt(pInput.value)||10; persistSoon(); };
             pointsRow.appendChild(pLabel); pointsRow.appendChild(pInput); root.appendChild(pointsRow);
 
-            const qTitle=document.createElement('div'); qTitle.className='qt-section-title'; qTitle.textContent='Frågor'; root.appendChild(qTitle);
+            const qHead=document.createElement('div'); qHead.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;';
+            const qTitle=document.createElement('div'); qTitle.className='qt-section-title'; qTitle.style.margin='0'; qTitle.textContent='Frågor'; qHead.appendChild(qTitle);
+            const qAiBtn=document.createElement('button'); qAiBtn.className='kw-btn kw-btn-ai'; qAiBtn.style.padding='4px 10px'; qAiBtn.style.fontSize='12px'; qAiBtn.textContent='✨ AI'; qAiBtn.title='Skapa quizfrågor med AI'; qAiBtn.onclick=openQuizAiDialog; qHead.appendChild(qAiBtn);
+            root.appendChild(qHead);
             const roundsList=document.createElement('div'); root.appendChild(roundsList);
             state.rounds.forEach((rnd,ri)=>{
                 const block=document.createElement('div'); block.className='qt-round-block';
@@ -21031,6 +21097,72 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 render(); persist();
             };
             roundBtns.appendChild(addRoundBtn); roundBtns.appendChild(startBtn); root.appendChild(roundBtns);
+        }
+
+        // ---- AI: lägg till genererade frågor i frågelistan (ersätter en enda tom standardfråga, annars läggs de på slutet) ----
+        function makeFromQuestions(questions, status, close){
+            if(!questions || !questions.length){ if(status) status.textContent='⚠️ Hittade inga användbara frågor.'; return false; }
+            const newRounds = questions.slice(0,20).map(q=>({
+                question: q.question,
+                options: q.options.map(t=>({text:t})),
+                correctIndex: q.correctIndex
+            }));
+            const tomStandard = state.rounds.length===1 && !state.rounds[0].question.trim() && state.rounds[0].options.every(o=>!o.text.trim());
+            state.rounds = tomStandard ? newRounds : state.rounds.concat(newRounds);
+            if(state.rounds.length>20) state.rounds = state.rounds.slice(0,20);
+            if(close) close();
+            renderSetup(); persist(); return true;
+        }
+        function openQuizAiDialog(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa quizfrågor med AI'; box.appendChild(title);
+            const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv quizet, t.ex.:\nSkapa 8 frågor i ämnet NO, åk 4, om vattnets kretslopp. 4 svarsalternativ per fråga.'; box.appendChild(ta);
+            const status=document.createElement('div'); status.className='kw-ai-status';
+
+            // ---- Alternativ 1: via Gemini, ingen nyckel ----
+            const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
+            const row1=document.createElement('div'); row1.className='kw-btnrow'; row1.style.margin='0 0 8px'; row1.style.justifyContent='flex-start';
+            const copyBtn=document.createElement('button'); copyBtn.className='kw-btn kw-btn-ai'; copyBtn.textContent='📋 Kopiera fråga & öppna Gemini';
+            copyBtn.onclick=()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; ta.focus(); return; } const full=buildQuizChatPrompt(d);
+                const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
+                try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
+                catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
+                window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
+            row1.appendChild(copyBtn); box.appendChild(row1);
+            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='100px'; pasteTa.placeholder='Klistra in Geminis svar här – frågorna läggs till automatiskt...'; box.appendChild(pasteTa);
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length>=1){ makeFromQuestions(qs, status, close); } },60); });
+            const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
+            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Lägg till frågorna';
+            makePasteBtn.onclick=()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length<1){ status.textContent='⚠️ Hittade inga frågor i svaret. Kolla att formatet stämmer.'; return; } makeFromQuestions(qs, status, close); };
+            row1b.appendChild(makePasteBtn); box.appendChild(row1b);
+
+            // ---- Alternativ 2: automatiskt med API-nyckel (valfritt) ----
+            const orEl=document.createElement('div'); orEl.className='kw-ai-or'; orEl.textContent='— ELLER —'; box.appendChild(orEl);
+            const advBtn=document.createElement('button'); advBtn.className='kw-ai-adv'; advBtn.textContent='Alternativ 2 – ett klick varje gång (engångsnyckel, ~30 sek) ▾'; box.appendChild(advBtn);
+            const adv=document.createElement('div'); adv.style.display='none'; box.appendChild(adv);
+            advBtn.onclick=()=>{ adv.style.display = adv.style.display==='none'?'block':'none'; };
+            const keyWrap=document.createElement('div'); adv.appendChild(keyWrap);
+            const keyInp=document.createElement('input'); keyInp.className='kw-ai-key'; keyInp.type='password'; keyInp.placeholder='Klistra in din Google AI (Gemini) API-nyckel';
+            const help=document.createElement('div'); help.className='kw-ai-help'; help.innerHTML="Hämta en gratis nyckel på <a href='https://aistudio.google.com/app/apikey' target='_blank' rel='noopener'>aistudio.google.com</a>. Nyckeln sparas bara på den här enheten.";
+            const showKeyField=()=>{ keyWrap.innerHTML=''; keyWrap.appendChild(keyInp); keyWrap.appendChild(help); };
+            if(aiKeyGet()){ const note=document.createElement('div'); note.className='kw-ai-help'; note.innerHTML="🔑 API-nyckel sparad. <a href='#' class='kw-ai-change'>Byt nyckel</a>"; keyWrap.appendChild(note); note.querySelector('.kw-ai-change').onclick=(e)=>{ e.preventDefault(); showKeyField(); }; }
+            else { showKeyField(); }
+            const row2=document.createElement('div'); row2.className='kw-btnrow'; row2.style.margin='8px 0 0'; row2.style.justifyContent='flex-start';
+            const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.title='Öppnar Google AI Studio – du är redan inloggad'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); status.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
+            const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='Skapa automatiskt (ett klick)';
+            autoBtn.onclick=async ()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; return; } let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } } if(!key){ status.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
+                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar frågorna..."; try{ const qs=await aiGenerateQuiz(d, key); makeFromQuestions(qs, status, close); }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
+            row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
+
+            box.appendChild(status);
+            const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
+            const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Stäng'; cancel.onclick=close; foot.appendChild(cancel); box.appendChild(foot);
+
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            setTimeout(()=>ta.focus(),60);
         }
 
         // ---- PLAY: visa en fråga i taget, avslöja rätt svar, dela ut poäng, gå vidare ----
