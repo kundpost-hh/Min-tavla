@@ -48,8 +48,18 @@
                 <div class="admin-panel-title">👥 Användare</div>
                 <button class="admin-panel-close" onclick="closeAdminPanel()">✕</button>
             </div>
-            <div class="admin-panel-desc">Alla som loggat in med Google. Klicka "Ta bort" för att neka någon åtkomst.</div>
-            <div id="admin-user-rows" class="admin-user-rows"></div>
+            <div class="admin-panel-tabs">
+                <button type="button" class="admin-panel-tab active" data-admintab="users" onclick="switchAdminPanelTab('users')">👥 Användare</button>
+                <button type="button" class="admin-panel-tab" data-admintab="stats" onclick="switchAdminPanelTab('stats')">📊 Statistik</button>
+            </div>
+            <div class="admin-panel-pane" id="admin-panel-pane-users">
+                <div class="admin-panel-desc">Alla som loggat in med Google. Klicka "Ta bort" för att neka någon åtkomst.</div>
+                <div id="admin-user-rows" class="admin-user-rows"></div>
+            </div>
+            <div class="admin-panel-pane" id="admin-panel-pane-stats" style="display:none;">
+                <div class="admin-panel-desc">Aktivitet för besökare som provar appen utan att logga in (gästläget). Ingen personlig information samlas in – bara antal besök.</div>
+                <div id="admin-guest-stats"></div>
+            </div>
         </div>
     </div>
 
@@ -2234,6 +2244,21 @@
     .admin-user-name { font-size: 15px; font-weight: 700; color: #222; }
     .admin-user-mail { font-size: 13px; color: #666; word-break: break-all; }
     .admin-user-last { font-size: 11px; color: #999; margin-top: 2px; }
+    .admin-panel-tabs { display: flex; gap: 6px; padding: 12px 16px 0; border-bottom: 1px solid #eee; }
+    .admin-panel-tab { flex: 1; border: none; background: transparent; padding: 8px 6px 10px; font-family: inherit; font-weight: 800; font-size: 13px; color: #999; cursor: pointer; border-bottom: 3px solid transparent; }
+    .admin-panel-tab:hover { color: #7c3aed; }
+    .admin-panel-tab.active { color: #7c3aed; border-bottom-color: #7c3aed; }
+    .admin-panel-pane { overflow-y: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+    .admin-guest-cards { display: flex; gap: 10px; flex-wrap: wrap; padding: 4px 16px 10px; }
+    .admin-guest-card { flex: 1 1 120px; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 12px 10px; text-align: center; }
+    .admin-guest-card .num { font-size: 24px; font-weight: 800; color: #7c3aed; line-height: 1.2; }
+    .admin-guest-card .lbl { font-size: 11px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: .02em; margin-top: 2px; }
+    .admin-guest-days { padding: 4px 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+    .admin-guest-day-row { display: flex; align-items: center; gap: 10px; }
+    .admin-guest-day-date { width: 84px; flex-shrink: 0; font-size: 12px; color: #666; font-weight: 700; }
+    .admin-guest-day-bar-wrap { flex: 1; background: #f2eefc; border-radius: 6px; overflow: hidden; height: 16px; }
+    .admin-guest-day-bar { height: 100%; background: linear-gradient(90deg,#a78bfa,#7c3aed); border-radius: 6px; }
+    .admin-guest-day-count { width: 26px; flex-shrink: 0; text-align: right; font-size: 12px; font-weight: 800; color: #7c3aed; }
 
     /* BILD-WIDGET */
     .img-area { width:100%; min-height:140px; flex:1; display:flex; align-items:center; justify-content:center; background:#f4f4f7; border-radius:10px; overflow:hidden; }
@@ -2389,7 +2414,7 @@
     /* ---- STARTUPPGIFT ---- */
     .su-intro { font-size:12.5px; color:#8e8e93; margin-bottom:10px; line-height:1.4; text-align:center; }
     .su-btn { font-size:15px; padding:11px; }
-    .su-lista { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+    .su-lista { display:flex; flex-direction:column; gap:10px; margin-top:12px; max-height:440px; overflow-y:auto; overflow-x:hidden; padding-right:4px; }
     .su-rad { background:#f7f7fa; border-radius:12px; padding:10px 12px; border:1.5px solid transparent; }
     .su-rad.su-klurig { background:#fdf3ff; border-color:#e9c6f5; }
     .su-tagg { display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:#7c3aed; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:6px; }
@@ -3590,10 +3615,64 @@
         } else if (existing){ existing.remove(); }
     }
 
+    let adminPanelTab = 'users';
+    function switchAdminPanelTab(tab){
+        adminPanelTab = tab;
+        document.querySelectorAll('.admin-panel-tab').forEach(b=> b.classList.toggle('active', b.dataset.admintab===tab));
+        document.getElementById('admin-panel-pane-users').style.display = tab==='users' ? 'flex' : 'none';
+        document.getElementById('admin-panel-pane-stats').style.display = tab==='stats' ? 'flex' : 'none';
+        if (tab==='stats') loadGuestStats();
+    }
+    window.switchAdminPanelTab = switchAdminPanelTab;
+
+    // ---- Gäststatistik: räknar bara antal besök (ingen personinfo) i stats/guests, uppdelat per dag ----
+    function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    function dateKeyDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    async function loadGuestStats(){
+        const box = document.getElementById('admin-guest-stats');
+        if (!box) return;
+        box.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Hämtar statistik…</div>';
+        try {
+            const snap = await fbDB.collection('stats').doc('guests').get();
+            const d = snap.exists ? (snap.data()||{}) : {};
+            const byDate = d.byDate || {};
+            const total = d.total || 0;
+            const today = byDate[todayKey()] || 0;
+            let last7 = 0, last30 = 0;
+            for (let i=0; i<30; i++){ const v = byDate[dateKeyDaysAgo(i)] || 0; last30 += v; if (i<7) last7 += v; }
+            box.innerHTML = '';
+            const cards = document.createElement('div'); cards.className = 'admin-guest-cards';
+            [['Idag', today], ['Senaste 7 dagarna', last7], ['Senaste 30 dagarna', last30], ['Totalt genom tiderna', total]].forEach(([lbl, num])=>{
+                const c = document.createElement('div'); c.className = 'admin-guest-card';
+                c.innerHTML = `<div class="num">${num}</div><div class="lbl">${lbl}</div>`;
+                cards.appendChild(c);
+            });
+            box.appendChild(cards);
+            const daysWrap = document.createElement('div'); daysWrap.className = 'admin-guest-days';
+            const days = []; for (let i=13; i>=0; i--){ days.push({ key: dateKeyDaysAgo(i), n: byDate[dateKeyDaysAgo(i)] || 0 }); }
+            const max = Math.max(1, ...days.map(x=>x.n));
+            days.forEach(day=>{
+                const row = document.createElement('div'); row.className = 'admin-guest-day-row';
+                const [y,m,dd] = day.key.split('-');
+                row.innerHTML = `<div class="admin-guest-day-date">${dd}/${m}</div>
+                    <div class="admin-guest-day-bar-wrap"><div class="admin-guest-day-bar" style="width:${Math.round(day.n/max*100)}%"></div></div>
+                    <div class="admin-guest-day-count">${day.n}</div>`;
+                daysWrap.appendChild(row);
+            });
+            box.appendChild(daysWrap);
+            if (!total){ box.innerHTML += '<div style="padding:0 16px 16px;text-align:center;color:#888;font-size:13px;">Ingen gäststatistik ännu.</div>'; }
+        } catch(err){
+            console.warn(err);
+            box.innerHTML = '<div style="padding:20px;text-align:center;color:#ff3b30;">Kunde inte hämta statistiken. Kontrollera att Firestore-regeln för stats/guests är på plats.</div>';
+        }
+    }
+    window.loadGuestStats = loadGuestStats;
+
     async function openAdminPanel(){
         const overlay = document.getElementById('admin-panel-overlay');
         const listEl = document.getElementById('admin-user-rows');
         overlay.style.display = 'flex';
+        switchAdminPanelTab('users');
         listEl.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Hämtar användare…</div>';
         try {
             // Hämta ALLA användardokument. Vi sorterar i minnet i stället för med
@@ -3724,7 +3803,7 @@
         box.innerHTML = "<div style='font-size:42px;line-height:1;margin-bottom:8px;'>📋</div>"
             + "<div class='cal-popup-title' style='margin-bottom:2px;'>Min tavla</div>"
             + "<div style='font-size:13px;color:#8e8e93;margin-bottom:16px;'>Version 1.0</div>"
-            + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;'>Ett lärarverktyg utvecklat av <b>Hussein Hirori</b>.</div>"
+            + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;'>Ett lärarverktyg skapat av <b>Hussein Hirori</b> — för en enklare och roligare vardag i klassrummet.</div>"
             + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;margin-top:14px;'>För synpunkter och förslag:</div>"
             + "<a href='mailto:mintavla.se@gmail.com' id='about-email-link' style='display:inline-block;font-size:14px;color:#007aff;font-weight:700;text-decoration:none;margin-top:2px;'>mintavla.se@gmail.com</a>";
         const btnWrap=document.createElement('div'); btnWrap.style.marginTop='18px';
@@ -3778,6 +3857,18 @@
         applyAdminUIMode();
         document.getElementById('login-overlay').style.display = 'none';
         const badge = document.getElementById('guest-mode-badge'); if(badge) badge.style.display = 'block';
+        // Räkna gästbesöket anonymt (bara en siffra per dag, ingen personinfo) så admin kan se
+        // aktivitet i gästläget. Icke-blockerande - misslyckas det (t.ex. regeln saknas ännu i
+        // Firestore) påverkar det aldrig själva gästupplevelsen.
+        try {
+            if (window.cloudReady && fbDB && typeof firebase!=='undefined' && firebase.firestore){
+                const dKey = todayKey();
+                fbDB.collection('stats').doc('guests').set({
+                    total: firebase.firestore.FieldValue.increment(1),
+                    ['byDate.' + dKey]: firebase.firestore.FieldValue.increment(1)
+                }, { merge: true }).catch(()=>{});
+            }
+        } catch(e){}
         // Ge gästen en färdig exempel-klasslista att testa med direkt (t.ex. i Elever/Turordning),
         // så man slipper skriva in namn själv bara för att prova. Sparas ENDAST i webbläsarens
         // localStorage under gästens slumpade session-id (samma spärr som allt annat i gästläget) -
@@ -19920,6 +20011,134 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         newBtn.onclick = ()=>{ if(mode === 'siffra') newSiffra(); else newKlocka(); };
         setMode('siffra');
     }
+    // ---- Vardagliga fraser (svenska -> engelska), till FRASER-fliken ----
+    const ENG_PHRASES = [
+        { sv:'Hej!', en:'Hi!' },
+        { sv:'Hej då!', en:'Bye!' },
+        { sv:'Hur mår du?', en:'How are you?' },
+        { sv:'Jag mår bra, tack.', en:"I'm fine, thank you." },
+        { sv:'Vad heter du?', en:"What's your name?" },
+        { sv:'Jag heter Emma.', en:'My name is Emma.' },
+        { sv:'Var kommer du ifrån?', en:'Where are you from?' },
+        { sv:'Jag kommer från Sverige.', en:"I'm from Sweden." },
+        { sv:'Hur gammal är du?', en:'How old are you?' },
+        { sv:'Jag är tio år.', en:'I am ten years old.' },
+        { sv:'Vad är klockan?', en:'What time is it?' },
+        { sv:'Klockan är tre.', en:"It's three o'clock." },
+        { sv:'Ursäkta mig.', en:'Excuse me.' },
+        { sv:'Förlåt.', en:'Sorry.' },
+        { sv:'Tack så mycket!', en:'Thank you very much!' },
+        { sv:'Varsågod.', en:"You're welcome." },
+        { sv:'Kan du hjälpa mig?', en:'Can you help me?' },
+        { sv:'Jag förstår inte.', en:"I don't understand." },
+        { sv:'Kan du upprepa det?', en:'Can you repeat that?' },
+        { sv:'Vad betyder det?', en:'What does that mean?' },
+        { sv:'Jag vet inte.', en:"I don't know." },
+        { sv:'Var är toaletten?', en:'Where is the toilet?' },
+        { sv:'Får jag gå på toaletten?', en:'May I go to the toilet?' },
+        { sv:'Jag är hungrig.', en:'I am hungry.' },
+        { sv:'Jag är törstig.', en:'I am thirsty.' },
+        { sv:'Jag är trött.', en:'I am tired.' },
+        { sv:'Jag mår inte bra.', en:"I don't feel well." },
+        { sv:'Kan jag få lite vatten?', en:'Can I have some water?' },
+        { sv:'Vilken dag är det idag?', en:'What day is it today?' },
+        { sv:'Idag är det måndag.', en:'Today is Monday.' },
+        { sv:'Vi ses imorgon!', en:'See you tomorrow!' },
+        { sv:'Ha en bra dag!', en:'Have a nice day!' },
+        { sv:'Grattis på födelsedagen!', en:'Happy birthday!' },
+        { sv:'Lycka till!', en:'Good luck!' },
+        { sv:'Vad tycker du om det här?', en:'What do you think about this?' },
+        { sv:'Jag håller med.', en:'I agree.' },
+        { sv:'Jag håller inte med.', en:"I don't agree." },
+        { sv:'Kan vi leka tillsammans?', en:'Can we play together?' },
+        { sv:'Är du klar?', en:'Are you ready?' },
+        { sv:'Vänta lite!', en:'Wait a moment!' },
+        { sv:'Skynda dig!', en:'Hurry up!' },
+        { sv:'Var försiktig!', en:'Be careful!' },
+        { sv:'Titta här!', en:'Look here!' },
+        { sv:'Kom hit!', en:'Come here!' },
+        { sv:'Var snäll och sitt ner.', en:'Please sit down.' },
+        { sv:'Får jag låna en penna?', en:'May I borrow a pen?' }
+    ];
+    function buildEngFraserPane(pane){
+        pane.innerHTML = `<div class='eng-ord-cat' style='font-size:11px;color:#8e8e93;text-align:center;margin-bottom:4px;font-weight:700;letter-spacing:.03em;'>VARDAGLIG FRAS</div>
+            <div class='eng-fraser-sv' style='font-size:19px;font-weight:800;text-align:center;color:#1d1d1f;margin:10px 0 12px;line-height:1.35;'></div>
+            <div class='eng-fraser-answer' style='display:none;text-align:center;margin-bottom:12px;'>
+                <div class='eng-fraser-en' style='font-size:19px;font-weight:800;color:#007aff;line-height:1.35;'></div>
+            </div>
+            <div class='hover-menu' style='display:flex;gap:8px;justify-content:center;flex-wrap:wrap;'>
+                <button type='button' class='btn btn-secondary eng-fraser-speak'>🔊 Uttal</button>
+                <button type='button' class='btn btn-primary eng-fraser-reveal'>Översätt</button>
+                <button type='button' class='btn btn-secondary eng-fraser-new'>🔄 Ny fras</button>
+            </div>`;
+        const svEl = pane.querySelector('.eng-fraser-sv'), answerBox = pane.querySelector('.eng-fraser-answer'), enEl = pane.querySelector('.eng-fraser-en'),
+              speakBtn = pane.querySelector('.eng-fraser-speak'), revealBtn = pane.querySelector('.eng-fraser-reveal'), newBtn = pane.querySelector('.eng-fraser-new');
+        let current = ENG_PHRASES[Math.floor(Math.random() * ENG_PHRASES.length)];
+        function render(){ svEl.textContent = current.sv; answerBox.style.display = 'none'; enEl.textContent = current.en; }
+        render();
+        speakBtn.onclick = ()=> speakEnglish(current.en);
+        revealBtn.onclick = ()=>{ answerBox.style.display = 'block'; };
+        newBtn.onclick = ()=>{
+            let next; do { next = ENG_PHRASES[Math.floor(Math.random() * ENG_PHRASES.length)]; } while(next.en === current.en && ENG_PHRASES.length > 1);
+            current = next; render();
+        };
+    }
+    // ---- Svenska meningar (mellanstadienivå) -> engelska, till MENING-fliken ----
+    const ENG_SENTENCES = [
+        { sv:'Jag går till skolan varje dag.', en:'I go to school every day.' },
+        { sv:'Min bästa vän heter Emma och hon är rolig.', en:"My best friend's name is Emma and she is funny." },
+        { sv:'På helgerna brukar jag spela fotboll med mina kompisar.', en:'On weekends I usually play football with my friends.' },
+        { sv:'Vi har matematik och svenska på schemat idag.', en:'We have math and Swedish on the schedule today.' },
+        { sv:'Min familj ska åka till mormor och morfar i sommar.', en:'My family is going to visit grandma and grandpa this summer.' },
+        { sv:'Jag tycker om att läsa böcker innan jag somnar.', en:'I like reading books before I fall asleep.' },
+        { sv:'Igår regnade det hela dagen, så vi stannade inne.', en:'Yesterday it rained all day, so we stayed inside.' },
+        { sv:'Kan du hjälpa mig med läxorna efter skolan?', en:'Can you help me with my homework after school?' },
+        { sv:'Min lillasyster gillar att rita och måla.', en:'My little sister likes to draw and paint.' },
+        { sv:'Vi ska ha ett prov i NO nästa vecka.', en:'We are going to have a test in science next week.' },
+        { sv:'Jag glömde min matsäck hemma idag.', en:'I forgot my packed lunch at home today.' },
+        { sv:'På fritids brukar vi bygga med lego.', en:'At after-school club we usually build with Lego.' },
+        { sv:'Min pappa lagar den godaste pastan i hela världen.', en:'My dad makes the best pasta in the whole world.' },
+        { sv:'Jag och min bror delar rum hemma.', en:'My brother and I share a room at home.' },
+        { sv:'Läraren sa att vi skulle skriva en berättelse om djur.', en:'The teacher said we should write a story about animals.' },
+        { sv:'Vi cyklade till skolan trots att det var kallt ute.', en:'We rode our bikes to school even though it was cold outside.' },
+        { sv:'Min favoritfärg är blå, men jag gillar också grönt.', en:'My favorite color is blue, but I also like green.' },
+        { sv:'Klassen ska åka på utflykt till museet på torsdag.', en:'The class is going on a field trip to the museum on Thursday.' },
+        { sv:'Jag övar på engelska varje kväll med en app.', en:'I practice English every evening with an app.' },
+        { sv:'Hunden sprang efter bollen i parken.', en:'The dog ran after the ball in the park.' },
+        { sv:'Vi hade fotbollsmatch mot en annan skola förra veckan.', en:'We had a football match against another school last week.' },
+        { sv:'Min mormor bakar de bästa kakorna på jul.', en:"My grandma bakes the best cookies at Christmas." },
+        { sv:'Jag vill bli veterinär när jag blir stor.', en:'I want to become a veterinarian when I grow up.' },
+        { sv:'Skolresan går till Skansen i år.', en:'The school trip goes to Skansen this year.' },
+        { sv:'Han glömde sin jacka i skåpet igen.', en:'He forgot his jacket in the locker again.' },
+        { sv:'Vi läser en spännande bok om rymden på svenskan.', en:'We are reading an exciting book about space in Swedish class.' },
+        { sv:'Efter skolan tränar jag simning två gånger i veckan.', en:'After school I train swimming twice a week.' },
+        { sv:'Min mamma jobbar som sjuksköterska på sjukhuset.', en:'My mom works as a nurse at the hospital.' },
+        { sv:'Vi målade en stor tavla tillsammans på bildlektionen.', en:'We painted a big picture together in art class.' },
+        { sv:'Det snöade så mycket att skolan blev inställd.', en:'It snowed so much that school was cancelled.' }
+    ];
+    function buildEngMeningPane(pane){
+        pane.innerHTML = `<div class='eng-ord-cat' style='font-size:11px;color:#8e8e93;text-align:center;margin-bottom:4px;font-weight:700;letter-spacing:.03em;'>MENING</div>
+            <div class='eng-mening-sv' style='font-size:16px;font-weight:700;text-align:center;color:#1d1d1f;margin:10px 0 12px;line-height:1.45;'></div>
+            <div class='eng-mening-answer' style='display:none;text-align:center;margin-bottom:12px;'>
+                <div class='eng-mening-en' style='font-size:16px;font-weight:700;color:#007aff;line-height:1.45;'></div>
+            </div>
+            <div class='hover-menu' style='display:flex;gap:8px;justify-content:center;flex-wrap:wrap;'>
+                <button type='button' class='btn btn-secondary eng-mening-speak'>🔊 Uttal</button>
+                <button type='button' class='btn btn-primary eng-mening-reveal'>Översätt</button>
+                <button type='button' class='btn btn-secondary eng-mening-new'>🔄 Ny mening</button>
+            </div>`;
+        const svEl = pane.querySelector('.eng-mening-sv'), answerBox = pane.querySelector('.eng-mening-answer'), enEl = pane.querySelector('.eng-mening-en'),
+              speakBtn = pane.querySelector('.eng-mening-speak'), revealBtn = pane.querySelector('.eng-mening-reveal'), newBtn = pane.querySelector('.eng-mening-new');
+        let current = ENG_SENTENCES[Math.floor(Math.random() * ENG_SENTENCES.length)];
+        function render(){ svEl.textContent = current.sv; answerBox.style.display = 'none'; enEl.textContent = current.en; }
+        render();
+        speakBtn.onclick = ()=> speakEnglish(current.en);
+        revealBtn.onclick = ()=>{ answerBox.style.display = 'block'; };
+        newBtn.onclick = ()=>{
+            let next; do { next = ENG_SENTENCES[Math.floor(Math.random() * ENG_SENTENCES.length)]; } while(next.en === current.en && ENG_SENTENCES.length > 1);
+            current = next; render();
+        };
+    }
     function createEngelskaMegaWidget(config){
         if(config === undefined) config = null;
         const body = createWidget('ENGELSKA', 280, 'eng-mega-widget', config);
@@ -19931,22 +20150,29 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     <button type='button' class='btn tid-mega-tab-btn' data-tab='ord'>💡 Ordet idag</button>
                     <button type='button' class='btn tid-mega-tab-btn' data-tab='memory'>🧩 Memory</button>
                     <button type='button' class='btn tid-mega-tab-btn' data-tab='rakna'>🔢 Räkna</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='fraser'>💬 Fraser</button>
+                    <button type='button' class='btn tid-mega-tab-btn' data-tab='mening'>📝 Meningar</button>
                 </div>
             </div>
             <div class='tid-mega-pane eng-pane-ord'></div>
             <div class='tid-mega-pane eng-pane-memory' style='display:none;'></div>
-            <div class='tid-mega-pane eng-pane-rakna' style='display:none;'></div>`;
+            <div class='tid-mega-pane eng-pane-rakna' style='display:none;'></div>
+            <div class='tid-mega-pane eng-pane-fraser' style='display:none;'></div>
+            <div class='tid-mega-pane eng-pane-mening' style='display:none;'></div>`;
 
         const tidTabsWrap = body.querySelector('.tid-tabs-wrap');
         const tabBtns = [...body.querySelectorAll('.tid-mega-tab-btn')];
-        const paneOrd = body.querySelector('.eng-pane-ord'), paneMem = body.querySelector('.eng-pane-memory'), paneRak = body.querySelector('.eng-pane-rakna');
+        const paneOrd = body.querySelector('.eng-pane-ord'), paneMem = body.querySelector('.eng-pane-memory'), paneRak = body.querySelector('.eng-pane-rakna'),
+              paneFraser = body.querySelector('.eng-pane-fraser'), paneMening = body.querySelector('.eng-pane-mening');
         let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'ord';
-        const ENG_TAB_WIDTH = { ord:260, memory:380, rakna:280 };
+        const ENG_TAB_WIDTH = { ord:260, memory:380, rakna:280, fraser:300, mening:340 };
         function renderTabs(){
             tabBtns.forEach(b=>{ const on = b.dataset.tab === activeTab; b.classList.toggle('btn-primary', on); b.classList.toggle('btn-secondary', !on); });
             paneOrd.style.display = activeTab === 'ord' ? 'block' : 'none';
             paneMem.style.display = activeTab === 'memory' ? 'block' : 'none';
             paneRak.style.display = activeTab === 'rakna' ? 'block' : 'none';
+            paneFraser.style.display = activeTab === 'fraser' ? 'block' : 'none';
+            paneMening.style.display = activeTab === 'mening' ? 'block' : 'none';
             widget.style.width = (ENG_TAB_WIDTH[activeTab] || 280) + 'px';
         }
         tabBtns.forEach(b=> b.onclick = ()=>{ activeTab = b.dataset.tab; tidTabsWrap.classList.remove('expanded'); renderTabs(); widget.dataset.engTab = activeTab; saveBoardState(); });
@@ -19955,6 +20181,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         buildEngOrdPane(paneOrd);
         buildEngMemoryPane(paneMem);
         buildEngRaknaPane(paneRak);
+        buildEngFraserPane(paneFraser);
+        buildEngMeningPane(paneMening);
 
         renderTabs();
     }
