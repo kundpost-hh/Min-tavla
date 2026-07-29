@@ -145,14 +145,26 @@
                 <button type="button" class="tool-pocket-add-chain" onclick="createMinaRutor()" title="Skapar dina fasta rutor och lägger in de widgetar du bestämt i respektive ruta">📦 Skapa & sortera mina rutor</button>
                 <button type="button" class="tool-pocket-add-chain" onclick="showToolPocketHistory()" title="Se tidigare sparade versioner av fickan och återställ en av dem">🕓 Historik</button>
             </div>
-            <div class="tool-pocket-admin" id="tool-pocket-admin">
-                <button class="admin-btn lock-toggle-btn" id="lock-board-btn-pocket" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
+            <div class="sp-copyright" id="tool-pocket-copyright">© 2026 Hussein Hirori. Alla rättigheter förbehållna.</div>
+        </div>
+    </div>
+
+    <!-- NEDRE SIDOFICKA: appinställningar (låsning, om appen, rensa, logga ut, bakgrund) -->
+    <div id="settings-pocket-zone">
+        <div id="settings-pocket-tab">⌃</div>
+        <div id="settings-pocket-panel">
+            <div class="tool-pocket-title">Inställningar</div>
+            <div class="tool-pocket-grid" id="settings-pocket-grid">
+                <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
+            </div>
+            <div class="tool-pocket-admin" id="settings-pocket-admin">
+                <button class="admin-btn lock-toggle-btn" id="lock-board-btn-settings" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
                 <button class="admin-btn toolbar-lock-toggle-btn" onclick="toggleToolbarOrderLock()" title="Lås/lås upp ordningen på verktygslådan och fickan för alla"><div class="icon">🔓</div><div class="label">Lås ordning</div></button>
                 <button class="admin-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
                 <button class="admin-btn admin-btn-danger" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
                 <button class="admin-btn admin-btn-danger" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
             </div>
-            <div class="sp-copyright" id="tool-pocket-copyright">© 2026 Hussein Hirori. Alla rättigheter förbehållna.</div>
+            <div class="sp-copyright" id="settings-pocket-copyright">© 2026 Hussein Hirori. Alla rättigheter förbehållna.</div>
         </div>
     </div>
 
@@ -257,7 +269,6 @@
 
         <!-- RAD 2: övriga widgetar (dolda tills man hovrar pilen) -->
         <div class="tool-group tool-extra" id="tool-extra">
-            <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createBirthdayWidget()"><div class="icon">🎂</div><div class="label">Grattis</div></button>
             <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
             <button class="tool-btn" onclick="createVideoWidget()"><div class="icon">🎬</div><div class="label">Video</div></button>
@@ -274,14 +285,6 @@
             <button class="tool-btn" data-cat="no-teknik" onclick="createTeknikWidget()"><div class="icon">⚙️</div><div class="label">Teknik</div></button>
         </div>
 
-        <!-- ADMIN: separat, visuellt avskild grupp för verktyg som inte lägger till en widget -->
-        <div class="tool-group tool-admin" id="tool-admin">
-            <button class="admin-btn lock-toggle-btn" id="lock-board-btn" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
-            <button class="admin-btn toolbar-lock-toggle-btn" onclick="toggleToolbarOrderLock()" title="Lås/lås upp ordningen på verktygslådan och fickan för alla"><div class="icon">🔓</div><div class="label">Lås ordning</div></button>
-            <button class="admin-btn" onclick="showAboutApp()"><div class="icon">ℹ️</div><div class="label">Om appen</div></button>
-            <button class="admin-btn admin-btn-danger" onclick="clearCurrentPage()"><div class="icon">🗑️</div><div class="label">Rensa</div></button>
-            <button class="admin-btn admin-btn-danger" onclick="logoutUser()"><div class="icon">🚪</div><div class="label">Logga ut</div></button>
-        </div>
     </div>
     <script>
         (function(){
@@ -495,6 +498,14 @@
     #tool-pocket-panel { position: absolute; top: 50%; left: 0; transform: translateY(-50%) translateX(-100%); width: 256px; max-height: 90vh; display: flex; flex-direction: column; background: rgba(255,255,255,0.97); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid rgba(0,0,0,0.08); padding: 14px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
     #tool-pocket-zone.open #tool-pocket-panel { opacity: 1; visibility: visible; transform: translateY(-50%) translateX(26px); pointer-events: auto; }
     #tool-pocket-scroll { overflow-y: auto; min-height: 0; flex: 1 1 auto; }
+
+    /* NEDRE SIDOFICKA – appinställningar (låsning, om appen, rensa, logga ut, bakgrund) */
+    #settings-pocket-zone { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 10500; width: 64px; height: 0; }
+    #settings-pocket-tab { position: absolute; bottom: 0; left: 0; width: 64px; height: 20px; background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); border-bottom: none; border-radius: 14px 14px 0 0; box-shadow: 0 -4px 16px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; color: #888; transition: all 0.25s ease; }
+    #settings-pocket-zone.open #settings-pocket-tab { height: 14px; color: #555; background: rgba(255,255,255,0.98); }
+    #settings-pocket-panel { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 260px; max-height: 74vh; overflow-y: auto; background: rgba(255,255,255,0.97); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid rgba(0,0,0,0.08); padding: 14px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+    #settings-pocket-zone.open #settings-pocket-panel { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-20px); pointer-events: auto; }
+    #settings-pocket-panel .tool-pocket-grid { margin-bottom: 4px; grid-template-columns: 1fr; }
     #tool-pocket-copyright { flex: 0 0 auto; }
     .tool-pocket-title { font-size: 12px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-bottom: 10px; }
     .tool-pocket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -2625,6 +2636,17 @@
     .enh-row.aktiv .enh-varde { color:#007aff; }
     .enh-uppgift { margin-top:10px; background:#fff7e6; border:1.5px dashed #ffcc66; border-radius:12px; padding:10px 12px; font-size:16px; font-weight:800; color:#333; text-align:center; }
     .enh-uppgift .rakna-ans { display:inline-block; font-size:16px; margin-left:6px; }
+    .enh-collapse { overflow:hidden; max-height:600px; opacity:1; transition:max-height 0.3s ease, opacity 0.25s ease, margin-top 0.3s ease; }
+    .enh-collapse.enh-hopfalld { max-height:0; opacity:0; margin-top:0; pointer-events:none; }
+    .enh-tabs { display:flex; gap:6px; margin-top:12px; border-bottom:1.5px solid #e5e5ea; }
+    .enh-tab { flex:1; padding:8px 6px; background:transparent; border:none; border-bottom:3px solid transparent; font-family:inherit; font-weight:800; font-size:14px; color:#8e8e93; cursor:pointer; border-radius:0; }
+    .enh-tab:hover { color:#007aff; }
+    .enh-tab.aktiv { color:#007aff; border-bottom-color:#007aff; }
+    .enh-panel { margin-top:10px; }
+    .enh-text-lista { display:flex; flex-direction:column; gap:8px; margin-top:10px; max-height:340px; overflow-y:auto; padding-right:2px; }
+    .enh-text-rad { background:#fff7e6; border:1.5px dashed #ffcc66; border-radius:12px; padding:10px 12px; font-size:14.5px; font-weight:700; color:#333; line-height:1.4; }
+    .enh-text-fraga { margin-right:4px; }
+    .enh-text-rad .rakna-ans { font-size:14px; }
 
     /* ---- MATTEKAMP ---- */
     .mk-ctrl { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
@@ -2852,6 +2874,14 @@
         /* Öppningsflikarna större och lättare att träffa */
         #side-pocket-tab, #tool-pocket-tab { height: 74px !important; width: 26px !important; font-size: 16px; }
 
+        /* Nedre inställningsficka: flyttas åt höger på mobil så den inte krockar
+           med den centrerade ☰-knappen som öppnar verktygslådan. */
+        #settings-pocket-zone { left: auto; right: 10px; transform: none; width: 58px; }
+        #settings-pocket-tab { width: 58px; height: 30px; font-size: 16px; }
+        #settings-pocket-zone.open #settings-pocket-tab { height: 22px; }
+        #settings-pocket-panel { left: auto; right: 0; transform: translateY(100%); width: 86vw !important; max-width: 300px; max-height: 70vh; }
+        #settings-pocket-zone.open #settings-pocket-panel { transform: translateY(-16px); }
+
         /* Helskärmsknappen ur vägen för mobil-verktygsknappen */
         #fullscreen-btn { top: calc(10px + var(--safe-top)); right: calc(10px + var(--safe-right)); }
 
@@ -2866,7 +2896,7 @@
     @media (max-width: 430px) {
         .tool-btn { min-width: 58px; }
         #mobile-tool-toggle { width: 52px; height: 52px; font-size: 22px; }
-        #side-pocket-panel, #tool-pocket-panel { width: 90vw !important; }
+        #side-pocket-panel, #tool-pocket-panel, #settings-pocket-panel { width: 90vw !important; }
     }
 
     /* Röd "ny/uppdaterad"-prick på verktygsknappar */
@@ -11608,8 +11638,9 @@
             vikt:  { namn:'Vikt',   enheter:[ ['mg',0.001], ['g',1], ['hg',100], ['kg',1000], ['ton',1000000] ] },
             volym: { namn:'Volym',  enheter:[ ['ml',0.001], ['cl',0.01], ['dl',0.1], ['l',1] ] }
         };
-        body.innerHTML = `<div class='hover-menu enh-ctrl'><select class='editor-select enh-kat'><option value='langd'>📏 Längd</option><option value='vikt'>⚖️ Vikt</option><option value='volym'>🧴 Volym</option></select></div><div class='enh-in-row'><input type='number' class='enh-varde-in' value='5' step='any'><select class='editor-select enh-enhet-sel'></select></div><input type='range' class='enh-slider' min='0' max='100' step='1'><div class='enh-rows'></div><div class='hover-menu' style='margin-top:10px;'><button class='btn btn-primary enh-ova' style='width:100%;'>Öva-uppgift ▶</button></div><div class='enh-uppgift' style='display:none;'></div>`;
-        const katSel=body.querySelector('.enh-kat'), valIn=body.querySelector('.enh-varde-in'), enhSel=body.querySelector('.enh-enhet-sel'), slider=body.querySelector('.enh-slider'), rows=body.querySelector('.enh-rows'), uppgEl=body.querySelector('.enh-uppgift');
+        body.innerHTML = `<div class='hover-menu enh-ctrl'><select class='editor-select enh-kat'><option value='langd'>📏 Längd</option><option value='vikt'>⚖️ Vikt</option><option value='volym'>🧴 Volym</option></select></div><div class='enh-collapse'><div class='enh-in-row'><input type='number' class='enh-varde-in' value='5' step='any'><select class='editor-select enh-enhet-sel'></select></div><input type='range' class='enh-slider' min='0' max='100' step='1'><div class='enh-rows'></div></div><div class='enh-tabs'><button class='enh-tab aktiv' data-tab='omvandla'>Omvandla</button><button class='enh-tab' data-tab='text'>Textuppgifter</button></div><div class='enh-panel enh-panel-omvandla'><div class='hover-menu' style='margin-top:0;'><button class='btn btn-primary enh-ova' style='width:100%;'>Ny uppgift ▶</button></div><div class='enh-uppgift' style='display:none;'></div></div><div class='enh-panel enh-panel-text' style='display:none;'><div class='hover-menu' style='margin-top:0;'><button class='btn btn-primary enh-text-ny' style='width:100%;'>Nya uppgifter ▶</button></div><div class='enh-text-lista'></div></div>`;
+        const katSel=body.querySelector('.enh-kat'), valIn=body.querySelector('.enh-varde-in'), enhSel=body.querySelector('.enh-enhet-sel'), slider=body.querySelector('.enh-slider'), rows=body.querySelector('.enh-rows'), uppgEl=body.querySelector('.enh-uppgift'), tabs=body.querySelectorAll('.enh-tab'), panelOmvandla=body.querySelector('.enh-panel-omvandla'), panelText=body.querySelector('.enh-panel-text'), textLista=body.querySelector('.enh-text-lista'), collapseWrap=body.querySelector('.enh-collapse');
+        let aktivFlik='omvandla';
         if(config && config.data){ if(config.data.cat) katSel.value=config.data.cat; if(config.data.value!==undefined) valIn.value=config.data.value; }
         const syncData=()=>{ widget.dataset.enheter = JSON.stringify({ cat: katSel.value, unit: enhSel.value, value: parseFloat(valIn.value) }); };
         function fmtNum(v){
@@ -11642,17 +11673,21 @@
                 rows.appendChild(r);
             });
         }
-        katSel.onchange=()=>{ fyllEnheter(false); uppgEl.style.display='none'; render(); saveBoardState(); };
+        katSel.onchange=()=>{ fyllEnheter(false); uppgEl.style.display='none'; textLista.innerHTML=''; if(aktivFlik==='text') renderTextUppgifter(); render(); saveBoardState(); };
         enhSel.onchange=()=>{ render(); saveBoardState(); };
         valIn.oninput=()=>{ render(); };
         valIn.onchange=()=>{ render(); saveBoardState(); };
         slider.oninput=()=>{ valIn.value=slider.value; render(); };
         slider.onchange=()=>{ saveBoardState(); };
         const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
-        body.querySelector('.enh-ova').onclick=()=>{
-            const enheter=KAT[katSel.value].enheter;
+        function slumpaEnhetPar(enheter){
             let i=ri(0,enheter.length-1), j=i; while(j===i) j=ri(0,enheter.length-1);
             if(enheter[i][1]/enheter[j][1] > 1000 || enheter[j][1]/enheter[i][1] > 1000){ j = i>0 ? i-1 : i+1; } // hoppa inte hela trappan
+            return [i,j];
+        }
+        body.querySelector('.enh-ova').onclick=()=>{
+            const enheter=KAT[katSel.value].enheter;
+            const [i,j]=slumpaEnhetPar(enheter);
             const v=ri(1,99);
             const svar = v*enheter[i][1]/enheter[j][1];
             uppgEl.style.display='block'; uppgEl.innerHTML='';
@@ -11661,6 +11696,198 @@
             a.onclick=()=>{ a.textContent=fmtNum(svar)+' '+enheter[j][0]; a.classList.add('revealed'); a.onclick=null; };
             uppgEl.appendChild(q); uppgEl.appendChild(a);
         };
+        // ---- TEXTUPPGIFTER: vardagsnära räknesagor kring den aktuella enhetskategorin ----
+        // Varje uppgift löses med ett av räknesätten: omvandling, addition, subtraktion,
+        // multiplikation eller division - för variation i hur eleverna behöver tänka.
+        const TEXT_MALLAR = {
+            langd: [
+                'Sträckan mellan skolan och affären är {v} {u1}. Hur många {u2} är det?',
+                'Ett rep är {v} {u1} långt. Hur många {u2} är det?',
+                'Ett staket är {v} {u1} högt. Hur många {u2} är det?',
+                'En pulkabacke är {v} {u1} lång. Hur många {u2} är det?',
+                'Bordet är {v} {u1} brett. Hur många {u2} är det?',
+                'Cykelturen var {v} {u1} lång. Hur många {u2} är det?',
+                'Trädet i trädgården är {v} {u1} högt. Hur många {u2} är det?',
+                'En löpbana är {v} {u1} lång. Hur många {u2} är det?',
+                'Simbassängen är {v} {u1} lång. Hur många {u2} är det?',
+                'Ett tygstycke mäter {v} {u1}. Hur många {u2} är det?'
+            ],
+            vikt: [
+                'En säck potatis väger {v} {u1}. Hur många {u2} är det?',
+                'Hunden väger {v} {u1}. Hur många {u2} är det?',
+                'En låda äpplen väger {v} {u1}. Hur många {u2} är det?',
+                'Ryggsäcken väger {v} {u1}. Hur många {u2} är det?',
+                'Ett paket mjöl väger {v} {u1}. Hur många {u2} är det?',
+                'En vattenmelon väger {v} {u1}. Hur många {u2} är det?',
+                'Katten väger {v} {u1}. Hur många {u2} är det?',
+                'En kasse med bananer väger {v} {u1}. Hur många {u2} är det?',
+                'En bok väger {v} {u1}. Hur många {u2} är det?',
+                'Ett paket smör väger {v} {u1}. Hur många {u2} är det?'
+            ],
+            volym: [
+                'En hink rymmer {v} {u1}. Hur många {u2} är det?',
+                'En läskflaska rymmer {v} {u1}. Hur många {u2} är det?',
+                'Badkaret rymmer {v} {u1} vatten. Hur många {u2} är det?',
+                'En kastrull rymmer {v} {u1}. Hur många {u2} är det?',
+                'Ett akvarium rymmer {v} {u1} vatten. Hur många {u2} är det?',
+                'En mjölkkartong rymmer {v} {u1}. Hur många {u2} är det?',
+                'En vattenkanna rymmer {v} {u1}. Hur många {u2} är det?',
+                'Ett dricksglas rymmer {v} {u1}. Hur många {u2} är det?',
+                'En soppgryta rymmer {v} {u1}. Hur många {u2} är det?',
+                'En regnvattentunna rymmer {v} {u1}. Hur många {u2} är det?'
+            ]
+        };
+        const OPS_MALLAR = {
+            langd: {
+                addition: [
+                    'Ett rep är {v1} {u1}. Du kopplar ihop det med ett rep som är {v2} {u2}. Hur långa är replarna tillsammans, i {u2}?',
+                    'En vandring har två etapper: {v1} {u1} och {v2} {u2}. Hur lång är hela vandringen, i {u2}?',
+                    'Ett bord är {v1} {u1} brett. Bredvid står ett bord som är {v2} {u2} brett. Hur breda är borden tillsammans, i {u2}?'
+                ],
+                subtraktion: [
+                    'Ett tygstycke är {v1} {u1} långt. Du klipper bort {v2} {u2}. Hur mycket tyg är kvar, i {u2}?',
+                    'En stege är {v1} {u1} lång. En annan stege är {v2} {u2} kortare. Hur lång är den andra stegen, i {u2}?',
+                    'En löpbana är {v1} {u1} lång. Du har sprungit {v2} {u2}. Hur långt är kvar, i {u2}?'
+                ],
+                multiplikation: [
+                    'En planka är {v1} {u1} lång. Du lägger {n} likadana plankor efter varandra. Hur långa är plankorna tillsammans, i {u2}?',
+                    'Varje trappsteg är {v1} {u1} högt. Trappan har {n} steg. Hur hög är trappan totalt, i {u2}?',
+                    'Ett staketbräde är {v1} {u1} brett. Staketet består av {n} likadana bräder. Hur brett är staketet totalt, i {u2}?'
+                ],
+                division: [
+                    'Ett rep som är {v1} {u1} klipps i {n} lika stora bitar. Hur lång är varje bit, i {u2}?',
+                    'En sträcka på {v1} {u1} delas upp i {n} lika långa etapper. Hur lång är varje etapp, i {u2}?',
+                    'Ett bord som är {v1} {u1} långt delas in i {n} lika breda fack. Hur brett är varje fack, i {u2}?'
+                ]
+            },
+            vikt: {
+                addition: [
+                    'En kasse väger {v1} {u1}. Du lägger i mer varor som väger {v2} {u2}. Hur mycket väger kassen totalt, i {u2}?',
+                    'En låda äpplen väger {v1} {u1}. En låda päron väger {v2} {u2}. Hur mycket väger lådorna tillsammans, i {u2}?',
+                    'En resväska väger {v1} {u1}. Du packar i saker som väger {v2} {u2}. Hur mycket väger resväskan totalt, i {u2}?'
+                ],
+                subtraktion: [
+                    'En säck mjöl väger {v1} {u1}. Du bakar och använder {v2} {u2}. Hur mycket mjöl är kvar, i {u2}?',
+                    'En låda med innehåll väger {v1} {u1}. Själva lådan väger {v2} {u2}. Hur mycket väger innehållet, i {u2}?',
+                    'En hund väger {v1} {u1}. Den går ner {v2} {u2} i vikt. Hur mycket väger hunden nu, i {u2}?'
+                ],
+                multiplikation: [
+                    'Ett äpple väger {v1} {u1}. Du köper {n} likadana äpplen. Hur mycket väger äpplena tillsammans, i {u2}?',
+                    'En chokladkaka väger {v1} {u1}. Du köper {n} kakor. Hur mycket väger de tillsammans, i {u2}?',
+                    'Ett paket ris väger {v1} {u1}. Du köper {n} paket. Hur mycket väger alla paketen tillsammans, i {u2}?'
+                ],
+                division: [
+                    'En påse med {v1} {u1} godis delas lika mellan {n} barn. Hur mycket godis får varje barn, i {u2}?',
+                    'En deg på {v1} {u1} delas i {n} lika stora bullar. Hur mycket väger varje bulle, i {u2}?',
+                    'En låda med {v1} {u1} skruvar delas lika i {n} burkar. Hur mycket väger skruvarna i varje burk, i {u2}?'
+                ]
+            },
+            volym: {
+                addition: [
+                    'En kanna rymmer {v1} {u1}. Du häller i mer vätska, {v2} {u2}. Hur mycket vätska är det totalt, i {u2}?',
+                    'En hink innehåller {v1} {u1} vatten. Du fyller på med {v2} {u2} till. Hur mycket vatten är det totalt, i {u2}?',
+                    'Ett glas innehåller {v1} {u1}. Du häller i {v2} {u2} till. Hur mycket är det i glaset nu, i {u2}?'
+                ],
+                subtraktion: [
+                    'En flaska innehåller {v1} {u1} saft. Du häller upp {v2} {u2}. Hur mycket saft är kvar i flaskan, i {u2}?',
+                    'Ett akvarium innehåller {v1} {u1} vatten. Du tappar ur {v2} {u2}. Hur mycket vatten är kvar, i {u2}?',
+                    'En gryta innehåller {v1} {u1} soppa. Ni äter upp {v2} {u2}. Hur mycket soppa är kvar, i {u2}?'
+                ],
+                multiplikation: [
+                    'Ett glas rymmer {v1} {u1}. Du fyller {n} likadana glas. Hur mycket vätska är det totalt, i {u2}?',
+                    'En flaska rymmer {v1} {u1}. Du köper {n} flaskor. Hur mycket är det totalt, i {u2}?',
+                    'En kopp rymmer {v1} {u1}. Du brygger {n} koppar kaffe. Hur mycket kaffe är det totalt, i {u2}?'
+                ],
+                division: [
+                    'En hink med {v1} {u1} vatten fördelas lika i {n} mindre kärl. Hur mycket vatten får varje kärl, i {u2}?',
+                    '{v1} {u1} saft ska delas lika mellan {n} flaskor. Hur mycket saft blir det i varje flaska, i {u2}?',
+                    'Ett fat med {v1} {u1} olja fördelas jämnt i {n} burkar. Hur mycket olja blir det i varje burk, i {u2}?'
+                ]
+            }
+        };
+        const RAKNESATT = ['omvandling','addition','subtraktion','multiplikation','division'];
+        function slumpaTyper(antal){
+            const bas=RAKNESATT.slice();
+            for(let k=bas.length-1;k>0;k--){ const r=ri(0,k); [bas[k],bas[r]]=[bas[r],bas[k]]; }
+            const typer=[];
+            while(typer.length<antal){ typer.push(typer.length<bas.length ? bas[typer.length] : RAKNESATT[ri(0,RAKNESATT.length-1)]); }
+            return typer;
+        }
+        function byggFraga(typ){
+            const enheter=KAT[katSel.value].enheter;
+            if(typ==='omvandling'){
+                const mallar=TEXT_MALLAR[katSel.value];
+                const mall=mallar[ri(0,mallar.length-1)];
+                const [i,j]=slumpaEnhetPar(enheter);
+                const v=ri(1,99);
+                const svar=v*enheter[i][1]/enheter[j][1];
+                return { text: mall.replace('{v}',v).replace('{u1}',enheter[i][0]).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+            }
+            if(typ==='addition'){
+                const mallar=OPS_MALLAR[katSel.value].addition;
+                const mall=mallar[ri(0,mallar.length-1)];
+                const [i,j]=slumpaEnhetPar(enheter);
+                const v1=ri(1,20), v2=ri(1,50);
+                const summaBas=v1*enheter[i][1]+v2*enheter[j][1];
+                const svar=summaBas/enheter[j][1];
+                return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+            }
+            if(typ==='subtraktion'){
+                const mallar=OPS_MALLAR[katSel.value].subtraktion;
+                const mall=mallar[ri(0,mallar.length-1)];
+                let [i,j]=slumpaEnhetPar(enheter);
+                if(enheter[i][1] < enheter[j][1]){ const tmp=i; i=j; j=tmp; }
+                let v1=ri(5,30), v1Bas=v1*enheter[i][1];
+                let maxV2=Math.floor(v1Bas/enheter[j][1])-1, guard=0;
+                while(maxV2<1 && guard<10){ v1*=2; v1Bas=v1*enheter[i][1]; maxV2=Math.floor(v1Bas/enheter[j][1])-1; guard++; }
+                const v2=ri(1, Math.max(1, Math.min(maxV2,99)));
+                const diffBas=v1Bas - v2*enheter[j][1];
+                const svar=diffBas/enheter[j][1];
+                return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+            }
+            if(typ==='multiplikation'){
+                const mallar=OPS_MALLAR[katSel.value].multiplikation;
+                const mall=mallar[ri(0,mallar.length-1)];
+                const [i,j]=slumpaEnhetPar(enheter);
+                const v1=ri(1,9), n=ri(2,9);
+                const totalBas=v1*n*enheter[i][1];
+                const svar=totalBas/enheter[j][1];
+                return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+            }
+            // division
+            const mallar=OPS_MALLAR[katSel.value].division;
+            const mall=mallar[ri(0,mallar.length-1)];
+            const [i,j]=slumpaEnhetPar(enheter);
+            const n=ri(2,9), v1=n*ri(1,9);
+            const totalBas=v1*enheter[i][1];
+            const svar=(totalBas/n)/enheter[j][1];
+            return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+        }
+        function genTextUppgifter(antal){
+            return slumpaTyper(antal).map(byggFraga);
+        }
+        function renderTextUppgifter(){
+            const lista=genTextUppgifter(8);
+            textLista.innerHTML='';
+            lista.forEach((u,idx)=>{
+                const rad=document.createElement('div'); rad.className='enh-text-rad';
+                const q=document.createElement('span'); q.className='enh-text-fraga'; q.textContent=(idx+1)+'. '+u.text+' ';
+                const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
+                a.onclick=()=>{ a.textContent=u.svar; a.classList.add('revealed'); a.onclick=null; };
+                rad.appendChild(q); rad.appendChild(a);
+                textLista.appendChild(rad);
+            });
+        }
+        function bytFlik(namn){
+            aktivFlik=namn;
+            tabs.forEach(t=>t.classList.toggle('aktiv', t.dataset.tab===namn));
+            panelOmvandla.style.display = namn==='omvandla' ? 'block' : 'none';
+            panelText.style.display = namn==='text' ? 'block' : 'none';
+            collapseWrap.classList.toggle('enh-hopfalld', namn==='text');
+            if(namn==='text' && !textLista.children.length) renderTextUppgifter();
+        }
+        tabs.forEach(t=> t.onclick=()=> bytFlik(t.dataset.tab) );
+        body.querySelector('.enh-text-ny').onclick=()=> renderTextUppgifter();
         render();
     }
 
@@ -11755,12 +11982,12 @@
         function tidenUte(){
             stoppaTimer();
             timeoutLage=true;
-            avslojad=true; // tiden är ute – visa rätt svar automatiskt
+            // avslojad förblir false – svaret hålls gömt tills läraren själv klickar och visar det.
             teams[turn].p=Math.max(0, teams[turn].p-1); // poängen stannar på 0, aldrig minus
             renderLag(); mkBuzz();
             timerEl.style.display='none';
-            renderTask(); // visar uppgiften med facit synligt
-            const m=document.createElement('span'); m.style.flexBasis='100%'; m.style.textAlign='center'; m.style.fontSize='16px'; m.textContent='⏰ Tiden är ute! Svaret visas ovan · −1 poäng · tryck "Ny uppgift"'; m.style.color='#ff3b30'; taskEl.appendChild(m);
+            renderTask(); // uppgiften visas fortfarande med "?" – klicka för att visa svaret
+            const m=document.createElement('span'); m.style.flexBasis='100%'; m.style.textAlign='center'; m.style.fontSize='16px'; m.textContent='⏰ Tiden är ute! −1 poäng · Klicka på "?" för att visa svaret · tryck "Ny uppgift"'; m.style.color='#ff3b30'; taskEl.appendChild(m);
             saveBoardState();
             // Ingen automatisk start längre – läraren startar nästa uppgift manuellt med knappen.
         }
@@ -24227,6 +24454,25 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         tab.addEventListener('mouseleave', closeP);
         panel.addEventListener('mouseenter', openP);
         panel.addEventListener('mouseleave', closeP);
+        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); };
+    })();
+
+    // ---- NEDRE SIDOFICKA: appinställningar (låsning, om appen, rensa, logga ut, bakgrund) ----
+    (function(){
+        const zone = document.getElementById('settings-pocket-zone');
+        const tab = document.getElementById('settings-pocket-tab');
+        const panel = document.getElementById('settings-pocket-panel');
+        if(!zone || !tab || !panel) return;
+        const setIcon = ()=>{ tab.textContent = zone.classList.contains('open') ? '⌄' : '⌃'; };
+        setIcon();
+        let t = null;
+        const openP = ()=>{ clearTimeout(t); zone.classList.add('open'); setIcon(); };
+        const closeP = ()=>{ clearTimeout(t); t = setTimeout(()=>{ zone.classList.remove('open'); setIcon(); }, 350); };
+        tab.addEventListener('mouseenter', openP);
+        tab.addEventListener('mouseleave', closeP);
+        panel.addEventListener('mouseenter', openP);
+        panel.addEventListener('mouseleave', closeP);
+        // klick kvar för touch-tavlor (ingen hover där)
         tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); };
     })();
 
