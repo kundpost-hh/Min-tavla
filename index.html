@@ -23318,8 +23318,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const api = 'https://meny-api.mateo.se/api/v1/days/' + id + '?from=' + dateStr + '&to=' + dateStr;
         // OBS: mateo-api:et svarar med Access-Control-Allow-Origin: https://meny.mateo.se,
         // dvs det tillåter bara anrop från deras egen sajt. Ett direktanrop härifrån blockeras
-        // alltid av webbläsarens CORS-skydd, så vi går raka vägen på CORS-proxyer istället.
+        // alltid av webbläsarens CORS-skydd. Vi använder därför i första hand vår egen
+        // Cloudflare Worker-proxy (pålitlig, under egen kontroll), med publika proxyer
+        // och direktanropet som reservlösningar om workern skulle vara nere.
+        const ownProxy = 'https://mateo-lunch-proxy.mintavla-se.workers.dev/?id=' + encodeURIComponent(id) + '&from=' + encodeURIComponent(dateStr) + '&to=' + encodeURIComponent(dateStr);
         const sources = [
+            ownProxy,
             'https://api.allorigins.win/raw?url=' + encodeURIComponent(api),
             'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(api),
             'https://corsproxy.io/?url=' + encodeURIComponent(api),
