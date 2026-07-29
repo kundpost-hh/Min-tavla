@@ -233,7 +233,6 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createTidMegaWidget()"><div class="icon">🕰️</div><div class="label">Tid</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createReminderWidget()"><div class="icon">⏰</div><div class="label">Reminder</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createMultiplicationTable()"><div class="icon">✖️</div><div class="label">Multiplikation</div></button>
-            <button class="tool-btn" data-cat="matte" onclick="createUppstallning()"><div class="icon">🧾</div><div class="label">Uppställning</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createTalfoljder()"><div class="icon">🔗</div><div class="label">Talföljder</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createDiagramWidget()"><div class="icon">📈</div><div class="label">Diagram</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createKoordinatsystem()"><div class="icon">📍</div><div class="label">Koordinatsystem</div></button>
@@ -2403,8 +2402,14 @@
     .rakna-ctrl { display:flex; gap:6px; margin-bottom:10px; }
     .rakna-ctrl select { flex:1; min-width:0; }
     .rakna-task { text-align:center; font-size:34px; font-weight:800; color:#333; padding:16px 6px; background:#f7f7fa; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
-    .mathtool-tabs { display:flex; gap:6px; margin-bottom:8px; }
-    .mathtool-tab-btn { flex:1 1 auto; }
+    .rakna-task.ekv-text-mode { font-size:17px; font-weight:700; line-height:1.5; text-align:left; justify-content:flex-start; padding:16px 18px; }
+    .rakna-task.ekv-text-mode .rakna-ans { font-size:17px; }
+    .pri-task.rakna-task, .neg-task.rakna-task { font-size:24px; }
+    .pri-task.rakna-task .rakna-ans, .neg-task.rakna-task .rakna-ans { font-size:17px; white-space:normal; word-break:break-word; max-width:100%; line-height:1.5; }
+    .bkr-task.rakna-task, .prc-task.rakna-task { font-size:24px; }
+    .bkr-task.rakna-task .rakna-ans, .prc-task.rakna-task .rakna-ans { font-size:17px; white-space:normal; word-break:break-word; max-width:100%; line-height:1.5; }
+    .mathtool-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+    .mathtool-tab-btn { flex:1 1 calc(50% - 3px); min-width:0; }
     .mathtool-pane { animation: mathtool-fade .2s ease; }
     @keyframes mathtool-fade { from{ opacity:0; } to{ opacity:1; } }
     .rakna-ans { min-width:64px; padding:2px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; cursor:pointer; user-select:none; }
@@ -4055,7 +4060,7 @@
                 else if (type === 'ÖVERSLAGSRÄKNING') { try{ state.data = JSON.parse(w.dataset.overslag || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'AVRUNDNING') { try{ state.data = JSON.parse(w.dataset.avrundning || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BRÅKJÄMFÖRELSE') { try{ state.data = JSON.parse(w.dataset.brak || '{}'); }catch(e){ state.data={}; } }
-                else if (type === 'DIGITAL TIMER' || type === 'BRÅK / TID' || type === 'TALFORMER') { const nIn = w.querySelectorAll('input[type="number"]'); if(nIn.length >= 2){ if(type === 'DIGITAL TIMER'){ state.data.min = nIn[0].value; state.data.sec = nIn[1].value; } else { state.data.num = nIn[0].value; state.data.den = nIn[1].value; } } }
+                else if (type === 'DIGITAL TIMER' || type === 'BRÅK / TID' || type === 'TALFORMER') { const nIn = w.querySelectorAll('input[type="number"]'); if(nIn.length >= 2){ if(type === 'DIGITAL TIMER'){ state.data.min = nIn[0].value; state.data.sec = nIn[1].value; } else { state.data.num = nIn[0].value; state.data.den = nIn[1].value; } } if(type === 'TALFORMER'){ try{ Object.assign(state.data, JSON.parse(w.dataset.talformerExtra || '{}')); }catch(e){} } }
                 else if (type === 'RITPLATTA') { const cv=w.querySelector('canvas'); state.data.img = cv ? compressCanvasToDataURL(cv, 1000, 0.82) : ''; }
                 else if (type === 'QR-KOD') { state.data.url = w.querySelector('.list-name-input')?.value || ''; }
                 else if (type === 'ARBETSSÄTT') { state.data.icon = w.querySelector('.work-symbol.active')?.dataset.icon || ''; }
@@ -11470,9 +11475,9 @@
     // Division byggs baklänges från multiplikation så svaret alltid blir heltal.
     function createMathChallenge(config){
         if(config===undefined) config=null;
-        const body = createWidget('RÄKNA', 320, 'rakna-widget mathtool-widget', config);
+        const body = createWidget('RÄKNA', 360, 'rakna-widget mathtool-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu mathtool-tabs'><button type='button' class='btn mathtool-tab-btn' data-tab='ovning'>🧮 Räkneövning</button><button type='button' class='btn mathtool-tab-btn' data-tab='raknare'>🖩 Räknare</button></div>
+        body.innerHTML = `<div class='hover-menu mathtool-tabs'><button type='button' class='btn mathtool-tab-btn' data-tab='ovning'>🧮 Räkneövning</button><button type='button' class='btn mathtool-tab-btn' data-tab='raknare'>🖩 Räknare</button><button type='button' class='btn mathtool-tab-btn' data-tab='uppstallning'>🧾 Uppställning</button><button type='button' class='btn mathtool-tab-btn' data-tab='ekvationer'>🧩 Ekvationer</button><button type='button' class='btn mathtool-tab-btn' data-tab='prioritet'>🔢 Prioritering</button><button type='button' class='btn mathtool-tab-btn' data-tab='negativa'>➖ Negativa tal</button></div>
             <div class='mathtool-pane mathtool-ovning'>
                 <div class='hover-menu rakna-ctrl'><select class='editor-select rakna-op'><option value='add'>Addition +</option><option value='sub'>Subtraktion −</option><option value='mul'>Multiplikation ×</option><option value='div'>Division ÷</option><option value='mix'>Blandat</option></select><select class='editor-select rakna-lvl'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select></div>
                 <div class='rakna-task'></div>
@@ -11481,14 +11486,81 @@
             </div>
             <div class='mathtool-pane mathtool-raknare' style='display:none;'>
                 <div class='calc-grid'><div class='calc-display'>0</div></div>
+            </div>
+            <div class='mathtool-pane mathtool-uppstallning' style='display:none;'>
+                <div class='hover-menu upp-ctrl'>
+                    <input type='number' class='upp-in upp-a' placeholder='Tal 1' min='0'>
+                    <select class='editor-select upp-op'>
+                        <option value='+'>+</option>
+                        <option value='-'>−</option>
+                        <option value='×'>×</option>
+                        <option value='÷'>÷</option>
+                    </select>
+                    <input type='number' class='upp-in upp-b' placeholder='Tal 2' min='0'>
+                    <button class='btn btn-primary upp-starta'>Starta</button>
+                </div>
+                <div class='hover-menu upp-ctrl2'>
+                    <select class='editor-select upp-siffror'>
+                        <option value='2'>2 siffror</option>
+                        <option value='3' selected>3 siffror</option>
+                        <option value='4'>4 siffror</option>
+                    </select>
+                    <button class='btn btn-secondary upp-slumpa'>🎲 Slumpa tal</button>
+                </div>
+                <div class='upp-grid'></div>
+                <div class='upp-status'>Skriv två tal eller slumpa fram ett exempel, välj räknesätt och klicka Starta.</div>
+                <div class='hover-menu upp-steg-ctrl'>
+                    <button class='btn btn-secondary upp-steg' disabled>Nästa steg ▶</button>
+                    <button class='btn btn-secondary upp-alla' disabled>Visa allt</button>
+                    <button class='btn btn-danger upp-om' disabled>Börja om</button>
+                </div>
+            </div>
+            <div class='mathtool-pane mathtool-ekvationer' style='display:none;'>
+                <div class='hover-menu rakna-ctrl'><select class='editor-select ekv-niva'><option value='ak4'>Åk 4</option><option value='ak5'>Åk 5</option><option value='ak6'>Åk 6</option></select></div>
+                <div class='ekv-task rakna-task' style='margin-bottom:12px;'></div>
+                <div class='hover-menu'><button class='btn btn-primary ekv-next'>Ny ekvation ▶</button></div>
+                <div class='ekv-count rakna-count' style='margin-top:10px;'></div>
+            </div>
+            <div class='mathtool-pane mathtool-prioritet' style='display:none;'>
+                <div class='hover-menu rakna-ctrl'><select class='editor-select pri-lvl'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select></div>
+                <div class='pri-task rakna-task' style='margin-bottom:12px;'></div>
+                <div class='hover-menu'><button class='btn btn-primary pri-next'>Ny uppgift ▶</button></div>
+                <div class='pri-count rakna-count' style='margin-top:10px;'></div>
+            </div>
+            <div class='mathtool-pane mathtool-negativa' style='display:none;'>
+                <div class='hover-menu rakna-ctrl'><select class='editor-select neg-lvl'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select></div>
+                <div class='neg-task rakna-task' style='margin-bottom:12px;'></div>
+                <div class='hover-menu'><button class='btn btn-primary neg-next'>Ny uppgift ▶</button></div>
+                <div class='neg-count rakna-count' style='margin-top:10px;'></div>
             </div>`;
         const tabBtns = [...body.querySelectorAll('.mathtool-tab-btn')];
-        const paneOvning = body.querySelector('.mathtool-ovning'), paneRaknare = body.querySelector('.mathtool-raknare');
+        const paneOvning = body.querySelector('.mathtool-ovning'), paneRaknare = body.querySelector('.mathtool-raknare'),
+              paneUpp = body.querySelector('.mathtool-uppstallning'), paneEkv = body.querySelector('.mathtool-ekvationer'),
+              panePri = body.querySelector('.mathtool-prioritet'), paneNeg = body.querySelector('.mathtool-negativa');
         const opSel=body.querySelector('.rakna-op'), lvlSel=body.querySelector('.rakna-lvl'), taskEl=body.querySelector('.rakna-task'), nextBtn=body.querySelector('.rakna-next'), countEl=body.querySelector('.rakna-count');
-        if(config && config.data){ if(config.data.op) opSel.value=config.data.op; if(config.data.lvl) lvlSel.value=config.data.lvl; }
-        let antal=0;
+        // Element-referenser för Uppställning och Ekvationer deklareras redan här (innan de används
+        // längre ner), så att den delade syncData-funktionen alltid kan läsa dem säkert oavsett i
+        // vilken ordning olika delar av widgeten råkar anropas under uppstarten.
+        const uppAIn=body.querySelector('.upp-a'), uppBIn=body.querySelector('.upp-b'), uppOpSel=body.querySelector('.upp-op');
+        const uppSiffrorSel=body.querySelector('.upp-siffror'), uppSlumpaBtn=body.querySelector('.upp-slumpa'), uppStartaBtn=body.querySelector('.upp-starta');
+        const uppGridEl=body.querySelector('.upp-grid'), uppStatusEl=body.querySelector('.upp-status');
+        const uppStegBtn=body.querySelector('.upp-steg'), uppAllaBtn=body.querySelector('.upp-alla'), uppOmBtn=body.querySelector('.upp-om');
+        const ekvNivaSel=body.querySelector('.ekv-niva'), ekvTaskEl=body.querySelector('.ekv-task'), ekvNextBtn=body.querySelector('.ekv-next'), ekvCountEl=body.querySelector('.ekv-count');
+        const priLvlSel=body.querySelector('.pri-lvl'), priTaskEl=body.querySelector('.pri-task'), priNextBtn=body.querySelector('.pri-next'), priCountEl=body.querySelector('.pri-count');
+        const negLvlSel=body.querySelector('.neg-lvl'), negTaskEl=body.querySelector('.neg-task'), negNextBtn=body.querySelector('.neg-next'), negCountEl=body.querySelector('.neg-count');
+        let uppCols=[], uppOp='+', uppStep=0, uppN=0, uppExtraDigit=null, uppExtraRevealed=false, uppDivisor=0;
+        if(config && config.data){ if(config.data.op) opSel.value=config.data.op; if(config.data.lvl) lvlSel.value=config.data.lvl; if(config.data.ekvNiva) ekvNivaSel.value=config.data.ekvNiva; if(config.data.priLvl) priLvlSel.value=config.data.priLvl; if(config.data.negLvl) negLvlSel.value=config.data.negLvl; }
+        let antal=0, ekvAntal=0, priAntal=0, negAntal=0;
         let activeTab = (config && config.data && config.data.tab) ? config.data.tab : 'ovning';
-        const syncData=()=>{ widget.dataset.rakna = JSON.stringify({ op: opSel.value, lvl: lvlSel.value, tab: activeTab }); };
+        // All widgetens data (räkneövning, aktiv flik, ekvationsnivå OCH uppställningens läge) sparas
+        // tillsammans i EN enda dataset-nyckel (widget.dataset.rakna), eftersom det bara är den nyckeln
+        // som läses in igen när tavlan laddas (se serializeWidget-funktionen för typen 'RÄKNA').
+        const syncData=()=>{
+            widget.dataset.rakna = JSON.stringify({
+                op: opSel.value, lvl: lvlSel.value, tab: activeTab, ekvNiva: ekvNivaSel.value, priLvl: priLvlSel.value, negLvl: negLvlSel.value,
+                uppData: { a: uppAIn.value, b: uppBIn.value, op: uppOpSel.value, step: uppStep, extraRevealed: uppExtraRevealed, started: uppN>0 }
+            });
+        };
         function renderTabs(){
             tabBtns.forEach(b=>{
                 const on = b.dataset.tab===activeTab;
@@ -11497,6 +11569,10 @@
             });
             paneOvning.style.display = activeTab==='ovning' ? 'block' : 'none';
             paneRaknare.style.display = activeTab==='raknare' ? 'block' : 'none';
+            paneUpp.style.display = activeTab==='uppstallning' ? 'block' : 'none';
+            paneEkv.style.display = activeTab==='ekvationer' ? 'block' : 'none';
+            panePri.style.display = activeTab==='prioritet' ? 'block' : 'none';
+            paneNeg.style.display = activeTab==='negativa' ? 'block' : 'none';
         }
         tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; renderTabs(); syncData(); saveBoardState(); });
         const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
@@ -11545,8 +11621,325 @@
             calcGrid.appendChild(b);
         });
 
+        // ---- Uppställning (flyttad hit från den tidigare fristående UPPSTÄLLNING-widgeten, samma logik oförändrad) ----
+        function uppSyncData(){ syncData(); }
+
+        function uppDigits(numStr, width){ return numStr.padStart(width,'0').split('').map(Number); }
+
+        function uppBuild(a,b,operation){
+            uppOp=operation;
+            let aStr=String(a), bStr=String(b);
+            const width = Math.max(aStr.length, bStr.length);
+            const aD = uppDigits(aStr, width);
+            const bD = uppDigits(bStr, width);
+            uppN = width; uppCols=[];
+            let carry=0;
+            if(uppOp==='+'){
+                for(let i=width-1;i>=0;i--){
+                    const sum=aD[i]+bD[i]+carry, carryIn=carry;
+                    const resultDigit=sum%10; carry=Math.floor(sum/10);
+                    uppCols[i]={topDigit:aD[i], bottomDigit:bD[i], carryIn, result:resultDigit, carryOut:carry};
+                }
+                uppExtraDigit = carry>0 ? carry : null;
+            } else if(uppOp==='-'){
+                for(let i=width-1;i>=0;i--){
+                    let top=aD[i]-carry; let borrowOut=0;
+                    if(top<bD[i]){ top+=10; borrowOut=1; }
+                    const resultDigit=top-bD[i];
+                    uppCols[i]={topDigit:aD[i], bottomDigit:bD[i], borrowIn:carry, result:resultDigit, borrowOut};
+                    carry=borrowOut;
+                }
+                uppExtraDigit=null;
+            } else if(uppOp==='×'){
+                const multiplier = bStr.length<=aStr.length ? Number(bStr) : Number(aStr);
+                const stora = bStr.length<=aStr.length ? aD : uppDigits(String(Math.max(a,b)), width);
+                for(let i=width-1;i>=0;i--){
+                    const prod = stora[i]*multiplier+carry, carryIn=carry;
+                    const resultDigit=prod%10; carry=Math.floor(prod/10);
+                    uppCols[i]={topDigit:stora[i], bottomDigit:(i===width-1?multiplier:null), carryIn, result:resultDigit, carryOut:carry};
+                }
+                uppExtraDigit = carry>0 ? carry : null;
+            } else if(uppOp==='÷'){
+                // Kort division: divisorn (b) är en ensiffrig siffra, kvoten räknas fram siffra för siffra från vänster.
+                uppDivisor = b;
+                let remainder=0;
+                for(let i=0;i<width;i++){
+                    const carryIn=remainder;
+                    const current=remainder*10+aD[i];
+                    const qDigit=Math.floor(current/b);
+                    remainder=current%b;
+                    uppCols[i]={digit:aD[i], carryIn, quotientDigit:qDigit, remainderOut:remainder};
+                }
+                uppExtraDigit=null;
+            }
+            uppStep=0; uppExtraRevealed=false;
+            uppRender(); uppSyncData();
+        }
+
+        function uppRender(){
+            if(uppOp==='÷'){ uppRenderDivision(); return; }
+            uppGridEl.innerHTML='';
+            if(uppExtraDigit!==null){
+                const ec=document.createElement('div'); ec.className='upp-col upp-extra';
+                ec.innerHTML = `<div class='upp-carry'></div><div class='upp-top'></div><div class='upp-bottom'></div><div class='upp-line'></div><div class='upp-result ${uppExtraRevealed?'revealed':''}'>${uppExtraRevealed?uppExtraDigit:''}</div>`;
+                uppGridEl.appendChild(ec);
+            }
+            uppCols.forEach((c,i)=>{
+                const revealed = i >= uppN-uppStep;
+                const isFirst = i===0;
+                const colEl=document.createElement('div'); colEl.className='upp-col';
+                let carryHtml='';
+                if((uppOp==='+'||uppOp==='×') && c.carryIn>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-carry'>+${c.carryIn}</span>`;
+                if(uppOp==='-' && c.borrowOut===1 && revealed) carryHtml = `<span class='upp-chip upp-chip-borrow'>+10</span>`;
+                let topHtml = `<span class='upp-digit'>${c.topDigit}</span>`;
+                if(uppOp==='-' && c.borrowIn>0 && revealed){
+                    topHtml = `<span class='upp-digit upp-strike'>${c.topDigit}</span><span class='upp-digit-reduced'>${c.topDigit-c.borrowIn}</span>`;
+                }
+                const opSymbolHtml = isFirst ? `<span class='upp-op-symbol'>${uppOp}</span>` : '';
+                const bottomHtml = (c.bottomDigit!==null && c.bottomDigit!==undefined) ? `${opSymbolHtml}<span class='upp-digit'>${c.bottomDigit}</span>` : opSymbolHtml;
+                colEl.innerHTML = `
+                    <div class='upp-carry'>${carryHtml}</div>
+                    <div class='upp-top'>${topHtml}</div>
+                    <div class='upp-bottom'>${bottomHtml}</div>
+                    <div class='upp-line'></div>
+                    <div class='upp-result ${revealed?'revealed':''}'>${revealed?c.result:'?'}</div>`;
+                uppGridEl.appendChild(colEl);
+            });
+            const doneAll = uppStep>=uppN && (uppExtraDigit===null || uppExtraRevealed);
+            if(doneAll){
+                const svar = ((uppExtraDigit!==null?String(uppExtraDigit):'') + uppCols.map(c=>c.result).join('')).replace(/^0+(?=\d)/,'');
+                uppStatusEl.innerHTML = `✅ Klart! Svaret är <b>${svar}</b>`;
+            } else if(uppStep===0){
+                uppStatusEl.textContent = 'Klicka "Nästa steg" för att räkna en kolumn i taget, från höger.';
+            } else {
+                uppStatusEl.textContent = 'Kolumn '+uppStep+' av '+uppN+' klar. Klicka igen för nästa.';
+            }
+            uppStegBtn.disabled = doneAll; uppAllaBtn.disabled = doneAll;
+        }
+
+        function uppRenderDivision(){
+            uppGridEl.innerHTML='';
+            const wrap=document.createElement('div'); wrap.className='upp-div-wrap';
+
+            const qRow=document.createElement('div'); qRow.className='upp-div-qrow';
+            uppCols.forEach((c,i)=>{
+                const revealed = i < uppStep;
+                const qc=document.createElement('div'); qc.className='upp-div-qcell';
+                qc.innerHTML = `<span class='upp-result ${revealed?'revealed':''}'>${revealed?c.quotientDigit:''}</span>`;
+                qRow.appendChild(qc);
+            });
+            wrap.appendChild(qRow);
+
+            const bodyRow=document.createElement('div'); bodyRow.className='upp-div-body';
+            const divisorEl=document.createElement('div'); divisorEl.className='upp-div-divisor'; divisorEl.textContent=String(uppDivisor);
+            bodyRow.appendChild(divisorEl);
+            const dividendRow=document.createElement('div'); dividendRow.className='upp-div-dividend-row';
+            uppCols.forEach((c,i)=>{
+                const revealed = i < uppStep;
+                const cell=document.createElement('div'); cell.className='upp-div-dcell';
+                let carryHtml='';
+                if(revealed && c.carryIn>0) carryHtml = `<span class='upp-chip upp-chip-carry'>${c.carryIn}</span>`;
+                cell.innerHTML = `<div class='upp-carry'>${carryHtml}</div><div class='upp-digit'>${c.digit}</div>`;
+                dividendRow.appendChild(cell);
+            });
+            bodyRow.appendChild(dividendRow);
+            wrap.appendChild(bodyRow);
+            uppGridEl.appendChild(wrap);
+
+            const doneAll = uppStep>=uppN;
+            if(doneAll){
+                const svar = uppCols.map(c=>c.quotientDigit).join('').replace(/^0+(?=\d)/,'') || '0';
+                const rest = uppCols[uppN-1].remainderOut;
+                uppStatusEl.innerHTML = rest>0 ? `✅ Klart! Svaret är <b>${svar}</b> rest <b>${rest}</b>` : `✅ Klart! Svaret är <b>${svar}</b>`;
+            } else if(uppStep===0){
+                uppStatusEl.textContent = 'Klicka "Nästa steg" för att räkna en siffra i taget, från vänster.';
+            } else {
+                uppStatusEl.textContent = 'Siffra '+uppStep+' av '+uppN+' klar. Klicka igen för nästa.';
+            }
+            uppStegBtn.disabled = doneAll; uppAllaBtn.disabled = doneAll;
+        }
+
+        function uppNextStep(){ if(uppStep<uppN){ uppStep++; } else if(uppExtraDigit!==null && !uppExtraRevealed){ uppExtraRevealed=true; } uppRender(); uppSyncData(); }
+        function uppShowAll(){ uppStep=uppN; uppExtraRevealed = uppExtraDigit!==null; uppRender(); uppSyncData(); }
+        function uppReset(){ uppStep=0; uppExtraRevealed=false; uppRender(); uppSyncData(); }
+
+        function uppStartaMed(a,b,operation){
+            if(isNaN(a)||isNaN(b)||a<0||b<0){ uppStatusEl.textContent='Skriv två positiva heltal i båda fälten.'; return false; }
+            if(operation==='-' && b>a){ uppStatusEl.textContent='Tal 2 måste vara mindre än eller lika med Tal 1 vid subtraktion.'; return false; }
+            if(operation==='×' && Math.min(String(a).length,String(b).length)>1){ uppStatusEl.textContent='Vid multiplikation ska ett av talen vara en ensiffrig siffra (kort multiplikation).'; return false; }
+            if(operation==='÷' && (b<1||b>9)){ uppStatusEl.textContent='Vid division ska Tal 2 (nämnaren) vara en ensiffrig siffra 1–9 (kort division).'; return false; }
+            uppBuild(a,b,operation);
+            uppStegBtn.disabled=false; uppAllaBtn.disabled=false; uppOmBtn.disabled=false;
+            return true;
+        }
+
+        uppStartaBtn.onclick=()=>{ uppStartaMed(parseInt(uppAIn.value,10), parseInt(uppBIn.value,10), uppOpSel.value); saveBoardState(); };
+        uppSlumpaBtn.onclick=()=>{
+            const digitsN=parseInt(uppSiffrorSel.value,10), operation=uppOpSel.value;
+            const max=Math.pow(10,digitsN)-1, min=Math.pow(10,digitsN-1);
+            let a=Math.floor(Math.random()*(max-min+1))+min, b;
+            if(operation==='×' || operation==='÷'){ b=Math.floor(Math.random()*8)+2; }
+            else { b=Math.floor(Math.random()*(max-min+1))+min; if(operation==='-' && b>a){ const t=a; a=b; b=t; } }
+            uppAIn.value=a; uppBIn.value=b;
+            uppStartaMed(a,b,operation); saveBoardState();
+        };
+        uppStegBtn.onclick=()=>{ uppNextStep(); saveBoardState(); };
+        uppAllaBtn.onclick=()=>{ uppShowAll(); saveBoardState(); };
+        uppOmBtn.onclick=()=>{ uppReset(); saveBoardState(); };
+
+        if(config && config.data && config.data.uppData && config.data.uppData.started){
+            const ud = config.data.uppData;
+            uppAIn.value=ud.a; uppBIn.value=ud.b; uppOpSel.value=ud.op||'+';
+            const a=parseInt(ud.a,10), b=parseInt(ud.b,10);
+            if(uppStartaMed(a,b,ud.op||'+')){
+                uppStep = Math.min(ud.step||0, uppN); uppExtraRevealed=!!ud.extraRevealed;
+                uppRender(); uppSyncData();
+            }
+        }
+
+        // ---- Ekvationer (uttryck + textuppgifter, tre nivåer: åk 4/5/6) ----
+        const EKV_NAMN=['Anna','Erik','Maja','Leo','Sara','Noah','Elin','Vilma','Oscar','Ines','Liam','Wilma'];
+        function ekvNamn(){ return EKV_NAMN[Math.floor(Math.random()*EKV_NAMN.length)]; }
+        function ekvGen(niva){
+            const namn = ekvNamn();
+            const typ = Math.random()<0.5 ? 'uttryck' : 'text';
+            if(niva==='ak4'){
+                if(Math.random()<0.5){
+                    const x=ri(1,20), a=ri(1,15), b=x+a;
+                    const uttr='x + '+a+' = '+b;
+                    return typ==='uttryck'
+                        ? { typ:'Uttryck', fraga:uttr, svar:'x = '+x }
+                        : { typ:'Textuppgift', fraga:namn+' hade en påse med kulor. '+namn+' fick '+a+' kulor till och har nu '+b+' kulor. Hur många kulor hade '+namn+' från början?', svar:uttr+'   →   x = '+x };
+                }
+                const x=ri(1,20), a=ri(1,15), b=x+a;
+                const uttr=b+' − x = '+a;
+                return typ==='uttryck'
+                    ? { typ:'Uttryck', fraga:uttr, svar:'x = '+x }
+                    : { typ:'Textuppgift', fraga:namn+' hade '+b+' kr. Efter att ha köpt något hade '+namn+' '+a+' kr kvar. Hur mycket kostade det '+namn+' köpte?', svar:uttr+'   →   x = '+x };
+            }
+            if(niva==='ak5'){
+                const variant = ri(0,2);
+                if(variant===0){
+                    const x=ri(10,80), a=ri(10,60), b=x+a;
+                    const uttr='x + '+a+' = '+b;
+                    return typ==='uttryck'
+                        ? { typ:'Uttryck', fraga:uttr, svar:'x = '+x }
+                        : { typ:'Textuppgift', fraga:'En klass hade redan samlat in '+a+' kr till en utflykt. Efter ett kalas hade de totalt '+b+' kr. Hur mycket samlade de in på kalaset?', svar:uttr+'   →   x = '+x };
+                }
+                if(variant===1){
+                    const x=ri(3,15), f=ri(2,9), b=x*f;
+                    const uttr='x × '+f+' = '+b;
+                    return typ==='uttryck'
+                        ? { typ:'Uttryck', fraga:uttr, svar:'x = '+x }
+                        : { typ:'Textuppgift', fraga:'Russin delas jämnt i '+f+' påsar. Totalt finns det '+b+' russin. Hur många russin finns det i varje påse?', svar:uttr+'   →   x = '+x };
+                }
+                const q=ri(3,20), f=ri(2,9), x=q*f;
+                const uttr='x ÷ '+f+' = '+q;
+                return typ==='uttryck'
+                    ? { typ:'Uttryck', fraga:uttr, svar:'x = '+x }
+                    : { typ:'Textuppgift', fraga:namn+' delar sina klistermärken lika mellan '+f+' kompisar. Var och en får '+q+' klistermärken. Hur många klistermärken hade '+namn+' totalt?', svar:uttr+'   →   x = '+x };
+            }
+            // ak6: tvåstegsekvationer
+            const variant = ri(0,2);
+            if(variant===0){
+                const x=ri(2,15), a=ri(2,6), c=ri(1,20), b=a*x+c;
+                const uttr=a+'x + '+c+' = '+b;
+                return typ==='uttryck'
+                    ? { typ:'Uttryck', fraga:uttr, svar:'x = '+x }
+                    : { typ:'Textuppgift', fraga:'Jag tänker på ett tal. Multiplicerar jag det med '+a+' och lägger till '+c+' får jag '+b+'. Vilket tal tänkte jag på?', svar:uttr+'   →   x = '+x };
+            }
+            if(variant===1){
+                const x=ri(2,15), a=ri(2,6), c=ri(1,Math.max(1,Math.min(20,a*x-1))), b=a*x-c;
+                const uttr=a+'x − '+c+' = '+b;
+                return typ==='uttryck'
+                    ? { typ:'Uttryck', fraga:uttr, svar:'x = '+x }
+                    : { typ:'Textuppgift', fraga:'Jag tänker på ett tal. Multiplicerar jag det med '+a+' och drar sedan bort '+c+' får jag '+b+'. Vilket tal tänkte jag på?', svar:uttr+'   →   x = '+x };
+            }
+            const x=ri(1,15), a=ri(2,6), c=ri(1,10), b=(x+c)*a;
+            const uttr='(x + '+c+') × '+a+' = '+b;
+            return typ==='uttryck'
+                ? { typ:'Uttryck', fraga:uttr, svar:'x = '+x }
+                : { typ:'Textuppgift', fraga:namn+' tänker på ett tal, lägger till '+c+' och multiplicerar sedan med '+a+'. Resultatet blir '+b+'. Vilket tal tänkte '+namn+' på?', svar:uttr+'   →   x = '+x };
+        }
+        function ekvNyUppgift(){
+            const u=ekvGen(ekvNivaSel.value); ekvAntal++;
+            ekvTaskEl.innerHTML='';
+            ekvTaskEl.classList.toggle('ekv-text-mode', u.typ==='Textuppgift');
+            const badge=document.createElement('div'); badge.className='kw-edit-hint'; badge.style.cssText='margin-bottom:6px;flex-basis:100%;'; badge.textContent=u.typ;
+            const q=document.createElement('span'); q.textContent=u.fraga+'  ';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
+            a.onclick=()=>{ a.textContent=u.svar; a.classList.add('revealed'); a.onclick=null; };
+            ekvTaskEl.appendChild(badge); ekvTaskEl.appendChild(q); ekvTaskEl.appendChild(a);
+            ekvCountEl.textContent='Uppgift '+ekvAntal;
+        }
+        ekvNivaSel.onchange=()=>{ syncData(); ekvNyUppgift(); saveBoardState(); };
+        ekvNextBtn.onclick=()=>{ ekvNyUppgift(); };
+
+        // ---- Prioriteringsregler (uttryck med + − × ÷ och parenteser, rätt räkneordning) ----
+        function evalExpr(s){ return Function('return ('+s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-')+')')(); }
+        function priGen(niva){
+            if(niva==='latt'){
+                const variant = ri(0,3);
+                if(variant===0){ const a=ri(2,9), b=ri(2,9), c=ri(2,9); const p=b*c, svar=a+p; const expr=a+' + '+b+' × '+c; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+a+' + '+p+' = '+svar }; }
+                if(variant===1){ const b=ri(2,9), c=ri(2,9); const a=ri(b*c+1, b*c+15); const p=b*c, svar=a-p; const expr=a+' − '+b+' × '+c; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+a+' − '+p+' = '+svar }; }
+                if(variant===2){ const a=ri(2,9), b=ri(2,9), c=ri(2,9); const p=a*b, svar=p+c; const expr=a+' × '+b+' + '+c; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+p+' + '+c+' = '+svar }; }
+                const a=ri(2,9), b=ri(2,9); const c=ri(1, Math.max(1,a*b-1)); const p=a*b, svar=p-c; const expr=a+' × '+b+' − '+c; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+p+' − '+c+' = '+svar };
+            }
+            if(niva==='medel'){
+                const variant = ri(0,3);
+                if(variant===0){ const a=ri(2,9), b=ri(2,9), c=ri(2,6); const sum=a+b, svar=sum*c; const expr='('+a+' + '+b+') × '+c; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+sum+' × '+c+' = '+svar }; }
+                if(variant===1){ const a=ri(5,15); const b=ri(1,a-1); const c=ri(2,6); const diff=a-b, svar=diff*c; const expr='('+a+' − '+b+') × '+c; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+diff+' × '+c+' = '+svar }; }
+                if(variant===2){ const a=ri(2,6), b=ri(2,9), c=ri(2,9); const sum=b+c, svar=a*sum; const expr=a+' × ('+b+' + '+c+')'; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+a+' × '+sum+' = '+svar }; }
+                const a=ri(2,6), b=ri(5,15); const c=ri(1,b-1); const diff=b-c, svar=a*diff; const expr=a+' × ('+b+' − '+c+')'; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+a+' × '+diff+' = '+svar };
+            }
+            const variant = ri(0,2);
+            if(variant===0){ const a=ri(2,9), b=ri(2,9), c=ri(5,15); const d=ri(1,c-1); const s1=a+b, s2=c-d, svar=s1*s2; const expr='('+a+' + '+b+') × ('+c+' − '+d+')'; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+s1+' × '+s2+' = '+svar }; }
+            if(variant===1){ const a=ri(2,9), b=ri(2,6), c=ri(2,9), d=ri(2,6); const p1=a*b, p2=c*d, svar=p1+p2; const expr=a+' × '+b+' + '+c+' × '+d; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+p1+' + '+p2+' = '+svar }; }
+            const a=ri(2,9), b=ri(2,6), c=ri(2,9); const p=b*c; const inner=a+p; const d=ri(1, Math.max(1,inner-1)); const svar=inner-d; const expr=a+' + '+b+' × '+c+' − '+d; return { fraga:expr+' =', svar:String(svar), steg: expr+' = '+a+' + '+p+' − '+d+' = '+inner+' − '+d+' = '+svar };
+        }
+        function priNyUppgift(){
+            const u=priGen(priLvlSel.value); priAntal++;
+            priTaskEl.innerHTML='';
+            const q=document.createElement('span'); q.textContent=u.fraga+'  ';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa hela uträkningen';
+            a.onclick=()=>{ a.textContent=u.steg; a.classList.add('revealed'); a.onclick=null; };
+            priTaskEl.appendChild(q); priTaskEl.appendChild(a);
+            priCountEl.textContent='Uppgift '+priAntal;
+        }
+        priLvlSel.onchange=()=>{ syncData(); priNyUppgift(); saveBoardState(); };
+        priNextBtn.onclick=()=>{ priNyUppgift(); };
+
+        // ---- Negativa tal (addition/subtraktion/multiplikation/division med negativa tal) ----
+        function fmtNeg(n){ return n<0 ? '−'+Math.abs(n) : String(n); }
+        function negGen(niva){
+            if(niva==='latt'){
+                const variant=ri(0,1);
+                if(variant===0){ const a=ri(0,10); const b=ri(a+1,a+15); const diff=b-a; const svar=a-b; return { fraga:a+' − '+b+' =', svar:fmtNeg(svar), steg: a+' − '+b+' = −('+diff+') = '+fmtNeg(svar) }; }
+                const a=ri(-10,-1), b=ri(1,10); const svar=a+b; return { fraga:fmtNeg(a)+' + '+b+' =', svar:fmtNeg(svar), steg: fmtNeg(a)+' + '+b+' = '+fmtNeg(svar)+'   (gå '+b+' steg åt höger på tallinjen från '+fmtNeg(a)+')' };
+            }
+            if(niva==='medel'){
+                const variant=ri(0,1);
+                if(variant===0){ const a=ri(-15,-1), b=ri(-15,-1); const svar=a-b; return { fraga:fmtNeg(a)+' − ('+fmtNeg(b)+') =', svar:fmtNeg(svar), steg: fmtNeg(a)+' − ('+fmtNeg(b)+') = '+fmtNeg(a)+' + '+Math.abs(b)+' = '+fmtNeg(svar)+'   (minus och minus blir plus)' }; }
+                const a=ri(-15,15), b=ri(-15,15); const svar=a+b; return { fraga:fmtNeg(a)+' + ('+fmtNeg(b)+') =', svar:fmtNeg(svar), steg: fmtNeg(a)+' + ('+fmtNeg(b)+') = '+fmtNeg(svar) };
+            }
+            const variant=ri(0,1);
+            if(variant===0){ const a=ri(-9,-2), b=ri(2,9); const svar=a*b; return { fraga:fmtNeg(a)+' × '+b+' =', svar:fmtNeg(svar), steg: fmtNeg(a)+' × '+b+' = '+fmtNeg(svar)+'   (minus gånger plus blir minus)' }; }
+            const b=ri(2,9), q=ri(-9,-1), a=b*q; return { fraga:fmtNeg(a)+' ÷ '+b+' =', svar:fmtNeg(q), steg: fmtNeg(a)+' ÷ '+b+' = '+fmtNeg(q)+'   (minus delat med plus blir minus)' };
+        }
+        function negNyUppgift(){
+            const u=negGen(negLvlSel.value); negAntal++;
+            negTaskEl.innerHTML='';
+            const q=document.createElement('span'); q.textContent=u.fraga+'  ';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa hur man tänker';
+            a.onclick=()=>{ a.textContent=u.steg; a.classList.add('revealed'); a.onclick=null; };
+            negTaskEl.appendChild(q); negTaskEl.appendChild(a);
+            negCountEl.textContent='Uppgift '+negAntal;
+        }
+        negLvlSel.onchange=()=>{ syncData(); negNyUppgift(); saveBoardState(); };
+        negNextBtn.onclick=()=>{ negNyUppgift(); };
+
         renderTabs();
-        syncData(); nyUppgift();
+        syncData(); nyUppgift(); ekvNyUppgift(); priNyUppgift(); negNyUppgift();
     }
 
     // ---- STARTUPPGIFT ----
@@ -23772,15 +24165,50 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
 
     function createFractionVisualizer(config){
-        const body=createWidget('TALFORMER',340,'',config);
-        body.innerHTML=`<div style='display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:10px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' max='20' class='d-i' style='width:50px;text-align:center;'></div>
-            <div class='hover-menu tf-viewctrl' style='display:flex;gap:6px;justify-content:center;margin-bottom:10px;'>
-                <button class='btn btn-secondary tf-view-pizza'>🍕 Pizza</button>
-                <button class='btn btn-secondary tf-view-bar'>📊 Stapel</button>
+        const body=createWidget('TALFORMER',360,'',config);
+        body.innerHTML=`<div class='hover-menu mathtool-tabs'><button type='button' class='btn mathtool-tab-btn' data-tab='brak'>🍕 Bråk</button><button type='button' class='btn mathtool-tab-btn' data-tab='brakrakning'>➕ Bråkräkning</button><button type='button' class='btn mathtool-tab-btn' data-tab='procent'>% Procent</button></div>
+            <div class='mathtool-pane tf-pane-brak'>
+                <div style='display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:10px;'><input type='number' value='1' min='0' class='n-i' style='width:50px;text-align:center;'>/<input type='number' value='4' min='1' max='20' class='d-i' style='width:50px;text-align:center;'></div>
+                <div class='hover-menu tf-viewctrl' style='display:flex;gap:6px;justify-content:center;margin-bottom:10px;'>
+                    <button class='btn btn-secondary tf-view-pizza'>🍕 Pizza</button>
+                    <button class='btn btn-secondary tf-view-bar'>📊 Stapel</button>
+                </div>
+                <div class='fraction-circle' style='display:flex;justify-content:center;'></div>
+                <div class='tf-hint' style='text-align:center;font-size:11px;color:#999;margin-top:4px;'>Klicka på bitarna för att fylla i en bråkdel</div>
+                <div class='frac-values' style='display:flex;justify-content:center;gap:8px;margin-top:12px;'><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Procent</div><div class='frac-pct' style='font-size:15px;font-weight:800;color:#007aff;'>25 %</div></div><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Decimal</div><div class='frac-dec' style='font-size:15px;font-weight:800;color:#007aff;'>0,25</div></div></div><div class='hover-menu tf-ovn-ctrl' style='display:flex;gap:6px;margin-top:14px;'><select class='editor-select tf-niva' style='flex:1;'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><button class='btn btn-primary tf-uppgift' style='flex:1;'>Övningsuppgift ▶</button></div><div class='tf-uppg' style='display:none;'></div>
             </div>
-            <div class='fraction-circle' style='display:flex;justify-content:center;'></div>
-            <div class='tf-hint' style='text-align:center;font-size:11px;color:#999;margin-top:4px;'>Klicka på bitarna för att fylla i en bråkdel</div>
-            <div class='frac-values' style='display:flex;justify-content:center;gap:8px;margin-top:12px;'><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Procent</div><div class='frac-pct' style='font-size:15px;font-weight:800;color:#007aff;'>25 %</div></div><div class='frac-val-box' style='flex:1;max-width:90px;text-align:center;background:#f2f2f7;border-radius:10px;padding:6px 4px;'><div style='font-size:10px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;'>Decimal</div><div class='frac-dec' style='font-size:15px;font-weight:800;color:#007aff;'>0,25</div></div></div><div class='hover-menu tf-ovn-ctrl' style='display:flex;gap:6px;margin-top:14px;'><select class='editor-select tf-niva' style='flex:1;'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select><button class='btn btn-primary tf-uppgift' style='flex:1;'>Övningsuppgift ▶</button></div><div class='tf-uppg' style='display:none;'></div>`;
+            <div class='mathtool-pane tf-pane-brakrakning' style='display:none;'>
+                <div class='hover-menu rakna-ctrl'><select class='editor-select bkr-niva'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select></div>
+                <div class='bkr-task rakna-task' style='margin-bottom:12px;'></div>
+                <div class='hover-menu'><button class='btn btn-primary bkr-next'>Ny uppgift ▶</button></div>
+                <div class='bkr-count rakna-count' style='margin-top:10px;'></div>
+            </div>
+            <div class='mathtool-pane tf-pane-procent' style='display:none;'>
+                <div class='hover-menu rakna-ctrl'><select class='editor-select prc-niva'><option value='latt'>Lätt</option><option value='medel'>Medel</option><option value='svar'>Svår</option></select></div>
+                <div class='prc-task rakna-task' style='margin-bottom:12px;'></div>
+                <div class='hover-menu'><button class='btn btn-primary prc-next'>Ny uppgift ▶</button></div>
+                <div class='prc-count rakna-count' style='margin-top:10px;'></div>
+            </div>`;
+        const tabBtns=[...body.querySelectorAll('.mathtool-tab-btn')];
+        const paneBrak=body.querySelector('.tf-pane-brak'), paneBkr=body.querySelector('.tf-pane-brakrakning'), panePrc=body.querySelector('.tf-pane-procent');
+        const bkrNivaSel=body.querySelector('.bkr-niva'), bkrTaskEl=body.querySelector('.bkr-task'), bkrNextBtn=body.querySelector('.bkr-next'), bkrCountEl=body.querySelector('.bkr-count');
+        const prcNivaSel=body.querySelector('.prc-niva'), prcTaskEl=body.querySelector('.prc-task'), prcNextBtn=body.querySelector('.prc-next'), prcCountEl=body.querySelector('.prc-count');
+        let activeTfTab = 'brak', bkrAntal=0, prcAntal=0;
+        if(config && config.data){
+            if(config.data.tfTab) activeTfTab = config.data.tfTab;
+            if(config.data.bkrNiva) bkrNivaSel.value = config.data.bkrNiva;
+            if(config.data.prcNiva) prcNivaSel.value = config.data.prcNiva;
+        }
+        const widgetElRef = body.parentElement.parentElement;
+        const syncTfExtra = ()=>{ widgetElRef.dataset.talformerExtra = JSON.stringify({ tfTab: activeTfTab, bkrNiva: bkrNivaSel.value, prcNiva: prcNivaSel.value }); };
+        function renderTfTabs(){
+            tabBtns.forEach(b=>{ const on=b.dataset.tab===activeTfTab; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); });
+            paneBrak.style.display = activeTfTab==='brak' ? 'block' : 'none';
+            paneBkr.style.display = activeTfTab==='brakrakning' ? 'block' : 'none';
+            panePrc.style.display = activeTfTab==='procent' ? 'block' : 'none';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeTfTab=b.dataset.tab; renderTfTabs(); syncTfExtra(); saveBoardState(); });
+
         const ni=body.querySelector('.n-i'), di=body.querySelector('.d-i'), circ=body.querySelector('.fraction-circle'), pctEl=body.querySelector('.frac-pct'), decEl=body.querySelector('.frac-dec'), nivaSel=body.querySelector('.tf-niva'), uppgEl=body.querySelector('.tf-uppg');
         const btnPizza=body.querySelector('.tf-view-pizza'), btnBar=body.querySelector('.tf-view-bar');
         if(config && config.data && config.data.niva) nivaSel.value=config.data.niva;
@@ -23895,36 +24323,42 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         function genUppgift(niva){
             const s = val(SET[niva]);
             const typ = ri(0,3); // 0: bråk->%  1: bråk->dec  2: %->bråk/dec  3: dec->%/bråk
-            let fraga, svar;
+            let fraga, svar, steg;
             const brak = braktext(s.t);
+            const [taljare, namnare] = s.t.split('/');
             const pStr = fmtPct(s.p)+' %';
             if(typ===0){
                 fraga = `Skriv <b>${brak}</b> i procentform.`;
                 svar = pStr;
+                steg = `${brak} = ${taljare} ÷ ${namnare} = ${s.d}  →  ${s.d} × 100 = ${pStr}`;
             } else if(typ===1){
                 fraga = `Skriv <b>${brak}</b> i decimalform.`;
                 svar = s.d;
+                steg = `${brak} = ${taljare} ÷ ${namnare} = ${s.d}`;
             } else if(typ===2){
                 fraga = `Skriv <b>${pStr}</b> som bråk och som decimaltal.`;
                 svar = `${brak}  och  ${s.d}`;
+                steg = `${pStr} betyder ${fmtPct(s.p)} delar av 100 = ${brak} (förkortat)   och som decimal: ${s.d}`;
             } else {
                 fraga = `Skriv decimaltalet <b>${s.d}</b> i procentform.`;
                 svar = pStr;
+                steg = `${s.d} × 100 = ${pStr}`;
             }
             // Ibland: en liten vardagskontext för variation (på lätt/medel oftare enkel form)
             if(niva!=='latt' && ri(0,2)===0){
                 fraga = kontext[ri(0,kontext.length-1)](brak) + ' Hur mycket är det i procent?';
                 svar = pStr;
+                steg = `${brak} = ${taljare} ÷ ${namnare} = ${s.d}  →  ${s.d} × 100 = ${pStr}`;
             }
-            return { fraga, svar };
+            return { fraga, svar, steg };
         }
         function visaUppgift(){
-            const { fraga, svar } = genUppgift(nivaSel.value);
+            const { fraga, svar, steg } = genUppgift(nivaSel.value);
             uppgEl.style.display='block'; uppgEl.innerHTML='';
             const q=document.createElement('div'); q.className='tf-fraga'; q.innerHTML=fraga; q.style.marginBottom='8px'; q.style.lineHeight='1.45';
             const rad=document.createElement('div'); rad.innerHTML='Svar: ';
-            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
-            a.onclick=()=>{ a.innerHTML=svar; a.classList.add('revealed'); a.onclick=null; };
+            const a=document.createElement('span'); a.className='rakna-ans'; a.style.cssText='white-space:normal;word-break:break-word;max-width:100%;line-height:1.5;'; a.textContent='?'; a.title='Klicka för att visa hur man tänker';
+            a.onclick=()=>{ a.innerHTML=steg; a.classList.add('revealed'); a.onclick=null; };
             rad.appendChild(a);
             const ny=document.createElement('button'); ny.className='tf-ny'; ny.type='button'; ny.textContent='🎲 Ny uppgift';
             ny.style.cssText='margin-top:10px;border:none;background:#007aff;color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:10px;cursor:pointer;font-family:inherit;';
@@ -23933,6 +24367,117 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         }
         nivaSel.onchange=()=>{ saveBoardState(); if(uppgEl.style.display!=='none') visaUppgift(); };
         body.querySelector('.tf-uppgift').onclick=()=> visaUppgift();
+
+        // ---- Bråkräkning (addition, subtraktion och multiplikation av bråk, tre nivåer) ----
+        function gcdTf(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a||1; }
+        function simplifyFrac(n,d){ const g=gcdTf(n,d); return [n/g, d/g]; }
+        function fracDisplay(n,d){ return d===1 ? String(n) : n+'/'+d; }
+        function bkrGen(niva){
+            if(niva==='latt'){
+                const d=[4,5,6,8,10][ri(0,4)];
+                const isAdd = Math.random()<0.6;
+                if(isAdd){
+                    const n1=ri(1,d-1), n2=ri(1,d-n1);
+                    const sumN=n1+n2;
+                    const [sn,sd]=simplifyFrac(sumN, d);
+                    const expr=n1+'/'+d+' + '+n2+'/'+d;
+                    let steg=expr+' = '+sumN+'/'+d;
+                    if(sd!==d || sn!==sumN) steg += ' = '+fracDisplay(sn,sd);
+                    return { fraga: expr+' =', svar: fracDisplay(sn,sd), steg };
+                }
+                const n1=ri(2,d-1), n2=ri(1,n1-1);
+                const diffN=n1-n2;
+                const [sn,sd]=simplifyFrac(diffN, d);
+                const expr=n1+'/'+d+' − '+n2+'/'+d;
+                let steg=expr+' = '+diffN+'/'+d;
+                if(sd!==d || sn!==diffN) steg += ' = '+fracDisplay(sn,sd);
+                return { fraga: expr+' =', svar: fracDisplay(sn,sd), steg };
+            }
+            if(niva==='medel'){
+                const d1=[2,3,4,5][ri(0,3)], mult=ri(2,4), d2=d1*mult;
+                const n1=ri(1,d1-1), n2=ri(1,d2-1), n1c=n1*mult;
+                const isAdd = Math.random()<0.6;
+                if(isAdd){
+                    const sumN=n1c+n2;
+                    const [sn,sd]=simplifyFrac(sumN, d2);
+                    const expr=n1+'/'+d1+' + '+n2+'/'+d2;
+                    let steg=expr+' = '+n1c+'/'+d2+' + '+n2+'/'+d2+' = '+sumN+'/'+d2;
+                    if(sd!==d2 || sn!==sumN) steg += ' = '+fracDisplay(sn,sd);
+                    return { fraga: expr+' =', svar: fracDisplay(sn,sd), steg };
+                }
+                let A=n1c, B=n2, fA=n1+'/'+d1, fB=n2+'/'+d2, fAc=n1c+'/'+d2, fBc=n2+'/'+d2;
+                if(A<B){ let t=A; A=B; B=t; t=fA; fA=fB; fB=t; t=fAc; fAc=fBc; fBc=t; }
+                const diffN=A-B;
+                const [sn,sd]=simplifyFrac(diffN, d2);
+                const expr=fA+' − '+fB;
+                let steg=expr+' = '+fAc+' − '+fBc+' = '+diffN+'/'+d2;
+                if(sd!==d2 || sn!==diffN) steg += ' = '+fracDisplay(sn,sd);
+                return { fraga: expr+' =', svar: fracDisplay(sn,sd), steg };
+            }
+            const n1=ri(1,5), d1=ri(n1+1,9), n2=ri(1,5), d2=ri(n2+1,9);
+            const prodN=n1*n2, prodD=d1*d2;
+            const [sn,sd]=simplifyFrac(prodN, prodD);
+            const expr=n1+'/'+d1+' × '+n2+'/'+d2;
+            let steg=expr+' = '+prodN+'/'+prodD;
+            if(sd!==prodD || sn!==prodN) steg += ' = '+fracDisplay(sn,sd);
+            return { fraga: expr+' =', svar: fracDisplay(sn,sd), steg };
+        }
+        function bkrNyUppgift(){
+            const u=bkrGen(bkrNivaSel.value); bkrAntal++;
+            bkrTaskEl.innerHTML='';
+            const q=document.createElement('span'); q.textContent=u.fraga+'  ';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa hur man tänker';
+            a.onclick=()=>{ a.textContent=u.steg; a.classList.add('revealed'); a.onclick=null; };
+            bkrTaskEl.appendChild(q); bkrTaskEl.appendChild(a);
+            bkrCountEl.textContent='Uppgift '+bkrAntal;
+        }
+        bkrNivaSel.onchange=()=>{ syncTfExtra(); bkrNyUppgift(); saveBoardState(); };
+        bkrNextBtn.onclick=()=>{ bkrNyUppgift(); };
+
+        // ---- Procent (procent av tal, andel i procent, omvänd procent - tre nivåer) ----
+        function prcGen(niva){
+            if(niva==='latt'){
+                const pTal=[10,25,50,75,100][ri(0,4)];
+                const mult=100/gcdTf(100,pTal);
+                const bas=ri(1,12)*mult;
+                const svar=bas*pTal/100;
+                const expr=pTal+' % av '+bas;
+                return { fraga: expr+' =', svar: String(svar), steg: expr+' = '+pTal+'/100 × '+bas+' = '+svar };
+            }
+            if(niva==='medel'){
+                if(Math.random()<0.5){
+                    const pTal=[5,15,20,30,40,60,70,80,90][ri(0,8)];
+                    const mult=100/gcdTf(100,pTal);
+                    const bas=ri(1,10)*mult;
+                    const svar=bas*pTal/100;
+                    const expr=pTal+' % av '+bas;
+                    return { fraga: expr+' =', svar: String(svar), steg: expr+' = '+pTal+'/100 × '+bas+' = '+svar };
+                }
+                const helhet=[20,25,40,50,80,100][ri(0,5)];
+                let p, del, guard=0;
+                do { del=ri(1,helhet-1); p=del*100/helhet; guard++; } while(!Number.isInteger(p) && guard<200);
+                return { fraga: 'Hur många procent är '+del+' av '+helhet+'?', svar: p+' %', steg: del+'/'+helhet+' × 100 = '+p+' %' };
+            }
+            const pTal=[10,20,25,50][ri(0,3)];
+            const mult=100/gcdTf(100,pTal);
+            const svarTal=ri(1,10)*mult;
+            const del=svarTal*pTal/100;
+            return { fraga: del+' är '+pTal+' % av vilket tal?', svar: String(svarTal), steg: del+' ÷ '+pTal+' × 100 = '+svarTal };
+        }
+        function prcNyUppgift(){
+            const u=prcGen(prcNivaSel.value); prcAntal++;
+            prcTaskEl.innerHTML='';
+            const q=document.createElement('span'); q.textContent=u.fraga+'  ';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa hur man tänker';
+            a.onclick=()=>{ a.textContent=u.steg; a.classList.add('revealed'); a.onclick=null; };
+            prcTaskEl.appendChild(q); prcTaskEl.appendChild(a);
+            prcCountEl.textContent='Uppgift '+prcAntal;
+        }
+        prcNivaSel.onchange=()=>{ syncTfExtra(); prcNyUppgift(); saveBoardState(); };
+        prcNextBtn.onclick=()=>{ prcNyUppgift(); };
+
+        renderTfTabs(); syncTfExtra();
+        bkrNyUppgift(); prcNyUppgift();
     }
 
     function createTableWidget(config) {
@@ -25713,7 +26258,6 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         'Matematik': [
             "createStartuppgift()",        // Startuppgift
             "createMathChallenge()",        // Räkna
-            "createUppstallning()",         // Uppställning
             "createBrakjamforelse()",       // Bråkjämförelse
             "createMultiplicationTable()",  // Multiplikation
             "createHundredChart()",         // Hundraruta
