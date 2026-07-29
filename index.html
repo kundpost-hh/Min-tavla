@@ -222,7 +222,7 @@
             <button class="tool-btn" data-cat="matte" onclick="createOverslagsrakning()"><div class="icon">🧭</div><div class="label">Överslagsräkning</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createAvrundning()"><div class="icon">🎚️</div><div class="label">Avrundning</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createMathChallenge()"><div class="icon"><svg viewBox="0 0 24 24" width="22" height="22" style="display:block;margin:0 auto;"><text x="6" y="10" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">+</text><text x="18" y="10" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">−</text><text x="6" y="21" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">×</text><text x="18" y="21" font-size="9" font-weight="900" text-anchor="middle" fill="#3a3a3c">÷</text></svg></div><div class="label">Räkna</div></button>
-            <button class="tool-btn" data-cat="klassrum" onclick="createStartuppgift()"><div class="icon">🎯</div><div class="label">Startuppgift</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createStartuppgift()"><div class="icon">🎯</div><div class="label">Startuppgift Mat</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createStartuppgiftSvenska()"><div class="icon">📖</div><div class="label">Startuppgift Sv</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createNumberLine()"><div class="icon">📏</div><div class="label">Tallinje</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createMoneyWidget()"><div class="icon">💰</div><div class="label">Pengar</div></button>
@@ -10777,6 +10777,11 @@
         if(config===undefined) config=null;
         const body = createWidget('STARTUPPGIFT', 400, 'startuppgift-widget', config);
         const widget = body.parentElement.parentElement;
+        // FIX: bara den VISADE rubriken byts till "Startuppgift Matematik" (för att skiljas från den
+        // nya svenska varianten) - det interna typ-namnet ('STARTUPPGIFT', används av widget.dataset.
+        // widgetType och alla serialize/deserialize-kopplingar) lämnas orört, annars skulle redan
+        // utplacerade Startuppgift-widgetar på lärares tavlor sluta gå att läsa in efter uppdateringen.
+        const suHeaderSpan = widget.querySelector('.widget-header > span'); if(suHeaderSpan) suHeaderSpan.textContent = 'Startuppgift Matematik';
         body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är lite klurigare!</div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
         const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
@@ -23311,20 +23316,34 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     function lunchCacheKey(id, d){ return 'mateoCache_' + id + '_' + d; }
     async function mateoFetchDay(id, dateStr){
         const api = 'https://meny-api.mateo.se/api/v1/days/' + id + '?from=' + dateStr + '&to=' + dateStr;
-        // Försök direkt först; faller tillbaka på CORS-proxy om webbläsaren blockerar (statisk sida)
-        const sources = [ api,
+        // OBS: mateo-api:et svarar med Access-Control-Allow-Origin: https://meny.mateo.se,
+        // dvs det tillåter bara anrop från deras egen sajt. Ett direktanrop härifrån blockeras
+        // alltid av webbläsarens CORS-skydd, så vi går raka vägen på CORS-proxyer istället.
+        const sources = [
+            'https://api.allorigins.win/raw?url=' + encodeURIComponent(api),
+            'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(api),
             'https://corsproxy.io/?url=' + encodeURIComponent(api),
-            'https://api.allorigins.win/raw?url=' + encodeURIComponent(api) ];
+            api // sista chansen, ifall CORS-policyn skulle ändras i framtiden
+        ];
+        const fetchWithTimeout = (url, ms) => {
+            const ctrl = new AbortController();
+            const t = setTimeout(()=>ctrl.abort(), ms);
+            return fetch(url, { headers:{ 'Accept':'application/json' }, signal: ctrl.signal }).finally(()=>clearTimeout(t));
+        };
+        let lastErr = null;
         for(const u of sources){
             try {
-                const r = await fetch(u, { headers:{ 'Accept':'application/json' } });
-                if(!r.ok) continue;
-                const data = await r.json();
+                const r = await fetchWithTimeout(u, 6000);
+                if(!r.ok) { lastErr = new Error('HTTP ' + r.status); continue; }
+                const text = await r.text();
+                const data = JSON.parse(text);
                 if(Array.isArray(data)){ try{ localStorage.setItem(lunchCacheKey(id,dateStr), JSON.stringify(data)); }catch(e){} return data; }
-            } catch(e){ /* prova nästa källa */ }
+                lastErr = new Error('Oväntat svarsformat');
+            } catch(e){ lastErr = e; /* prova nästa källa */ }
         }
         // Sista utväg: visa senast sparade (om vi hämtat denna dag tidigare)
         try { const c = localStorage.getItem(lunchCacheKey(id,dateStr)); if(c) return JSON.parse(c); } catch(e){}
+        console.warn('Lunch: kunde inte hämta menyn', lastErr);
         throw new Error('Kunde inte hämta menyn');
     }
 
