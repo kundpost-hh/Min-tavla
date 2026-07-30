@@ -2148,6 +2148,13 @@
     .cal-day.cal-hasnote:hover { background:#ffeeb0; }
     .cal-note-dot { position:absolute; top:4px; right:4px; width:7px; height:7px; border-radius:50%; background:#ff9500; box-shadow:0 0 0 2px #fff; }
     .cal-day.cal-today .cal-note-dot { box-shadow:0 0 0 2px #007aff; }
+    .cal-note-dot.cal-note-dot-blink { background:#ff3b30; animation:calNoteBlink 1.1s ease-in-out infinite; }
+    .cal-day.cal-today .cal-note-dot.cal-note-dot-blink { box-shadow:0 0 0 2px #007aff; }
+    @keyframes calNoteBlink {
+        0%   { transform:scale(1);    opacity:1;   box-shadow:0 0 0 0 rgba(255,59,48,.7); }
+        60%  { transform:scale(1.35); opacity:.55; box-shadow:0 0 0 5px rgba(255,59,48,0); }
+        100% { transform:scale(1);    opacity:1;   box-shadow:0 0 0 0 rgba(255,59,48,0); }
+    }
     .cal-popup-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:99999999; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; padding:4vh 12px; box-sizing:border-box; }
     .cal-popup { background:#fff; border-radius:16px; padding:18px 20px 16px; width:min(380px,92vw); box-shadow:0 12px 40px rgba(0,0,0,.3); margin:auto; }
     .cal-popup-title { font-size:15px; font-weight:800; color:#1d1d1f; margin-bottom:10px; text-align:center; }
@@ -2382,6 +2389,10 @@
     .multi-a { color:#007aff; min-width:46px; text-align:center; }
     .multi-a.hidden-ans { color:#b57400; background:#ffe9c2; border-radius:6px; }
     .multi-a.revealed { color:#1f7a37; background:#d9f2df; border-radius:6px; }
+    .tempo-timer { text-align:center; font-size:26px; font-weight:900; color:#007aff; margin-bottom:10px; }
+    .tempo-timer.tempo-timer-lag { color:#ff3b30; }
+    .tempo-svarrad { display:flex; gap:8px; margin-bottom:10px; }
+    .tempo-score { text-align:center; font-size:14px; font-weight:700; color:#333; margin-top:10px; line-height:1.5; }
 
     /* ---- HUNDRARUTA ---- */
     .hundra-ctrl { display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
@@ -2397,6 +2408,11 @@
     .hundra-cell.m2 { background:#5ac8fa; color:#fff; }
     .hundra-cell.m3 { background:#ff2d55; color:#fff; }
     .hundra-cell.gomd { background:#ffe9c2; color:#b57400; }
+    .hundra-cell.gissa-highlight { background:#af52de; color:#fff; }
+    .hundra-cell.hoppa-highlight { background:#c9e8ff; color:#0a5bd3; }
+    .hundra-cell.hoppa-current { background:#007aff; color:#fff; transform:scale(1.12); box-shadow:0 2px 8px rgba(0,122,255,.5); }
+    .gissa-facit { text-align:center; font-size:13px; font-weight:800; color:#af52de; margin-top:10px; min-height:18px; }
+    .hoppa-sekvens { text-align:center; font-size:13px; font-weight:700; color:#555; margin-top:10px; line-height:1.6; word-break:break-word; }
 
     /* ---- RÄKNEUTMANING ---- */
     .rakna-ctrl { display:flex; gap:6px; margin-bottom:10px; }
@@ -2430,7 +2446,7 @@
     .su-fraga-rad { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
     .su-fraga { font-size:15px; font-weight:700; color:#333; flex:1; min-width:0; }
     .su-rad.su-klurig .su-fraga { font-size:14px; }
-    .su-svar { min-width:74px; text-align:center; padding:5px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; font-weight:800; font-size:13.5px; cursor:pointer; user-select:none; flex-shrink:0; }
+    .su-svar { min-width:74px; max-width:45%; text-align:center; padding:5px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; font-weight:800; font-size:13.5px; cursor:pointer; user-select:none; flex-shrink:0; word-break:break-word; line-height:1.4; }
     .su-svar:hover { background:#ffd98f; }
     .su-svar.revealed { background:#d9f2df; color:#1f7a37; cursor:default; }
 
@@ -2520,6 +2536,8 @@
     .sam-knapp:hover { background:#2fb350; }
     .sam-knapp:active { transform:scale(.98); }
     .sam-raknare { text-align:center; font-size:12px; color:#8a9aa5; margin-top:8px; }
+    .sam-fraga-ruta.kalla-ai, .exit-atk-fraga-box.kalla-ai { background:linear-gradient(135deg,#f3f0ff,#eef4ff) !important; border:1px solid #d8cffa !important; }
+    .sam-kalla-info { text-align:center; font-size:11.5px; font-weight:700; color:#7048e8; margin:-6px 0 10px; min-height:15px; }
 
     /* ---- PRATA ---- */
     .prata-typ { display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:800; color:#7a4fbf; background:#f2ecfb; border-radius:999px; padding:7px 14px; margin-bottom:14px; }
@@ -8169,20 +8187,28 @@
         ];
         body.innerHTML = `<div class='sam-topp'>✍️ Skrivstart</div>`
             + `<div class='hover-menu tal-ctrl'><select class='editor-select skriv-tid'><option value='0' selected>⏱ Ingen timer</option><option value='300'>⏱ 5 minuter</option><option value='600'>⏱ 10 minuter</option><option value='900'>⏱ 15 minuter</option><option value='1200'>⏱ 20 minuter</option></select></div>`
+            + `<div class='sam-kalla-info'></div>`
             + `<div class='sam-fraga-ruta'><span class='sam-placeholder'>Tryck på 🎲 för en ny skrivstart</span></div>`
             + `<div class='tal-timer-wrap' style='display:none;'><div class='tal-timer-bar-bg'><div class='tal-timer-bar'></div></div><div class='tal-timer-txt'></div></div>`
             + `<button class='sam-knapp'>🎲 Ny skrivstart</button>`
-            + `<div class='hover-menu kw-btnrow' style='margin-top:8px;'><button type='button' class='kw-btn kw-btn-ai skriv-ai-btn'>✨ Skapa fler med AI</button></div>`
+            + `<div class='hover-menu kw-btnrow' style='margin-top:8px;'><button type='button' class='kw-btn kw-btn-ai skriv-ai-btn'>✨ Skapa nya med AI</button></div>`
+            + `<div class='hover-menu kw-btnrow' style='margin-top:6px;'><button type='button' class='kw-btn kw-btn-ghost skriv-tillbaka-btn' style='display:none;'>↩ Tillbaka till standardfrågorna</button></div>`
+            + `<div class='hover-menu sam-ai-hint' style='font-size:11px;color:#8a8a92;text-align:center;margin-top:4px;'>AI-skrivstarterna ersätter standardfrågorna helt och gäller bara den här gången.</div>`
             + `<div class='sam-raknare'></div>`;
         const fragaRuta=body.querySelector('.sam-fraga-ruta'), raknare=body.querySelector('.sam-raknare'), tidSel=body.querySelector('.skriv-tid'), timerWrap=body.querySelector('.tal-timer-wrap'), barEl=body.querySelector('.tal-timer-bar'), txtEl=body.querySelector('.tal-timer-txt');
+        const kallaInfoEl=body.querySelector('.sam-kalla-info'), tillbakaBtn=body.querySelector('.skriv-tillbaka-btn');
         let aktuellFraga='', tickId=null, deadline=0, total=600000;
+        // OBS: egnaFragor (AI-skapade skrivstarter) lever bara i minnet så länge widgeten är öppen.
+        // De sparas medvetet INTE till brädans tillstånd, så de försvinner när widgeten stängs
+        // eller sidan laddas om. fragKalla styr om 🎲 slumpar bland standardfrågorna ELLER de
+        // AI-skapade - de blandas ALDRIG ihop, det är alltid det ena eller det andra.
         let egnaFragor=[];
+        let fragKalla='standard'; // 'standard' | 'ai'
         if(config && config.data){
             if(config.data.tid) tidSel.value=config.data.tid;
-            if(Array.isArray(config.data.egna)) egnaFragor=config.data.egna.slice(0,80);
             if(config.data.fraga){ aktuellFraga=config.data.fraga; visaFraga(aktuellFraga); }
         }
-        function syncData(){ widget.dataset.skrivFraga = aktuellFraga; widget.dataset.skrivTid = tidSel.value; widget.dataset.skrivEgna = JSON.stringify(egnaFragor); }
+        function syncData(){ widget.dataset.skrivFraga = aktuellFraga; widget.dataset.skrivTid = tidSel.value; }
         function visaFraga(f){ fragaRuta.innerHTML = `<span class='sam-fraga-txt'>${f}</span>`; }
         function stoppaTimer(){ if(tickId){ clearInterval(tickId); tickId=null; } }
         function fmtTid(ms){ const s=Math.max(0,Math.ceil(ms/1000)); const m=Math.floor(s/60), r=s%60; return m+':'+String(r).padStart(2,'0'); }
@@ -8205,16 +8231,25 @@
             uppdatera(); tickId=setInterval(uppdatera, 200);
         }
         function skrivBuzz(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; if(!window._remAC) window._remAC=new AC(); const ctx=window._remAC; if(ctx.state==='suspended') ctx.resume().catch(()=>{}); [0,0.18,0.36].forEach(d=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=660; const t=ctx.currentTime+d; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.16,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.15); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.16); }); }catch(e){} }
+        function updateKallaUI(){
+            fragaRuta.classList.toggle('kalla-ai', fragKalla==='ai');
+            tillbakaBtn.style.display = fragKalla==='ai' ? 'block' : 'none';
+            kallaInfoEl.textContent = fragKalla==='ai' ? '✨ Visar AI-skapade skrivstarter (gäller bara nu)' : '';
+        }
         function slumpaFraga(){
-            const pool = FRAGOR.concat(egnaFragor);
+            const pool = fragKalla==='ai' ? egnaFragor : FRAGOR;
             let f; do { f=pool[Math.floor(Math.random()*pool.length)]; } while(pool.length>1 && f===aktuellFraga);
             aktuellFraga=f; visaFraga(f); syncData(); saveBoardState();
-            raknare.textContent = pool.length + ' skrivstarter att välja mellan' + (egnaFragor.length ? ' (varav ' + egnaFragor.length + ' egna/AI-skapade)' : '');
+            raknare.textContent = fragKalla==='ai'
+                ? egnaFragor.length + ' AI-skapade skrivstarter att välja mellan'
+                : FRAGOR.length + ' skrivstarter att välja mellan';
+            updateKallaUI();
             startaTimer();
         }
         body.querySelector('.sam-knapp').onclick=slumpaFraga;
         tidSel.onchange=()=>{ syncData(); saveBoardState(); if(aktuellFraga) startaTimer(); };
-        raknare.textContent = FRAGOR.concat(egnaFragor).length + ' skrivstarter att välja mellan' + (egnaFragor.length ? ' (varav ' + egnaFragor.length + ' egna/AI-skapade)' : '');
+        raknare.textContent = FRAGOR.length + ' skrivstarter att välja mellan';
+        updateKallaUI();
         const skrivObs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ stoppaTimer(); skrivObs.disconnect(); } });
         const skrivCc=document.getElementById('canvas-container-v6'); if(skrivCc) skrivObs.observe(skrivCc,{childList:true,subtree:true});
 
@@ -8255,8 +8290,8 @@
         }
         function leggTillSkrivstarter(list, status, close){
             if(!list || !list.length){ if(status) status.textContent='⚠️ Hittade inga skrivstarter i svaret.'; return false; }
-            list.slice(0,30).forEach(p=>{ if(!egnaFragor.includes(p)) egnaFragor.push(p); });
-            if(egnaFragor.length>80) egnaFragor = egnaFragor.slice(egnaFragor.length-80);
+            egnaFragor = list.slice(0,30); // Ersätter ett ev. tidigare AI-set helt - blandas aldrig med standardfrågorna
+            fragKalla = 'ai';
             if(close) close();
             slumpaFraga(); saveBoardState();
             return true;
@@ -8265,7 +8300,7 @@
             const ov=document.createElement('div'); ov.className='cal-popup-overlay';
             const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
             const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
-            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa fler skrivstarter med AI'; box.appendChild(title);
+            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa nya skrivstarter med AI'; box.appendChild(title);
             const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv temat, t.ex.:\nSkapa 8 skrivstarter om rymden för åk 3.'; box.appendChild(ta);
             const status=document.createElement('div'); status.className='kw-ai-status';
 
@@ -8278,10 +8313,10 @@
                 catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
-            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – skrivstarterna läggs till automatiskt...'; box.appendChild(pasteTa);
+            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – de nya skrivstarterna ersätter automatiskt de nuvarande...'; box.appendChild(pasteTa);
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseSkrivstartList(pasteTa.value); if(list.length>=1){ leggTillSkrivstarter(list, status, close); } },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
-            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Lägg till skrivstarterna';
+            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd skrivstarterna';
             makePasteBtn.onclick=()=>{ const list=parseSkrivstartList(pasteTa.value); if(list.length<1){ status.textContent='⚠️ Hittade inga skrivstarter i svaret.'; return; } leggTillSkrivstarter(list, status, close); };
             row1b.appendChild(makePasteBtn); box.appendChild(row1b);
 
@@ -8311,6 +8346,7 @@
             setTimeout(()=>ta.focus(),60);
         }
         body.querySelector('.skriv-ai-btn').onclick = openSkrivstartAiDialog;
+        tillbakaBtn.onclick = ()=>{ fragKalla='standard'; slumpaFraga(); };
     }
 
     // ---- MENINGSBYGGNAD ----
@@ -10829,16 +10865,56 @@
     // dolda och avslöjas ett och ett med klick – gröna när de visats.
     function createMultiplicationTable(config){
         if(config===undefined) config=null;
-        const body = createWidget('MULTIPLIKATION', 340, 'multi-widget', config);
+        const body = createWidget('MULTIPLIKATION', 340, 'multi-widget mathtool-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu multi-ctrl'><select class='editor-select multi-sel'></select><button class='btn btn-secondary multi-mode'>Öva-läge</button></div><div class='multi-area'></div>`;
+        body.innerHTML = `<div class='hover-menu mathtool-tabs'><button type='button' class='btn mathtool-tab-btn' data-tab='tabell'>🔢 Tabell</button><button type='button' class='btn mathtool-tab-btn' data-tab='tempo'>⏱️ Tempo</button><button type='button' class='btn mathtool-tab-btn' data-tab='luckor'>🧩 Luckor</button></div>
+            <div class='mathtool-pane multi-pane-tabell'>
+                <div class='hover-menu multi-ctrl'><select class='editor-select multi-sel'></select><button class='btn btn-secondary multi-mode'>Öva-läge</button></div>
+                <div class='multi-area'></div>
+            </div>
+            <div class='mathtool-pane multi-pane-tempo' style='display:none;'>
+                <div class='hover-menu rakna-ctrl'><select class='editor-select tempo-sel'></select></div>
+                <div class='tempo-timer'>60 sek</div>
+                <div class='tempo-task rakna-task' style='margin-bottom:10px;'></div>
+                <div class='hover-menu tempo-svarrad' style='display:none;'>
+                    <button class='btn btn-danger tempo-fel' style='flex:1;'>✗ Fel</button>
+                    <button class='btn btn-primary tempo-ratt' style='flex:1;'>✓ Rätt</button>
+                </div>
+                <button class='btn btn-primary tempo-start' style='width:100%;'>▶️ Starta (60 sek)</button>
+                <div class='tempo-score'></div>
+            </div>
+            <div class='mathtool-pane multi-pane-luckor' style='display:none;'>
+                <div class='hover-menu rakna-ctrl'><select class='editor-select luckor-sel'></select></div>
+                <div class='luckor-task rakna-task' style='margin-bottom:10px;'></div>
+                <div class='hover-menu'><button class='btn btn-primary luckor-next'>Ny uppgift ▶</button></div>
+                <div class='luckor-count rakna-count' style='margin-top:10px;'></div>
+            </div>`;
+        const tabBtns=[...body.querySelectorAll('.mathtool-tab-btn')];
+        const paneTabell=body.querySelector('.multi-pane-tabell'), paneTempo=body.querySelector('.multi-pane-tempo'), paneLuckor=body.querySelector('.multi-pane-luckor');
         const sel=body.querySelector('.multi-sel'), modeBtn=body.querySelector('.multi-mode'), area=body.querySelector('.multi-area');
-        for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.value=String(i); o.textContent=i+':ans tabell'; sel.appendChild(o); }
+        const tempoSel=body.querySelector('.tempo-sel'), tempoTimerEl=body.querySelector('.tempo-timer'), tempoTaskEl=body.querySelector('.tempo-task'), tempoSvarrad=body.querySelector('.tempo-svarrad'), tempoFelBtn=body.querySelector('.tempo-fel'), tempoRattBtn=body.querySelector('.tempo-ratt'), tempoStartBtn=body.querySelector('.tempo-start'), tempoScoreEl=body.querySelector('.tempo-score');
+        const luckorSel=body.querySelector('.luckor-sel'), luckorTaskEl=body.querySelector('.luckor-task'), luckorNextBtn=body.querySelector('.luckor-next'), luckorCountEl=body.querySelector('.luckor-count');
+        [sel, tempoSel, luckorSel].forEach(s=>{
+            for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.value=String(i); o.textContent=i+':ans tabell'; s.appendChild(o); }
+        });
         const oAll=document.createElement('option'); oAll.value='alla'; oAll.textContent='Hela tabellen (1–12)'; sel.appendChild(oAll);
+        const oAllTempo=document.createElement('option'); oAllTempo.value='alla'; oAllTempo.textContent='Blandat (1–12)'; tempoSel.insertBefore(oAllTempo, tempoSel.firstChild);
+        const oAllLuckor=document.createElement('option'); oAllLuckor.value='alla'; oAllLuckor.textContent='Blandat (1–12)'; luckorSel.insertBefore(oAllLuckor, luckorSel.firstChild);
         let practice = false;
+        let activeMultiTab = (config && config.data && config.data.tab) ? config.data.tab : 'tabell';
         if(config && config.data && config.data.table){ sel.value=config.data.table; practice = !!config.data.practice; }
         else sel.value='alla';
-        const syncData=()=>{ widget.dataset.multi = JSON.stringify({ table: sel.value, practice: practice }); };
+        if(config && config.data && config.data.tempoSel) tempoSel.value=config.data.tempoSel;
+        if(config && config.data && config.data.luckorSel) luckorSel.value=config.data.luckorSel;
+        const syncData=()=>{ widget.dataset.multi = JSON.stringify({ table: sel.value, practice: practice, tab: activeMultiTab, tempoSel: tempoSel.value, luckorSel: luckorSel.value }); };
+        function renderMultiTabs(){
+            tabBtns.forEach(b=>{ const on=b.dataset.tab===activeMultiTab; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); });
+            paneTabell.style.display = activeMultiTab==='tabell' ? 'block' : 'none';
+            paneTempo.style.display = activeMultiTab==='tempo' ? 'block' : 'none';
+            paneLuckor.style.display = activeMultiTab==='luckor' ? 'block' : 'none';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ if(b.dataset.tab!=='tempo' && tempoRunning) tempoStop(); activeMultiTab=b.dataset.tab; renderMultiTabs(); syncData(); saveBoardState(); });
+
         function cell(txt, cls){ const d=document.createElement('div'); d.className='multi-cell '+cls; d.textContent=txt; return d; }
         const render=()=>{
             syncData();
@@ -10875,22 +10951,159 @@
         };
         sel.onchange=()=>{ render(); saveBoardState(); };
         modeBtn.onclick=()=>{ practice=!practice; render(); saveBoardState(); };
-        render();
+
+        // ---- TEMPO: 60 sekunders utmaning, elever/klassen självrättar Rätt/Fel ----
+        const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
+        let tempoRunning=false, tempoTime=60, tempoTimer=null, tempoRatt=0, tempoTotal=0, tempoCurrent=null;
+        function tempoGenFraga(){
+            const n = tempoSel.value==='alla' ? ri(1,12) : parseInt(tempoSel.value);
+            const m = ri(1,12);
+            tempoCurrent = { fraga: n+' × '+m+' =', svar: n*m };
+            tempoTaskEl.innerHTML='';
+            const q=document.createElement('span'); q.textContent=tempoCurrent.fraga+'  ';
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
+            a.onclick=()=>{ a.textContent=tempoCurrent.svar; a.classList.add('revealed'); a.onclick=null; tempoSvarrad.style.display='flex'; };
+            tempoTaskEl.appendChild(q); tempoTaskEl.appendChild(a);
+            tempoSvarrad.style.display='none';
+        }
+        function tempoUppdateraTimer(){
+            tempoTimerEl.textContent = tempoTime+' sek';
+            tempoTimerEl.classList.toggle('tempo-timer-lag', tempoTime<=10);
+        }
+        function tempoStop(){
+            tempoRunning=false; clearInterval(tempoTimer); tempoTimer=null;
+            tempoSvarrad.style.display='none';
+            tempoStartBtn.style.display='block'; tempoStartBtn.textContent='▶️ Kör igen (60 sek)';
+            tempoScoreEl.innerHTML = tempoTotal>0 ? `🏁 Klart! Du fick <b>${tempoRatt}</b> rätt av <b>${tempoTotal}</b> frågor på 60 sekunder.` : '';
+            tempoTaskEl.innerHTML='';
+        }
+        function tempoStart(){
+            tempoRunning=true; tempoTime=60; tempoRatt=0; tempoTotal=0;
+            tempoUppdateraTimer(); tempoScoreEl.textContent=''; tempoStartBtn.style.display='none';
+            tempoGenFraga();
+            tempoTimer=setInterval(()=>{
+                tempoTime--; tempoUppdateraTimer();
+                if(tempoTime<=0) tempoStop();
+            },1000);
+        }
+        tempoStartBtn.onclick=()=> tempoStart();
+        tempoRattBtn.onclick=()=>{ if(!tempoRunning) return; tempoRatt++; tempoTotal++; tempoGenFraga(); };
+        tempoFelBtn.onclick=()=>{ if(!tempoRunning) return; tempoTotal++; tempoGenFraga(); };
+        tempoSel.onchange=()=>{ syncData(); saveBoardState(); };
+
+        // ---- LUCKOR: hitta den saknade faktorn, t.ex. "? × 6 = 42" eller "7 × ? = 56" ----
+        let luckorAntal=0;
+        function luckorGen(){
+            const n = luckorSel.value==='alla' ? ri(1,12) : parseInt(luckorSel.value);
+            const m = ri(1,12);
+            const produkt = n*m;
+            const doljForsta = Math.random()<0.5;
+            const fraga = doljForsta ? ('? × '+m+' = '+produkt) : (n+' × ? = '+produkt);
+            const svar = doljForsta ? n : m;
+            return { fraga: fraga+'  ', svar: String(svar) };
+        }
+        function luckorNyUppgift(){
+            const u=luckorGen(); luckorAntal++;
+            luckorTaskEl.innerHTML='';
+            const q=document.createElement('span'); q.textContent=u.fraga;
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
+            a.onclick=()=>{ a.textContent=u.svar; a.classList.add('revealed'); a.onclick=null; };
+            luckorTaskEl.appendChild(q); luckorTaskEl.appendChild(a);
+            luckorCountEl.textContent='Uppgift '+luckorAntal;
+        }
+        luckorSel.onchange=()=>{ syncData(); luckorNyUppgift(); saveBoardState(); };
+        luckorNextBtn.onclick=()=>{ luckorNyUppgift(); };
+
+        renderMultiTabs();
+        render(); luckorNyUppgift(); tempoUppdateraTimer();
     }
 
     // ---- HUNDRARUTA (1–100) ----
     // Färglägg tal för att visa mönster (5-skutt, jämna/udda...) med fyra färger,
     // eller göm slumpvisa tal och låt klassen lista ut vilka som saknas.
+    const HUNDRA_MONSTER_LISTA = [
+        {key:'udda', namn:'Udda tal'},
+        {key:'jamna', namn:'Jämna tal'},
+        {key:'hopp3', namn:'3-hopp (multiplar av 3)'},
+        {key:'hopp5', namn:'5-hopp (multiplar av 5)'},
+        {key:'hopp10', namn:'10-hopp (multiplar av 10)'},
+        {key:'mult2', namn:'Multiplar av 2'},
+        {key:'mult4', namn:'Multiplar av 4'},
+        {key:'mult6', namn:'Multiplar av 6'},
+        {key:'mult7', namn:'Multiplar av 7'},
+        {key:'mult8', namn:'Multiplar av 8'},
+        {key:'mult9', namn:'Multiplar av 9'}
+    ];
+    function hundraMatcharMonster(n, m){
+        switch(m){
+            case 'udda':   return n % 2 !== 0;
+            case 'jamna':  return n % 2 === 0;
+            case 'hopp3':  return n % 3 === 0;
+            case 'hopp5':  return n % 5 === 0;
+            case 'hopp10': return n % 10 === 0;
+            case 'mult9':  return n % 9 === 0;
+            case 'mult8':  return n % 8 === 0;
+            case 'mult7':  return n % 7 === 0;
+            case 'mult6':  return n % 6 === 0;
+            case 'mult5':  return n % 5 === 0;
+            case 'mult4':  return n % 4 === 0;
+            case 'mult3':  return n % 3 === 0;
+            case 'mult2':  return n % 2 === 0;
+            default: return false;
+        }
+    }
     function createHundredChart(config){
         if(config===undefined) config=null;
-        const body = createWidget('HUNDRARUTA', 340, 'hundra-widget', config);
+        const body = createWidget('HUNDRARUTA', 340, 'hundra-widget mathtool-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu hundra-ctrl'><div class='hundra-colors'></div><select class='editor-select hundra-monster'><option value=''>Markera mönster…</option><option value='udda'>Udda tal</option><option value='jamna'>Jämna tal</option><option value='hopp3'>3-hopp</option><option value='hopp5'>5-hopp</option><option value='hopp10'>10-hopp</option><option value='mult9'>Multiplar av 9</option><option value='mult8'>Multiplar av 8</option><option value='mult7'>Multiplar av 7</option><option value='mult6'>Multiplar av 6</option><option value='mult5'>Multiplar av 5</option><option value='mult4'>Multiplar av 4</option><option value='mult3'>Multiplar av 3</option><option value='mult2'>Multiplar av 2</option></select><button class='btn btn-secondary hundra-clear'>Rensa</button></div><div class='hundra-grid'></div>`;
-        const colorsEl=body.querySelector('.hundra-colors'), grid=body.querySelector('.hundra-grid');
+        body.innerHTML = `<div class='hover-menu mathtool-tabs'><button type='button' class='btn mathtool-tab-btn' data-tab='mala'>🎨 Måla</button><button type='button' class='btn mathtool-tab-btn' data-tab='gissa'>🎯 Gissa mönstret</button><button type='button' class='btn mathtool-tab-btn' data-tab='hoppa'>🔁 Hoppa-tur</button></div>
+            <div class='mathtool-pane hundra-pane-mala'>
+                <div class='hover-menu hundra-ctrl'><div class='hundra-colors'></div><select class='editor-select hundra-monster'><option value=''>Markera mönster…</option>${HUNDRA_MONSTER_LISTA.map(m=>`<option value='${m.key}'>${m.namn}</option>`).join('')}</select><button class='btn btn-secondary hundra-clear'>Rensa</button></div>
+                <div class='hundra-grid'></div>
+            </div>
+            <div class='mathtool-pane hundra-pane-gissa' style='display:none;'>
+                <div class='hover-menu' style='margin-bottom:8px;'><button class='btn btn-primary gissa-nytt' style='width:100%;'>🎲 Nytt mönster</button></div>
+                <div class='hundra-grid gissa-grid'></div>
+                <div class='hover-menu' style='margin-top:10px;'><button class='btn btn-secondary gissa-visa' style='width:100%;'>👁️ Visa mönstret</button></div>
+                <div class='gissa-facit'></div>
+            </div>
+            <div class='mathtool-pane hundra-pane-hoppa' style='display:none;'>
+                <div class='hover-menu' style='margin-bottom:8px;'>
+                    <input type='number' class='hoppa-start' value='2' min='1' max='100' style='width:70px;text-align:center;'>
+                    <select class='editor-select hoppa-steg'><option value='2'>Hoppa i 2</option><option value='3'>Hoppa i 3</option><option value='4'>Hoppa i 4</option><option value='5'>Hoppa i 5</option><option value='6'>Hoppa i 6</option><option value='10'>Hoppa i 10</option></select>
+                </div>
+                <div class='hundra-grid hoppa-grid'></div>
+                <div class='hoppa-sekvens'></div>
+                <div class='hover-menu' style='margin-top:10px;'><button class='btn btn-secondary hoppa-om' style='flex:1;'>↩️ Börja om</button><button class='btn btn-primary hoppa-nasta' style='flex:1;'>▶️ Nästa hopp</button></div>
+            </div>`;
+        const tabBtns=[...body.querySelectorAll('.mathtool-tab-btn')];
+        const paneMala=body.querySelector('.hundra-pane-mala'), paneGissa=body.querySelector('.hundra-pane-gissa'), paneHoppa=body.querySelector('.hundra-pane-hoppa');
+        const colorsEl=body.querySelector('.hundra-colors'), grid=body.querySelector('.hundra-pane-mala .hundra-grid');
+        const gissaGridEl=body.querySelector('.gissa-grid'), gissaNyttBtn=body.querySelector('.gissa-nytt'), gissaVisaBtn=body.querySelector('.gissa-visa'), gissaFacitEl=body.querySelector('.gissa-facit');
+        const hoppaGridEl=body.querySelector('.hoppa-grid'), hoppaStartIn=body.querySelector('.hoppa-start'), hoppaStegSel=body.querySelector('.hoppa-steg'), hoppaSekvensEl=body.querySelector('.hoppa-sekvens'), hoppaOmBtn=body.querySelector('.hoppa-om'), hoppaNastaBtn=body.querySelector('.hoppa-nasta');
         const COLORS=['#34c759','#ff9500','#5ac8fa','#ff2d55'];
         let marks={}, hidden=new Set(), cur=0; // cur = vald färg (0-3) eller 'sudd'
-        if(config && config.data){ marks = config.data.marks || {}; hidden = new Set(config.data.hidden || []); }
-        const syncData=()=>{ widget.dataset.hundra = JSON.stringify({ marks: marks, hidden: [...hidden] }); };
+        let activeHundraTab='mala', gissaMonsterIdx=0, gissaAvslojad=false, hoppaVisade=[];
+        if(config && config.data){
+            marks = config.data.marks || {}; hidden = new Set(config.data.hidden || []);
+            if(config.data.tab) activeHundraTab = config.data.tab;
+            if(typeof config.data.gissaMonsterIdx==='number') gissaMonsterIdx = config.data.gissaMonsterIdx;
+            if(config.data.gissaAvslojad) gissaAvslojad = true;
+            if(Array.isArray(config.data.hoppaVisade)) hoppaVisade = config.data.hoppaVisade;
+            if(config.data.hoppaStart) hoppaStartIn.value = config.data.hoppaStart;
+            if(config.data.hoppaSteg) hoppaStegSel.value = config.data.hoppaSteg;
+        } else {
+            gissaMonsterIdx = Math.floor(Math.random()*HUNDRA_MONSTER_LISTA.length);
+        }
+        const syncData=()=>{ widget.dataset.hundra = JSON.stringify({ marks: marks, hidden: [...hidden], tab: activeHundraTab, gissaMonsterIdx: gissaMonsterIdx, gissaAvslojad: gissaAvslojad, hoppaVisade: hoppaVisade, hoppaStart: hoppaStartIn.value, hoppaSteg: hoppaStegSel.value }); };
+        function renderHundraTabs(){
+            tabBtns.forEach(b=>{ const on=b.dataset.tab===activeHundraTab; b.classList.toggle('btn-primary',on); b.classList.toggle('btn-secondary',!on); });
+            paneMala.style.display = activeHundraTab==='mala' ? 'block' : 'none';
+            paneGissa.style.display = activeHundraTab==='gissa' ? 'block' : 'none';
+            paneHoppa.style.display = activeHundraTab==='hoppa' ? 'block' : 'none';
+        }
+        tabBtns.forEach(b=> b.onclick = ()=>{ activeHundraTab=b.dataset.tab; renderHundraTabs(); syncData(); saveBoardState(); });
+
         const renderColors=()=>{
             colorsEl.innerHTML='';
             COLORS.forEach((c,i)=>{ const s=document.createElement('div'); s.className='hundra-swatch'+(cur===i?' sel':''); s.style.background=c; s.title='Måla med färg '+(i+1); s.onclick=()=>{ cur=i; renderColors(); }; colorsEl.appendChild(s); });
@@ -10912,37 +11125,74 @@
                 grid.appendChild(c);
             }
         };
-        // Markera alla tal som matchar valt mönster, med den färg som är vald i paletten.
         const monsterSel = body.querySelector('.hundra-monster');
-        function matcharMonster(n, m){
-            switch(m){
-                case 'udda':   return n % 2 !== 0;
-                case 'jamna':  return n % 2 === 0;
-                case 'hopp3':  return n % 3 === 0;
-                case 'hopp5':  return n % 5 === 0;
-                case 'hopp10': return n % 10 === 0;
-                case 'mult9':  return n % 9 === 0;
-                case 'mult8':  return n % 8 === 0;
-                case 'mult7':  return n % 7 === 0;
-                case 'mult6':  return n % 6 === 0;
-                case 'mult5':  return n % 5 === 0;
-                case 'mult4':  return n % 4 === 0;
-                case 'mult3':  return n % 3 === 0;
-                case 'mult2':  return n % 2 === 0;
-                default: return false;
-            }
-        }
         monsterSel.onchange=()=>{
             const m = monsterSel.value;
             if(!m){ return; }
-            // Använd vald färg; om suddet är valt, måla ändå med första färgen så mönstret syns.
             const farg = (cur==='sudd') ? 0 : cur;
-            for(let n=1;n<=100;n++){ if(matcharMonster(n, m)) marks[n]=farg; }
-            monsterSel.value=''; // återställ menyn så man kan välja samma igen
+            for(let n=1;n<=100;n++){ if(hundraMatcharMonster(n, m)) marks[n]=farg; }
+            monsterSel.value='';
             render(); saveBoardState();
         };
         body.querySelector('.hundra-clear').onclick=()=>{ marks={}; hidden.clear(); render(); saveBoardState(); };
+
+        // ---- GISSA MÖNSTRET: en uppsättning tal göms enligt ett hemligt mönster, klassen gissar vilka ----
+        function gissaRender(){
+            gissaGridEl.innerHTML='';
+            const monster = HUNDRA_MONSTER_LISTA[gissaMonsterIdx];
+            for(let n=1;n<=100;n++){
+                const c=document.createElement('div'); c.className='hundra-cell';
+                const matchar = hundraMatcharMonster(n, monster.key);
+                if(matchar && !gissaAvslojad){ c.classList.add('gomd'); c.textContent='?'; }
+                else { c.textContent=n; if(matchar) c.classList.add('gissa-highlight'); }
+                gissaGridEl.appendChild(c);
+            }
+            gissaFacitEl.textContent = gissaAvslojad ? ('Mönstret var: '+monster.namn) : '';
+            gissaVisaBtn.textContent = gissaAvslojad ? '🙈 Dölj mönstret igen' : '👁️ Visa mönstret';
+            syncData();
+        }
+        gissaNyttBtn.onclick=()=>{
+            let ny; do { ny = Math.floor(Math.random()*HUNDRA_MONSTER_LISTA.length); } while(HUNDRA_MONSTER_LISTA.length>1 && ny===gissaMonsterIdx);
+            gissaMonsterIdx=ny; gissaAvslojad=false; gissaRender(); saveBoardState();
+        };
+        gissaVisaBtn.onclick=()=>{ gissaAvslojad=!gissaAvslojad; gissaRender(); saveBoardState(); };
+
+        // ---- HOPPA-TUR: stegvis, klickbar genomgång av en talföljd (hoppräkning) ----
+        function hoppaLista(){
+            const start=Math.max(1, Math.min(100, parseInt(hoppaStartIn.value)||2));
+            const steg=Math.max(1, parseInt(hoppaStegSel.value)||2);
+            const lista=[]; let v=start;
+            while(v<=100){ lista.push(v); v+=steg; }
+            return lista;
+        }
+        function hoppaRender(){
+            hoppaGridEl.innerHTML='';
+            const lista = hoppaLista();
+            const visadeSet = new Set(hoppaVisade);
+            const senaste = hoppaVisade.length ? hoppaVisade[hoppaVisade.length-1] : null;
+            for(let n=1;n<=100;n++){
+                const c=document.createElement('div'); c.className='hundra-cell';
+                c.textContent=n;
+                if(visadeSet.has(n)){ c.classList.add('hoppa-highlight'); if(n===senaste) c.classList.add('hoppa-current'); }
+                hoppaGridEl.appendChild(c);
+            }
+            hoppaSekvensEl.textContent = hoppaVisade.length ? hoppaVisade.join(' → ') : 'Tryck på "Nästa hopp" för att börja hoppräkna.';
+            hoppaNastaBtn.disabled = hoppaVisade.length >= lista.length;
+            syncData();
+        }
+        function hoppaOm(){ hoppaVisade=[]; hoppaRender(); }
+        hoppaOmBtn.onclick=()=>{ hoppaOm(); saveBoardState(); };
+        hoppaNastaBtn.onclick=()=>{
+            const lista = hoppaLista();
+            if(hoppaVisade.length < lista.length){ hoppaVisade = hoppaVisade.concat([lista[hoppaVisade.length]]); }
+            hoppaRender(); saveBoardState();
+        };
+        hoppaStartIn.onchange=()=>{ hoppaOm(); saveBoardState(); };
+        hoppaStegSel.onchange=()=>{ hoppaOm(); saveBoardState(); };
+
+        renderHundraTabs();
         renderColors(); render();
+        gissaRender(); hoppaRender();
     }
 
     // ---- POSITIONSSYSTEMET ----
@@ -11956,76 +12206,111 @@
         // widgetType och alla serialize/deserialize-kopplingar) lämnas orört, annars skulle redan
         // utplacerade Startuppgift-widgetar på lärares tavlor sluta gå att läsa in efter uppdateringen.
         const suHeaderSpan = widget.querySelector('.widget-header > span'); if(suHeaderSpan) suHeaderSpan.textContent = 'Startuppgift Matematik';
-        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är lite klurigare!</div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
-        const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista');
+        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är lite klurigare!</div><div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Åk 4</option><option value='ak5'>Åk 5</option><option value='ak6'>Åk 6</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
+        const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista'), nivaSelSU = body.querySelector('.su-niva');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
+        function gcdSU(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a||1; }
+        // Bakåtkompatibelt: äldre sparade widgetar har hela svaret som en ren array (utan nivåval).
+        // Nya sparningar lagras som {niva, uppgifter}. Båda format läses in korrekt här.
+        let initialUppgifter = null;
+        if(config && config.data){
+            if(Array.isArray(config.data) && config.data.length){ initialUppgifter = config.data; }
+            else if(config.data.uppgifter && Array.isArray(config.data.uppgifter)){
+                initialUppgifter = config.data.uppgifter;
+                if(config.data.niva) nivaSelSU.value = config.data.niva;
+            }
+        }
 
         const OMRADEN = {
             add_sub: {
                 namn:'Addition & subtraktion', emoji:'➕',
-                gen: function(){
+                gen: function(niva){
+                    const R = niva==='ak4' ? [10,100] : niva==='ak5' ? [50,500] : [100,2000];
                     const typ = Math.random()<0.5 ? 'add' : 'sub';
-                    if(typ==='add'){ const a=ri(10,300), b=ri(10,300); return { fraga:a+' + '+b+' =', svar:a+b }; }
-                    const stor=ri(50,500), liten=ri(10,stor-1); return { fraga:stor+' − '+liten+' =', svar:stor-liten };
+                    if(typ==='add'){ const a=ri(R[0],R[1]), b=ri(R[0],R[1]); return { fraga:a+' + '+b+' =', svar:a+b }; }
+                    const stor=ri(Math.round(R[0]*1.5),R[1]), liten=ri(R[0],stor-1); return { fraga:stor+' − '+liten+' =', svar:stor-liten };
                 }
             },
             mul_div: {
                 namn:'Multiplikation & division', emoji:'✖️',
-                gen: function(){
+                gen: function(niva){
+                    const R = niva==='ak4' ? [2,10] : niva==='ak5' ? [2,12] : [2,20];
                     const typ = Math.random()<0.5 ? 'mul' : 'div';
-                    const a=ri(2,12), b=ri(2,12);
+                    const a=ri(R[0],R[1]), b=ri(R[0],R[1]);
                     if(typ==='mul') return { fraga:a+' × '+b+' =', svar:a*b };
                     return { fraga:(a*b)+' ÷ '+b+' =', svar:a };
                 }
             },
             brak_tal: {
                 namn:'Bråk & tal', emoji:'🔢',
-                gen: function(){
+                gen: function(niva){
                     const val = ri(0,2);
-                    if(val===0){ const namnare=[2,3,4,5,10][ri(0,4)]; const multipel=ri(1,8)*namnare; return { fraga:'1/'+namnare+' av '+multipel+' =', svar:String(multipel/namnare) }; }
-                    if(val===1){ const tal=ri(11,989); const svar=Math.round(tal/10)*10; return { fraga:'Avrunda '+tal+' till närmaste tiotal:', svar:String(svar) }; }
-                    const tal=ri(1,200); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
+                    if(niva==='ak4'){
+                        if(val===0){ const namnare=[2,4,5,10][ri(0,3)]; const multipel=ri(1,8)*namnare; return { fraga:'1/'+namnare+' av '+multipel+' =', svar:String(multipel/namnare) }; }
+                        if(val===1){ const tal=ri(11,989); const svar=Math.round(tal/10)*10; return { fraga:'Avrunda '+tal+' till närmaste tiotal:', svar:String(svar) }; }
+                        const tal=ri(1,200); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
+                    }
+                    if(niva==='ak5'){
+                        if(val===0){ const namnare=[2,3,4,5,6,8,10][ri(0,6)]; const taljare=ri(1,namnare-1); const multipel=ri(2,9)*namnare; return { fraga:taljare+'/'+namnare+' av '+multipel+' =', svar:String(multipel*taljare/namnare) }; }
+                        if(val===1){ const tal=ri(101,9899); const svar=Math.round(tal/100)*100; return { fraga:'Avrunda '+tal+' till närmaste hundratal:', svar:String(svar) }; }
+                        const tal=ri(200,2000); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
+                    }
+                    if(val===0){ const p=[10,20,25,50,75][ri(0,4)]; const mult=100/gcdSU(100,p); const bas=ri(1,15)*mult; return { fraga:p+' % av '+bas+' =', svar:String(bas*p/100) }; }
+                    if(val===1){ const tal=ri(1001,98999); const svar=Math.round(tal/1000)*1000; return { fraga:'Avrunda '+tal+' till närmaste tusental:', svar:String(svar) }; }
+                    const tal=ri(2000,20000); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
                 }
             },
             geo_matt: {
                 namn:'Geometri, mätning & klockan', emoji:'📐',
-                gen: function(){
+                gen: function(niva){
                     const val = ri(0,2);
-                    if(val===0){ const l=ri(3,20), b=ri(3,20); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:(2*(l+b))+' cm' }; }
-                    if(val===1){ const h=ri(1,12), halv=Math.random()<0.5; const fraga = halv ? ('Vad är klockan en halvtimme efter '+h+':00?') : ('Vad är klockan en timme efter '+h+':00?'); const svarH = (h%12)+1; const svar = halv ? (h+':30') : (svarH+':00'); return { fraga:fraga, svar:svar }; }
-                    const l=ri(3,15), b=ri(3,15); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:(l*b)+' cm²' };
+                    if(niva==='ak4'){
+                        if(val===0){ const l=ri(3,20), b=ri(3,20); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:(2*(l+b))+' cm' }; }
+                        if(val===1){ const h=ri(1,12), halv=Math.random()<0.5; const fraga = halv ? ('Vad är klockan en halvtimme efter '+h+':00?') : ('Vad är klockan en timme efter '+h+':00?'); const svarH = (h%12)+1; const svar = halv ? (h+':30') : (svarH+':00'); return { fraga:fraga, svar:svar }; }
+                        const l=ri(3,15), b=ri(3,15); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:(l*b)+' cm²' };
+                    }
+                    if(niva==='ak5'){
+                        if(val===0){ const l=ri(10,40), b=ri(10,40); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:(l*b)+' cm²' }; }
+                        if(val===1){ const h=ri(1,12); const kvart=[15,30,45][ri(0,2)]; return { fraga:'Vad är klockan om vi lägger till '+kvart+' minuter till '+h+':00?', svar:h+':'+String(kvart).padStart(2,'0') }; }
+                        const bas=ri(6,30), hojd=ri(Math.ceil(4/2),Math.floor(20/2))*2; return { fraga:'En triangel har basen '+bas+' cm och höjden '+hojd+' cm. Vad är arean? (bas × höjd ÷ 2)', svar:(bas*hojd/2)+' cm²' };
+                    }
+                    if(val===0){ const l=ri(15,80), b=ri(15,80); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:(2*(l+b))+' cm' }; }
+                    if(val===1){ const l=ri(4,15), b=ri(4,15), h=ri(2,10); return { fraga:'En låda är '+l+' cm lång, '+b+' cm bred och '+h+' cm hög. Vad är volymen? (l × b × h)', svar:(l*b*h)+' cm³' }; }
+                    const bas=ri(8,40), hojd=ri(Math.ceil(6/2),Math.floor(30/2))*2; return { fraga:'En triangel har basen '+bas+' cm och höjden '+hojd+' cm. Vad är arean?', svar:(bas*hojd/2)+' cm²' };
                 }
             },
             klurig: {
                 namn:'Klurig utmaning', emoji:'🧩',
-                gen: function(){
+                gen: function(niva){
                     const val = ri(0,3);
-                    if(val===0){
-                        const pris=ri(5,40), antal=ri(2,6); const kostnad=pris*antal; const pengar=kostnad+ri(10,150);
-                        return { fraga:'Alex har '+pengar+' kr. Hen köper '+antal+' block som kostar '+pris+' kr styck. Hur mycket pengar har Alex kvar?', svar:(pengar-kostnad)+' kr' };
+                    if(niva==='ak4'){
+                        if(val===0){ const pris=ri(5,40), antal=ri(2,6); const kostnad=pris*antal; const pengar=kostnad+ri(10,150); return { fraga:'Alex har '+pengar+' kr. Hen köper '+antal+' block som kostar '+pris+' kr styck. Hur mycket pengar har Alex kvar?', svar:(pengar-kostnad)+' kr' }; }
+                        if(val===1){ const elever=ri(20,30), grupper=[2,3,4,5][ri(0,3)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever i klassen. De delas in i lika stora grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever i klassen. Läraren delar dem i grupper om '+grupper+' elever. Hur många elever blir över?'); return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' grupper' : rest+' elever' }; }
+                        if(val===2){ const start=ri(2000,2015), alder=ri(6,12); return { fraga:'Ebba föddes år '+start+'. Hur gammal är hon år '+(start+alder)+'?', svar:alder+' år' }; }
+                        const a=ri(15,60), b=ri(15,60), c=ri(5,30); return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:(a+b-c)+' frukter' };
                     }
-                    if(val===1){
-                        const elever=ri(20,30), grupper=[2,3,4,5][ri(0,3)]; const rest=elever%grupper; const perGrupp=Math.floor(elever/grupper);
-                        const fraga = rest===0 ? ('Det är '+elever+' elever i klassen. De delas in i lika stora grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever i klassen. Läraren delar dem i grupper om '+grupper+' elever. Hur många elever blir över?');
-                        return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' grupper' : rest+' elever' };
+                    if(niva==='ak5'){
+                        if(val===0){ const pris=ri(15,80), antal=ri(3,9); const kostnad=pris*antal; const pengar=kostnad+ri(50,400); return { fraga:'Jonas har '+pengar+' kr. Han köper '+antal+' böcker som kostar '+pris+' kr styck. Hur mycket pengar har han kvar?', svar:(pengar-kostnad)+' kr' }; }
+                        if(val===1){ const elever=ri(60,120), grupper=[4,5,6,7,8][ri(0,4)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever på skolan som ska åka buss. Varje buss rymmer '+grupper+' elever och alla bussar fylls helt. Hur många bussar behövs?') : ('Det är '+elever+' elever som ska delas i grupper om '+grupper+'. Hur många elever blir över efter de fulla grupperna?'); return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' bussar' : rest+' elever' }; }
+                        if(val===2){ const start=ri(1990,2015), alder=ri(10,25); return { fraga:'Filip föddes år '+start+'. Hur gammal är han år '+(start+alder)+'?', svar:alder+' år' }; }
+                        const a=ri(100,400), b=ri(100,400), c=ri(30,150); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+c+' pennor säljs. Hur många pennor finns kvar totalt?', svar:(a+b-c)+' pennor' };
                     }
-                    if(val===2){
-                        const start=ri(2000,2015), alder=ri(6,12);
-                        return { fraga:'Ebba föddes år '+start+'. Hur gammal är hon år '+(start+alder)+'?', svar:alder+' år' };
-                    }
-                    const a=ri(15,60), b=ri(15,60), c=ri(5,30);
-                    return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:(a+b-c)+' frukter' };
+                    if(val===0){ const pris=ri(50,300), antal=ri(4,12); const rabatt=[10,15,20,25][ri(0,3)]; const kostnadFore=pris*antal; const kostnadEfter=Math.round(kostnadFore*(100-rabatt)/100); return { fraga:'En klass köper '+antal+' biljetter á '+pris+' kr. De får '+rabatt+'% rabatt på hela summan. Vad kostar det totalt efter rabatt?', svar:kostnadEfter+' kr' }; }
+                    if(val===1){ const elever=ri(150,400), grupper=[6,7,8,9,12][ri(0,4)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever på skolan. De delas jämnt i grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever som delas i grupper om '+grupper+'. Hur många elever blir över?'); return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' grupper' : rest+' elever' }; }
+                    if(val===2){ const start=ri(1980,2010), alder=ri(15,40); return { fraga:'Nora föddes år '+start+'. Hur gammal blir hon år '+(start+alder)+'?', svar:alder+' år' }; }
+                    const a=ri(500,2000), b=ri(500,2000), pct=[10,20,25,50][ri(0,3)]; const salda=Math.round((a+b)*pct/100); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+pct+'% av alla pennor säljs. Hur många pennor säljs?', svar:salda+' pennor' };
                 }
             }
         };
         const GRUNDOMRADEN = ['add_sub','mul_div','brak_tal','geo_matt'];
 
         function dagensUppgifter(){
+            const niva = nivaSelSU.value;
             const uppgifter = blandaSU(GRUNDOMRADEN).map(key=>{
-                const u = OMRADEN[key].gen();
+                const u = OMRADEN[key].gen(niva);
                 return { omrade:OMRADEN[key].namn, emoji:OMRADEN[key].emoji, klurig:false, fraga:u.fraga, svar:u.svar };
             });
-            const k = OMRADEN.klurig.gen();
+            const k = OMRADEN.klurig.gen(niva);
             uppgifter.push({ omrade:OMRADEN.klurig.namn, emoji:OMRADEN.klurig.emoji, klurig:true, fraga:k.fraga, svar:k.svar });
             return uppgifter;
         }
@@ -12044,12 +12329,13 @@
                 rad.appendChild(tagg); rad.appendChild(rad2);
                 lista.appendChild(rad);
             });
-            widget.dataset.startuppgift = JSON.stringify(uppgifter);
+            widget.dataset.startuppgift = JSON.stringify({ niva: nivaSelSU.value, uppgifter: uppgifter });
         }
 
         btn.onclick=()=>{ renderUppgifter(dagensUppgifter()); saveBoardState(); };
+        nivaSelSU.onchange=()=>{ renderUppgifter(dagensUppgifter()); saveBoardState(); };
 
-        if(config && config.data && Array.isArray(config.data) && config.data.length){ renderUppgifter(config.data); }
+        if(initialUppgifter){ renderUppgifter(initialUppgifter); }
         else { renderUppgifter(dagensUppgifter()); }
     }
 
@@ -12060,79 +12346,166 @@
         if(config===undefined) config=null;
         const body = createWidget('STARTUPPGIFT SVENSKA', 400, 'startuppgift-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är en klurig gåta!</div><button class='btn btn-primary su-btn' style='width:100%'>📖 Dagens uppgift</button><div class='su-lista'></div>`;
-        const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista');
+        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är en klurig gåta!</div><div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Åk 4</option><option value='ak5'>Åk 5</option><option value='ak6'>Åk 6</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>📖 Dagens uppgift</button><div class='su-lista'></div>`;
+        const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista'), nivaSelSU = body.querySelector('.su-niva');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
         const val = (arr)=> arr[ri(0, arr.length-1)];
+        // Bakåtkompatibelt: äldre sparade widgetar har hela svaret som en ren array (utan nivåval).
+        // Nya sparningar lagras som {niva, uppgifter}. Båda format läses in korrekt här.
+        let initialUppgifter = null;
+        if(config && config.data){
+            if(Array.isArray(config.data) && config.data.length){ initialUppgifter = config.data; }
+            else if(config.data.uppgifter && Array.isArray(config.data.uppgifter)){
+                initialUppgifter = config.data.uppgifter;
+                if(config.data.niva) nivaSelSU.value = config.data.niva;
+            }
+        }
 
-        const ORDKLASS_ORD = [
-            { ord:'hund', klass:'Substantiv' }, { ord:'springa', klass:'Verb' }, { ord:'glad', klass:'Adjektiv' },
-            { ord:'bil', klass:'Substantiv' }, { ord:'äta', klass:'Verb' }, { ord:'snabb', klass:'Adjektiv' },
-            { ord:'bok', klass:'Substantiv' }, { ord:'sova', klass:'Verb' }, { ord:'blå', klass:'Adjektiv' },
-            { ord:'lärare', klass:'Substantiv' }, { ord:'hoppa', klass:'Verb' }, { ord:'stor', klass:'Adjektiv' },
-            { ord:'skola', klass:'Substantiv' }, { ord:'läsa', klass:'Verb' }, { ord:'liten', klass:'Adjektiv' },
-            { ord:'katt', klass:'Substantiv' }, { ord:'skratta', klass:'Verb' }, { ord:'kall', klass:'Adjektiv' }
-        ];
-        const STAVNING_PAR = [
-            { ratt:'kyckling', fel:'kykling' }, { ratt:'restaurang', fel:'restorang' }, { ratt:'choklad', fel:'sjoklad' },
-            { ratt:'känguru', fel:'kenguru' }, { ratt:'stjärna', fel:'sjärna' }, { ratt:'tjugo', fel:'kjugo' },
-            { ratt:'misstag', fel:'mistag' }, { ratt:'äpple', fel:'äple' }, { ratt:'flicka', fel:'flika' },
-            { ratt:'skjorta', fel:'sjorta' }, { ratt:'gungar', fel:'gunggar' }, { ratt:'sjuksköterska', fel:'sjuksköterksa' }
-        ];
-        const SYNONYM_PAR = [
-            { ord:'glad', typ:'motsats', svar:'ledsen' }, { ord:'stor', typ:'motsats', svar:'liten' },
-            { ord:'snabb', typ:'motsats', svar:'långsam' }, { ord:'varm', typ:'motsats', svar:'kall' },
-            { ord:'ny', typ:'motsats', svar:'gammal' }, { ord:'hoppa', typ:'synonym', svar:'skutta' },
-            { ord:'titta', typ:'synonym', svar:'se / kolla' }, { ord:'fin', typ:'synonym', svar:'vacker / snygg' },
-            { ord:'rädd', typ:'synonym', svar:'skraj / skrämd' }, { ord:'prata', typ:'synonym', svar:'tala / snacka' }
-        ];
-        const MENING_BAS = [
-            'det regnar ute', 'jag gillar att spela fotboll', 'min bästa kompis heter alex',
-            'vi ska åka till mormor i helgen', 'skolan börjar klockan åtta', 'hunden heter bella',
-            'imorgon ska vi ha idrott', 'katten sitter i fönstret', 'vi läser en bok om rymden'
-        ];
-        const KLURIG_ORD = [
-            { del1:'fot', del2:'boll', ledtrad:'Ett spel du sparkar på.' },
-            { del1:'regn', del2:'båge', ledtrad:'Syns på himlen efter att det regnat.' },
-            { del1:'sol', del2:'glasögon', ledtrad:'Skyddar ögonen på sommaren.' },
-            { del1:'bok', del2:'hylla', ledtrad:'Där man förvarar böcker.' },
-            { del1:'köks', del2:'bord', ledtrad:'Man äter frukost vid det.' },
-            { del1:'sim', del2:'bassäng', ledtrad:'Där man badar inomhus.' },
-            { del1:'brand', del2:'bil', ledtrad:'Kommer när det brinner.' },
-            { del1:'glass', del2:'strut', ledtrad:'Håller i glassen så den inte smetar ner handen.' },
-            { del1:'snö', del2:'gubbe', ledtrad:'Bygger man på vintern av snö.' }
-        ];
+        const ORDKLASS_ORD = {
+            ak4: [
+                { ord:'hund', klass:'Substantiv' }, { ord:'springa', klass:'Verb' }, { ord:'glad', klass:'Adjektiv' },
+                { ord:'bil', klass:'Substantiv' }, { ord:'äta', klass:'Verb' }, { ord:'snabb', klass:'Adjektiv' },
+                { ord:'bok', klass:'Substantiv' }, { ord:'sova', klass:'Verb' }, { ord:'blå', klass:'Adjektiv' },
+                { ord:'lärare', klass:'Substantiv' }, { ord:'hoppa', klass:'Verb' }, { ord:'stor', klass:'Adjektiv' },
+                { ord:'skola', klass:'Substantiv' }, { ord:'läsa', klass:'Verb' }, { ord:'liten', klass:'Adjektiv' },
+                { ord:'katt', klass:'Substantiv' }, { ord:'skratta', klass:'Verb' }, { ord:'kall', klass:'Adjektiv' }
+            ],
+            ak5: [
+                { ord:'cykel', klass:'Substantiv' }, { ord:'simma', klass:'Verb' }, { ord:'nyfiken', klass:'Adjektiv' },
+                { ord:'dator', klass:'Substantiv' }, { ord:'rita', klass:'Verb' }, { ord:'trött', klass:'Adjektiv' },
+                { ord:'jag', klass:'Pronomen' }, { ord:'de', klass:'Pronomen' }, { ord:'vi', klass:'Pronomen' },
+                { ord:'sakta', klass:'Adverb' }, { ord:'ofta', klass:'Adverb' }, { ord:'idag', klass:'Adverb' },
+                { ord:'kompis', klass:'Substantiv' }, { ord:'cykla', klass:'Verb' }, { ord:'modig', klass:'Adjektiv' }
+            ],
+            ak6: [
+                { ord:'under', klass:'Preposition' }, { ord:'mellan', klass:'Preposition' }, { ord:'genom', klass:'Preposition' },
+                { ord:'bakom', klass:'Preposition' }, { ord:'känsla', klass:'Substantiv' }, { ord:'fundera', klass:'Verb' },
+                { ord:'ovanlig', klass:'Adjektiv' }, { ord:'dessutom', klass:'Adverb' }, { ord:'någon', klass:'Pronomen' },
+                { ord:'ansvar', klass:'Substantiv' }, { ord:'diskutera', klass:'Verb' }, { ord:'medveten', klass:'Adjektiv' },
+                { ord:'sällan', klass:'Adverb' }, { ord:'vår', klass:'Pronomen' }
+            ]
+        };
+        const STAVNING_PAR = {
+            ak4: [
+                { ratt:'kyckling', fel:'kykling' }, { ratt:'choklad', fel:'sjoklad' }, { ratt:'stjärna', fel:'sjärna' },
+                { ratt:'tjugo', fel:'kjugo' }, { ratt:'äpple', fel:'äple' }, { ratt:'flicka', fel:'flika' },
+                { ratt:'skjorta', fel:'sjorta' }, { ratt:'gungar', fel:'gunggar' }, { ratt:'kanin', fel:'kannin' },
+                { ratt:'fjäril', fel:'fjäriel' }
+            ],
+            ak5: [
+                { ratt:'restaurang', fel:'restorang' }, { ratt:'känguru', fel:'kenguru' }, { ratt:'misstag', fel:'mistag' },
+                { ratt:'sjuksköterska', fel:'sjuksköterksa' }, { ratt:'ambulans', fel:'amballans' }, { ratt:'schema', fel:'skema' },
+                { ratt:'utseende', fel:'utsende' }, { ratt:'känsla', fel:'kensla' }, { ratt:'lyckades', fel:'lykades' },
+                { ratt:'genast', fel:'jenast' }
+            ],
+            ak6: [
+                { ratt:'chaufför', fel:'chafför' }, { ratt:'parallell', fel:'paralell' }, { ratt:'nödvändig', fel:'nödvendig' },
+                { ratt:'genomskinlig', fel:'genomskilig' }, { ratt:'diskussion', fel:'diskusion' }, { ratt:'kommunicera', fel:'komunicera' },
+                { ratt:'necessär', fel:'nessesär' }, { ratt:'oberoende', fel:'oberonde' }, { ratt:'konsekvens', fel:'konskevens' },
+                { ratt:'självständig', fel:'sjelvständig' }
+            ]
+        };
+        const SYNONYM_PAR = {
+            ak4: [
+                { ord:'glad', typ:'motsats', svar:'ledsen' }, { ord:'stor', typ:'motsats', svar:'liten' },
+                { ord:'snabb', typ:'motsats', svar:'långsam' }, { ord:'varm', typ:'motsats', svar:'kall' },
+                { ord:'ny', typ:'motsats', svar:'gammal' }, { ord:'hoppa', typ:'synonym', svar:'skutta' }
+            ],
+            ak5: [
+                { ord:'titta', typ:'synonym', svar:'se / kolla' }, { ord:'fin', typ:'synonym', svar:'vacker / snygg' },
+                { ord:'rädd', typ:'synonym', svar:'skraj / skrämd' }, { ord:'prata', typ:'synonym', svar:'tala / snacka' },
+                { ord:'stark', typ:'motsats', svar:'svag' }, { ord:'lätt', typ:'motsats', svar:'svår' },
+                { ord:'högt', typ:'motsats', svar:'lågt' }
+            ],
+            ak6: [
+                { ord:'modig', typ:'motsats', svar:'feg' }, { ord:'ärlig', typ:'motsats', svar:'oärlig' },
+                { ord:'noggrann', typ:'synonym', svar:'nogsam / precis' }, { ord:'envis', typ:'synonym', svar:'enveten / tjurig' },
+                { ord:'nyfiken', typ:'synonym', svar:'intresserad' }, { ord:'försiktig', typ:'motsats', svar:'vårdslös' },
+                { ord:'tydlig', typ:'motsats', svar:'otydlig' }, { ord:'vänlig', typ:'synonym', svar:'snäll / trevlig' }
+            ]
+        };
+        const MENING_BAS = {
+            ak4: [
+                'det regnar ute', 'jag gillar att spela fotboll', 'min bästa kompis heter alex',
+                'vi ska åka till mormor i helgen', 'skolan börjar klockan åtta', 'hunden heter bella',
+                'imorgon ska vi ha idrott', 'katten sitter i fönstret', 'vi läser en bok om rymden'
+            ],
+            ak5: [
+                'vi cyklade till skolan och det regnade lite', 'min lillasyster gillar att rita och måla',
+                'vi ska ha matte och svenska idag', 'hunden sprang efter bollen i parken',
+                'jag glömde min matsäck hemma idag', 'vi åt lunch och sedan lekte vi ute',
+                'min mamma jobbar på sjukhuset och min pappa är lärare'
+            ],
+            ak6: [
+                'eftersom det regnade stannade vi inne hela dagen', 'när vi kom hem lagade vi middag tillsammans',
+                'om du vill kan du följa med oss till biblioteket', 'trots att hon var trött tränade hon ändå',
+                'innan vi åkte hem städade vi klassrummet', 'medan läraren pratade satt alla tysta och lyssnade',
+                'även om det var kallt ute badade vi ändå'
+            ]
+        };
+        const KLURIG_ORD = {
+            ak4: [
+                { del1:'fot', del2:'boll', ledtrad:'Ett spel du sparkar på.' },
+                { del1:'regn', del2:'båge', ledtrad:'Syns på himlen med många färger efter ett skyfall.' },
+                { del1:'sol', del2:'glasögon', ledtrad:'Bär man för att slippa bli bländad en varm dag.' },
+                { del1:'bok', del2:'hylla', ledtrad:'Möbeln i ett rum, full av sagor och fakta att bläddra i.' },
+                { del1:'köks', del2:'bord', ledtrad:'Man äter frukost vid det.' },
+                { del1:'sim', del2:'bassäng', ledtrad:'Där man badar inomhus.' },
+                { del1:'brand', del2:'bil', ledtrad:'Ett fordon med blåljus och en stege som skyndar sig till nödsituationer.' },
+                { del1:'glass', del2:'strut', ledtrad:'Det krispiga man håller i när man äter en kall sommargodis.' },
+                { del1:'snö', del2:'gubbe', ledtrad:'Får ofta en morot som näsa och en hatt på huvudet, och smälter när det blir varmt.' }
+            ],
+            ak5: [
+                { del1:'sommar', del2:'lov', ledtrad:'De veckorna på året då man badar mycket och slipper läxor.' },
+                { del1:'cykel', del2:'hjälm', ledtrad:'Skyddar huvudet när man trampar fram på två hjul.' },
+                { del1:'mat', del2:'säck', ledtrad:'Där man har med sig sin lunch.' },
+                { del1:'tand', del2:'borste', ledtrad:'Ett redskap man använder morgon och kväll i badrummet.' },
+                { del1:'fisk', del2:'mås', ledtrad:'En fågel som ofta syns vid havet och skriker högt.' },
+                { del1:'sjuk', del2:'hus', ledtrad:'Dit man åker med ambulans om något allvarligt händer.' },
+                { del1:'sopp', del2:'sked', ledtrad:'Ett bestick man behöver om middagen är flytande.' }
+            ],
+            ak6: [
+                { del1:'själv', del2:'förtroende', ledtrad:'Tron på sin egen förmåga.' },
+                { del1:'huvud', del2:'värk', ledtrad:'Kan göra att du behöver vila i ett mörkt, tyst rum en stund.' },
+                { del1:'arbets', del2:'kraft', ledtrad:'Ett begrepp som beskriver hur många som kan bidra till ett lands ekonomi.' },
+                { del1:'sam', del2:'arbete', ledtrad:'Det som krävs för att ett fotbollslag ska kunna vinna en match.' },
+                { del1:'själv', del2:'ständig', ledtrad:'Beskriver en elev som gör läxorna utan att bli påmind.' },
+                { del1:'val', del2:'frihet', ledtrad:'Att själv få bestämma vad man vill göra.' },
+                { del1:'yttrande', del2:'frihet', ledtrad:'Något viktigt i en demokrati, men som ofta saknas i en diktatur.' }
+            ]
+        };
 
         const OMRADEN = {
             ordklass: {
                 namn:'Ordklasser', emoji:'🔤',
-                gen: function(){ const o = val(ORDKLASS_ORD); return { fraga:'Vilken ordklass tillhör ordet "'+o.ord+'"?', svar:o.klass }; }
+                gen: function(niva){ const o = val(ORDKLASS_ORD[niva]); return { fraga:'Vilken ordklass tillhör ordet "'+o.ord+'"?', svar:o.klass }; }
             },
             stavning: {
                 namn:'Stavning', emoji:'✏️',
-                gen: function(){ const p = val(STAVNING_PAR); const omvant = Math.random()<0.5; const a = omvant ? p.ratt : p.fel, b = omvant ? p.fel : p.ratt; return { fraga:'Vilket är rätt stavat: "'+a+'" eller "'+b+'"?', svar:p.ratt }; }
+                gen: function(niva){ const p = val(STAVNING_PAR[niva]); const omvant = Math.random()<0.5; const a = omvant ? p.ratt : p.fel, b = omvant ? p.fel : p.ratt; return { fraga:'Vilket är rätt stavat: "'+a+'" eller "'+b+'"?', svar:p.ratt }; }
             },
             synonym: {
                 namn:'Synonymer & motsatsord', emoji:'🔁',
-                gen: function(){ const s = val(SYNONYM_PAR); const fraga = s.typ==='motsats' ? ('Vad är motsatsen till "'+s.ord+'"?') : ('Ge ett ord med samma betydelse som "'+s.ord+'" (synonym).'); return { fraga:fraga, svar:s.svar }; }
+                gen: function(niva){ const s = val(SYNONYM_PAR[niva]); const fraga = s.typ==='motsats' ? ('Vad är motsatsen till "'+s.ord+'"?') : ('Ge ett ord med samma betydelse som "'+s.ord+'" (synonym).'); return { fraga:fraga, svar:s.svar }; }
             },
             mening: {
                 namn:'Meningsbyggnad', emoji:'✍️',
-                gen: function(){ const m = val(MENING_BAS); const ratt = m.charAt(0).toUpperCase() + m.slice(1) + '.'; return { fraga:'Skriv om meningen med stor bokstav och punkt: "'+m+'"', svar:ratt }; }
+                gen: function(niva){ const m = val(MENING_BAS[niva]); const ratt = m.charAt(0).toUpperCase() + m.slice(1) + '.'; return { fraga:'Skriv om meningen enligt skrivreglerna: "'+m+'"', svar:ratt }; }
             },
             klurig: {
                 namn:'Ordgåta', emoji:'🧩',
-                gen: function(){ const k = val(KLURIG_ORD); return { fraga:'Gåta: Jag är ett sammansatt ord. '+k.ledtrad+' Jag börjar på "'+k.del1+'" och slutar på "'+k.del2+'". Vad är jag?', svar:k.del1+k.del2 }; }
+                gen: function(niva){ const k = val(KLURIG_ORD[niva]); return { fraga:'Gåta: Jag är ett sammansatt ord. '+k.ledtrad+' Vad är jag?', svar:k.del1+k.del2 }; }
             }
         };
         const GRUNDOMRADEN = ['ordklass','stavning','synonym','mening'];
 
         function dagensUppgifter(){
+            const niva = nivaSelSU.value;
             const uppgifter = blandaSU(GRUNDOMRADEN).map(key=>{
-                const u = OMRADEN[key].gen();
+                const u = OMRADEN[key].gen(niva);
                 return { omrade:OMRADEN[key].namn, emoji:OMRADEN[key].emoji, klurig:false, fraga:u.fraga, svar:u.svar };
             });
-            const k = OMRADEN.klurig.gen();
+            const k = OMRADEN.klurig.gen(niva);
             uppgifter.push({ omrade:OMRADEN.klurig.namn, emoji:OMRADEN.klurig.emoji, klurig:true, fraga:k.fraga, svar:k.svar });
             return uppgifter;
         }
@@ -12151,12 +12524,13 @@
                 rad.appendChild(tagg); rad.appendChild(rad2);
                 lista.appendChild(rad);
             });
-            widget.dataset.startuppgiftSve = JSON.stringify(uppgifter);
+            widget.dataset.startuppgiftSve = JSON.stringify({ niva: nivaSelSU.value, uppgifter: uppgifter });
         }
 
         btn.onclick=()=>{ renderUppgifter(dagensUppgifter()); saveBoardState(); };
+        nivaSelSU.onchange=()=>{ renderUppgifter(dagensUppgifter()); saveBoardState(); };
 
-        if(config && config.data && Array.isArray(config.data) && config.data.length){ renderUppgifter(config.data); }
+        if(initialUppgifter){ renderUppgifter(initialUppgifter); }
         else { renderUppgifter(dagensUppgifter()); }
     }
     window.createStartuppgiftSvenska = createStartuppgiftSvenska;
@@ -21726,19 +22100,51 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         { emoji:'🧎', text:'Gör 5 knäböj, håll ryggen rak.' },
         { emoji:'🚶', text:'Gå på tå tvärs över rummet, och tillbaka på hälarna.' }
     ];
+    const IDROTT_STADIE_LABELS = {
+        forskola: '🧸 Förskola (3–6 år)',
+        lag:      '🎒 Lågstadiet (7–9 år)',
+        mellan:   '📘 Mellanstadiet (10–12 år)',
+        hog:      '🎓 Högstadiet (13–15 år)'
+    };
     const IDROTT_LEKAR = [
-        { emoji:'🏃', namn:'Kull', besk:'En person är "den" och ska försöka ta (kulla) de andra. Den som blir tagen blir ny "den".' },
-        { emoji:'🧊', namn:'Fryskull', besk:'Som vanlig kull, men den som blir tagen fryser till is och står stilla tills en kompis "tinar" upp genom att krypa under benen.' },
-        { emoji:'🐻', namn:'Björnen sover', besk:'En är björnen och låtsas sova. De andra smyger fram och ropar "Björnen sover, vågar vi väcka den?" - plötsligt vaknar björnen och jagar!' },
-        { emoji:'🪑', namn:'Hela havet stormar', besk:'Alla springer runt stolar/markeringar. När ledaren ropar "stopp" ska alla hitta en plats - en plats färre än antal spelare varje gång.' },
-        { emoji:'👮', namn:'Tjuv och polis', besk:'Dela in i två lag: tjuvar och poliser. Poliserna ska fånga tjuvarna och sätta dem i "fängelset", tjuvarna kan befria varandra.' },
-        { emoji:'🙈', namn:'Kurragömma', besk:'En räknar till 20 med ögonen stängda medan de andra gömmer sig. Sedan letar man reda på alla.' },
-        { emoji:'🔲', namn:'Fyra hörn', besk:'Planens fyra hörn numreras 1-4. En i mitten blundar och ropar en siffra - alla vid det hörnet måste snabbt byta till ett annat.' },
-        { emoji:'🦆', namn:'Följa John', besk:'En ledare gör rörelser (hoppa, snurra, gå som en anka) och alla andra ska göra likadant.' },
-        { emoji:'🪢', namn:'Knuten', besk:'Stå i en ring och håll händerna med två olika personer mitt emot dig. Nysta upp knuten tillsammans utan att släppa taget.' },
-        { emoji:'🏐', namn:'Linjebollen', besk:'Två lag på varsin sida om en linje. Kasta en mjuk boll över linjen och försök få den att landa på motståndarnas sida.' },
-        { emoji:'🩰', namn:'Gummitwist', besk:'Två personer håller ett gummiband runt benen medan en tredje hoppar olika mönster.' },
-        { emoji:'🐆', namn:'Djungelkull', besk:'Alla utom en är djungeldjur som rör sig som sitt djur. "Jägaren" ska kulla djuren, som fryser tills en kompis befriar dem.' }
+        // ---- FÖRSKOLA (3–6 år): enkla regler, sång/rim, kort väntetid, låg fysisk press ----
+        { stadie:'forskola', emoji:'🐻', namn:'Björnen sover', besk:'En är björnen och låtsas sova. De andra smyger fram och ropar "Björnen sover, vågar vi väcka den?" – plötsligt vaknar björnen och jagar!' },
+        { stadie:'forskola', emoji:'🙈', namn:'Kurragömma', besk:'En räknar till 20 med ögonen stängda medan de andra gömmer sig. Sedan letar man reda på alla, en i taget.' },
+        { stadie:'forskola', emoji:'🦆', namn:'Följa John', besk:'En ledare gör rörelser (hoppa, snurra, gå som en anka) och alla andra ska göra likadant så fort som möjligt.' },
+        { stadie:'forskola', emoji:'🌉', namn:'Bro bro breja', besk:'Två barn bildar en "bro" med armarna. Alla andra går i en ring under bron medan man sjunger, och på sista tonen "fångas" ett barn i bron.' },
+        { stadie:'forskola', emoji:'🕊️', namn:'Alla fåglar flyga', besk:'Ledaren ropar namnet på ett djur. Kan djuret flyga ska alla flaxa med armarna, kan det inte flyga ska alla stå still. Fel rörelse = ur leken en stund.' },
+        { stadie:'forskola', emoji:'🗿', namn:'Staty', besk:'Alla dansar eller springer fritt till musik. När musiken stannar ska alla frysa som statyer på ett bin – den som rör sig får hjälpa till att döma nästa gång.' },
+        { stadie:'forskola', emoji:'🎈', namn:'Ballongdansen', besk:'Två och två håller en ballong mellan pannorna (utan händer) och rör sig tillsammans utan att ballongen ramlar. Bra för samarbete och finmotorik.' },
+        { stadie:'forskola', emoji:'🐱', namn:'Katten och råttan', besk:'Alla står i en ring och håller händerna. En "katt" är utanför ringen och en "råtta" innanför – katten ska ta sig in genom ringen och jaga råttan.' },
+
+        // ---- LÅGSTADIET (7–9 år): mer spring, enkla lagindelningar, tydliga regler ----
+        { stadie:'lag', emoji:'🏃', namn:'Kull', besk:'En person är "den" och ska försöka ta (kulla) de andra. Den som blir tagen blir ny "den".' },
+        { stadie:'lag', emoji:'🧊', namn:'Fryskull', besk:'Som vanlig kull, men den som blir tagen fryser till is och står stilla tills en kompis "tinar" upp genom att krypa under benen.' },
+        { stadie:'lag', emoji:'🪑', namn:'Hela havet stormar', besk:'Alla springer runt stolar/markeringar. När ledaren ropar "stopp" ska alla hitta en plats – en plats färre än antal spelare varje gång.' },
+        { stadie:'lag', emoji:'👮', namn:'Tjuv och polis', besk:'Dela in i två lag: tjuvar och poliser. Poliserna ska fånga tjuvarna och sätta dem i "fängelset", tjuvarna kan befria varandra genom att röra fängelset.' },
+        { stadie:'lag', emoji:'🔲', namn:'Fyra hörn', besk:'Planens fyra hörn numreras 1–4. En i mitten blundar och ropar en siffra – alla vid det hörnet måste snabbt byta till ett annat hörn.' },
+        { stadie:'lag', emoji:'🏐', namn:'Linjebollen', besk:'Två lag på varsin sida om en linje. Kasta en mjuk boll över linjen och försök få den att landa på motståndarnas sida utan att de hinner ta emot.' },
+        { stadie:'lag', emoji:'🥎', namn:'Brännboll (enkel)', besk:'Ett lag slår/sparkar bollen och springer runt "bränningar" medan det andra laget fångar bollen och försöker bränna löparna innan de hinner runt.' },
+        { stadie:'lag', emoji:'🦶', namn:'Hoppa hage', besk:'Rita en hage med nummer på marken. Kasta en sten i rutan, hoppa på ett ben genom hagen utan att trampa på strecken eller på rutan med stenen.' },
+
+        // ---- MELLANSTADIET (10–12 år): fler lagsporter, taktik och samarbete ----
+        { stadie:'mellan', emoji:'🐆', namn:'Djungelkull', besk:'Alla utom en är djungeldjur som rör sig som sitt djur. "Jägaren" ska kulla djuren, som fryser tills en kompis befriar dem.' },
+        { stadie:'mellan', emoji:'🪢', namn:'Knuten', besk:'Stå i en ring och håll händerna med två olika personer mitt emot dig. Nysta upp knuten tillsammans utan att släppa taget – kräver samarbete och tålamod.' },
+        { stadie:'mellan', emoji:'🩰', namn:'Gummitwist', besk:'Två personer håller ett gummiband runt benen medan en tredje hoppar olika mönster i stigande svårighetsgrad och höjd.' },
+        { stadie:'mellan', emoji:'⚾', namn:'Kanonboll (dodgeball)', besk:'Två lag försöker träffa varandra med mjuka bollar. Blir man träffad är man ute, men kan komma tillbaka genom att fånga en boll i luften.' },
+        { stadie:'mellan', emoji:'🚩', namn:'Fångna flaggan', besk:'Två lag har varsin planhalva med en flagga. Målet är att smyga in på motståndarens sida, ta deras flagga och springa hem utan att bli tagen.' },
+        { stadie:'mellan', emoji:'🏁', namn:'Stafett', besk:'Dela in i lag som springer en sträcka i taget och lämnar över en pinne/föremål till nästa i laget. Laget som är klart först vinner.' },
+        { stadie:'mellan', emoji:'🏔️', namn:'Kung på berget', besk:'En person står på en upphöjd plats ("berget") och försöker knuffa/hindra andra från att ta sig upp och bli ny kung – utan att någon skadas.' },
+        { stadie:'mellan', emoji:'🥏', namn:'Frisbeegolf-lek', besk:'Sätt upp enkla "mål" (koner, träd, hoola-hoop) på skolgården och kasta en frisbee runt banan på så få kast som möjligt.' },
+
+        // ---- HÖGSTADIET (13–15 år): mer regelstyrda lagsporter och kondition ----
+        { stadie:'hog', emoji:'🥎', namn:'Brännboll (turnering)', besk:'Spela brännboll i fasta lag med poängräkning över flera innings – bra uppvärmning och passar för klassturneringar.' },
+        { stadie:'hog', emoji:'⚾', namn:'Kanonboll (lagform)', besk:'Spela kanonboll i fasta lag på avgränsad plan med tydliga gränser och "liv"-system, gärna som en kort turnering mellan flera lag.' },
+        { stadie:'hog', emoji:'🏐', namn:'Enkel volleyboll', besk:'Spela volleyboll över nät eller ett rep, med förenklade regler (t.ex. tillåt studs eller fler tre­kontakter) för att alla ska hänga med.' },
+        { stadie:'hog', emoji:'🥏', namn:'Ultimate frisbee', besk:'Två lag kastar en frisbee mellan sig och försöker göra mål genom att fånga den i motståndarnas målzon. Ingen får springa med skivan i handen.' },
+        { stadie:'hog', emoji:'🚩', namn:'Fångna flaggan (turnering)', besk:'Samma grundregler som fångna flaggan, men på en större plan med fler spelare, taktikroller (försvar/anfall) och tidsbegränsade omgångar.' },
+        { stadie:'hog', emoji:'🏁', namn:'Stationsstafett', besk:'Dela klassen i lag som roterar mellan flera fysiska stationer (t.ex. hopprep, situps, koner) och samlar poäng eller tid tillsammans.' },
+        { stadie:'hog', emoji:'🤾', namn:'Enkel handboll/innebandy', besk:'Spela en förenklad version av handboll eller innebandy på liten plan, med fokus på passningsspel och samarbete snarare än fullständiga regler.' }
     ];
     function buildIdrottRorelsePane(pane){
         pane.innerHTML = `<div class='idr-ro-emoji' style='font-size:52px;text-align:center;'></div>
@@ -21781,19 +22187,43 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         };
     }
     function buildIdrottLekPane(pane){
-        pane.innerHTML = `<div class='idr-lek-emoji' style='font-size:44px;text-align:center;'></div>
-            <div class='idr-lek-namn' style='font-size:18px;font-weight:800;text-align:center;color:#1d1d1f;margin:6px 0 8px;'></div>
+        pane.innerHTML = `<div class='hover-menu' style='margin-bottom:10px;'>
+                <select class='idr-lek-stadie' style='width:100%;padding:6px 8px;border-radius:10px;border:1px solid #d0d0d5;font-size:12px;font-weight:700;color:#1d1d1f;background:#f5f5f7;'>
+                    <option value='alla'>🎯 Alla stadier</option>
+                    <option value='forskola'>🧸 Förskola (3–6 år)</option>
+                    <option value='lag'>🎒 Lågstadiet (7–9 år)</option>
+                    <option value='mellan'>📘 Mellanstadiet (10–12 år)</option>
+                    <option value='hog'>🎓 Högstadiet (13–15 år)</option>
+                </select>
+            </div>
+            <div class='idr-lek-emoji' style='font-size:44px;text-align:center;'></div>
+            <div class='idr-lek-namn' style='font-size:18px;font-weight:800;text-align:center;color:#1d1d1f;margin:6px 0 6px;'></div>
+            <div style='text-align:center;margin-bottom:8px;'><span class='idr-lek-badge' style='display:inline-block;font-size:11px;font-weight:700;color:#007aff;background:#eaf3ff;padding:2px 10px;border-radius:20px;'></span></div>
             <div class='idr-lek-besk' style='font-size:13px;text-align:center;color:#3a3a3c;line-height:1.5;min-height:70px;'></div>
             <div class='hover-menu' style='display:flex;justify-content:center;margin-top:12px;'>
                 <button type='button' class='btn btn-secondary idr-lek-new'>🔄 Ny lek</button>
             </div>`;
-        const emojiEl = pane.querySelector('.idr-lek-emoji'), namnEl = pane.querySelector('.idr-lek-namn'), beskEl = pane.querySelector('.idr-lek-besk'), newBtn = pane.querySelector('.idr-lek-new');
-        let current = IDROTT_LEKAR[Math.floor(Math.random() * IDROTT_LEKAR.length)];
-        function render(){ emojiEl.textContent = current.emoji; namnEl.textContent = current.namn; beskEl.textContent = current.besk; }
+        const emojiEl = pane.querySelector('.idr-lek-emoji'), namnEl = pane.querySelector('.idr-lek-namn'),
+              badgeEl = pane.querySelector('.idr-lek-badge'), beskEl = pane.querySelector('.idr-lek-besk'),
+              newBtn = pane.querySelector('.idr-lek-new'), stadieSel = pane.querySelector('.idr-lek-stadie');
+        function filtered(){ const v = stadieSel.value; return v === 'alla' ? IDROTT_LEKAR : IDROTT_LEKAR.filter(l => l.stadie === v); }
+        let pool = filtered();
+        let current = pool[Math.floor(Math.random() * pool.length)];
+        function render(){
+            emojiEl.textContent = current.emoji; namnEl.textContent = current.namn;
+            badgeEl.textContent = IDROTT_STADIE_LABELS[current.stadie] || '';
+            beskEl.textContent = current.besk;
+        }
         render();
         newBtn.onclick = ()=>{
-            let next; do { next = IDROTT_LEKAR[Math.floor(Math.random() * IDROTT_LEKAR.length)]; } while(next.namn === current.namn && IDROTT_LEKAR.length > 1);
+            pool = filtered();
+            let next; do { next = pool[Math.floor(Math.random() * pool.length)]; } while(next.namn === current.namn && pool.length > 1);
             current = next; render();
+        };
+        stadieSel.onchange = ()=>{
+            pool = filtered();
+            current = pool[Math.floor(Math.random() * pool.length)];
+            render();
         };
     }
     function createIdrottMegaWidget(config){
@@ -23500,21 +23930,46 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         'Sammanfatta dagens lektion med några meningar.'
     ];
 
-    // ---- AI: generera fler återkopplingsfrågor för Exit Ticket (samma mönster som Skrivstart) ----
+    // ---- AI: generera fler återkopplingsfrågor för Exit Ticket, nu med exempelsvar till varje fråga ----
     function parseExitFragorList(text){
         if(!text) return [];
         let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
         if(obj){
             const arr = obj.fragor || obj.questions || [];
-            if(Array.isArray(arr)){ const r=arr.map(p=>String(p||'').trim()).filter(p=>p.length>3); if(r.length) return r; }
+            if(Array.isArray(arr)){
+                const r = arr.map(item=>{
+                    if(item && typeof item==='object'){
+                        const fraga=String(item.fraga||item.question||'').trim();
+                        const svar=String(item.svar||item.answer||item.exempelsvar||'').trim();
+                        return fraga ? { fraga, svar } : null;
+                    }
+                    const fraga=String(item||'').trim();
+                    return fraga ? { fraga, svar:'' } : null;
+                }).filter(Boolean);
+                if(r.length) return r;
+            }
         }
-        return text.split(/\r?\n/).map(l=> l.trim().replace(/^\s*\d+[\.\)]\s*/,'').replace(/^[-*•]\s*/,'').trim()).filter(l=> l.length>3 && !/^```/.test(l));
+        // Textformat: block med FRÅGA: / SVAR:-rader, en tom rad mellan varje block
+        const blocks = text.split(/\r?\n\s*\r?\n/).map(b=>b.trim()).filter(Boolean);
+        const fromBlocks = blocks.map(block=>{
+            const lines = block.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+            let fraga='', svar='';
+            lines.forEach(line=>{
+                const fm=line.match(/^(?:FRÅGA|FRAGA|Q)\s*[:\-]\s*(.+)$/i); if(fm){ fraga=fm[1].trim(); return; }
+                const sm=line.match(/^(?:SVAR|EXEMPELSVAR|A)\s*[:\-]\s*(.+)$/i); if(sm){ svar=sm[1].trim(); return; }
+                if(!fraga) fraga=line.replace(/^\s*\d+[\.\)]\s*/,'').replace(/^[-*•]\s*/,'').trim();
+            });
+            return fraga ? { fraga, svar } : null;
+        }).filter(Boolean);
+        if(fromBlocks.length) return fromBlocks;
+        // Sista utväg: en fråga per rad, utan exempelsvar
+        return text.split(/\r?\n/).map(l=> l.trim().replace(/^\s*\d+[\.\)]\s*/,'').replace(/^[-*•]\s*/,'').trim()).filter(l=> l.length>3 && !/^```/.test(l)).map(f=>({ fraga:f, svar:'' }));
     }
     function buildExitFragorChatPrompt(desc){
-        return desc.trim() + "\n\nSvara ENDAST med reflektionsfrågorna, en per rad, inget annat - ingen rubrik, ingen numrering. Varje rad ska vara en kort återkopplings-/reflektionsfråga på svenska som eleverna kan svara på i slutet av en lektion.";
+        return desc.trim() + "\n\nSvara ENDAST i exakt detta format, en fråga per block, med en tom rad mellan varje block, inget annat - ingen rubrik, ingen numrering:\nFRÅGA: <kort återkopplings-/reflektionsfråga>\nSVAR: <ett kort exempel på ett bra svar en elev skulle kunna ge>\n\nAllt på svenska, anpassat till angivet ämne/årskurs.";
     }
     async function aiGenerateExitFragor(userPrompt, apiKey){
-        const instruction = "Du är en lärarassistent som skapar återkopplings- och reflektionsfrågor att använda som \"exit ticket\" i slutet av en lektion. Returnera ENDAST giltig JSON i formen {\"fragor\":[\"fråga 1\",\"fråga 2\"]}. Varje fråga ska vara kort och på svenska, anpassad till angivet ämne/årskurs. Skapa så många som anges i uppgiften, annars 6 st. Om ingen årskurs anges, anta mellanstadienivå (åk 4–6, ca 10–12 år) som standard. Ingen annan text, ingen markdown.";
+        const instruction = "Du är en lärarassistent som skapar återkopplings- och reflektionsfrågor att använda som \"exit ticket\" i slutet av en lektion, tillsammans med ett kort exempel på ett bra svar till varje fråga. Returnera ENDAST giltig JSON i formen {\"fragor\":[{\"fraga\":\"fråga 1\",\"svar\":\"exempel på svar 1\"}]}. Varje fråga ska vara kort och på svenska, anpassad till angivet ämne/årskurs. Varje exempelsvar ska vara kort (1-2 meningar) och visa hur ett bra, konkret svar från en elev skulle kunna se ut. Skapa så många som anges i uppgiften, annars 6 st. Om ingen årskurs anges, anta mellanstadienivå (åk 4–6, ca 10–12 år) som standard. Ingen annan text, ingen markdown.";
         const models = ["gemini-2.0-flash","gemini-1.5-flash-latest","gemini-1.5-flash"];
         const bodyObj = { contents:[{ parts:[{ text: instruction + "\n\nUppgift: " + userPrompt }] }], generationConfig:{ temperature:0.9, responseMimeType:"application/json" } };
         let lastErr='';
@@ -23542,13 +23997,17 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         let counts = options.map(()=>0);
         let läge = 'atk';
         let atkListVald = '';
+        // OBS: egnaFragor (AI-skapade återkopplingsfrågor) lever bara i minnet så länge widgeten
+        // är öppen. De sparas medvetet INTE till brädans tillstånd, så de försvinner när widgeten
+        // stängs eller sidan laddas om. atkFragKalla styr om 🎲 slumpar bland standardfrågorna
+        // ELLER de AI-skapade - de blandas ALDRIG ihop, det är alltid det ena eller det andra.
         let egnaFragor = [];
+        let atkFragKalla = 'standard'; // 'standard' | 'ai'
         if(config && config.data){
             if(typeof config.data.question === 'string') question = config.data.question;
             if(Array.isArray(config.data.counts) && config.data.counts.length===options.length) counts = config.data.counts.map(n=>parseInt(n)||0);
             if(config.data.läge==='atk') läge = 'atk';
             if(typeof config.data.atkList === 'string') atkListVald = config.data.atkList;
-            if(Array.isArray(config.data.egnaFragor)) egnaFragor = config.data.egnaFragor.slice(0,60);
         }
 
         const root=document.createElement('div'); root.className='exit-root'; body.appendChild(root);
@@ -23582,7 +24041,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const elevBox = elevBlock.querySelector('.exit-atk-elev-box');
 
         const widgetElRef = widgetEl;
-        const stamp=()=>{ widgetElRef.dataset.exitTicket = JSON.stringify({ question, counts, läge, atkList: atkListSel.value, egnaFragor }); };
+        const stamp=()=>{ widgetElRef.dataset.exitTicket = JSON.stringify({ question, counts, läge, atkList: atkListSel.value }); };
         const persist=()=>{ stamp(); saveBoardState(); };
 
         function renderBars(){
@@ -23624,11 +24083,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         };
 
         fragaBlock.querySelector('.exit-atk-slump-fraga').onclick=()=>{
-            openExitAtkFragaPopup();
+            if(atkFragKalla==='ai' && egnaFragor.length) openExitAiFragaPopup();
+            else openExitStandardFragaPopup();
         };
 
-        // ---- Popup som visar en slumpad återkopplingsfråga, med möjlighet att slumpa fler ----
-        function openExitAtkFragaPopup(){
+        // ---- Popup 1 av 2: STANDARDFRÅGOR (fasta frågor ur EXIT_ATK_FRAGOR) - helt egen ruta ----
+        function openExitStandardFragaPopup(){
             const ov=document.createElement('div'); ov.className='figx-overlay';
             const box=document.createElement('div'); box.className='figx-box'; box.style.width='min(520px,96vw)'; box.style.textAlign='center';
             const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
@@ -23639,23 +24099,85 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
             head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
 
-            const fragaVisning=document.createElement('div'); fragaVisning.className='exit-atk-fraga-box'; fragaVisning.style.fontSize='19px'; fragaVisning.style.margin='18px 0';
+            const fragaVisning=document.createElement('div'); fragaVisning.className='exit-atk-fraga-box'; fragaVisning.style.fontSize='19px'; fragaVisning.style.margin='0 0 18px';
             box.appendChild(fragaVisning);
 
             const nyBtn=document.createElement('button'); nyBtn.type='button'; nyBtn.className='btn btn-primary'; nyBtn.style.width='100%'; nyBtn.textContent='🎲 Slumpa ny fråga';
             box.appendChild(nyBtn);
-            const aiBtn=document.createElement('button'); aiBtn.type='button'; aiBtn.className='kw-btn kw-btn-ai'; aiBtn.style.width='100%'; aiBtn.style.marginTop='8px'; aiBtn.textContent='✨ Skapa fler frågor med AI';
+            const aiBtn=document.createElement('button'); aiBtn.type='button'; aiBtn.className='kw-btn kw-btn-ai'; aiBtn.style.width='100%'; aiBtn.style.marginTop='8px'; aiBtn.textContent='✨ Skapa frågor med AI';
             box.appendChild(aiBtn);
 
-            const nyFraga=()=>{
-                const pool = EXIT_ATK_FRAGOR.concat(egnaFragor);
-                const f = pool[Math.floor(Math.random()*pool.length)];
+            const visa=()=>{
+                const f = EXIT_ATK_FRAGOR[Math.floor(Math.random()*EXIT_ATK_FRAGOR.length)];
                 fragaVisning.textContent = f;
                 fragaBox.textContent = f; // hålls i synk med widgeten i bakgrunden
+                fragaBox.classList.remove('kalla-ai');
             };
-            nyBtn.onclick = nyFraga;
-            aiBtn.onclick = ()=> openExitAiDialog(nyFraga);
-            nyFraga();
+            nyBtn.onclick = visa;
+            // AI-dialogen öppnas ovanpå. Lyckas den: stäng DEN HÄR rutan helt och öppna den
+            // separata AI-rutan istället - de två visas aldrig i eller blandas i samma ruta.
+            aiBtn.onclick = ()=> openExitAiDialog(()=>{ stang(); openExitAiFragaPopup(); });
+            visa();
+
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        // ---- Popup 2 av 2: AI-FRÅGOR - helt egen, tydligt märkt ruta som ENDAST visar de AI-skapade
+        // frågorna. Standardfrågorna finns aldrig med här - byt tillbaka via knappen nedan. ----
+        function openExitAiFragaPopup(){
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box kalla-ai-box'; box.style.width='min(520px,96vw)'; box.style.textAlign='center'; box.style.border='2px solid #d8cffa';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.style.color='#7048e8'; h2.textContent='✨ AI-fråga (gäller bara nu)';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+
+            const tabsWrap=document.createElement('div'); tabsWrap.className='exit-tabs'; tabsWrap.style.marginBottom='12px';
+            const tabFraga=document.createElement('button'); tabFraga.type='button'; tabFraga.className='exit-tab active'; tabFraga.textContent='❓ Fråga';
+            const tabSvar=document.createElement('button'); tabSvar.type='button'; tabSvar.className='exit-tab'; tabSvar.textContent='💡 Exempelsvar';
+            tabsWrap.appendChild(tabFraga); tabsWrap.appendChild(tabSvar);
+            box.appendChild(tabsWrap);
+
+            const fragaVisning=document.createElement('div'); fragaVisning.className='exit-atk-fraga-box kalla-ai'; fragaVisning.style.fontSize='19px'; fragaVisning.style.minHeight='70px'; fragaVisning.style.margin='0 0 18px';
+            box.appendChild(fragaVisning);
+
+            const nyBtn=document.createElement('button'); nyBtn.type='button'; nyBtn.className='btn btn-primary'; nyBtn.style.width='100%'; nyBtn.textContent='🎲 Slumpa ny AI-fråga';
+            box.appendChild(nyBtn);
+            const aiBtn=document.createElement('button'); aiBtn.type='button'; aiBtn.className='kw-btn kw-btn-ai'; aiBtn.style.width='100%'; aiBtn.style.marginTop='8px'; aiBtn.textContent='✨ Skapa nya AI-frågor (ersätter dessa)';
+            box.appendChild(aiBtn);
+            const tillbakaBtn=document.createElement('button'); tillbakaBtn.type='button'; tillbakaBtn.className='kw-btn kw-btn-ghost'; tillbakaBtn.style.width='100%'; tillbakaBtn.style.marginTop='8px'; tillbakaBtn.textContent='↩ Tillbaka till standardfrågorna';
+            box.appendChild(tillbakaBtn);
+            const aiHint=document.createElement('div'); aiHint.style.fontSize='11px'; aiHint.style.color='#8a8a92'; aiHint.style.marginTop='6px'; aiHint.textContent='Den här rutan visar bara AI-frågorna - aldrig blandat med standardfrågorna. Gäller bara den här gången.';
+            box.appendChild(aiHint);
+
+            let current=null, activeTab='fraga';
+            const renderTab=()=>{
+                tabFraga.classList.toggle('active', activeTab==='fraga');
+                tabSvar.classList.toggle('active', activeTab==='svar');
+                if(!current) return;
+                fragaVisning.textContent = activeTab==='fraga'
+                    ? current.fraga
+                    : (current.svar ? current.svar : 'Inget exempelsvar skapades för den här frågan.');
+            };
+            tabFraga.onclick=()=>{ activeTab='fraga'; renderTab(); };
+            tabSvar.onclick=()=>{ activeTab='svar'; renderTab(); };
+
+            const visa=()=>{
+                const raw = egnaFragor[Math.floor(Math.random()*egnaFragor.length)];
+                current = (raw && typeof raw==='object') ? raw : { fraga:String(raw||''), svar:'' };
+                activeTab='fraga';
+                renderTab();
+                fragaBox.textContent = current.fraga; // hålls i synk med widgeten i bakgrunden (visar alltid frågan, inte svaret)
+                fragaBox.classList.add('kalla-ai');
+            };
+            nyBtn.onclick = visa;
+            aiBtn.onclick = ()=> openExitAiDialog(()=>{ stang(); openExitAiFragaPopup(); });
+            tillbakaBtn.onclick = ()=>{ atkFragKalla='standard'; stang(); openExitStandardFragaPopup(); };
+            visa();
 
             ov.appendChild(box);
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
@@ -23665,14 +24187,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const ov=document.createElement('div'); ov.className='cal-popup-overlay';
             const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
             const closeDlg=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
-            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa återkopplingsfrågor med AI'; box.appendChild(title);
+            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa nya återkopplingsfrågor med AI'; box.appendChild(title);
             const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv ämnet, t.ex.:\nReflektionsfrågor om dagens NO-lektion om vattnets kretslopp, åk 4.'; box.appendChild(ta);
             const statusEl=document.createElement('div'); statusEl.className='kw-ai-status';
 
             const leggTill=(list, stEl)=>{
                 if(!list || !list.length){ if(stEl) stEl.textContent='⚠️ Hittade inga frågor i svaret.'; return; }
-                list.slice(0,30).forEach(f=>{ if(!egnaFragor.includes(f)) egnaFragor.push(f); });
-                if(egnaFragor.length>60) egnaFragor = egnaFragor.slice(egnaFragor.length-60);
+                egnaFragor = list.slice(0,30); // Ersätter ett ev. tidigare AI-set helt - blandas aldrig med standardfrågorna
+                atkFragKalla = 'ai';
                 closeDlg(); persist(); if(onKlar) onKlar();
             };
 
@@ -23685,10 +24207,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 catch(e){ ta.value=full; ta.select(); statusEl.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
-            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – frågorna läggs till automatiskt...'; box.appendChild(pasteTa);
+            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – de nya frågorna ersätter automatiskt de nuvarande...'; box.appendChild(pasteTa);
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseExitFragorList(pasteTa.value); if(list.length>=1) leggTill(list, statusEl); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
-            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Lägg till frågorna';
+            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd frågorna';
             makePasteBtn.onclick=()=>{ const list=parseExitFragorList(pasteTa.value); if(list.length<1){ statusEl.textContent='⚠️ Hittade inga frågor i svaret.'; return; } leggTill(list, statusEl); };
             row1b.appendChild(makePasteBtn); box.appendChild(row1b);
 
@@ -25847,7 +26369,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                         const dn=document.createElement('span'); dn.className='cal-dnum'; dn.textContent=dnum; cell.appendChild(dn);
                         const ndEl=document.createElement('span'); ndEl.className='cal-nd'; ndEl.textContent=nd; cell.appendChild(ndEl);
                         const note=notes[key];
-                        if(note){ cell.classList.add('cal-hasnote'); cell.title=note; const dot=document.createElement('span'); dot.className='cal-note-dot'; cell.appendChild(dot); }
+                        if(note){
+                            cell.classList.add('cal-hasnote'); cell.title=note;
+                            const dot=document.createElement('span');
+                            dot.className='cal-note-dot'+(cell.classList.contains('cal-today') ? ' cal-note-dot-blink' : '');
+                            cell.appendChild(dot);
+                        }
                         else if(nd){ cell.title=nd; }
                         const label=dnum+' '+MONTHS[viewM]+' '+viewY+(nd?(' · '+nd):'');
                         cell.onclick=()=>openCalDayPopup(key, label, render);
