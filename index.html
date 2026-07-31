@@ -4180,13 +4180,25 @@
             // FIX: nollställ gästläget vid utloggning. Annars skulle en gäst som loggar ut och sedan
             // loggar in på riktigt (Google/e-post) fastna i "inget sparas"-läget även på sitt riktiga
             // konto, eftersom saveBoardState()/syncToCloud() annars fortsätter blockeras av flaggan.
+            const wasGuest = window.isGuestMode;
             window.isGuestMode = false;
             const guestBadge = document.getElementById('guest-mode-badge'); if(guestBadge) guestBadge.style.display = 'none';
             if (_sharedToolbarUnsub){ try{ _sharedToolbarUnsub(); }catch(e){} _sharedToolbarUnsub = null; }
             currentUser = null; localStorage.removeItem('classboardzUser');
             document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
             updateAdminButton();
-            if (window.cloudReady && fbAuth){ fbAuth.signOut().catch(()=>{}); }
+            if (wasGuest){
+                // FIX: en gäst har aldrig varit inloggad i Firebase Auth på riktigt (gästläget sätter
+                // bara ett lokalt slumpat ID), så fbAuth.signOut() ger ingen "utloggad"-händelse att
+                // reagera på - onAuthStateChanged triggas aldrig, och sidan blev tidigare stående
+                // blank istället för att visa inloggningsrutan. Visa den direkt istället för att
+                // vänta på en händelse som aldrig kommer.
+                _boardInitializedForUser = null;
+                if (window.cloudReady && fbAuth){ fbAuth.signOut().catch(()=>{}); }
+                document.getElementById('login-overlay').style.display = 'flex';
+                showLoginButton();
+            }
+            else if (window.cloudReady && fbAuth){ fbAuth.signOut().catch(()=>{}); }
             else { showLocalLoginOption(); document.getElementById('login-overlay').style.display = 'flex'; }
         });
     }
@@ -26339,6 +26351,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const pumpkins=()=>{ let o=''; const xs=[150,360,590,1010,1250,1460]; xs.forEach((x,i)=>{ const y=820, sc=(i%2?1.15:0.92); o+=`<g transform='translate(${x},${y}) scale(${sc})'><ellipse cx='0' cy='0' rx='48' ry='40' fill='#ff922b'/><ellipse cx='-24' cy='0' rx='18' ry='38' fill='#f76707' opacity='0.55'/><ellipse cx='24' cy='0' rx='18' ry='38' fill='#f76707' opacity='0.55'/><rect x='-5' y='-48' width='10' height='15' fill='#2f9e44'/><polygon points='-22,-8 -6,-8 -14,6' fill='#3a1d00'/><polygon points='22,-8 6,-8 14,6' fill='#3a1d00'/><path d='M-24 16 L -14 8 L -5 16 L 4 8 L 13 16 L 22 8 L 26 16' stroke='#3a1d00' stroke-width='5' fill='none'/></g>`; }); return o; };
         const bats=(seed)=>{ const r=det(seed); let o=''; for(let i=0;i<11;i++){ const x=(r()*1400+90)|0, y=(r()*280+50)|0, sc=(r()*0.6+0.5); o+=`<g transform='translate(${x},${y}) scale(${sc.toFixed(2)})' fill='#1a1030'><path d='M0 0 C -10 -12 -22 -12 -30 -4 C -24 -6 -18 -2 -14 2 C -8 -4 -4 -2 0 3 C 4 -2 8 -4 14 2 C 18 -2 24 -6 30 -4 C 22 -12 10 -12 0 0 Z'/></g>`; } return o; };
         const mtns=()=>{ let o=''; o+=`<polygon points='0,560 380,255 760,560' fill='#9db8cf'/><polygon points='520,560 980,220 1440,560' fill='#89a6c1'/><polygon points='1030,560 1400,300 1600,520 1600,560' fill='#a7c0d6'/>`; o+=`<polygon points='980,220 930,290 1030,290' fill='#ffffff'/><polygon points='380,255 338,315 422,315' fill='#ffffff'/>`; return o; };
+        const grass=(seed,y0,n,h,color)=>{ const r=det(seed); let o=''; for(let i=0;i<n;i++){ const x=(r()*1600)|0, sc=(r()*0.6+0.7), sway=((r()*14-7))|0; o+=`<path d='M${x} ${y0} Q ${x+sway} ${(y0-h*sc*0.6)|0} ${(x+sway*1.4)|0} ${(y0-h*sc)|0}' stroke='${color||'#4c9a3d'}' stroke-width='${(2.2*sc).toFixed(1)}' fill='none' stroke-linecap='round' opacity='0.85'/>`; } return o; };
+        const pineLayer=(seed,y,n,colTrunk,colLeaf,minS,maxS)=>{ const r=det(seed); let o=''; for(let i=0;i<n;i++){ const x=((1600/n)*i+r()*60-30)|0, sc=(minS+r()*(maxS-minS)); o+=`<g transform='translate(${x},${y}) scale(${sc.toFixed(2)})'><rect x='-6' y='0' width='12' height='26' fill='${colTrunk}'/><polygon points='0,-100 -42,-6 42,-6' fill='${colLeaf}'/><polygon points='0,-75 -34,4 34,4' fill='${colLeaf}'/><polygon points='0,-50 -26,12 26,12' fill='${colLeaf}'/></g>`; } return o; };
+        const sunflowerRow=(seed,y,n,scale)=>{ const r=det(seed); let o=''; for(let i=0;i<n;i++){ const x=((1600/n)*i+r()*50-25)|0; o+=`<g transform='translate(${x},${y}) scale(${scale})'><rect x='-3' y='0' width='6' height='40' fill='#5a7d2a'/><g fill='#ffd43b'>${[0,45,90,135,180,225,270,315].map(a=>`<ellipse cx='0' cy='-22' rx='7' ry='16' transform='rotate(${a})'/>`).join('')}</g><circle cx='0' cy='0' r='11' fill='#6b4423'/></g>`; } return o; };
+        const tulipRow=(seed,y,n,colors,scale)=>{ const r=det(seed); let o=''; for(let i=0;i<n;i++){ const x=((1600/n)*i+r()*18-9)|0; const c=colors[(r()*colors.length)|0]; o+=`<g transform='translate(${x},${y}) scale(${scale})'><rect x='-2' y='0' width='4' height='22' fill='#3a9d3a'/><path d='M-8 -4 Q0 -22 8 -4 Q0 2 -8 -4Z' fill='${c}'/></g>`; } return o; };
+        const butterflies=(seed,n)=>{ const r=det(seed); let o=''; for(let i=0;i<n;i++){ const x=(r()*1600)|0, y=(r()*400+220)|0, sc=(r()*0.5+0.6), rot=((r()*30-15))|0; const c=['#ff8cc6','#ffd43b','#74c0fc','#ff922b'][(r()*4)|0]; o+=`<g transform='translate(${x},${y}) rotate(${rot}) scale(${sc.toFixed(2)})' fill='${c}'><ellipse cx='-7' cy='-4' rx='7' ry='10'/><ellipse cx='7' cy='-4' rx='7' ry='10'/><ellipse cx='-6' cy='7' rx='5' ry='7'/><ellipse cx='6' cy='7' rx='5' ry='7'/><rect x='-1' y='-10' width='2' height='20' fill='#3a2418'/></g>`; } return o; };
+        const waves=(seed)=>{ const r=det(seed); let o=''; for(let i=0;i<7;i++){ const y=(450+i*28+((r()*10)|0)); o+=`<path d='M0 ${y} Q 200 ${y-10} 400 ${y} T 800 ${y} T 1200 ${y} T 1600 ${y}' stroke='#ffffff' stroke-width='2.5' fill='none' opacity='${(0.5-i*0.055).toFixed(2)}'/>`; } return o; };
         return [
             { cl:'theme-img-space', name:'🚀 Rymden',
               svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><radialGradient id='s' cx='28%' cy='24%' r='100%'><stop offset='0%' stop-color='#22335c'/><stop offset='60%' stop-color='#101a33'/><stop offset='100%' stop-color='#070b16'/></radialGradient></defs><rect width='1600' height='900' fill='url(#s)'/>${stars(150,1600,900,7,'#ffffff')}<circle cx='1285' cy='205' r='95' fill='#cdd6f4'/><circle cx='1258' cy='185' r='95' fill='#101a33' opacity='0.16'/><circle cx='1305' cy='235' r='13' fill='#9aa6d6' opacity='0.5'/><circle cx='1252' cy='232' r='8' fill='#9aa6d6' opacity='0.5'/></svg>` },
@@ -26367,7 +26385,19 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             { cl:'theme-img-mountains', name:'⛰️ Berg',
               svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='bgm' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe3ff'/><stop offset='100%' stop-color='#eaf6ff'/></linearGradient></defs><rect width='1600' height='900' fill='url(#bgm)'/><circle cx='1320' cy='165' r='60' fill='#fff2b8' opacity='0.9'/>${mtns()}<path d='M0 560 H1600 V900 H0 Z' fill='#dff0e4'/><path d='M0 560 Q 400 612 800 572 T 1600 578 V640 H0 Z' fill='#bfe0c6'/></svg>` },
             { cl:'theme-img-meadow', name:'\U0001F337 Blomsteräng',
-              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='mea' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe6ff'/><stop offset='52%' stop-color='#eafbe8'/><stop offset='100%' stop-color='#b6e389'/></linearGradient></defs><rect width='1600' height='900' fill='url(#mea)'/><circle cx='260' cy='160' r='58' fill='#fff2b0' opacity='0.9'/>${clouds(23)}<path d='M0 700 Q 480 650 980 700 T 1600 695 V900 H0 Z' fill='#9fd968'/>${scatterFlowers(13,700,875,44)}</svg>` }
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='mea' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe6ff'/><stop offset='52%' stop-color='#eafbe8'/><stop offset='100%' stop-color='#b6e389'/></linearGradient></defs><rect width='1600' height='900' fill='url(#mea)'/><circle cx='260' cy='160' r='58' fill='#fff2b0' opacity='0.9'/>${clouds(23)}<path d='M0 700 Q 480 650 980 700 T 1600 695 V900 H0 Z' fill='#9fd968'/>${scatterFlowers(13,700,875,44)}</svg>` },
+            { cl:'theme-img-hills', name:'\U0001F3DE️ Kullar',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='hl' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe3ff'/><stop offset='50%' stop-color='#eaf6ee'/><stop offset='100%' stop-color='#cdeecb'/></linearGradient></defs><rect width='1600' height='900' fill='url(#hl)'/><circle cx='1300' cy='150' r='62' fill='#fff2b8' opacity='0.9'/>${clouds(44)}<path d='M0 480 Q 400 420 800 470 T 1600 450 V900 H0 Z' fill='#cdeecb'/><path d='M0 560 Q 420 500 840 555 T 1600 540 V900 H0 Z' fill='#a9dba0'/><path d='M0 660 Q 460 590 900 650 T 1600 635 V900 H0 Z' fill='#7fc86f'/>${pineLayer(55,660,7,'#5a7d2a','#3f9142',0.5,0.8)}${pineLayer(56,780,5,'#4a6a20','#2f7a34',0.8,1.2)}</svg>` },
+            { cl:'theme-img-sunflower', name:'\U0001F33B Solrosfält',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='sf' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#aee2ff'/><stop offset='55%' stop-color='#eaf6ff'/><stop offset='100%' stop-color='#f7e07a'/></linearGradient></defs><rect width='1600' height='900' fill='url(#sf)'/><circle cx='260' cy='160' r='64' fill='#fff2b0' opacity='0.9'/>${clouds(62)}<path d='M0 620 Q 400 580 800 615 T 1600 605 V900 H0 Z' fill='#dcd15a'/>${sunflowerRow(63,650,9,0.7)}${sunflowerRow(64,740,7,1.0)}${sunflowerRow(65,840,5,1.3)}</svg>` },
+            { cl:'theme-img-tulips', name:'\U0001F337 Tulpanfält',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='tf' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe3ff'/><stop offset='100%' stop-color='#eef8ff'/></linearGradient></defs><rect width='1600' height='900' fill='url(#tf)'/><circle cx='1310' cy='150' r='58' fill='#fff2b8' opacity='0.9'/>${clouds(71)}<path d='M0 560 H1600 V900 H0 Z' fill='#e7f3d9'/><rect x='0' y='590' width='1600' height='55' fill='#ff8787'/><rect x='0' y='645' width='1600' height='55' fill='#ffd43b'/><rect x='0' y='700' width='1600' height='60' fill='#f783ac'/><rect x='0' y='760' width='1600' height='65' fill='#9775fa'/><rect x='0' y='825' width='1600' height='75' fill='#69db7c'/>${tulipRow(76,855,14,['#ff8787','#ffd43b','#f783ac','#9775fa'],1.4)}</svg>` },
+            { cl:'theme-img-wildmeadow', name:'\U0001F98B Vildäng',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='wm' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe6ff'/><stop offset='50%' stop-color='#eafbe8'/><stop offset='100%' stop-color='#9fd968'/></linearGradient></defs><rect width='1600' height='900' fill='url(#wm)'/><circle cx='240' cy='150' r='56' fill='#fff2b0' opacity='0.9'/>${clouds(81)}<path d='M0 680 Q 460 620 920 675 T 1600 660 V900 H0 Z' fill='#8fd35f'/>${grass(82,880,90,50)}${scatterFlowers(83,700,865,55)}${butterflies(84,7)}</svg>` },
+            { cl:'theme-img-pineforest', name:'\U0001F332 Barrskog',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='pf' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#cfe8f0'/><stop offset='60%' stop-color='#e7f3ea'/><stop offset='100%' stop-color='#cfe3c8'/></linearGradient></defs><rect width='1600' height='900' fill='url(#pf)'/><circle cx='1280' cy='150' r='58' fill='#fff6cf' opacity='0.75'/>${pineLayer(91,520,10,'#8aa88a','#a9c9ad',0.4,0.6)}<rect x='0' y='500' width='1600' height='40' fill='#ffffff' opacity='0.35'/>${pineLayer(92,640,8,'#6b8a52','#5c9a5f',0.65,0.9)}<rect x='0' y='620' width='1600' height='36' fill='#ffffff' opacity='0.25'/>${pineLayer(93,800,6,'#4a6a2f','#356b3a',0.95,1.3)}</svg>` },
+            { cl:'theme-img-coast', name:'\U0001F3D6️ Kustlinje',
+              svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='co' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe9ff'/><stop offset='40%' stop-color='#d9f4ff'/><stop offset='100%' stop-color='#2f9fc4'/></linearGradient></defs><rect width='1600' height='900' fill='url(#co)'/><circle cx='300' cy='150' r='60' fill='#fff2b8' opacity='0.9'/>${clouds(101)}<rect x='0' y='420' width='1600' height='250' fill='#4fb3d9'/>${waves(102)}<path d='M0 640 Q 420 590 840 635 T 1600 620 V900 H0 Z' fill='#f5e3b3'/>${grass(103,880,26,34,'#8aa63c')}</svg>` }
         ];
     })();
     function injectBackgroundThemeCSS(){ if(document.getElementById('img-theme-style')) return; const st=document.createElement('style'); st.id='img-theme-style'; st.textContent = IMG_THEMES.map(t=>`#cb-app-wrapper.${t.cl} .canvas-page{background-image:url("data:image/svg+xml,${encodeURIComponent(t.svg)}") !important;background-size:cover !important;background-position:center !important;background-repeat:no-repeat !important;}`).join('\n'); document.head.appendChild(st); }
@@ -26376,14 +26406,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     function createBgSelector(config){
         const body=createWidget('BAKGRUND',260,'',config); body.innerHTML=`<div class='bg-panel'></div>`; const p=body.firstChild;
         const themes = [
-            {n:'Standard',cl:'',sw:'radial-gradient(#ccc 1.5px, transparent 1.5px)',size:'7px 7px',bg:'#fff'},
-            {n:'Linjerat',cl:'theme-lined',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)'},
-            {n:'Rutigt',cl:'theme-grid',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff'},
-            {n:'Mörkt',cl:'theme-dark',sw:'radial-gradient(#444 1px, transparent 1px)',size:'6px 6px',bg:'#222'},
-            {n:'Grön tavla',cl:'theme-chalkboard',sw:'#1e3f20'},
-            {n:'Blank – utan vattenstämpel',cl:'theme-blank no-watermark',sw:'#ffffff',border:'2px solid #d8d8dc'},
-            {n:'Vit rutig – utan vattenstämpel',cl:'theme-grid no-watermark',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff',border:'2px solid #d8d8dc'},
-            {n:'Vit linjär – utan vattenstämpel',cl:'theme-lined no-watermark',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)',border:'2px solid #d8d8dc'}
+            {n:'Standard',cl:'no-watermark',sw:'radial-gradient(#ccc 1.5px, transparent 1.5px)',size:'7px 7px',bg:'#fff'},
+            {n:'Linjerat',cl:'theme-lined no-watermark',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)'},
+            {n:'Rutigt',cl:'theme-grid no-watermark',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff'},
+            {n:'Mörkt',cl:'theme-dark no-watermark',sw:'radial-gradient(#444 1px, transparent 1px)',size:'6px 6px',bg:'#222'},
+            {n:'Grön tavla',cl:'theme-chalkboard no-watermark',sw:'#1e3f20'},
+            {n:'Blank',cl:'theme-blank no-watermark',sw:'#ffffff',border:'2px solid #d8d8dc'},
+            {n:'Vit rutig',cl:'theme-grid no-watermark',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff',border:'2px solid #d8d8dc'},
+            {n:'Vit linjär',cl:'theme-lined no-watermark',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)',border:'2px solid #d8d8dc'}
         ];
         themes.forEach(t=>{
             let d=document.createElement('div'); d.className='bg-dot'; d.title=t.n;
