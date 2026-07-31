@@ -1,9 +1,19 @@
+
+
 <!DOCTYPE html>
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Min Tavla</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Min Tavla">
+    <link rel="apple-touch-icon" href="icon-180-apple.png">
+    <link rel="icon" href="icon-192.png" type="image/png">
 </head>
 <body>
 
@@ -100,6 +110,7 @@
     <style>@keyframes mtSpin{ to { transform: rotate(360deg); } }</style>
 
     <button id="fullscreen-btn" onclick="toggleFullScreen()" title="Helskärm">⛶</button>
+    <button id="pwa-install-btn" onclick="promptPwaInstall()" title="Installera Min Tavla som app" style="display:none;">📲 Installera app</button>
     <div id="canvas-container-v6"></div>
     
 
@@ -406,6 +417,8 @@
     
     #fullscreen-btn { position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); cursor: pointer; font-size: 18px; color: #333; transition: opacity 0.25s ease, background-color 0.2s, transform 0.2s; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; font-weight: bold; opacity: 0.3; }
     #fullscreen-btn:hover { background-color: #e5e5ea; transform: scale(1.05); opacity: 1; }
+    #pwa-install-btn { position: absolute; top: 20px; right: 72px; z-index: 10000; background: #1a73e8; color: #fff; padding: 0 16px; height: 44px; border-radius: 12px; box-shadow: 0 4px 15px rgba(26,115,232,0.35); border: none; cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.2s, opacity 0.2s; opacity: 0.92; }
+    #pwa-install-btn:hover { transform: scale(1.04); opacity: 1; }
 
     #menu-hover-zone { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 9998; }
     #toolbar-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(50px); width: 95%; max-width: 1400px; background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 0, 0, 0.08); padding: 8px 15px; z-index: 9999; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -3033,6 +3046,7 @@
 
         /* Helskärmsknappen ur vägen för mobil-verktygsknappen */
         #fullscreen-btn { top: calc(10px + var(--safe-top)); right: calc(10px + var(--safe-right)); }
+        #pwa-install-btn { top: calc(10px + var(--safe-top)); right: calc(62px + var(--safe-right)); }
 
         /* Sidnavigering nedtill får inte krocka med verktygsknappen */
         #pages-nav-v6 { bottom: calc(150px + var(--safe-bottom)) !important; }
@@ -3992,6 +4006,42 @@
         const appWrapper = document.getElementById('cb-app-wrapper');
         if (!document.fullscreenElement) { appWrapper.requestFullscreen().catch(err => { customAlert('Kunde inte starta helskärmsläge: ' + err.message, '⚠️'); }); }
         else { document.exitFullscreen(); }
+    }
+
+    // ==================== PWA: installera som app ====================
+    // Chrome/Edge/Android skickar 'beforeinstallprompt' när sidan uppfyller kraven
+    // (manifest + service worker + HTTPS). Vi sparar händelsen och visar en egen knapp
+    // istället för webbläsarens standardbanner, så det ser ut som resten av appen.
+    let _pwaDeferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        _pwaDeferredPrompt = e;
+        const btn = document.getElementById('pwa-install-btn');
+        if (btn && !window.matchMedia('(display-mode: standalone)').matches) btn.style.display = 'flex';
+    });
+    window.addEventListener('appinstalled', () => {
+        _pwaDeferredPrompt = null;
+        const btn = document.getElementById('pwa-install-btn'); if (btn) btn.style.display = 'none';
+    });
+    async function promptPwaInstall(){
+        if (!_pwaDeferredPrompt){
+            // iOS Safari (och några andra) stödjer inte beforeinstallprompt - visa instruktion istället.
+            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            if (isIOS) customAlert('Tryck på Dela-ikonen ⬆️ i Safari och välj "Lägg till på hemskärmen" för att installera Min Tavla som en app.', '📲');
+            else customAlert('Appen är redan installerad, eller så stödjer den här webbläsaren inte installation just nu.', 'ℹ️');
+            return;
+        }
+        const btn = document.getElementById('pwa-install-btn'); if (btn) btn.style.display = 'none';
+        _pwaDeferredPrompt.prompt();
+        try { await _pwaDeferredPrompt.userChoice; } catch(e){}
+        _pwaDeferredPrompt = null;
+    }
+    // Registrera service worker (krävs för installation + offline-cache). Görs sist och tyst -
+    // om den skulle misslyckas (t.ex. filen saknas på servern) påverkar det aldrig resten av appen.
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.warn('[MinTavla] Service worker kunde inte registreras (PWA-installation fungerar då inte, men appen funkar som vanligt i webbläsaren):', err));
+        });
     }
 
     // Lokalt läge (offline-versionen): används både vid start och när man
@@ -5091,7 +5141,7 @@
         }
         if(config && config.data && config.data.rows) config.data.rows.forEach(r => addRow(r.time, r.task, r.icon||'skriv', r.color, r.fav, r.note));
         else { addRow('08:00','Morgonsamling','samling','#e5e5ea'); addRow('09:00','Matematik','matte','#e5e5ea'); addRow('10:30','Svenska','abc','#e5e5ea'); }
-        const act = document.createElement('div'); act.className='hover-menu'; act.style.cssText='padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;'; const ab=document.createElement('button'); ab.className='btn btn-primary'; ab.innerText='+ Rad'; ab.onclick=()=>{ const forstaTid = cont.querySelectorAll('.schedule-row').length===0 ? '08:00' : '08:30'; addRow(forstaTid,'Lektion','skriv','#e5e5ea');updateScheduleStatus();saveBoardState();};
+        const act = document.createElement('div'); act.style.cssText='padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;'; const ab=document.createElement('button'); ab.className='btn btn-primary hover-menu'; ab.innerText='+ Rad'; ab.onclick=()=>{ const forstaTid = cont.querySelectorAll('.schedule-row').length===0 ? '08:00' : '08:30'; addRow(forstaTid,'Lektion','skriv','#e5e5ea');updateScheduleStatus();saveBoardState();};
         const digClock = document.createElement('div'); digClock.className='btn btn-primary sched-dig-clock'; digClock.style.cssText='cursor:default;'; digClock.textContent='--:--';
         function updateSchedDigClock(){ const now=new Date(); digClock.textContent = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'); }
         updateSchedDigClock(); digClockInterval = setInterval(updateSchedDigClock, 1000);
@@ -11181,7 +11231,7 @@
     function createTermPlan(config){
         const body = createWidget('TERMINSSCHEMA', 900, 'termplan-widget', config);
         const widgetEl = body.parentElement.parentElement;
-        if(!config){ widgetEl.style.height = '600px'; }
+        if(!config){ widgetEl.style.height = '480px'; }
 
         const nowWeek = termIsoWeek(new Date());
         let tp = { termin:'ht', startWeek: nowWeek, numWeeks: 15, subjects: [
