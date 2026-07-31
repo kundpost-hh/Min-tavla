@@ -279,6 +279,7 @@
             <button class="tool-btn" onclick="createImageWidget()"><div class="icon">🖼️</div><div class="label">Bild</div></button>
             <button class="tool-btn" onclick="createVideoWidget()"><div class="icon">🎬</div><div class="label">Video</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createWeekSchedule()"><div class="icon">🗓️</div><div class="label">Veckoschema</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createTermPlan()"><div class="icon">📆</div><div class="label">Terminsschema</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createChecklist()"><div class="icon">✅</div><div class="label">Checklista</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
@@ -2309,6 +2310,55 @@
     .video-controls { margin-top:8px; }
     .video-hint { font-size:10px; color:#b0b0b6; margin-top:5px; text-align:center; line-height:1.4; }
 
+    /* TERMINSSCHEMA */
+    .termplan-widget .widget-body { overflow: auto; }
+    .tp-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px 4px 10px; }
+    .tp-lbl { font-size:11.5px; font-weight:700; color:#555; display:flex; align-items:center; gap:4px; }
+    .tp-lbl input[type=number] { width:48px; padding:4px 5px; border:1px solid #d1d1d6; border-radius:6px; font-size:12px; text-align:center; }
+    .tp-grid-wrap { overflow:auto; max-height:520px; border:1px solid #e5e5ea; border-radius:10px; }
+    .tp-table { border-collapse:separate; border-spacing:0; width:max-content; min-width:100%; }
+    .tp-table th, .tp-table td { border-right:1px solid #eee; border-bottom:1px solid #eee; padding:0; }
+    .tp-corner { position:sticky; left:0; top:0; z-index:3; background:#f2f2f7; min-width:150px; }
+    .tp-week-head { position:sticky; top:0; z-index:2; background:#f2f2f7; font-size:11.5px; font-weight:800; color:#333; padding:8px 6px !important; min-width:74px; text-align:center; white-space:nowrap; }
+    .tp-week-head.tp-current-week { background:#dcefff; color:#007aff; }
+    .tp-subj-cell { position:sticky; left:0; z-index:1; background:#fff; min-width:150px; display:flex; align-items:center; gap:6px; padding:6px 8px !important; }
+    .tp-subj-strip { width:9px; height:9px; border-radius:50%; flex-shrink:0; cursor:pointer; }
+    .tp-subj-name { flex:1; min-width:0; border:none; background:transparent; font-weight:700; font-size:12.5px; padding:4px; outline:none; }
+    .tp-subj-name:focus { background:#f2f2f7; border-radius:6px; }
+    .tp-row-del { background:none; border:none; color:#ff3b30; cursor:pointer; font-size:12px; padding:2px; flex-shrink:0; }
+    .tp-cell { min-width:74px; }
+    .tp-cell.tp-current-week { background:#f2f8ff; }
+    .tp-cell.tp-cell-filled { background:#fff9ec; }
+    .tp-cell.tp-cell-filled.tp-current-week { background:#f4f4ff; }
+    .tp-cell-input { width:100%; box-sizing:border-box; border:none; background:transparent; font-size:12px; padding:8px 6px; outline:none; text-align:center; }
+    .tp-cell-input:focus { background:#fff8e6; }
+    .tp-cell-btn { width:100%; box-sizing:border-box; border:none; background:transparent; font-size:12px; padding:9px 6px; cursor:pointer; text-align:left; color:#1d1d1f; font-family:inherit; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+    .tp-cell-btn:hover { background:#fff8e6; }
+    .tp-cell-btn.tp-cell-empty { color:#c7c7cc; text-align:center; }
+    .tp-cell-btn.tp-cell-empty.tp-cell-has-text { color:#909096; font-weight:800; }
+    .tp-cell-btn.tp-cell-center { text-align:center; }
+    .tp-flags-row { display:flex; gap:6px; flex-wrap:wrap; }
+    .tp-cell-btn.tp-cell-selected { outline:2px solid #007aff; outline-offset:-2px; background:#eaf3ff; }
+    .tp-detail-panel { margin-top:14px; padding:14px 16px; border:1.5px solid #e5e5ea; border-radius:14px; background:#fafafa; min-height:150px; box-sizing:border-box; }
+    .tp-detail-empty { color:#999; font-size:13px; text-align:center; padding:26px 10px; }
+    .tp-detail-hd { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+    .tp-detail-title { font-weight:800; font-size:14.5px; color:#1d1d1f; flex-shrink:0; }
+    .tp-detail-textarea { width:100%; box-sizing:border-box; min-height:100px; border:1.5px solid #d1d1d6; border-radius:10px; padding:10px; font-size:13px; font-family:inherit; resize:vertical; outline:none; }
+    .tp-detail-textarea:focus { border-color:#007aff; }
+    .tp-flag-chip { display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; color:#555; background:#f2f2f7; border:1.5px solid #e5e5ea; border-radius:20px; padding:4px 9px 4px 7px; cursor:pointer; user-select:none; }
+    .tp-flag-chip input { margin:0; }
+    /* Samma färgspråk som resten av appen: rött = viktigt/kritiskt (som Sant/Falskt-widgetens "falskt"),
+       orange = påminnelse/deadline (samma orange som Kalenderns egen anteckningsprick),
+       grått = neutralt/övrigt. */
+    .tp-flag-chip.tp-flag-prov.checked { background:#ffe5e3; border-color:#ff3b30; color:#c62a20; }
+    .tp-flag-chip.tp-flag-inlamning.checked { background:#fff1dc; border-color:#ff9500; color:#a15f00; }
+    .tp-flag-chip.tp-flag-annat.checked { background:#eee; border-color:#8e8e93; color:#48484a; }
+    .tp-cell-dots { display:inline-flex; gap:2px; margin-right:4px; vertical-align:middle; }
+    .tp-cell-dot { width:7px; height:7px; border-radius:50%; display:inline-block; box-shadow:0 0 0 1.5px #fff; }
+    .tp-cell-dot.tp-dot-prov { background:#ff3b30; }
+    .tp-cell-dot.tp-dot-inlamning { background:#ff9500; }
+    .tp-cell-dot.tp-dot-annat { background:#8e8e93; }
+
     /* VECKOSCHEMA */
     .week-widget { min-width:680px; }
     .week-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
@@ -4152,6 +4202,7 @@
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VIDEO') { state.data.kind = w.dataset.videoKind || ''; state.data.src = w.dataset.videoSrc || ''; }
+                else if (type === 'TERMINSSCHEMA') { try{ state.data = JSON.parse(w.dataset.termplan || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'VECKOSCHEMA') {
                     const conts = [...w.querySelectorAll('.week-rows')];
                     state.data.days = conts.map(cont => [...cont.querySelectorAll('.week-row')].map(r => ({
@@ -4264,6 +4315,7 @@
             else if (w.type === 'BILD') createImageWidget(w);
             else if (w.type === 'VIDEO') createVideoWidget(w);
             else if (w.type === 'VECKOSCHEMA') createWeekSchedule(w);
+            else if (w.type === 'TERMINSSCHEMA') createTermPlan(w);
             else if (w.type === 'CHECKLISTA') createChecklist(w);
             else if (w.type === 'SLUMPA-HJUL') createWheel(w);
             else if (w.type === 'DAGENS ORD') createWordOfTheDay(w);
@@ -10921,7 +10973,8 @@
             const cs = document.createElement('div'); cs.className='schedule-color-strip'; cs.dataset.color=startColor; cs.dataset.manual=manualColor?'1':'0'; cs.style.backgroundColor=startColor;
             cs.onclick=()=>{ const cl=SCHEDULE_COLOR_CYCLE; let idx=(cl.indexOf(cs.dataset.color)+1)%cl.length; cs.dataset.color=cl[idx]; cs.dataset.manual='1'; cs.style.backgroundColor=cl[idx]; saveBoardState(); };
             const tinS = document.createElement('input'); tinS.className='week-time-input week-time-start'; tinS.value=startTi||''; tinS.placeholder='Start'; tinS.title='Starttid (t.ex. 08:00)';
-            tinS.oninput=()=>{ sortDayRows(dayIdx); saveBoardState(); };
+            tinS.oninput=saveBoardState; // spara varje tecken, men sortera INTE här - det skulle rycka bort fokus mitt i skrivandet
+            tinS.addEventListener('blur', ()=> sortDayRows(dayIdx));
             const sep = document.createElement('span'); sep.className='week-time-sep'; sep.textContent='–';
             const tinE = document.createElement('input'); tinE.className='week-time-input week-time-end'; tinE.value=endTi||''; tinE.placeholder='Slut'; tinE.title='Sluttid (t.ex. 08:45)';
             tinE.oninput=saveBoardState;
@@ -11110,6 +11163,265 @@
             html += '</div>';
         });
         html += '</div><div style="margin-top:24px;text-align:center;font-size:11px;color:#999;"><a href="https://www.min-tavla.se" style="color:#999;text-decoration:none;">www.min-tavla.se</a></div></body></html>';
+        w.document.write(html); w.document.close();
+        setTimeout(()=>{ try{ w.print(); }catch(e){} }, 300);
+    }
+
+    // ==== TERMINSSCHEMA ====
+    // Enkel första version: ämnesrader × veckokolumner för hela terminen, så man ser vad som
+    // är planerat i varje ämne över tid (skiljer sig från Veckoschema som är en återkommande
+    // vecka, och från Kalender som är datumspecifik). Byggd för att kunna vidareutvecklas.
+    function termIsoWeek(d){
+        const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        const day = date.getUTCDay() || 7;
+        date.setUTCDate(date.getUTCDate() + 4 - day);
+        const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+        return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+    function createTermPlan(config){
+        const body = createWidget('TERMINSSCHEMA', 900, 'termplan-widget', config);
+        const widgetEl = body.parentElement.parentElement;
+        if(!config){ widgetEl.style.height = '600px'; }
+
+        const nowWeek = termIsoWeek(new Date());
+        let tp = { termin:'ht', startWeek: nowWeek, numWeeks: 15, subjects: [
+            { name:'Matte', color:'#e5e5ea', cells:[] },
+            { name:'Svenska', color:'#e5e5ea', cells:[] },
+            { name:'SO', color:'#e5e5ea', cells:[] }
+        ] };
+        if(config && config.data && Array.isArray(config.data.subjects)){ tp = Object.assign(tp, config.data); }
+
+        function persist(){ widgetEl.dataset.termplan = JSON.stringify(tp); saveBoardState(); }
+
+        body.innerHTML = `
+            <div class='tp-toolbar'>
+                <select class='tp-termin editor-select'><option value='ht'>Höstterminen</option><option value='vt'>Vårterminen</option></select>
+                <label class='tp-lbl'>Startvecka <input type='number' class='tp-startweek' min='1' max='53'></label>
+                <label class='tp-lbl'>Antal veckor <input type='number' class='tp-numweeks' min='1' max='40'></label>
+                <button type='button' class='tp-add-subject btn btn-primary'>+ Ämne</button>
+                <button type='button' class='tp-share btn btn-secondary'>🔗 Dela</button>
+                <button type='button' class='tp-print btn btn-secondary'>🖨️ Skriv ut</button>
+            </div>
+            <div class='tp-grid-wrap'><table class='tp-table'><thead><tr class='tp-head-row'></tr></thead><tbody></tbody></table></div>
+            <div class='tp-detail-panel'>
+                <div class='tp-detail-empty'>👆 Klicka på en ruta i schemat ovan för att läsa, skriva eller redigera detaljer här.</div>
+                <div class='tp-detail-active' style='display:none;'>
+                    <div class='tp-detail-hd'><span class='tp-detail-title'></span><div class='tp-flags-row'></div></div>
+                    <textarea class='tp-detail-textarea' placeholder='Skriv detaljer om vad som ska hända denna vecka – t.ex. planering, prov, läxor eller länkar...'></textarea>
+                </div>
+            </div>`;
+
+        const selTermin = body.querySelector('.tp-termin'), inpStart = body.querySelector('.tp-startweek'), inpNum = body.querySelector('.tp-numweeks');
+        const headRow = body.querySelector('.tp-head-row'), tbody = body.querySelector('tbody');
+        const detailEmpty = body.querySelector('.tp-detail-empty'), detailActive = body.querySelector('.tp-detail-active');
+        const detailTitle = body.querySelector('.tp-detail-title'), detailFlags = body.querySelector('.tp-detail-active .tp-flags-row'), detailTa = body.querySelector('.tp-detail-textarea');
+        selTermin.value = tp.termin; inpStart.value = tp.startWeek; inpNum.value = tp.numWeeks;
+
+        function weekNumbers(){
+            const arr = []; for(let i=0;i<tp.numWeeks;i++){ arr.push(((tp.startWeek - 1 + i) % 52) + 1); } return arr;
+        }
+
+        // Normaliserar en cell till {text, prov, inlamning, annat} - stöder gamla sparade celler
+        // som bara var en textsträng (bakåtkompatibelt), och skriver alltid tillbaka objektet.
+        function getCellData(subj, wi){
+            if(!subj.cells) subj.cells=[];
+            let c = subj.cells[wi];
+            if(!c || typeof c === 'string'){ c = { text: c||'', prov:false, inlamning:false, annat:false }; subj.cells[wi]=c; }
+            if(typeof c.prov!=='boolean') c.prov=false;
+            if(typeof c.inlamning!=='boolean') c.inlamning=false;
+            if(typeof c.annat!=='boolean') c.annat=false;
+            return c;
+        }
+
+        // ---- Detaljpanel: klicka på en ruta i rutnätet, panelen längst ner öppnas för just den
+        // rutan (istället för en popup) - man kan läsa/skriva/redigera samt kryssa i markeringar. ----
+        let selectedBtn = null, selectedSubj = null, selectedWi = null;
+        function selectCell(subj, wi, weekNum, cellData, setPreview, btn){
+            if(selectedBtn) selectedBtn.classList.remove('tp-cell-selected');
+            selectedBtn = btn; selectedSubj = subj; selectedWi = wi; btn.classList.add('tp-cell-selected');
+            detailEmpty.style.display='none'; detailActive.style.display='block';
+            detailTitle.textContent = (subj.name||'Ämne') + ' – v.' + weekNum;
+            detailFlags.innerHTML = '';
+            const mkFlag = (key, label, emoji)=>{
+                const lbl = document.createElement('label'); lbl.className='tp-flag-chip tp-flag-'+key+(cellData[key]?' checked':'');
+                const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = !!cellData[key];
+                cb.onchange = ()=>{ cellData[key]=cb.checked; lbl.classList.toggle('checked', cb.checked); persist(); setPreview(); };
+                lbl.appendChild(cb); lbl.appendChild(document.createTextNode(' '+emoji+' '+label));
+                return lbl;
+            };
+            detailFlags.appendChild(mkFlag('prov','Prov','📝'));
+            detailFlags.appendChild(mkFlag('inlamning','Inlämning','📤'));
+            detailFlags.appendChild(mkFlag('annat','Annat','❗'));
+            detailTa.value = cellData.text || '';
+            detailTa.oninput = ()=>{ cellData.text = detailTa.value; persist(); setPreview(); };
+            detailTa.focus();
+        }
+        function clearSelection(){
+            if(selectedBtn) selectedBtn.classList.remove('tp-cell-selected');
+            selectedBtn = null; selectedSubj = null; selectedWi = null;
+            detailActive.style.display='none'; detailEmpty.style.display='block';
+        }
+
+        function renderGrid(){
+            clearSelection();
+            const weeks = weekNumbers();
+            headRow.innerHTML = "<th class='tp-corner'></th>" + weeks.map(w => "<th class='tp-week-head"+(w===nowWeek?' tp-current-week':'')+"'>v."+w+"</th>").join('');
+            tbody.innerHTML = '';
+            tp.subjects.forEach((subj, si) => {
+                const tr = document.createElement('tr'); tr.className='tp-subject-row';
+                const tdName = document.createElement('td'); tdName.className='tp-subj-cell';
+                if(!subj.manualColor){ const auto = matchSubjectColor(subj.name); if(auto) subj.color = auto; }
+                const strip = document.createElement('span'); strip.className='tp-subj-strip'; strip.style.background = subj.color || SCHEDULE_DEFAULT_COLOR; strip.dataset.manual = subj.manualColor ? '1' : '0';
+                strip.onclick = ()=>{ const cl=SCHEDULE_COLOR_CYCLE; let idx=(cl.indexOf(subj.color)+1)%cl.length; subj.color=cl[idx]; subj.manualColor=true; strip.style.background=subj.color; persist(); };
+                const nameInp = document.createElement('input'); nameInp.className='tp-subj-name'; nameInp.value = subj.name; nameInp.placeholder='Ämne';
+                nameInp.oninput = ()=>{
+                    subj.name = nameInp.value;
+                    if(!subj.manualColor){ const next = matchSubjectColor(subj.name) || SCHEDULE_DEFAULT_COLOR; subj.color = next; strip.style.background = next; }
+                    if(selectedSubj === subj){ const wn = weekNumbers()[selectedWi]; detailTitle.textContent = (subj.name||'Ämne') + ' – v.' + wn; }
+                    persist();
+                };
+                const delBtn = document.createElement('button'); delBtn.type='button'; delBtn.className='tp-row-del row-hover-menu'; delBtn.textContent='✕'; delBtn.title='Ta bort ämnesrad';
+                delBtn.onclick = ()=>{ tp.subjects.splice(si,1); persist(); renderGrid(); };
+                tdName.appendChild(strip); tdName.appendChild(nameInp); tdName.appendChild(delBtn);
+                tr.appendChild(tdName);
+                weeks.forEach((w, wi) => {
+                    const td = document.createElement('td'); td.className='tp-cell'+(w===nowWeek?' tp-current-week':'');
+                    const btn = document.createElement('button'); btn.type='button'; btn.className='tp-cell-btn';
+                    const cellData = getCellData(subj, wi);
+                    const setPreview = ()=>{
+                        const hasText = !!(cellData.text && cellData.text.trim());
+                        const dots = [];
+                        if(cellData.prov) dots.push("<span class='tp-cell-dot tp-dot-prov'></span>");
+                        if(cellData.inlamning) dots.push("<span class='tp-cell-dot tp-dot-inlamning'></span>");
+                        if(cellData.annat) dots.push("<span class='tp-cell-dot tp-dot-annat'></span>");
+                        btn.classList.remove('tp-cell-empty','tp-cell-center','tp-cell-has-text');
+                        td.classList.toggle('tp-cell-filled', hasText || dots.length>0);
+                        if(!dots.length){ btn.textContent='+'; btn.classList.add('tp-cell-empty'); if(hasText) btn.classList.add('tp-cell-has-text'); }
+                        else { btn.innerHTML = "<span class='tp-cell-dots'>"+dots.join('')+"</span>"; btn.classList.add('tp-cell-center'); }
+                        const tags=[]; if(cellData.prov) tags.push('Prov'); if(cellData.inlamning) tags.push('Inlämning'); if(cellData.annat) tags.push('Annat');
+                        let tip = cellData.text || '';
+                        if(tags.length) tip = (tip?tip+'\n':'')+'🔖 '+tags.join(', ');
+                        btn.title = tip || 'Klicka för att lägga till detaljer';
+                    };
+                    setPreview();
+                    btn.onclick = ()=> selectCell(subj, wi, w, cellData, setPreview, btn);
+                    td.appendChild(btn); tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+        renderGrid();
+
+        // I vila (musen lämnar widgeten): nollställ vald ruta/panel till standardläge, precis
+        // som övriga widgetar i appen - fokus ska inte bli kvar i en ruta som inte längre hovras.
+        widgetEl.addEventListener('mouseleave', ()=>{
+            if(document.activeElement === detailTa) detailTa.blur();
+            clearSelection();
+        });
+
+        // ---- Dela/importera: en kod med hela terminsplanen som kan skickas till en specifik
+        // kollega, som klistrar in den i sin egen Terminsschema-widget. (Det finns inget
+        // konto-till-konto-delningssystem i appen, så det här är den praktiska motsvarigheten -
+        // ingen realtidssynk mellan olika inloggningar, men innehållet går att dela exakt.) ----
+        function openShareDialog(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(480px,96vw)';
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='🔗 Dela terminsschema'; box.appendChild(title);
+            const info=document.createElement('div'); info.className='kw-ai-help'; info.style.textAlign='center'; info.style.marginBottom='10px';
+            info.textContent='Delar ni redan samma inloggning/tavla ser ni denna widget live utan vidare - detta är till för att skicka innehållet till en kollega med en ANNAN inloggning. Kopiera koden och skicka den (mejl/chatt); de klistrar in den under "Importera" nedan.';
+            box.appendChild(info);
+            const code = btoa(unescape(encodeURIComponent(JSON.stringify(tp))));
+            const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.style.minHeight='90px'; ta.readOnly=true; ta.value=code; box.appendChild(ta);
+            const status=document.createElement('div'); status.className='kw-ai-status';
+            const row=document.createElement('div'); row.className='kw-btnrow'; row.style.marginTop='8px';
+            const copyBtn=document.createElement('button'); copyBtn.className='kw-btn kw-btn-primary'; copyBtn.textContent='📋 Kopiera kod';
+            copyBtn.onclick=()=>{ try{ navigator.clipboard.writeText(code).then(()=>{ status.textContent='✅ Koden är kopierad!'; }, ()=>{ ta.select(); status.textContent='Markera och kopiera koden manuellt (Ctrl/Cmd+C).'; }); }catch(e){ ta.select(); status.textContent='Markera och kopiera koden manuellt.'; } };
+            row.appendChild(copyBtn); box.appendChild(row); box.appendChild(status);
+
+            const orEl=document.createElement('div'); orEl.className='kw-ai-or'; orEl.textContent='— ELLER TA EMOT EN KOD —'; box.appendChild(orEl);
+            const importTa=document.createElement('textarea'); importTa.className='kw-ai-ta'; importTa.style.minHeight='90px'; importTa.placeholder='Klistra in en kod du fått från en kollega här...'; box.appendChild(importTa);
+            const importStatus=document.createElement('div'); importStatus.className='kw-ai-status';
+            const importHint=document.createElement('div'); importHint.className='kw-ai-help'; importHint.style.margin='4px 0 0';
+            importHint.textContent='OBS: det finns ingen live-samredigering mellan olika inloggningar i appen - det här är en engångsimport av innehållet. Du väljer om det ska ersätta det du redan har, eller läggas till som en egen, separat widget så du behåller båda.';
+            box.appendChild(importHint);
+            function parseShareCode(){
+                const raw=importTa.value.trim(); if(!raw){ importStatus.textContent='Klistra in en kod först.'; return null; }
+                let parsed=null;
+                try{ parsed=JSON.parse(decodeURIComponent(escape(atob(raw)))); }catch(e){ parsed=null; }
+                if(!parsed || !Array.isArray(parsed.subjects)){ importStatus.textContent='⚠️ Koden gick inte att läsa. Kontrollera att hela koden kopierades med.'; return null; }
+                return parsed;
+            }
+            const importRow=document.createElement('div'); importRow.className='kw-btnrow'; importRow.style.marginTop='8px'; importRow.style.flexWrap='wrap';
+            const replaceBtn=document.createElement('button'); replaceBtn.className='kw-btn kw-btn-ai'; replaceBtn.textContent='🔁 Ersätt det här schemat';
+            replaceBtn.onclick=()=>{
+                const parsed=parseShareCode(); if(!parsed) return;
+                close();
+                customConfirm('Ersätta det här terminsschemat med det importerade? Det du redan har skrivit här försvinner.', ()=>{
+                    tp = parsed;
+                    selTermin.value = tp.termin||'ht'; inpStart.value = tp.startWeek||nowWeek; inpNum.value = tp.numWeeks||15;
+                    persist(); renderGrid();
+                });
+            };
+            const keepBothBtn=document.createElement('button'); keepBothBtn.className='kw-btn kw-btn-primary'; keepBothBtn.textContent='➕ Behåll båda (ny widget bredvid)';
+            keepBothBtn.onclick=()=>{
+                const parsed=parseShareCode(); if(!parsed) return;
+                const nx = (widgetEl.offsetLeft||0) + 40, ny = (widgetEl.offsetTop||0) + 40;
+                createTermPlan({ x:nx, y:ny, w: widgetEl.offsetWidth||900, h: widgetEl.offsetHeight||380, data: parsed });
+                close();
+            };
+            importRow.appendChild(replaceBtn); importRow.appendChild(keepBothBtn); box.appendChild(importRow); box.appendChild(importStatus);
+
+            const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
+            const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Stäng'; cancel.onclick=close; foot.appendChild(cancel); box.appendChild(foot);
+
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        selTermin.onchange = ()=>{ tp.termin = selTermin.value; persist(); };
+        inpStart.onchange = ()=>{ tp.startWeek = Math.max(1, Math.min(53, parseInt(inpStart.value)||1)); inpStart.value = tp.startWeek; persist(); renderGrid(); };
+        inpNum.onchange = ()=>{ tp.numWeeks = Math.max(1, Math.min(40, parseInt(inpNum.value)||1)); inpNum.value = tp.numWeeks; persist(); renderGrid(); };
+        body.querySelector('.tp-add-subject').onclick = ()=>{ tp.subjects.push({ name:'', color:SCHEDULE_DEFAULT_COLOR, cells:[] }); persist(); renderGrid(); const last=body.querySelectorAll('.tp-subj-name'); if(last.length) last[last.length-1].focus(); };
+        body.querySelector('.tp-share').onclick = openShareDialog;
+        body.querySelector('.tp-print').onclick = ()=> printTermPlan(tp, weekNumbers());
+    }
+
+    function printTermPlan(tp, weeks){
+        const w = window.open('', '_blank'); if(!w) return;
+        const terminLabel = tp.termin==='vt' ? 'Vårterminen' : 'Höstterminen';
+        let html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Terminsschema</title><style>'
+            + '@page{ size:portrait; margin:16mm; } body{font-family:Segoe UI,Arial,sans-serif;padding:0;color:#1d1d1f;} '
+            + 'h1{margin:0 0 2px;font-size:22px;} .sub{color:#666;margin-bottom:22px;font-size:13px;} '
+            + '.subj{margin-bottom:20px; page-break-inside:avoid;} '
+            + '.subj-hd{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;border-bottom:2px solid #eee;padding-bottom:4px;margin-bottom:8px;} '
+            + '.strip{display:inline-block;width:12px;height:12px;border-radius:3px;flex-shrink:0;} '
+            + '.wk-row{display:flex;gap:10px;padding:6px 2px;border-bottom:1px solid #f2f2f2;} '
+            + '.wk-num{width:46px;flex-shrink:0;font-weight:700;color:#444;} '
+            + '.wk-body{flex:1;} .wk-tags{font-size:11px;font-weight:700;color:#a15f00;margin-top:2px;} '
+            + '.empty-note{color:#999;font-size:12.5px;font-style:italic;padding:4px 2px;} '
+            + '@media print{ .strip{ -webkit-print-color-adjust:exact; print-color-adjust:exact; } }'
+            + '</style></head><body>';
+        html += '<h1>📆 Terminsschema</h1><div class="sub">'+terminLabel+' · v.'+weeks[0]+'–v.'+weeks[weeks.length-1]+'</div>';
+        tp.subjects.forEach(subj=>{
+            html += '<div class="subj"><div class="subj-hd"><span class="strip" style="background:'+(subj.color||'#e5e5ea')+'"></span>'+(subj.name||'(namnlöst ämne)').replace(/</g,'&lt;')+'</div>';
+            let anyFilled = false;
+            weeks.forEach((wn,wi)=>{
+                const raw = (subj.cells && subj.cells[wi]) || '';
+                const c = (typeof raw === 'string') ? { text:raw, prov:false, inlamning:false, annat:false } : raw;
+                const hasText = !!(c.text && c.text.trim());
+                const tags=[]; if(c.prov) tags.push('📝 Prov'); if(c.inlamning) tags.push('📤 Inlämning'); if(c.annat) tags.push('❗ Annat');
+                if(!hasText && !tags.length) return; // hoppa över tomma veckor - det är därför utskriften kändes tom
+                anyFilled = true;
+                html += '<div class="wk-row"><div class="wk-num">v.'+wn+'</div><div class="wk-body">'
+                    + (hasText ? c.text.replace(/</g,'&lt;').replace(/\n/g,'<br>') : '<span style="color:#bbb;">(ingen text, bara markering)</span>')
+                    + (tags.length ? '<div class="wk-tags">'+tags.join(' · ')+'</div>' : '')
+                    + '</div></div>';
+            });
+            if(!anyFilled) html += '<div class="empty-note">Inget planerat ännu för v.'+weeks[0]+'–v.'+weeks[weeks.length-1]+'.</div>';
+            html += '</div>';
+        });
+        html += '</body></html>';
         w.document.write(html); w.document.close();
         setTimeout(()=>{ try{ w.print(); }catch(e){} }, 300);
     }
