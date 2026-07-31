@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -2407,6 +2405,15 @@
     .row-fav-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px 3px; flex-shrink: 0; line-height: 1; opacity: .6; }
     .row-fav-btn:hover { opacity: 1; }
     .row-fav-btn[data-fav="1"] { opacity: 1; }
+    .schedule-widget .schedule-task-wrap { flex: 1 1 auto; min-width: 60px; display: flex; flex-direction: column; gap: 3px; }
+    .schedule-widget .sched-hw-badge { display: none; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; width: fit-content; }
+    .schedule-widget .sched-hw-badge.type-laxa { display: inline-block; background: #fff4e0; color: #b25f00; }
+    .schedule-widget .sched-hw-badge.type-prov { display: inline-block; background: #ffe9e9; color: #c62828; }
+    .row-hw-btn.has-hw { opacity: 1 !important; }
+    .sched-hw-type-btn { flex: 1; padding: 8px 6px; border-radius: 8px; border: 1.5px solid #d1d1d6; background: #fff; cursor: pointer; font-size: 13px; font-weight: 700; color: #3a3a3c; }
+    .sched-hw-type-btn.active[data-type="laxa"] { background: #fff4e0; border-color: #ff9500; color: #b25f00; }
+    .sched-hw-type-btn.active[data-type="prov"] { background: #ffe9e9; border-color: #ff3b30; color: #c62828; }
+    .sched-hw-type-btn.active[data-type=""] { background: #f2f2f7; border-color: #8e8e93; color: #48484a; }
     .week-row .schedule-icon-select { width:28px; height:28px; padding:2px; }
     .week-add-row { display:block; width:calc(100% - 12px); margin:0 6px 8px; padding:6px; border:1.5px dashed #d1d1d6; background:none; border-radius:8px; color:#8a8a90; font-weight:700; font-size:11.5px; cursor:pointer; font-family:inherit; }
     .week-add-row:hover { border-color:#007aff; color:#007aff; }
@@ -4190,7 +4197,7 @@
 
                 if (type === 'KLISTERLAPP') { state.data.title = w.querySelector('.sticky-title-input')?.value || ''; state.data.text = w.querySelector('.sticky-textarea')?.value || ''; }
                 else if (type === 'TEXTEDITOR') { state.data.html = w.querySelector('.editor-content')?.innerHTML || ''; }
-                else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.dataset.icon || 'skriv', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea', fav: r.querySelector('.row-fav-btn')?.dataset.fav === '1', note: r.querySelector('.week-note-btn')?.dataset.note || '' }); }); }
+                else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.dataset.icon || 'skriv', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea', fav: r.querySelector('.row-fav-btn')?.dataset.fav === '1', note: r.querySelector('.week-note-btn')?.dataset.note || '', hw: { type: r.querySelector('.row-hw-btn')?.dataset.hwType || '', text: r.querySelector('.row-hw-btn')?.dataset.hwText || '' } }); }); }
                 else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; const clk = w.querySelectorAll('.lesson-clock .pclock-digital'); const pT=(el)=>{ const t=(el?.textContent||'08:00').split(':'); return {h:(parseInt(t[0])||0)%24, m:parseInt(t[1])||0}; }; if(clk[0]) state.data.clock1=pT(clk[0]); if(clk[1]) state.data.clock2=pT(clk[1]); }
                 else if (type === 'SKAPA GRUPPER' || type === 'SLUMPA NAMN' || type === 'DAGENS ORD') { state.data.list = w.querySelector('select')?.value || ''; state.data.text = w.querySelector('.name-input')?.value || ''; if(type === 'SKAPA GRUPPER') { state.data.count = w.querySelector('input[type="number"]')?.value || '4'; state.data.result = w.querySelector('.group-result')?.innerHTML || ''; } if(type === 'SLUMPA NAMN') { state.data.removeCb = w.querySelector('input[type="checkbox"]')?.checked || false; } if(type === 'DAGENS ORD') { state.data.result = w.querySelector('.name-result')?.innerHTML || ''; } }
                 else if (type === 'BEGREPPSKORT') { try{ state.data = JSON.parse(w.dataset.begrepp || '{}'); }catch(e){ state.data={}; } }
@@ -4919,7 +4926,7 @@
     function linkifyText(s){ return escapeHtml(s).replace(/(https?:\/\/[^\s]+)/g, function(u){ return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>'; }); }
     function feedSeenKey(){ return 'mintavla_feedSeen_'+currentUser; }
     function setupFeedListener(){
-        if(!window.cloudReady || !fbDB){ renderFeed(); return; }
+        if(!window.cloudReady || !fbDB || window.isGuestMode){ renderFeed(); return; }
         if(feedListening) return; feedListening = true;
         try {
             fbDB.collection('feed').orderBy('ts','desc').limit(60).onSnapshot(snap => {
@@ -4933,6 +4940,7 @@
         const el = document.getElementById('sp-feed'); if(!el) return;
         const compose = document.getElementById('sp-feed-compose');
         if(!window.cloudReady){ el.innerHTML = '<div class="sp-empty">Flödet fungerar på webben när du är inloggad.</div>'; if(compose) compose.style.display='none'; return; }
+        if(window.isGuestMode){ el.innerHTML = '<div class="sp-empty">Personalflödet är avstängt i gästläget – inget sparas här.</div>'; if(compose) compose.style.display='none'; return; }
         if(compose) compose.style.display='';
         if(feedMessages.length===0){ el.innerHTML = '<div class="sp-empty">Inga inlägg än – skriv det första!</div>'; return; }
         el.innerHTML='';
@@ -4951,6 +4959,7 @@
         const inp = document.getElementById('sp-feed-input'); const text = (inp.value||'').trim();
         if(!text) return;
         if(!window.cloudReady){ customAlert('Personalflödet kräver att du är inloggad på webben.', 'ℹ️'); return; }
+        if(window.isGuestMode){ customAlert('Personalflödet är avstängt i gästläget – inget sparas här.', 'ℹ️'); return; }
         fbDB.collection('feed').add({ author: currentUser, name: currentUserName||currentUser, text: text, ts: Date.now() }).catch(e=>{ console.warn(e); customAlert('Kunde inte skicka inlägget. Försök igen.', '⚠️'); });
         inp.value=''; setTimeout(markFeedSeen, 150);
     }
@@ -5096,8 +5105,36 @@
             setTimeout(()=> ta.focus(), 60);
         }
 
-        function addRow(ti, ta, ic, co, fav, note){
+        function openScheduleHomeworkPopup(activityLabel, current, onSave){
+            const ov = document.createElement('div'); ov.className='week-day-overlay';
+            const modal = document.createElement('div'); modal.className='week-day-modal'; modal.style.maxWidth='380px';
+            const header = document.createElement('div'); header.className='week-day-modal-header';
+            header.innerHTML = `<span>📚 Läxa / prov${activityLabel ? ' – '+escapeHtml(activityLabel) : ''}</span><div class='week-day-modal-controls'><button type='button' class='week-day-modal-close'>✕</button></div>`;
+            modal.appendChild(header);
+            const content = document.createElement('div'); content.className='week-day-modal-content';
+            const typeWrap = document.createElement('div'); typeWrap.style.cssText='display:flex;gap:8px;margin-bottom:10px;';
+            let selectedType = (current && current.type) || '';
+            const types = [['', 'Ingen'], ['laxa', '📚 Läxa'], ['prov', '📝 Prov']];
+            const typeBtns = types.map(([val, label]) => {
+                const b = document.createElement('button'); b.type='button'; b.className='sched-hw-type-btn'+(val===selectedType?' active':''); b.dataset.type=val; b.textContent=label;
+                b.onclick = () => { selectedType = val; typeBtns.forEach(x => x.classList.toggle('active', x===b)); };
+                typeWrap.appendChild(b);
+                return b;
+            });
+            content.appendChild(typeWrap);
+            const ta = document.createElement('textarea'); ta.className='week-day-modal-notes'; ta.style.minHeight='50px'; ta.placeholder='Valfri detalj, t.ex. "Kap 5" eller "Glosor s.12"'; ta.value = (current && current.text) || '';
+            content.appendChild(ta);
+            modal.appendChild(content);
+            ov.appendChild(modal);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            const closeIt=()=>{ onSave({ type: selectedType, text: ta.value }); ov.remove(); };
+            header.querySelector('.week-day-modal-close').onclick=closeIt;
+            ov.onclick=(e)=>{ if(e.target===ov) closeIt(); };
+        }
+
+        function addRow(ti, ta, ic, co, fav, note, hw){
             const r = document.createElement('div'); r.className='schedule-row';
+            const hwState = { type: (hw && hw.type) || '', text: (hw && hw.text) || '' };
             const suggested = matchSubjectColor(ta);
             let manualColor = false, startColor;
             if(co && co!==SCHEDULE_DEFAULT_COLOR){
@@ -5111,6 +5148,7 @@
             const sel = document.createElement('button'); sel.type='button'; sel.className='schedule-icon-select schedule-icon-btn';
             sel.dataset.icon = (ic && SCHEDULE_ICONS[ic]) ? ic : ((ic && ic.length) ? ic : 'skriv'); renderSchedIcon(sel);
             sel.onclick=()=>{ openSchedIconPicker(sel.dataset.icon, (k)=>{ sel.dataset.icon=k; renderSchedIcon(sel); saveBoardState(); }); };
+            const taskWrap = document.createElement('div'); taskWrap.className='schedule-task-wrap';
             const tain = document.createElement('input'); tain.className='schedule-task-input'; tain.value=ta;
             tain.oninput=()=>{
                 if(cs.dataset.manual!=='1'){
@@ -5119,6 +5157,28 @@
                 }
                 updateScheduleStatus();
                 saveBoardState();
+            };
+            const hwBadge = document.createElement('div'); hwBadge.className='sched-hw-badge';
+            function renderHwBadge(){
+                hwBadge.className = 'sched-hw-badge' + (hwState.type ? ' type-'+hwState.type : '');
+                const label = hwState.type==='laxa' ? '📚 Läxa' : (hwState.type==='prov' ? '📝 Prov' : '');
+                hwBadge.textContent = label + (hwState.text ? ': '+hwState.text : '');
+            }
+            renderHwBadge();
+            taskWrap.appendChild(tain); taskWrap.appendChild(hwBadge);
+            const hwBtn = document.createElement('button'); hwBtn.type='button'; hwBtn.className='row-hw-btn row-hover-menu'+(hwState.type?' has-hw':''); hwBtn.innerText='📚';
+            hwBtn.dataset.hwType = hwState.type; hwBtn.dataset.hwText = hwState.text;
+            hwBtn.title = hwState.type ? (hwState.type==='laxa'?'Läxa':'Prov')+(hwState.text?': '+hwState.text:'') : 'Lägg till läxa/prov';
+            hwBtn.onclick=(e)=>{
+                e.stopPropagation();
+                openScheduleHomeworkPopup(tain.value, hwState, (val)=>{
+                    hwState.type = val.type; hwState.text = val.text;
+                    hwBtn.dataset.hwType = hwState.type; hwBtn.dataset.hwText = hwState.text;
+                    hwBtn.classList.toggle('has-hw', !!hwState.type);
+                    hwBtn.title = hwState.type ? (hwState.type==='laxa'?'Läxa':'Prov')+(hwState.text?': '+hwState.text:'') : 'Lägg till läxa/prov';
+                    renderHwBadge();
+                    saveBoardState();
+                });
             };
             const favBtn = document.createElement('button'); favBtn.type='button'; favBtn.className='row-fav-btn row-hover-menu'; favBtn.title='Favoritmarkera';
             favBtn.dataset.fav = fav ? '1' : '0'; favBtn.innerText = fav ? '⭐' : '☆';
@@ -5137,9 +5197,9 @@
                 });
             };
             const d = document.createElement('button'); d.className='row-del-btn row-hover-menu'; d.innerText='✕'; d.onclick=()=>{r.remove();updateScheduleStatus();saveBoardState();};
-            r.appendChild(cs); r.appendChild(tin); r.appendChild(sel); r.appendChild(tain); r.appendChild(favBtn); r.appendChild(noteBtn); r.appendChild(d); cont.appendChild(r);
+            r.appendChild(cs); r.appendChild(tin); r.appendChild(sel); r.appendChild(taskWrap); r.appendChild(favBtn); r.appendChild(hwBtn); r.appendChild(noteBtn); r.appendChild(d); cont.appendChild(r);
         }
-        if(config && config.data && config.data.rows) config.data.rows.forEach(r => addRow(r.time, r.task, r.icon||'skriv', r.color, r.fav, r.note));
+        if(config && config.data && config.data.rows) config.data.rows.forEach(r => addRow(r.time, r.task, r.icon||'skriv', r.color, r.fav, r.note, r.hw));
         else { addRow('08:00','Morgonsamling','samling','#e5e5ea'); addRow('09:00','Matematik','matte','#e5e5ea'); addRow('10:30','Svenska','abc','#e5e5ea'); }
         const act = document.createElement('div'); act.style.cssText='padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;'; const ab=document.createElement('button'); ab.className='btn btn-primary hover-menu'; ab.innerText='+ Rad'; ab.onclick=()=>{ const forstaTid = cont.querySelectorAll('.schedule-row').length===0 ? '08:00' : '08:30'; addRow(forstaTid,'Lektion','skriv','#e5e5ea');updateScheduleStatus();saveBoardState();};
         const digClock = document.createElement('div'); digClock.className='btn btn-primary sched-dig-clock'; digClock.style.cssText='cursor:default;'; digClock.textContent='--:--';
