@@ -24737,7 +24737,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             function handleAiQuestions(qs, status){
                 state.rounds = questionsToRounds(qs);
                 renderSetup(); persist();
-                status.textContent='✅ '+qs.length+' AI-fråg'+(qs.length===1?'a':'or')+' inlagda. Klicka "🚀 Starta tävling" när du är redo.';
+                close();
             }
 
             // ---- Alternativ 1: via Gemini, ingen nyckel ----
