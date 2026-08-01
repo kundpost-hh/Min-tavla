@@ -4895,6 +4895,40 @@
         old.forEach(m => { fbDB.collection('feed').doc(m.id).delete().catch(()=>{}); });
     }
     function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // Delad, tålig JSON-tolkning för AI-genererade svar (används av alla "klistra in AI-svar"-widgetar).
+    // AI-modeller gör ofta två saker som gör att strikt JSON.parse kraschar trots att svaret annars
+    // är korrekt: (1) riktiga radbrytningar inuti textfält istället för tecknet \n, särskilt vanligt
+    // i långa brödtexter med flera stycken, och (2) ett extra kommatecken kvar sist i en lista/objekt
+    // innan } eller ]. Den här funktionen försöker vanlig JSON.parse först, och reparerar annars just
+    // de här två sakerna innan den ger upp - istället för att bara tyst misslyckas som tidigare.
+    function repairJsonString(s){
+        try{ return JSON.parse(s); }catch(_){}
+        let out=''; let inStr=false, esc=false;
+        for(let i=0;i<s.length;i++){
+            const c = s[i];
+            if(inStr){
+                if(esc){ out+=c; esc=false; continue; }
+                if(c==='\\'){ out+=c; esc=true; continue; }
+                if(c==='"'){ inStr=false; out+=c; continue; }
+                if(c==='\n'){ out+='\\n'; continue; }
+                if(c==='\r'){ continue; }
+                if(c==='\t'){ out+='\\t'; continue; }
+                out+=c;
+            } else {
+                if(c==='"'){ inStr=true; out+=c; continue; }
+                out+=c;
+            }
+        }
+        out = out.replace(/,\s*([}\]])/g, '$1');
+        try{ return JSON.parse(out); }catch(e){ console.warn('[AI-tolkning] Kunde inte tolka svaret ens efter reparation:', e); return null; }
+    }
+    function tryParseLooseJson(text, allowArray){
+        const re = allowArray ? /\{[\s\S]*\}|\[[\s\S]*\]/ : /\{[\s\S]*\}/;
+        const jm = text && text.match(re);
+        if(!jm) return null;
+        return repairJsonString(jm[0]);
+    }
     // Rensar en textrad från vanlig markdown-formattering (**fetstil**, inledande punktlistetecken,
     // kodstaket ```) innan den tolkas av AI-svarsparsers. Gemini/Chat-svar formaterar ofta t.ex.
     // "**FRÅGA:**" eller "**A)** ..." - utan denna rensning missar regex-parsningen raden helt
@@ -5695,7 +5729,7 @@
     // ---- AI: generera ett nytt begreppskort (samma mönster som källkritik/rimlighet) ----
     function parseBegreppskort(text){
         if(!text) return null;
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text);
         if(obj){
             const ord = String(obj.ord||obj.begrepp||'').trim();
             const emoji = String(obj.emoji||'📖').trim() || '📖';
@@ -5868,7 +5902,7 @@
     // ---- AI: generera flera NO-frågor på en gång, körs i kö efter varandra (samma mönster som övriga) ----
     function parseNoFragaList(text){
         if(!text) return [];
-        let obj=null; const jm=text.match(/\{[\s\S]*\}|\[[\s\S]*\]/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text, true);
         let arr=null;
         if(Array.isArray(obj)) arr=obj;
         else if(obj && Array.isArray(obj.fragor)) arr=obj.fragor;
@@ -6079,7 +6113,7 @@
     // ---- AI: generera flera sant/falskt-påståenden på en gång, körs i kö efter varandra ----
     function parseSantFalsktList(text){
         if(!text) return [];
-        let obj=null; const jm=text.match(/\{[\s\S]*\}|\[[\s\S]*\]/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text, true);
         let arr=null;
         if(Array.isArray(obj)) arr=obj;
         else if(obj && Array.isArray(obj.pastaenden)) arr=obj.pastaenden;
@@ -8642,7 +8676,7 @@
     // ---- AI: generera fler skrivstarter kring valfritt tema (delas mellan Skrivstart och Berättarverkstaden) ----
     function parseSkrivstartList(text){
         if(!text) return [];
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text);
         if(obj){
             const arr = obj.prompts || obj.skrivstarter || obj.fraser || [];
             if(Array.isArray(arr)){
@@ -9172,7 +9206,7 @@
     function parseMeningsbyggnadList(text, level){
         if(!text) return [];
         const behov = meningsbyggnadRoller(level).length;
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text);
         if(obj){
             const arr = obj.meningar || obj.sentences || [];
             if(Array.isArray(arr)){
@@ -9878,7 +9912,7 @@
     // ---- AI: generera flera källkritik-exempel på en gång, körs i kö efter varandra ----
     function parseKallkritikList(text){
         if(!text) return [];
-        let obj=null; const jm=text.match(/\{[\s\S]*\}|\[[\s\S]*\]/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text, true);
         let arr=null;
         if(Array.isArray(obj)) arr=obj;
         else if(obj && Array.isArray(obj.exempel)) arr=obj.exempel;
@@ -16574,7 +16608,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
     function parseLasfAiPaket(text){
         if(!text) return null;
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        const obj = tryParseLooseJson(text);
         if(!obj) return null;
         const titel = String(obj.titel||obj.title||'').trim();
         const txt = String(obj.text||obj.brodtext||'').trim();
@@ -22104,7 +22138,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     const BERATTAR_KAT_NYCKLAR = ['karaktar','plats','foremal','problem'];
     function parseBerattarTema(text){
         if(!text) return null;
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text);
         if(!obj) return null;
         const ut = [];
         for(let i=0;i<4;i++){
@@ -24068,7 +24102,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // ---- AI: generera en fråga med svarsalternativ till Omröstning ----
     function parsePollFraga(text){
         if(!text) return null;
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text);
         if(obj){
             const question = String(obj.question||obj.fraga||'').trim();
             const opts = (Array.isArray(obj.options)?obj.options:[]).map(o=>String(o||'').trim()).filter(Boolean).slice(0,6);
@@ -24311,7 +24345,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
     function parseQuizList(text){
         if(!text) return [];
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text);
         if(obj){
             const arr = obj.questions || obj.fragor || obj['frågor'] || [];
             if(Array.isArray(arr)){
@@ -24686,7 +24720,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // ---- AI: generera flera rimlighetsexempel på en gång, körs i kö efter varandra ----
     function parseRimlighetList(text){
         if(!text) return [];
-        let obj=null; const jm=text.match(/\{[\s\S]*\}|\[[\s\S]*\]/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text, true);
         let arr=null;
         if(Array.isArray(obj)) arr=obj;
         else if(obj && Array.isArray(obj.exempel)) arr=obj.exempel;
@@ -25237,7 +25271,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // ---- AI: generera fler återkopplingsfrågor för Exit Ticket, nu med exempelsvar till varje fråga ----
     function parseExitFragorList(text){
         if(!text) return [];
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text);
         if(obj){
             const arr = obj.fragor || obj.questions || [];
             if(Array.isArray(arr)){
@@ -27013,7 +27047,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
     function parseWordList(text){
         if(!text) return [];
-        let obj=null; const jm=text.match(/\{[\s\S]*\}/); if(jm){ try{ obj=JSON.parse(jm[0]); }catch(_){} }
+        let obj=tryParseLooseJson(text);
         if(obj){ const arr=obj.words||obj.ord||obj.korsord; if(Array.isArray(arr)){ const r=arr.map(w=>({ word:String(w.word||w.ord||'').toUpperCase().replace(/[^A-ZÅÄÖ]/g,''), clue:String(w.clue||w.ledtrad||w['ledtråd']||'').trim() })).filter(w=>w.word.length>=2); if(r.length) return r; } }
         const seps=['|','\t',':','–','—',' - '];
         const out=[];
