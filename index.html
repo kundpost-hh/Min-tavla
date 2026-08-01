@@ -24528,7 +24528,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
     function buildQuizChatPrompt(desc){
         desc = withArskurs(desc);
-        return desc.trim() + "\n\nSvara ENDAST med frågorna i exakt detta format, en fråga per block, separerade med en tom rad:\nFRÅGA: <frågetext>\nA) <alternativ 1>\nB) <alternativ 2>\nC) <alternativ 3>\nD) <alternativ 4>\nRÄTT: <bokstaven för det rätta alternativet, t.ex. B>\n\nRegler: 3-4 alternativ per fråga, på svenska, anpassade till angiven årskurs/ämne. Om ingen årskurs anges, anta mellanstadienivå (åk 4–6, ca 10–12 år). Skriv ingen rubrik, ingen inledning och ingen annan text än frågeblocken.";
+        return desc.trim() + "\n\nSvara ENDAST med frågorna i exakt detta format, en fråga per block, separerade med en tom rad. VIKTIGT: varje del (FRÅGA, varje svarsalternativ och RÄTT) måste stå på sin EGEN rad med radbrytning emellan - skriv INTE ihop flera delar på samma rad:\nFRÅGA: <frågetext>\nA) <alternativ 1>\nB) <alternativ 2>\nC) <alternativ 3>\nD) <alternativ 4>\nRÄTT: <bokstaven för det rätta alternativet, t.ex. B>\n\nRegler: 3-4 alternativ per fråga, på svenska, anpassade till angiven årskurs/ämne. Om ingen årskurs anges, anta mellanstadienivå (åk 4–6, ca 10–12 år). Skriv ingen rubrik, ingen inledning och ingen annan text än frågeblocken.";
     }
     function parseQuizList(text){
         if(!text) return [];
@@ -24549,7 +24549,15 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const blocks = text.split(/\r?\n\s*\r?\n+/).map(b=>b.trim()).filter(Boolean);
         const out=[];
         blocks.forEach(block=>{
-            const lines = block.split(/\r?\n/).map(mdCleanLine).filter(Boolean);
+            // Gemini (särskilt i webbchatten) klumpar ibland ihop hela frågan på EN rad istället för
+            // att bryta rad mellan FRÅGA/A)/B)/C)/D)/RÄTT som prompten bad om. Normalisera därför blocket
+            // genom att tvinga in en radbrytning direkt före varje sådan markör, var den än förekommer -
+            // fungerar lika bra oavsett om Gemini redan brutit raderna själv eller inte.
+            const normalized = block
+                .replace(/\s*(?=(?:FRÅGA|FRAGA)\s*[:\-])/gi, '\n')
+                .replace(/\s*(?=[A-F][\)\.]\s)/g, '\n')
+                .replace(/\s*(?=(?:RÄTT|RATT|SVAR|CORRECT)\s*[:\-])/gi, '\n');
+            const lines = normalized.split(/\r?\n/).map(mdCleanLine).filter(Boolean);
             if(!lines.length) return;
             let question='', options=[], correctLetter='';
             lines.forEach(line=>{
