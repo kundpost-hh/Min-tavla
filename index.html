@@ -3971,7 +3971,7 @@
         } catch(e){ console.warn('Ljud kunde inte spelas:', e); }
     }
 
-    function customConfirm(message, onConfirm) {
+    function customConfirm(message, onConfirm, onCancel) {
         const overlay = document.getElementById('custom-confirm-overlay');
         const textEl = document.getElementById('custom-confirm-text');
         const btnYes = document.getElementById('custom-confirm-yes');
@@ -3979,7 +3979,7 @@
         textEl.innerText = message; overlay.style.display = 'flex';
         const cleanup = () => { overlay.style.display = 'none'; btnYes.onclick = null; btnNo.onclick = null; };
         btnYes.onclick = () => { cleanup(); onConfirm(); };
-        btnNo.onclick = () => { cleanup(); };
+        btnNo.onclick = () => { cleanup(); if(onCancel) onCancel(); };
     }
 
     // Egen inmatningsruta (ersätter webbläsarens prompt så vi slipper "På den här sidan står det...")
@@ -24733,6 +24733,23 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     close(); renderSetup(); persist();
                 });
             };
+            // Körs så fort AI-frågor finns tillgängliga (klistrat in eller auto-genererat): frågar
+            // DIREKT om man vill ersätta ev. gamla sparade frågor - man behöver inte längre själv
+            // klicka på "Kör bara dessa AI-frågor" i efterhand. Finns inga gamla frågor att bry sig
+            // om (bara en tom standardfråga) läggs de nya bara in direkt, utan att fråga i onödan.
+            function handleAiQuestions(qs, status){
+                lastAiQuestions=qs; onlyAiBtn.style.display='';
+                const tomStandard = state.rounds.length===1 && !state.rounds[0].question.trim() && state.rounds[0].options.every(o=>!o.text.trim());
+                if(tomStandard){
+                    makeFromQuestions(qs, status, null);
+                    status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda.';
+                    return;
+                }
+                customConfirm('Hittade '+qs.length+' AI-fråg'+(qs.length===1?'a':'or')+'. Vill du ta bort de tidigare sparade frågorna och köra bara dessa? Lagen behålls.',
+                    ()=>{ state.rounds = questionsToRounds(qs); renderSetup(); persist(); status.textContent='✅ Kör nu med bara de '+qs.length+' AI-fråg'+(qs.length===1?'a':'orna')+'.'; },
+                    ()=>{ makeFromQuestions(qs, status, null); status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda sist i listan (bakom de gamla). Du kan fortfarande köra bara AI-frågorna med knappen nedan.'; }
+                );
+            }
 
             // ---- Alternativ 1: via Gemini, ingen nyckel ----
             const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
@@ -24745,10 +24762,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='100px'; pasteTa.placeholder='Klistra in Geminis svar här – frågorna läggs till automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length>=1){ lastAiQuestions=qs; onlyAiBtn.style.display=''; makeFromQuestions(qs, status, null); status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda sist i listan. Vill du hoppa över eventuella gamla sparade frågor och bara köra dessa? Klicka knappen nedan.'; } },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length>=1){ handleAiQuestions(qs, status); } },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Lägg till frågorna';
-            makePasteBtn.onclick=()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length<1){ status.textContent='⚠️ Hittade inga frågor i svaret. Kolla att formatet stämmer.'; return; } lastAiQuestions=qs; onlyAiBtn.style.display=''; makeFromQuestions(qs, status, null); status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda sist i listan. Vill du hoppa över eventuella gamla sparade frågor och bara köra dessa? Klicka knappen nedan.'; };
+            makePasteBtn.onclick=()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length<1){ status.textContent='⚠️ Hittade inga frågor i svaret. Kolla att formatet stämmer.'; return; } handleAiQuestions(qs, status); };
             row1b.appendChild(makePasteBtn); box.appendChild(row1b);
 
             // ---- Alternativ 2: automatiskt med API-nyckel (valfritt) ----
@@ -24766,7 +24783,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.title='Öppnar Google AI Studio – du är redan inloggad'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); status.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
             const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='Skapa automatiskt (ett klick)';
             autoBtn.onclick=async ()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; return; } let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } } if(!key){ status.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
-                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar frågorna..."; try{ const qs=await aiGenerateQuiz(d, key); lastAiQuestions=qs; onlyAiBtn.style.display=''; makeFromQuestions(qs, status, null); status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda sist i listan. Vill du hoppa över eventuella gamla sparade frågor och bara köra dessa? Klicka knappen nedan.'; autoBtn.disabled=false; }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
+                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar frågorna..."; try{ const qs=await aiGenerateQuiz(d, key); handleAiQuestions(qs, status); autoBtn.disabled=false; }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
             row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
 
             box.appendChild(status);
