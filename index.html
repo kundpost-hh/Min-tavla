@@ -523,6 +523,24 @@
     #settings-pocket-zone { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 10500; width: 64px; height: 0; }
     #settings-pocket-tab { position: absolute; bottom: 0; left: 0; width: 64px; height: 20px; background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08); border-bottom: none; border-radius: 14px 14px 0 0; box-shadow: 0 -4px 16px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; color: #888; transition: all 0.25s ease; }
     #settings-pocket-zone.open #settings-pocket-tab { height: 14px; color: #555; background: rgba(255,255,255,0.98); }
+
+    /* Uppmärksamhetsring vid första inloggningen: pulserar runt fickflikarna tills man öppnar dem.
+       Stark ring på vänsterfickan (verktyg) eftersom den är viktigast att upptäcka först,
+       svagare ring på de andra två så det inte känns påträngande. */
+    .pocket-hint-strong, .pocket-hint-soft { position: absolute; }
+    .pocket-hint-strong::after, .pocket-hint-soft::after { content: ''; position: absolute; inset: -4px; border-radius: inherit; pointer-events: none; z-index: 1; }
+    .pocket-hint-strong::after { animation: pocketPulseStrong 1.5s ease-out infinite; }
+    .pocket-hint-soft::after { animation: pocketPulseSoft 2.6s ease-out infinite; }
+    @keyframes pocketPulseStrong {
+        0% { box-shadow: 0 0 0 0 rgba(0,122,255,0.6); }
+        70% { box-shadow: 0 0 0 14px rgba(0,122,255,0); }
+        100% { box-shadow: 0 0 0 0 rgba(0,122,255,0); }
+    }
+    @keyframes pocketPulseSoft {
+        0% { box-shadow: 0 0 0 0 rgba(0,122,255,0.32); }
+        70% { box-shadow: 0 0 0 8px rgba(0,122,255,0); }
+        100% { box-shadow: 0 0 0 0 rgba(0,122,255,0); }
+    }
     #settings-pocket-panel { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 260px; max-height: 74vh; overflow-y: auto; background: rgba(255,255,255,0.97); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid rgba(0,0,0,0.08); padding: 14px; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
     #settings-pocket-zone.open #settings-pocket-panel { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-20px); pointer-events: auto; }
     #settings-pocket-panel .tool-pocket-grid { margin-bottom: 4px; grid-template-columns: 1fr; }
@@ -28455,6 +28473,25 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         refreshPocketData();
         if(newDays > 0) saveBoardState();
         if(typeof window.uppdateraNyWidgetBadges === 'function') setTimeout(window.uppdateraNyWidgetBadges, 300);
+        showFirstLoginPocketHints();
+    }
+
+    // Visar en pulserande uppmärksamhetsring runt de tre fickflikarna (vänster/höger/nedre) första
+    // gången en användare (eller gäst) loggar in, så de upptäcker att det finns något att öppna där.
+    // Ringen försvinner så fort man öppnar just den fickan, och visas aldrig igen efter första gången
+    // (sparas lokalt per konto - gäster får en enhetsbaserad flagga eftersom deras ID är slumpat varje gång).
+    function showFirstLoginPocketHints(){
+        try{
+            const key = 'mintavla_pocketHintsSeen_' + (window.isGuestMode ? 'device' : (currentUser || 'device'));
+            if(localStorage.getItem(key)) return;
+            localStorage.setItem(key, '1');
+            const toolTab = document.getElementById('tool-pocket-tab');
+            const sideTab = document.getElementById('side-pocket-tab');
+            const settingsTab = document.getElementById('settings-pocket-tab');
+            if(toolTab) toolTab.classList.add('pocket-hint-strong');
+            if(sideTab) sideTab.classList.add('pocket-hint-soft');
+            if(settingsTab) settingsTab.classList.add('pocket-hint-soft');
+        }catch(e){}
     }
 
     checkLogin();
@@ -28465,14 +28502,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         let spTimer = null;
         const icon = document.getElementById('sp-tab-icon');
         const setIcon = ()=>{ if(icon) icon.textContent = zone.classList.contains('open') ? '❯' : '❮'; };
-        const openP = ()=>{ clearTimeout(spTimer); zone.classList.add('open'); setIcon(); if(typeof markFeedSeen==='function') markFeedSeen(); };
+        const openP = ()=>{ clearTimeout(spTimer); zone.classList.add('open'); setIcon(); tab.classList.remove('pocket-hint-soft'); if(typeof markFeedSeen==='function') markFeedSeen(); };
         const closeP = ()=>{ clearTimeout(spTimer); spTimer = setTimeout(()=>{ zone.classList.remove('open'); setIcon(); }, 350); };
         tab.addEventListener('mouseenter', openP);
         tab.addEventListener('mouseleave', closeP);
         panel.addEventListener('mouseenter', openP);
         panel.addEventListener('mouseleave', closeP);
         // klick kvar för touch-tavlor (ingen hover där)
-        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); if(zone.classList.contains('open') && typeof markFeedSeen==='function') markFeedSeen(); };
+        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); tab.classList.remove('pocket-hint-soft'); if(zone.classList.contains('open') && typeof markFeedSeen==='function') markFeedSeen(); };
     })();
 
     // ---- VÄNSTER SIDOFICKA: verktyg (test) ----
@@ -28496,13 +28533,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const setIcon = ()=>{ tab.textContent = zone.classList.contains('open') ? '❮' : '❯'; };
         setIcon();
         let t = null;
-        const openP = ()=>{ clearTimeout(t); zone.classList.add('open'); setIcon(); };
+        const openP = ()=>{ clearTimeout(t); zone.classList.add('open'); setIcon(); tab.classList.remove('pocket-hint-strong'); };
         const closeP = ()=>{ clearTimeout(t); t = setTimeout(()=>{ zone.classList.remove('open'); setIcon(); }, 350); };
         tab.addEventListener('mouseenter', openP);
         tab.addEventListener('mouseleave', closeP);
         panel.addEventListener('mouseenter', openP);
         panel.addEventListener('mouseleave', closeP);
-        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); };
+        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); tab.classList.remove('pocket-hint-strong'); };
     })();
 
     // ---- NEDRE SIDOFICKA: appinställningar (låsning, om appen, rensa, logga ut, bakgrund) ----
@@ -28514,14 +28551,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const setIcon = ()=>{ tab.textContent = zone.classList.contains('open') ? '⌄' : '⌃'; };
         setIcon();
         let t = null;
-        const openP = ()=>{ clearTimeout(t); zone.classList.add('open'); setIcon(); };
+        const openP = ()=>{ clearTimeout(t); zone.classList.add('open'); setIcon(); tab.classList.remove('pocket-hint-soft'); };
         const closeP = ()=>{ clearTimeout(t); t = setTimeout(()=>{ zone.classList.remove('open'); setIcon(); }, 350); };
         tab.addEventListener('mouseenter', openP);
         tab.addEventListener('mouseleave', closeP);
         panel.addEventListener('mouseenter', openP);
         panel.addEventListener('mouseleave', closeP);
         // klick kvar för touch-tavlor (ingen hover där)
-        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); };
+        tab.onclick = ()=>{ zone.classList.toggle('open'); setIcon(); tab.classList.remove('pocket-hint-soft'); };
     })();
 
     // ---- HÅLL SKÄRMEN VAKEN (skjut upp datorns viloläge medan appen visas) ----
