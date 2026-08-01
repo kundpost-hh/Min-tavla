@@ -24731,32 +24731,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa quizfrågor med AI'; box.appendChild(title);
             const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv quizet, t.ex.:\nSkapa 8 frågor i ämnet NO, åk 4, om vattnets kretslopp. 4 svarsalternativ per fråga.'; box.appendChild(ta);
             const status=document.createElement('div'); status.className='kw-ai-status';
-            let lastAiQuestions=null;
-            const onlyAiBtn=document.createElement('button'); onlyAiBtn.className='kw-btn kw-btn-primary'; onlyAiBtn.textContent='🚀 Kör bara dessa AI-frågor'; onlyAiBtn.style.display='none'; onlyAiBtn.style.width='100%'; onlyAiBtn.style.marginTop='6px';
-            onlyAiBtn.title='Rensar bort ev. tidigare sparade frågor och kör tävlingen med enbart de här AI-frågorna';
-            onlyAiBtn.onclick=()=>{
-                if(!lastAiQuestions || !lastAiQuestions.length) return;
-                customConfirm('Detta tar bort alla tidigare sparade frågor och ersätter dem med de '+lastAiQuestions.length+' AI-frågorna. Lagen behålls. Fortsätt?', ()=>{
-                    state.rounds = questionsToRounds(lastAiQuestions);
-                    close(); renderSetup(); persist();
-                });
-            };
-            // Körs så fort AI-frågor finns tillgängliga (klistrat in eller auto-genererat): frågar
-            // DIREKT om man vill ersätta ev. gamla sparade frågor - man behöver inte längre själv
-            // klicka på "Kör bara dessa AI-frågor" i efterhand. Finns inga gamla frågor att bry sig
-            // om (bara en tom standardfråga) läggs de nya bara in direkt, utan att fråga i onödan.
+            // Körs så fort AI-frågor finns tillgängliga (klistrat in eller auto-genererat): ersätter
+            // ALLTID direkt eventuella tidigare sparade frågor med de nya AI-frågorna, utan att fråga -
+            // enligt uttryckligt önskemål (ingen bekräftelseruta). Lagen påverkas inte.
             function handleAiQuestions(qs, status){
-                lastAiQuestions=qs; onlyAiBtn.style.display='';
-                const tomStandard = state.rounds.length===1 && !state.rounds[0].question.trim() && state.rounds[0].options.every(o=>!o.text.trim());
-                if(tomStandard){
-                    makeFromQuestions(qs, status, null);
-                    status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda.';
-                    return;
-                }
-                customConfirm('Hittade '+qs.length+' AI-fråg'+(qs.length===1?'a':'or')+'. Vill du ta bort de tidigare sparade frågorna och köra bara dessa? Lagen behålls.',
-                    ()=>{ state.rounds = questionsToRounds(qs); renderSetup(); persist(); status.textContent='✅ Kör nu med bara de '+qs.length+' AI-fråg'+(qs.length===1?'a':'orna')+'.'; },
-                    ()=>{ makeFromQuestions(qs, status, null); status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda sist i listan (bakom de gamla). Du kan fortfarande köra bara AI-frågorna med knappen nedan.'; }
-                );
+                state.rounds = questionsToRounds(qs);
+                renderSetup(); persist();
+                status.textContent='✅ '+qs.length+' AI-fråg'+(qs.length===1?'a':'or')+' inlagda. Klicka "🚀 Starta tävling" när du är redo.';
             }
 
             // ---- Alternativ 1: via Gemini, ingen nyckel ----
@@ -24795,7 +24776,6 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
 
             box.appendChild(status);
-            box.appendChild(onlyAiBtn);
             const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
             const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Stäng'; cancel.onclick=close; foot.appendChild(cancel); box.appendChild(foot);
 
