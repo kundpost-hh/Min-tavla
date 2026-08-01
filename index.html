@@ -751,6 +751,7 @@
     .pclock-btn:hover { background: #f1f5f9; }
     .pclock-btn:active { transform: scale(0.95); }
     .pclock-btn.pclock-random-btn { color: #7c3aed; border-color: #c4b5fd; }
+    .pclock-btn.pclock-enheter-btn { color: #b45309; border-color: #fcd34d; background: #fffbeb; }
     .pclock-btn.pclock-rakna-btn { color: #0369a1; border-color: #7dd3fc; background: #f0f9ff; }
     .pclock-btn.pclock-facit-btn { color: #059669; border-color: #6ee7b7; background: #ecfdf5; }
     .pclock-digital.pclock-reveal { animation: pclockPop .35s ease; }
@@ -13723,10 +13724,18 @@
                               `<path d="M ${vx+r} ${vy-6} L ${vx+r} ${vy+6} L ${vx+r+8} ${vy} Z" fill="#dc2626"/>`;
                 } else {
                     const x2=vx+L*Math.cos(theta), y2=vy-L*Math.sin(theta);
-                    const largeArc = deg>180 ? 1 : 0;
-                    const ax=vx+r*Math.cos(theta), ay=vy-r*Math.sin(theta);
-                    arcPath = `<line x1="${vx}" y1="${vy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#2563eb" stroke-width="3"/>`+
-                              `<path d="M ${(vx+r).toFixed(1)} ${vy} A ${r} ${r} 0 ${largeArc} 0 ${ax.toFixed(1)} ${ay.toFixed(1)}" fill="none" stroke="#dc2626" stroke-width="2.5"/>`;
+                    const leg2 = `<line x1="${vx}" y1="${vy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#2563eb" stroke-width="3"/>`;
+                    if(Math.round(deg)===90){
+                        // Rät vinkel: rita den vanliga lilla fyrkanten i hörnet istället för en båge
+                        const sq = r*0.68;
+                        const markPath = `<path d="M ${(vx+sq).toFixed(1)} ${vy} L ${(vx+sq).toFixed(1)} ${(vy-sq).toFixed(1)} L ${vx} ${(vy-sq).toFixed(1)}" fill="none" stroke="#dc2626" stroke-width="2.5"/>`;
+                        arcPath = leg2 + markPath;
+                    } else {
+                        const largeArc = deg>180 ? 1 : 0;
+                        const ax=vx+r*Math.cos(theta), ay=vy-r*Math.sin(theta);
+                        const bowPath = `<path d="M ${(vx+r).toFixed(1)} ${vy} A ${r} ${r} 0 ${largeArc} 0 ${ax.toFixed(1)} ${ay.toFixed(1)}" fill="none" stroke="#dc2626" stroke-width="2.5"/>`;
+                        arcPath = leg2 + bowPath;
+                    }
                 }
                 return `<svg viewBox="0 0 100 100"><line x1="${vx}" y1="${vy}" x2="${x1}" y2="${y1}" stroke="#2563eb" stroke-width="3"/>${arcPath}<circle cx="${vx}" cy="${vy}" r="3" fill="#111"/></svg>`;
             }
@@ -23452,6 +23461,85 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         { stadie:'mellan', emoji:'🏔️', namn:'Kung på berget', besk:'En person står på en upphöjd plats ("berget") och försöker knuffa/hindra andra från att ta sig upp och bli ny kung – utan att någon skadas.' },
         { stadie:'mellan', emoji:'🥏', namn:'Frisbeegolf-lek', besk:'Sätt upp enkla "mål" (koner, träd, hoola-hoop) på skolgården och kasta en frisbee runt banan på så få kast som möjligt.' },
 
+        // ---- MELLANSTADIET, fler jaga-/kull-lekar ----
+        { stadie:'mellan', emoji:'🦢', namn:'Svanskull', besk:'Alla har en tygbit ("svans") i byxlinningen. Den som lyckas dra en annans svans vinner den – kul lek utan att man behöver ta i varandra.' },
+        { stadie:'mellan', emoji:'🚽', namn:'Toakull', besk:'Som vanlig kull, men den som blir tagen sätter sig som en toalett och räcker upp en arm. En kompis kan befria genom att trycka på armen som en spolknapp.' },
+        { stadie:'mellan', emoji:'⛓️', namn:'Kedjekull', besk:'Den som blir tagen håller hand med "den" och jagar tillsammans vidare. Kedjan växer för varje fångad spelare tills alla är fast.' },
+        { stadie:'mellan', emoji:'🪞', namn:'Spegelkull', besk:'Den som blir tagen måste göra exakt samma rörelse som "den" gjorde precis innan – som en spegelbild – innan de får springa vidare.' },
+        { stadie:'mellan', emoji:'🎨', namn:'Färgkull', besk:'"Den" ropar en färg. Alla som rör vid något i den färgen är fredade – annars gäller det att springa undan!' },
+        { stadie:'mellan', emoji:'👥', namn:'Skuggkull', besk:'Man blir tagen genom att någon kliver på ens skugga istället för att röra en. Bäst i soligt väder!' },
+        { stadie:'mellan', emoji:'🕳️', namn:'Tunnelkull', besk:'Den som blir tagen ställer sig med benen isär som en tunnel. En kompis kan befria genom att krypa igenom tunneln.' },
+        { stadie:'mellan', emoji:'🧟', namn:'Zombiekull', besk:'Den som blir tagen blir själv en långsam zombie och hjälper till att jaga resten – till slut är alla zombies utom en.' },
+        { stadie:'mellan', emoji:'🦠', namn:'Viruskull', besk:'Blir man tagen "smittas" man och blir en ny jagare. Leken fortsätter tills nästan alla är smittade – vem klarar sig längst?' },
+        { stadie:'mellan', emoji:'🦸', namn:'Superhjältekull', besk:'Varje spelare väljer en superkraft (t.ex. osynlighet i 5 sekunder eller superfart) som får användas en gång för att slippa bli tagen.' },
+
+        // ---- MELLANSTADIET, laglekar ----
+        { stadie:'mellan', emoji:'👻', namn:'Spökboll', besk:'Som brännboll men den som är "ute" spökar för motståndarlaget genom att försöka störa dem – kul variant med extra fart.' },
+        { stadie:'mellan', emoji:'💥', namn:'Killerball', besk:'Alla har varsin mjuk boll och springer fritt på planen. Träffar man någon under midjan är den personen ute.' },
+        { stadie:'mellan', emoji:'🐶', namn:'Brittisk bulldogg', besk:'Alla springer från ena kortsidan till den andra utan att bli tagna av "bulldoggarna" i mitten – blir man tagen blir man själv bulldogg.' },
+        { stadie:'mellan', emoji:'🪢', namn:'Dragkamp', besk:'Två lag drar i varsin ände av ett rep och försöker dra motståndarlaget över en mittlinje. Klassisk styrke- och samarbetslek.' },
+        { stadie:'mellan', emoji:'🥚', namn:'Äggstafett', besk:'Spring en sträcka med ett ägg (eller en boll) på en sked utan att tappa det, lämna sedan över till nästa i laget.' },
+        { stadie:'mellan', emoji:'🗺️', namn:'Skattjakt', besk:'Gömda ledtrådar leder laget från plats till plats tills de hittar den gömda skatten – bra för samarbete och läsförståelse.' },
+        { stadie:'mellan', emoji:'🏗️', namn:'Hinderbana i lag', besk:'Bygg en bana med koner, hopprep och madrasser som laget tar sig igenom tillsammans, gärna på tid.' },
+        { stadie:'mellan', emoji:'🧱', namn:'Bygga högsta tornet', besk:'Lag tävlar om att bygga det högsta stabila tornet av koner eller mjuka klossar på begränsad tid.' },
+
+        // ---- MELLANSTADIET, bollspel ----
+        { stadie:'mellan', emoji:'👑', namn:'King/Kingruta', besk:'Studsa bollen mellan rutor ritade på marken enligt reglerna – missar man eller gör fel blir man av med sin ruta.' },
+        { stadie:'mellan', emoji:'◻️', namn:'Fyrkant', besk:'Fyra spelare studsar en boll mellan fyra rutor på marken enligt givna regler – förlorar man en omgång byter man plats i kön.' },
+        { stadie:'mellan', emoji:'🤾', namn:'Minihandboll', besk:'Enkel variant av handboll på liten plan med förenklade regler, fokus på passningar och samarbete.' },
+        { stadie:'mellan', emoji:'⚽', namn:'Fotboll', besk:'Klassiskt lagspel där man ska göra mål genom att sparka bollen i motståndarnas mål utan att använda händerna.' },
+        { stadie:'mellan', emoji:'🏒', namn:'Innebandy', besk:'Spela boll med klubba på en avgränsad plan och gör mål i motståndarnas mål – bra inomhusalternativ.' },
+        { stadie:'mellan', emoji:'🏀', namn:'Basket', besk:'Dribbla, passa och kasta bollen i korgen – spela med förenklade regler och färre spelare för mer speltid var.' },
+        { stadie:'mellan', emoji:'🎾', namn:'Tennisbollsbrännboll', besk:'Brännboll fast med en mjuk tennisboll som är lättare att slå och fånga – bra för yngre eller ovana spelare.' },
+        { stadie:'mellan', emoji:'🧘', namn:'Matta-boll', besk:'Kasta bollen mellan lagkamrater som står på varsin matta/platta – tar man ett steg utanför mattan är man ute.' },
+        { stadie:'mellan', emoji:'🏐', namn:'Boll över nät', besk:'Enkel variant av volleyboll där bollen får studsa en gång innan den kastas eller slås över nätet – lättare att lyckas.' },
+
+        // ---- MELLANSTADIET, samarbetslekar ----
+        { stadie:'mellan', emoji:'🌊', namn:'Hela gruppen över floden', besk:'Hela laget ska ta sig över en "flod" genom att flytta och stå på mattor/plattor utan att röra golvet – kräver planering och samarbete.' },
+        { stadie:'mellan', emoji:'🔄', namn:'Byta plats om...', besk:'Alla sitter eller står i en ring. Ledaren säger "byt plats om du..." (t.ex. har blåa skor) och alla som stämmer byter snabbt plats.' },
+        { stadie:'mellan', emoji:'⚙️', namn:'Mänsklig maskin', besk:'I grupp bygger man en "maskin" där varje person gör en egen upprepad rörelse och ljud som tillsammans bildar en fungerande helhet.' },
+        { stadie:'mellan', emoji:'🙈', namn:'Blindbana', besk:'En elev har ögonbindel och leds säkert genom en enkel bana av en kompis som bara får ge muntliga instruktioner.' },
+        { stadie:'mellan', emoji:'🗿', namn:'Bygg en staty', besk:'I par eller grupp bygger man tillsammans en levande staty utifrån ett givet tema, t.ex. "djur" eller "sport".' },
+        { stadie:'mellan', emoji:'🎱', namn:'Transportera bollen utan händer', besk:'Laget ska flytta en boll från start till mål utan att använda händerna eller armarna – kräver kreativa lösningar tillsammans.' },
+        { stadie:'mellan', emoji:'🔴', namn:'Rockringsutmaningar', besk:'Hela laget håller händerna och ska ta sig igenom en rockring som skickas laget runt utan att släppa greppet.' },
+
+        // ---- MELLANSTADIET, rörelselekar ----
+        { stadie:'mellan', emoji:'🐔', namn:'Kom alla mina kycklingar', besk:'En "höna" ropar sina kycklingars namn som då ska springa hem till henne utan att bli tagna av en "räv".' },
+        { stadie:'mellan', emoji:'🦅', namn:'Under hökens vingar', besk:'En "höna" skyddar sina "kycklingar" som står i rad bakom henne, medan en "hök" försöker fånga den sista i raden.' },
+        { stadie:'mellan', emoji:'🏃', namn:'Sisten över', besk:'Springlek där den som kommer sist över en linje eller till ett mål får en "prick" – tre prickar och man är ute för den omgången.' },
+        { stadie:'mellan', emoji:'🖤', namn:'Vem är rädd för svarte man?', besk:'Alla ropar frågan till "svarte man" som svarar och sedan jagar – de andra ska springa förbi utan att bli tagna.' },
+        { stadie:'mellan', emoji:'🪞', namn:'Spegeln', besk:'Två och två står mitt emot varandra – den ena gör rörelser som den andra ska härma exakt, som en spegelbild.' },
+        { stadie:'mellan', emoji:'🗣️', namn:'Simon säger', besk:'Ledaren ger instruktioner, men de får bara följas om ledaren säger "Simon säger" innan – annars är man ute.' },
+        { stadie:'mellan', emoji:'💃', namn:'Rörelsestopp (dansstopp)', besk:'Alla dansar eller rör sig fritt till musik. När musiken stannar ska alla frysa direkt – den som rör sig blir tillfälligt ute.' },
+        { stadie:'mellan', emoji:'🐸', namn:'Djurstafett', besk:'Springlag byter till olika djurrörelser vid varje delsträcka, t.ex. hoppa som en groda eller gå som en krabba.' },
+        { stadie:'mellan', emoji:'🥷', namn:'Ninja', besk:'Stå i en ring. I tur och ordning gör alla ett enda snabbt rörelseanfall mot en annans hand – blir handen träffad är man ute.' },
+
+        // ---- MELLANSTADIET, tysta och lugnare lekar ----
+        { stadie:'mellan', emoji:'🚦', namn:'1, 2, 3 Rött ljus', besk:'En står vänd mot en vägg och räknar högt medan alla andra smyger fram. Vid "rött ljus" vänder sig personen om – då måste alla frysa.' },
+        { stadie:'mellan', emoji:'🔑', namn:'Gömma nyckeln', besk:'En nyckel (eller ett föremål) gömts i förväg. Gruppen letar tillsammans medan ledaren säger "kallt" eller "varmt" beroende på avstånd.' },
+        { stadie:'mellan', emoji:'🤫', namn:'Viskleken', besk:'En mening viskas vidare person till person i en rad – vad blev meningen till slut, jämfört med originalet?' },
+        { stadie:'mellan', emoji:'🕵️', namn:'Mästardetektiven', besk:'En detektiv lämnar rummet medan gruppen väljer en "ledare" vars rörelser alla ska härma diskret. Detektiven ska gissa vem ledaren är.' },
+        { stadie:'mellan', emoji:'👀', namn:'Hitta ledaren', besk:'Samma idé som Mästardetektiven – en person gissar vem i ringen som styr rörelserna som alla andra följer efter.' },
+        { stadie:'mellan', emoji:'🧠', namn:'Minnesstafett', besk:'Lagmedlemmar springer en i taget till en lista, memorerar så många ord/föremål som möjligt och rapporterar till laget vid återkomst.' },
+        { stadie:'mellan', emoji:'🌳', namn:'Naturbingo', besk:'Alla får en bingobricka med saker att hitta utomhus (kotte, mask, tre sorters löv...) – först klar med en rad vinner.' },
+        { stadie:'mellan', emoji:'🔤', namn:'Bokstavsjakt', besk:'Leta efter föremål eller saker i naturen/skolgården som börjar på en given bokstav inom en tidsgräns.' },
+
+        // ---- MELLANSTADIET, rastlekar med lite material ----
+        { stadie:'mellan', emoji:'🪢', namn:'Hopprep', besk:'Hoppa själv eller turas om att hoppa medan andra svänger repet – testa olika rytmer och svårighetsgrader.' },
+        { stadie:'mellan', emoji:'🌀', namn:'Twist', besk:'Snurra höftringen (eller använd en Twister-matta) och håll balansen så länge som möjligt utan att tappa den.' },
+        { stadie:'mellan', emoji:'🥫', namn:'Burken', besk:'En burk sparkas iväg medan alla gömmer sig. "Den" letar rätt på gömda spelare, men de kan bli fria genom att smyga fram och sparka burken igen.' },
+        { stadie:'mellan', emoji:'🎯', namn:'Kasta prick', besk:'Kasta ärtpåsar mot mål ritade på marken eller i lådor på olika avstånd och samla poäng.' },
+        { stadie:'mellan', emoji:'✊', namn:'Sten, sax, påse-turnering', besk:'Klassisk sten-sax-påse spelas i turneringsform – förloraren hejar på vinnaren tills en mästare koras.' },
+        { stadie:'mellan', emoji:'⚖️', namn:'Balansutmaningar', besk:'Testa olika balansövningar, t.ex. gå på en linje, stå på ett ben eller balansera ett föremål på huvudet.' },
+        { stadie:'mellan', emoji:'🚧', namn:'Konbanor', besk:'Bygg en bana av koner att springa slalom mellan, hoppa över eller gå baklänges runt – variera för olika utmaningar.' },
+
+        // ---- MELLANSTADIET, fler uppskattade idrottslekar ----
+        { stadie:'mellan', emoji:'🤝', namn:'Samarbetsstafett', besk:'En stafett där varje lagmedlem måste klara en samarbetsuppgift tillsammans med nästa person innan stafettpinnen lämnas över.' },
+        { stadie:'mellan', emoji:'🧭', namn:'Orienteringslek', besk:'Följ enkla kartor eller ledtrådar till utsatta kontroller på skolgården – bra träning i kartläsning och samarbete.' },
+        { stadie:'mellan', emoji:'🥎', namn:'Bolltjuv', besk:'Bollar ligger i mitten av planen. Två lag springer växelvis fram och försöker "stjäla" så många bollar som möjligt till sin sida.' },
+        { stadie:'mellan', emoji:'🚩', namn:'Konstjuv', besk:'Koner placeras i mitten. Lagen springer fram i tur och ordning och försöker samla hem så många koner som möjligt till sin sida.' },
+        { stadie:'mellan', emoji:'⚔️', namn:'Överlevnadsleken', besk:'Alla mot alla – varje spelare får hemliga uppdrag (t.ex. "få någon att säga ditt namn") och den som klarar flest uppdrag vinner.' },
+
         // ---- HÖGSTADIET (13–15 år): mer regelstyrda lagsporter och kondition ----
         { stadie:'hog', emoji:'🥎', namn:'Brännboll (turnering)', besk:'Spela brännboll i fasta lag med poängräkning över flera innings – bra uppvärmning och passar för klassturneringar.' },
         { stadie:'hog', emoji:'⚾', namn:'Kanonboll (lagform)', besk:'Spela kanonboll i fasta lag på avgränsad plan med tydliga gränser och "liv"-system, gärna som en kort turnering mellan flera lag.' },
@@ -23862,10 +23950,91 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const body = createWidget('ÖVNINGSKLOCKA', 420, 'practice-clock-widget', config);
         const widgetEl = body.parentElement.parentElement;
         if(!config){ widgetEl.style.width='420px'; widgetEl.style.height='560px'; }
-        body.innerHTML = `<div class='pclock-toolbar'><button type='button' class='pclock-btn pclock-random-btn' title='Slumpa en ny tid som klassen ska läsa av'>🎲 Slumpa tid</button><button type='button' class='pclock-btn pclock-facit-btn' title='Visa rätt klockslag' style='display:none;'>👁️ Visa facit</button><button type='button' class='pclock-btn pclock-rakna-btn' title='Öppna textuppgifter om tid och tidsräkning'>🧮 Räkna tid</button></div><div class='pclock-legend'><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-hour'></span>Timme</span><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-min'></span>Minut</span></div><div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital-wrap'><div class='pclock-digital pclock-digital-am'>08:00</div><div class='pclock-digital pclock-digital-pm'>20:00</div></div><div class='pclock-analog'></div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
+        body.innerHTML = `<div class='pclock-toolbar'><button type='button' class='pclock-btn pclock-random-btn' title='Slumpa en ny tid som klassen ska läsa av'>🎲 Slumpa tid</button><button type='button' class='pclock-btn pclock-facit-btn' title='Visa rätt klockslag' style='display:none;'>👁️ Visa facit</button><button type='button' class='pclock-btn pclock-enheter-btn' title='Exempel och övningar om tidsenheter'>📏 Tidsenheter</button><button type='button' class='pclock-btn pclock-rakna-btn' title='Öppna textuppgifter om tid och tidsräkning'>🧮 Räkna tid</button></div><div class='pclock-legend'><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-hour'></span>Timme</span><span class='pclock-legend-item'><span class='pclock-legend-dot pclock-legend-min'></span>Minut</span></div><div class='pclock-fit'><div class='pclock-inner'><div class='pclock-digital-wrap'><div class='pclock-digital pclock-digital-am'>08:00</div><div class='pclock-digital pclock-digital-pm'>20:00</div></div><div class='pclock-analog'></div><div class='real-clock-face pclock-face'><div class='hand hour pclock-hh'></div><div class='hand minute pclock-mh'></div></div></div></div>`;
         const inner=body.querySelector('.pclock-inner'), cf=body.querySelector('.pclock-face'), hh=body.querySelector('.pclock-hh'), mh=body.querySelector('.pclock-mh'), digAM=body.querySelector('.pclock-digital-am'), digPM=body.querySelector('.pclock-digital-pm'), ana=body.querySelector('.pclock-analog');
-        const randomBtn=body.querySelector('.pclock-random-btn'), facitBtn=body.querySelector('.pclock-facit-btn'), raknaBtn=body.querySelector('.pclock-rakna-btn');
+        const randomBtn=body.querySelector('.pclock-random-btn'), facitBtn=body.querySelector('.pclock-facit-btn'), raknaBtn=body.querySelector('.pclock-rakna-btn'), enheterBtn=body.querySelector('.pclock-enheter-btn');
         raknaBtn.addEventListener('click',(e)=>{ e.stopPropagation(); openRaknaTid(); });
+        enheterBtn.addEventListener('click',(e)=>{ e.stopPropagation(); openTidsenheter(); });
+
+        // ---- TIDSENHETER: popup med omvandlingsexempel och korta övningar ----
+        function openTidsenheter(){
+            const ri=(min,max)=> min+Math.floor(Math.random()*(max-min+1));
+
+            const ENHET_MALLAR = [
+                function(){ const n=ri(1,10)*60; return { fraga:'Hur många minuter är '+n+' sekunder?', svar:(n/60)+' minuter', uträkning:n+' sekunder ÷ 60 = '+(n/60)+' minuter' }; },
+                function(){ const n=ri(1,10); return { fraga:'Hur många sekunder är '+n+' '+(n===1?'minut':'minuter')+'?', svar:(n*60)+' sekunder', uträkning:n+' × 60 = '+(n*60)+' sekunder' }; },
+                function(){ const n=ri(1,10)*60; return { fraga:'Hur många timmar är '+n+' minuter?', svar:(n/60)+' '+((n/60)===1?'timme':'timmar'), uträkning:n+' minuter ÷ 60 = '+(n/60)+' '+((n/60)===1?'timme':'timmar') }; },
+                function(){ const n=ri(1,10); return { fraga:'Hur många minuter är '+n+' '+(n===1?'timme':'timmar')+'?', svar:(n*60)+' minuter', uträkning:n+' × 60 = '+(n*60)+' minuter' }; },
+                function(){ const n=ri(1,10)*24; return { fraga:'Hur många dygn är '+n+' timmar?', svar:(n/24)+' dygn', uträkning:n+' timmar ÷ 24 = '+(n/24)+' dygn' }; },
+                function(){ const n=ri(1,8); return { fraga:'Hur många timmar är '+n+' dygn?', svar:(n*24)+' timmar', uträkning:n+' × 24 = '+(n*24)+' timmar' }; },
+                function(){ const n=ri(1,10)*7; return { fraga:'Hur många veckor är '+n+' dygn?', svar:(n/7)+' '+((n/7)===1?'vecka':'veckor'), uträkning:n+' dygn ÷ 7 = '+(n/7)+' '+((n/7)===1?'vecka':'veckor') }; },
+                function(){ const n=ri(1,8); return { fraga:'Hur många dygn är '+n+' '+(n===1?'vecka':'veckor')+'?', svar:(n*7)+' dygn', uträkning:n+' × 7 = '+(n*7)+' dygn' }; },
+                function(){ const n=ri(1,8); return { fraga:'Hur många månader är '+n+' '+(n===1?'år':'år')+'?', svar:(n*12)+' månader', uträkning:n+' × 12 = '+(n*12)+' månader' }; },
+                function(){ const n=ri(1,10)*12; return { fraga:'Hur många år är '+n+' månader?', svar:(n/12)+' år', uträkning:n+' månader ÷ 12 = '+(n/12)+' år' }; }
+            ];
+            function nyaEnhetsuppgifter(antal){
+                const valda=[]; const kopia=ENHET_MALLAR.slice();
+                for(let i=0;i<antal;i++){ const idx=ri(0,kopia.length-1); valda.push(kopia[idx]()); }
+                return valda;
+            }
+
+            const ov=document.createElement('div'); ov.className='figx-overlay';
+            const box=document.createElement('div'); box.className='figx-box';
+            const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
+
+            const head=document.createElement('div'); head.className='figx-head';
+            const h2=document.createElement('h2'); h2.textContent='📏 Tidsenheter';
+            const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
+            head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
+            const sub=document.createElement('p'); sub.className='figx-sub'; sub.textContent='Så hänger tidsenheterna ihop – och några korta övningar att räkna på.';
+            box.appendChild(sub);
+
+            const exempelWrap=document.createElement('div'); exempelWrap.className='su-lista'; exempelWrap.style.marginBottom='16px';
+            const EXEMPEL = ['60 sekunder = 1 minut','60 minuter = 1 timme','24 timmar = 1 dygn','7 dygn = 1 vecka','12 månader = 1 år','ca 365 dygn = 1 år'];
+            EXEMPEL.forEach(rad=>{
+                const r=document.createElement('div'); r.className='su-rad';
+                const r2=document.createElement('div'); r2.className='su-fraga-rad';
+                const fr=document.createElement('div'); fr.className='su-fraga'; fr.style.fontWeight='700'; fr.textContent='⏱️ '+rad;
+                r2.appendChild(fr); r.appendChild(r2); exempelWrap.appendChild(r);
+            });
+            box.appendChild(exempelWrap);
+
+            const ovRubrik=document.createElement('h3'); ovRubrik.className='figx-ov-rubrik'; ovRubrik.textContent='🎯 Öva: Omvandla tidsenheter';
+            box.appendChild(ovRubrik);
+            const lista=document.createElement('div'); lista.className='su-lista';
+            box.appendChild(lista);
+            const raknare=document.createElement('div'); raknare.className='figx-sub'; raknare.style.textAlign='center'; raknare.style.fontWeight='700'; raknare.style.color='#0369a1';
+            box.appendChild(raknare);
+            const nyBtn=document.createElement('button'); nyBtn.className='btn btn-primary'; nyBtn.style.width='100%'; nyBtn.style.marginTop='14px'; nyBtn.textContent='Nästa uppgift ▶';
+
+            let nr=0;
+            function rendera(){
+                nr++;
+                raknare.textContent='Uppgift '+nr;
+                lista.innerHTML='';
+                const u=nyaEnhetsuppgifter(1)[0];
+                const rad=document.createElement('div'); rad.className='su-rad';
+                const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
+                const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
+                const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret och uträkningen';
+                const berak=document.createElement('div'); berak.className='su-berakning'; berak.style.display='none';
+                sv.onclick=()=>{
+                    sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null;
+                    berak.textContent='🧮 '+u.uträkning; berak.style.display='block';
+                };
+                rad2.appendChild(fr); rad2.appendChild(sv);
+                rad.appendChild(rad2);
+                rad.appendChild(berak);
+                lista.appendChild(rad);
+            }
+            box.appendChild(nyBtn);
+            nyBtn.onclick=rendera;
+            rendera();
+
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
 
         // ---- RÄKNA TID: popup med slumpade textuppgifter om tid & tidsräkning ----
         function openRaknaTid(){
@@ -24531,13 +24700,16 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         }
 
         // ---- AI: lägg till genererade frågor i frågelistan (ersätter en enda tom standardfråga, annars läggs de på slutet) ----
-        function makeFromQuestions(questions, status, close){
-            if(!questions || !questions.length){ if(status) status.textContent='⚠️ Hittade inga användbara frågor.'; return false; }
-            const newRounds = questions.slice(0,20).map(q=>({
+        function questionsToRounds(questions){
+            return questions.slice(0,20).map(q=>({
                 question: q.question,
                 options: q.options.map(t=>({text:t})),
                 correctIndex: q.correctIndex
             }));
+        }
+        function makeFromQuestions(questions, status, close){
+            if(!questions || !questions.length){ if(status) status.textContent='⚠️ Hittade inga användbara frågor.'; return false; }
+            const newRounds = questionsToRounds(questions);
             const tomStandard = state.rounds.length===1 && !state.rounds[0].question.trim() && state.rounds[0].options.every(o=>!o.text.trim());
             state.rounds = tomStandard ? newRounds : state.rounds.concat(newRounds);
             if(state.rounds.length>20) state.rounds = state.rounds.slice(0,20);
@@ -24551,6 +24723,16 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa quizfrågor med AI'; box.appendChild(title);
             const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv quizet, t.ex.:\nSkapa 8 frågor i ämnet NO, åk 4, om vattnets kretslopp. 4 svarsalternativ per fråga.'; box.appendChild(ta);
             const status=document.createElement('div'); status.className='kw-ai-status';
+            let lastAiQuestions=null;
+            const onlyAiBtn=document.createElement('button'); onlyAiBtn.className='kw-btn kw-btn-primary'; onlyAiBtn.textContent='🚀 Kör bara dessa AI-frågor'; onlyAiBtn.style.display='none'; onlyAiBtn.style.width='100%'; onlyAiBtn.style.marginTop='6px';
+            onlyAiBtn.title='Rensar bort ev. tidigare sparade frågor och kör tävlingen med enbart de här AI-frågorna';
+            onlyAiBtn.onclick=()=>{
+                if(!lastAiQuestions || !lastAiQuestions.length) return;
+                customConfirm('Detta tar bort alla tidigare sparade frågor och ersätter dem med de '+lastAiQuestions.length+' AI-frågorna. Lagen behålls. Fortsätt?', ()=>{
+                    state.rounds = questionsToRounds(lastAiQuestions);
+                    close(); renderSetup(); persist();
+                });
+            };
 
             // ---- Alternativ 1: via Gemini, ingen nyckel ----
             const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
@@ -24563,10 +24745,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='100px'; pasteTa.placeholder='Klistra in Geminis svar här – frågorna läggs till automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length>=1){ makeFromQuestions(qs, status, close); } },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length>=1){ lastAiQuestions=qs; onlyAiBtn.style.display=''; makeFromQuestions(qs, status, null); status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda sist i listan. Vill du hoppa över eventuella gamla sparade frågor och bara köra dessa? Klicka knappen nedan.'; } },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Lägg till frågorna';
-            makePasteBtn.onclick=()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length<1){ status.textContent='⚠️ Hittade inga frågor i svaret. Kolla att formatet stämmer.'; return; } makeFromQuestions(qs, status, close); };
+            makePasteBtn.onclick=()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length<1){ status.textContent='⚠️ Hittade inga frågor i svaret. Kolla att formatet stämmer.'; return; } lastAiQuestions=qs; onlyAiBtn.style.display=''; makeFromQuestions(qs, status, null); status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda sist i listan. Vill du hoppa över eventuella gamla sparade frågor och bara köra dessa? Klicka knappen nedan.'; };
             row1b.appendChild(makePasteBtn); box.appendChild(row1b);
 
             // ---- Alternativ 2: automatiskt med API-nyckel (valfritt) ----
@@ -24584,10 +24766,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.title='Öppnar Google AI Studio – du är redan inloggad'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); status.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
             const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='Skapa automatiskt (ett klick)';
             autoBtn.onclick=async ()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; return; } let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } } if(!key){ status.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
-                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar frågorna..."; try{ const qs=await aiGenerateQuiz(d, key); makeFromQuestions(qs, status, close); }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
+                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar frågorna..."; try{ const qs=await aiGenerateQuiz(d, key); lastAiQuestions=qs; onlyAiBtn.style.display=''; makeFromQuestions(qs, status, null); status.textContent='✅ '+qs.length+' fråg'+(qs.length===1?'a':'or')+' tillagda sist i listan. Vill du hoppa över eventuella gamla sparade frågor och bara köra dessa? Klicka knappen nedan.'; autoBtn.disabled=false; }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
             row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
 
             box.appendChild(status);
+            box.appendChild(onlyAiBtn);
             const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
             const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Stäng'; cancel.onclick=close; foot.appendChild(cancel); box.appendChild(foot);
 
