@@ -27556,6 +27556,43 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(!pages.length) return null;
         return { title: title||'Min saga', pages };
     }
+    function printStorybook(state){
+        if(!state || !state.pages || !state.pages.length) return;
+        const title = state.title || 'Min saga';
+        const coverPage = state.pages[0];
+        const coverScene = sbDetectScene(coverPage.bild||coverPage.text);
+        const coverEmoji = sbDetectEmoji(coverPage.bild||coverPage.text);
+        const coverSvg = sbSceneSvg(coverScene, coverEmoji, 1);
+        let pagesHtml = '';
+        state.pages.forEach((p,i)=>{
+            const scene = sbDetectScene(p.bild||p.text);
+            const emoji = sbDetectEmoji(p.bild||p.text);
+            const svg = sbSceneSvg(scene, emoji, i+1);
+            pagesHtml += "<div class='page'><div class='page-illu'>"+svg+"</div><div class='page-text'>"+escapeHtml(p.text)+"</div><div class='page-num'>"+(i+1)+"</div></div>";
+        });
+        const html = "<!doctype html><html lang='sv'><head><meta charset='utf-8'><title>"+escapeHtml(title)+"</title><style>"
+            +"@page{size:A4;margin:14mm;}"
+            +"*{box-sizing:border-box;}"
+            +"html,body{height:100%;margin:0;}"
+            +"body{font-family:Georgia,'Times New Roman',serif;color:#222;}"
+            +".page{page-break-after:always;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:250mm;padding:10mm;text-align:center;}"
+            +".page:last-child{page-break-after:auto;}"
+            +".cover-illu{width:130mm;height:84.5mm;border-radius:6mm;overflow:hidden;box-shadow:0 2mm 8mm rgba(0,0,0,0.18);margin-bottom:10mm;}"
+            +".cover-illu svg{width:100%;height:100%;display:block;}"
+            +".cover-title{font-size:34px;font-weight:800;margin:0 0 4mm;}"
+            +".cover-sub{font-size:14px;color:#888;letter-spacing:1px;text-transform:uppercase;}"
+            +".page-illu{width:150mm;height:97.5mm;border-radius:5mm;overflow:hidden;margin-bottom:9mm;box-shadow:0 1.5mm 6mm rgba(0,0,0,0.12);}"
+            +".page-illu svg{width:100%;height:100%;display:block;}"
+            +".page-text{font-size:17px;line-height:1.65;max-width:150mm;}"
+            +".page-num{margin-top:10mm;font-size:11px;color:#aaa;}"
+            +"</style></head><body>"
+            +"<div class='page'><div class='cover-illu'>"+coverSvg+"</div><div class='cover-title'>"+escapeHtml(title)+"</div><div class='cover-sub'>En saga</div></div>"
+            +pagesHtml
+            +"<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body></html>";
+        const w=window.open('','sbprint'+Date.now(),'width=820,height=920');
+        if(!w){ customAlert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.','🖨️'); return; }
+        w.document.open(); w.document.write(html); w.document.close();
+    }
     function createStorybook(config){
         if(config===undefined) config=null;
         const body=createWidget('SAGOBOK', 380, 'storybook-widget', config);
@@ -27580,8 +27617,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const top=document.createElement('div'); top.className='sb-top';
             const titleEl=document.createElement('div'); titleEl.className='sb-title'; titleEl.textContent=state.title||'Min saga';
             const editBtn=document.createElement('button'); editBtn.className='sb-mini-btn'; editBtn.textContent='✏️'; editBtn.title='Redigera'; editBtn.onclick=()=>{ state.mode='edit'; persist(); render(); };
+            const printBtn=document.createElement('button'); printBtn.className='sb-mini-btn'; printBtn.textContent='🖨️'; printBtn.title='Skriv ut som bok'; printBtn.onclick=()=>printStorybook(state);
             const newBtn=document.createElement('button'); newBtn.className='sb-mini-btn'; newBtn.textContent='✨'; newBtn.title='Skapa ny saga'; newBtn.onclick=openStorybookAiDialog;
-            top.appendChild(titleEl); top.appendChild(editBtn); top.appendChild(newBtn);
+            top.appendChild(titleEl); top.appendChild(editBtn); top.appendChild(printBtn); top.appendChild(newBtn);
             root.appendChild(top);
 
             const page = state.pages[state.currentPage];
@@ -27609,8 +27647,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const t=document.createElement('input'); t.className='sb-title-in'; t.placeholder='Sagans titel'; t.value=state.title||'';
             t.oninput=()=>{ state.title=t.value; persist(); };
             const readBtn=document.createElement('button'); readBtn.className='sb-mini-btn'; readBtn.textContent='📖'; readBtn.title='Läsläge'; readBtn.onclick=()=>{ state.mode='read'; persist(); render(); };
+            const printBtn2=document.createElement('button'); printBtn2.className='sb-mini-btn'; printBtn2.textContent='🖨️'; printBtn2.title='Skriv ut som bok'; printBtn2.onclick=()=>printStorybook(state);
             const newBtn=document.createElement('button'); newBtn.className='sb-mini-btn'; newBtn.textContent='✨'; newBtn.title='Skapa ny saga'; newBtn.onclick=openStorybookAiDialog;
-            top.appendChild(t); top.appendChild(readBtn); top.appendChild(newBtn);
+            top.appendChild(t); top.appendChild(readBtn); top.appendChild(printBtn2); top.appendChild(newBtn);
             root.appendChild(top);
 
             const list=document.createElement('div'); list.className='sb-edit-list';
