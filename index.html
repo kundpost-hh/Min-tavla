@@ -223,6 +223,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createElevWidget()"><div class="icon">🧑‍🎓</div><div class="label">Elever</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createUppmarksamhetWidget()"><div class="icon">🤫</div><div class="label">Uppmärksamhet</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createBerattarverkstad()"><div class="icon">🎲</div><div class="label">Berättarverkstad</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createStorybook()"><div class="icon">📖</div><div class="label">Sagobok</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
             <button class="tool-btn" data-cat="engelska" onclick="createEngelskaMegaWidget()"><div class="icon">🇬🇧</div><div class="label">Engelska</div></button>
             <button class="tool-btn" data-cat="no-teknik" onclick="createBegreppskort()"><div class="icon">🌱</div><div class="label">Begreppskort</div></button>
@@ -1937,6 +1938,29 @@
     /* ---- KORSORD ---- */
     .korsord-widget .widget-inner { background:#fff; }
     .korsord-root { --kw-cell:32px; display:flex; flex-direction:column; width:100%; font-size:13px; }
+
+    /* ---- SAGOBOK ---- */
+    .storybook-root { display:flex; flex-direction:column; width:100%; gap:8px; }
+    .sb-empty { display:flex; flex-direction:column; align-items:center; gap:10px; padding:30px 10px; text-align:center; }
+    .sb-empty-icon { font-size:48px; opacity:0.6; }
+    .sb-empty-text { font-size:14px; color:#8e8e93; font-weight:600; }
+    .sb-top { display:flex; align-items:center; gap:6px; }
+    .sb-title { flex:1; font-weight:800; font-size:15px; color:#3a3a3c; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sb-title-in { flex:1; font-weight:800; font-size:14px; color:#3a3a3c; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; outline:none; min-width:0; }
+    .sb-mini-btn { flex-shrink:0; background:#f2f2f7; border:1px solid #e5e5ea; border-radius:8px; width:30px; height:30px; font-size:14px; cursor:pointer; }
+    .sb-mini-btn:hover { background:#e5e5ea; }
+    .sb-illu { width:100%; aspect-ratio:400/260; border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+    .sb-illu svg { width:100%; height:100%; display:block; }
+    .sb-text { font-size:15px; line-height:1.5; color:#1d1d1f; text-align:center; padding:4px 6px; min-height:60px; }
+    .sb-nav { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .sb-nav-btn { background:#007aff; color:#fff; border:none; border-radius:10px; width:40px; height:36px; font-size:16px; cursor:pointer; font-weight:700; }
+    .sb-nav-btn:disabled { background:#c7c7cc; cursor:default; }
+    .sb-nav-counter { flex:1; text-align:center; font-size:12.5px; font-weight:700; color:#8e8e93; }
+    .sb-edit-list { display:flex; flex-direction:column; gap:8px; max-height:320px; overflow-y:auto; }
+    .sb-edit-row { display:flex; align-items:flex-start; gap:6px; background:#f7f7f9; border-radius:10px; padding:8px; }
+    .sb-edit-num { flex-shrink:0; font-size:11px; font-weight:700; color:#8e8e93; padding-top:6px; width:44px; }
+    .sb-edit-ta { flex:1; min-height:50px; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; resize:vertical; outline:none; }
+    .sb-edit-del { flex-shrink:0; background:none; border:none; color:#ff3b30; font-size:15px; cursor:pointer; padding:4px; }
     .kw-title-in { font-size:16px; font-weight:800; color:#1d1d1f; text-align:center; border:none; outline:none; width:100%; margin-bottom:8px; background:transparent; }
     .kw-title-in::placeholder { color:#c7c7cc; font-weight:700; }
     .kw-title { font-size:17px; font-weight:800; color:#1d1d1f; text-align:center; margin-bottom:8px; }
@@ -4284,6 +4308,7 @@
                 else if (type === 'BERÄTTARTÄRNING') { try{ state.data = JSON.parse(w.dataset.berattar || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'SAGOBOK') { try{ state.data = JSON.parse(w.querySelector('.storybook-root')?.dataset.sb || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ÖVNINGSKLOCKA') { let _ph=parseInt(w.dataset.pclockH), _pm=parseInt(w.dataset.pclockM); if(isNaN(_ph)||isNaN(_pm)){ const t=(w.querySelector('.pclock-digital-am')?.textContent.replace(/[^\d:]/g,'')||'08:00').split(':'); _ph=(parseInt(t[0])||0)%24; _pm=parseInt(t[1])||0; } state.data.h = _ph; state.data.m = _pm; state.data.hidden = w.dataset.pclockHidden === 'true'; }
                 else if (type === 'TID') { state.data.tab = w.dataset.tidTab || 'klocka'; }
@@ -4442,6 +4467,7 @@
             else if (w.type === 'KALENDER') createCalendarWidget(w);
             else if (w.type === 'LUNCH') createLunchWidget(w);
             else if (w.type === 'KORSORD') createCrossword(w);
+            else if (w.type === 'SAGOBOK') createStorybook(w);
             else if (w.type === 'ORDGÖMMA') createWordSearch(w);
             else if (w.type === 'KLISTERMÄRKEN') createStickerPicker(w);
             else if (w.type === 'STICKER') createStickerElement(w);
@@ -27438,6 +27464,216 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         render();
     }
 
+    // ---- SAGOBOK (AI-genererad bläddringsbar barnsaga, bild+text per sida) ----
+    function sbMulberry32(seed){ let a=seed>>>0; return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+    const SB_SCENE_KEYWORDS = {
+        skog: ['skog','träd','gran','tall','buske','stig','stubbe'],
+        hav: ['hav','sjö','vatten','ö','båt','strand','brygga','våg'],
+        rymden: ['rymd','planet','stjärn','måne','raket','astronaut','galax'],
+        äng: ['äng','blomm','gräs','fjäril','bi ','sommar','trädgård'],
+        vinter: ['snö','vinter','is','jul','kallt','frost'],
+        stad: ['stad','hus','gata','skola','rum','hem','by ']
+    };
+    const SB_EMOJI_KEYWORDS = [
+        ['räv','🦊'],['björn','🐻'],['varg','🐺'],['kanin','🐰'],['igelkott','🦔'],['ekorre','🐿️'],['hjort','🦌'],
+        ['lejon','🦁'],['tiger','🐯'],['elefant','🐘'],['giraff','🦒'],['apa','🐵'],
+        ['drake','🐉'],['enhörning','🦄'],['häxa','🧙'],['trollkarl','🧙'],['troll','👹'],['spöke','👻'],['tomte','🎅'],['älva','🧚'],
+        ['prinsessa','👸'],['prins','🤴'],['riddare','⚔️'],['kung','🤴'],['drottning','👑'],
+        ['katt','🐱'],['hund','🐶'],['häst','🐴'],['get','🐐'],['gris','🐷'],['ko ','🐮'],['får','🐑'],['kyckling','🐔'],['anka','🦆'],
+        ['fisk','🐟'],['val','🐳'],['delfin','🐬'],['krabba','🦀'],['sköldpadda','🐢'],['groda','🐸'],
+        ['fågel','🐦'],['uggla','🦉'],['pingvin','🐧'],
+        ['robot','🤖'],['rymdskepp','🚀'],['astronaut','👨‍🚀'],['planet','🪐'],
+        ['stjärna','⭐'],['måne','🌙'],['sol ','☀️'],['regnbåge','🌈'],['blomma','🌸'],['träd','🌳']
+    ];
+    function sbDetectScene(text){
+        const t = (text||'').toLowerCase();
+        for(const scene in SB_SCENE_KEYWORDS){ if(SB_SCENE_KEYWORDS[scene].some(k=>t.includes(k))) return scene; }
+        return 'magisk';
+    }
+    function sbDetectEmoji(text){
+        const t = (text||'').toLowerCase();
+        for(const [k,e] of SB_EMOJI_KEYWORDS){ if(t.includes(k)) return e; }
+        return '✨';
+    }
+    function sbSceneSvg(scene, emoji, seed){
+        const r = sbMulberry32(seed||1);
+        let bg='', deco='';
+        if(scene==='skog'){
+            bg = `<rect width='400' height='260' fill='#cfe8d0'/><rect y='170' width='400' height='90' fill='#7fc86f'/>`;
+            for(let i=0;i<5;i++){ const x=(20+i*80+r()*20)|0; deco += `<g transform='translate(${x},180) scale(0.6)'><rect x='-6' y='0' width='12' height='20' fill='#5a7d2a'/><polygon points='0,-70 -30,-4 30,-4' fill='#2f7a34'/><polygon points='0,-50 -24,8 24,8' fill='#3f9142'/></g>`; }
+        } else if(scene==='hav'){
+            bg = `<rect width='400' height='260' fill='#bfe9ff'/><rect y='150' width='400' height='110' fill='#4fb3d9'/>`;
+            for(let i=0;i<4;i++){ deco += `<path d='M0 ${170+i*18} Q100 ${160+i*18} 200 ${170+i*18} T400 ${170+i*18}' stroke='#fff' stroke-width='2' fill='none' opacity='0.5'/>`; }
+        } else if(scene==='rymden'){
+            bg = `<rect width='400' height='260' fill='#1a1a3d'/>`;
+            for(let i=0;i<40;i++){ deco += `<circle cx='${(r()*400)|0}' cy='${(r()*260)|0}' r='${(r()*1.5+0.5).toFixed(1)}' fill='#fff' opacity='${(r()*0.7+0.3).toFixed(2)}'/>`; }
+        } else if(scene==='äng'){
+            bg = `<rect width='400' height='260' fill='#bfe6ff'/><rect y='160' width='400' height='100' fill='#9fd968'/>`;
+            for(let i=0;i<10;i++){ const x=(r()*400)|0, y=(170+r()*70)|0; deco += `<circle cx='${x}' cy='${y}' r='4' fill='${['#ff6b6b','#ffd43b','#ff8cc6','#7048e8'][i%4]}'/>`; }
+        } else if(scene==='vinter'){
+            bg = `<rect width='400' height='260' fill='#e8f4fb'/><rect y='180' width='400' height='80' fill='#fff'/>`;
+            for(let i=0;i<20;i++){ deco += `<text x='${(r()*400)|0}' y='${(r()*180)|0}' font-size='${(r()*8+6)|0}' fill='#bcdcf5'>❄</text>`; }
+        } else if(scene==='stad'){
+            bg = `<rect width='400' height='260' fill='#fde8c8'/><rect y='180' width='400' height='80' fill='#d9c58a'/>`;
+            for(let i=0;i<3;i++){ const x=40+i*120; deco += `<rect x='${x}' y='120' width='70' height='70' fill='#f3a24b'/><polygon points='${x-8},120 ${x+35},90 ${x+78},120' fill='#c0392b'/>`; }
+        } else {
+            bg = `<rect width='400' height='260' fill='#e0d4f7'/><rect y='190' width='400' height='70' fill='#c9a8e8'/>`;
+            for(let i=0;i<15;i++){ deco += `<circle cx='${(r()*400)|0}' cy='${(r()*150)|0}' r='1.5' fill='#fff' opacity='0.7'/>`; }
+        }
+        return `<svg viewBox='0 0 400 260' xmlns='http://www.w3.org/2000/svg'>${bg}${deco}<text x='200' y='150' font-size='90' text-anchor='middle' dominant-baseline='middle'>${emoji}</text></svg>`;
+    }
+    function buildStorybookPrompt(desc){
+        desc = withArskurs(desc.trim());
+        return desc + "\n\nSkriv en kort barnsaga på svenska utifrån beskrivningen ovan, uppdelad i 6-8 sidor. Svara ENDAST i exakt detta format, en tom rad mellan varje sida. VIKTIGT: varje del (SIDA, TEXT, BILD) måste stå på sin EGEN rad med radbrytning emellan - skriv INTE ihop flera delar på samma rad:\nTITEL: <sagans titel>\n\nSIDA 1\nTEXT: <2-4 korta meningar för sidan, enkelt och varmt språk anpassat för barn>\nBILD: <kort beskrivning av vad som syns på bilden, t.ex. \"en röd räv springer genom en grön skog\">\n\nSIDA 2\nTEXT: ...\nBILD: ...\n\n(fortsätt likadant för alla sidor)\n\nOm ingen årskurs/ålder anges, anta lågstadienivå (6-9 år). Skriv ingen annan text än formatet ovan.";
+    }
+    function parseStorybookText(text){
+        if(!text) return null;
+        let title='';
+        const tm = text.match(/TITEL\s*[:\-]\s*(.+)/i);
+        if(tm) title = mdCleanLine(tm[1]).trim();
+        let body = text.replace(/TITEL\s*[:\-]\s*.+/i, '');
+        // Tvinga fram en sidbrytning före varje "SIDA N" oavsett om Gemini redan gjort det -
+        // samma tåliga knep som räddade Quiztävlingens AI-tolkning.
+        body = body.replace(/\s*(?=SIDA\s*\d+)/gi, '\n\n');
+        const blocks = body.split(/\r?\n\s*\r?\n+/).map(b=>b.trim()).filter(Boolean);
+        const pages=[];
+        blocks.forEach(block=>{
+            const normalized = block
+                .replace(/\s*(?=TEXT\s*[:\-])/gi, '\n')
+                .replace(/\s*(?=BILD\s*[:\-])/gi, '\n');
+            const lines = normalized.split(/\r?\n/).map(mdCleanLine).filter(Boolean);
+            let pText='', pBild='';
+            lines.forEach(line=>{
+                const tm2 = line.match(/^TEXT\s*[:\-]\s*(.+)$/i);
+                if(tm2){ pText = tm2[1].trim(); return; }
+                const bm = line.match(/^BILD\s*[:\-]\s*(.+)$/i);
+                if(bm){ pBild = bm[1].trim(); return; }
+                if(/^SIDA\s*\d*$/i.test(line)) return;
+                if(!pText) pText = line;
+            });
+            if(pText) pages.push({ text:pText, bild:pBild });
+        });
+        if(!pages.length) return null;
+        return { title: title||'Min saga', pages };
+    }
+    function createStorybook(config){
+        if(config===undefined) config=null;
+        const body=createWidget('SAGOBOK', 380, 'storybook-widget', config);
+        const root=document.createElement('div'); root.className='storybook-root'; body.appendChild(root);
+        let state={ title:'', pages:[], currentPage:0, mode:'read' };
+        if(config && config.data){ try{ Object.assign(state, config.data); }catch(e){} }
+        if(!Array.isArray(state.pages)) state.pages=[];
+        if(state.currentPage>=state.pages.length) state.currentPage=0;
+        const stamp=()=>{ root.dataset.sb=JSON.stringify(state); };
+        const persist=()=>{ stamp(); saveBoardState(); };
+
+        function renderEmpty(){
+            root.innerHTML='';
+            const wrap=document.createElement('div'); wrap.className='sb-empty';
+            wrap.innerHTML=`<div class="sb-empty-icon">📖</div><div class="sb-empty-text">Ingen saga skapad än</div>`;
+            const btn=document.createElement('button'); btn.className='btn btn-primary'; btn.textContent='✨ Skapa saga med AI'; btn.onclick=openStorybookAiDialog;
+            wrap.appendChild(btn);
+            root.appendChild(wrap);
+        }
+        function renderRead(){
+            root.innerHTML='';
+            const top=document.createElement('div'); top.className='sb-top';
+            const titleEl=document.createElement('div'); titleEl.className='sb-title'; titleEl.textContent=state.title||'Min saga';
+            const editBtn=document.createElement('button'); editBtn.className='sb-mini-btn'; editBtn.textContent='✏️'; editBtn.title='Redigera'; editBtn.onclick=()=>{ state.mode='edit'; persist(); render(); };
+            const newBtn=document.createElement('button'); newBtn.className='sb-mini-btn'; newBtn.textContent='✨'; newBtn.title='Skapa ny saga'; newBtn.onclick=openStorybookAiDialog;
+            top.appendChild(titleEl); top.appendChild(editBtn); top.appendChild(newBtn);
+            root.appendChild(top);
+
+            const page = state.pages[state.currentPage];
+            const illu=document.createElement('div'); illu.className='sb-illu';
+            const scene = sbDetectScene(page.bild||page.text);
+            const emoji = sbDetectEmoji(page.bild||page.text);
+            illu.innerHTML = sbSceneSvg(scene, emoji, state.currentPage+1);
+            root.appendChild(illu);
+
+            const txt=document.createElement('div'); txt.className='sb-text'; txt.textContent=page.text;
+            root.appendChild(txt);
+
+            const nav=document.createElement('div'); nav.className='sb-nav';
+            const prev=document.createElement('button'); prev.className='sb-nav-btn'; prev.textContent='◀'; prev.disabled = state.currentPage<=0;
+            prev.onclick=()=>{ if(state.currentPage>0){ state.currentPage--; persist(); render(); } };
+            const counter=document.createElement('div'); counter.className='sb-nav-counter'; counter.textContent='Sida '+(state.currentPage+1)+' av '+state.pages.length;
+            const next=document.createElement('button'); next.className='sb-nav-btn'; next.textContent='▶'; next.disabled = state.currentPage>=state.pages.length-1;
+            next.onclick=()=>{ if(state.currentPage<state.pages.length-1){ state.currentPage++; persist(); render(); } };
+            nav.appendChild(prev); nav.appendChild(counter); nav.appendChild(next);
+            root.appendChild(nav);
+        }
+        function renderEditMode(){
+            root.innerHTML='';
+            const top=document.createElement('div'); top.className='sb-top';
+            const t=document.createElement('input'); t.className='sb-title-in'; t.placeholder='Sagans titel'; t.value=state.title||'';
+            t.oninput=()=>{ state.title=t.value; persist(); };
+            const readBtn=document.createElement('button'); readBtn.className='sb-mini-btn'; readBtn.textContent='📖'; readBtn.title='Läsläge'; readBtn.onclick=()=>{ state.mode='read'; persist(); render(); };
+            const newBtn=document.createElement('button'); newBtn.className='sb-mini-btn'; newBtn.textContent='✨'; newBtn.title='Skapa ny saga'; newBtn.onclick=openStorybookAiDialog;
+            top.appendChild(t); top.appendChild(readBtn); top.appendChild(newBtn);
+            root.appendChild(top);
+
+            const list=document.createElement('div'); list.className='sb-edit-list';
+            state.pages.forEach((p,i)=>{
+                const row=document.createElement('div'); row.className='sb-edit-row';
+                const num=document.createElement('div'); num.className='sb-edit-num'; num.textContent='Sida '+(i+1);
+                const ta=document.createElement('textarea'); ta.className='sb-edit-ta'; ta.value=p.text;
+                ta.oninput=()=>{ p.text=ta.value; persist(); };
+                const del=document.createElement('button'); del.className='sb-edit-del'; del.textContent='✕'; del.onclick=()=>{ state.pages.splice(i,1); if(state.currentPage>=state.pages.length) state.currentPage=Math.max(0,state.pages.length-1); persist(); render(); };
+                row.appendChild(num); row.appendChild(ta); row.appendChild(del);
+                list.appendChild(row);
+            });
+            root.appendChild(list);
+            const addBtn=document.createElement('button'); addBtn.className='btn btn-primary'; addBtn.style.width='100%'; addBtn.style.marginTop='8px'; addBtn.textContent='+ Ny sida';
+            addBtn.onclick=()=>{ state.pages.push({text:'',bild:''}); persist(); render(); };
+            root.appendChild(addBtn);
+        }
+        function render(){
+            stamp();
+            if(!state.pages.length){ renderEmpty(); return; }
+            if(state.mode==='edit') renderEditMode(); else renderRead();
+        }
+
+        function openStorybookAiDialog(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa saga med AI'; box.appendChild(title);
+            const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv sagan, t.ex.:\nEn saga om en nyfiken räv som hittar en magisk skog, för åk 2.'; box.appendChild(ta);
+            const status=document.createElement('div'); status.className='kw-ai-status';
+
+            const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
+            const row1=document.createElement('div'); row1.className='kw-btnrow'; row1.style.margin='0 0 8px'; row1.style.justifyContent='flex-start';
+            const copyBtn=document.createElement('button'); copyBtn.className='kw-btn kw-btn-ai'; copyBtn.textContent='📋 Kopiera fråga & öppna Gemini';
+            copyBtn.onclick=()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; ta.focus(); return; } const full=buildStorybookPrompt(d);
+                const done=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
+                try{ navigator.clipboard.writeText(full).then(done, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
+                catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
+                window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
+            row1.appendChild(copyBtn); box.appendChild(row1);
+            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – sagan skapas automatiskt...'; box.appendChild(pasteTa);
+            function handleStory(parsed){
+                state.title=parsed.title; state.pages=parsed.pages; state.currentPage=0; state.mode='read';
+                persist(); render(); close();
+            }
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const parsed=parseStorybookText(pasteTa.value); if(parsed && parsed.pages.length>=1){ handleStory(parsed); } },60); });
+            const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
+            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Skapa saga från svaret';
+            makePasteBtn.onclick=()=>{ const parsed=parseStorybookText(pasteTa.value); if(!parsed || parsed.pages.length<1){ status.textContent='⚠️ Hittade inga sidor i svaret. Kolla att formatet stämmer.'; return; } handleStory(parsed); };
+            row1b.appendChild(makePasteBtn); box.appendChild(row1b);
+
+            box.appendChild(status);
+            const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
+            const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Stäng'; cancel.onclick=close; foot.appendChild(cancel); box.appendChild(foot);
+
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            setTimeout(()=>ta.focus(),60);
+        }
+        render();
+    }
+    window.createStorybook = createStorybook;
+
     // ---- ORDGÖMMA (word search) ----
     function buildWordSearch(wordsInput, allowDiagonal){
         if(allowDiagonal===undefined) allowDiagonal=true;
@@ -28314,7 +28550,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         toggleEl.addEventListener('pointerdown', (e)=> e.stopPropagation());
         toggleEl.addEventListener('click', toggleOpen);
         box.querySelector('.tpc-header').addEventListener('click', (e)=>{
-            if(e.target.closest('.tpc-handle, .tpc-remove, .tpc-title')) return;
+            if(e.target.closest('.tpc-handle, .tpc-remove')) return;
             toggleOpen(e);
         });
         const removeBtn = box.querySelector('.tpc-remove');
@@ -28398,6 +28634,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             "createTextGenres()",       // Textgenrer
             "createLasforstaelse()",    // Läsförståelse
             "createBerattarverkstad()", // Berättarverkstad
+            "createStorybook()",        // Sagobok
             "createSpellingBattle()",   // Stavningskamp
             "createCountryWidget()",    // Länder/Invånare
             "createKallkritik()",       // Källkritik
