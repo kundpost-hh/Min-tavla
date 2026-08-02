@@ -970,6 +970,11 @@
     .vd-live-stat{ background:#fff; border-radius:10px; padding:8px 6px; font-size:12px; }
     .vd-live-stat b{ display:block; font-size:15px; color:#1d1d1f; }
     .vd-msg{ text-align:center; color:#8a8a90; font-size:13px; padding:24px 10px; }
+    .vd-temp-input-row{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:4px; }
+    .vd-temp-input{ width:110px; font-size:20px; font-weight:800; text-align:center; padding:10px 8px; border:1.5px solid #d1d1d6; border-radius:10px; outline:none; font-family:inherit; color:#1d1d1f; -moz-appearance:textfield; }
+    .vd-temp-input:focus{ border-color:#007aff; }
+    .vd-temp-input:disabled{ background:#f2f2f7; color:#8a8a90; }
+    .vd-temp-unit{ font-size:14px; font-weight:700; color:#5856d6; }
     .vd-spin{ width:26px; height:26px; border:3px solid #e5e5ea; border-top-color:#5856d6; border-radius:50%; margin:16px auto; animation:vd-spin 0.8s linear infinite; }
     @keyframes vd-spin{ to{ transform:rotate(360deg); } }
     .vd-jamfor-grid{ display:flex; gap:10px; margin-bottom:12px; }
@@ -1144,7 +1149,7 @@
     .lesson-header-input { background: transparent; border: none; color: #ffffff; font-size: 22px; font-weight: bold; text-align: center; font-family: inherit; outline: none; width: 30%; min-width: 100px;}
     .lesson-header-input::placeholder { color: rgba(255,255,255,0.75); }
     .lesson-header-sep { font-weight: 300; margin: 0 10px; color: rgba(255,255,255,0.7); }
-    .lesson-widget .lesson-date { color: #ffffff !important; }
+    .lesson-widget .lesson-date { color: #ffffff !important; margin-left: 26px; }
     .lesson-goal-row { background: #f2f2f7; border: 1px solid #e5e5ea; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; font-size: 15px; font-weight: 600; }
     .lesson-goal-label { color: #ff3b30; font-weight: bold; margin-right: 5px; }
     .lesson-goal-input { background: transparent; border: none; color: #333 !important; font-size: 15px; font-family: inherit; outline: none; flex-grow: 1; font-weight: 600; }
@@ -6922,6 +6927,9 @@
         let quizValt = (config && config.data && typeof config.data.quizValt==='number') ? config.data.quizValt : null;
         let quizScore = (config && config.data && config.data.quizScore) || 0;
         let quizTotal = (config && config.data && config.data.quizTotal) || 0;
+        let tempScore = (config && config.data && config.data.tempScore) || 0;
+        let tempTotal = (config && config.data && config.data.tempTotal) || 0;
+        let tempUppgift = null, tempChecked = false, tempRatt = false;
         let vaderData = null, kartaData = null, vaderFel = false, vaderLaddar = false, reqToken = 0;
 
         const tabRow=document.createElement('div'); tabRow.className='hover-menu vd-tabs'; tabRow.style.padding='8px 8px 0'; tabRow.style.display='flex'; tabRow.style.flexWrap='wrap'; tabRow.style.gap='6px';
@@ -6929,14 +6937,15 @@
         const tabJamfor=document.createElement('button'); tabJamfor.type='button'; tabJamfor.className='btn'; tabJamfor.textContent='📅 Jämför igår'; tabJamfor.style.flex='1 1 auto';
         const tabLexikon=document.createElement('button'); tabLexikon.type='button'; tabLexikon.className='btn'; tabLexikon.textContent='📖 Lexikon'; tabLexikon.style.flex='1 1 auto';
         const tabQuiz=document.createElement('button'); tabQuiz.type='button'; tabQuiz.className='btn'; tabQuiz.textContent='🧠 Quiz'; tabQuiz.style.flex='1 1 auto';
+        const tabTemp=document.createElement('button'); tabTemp.type='button'; tabTemp.className='btn'; tabTemp.textContent='🌡️ Räkna temperatur'; tabTemp.style.flex='1 1 auto';
         const tabVind=document.createElement('button'); tabVind.type='button'; tabVind.className='btn'; tabVind.textContent='🌬️ Hur vindar bildas'; tabVind.style.flex='1 1 auto';
-        [tabIdag,tabJamfor,tabLexikon,tabVind,tabQuiz].forEach(t=>tabRow.appendChild(t));
+        [tabIdag,tabJamfor,tabLexikon,tabVind,tabQuiz,tabTemp].forEach(t=>tabRow.appendChild(t));
         body.appendChild(tabRow);
 
         const kortWrap = document.createElement('div'); kortWrap.className='ry-content'; kortWrap.style.padding='10px';
         body.appendChild(kortWrap);
 
-        function persist(){ widget.dataset.vadret = JSON.stringify({ mode, quizIdx, quizValt, quizScore, quizTotal }); saveBoardState(); }
+        function persist(){ widget.dataset.vadret = JSON.stringify({ mode, quizIdx, quizValt, quizScore, quizTotal, tempScore, tempTotal }); saveBoardState(); }
 
         async function sakerstallData(){
             if((vaderData && kartaData) || vaderLaddar) return;
@@ -7132,6 +7141,84 @@
             kortWrap.appendChild(resetBtn);
         }
 
+        // ---- Räkna temperatur: slumpade övningar om att räkna ut temperaturändringar upp och ner ----
+        // Flera olika typer av uppgifter varvas slumpmässigt så det blir gott om övning:
+        // 1) Temperaturen stiger med X grader - vad blir den nya temperaturen?
+        // 2) Temperaturen sjunker med X grader - vad blir den nya temperaturen? (kan gå under noll)
+        // 3) Given start- och sluttemperatur - hur många grader steg/sjönk den?
+        function genTempUppgift(){
+            const typ = Math.floor(Math.random()*3);
+            if(typ===0){
+                const start = Math.floor(Math.random()*26)-10; // -10 .. 15
+                const andring = Math.floor(Math.random()*12)+1; // 1 .. 12
+                const svar = start + andring;
+                return {
+                    fraga: `Klockan var 8 på morgonen och termometern visade ${start}°C. Fram till klockan 14 steg temperaturen med ${andring} grader. Vad visade termometern klockan 14?`,
+                    svar: svar,
+                    forklaring: `${start} + ${andring} = ${svar}°C`
+                };
+            } else if(typ===1){
+                const start = Math.floor(Math.random()*26)-5; // -5 .. 20
+                const andring = Math.floor(Math.random()*15)+1; // 1 .. 15
+                const svar = start - andring;
+                return {
+                    fraga: `På kvällen visade termometern ${start}°C. Under natten sjönk temperaturen med ${andring} grader. Vad visade termometern på morgonen?`,
+                    svar: svar,
+                    forklaring: `${start} − ${andring} = ${svar}°C`
+                };
+            } else {
+                let start, slut;
+                do { start = Math.floor(Math.random()*26)-10; slut = Math.floor(Math.random()*26)-10; } while(start===slut);
+                const diff = slut - start;
+                const riktning = diff>0 ? 'steg' : 'sjönk';
+                const svar = Math.abs(diff);
+                return {
+                    fraga: `På morgonen var det ${start}°C. På eftermiddagen var det ${slut}°C. Hur många grader ${riktning} temperaturen?`,
+                    svar: svar,
+                    forklaring: `Skillnaden mellan ${slut}°C och ${start}°C är ${svar} grader (den ${riktning}).`
+                };
+            }
+        }
+        function renderTemp(){
+            if(!tempUppgift){ tempUppgift = genTempUppgift(); tempChecked=false; tempRatt=false; }
+            kortWrap.innerHTML='';
+            const scoreEl=document.createElement('div'); scoreEl.className='ry-quiz-score'; scoreEl.textContent='Poäng: '+tempScore+' / '+tempTotal; kortWrap.appendChild(scoreEl);
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🌡️ Räkna ut hur temperaturen ändras – både uppåt och nedåt!'; kortWrap.appendChild(hint);
+            const fragaEl=document.createElement('div'); fragaEl.className='ry-quiz-fraga'; fragaEl.textContent=tempUppgift.fraga; kortWrap.appendChild(fragaEl);
+
+            const inputRow=document.createElement('div'); inputRow.className='vd-temp-input-row';
+            const input=document.createElement('input'); input.type='number'; input.className='vd-temp-input'; input.placeholder='Ditt svar'; input.disabled=tempChecked;
+            const unit=document.createElement('span'); unit.className='vd-temp-unit'; unit.textContent = tempUppgift.fraga.includes('Hur många grader') ? 'grader' : '°C';
+            inputRow.appendChild(input); inputRow.appendChild(unit);
+            kortWrap.appendChild(inputRow);
+
+            const checkBtn=document.createElement('button'); checkBtn.type='button'; checkBtn.className='btn btn-primary'; checkBtn.style.width='100%'; checkBtn.style.marginTop='10px'; checkBtn.textContent='✅ Kontrollera';
+            const doCheck=()=>{
+                if(tempChecked) return;
+                const val = parseInt(input.value, 10);
+                if(isNaN(val)) { input.focus(); return; }
+                tempChecked = true; tempRatt = (val === tempUppgift.svar); tempTotal++; if(tempRatt) tempScore++;
+                renderTemp(); persist();
+            };
+            checkBtn.onclick=doCheck;
+            input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); doCheck(); } });
+            if(!tempChecked){ kortWrap.appendChild(checkBtn); }
+
+            if(tempChecked){
+                const fork=document.createElement('div'); fork.className='ry-quiz-fork'; fork.style.textAlign='center'; fork.style.fontWeight='700';
+                fork.innerHTML = (tempRatt ? '✅ Rätt! ' : '❌ Inte riktigt. Rätt svar: '+tempUppgift.svar+'. ') + tempUppgift.forklaring;
+                kortWrap.appendChild(fork);
+                input.value = tempUppgift.svar;
+                const nextBtn=document.createElement('button'); nextBtn.type='button'; nextBtn.className='btn btn-primary'; nextBtn.style.width='100%'; nextBtn.style.marginTop='10px'; nextBtn.textContent='➡️ Nästa uppgift';
+                nextBtn.onclick=()=>{ tempUppgift=genTempUppgift(); tempChecked=false; tempRatt=false; renderTemp(); persist(); };
+                kortWrap.appendChild(nextBtn);
+            }
+            const resetBtn=document.createElement('button'); resetBtn.type='button'; resetBtn.className='btn btn-secondary'; resetBtn.style.width='100%'; resetBtn.style.marginTop='6px'; resetBtn.textContent='🔄 Börja om';
+            resetBtn.onclick=()=>{ tempScore=0; tempTotal=0; tempUppgift=genTempUppgift(); tempChecked=false; tempRatt=false; renderTemp(); persist(); };
+            kortWrap.appendChild(resetBtn);
+            if(!tempChecked) setTimeout(()=> input.focus(), 30);
+        }
+
         function renderVind(){
             kortWrap.innerHTML='';
             const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🌬️ Så här bildas vind, steg för steg!'; kortWrap.appendChild(hint);
@@ -7191,13 +7278,14 @@
         }
 
         function render(){
-            [[tabIdag,'idag'],[tabJamfor,'jamfor'],[tabLexikon,'lexikon'],[tabVind,'vind'],[tabQuiz,'quiz']].forEach(([btn,m])=>{
+            [[tabIdag,'idag'],[tabJamfor,'jamfor'],[tabLexikon,'lexikon'],[tabVind,'vind'],[tabQuiz,'quiz'],[tabTemp,'temp']].forEach(([btn,m])=>{
                 btn.classList.toggle('btn-primary', mode===m); btn.classList.toggle('btn-secondary', mode!==m);
             });
             if(mode==='jamfor'){ renderJamfor(); sakerstallData(); }
             else if(mode==='lexikon') renderLexikon();
             else if(mode==='vind') renderVind();
             else if(mode==='quiz') renderQuiz();
+            else if(mode==='temp') renderTemp();
             else { renderIdag(); sakerstallData(); }
         }
         tabIdag.onclick=()=>{ mode='idag'; render(); persist(); };
@@ -7205,6 +7293,7 @@
         tabLexikon.onclick=()=>{ mode='lexikon'; render(); persist(); };
         tabVind.onclick=()=>{ mode='vind'; render(); persist(); };
         tabQuiz.onclick=()=>{ mode='quiz'; render(); persist(); };
+        tabTemp.onclick=()=>{ mode='temp'; render(); persist(); };
         render();
         if(!config) persist();
     }
@@ -8945,12 +9034,12 @@
         // ==== Flik: Meningsbyggnad (oförändrad logik) ====
         const mbRoot=document.createElement('div'); paneMB.appendChild(mbRoot);
         let mbState = { level:'latt', words:[], roles:[], current:[], checked:false };
-        if(config && config.data && config.data.mb && Array.isArray(config.data.mb.words) && config.data.mb.words.length){ Object.assign(mbState, config.data.mb); }
-        else { nyMeningMB('latt', false); }
         // AI-skapade meningar lever bara i minnet (sparas INTE, blandas ALDRIG med standardbanken).
         // mbKalla styr om 🎲 Ny mening slumpar bland standardmeningarna ELLER de AI-skapade.
         let mbEgna = [];
         let mbKalla = 'standard'; // 'standard' | 'ai'
+        if(config && config.data && config.data.mb && Array.isArray(config.data.mb.words) && config.data.mb.words.length){ Object.assign(mbState, config.data.mb); }
+        else { nyMeningMB('latt', false); }
 
         function blandaOrdningMB(arr){
             let out = arr.slice();
@@ -11095,7 +11184,10 @@
     function createWeekSchedule(config){
         const body = createWidget('VECKOSCHEMA', 1320, 'week-widget', config);
         const widget = body.parentElement.parentElement;
-        if(!config){ widget.style.height = '560px'; }
+        // OBS: sätter INTE en fast standardhöjd längre. Widgeten är bara ~115px hög med tomma
+        // dagar (rubrik + "+ Rad"-knapp), men fick tidigare tvingas till 560px – det gav ett stort
+        // tomt vitt område under schemat. Nu får höjden istället följa innehållet automatiskt och
+        // växa av sig själv när fler rader läggs till. Går ändå att dra i resize-handtaget manuellt.
         const days=['Måndag','Tisdag','Onsdag','Torsdag','Fredag'];
         const todayIdx = (()=>{ const d=new Date().getDay(); return (d>=1 && d<=5) ? d-1 : -1; })();
 
