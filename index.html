@@ -27560,15 +27560,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(!state || !state.pages || !state.pages.length) return;
         const title = state.title || 'Min saga';
         const coverPage = state.pages[0];
-        const coverScene = sbDetectScene(coverPage.bild||coverPage.text);
-        const coverEmoji = sbDetectEmoji(coverPage.bild||coverPage.text);
-        const coverSvg = sbSceneSvg(coverScene, coverEmoji, 1);
+        const coverIllu = coverPage.img ? "<img src='"+coverPage.img+"' style='width:100%;height:100%;object-fit:cover;display:block;'>" : sbSceneSvg(sbDetectScene(coverPage.bild||coverPage.text), sbDetectEmoji(coverPage.bild||coverPage.text), 1);
         let pagesHtml = '';
         state.pages.forEach((p,i)=>{
-            const scene = sbDetectScene(p.bild||p.text);
-            const emoji = sbDetectEmoji(p.bild||p.text);
-            const svg = sbSceneSvg(scene, emoji, i+1);
-            pagesHtml += "<div class='page'><div class='page-illu'>"+svg+"</div><div class='page-text'>"+escapeHtml(p.text)+"</div><div class='page-num'>"+(i+1)+"</div></div>";
+            const pageIllu = p.img ? "<img src='"+p.img+"' style='width:100%;height:100%;object-fit:cover;display:block;'>" : sbSceneSvg(sbDetectScene(p.bild||p.text), sbDetectEmoji(p.bild||p.text), i+1);
+            pagesHtml += "<div class='page'><div class='page-illu'>"+pageIllu+"</div><div class='page-text'>"+escapeHtml(p.text)+"</div><div class='page-num'>"+(i+1)+"</div></div>";
         });
         const html = "<!doctype html><html lang='sv'><head><meta charset='utf-8'><title>"+escapeHtml(title)+"</title><style>"
             +"@page{size:A4;margin:14mm;}"
@@ -27586,12 +27582,79 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             +".page-text{font-size:17px;line-height:1.65;max-width:150mm;}"
             +".page-num{margin-top:10mm;font-size:11px;color:#aaa;}"
             +"</style></head><body>"
-            +"<div class='page'><div class='cover-illu'>"+coverSvg+"</div><div class='cover-title'>"+escapeHtml(title)+"</div><div class='cover-sub'>En saga</div></div>"
+            +"<div class='page'><div class='cover-illu'>"+coverIllu+"</div><div class='cover-title'>"+escapeHtml(title)+"</div><div class='cover-sub'>En saga</div></div>"
             +pagesHtml
             +"<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body></html>";
         const w=window.open('','sbprint'+Date.now(),'width=820,height=920');
         if(!w){ customAlert('Tillåt popup-fönster i webbläsaren för att kunna skriva ut.','🖨️'); return; }
         w.document.open(); w.document.write(html); w.document.close();
+    }
+    // ---- AI-generering av riktiga bilder till sagoboken (endast via API-nyckel-läget, Alternativ 2) ----
+    async function aiGenerateStorybookText(userPrompt, apiKey){
+        const prompt = buildStorybookPrompt(userPrompt);
+        const models = ["gemini-2.0-flash","gemini-1.5-flash-latest","gemini-1.5-flash"];
+        const bodyObj = { contents:[{ parts:[{ text: prompt }] }], generationConfig:{ temperature:0.9 } };
+        let lastErr='';
+        for(const m of models){
+            try{
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(apiKey);
+                const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(bodyObj) });
+                if(!r.ok){ const t=await r.text().catch(()=> ''); if(/API key not valid|API_KEY_INVALID|invalid.*key/i.test(t)) throw new Error('Ogiltig API-nyckel.'); lastErr='Servern svarade ' + r.status; continue; }
+                const data = await r.json();
+                const text = (((data.candidates||[])[0]||{}).content||{}).parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : '';
+                const parsed = parseStorybookText(text);
+                if(parsed && parsed.pages.length) return parsed;
+                lastErr='AI gav inget användbart svar.';
+            }catch(e){ if(e && e.message==='Ogiltig API-nyckel.') throw e; lastErr=(e&&e.message)||'nätverksfel'; }
+        }
+        throw new Error(lastErr||'Kunde inte skapa sagan.');
+    }
+    // Komprimerar en base64-bild (ändrar storlek + gör om till JPEG) innan den sparas, så att en
+    // sagobok med flera AI-bilder aldrig riskerar att spränga Firestores gräns på 1 MB per dokument
+    // och därmed stoppa all sparning av hela tavlan. Släpper igenom null om något går fel (då faller
+    // sidan tillbaka på den enkla vektor-illustrationen istället).
+    function sbCompressImage(dataUri, maxDim, quality){
+        return new Promise((resolve)=>{
+            try{
+                const img = new Image();
+                img.onload = ()=>{
+                    let w=img.width, h=img.height;
+                    if(w>=h){ if(w>maxDim){ h=Math.round(h*maxDim/w); w=maxDim; } }
+                    else { if(h>maxDim){ w=Math.round(w*maxDim/h); h=maxDim; } }
+                    const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+                    const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+                    try{ resolve(canvas.toDataURL('image/jpeg', quality)); }catch(e){ resolve(null); }
+                };
+                img.onerror=()=>resolve(null);
+                img.src=dataUri;
+            }catch(e){ resolve(null); }
+        });
+    }
+    async function aiGenerateStorybookImage(bildDesc){
+        const key = aiKeyGet(); if(!key) return null;
+        const prompt = "Barnboksillustration i mjuk, färgglad akvarellstil av: " + bildDesc + ". Ingen text i bilden. Vänlig, varm och trygg stämning lämplig för barn.";
+        const models = ["gemini-2.5-flash-image","gemini-3.1-flash-image"];
+        for(const m of models){
+            try{
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(key);
+                const bodyObj = { contents:[{ parts:[{ text: prompt }] }], generationConfig:{ responseModalities:["IMAGE"] } };
+                const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(bodyObj) });
+                if(!r.ok) continue;
+                const data = await r.json();
+                const parts = (((data.candidates||[])[0]||{}).content||{}).parts || [];
+                const imgPart = parts.find(p=> p.inlineData || p.inline_data);
+                if(!imgPart) continue;
+                const inline = imgPart.inlineData || imgPart.inline_data;
+                const mime = inline.mimeType || inline.mime_type || 'image/png';
+                const raw = 'data:'+mime+';base64,'+inline.data;
+                const compressed = await sbCompressImage(raw, 380, 0.55);
+                // Säkerhetsnät: om bilden ändå blev för stor (t.ex. väldigt detaljrik), hoppa över den
+                // för just den här sidan istället för att riskera hela tavlans sparning.
+                if(compressed && compressed.length < 200000) return compressed;
+                return null;
+            }catch(e){ continue; }
+        }
+        return null;
     }
     function createStorybook(config){
         if(config===undefined) config=null;
@@ -27624,9 +27687,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
             const page = state.pages[state.currentPage];
             const illu=document.createElement('div'); illu.className='sb-illu';
-            const scene = sbDetectScene(page.bild||page.text);
-            const emoji = sbDetectEmoji(page.bild||page.text);
-            illu.innerHTML = sbSceneSvg(scene, emoji, state.currentPage+1);
+            if(page.img){
+                illu.innerHTML = "<img src='"+page.img+"' alt='' style='width:100%;height:100%;object-fit:cover;display:block;'>";
+            } else {
+                const scene = sbDetectScene(page.bild||page.text);
+                const emoji = sbDetectEmoji(page.bild||page.text);
+                illu.innerHTML = sbSceneSvg(scene, emoji, state.currentPage+1);
+            }
             root.appendChild(illu);
 
             const txt=document.createElement('div'); txt.className='sb-text'; txt.textContent=page.text;
@@ -27700,6 +27767,38 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Skapa saga från svaret';
             makePasteBtn.onclick=()=>{ const parsed=parseStorybookText(pasteTa.value); if(!parsed || parsed.pages.length<1){ status.textContent='⚠️ Hittade inga sidor i svaret. Kolla att formatet stämmer.'; return; } handleStory(parsed); };
             row1b.appendChild(makePasteBtn); box.appendChild(row1b);
+
+            // ---- Alternativ 2: automatiskt med API-nyckel, ger riktiga AI-genererade bilder ----
+            const orEl=document.createElement('div'); orEl.className='kw-ai-or'; orEl.textContent='— ELLER —'; box.appendChild(orEl);
+            const advBtn=document.createElement('button'); advBtn.className='kw-ai-adv'; advBtn.textContent='Alternativ 2 – med riktiga AI-bilder (engångsnyckel, tar en stund) ▾'; box.appendChild(advBtn);
+            const adv=document.createElement('div'); adv.style.display='none'; box.appendChild(adv);
+            advBtn.onclick=()=>{ adv.style.display = adv.style.display==='none'?'block':'none'; };
+            const keyWrap=document.createElement('div'); adv.appendChild(keyWrap);
+            const keyInp=document.createElement('input'); keyInp.className='kw-ai-key'; keyInp.type='password'; keyInp.placeholder='Klistra in din Google AI (Gemini) API-nyckel';
+            const help=document.createElement('div'); help.className='kw-ai-help'; help.innerHTML="Hämta en gratis nyckel på <a href='https://aistudio.google.com/app/apikey' target='_blank' rel='noopener'>aistudio.google.com</a>. Nyckeln sparas bara på den här enheten.";
+            const showKeyField=()=>{ keyWrap.innerHTML=''; keyWrap.appendChild(keyInp); keyWrap.appendChild(help); };
+            if(aiKeyGet()){ const note=document.createElement('div'); note.className='kw-ai-help'; note.innerHTML="🔑 API-nyckel sparad. <a href='#' class='kw-ai-change'>Byt nyckel</a>"; keyWrap.appendChild(note); note.querySelector('.kw-ai-change').onclick=(e)=>{ e.preventDefault(); showKeyField(); }; }
+            else { showKeyField(); }
+            const row2=document.createElement('div'); row2.className='kw-btnrow'; row2.style.margin='8px 0 0'; row2.style.justifyContent='flex-start';
+            const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.title='Öppnar Google AI Studio – du är redan inloggad'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); status.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
+            const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='✨ Skapa saga + riktiga bilder';
+            autoBtn.onclick=async ()=>{
+                const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; return; }
+                let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } }
+                if(!key){ status.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
+                autoBtn.disabled=true;
+                try{
+                    status.innerHTML="<span class='kw-ai-spin'></span> AI skriver sagan...";
+                    const parsed = await aiGenerateStorybookText(d, key);
+                    for(let i=0;i<parsed.pages.length;i++){
+                        status.innerHTML="<span class='kw-ai-spin'></span> Skapar bild "+(i+1)+" av "+parsed.pages.length+"...";
+                        try{ const img = await aiGenerateStorybookImage(parsed.pages[i].bild || parsed.pages[i].text); if(img) parsed.pages[i].img = img; }catch(e){}
+                    }
+                    handleStory(parsed);
+                }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); }
+                autoBtn.disabled=false;
+            };
+            row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
 
             box.appendChild(status);
             const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
