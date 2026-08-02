@@ -405,16 +405,17 @@
     
     #watermark { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' transform='rotate(-30, 300, 200)' fill='rgba(150,150,150,0.08)' font-size='60' font-family='Arial, sans-serif' font-weight='900' letter-spacing='4'%3EHIMNASKOLAN%3C/text%3E%3C/svg%3E"); background-repeat: repeat; }
     
-    #cb-app-wrapper.theme-chalkboard .canvas-page { background-color: #1e3f20; background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px); background-size: 20px 20px; }
-    #cb-app-wrapper.theme-blueprint .canvas-page { background-color: #0f4c81; background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 30px 30px; }
-    #cb-app-wrapper.theme-dark .canvas-page { background-color: #222222; background-image: radial-gradient(#444444 1px, transparent 1px); }
-    #cb-app-wrapper.theme-lined .canvas-page { background-color: #ffffff; background-image: repeating-linear-gradient(transparent, transparent 31px, #a8d5ff 31px, #a8d5ff 32px); background-size: 100% 32px; }
-    #cb-app-wrapper.theme-grid .canvas-page { background-color: #ffffff; background-image: linear-gradient(#cce0ff 1px, transparent 1px), linear-gradient(90deg, #cce0ff 1px, transparent 1px); background-size: 20px 20px; }
-    #cb-app-wrapper.theme-purple .canvas-page { background-color: #f4ebff; background-image: radial-gradient(#d6bdf2 1.5px, transparent 1.5px); background-size: 24px 24px; }
-    #cb-app-wrapper.theme-cork .canvas-page { background-color: #f7e6d2; background-image: radial-gradient(rgba(0,0,0,0.06) 2px, transparent 2px); background-size: 10px 10px; }
-    #cb-app-wrapper.theme-blank .canvas-page { background-color: #ffffff; background-image: none; }
+    #cb-app-wrapper.theme-chalkboard .canvas-page, .canvas-page.theme-chalkboard { background-color: #1e3f20; background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px); background-size: 20px 20px; }
+    #cb-app-wrapper.theme-blueprint .canvas-page, .canvas-page.theme-blueprint { background-color: #0f4c81; background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 30px 30px; }
+    #cb-app-wrapper.theme-dark .canvas-page, .canvas-page.theme-dark { background-color: #222222; background-image: radial-gradient(#444444 1px, transparent 1px); }
+    #cb-app-wrapper.theme-lined .canvas-page, .canvas-page.theme-lined { background-color: #ffffff; background-image: repeating-linear-gradient(transparent, transparent 31px, #a8d5ff 31px, #a8d5ff 32px); background-size: 100% 32px; }
+    #cb-app-wrapper.theme-grid .canvas-page, .canvas-page.theme-grid { background-color: #ffffff; background-image: linear-gradient(#cce0ff 1px, transparent 1px), linear-gradient(90deg, #cce0ff 1px, transparent 1px); background-size: 20px 20px; }
+    #cb-app-wrapper.theme-purple .canvas-page, .canvas-page.theme-purple { background-color: #f4ebff; background-image: radial-gradient(#d6bdf2 1.5px, transparent 1.5px); background-size: 24px 24px; }
+    #cb-app-wrapper.theme-cork .canvas-page, .canvas-page.theme-cork { background-color: #f7e6d2; background-image: radial-gradient(rgba(0,0,0,0.06) 2px, transparent 2px); background-size: 10px 10px; }
+    #cb-app-wrapper.theme-blank .canvas-page, .canvas-page.theme-blank { background-color: #ffffff; background-image: none; }
     #cb-app-wrapper.no-watermark #watermark { display: none !important; }
     
+
     #fullscreen-btn { position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.06); cursor: pointer; font-size: 18px; color: #333; transition: opacity 0.25s ease, background-color 0.2s, transform 0.2s; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; font-weight: bold; opacity: 0.3; }
     #fullscreen-btn:hover { background-color: #e5e5ea; transform: scale(1.05); opacity: 1; }
     #pwa-install-btn { position: absolute; top: 20px; right: 72px; z-index: 10000; background: #1a73e8; color: #fff; padding: 0 16px; height: 44px; border-radius: 12px; box-shadow: 0 4px 15px rgba(26,115,232,0.35); border: none; cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.2s, opacity 0.2s; opacity: 0.92; }
@@ -4506,7 +4507,7 @@
 
         const pages = []; const canvasPages = document.querySelectorAll('.canvas-page');
         canvasPages.forEach(page => {
-            const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, widgets: [] };
+            const pageData = { id: page.id, name: page.dataset.pageName || '', bgImage: page.style.backgroundImage, bgTheme: page.dataset.bgTheme || '', bgNoWatermark: page.dataset.bgNoWatermark === '1', widgets: [] };
             if(page.dataset.day !== undefined && page.dataset.day !== '') pageData.day = parseInt(page.dataset.day);
             if(page.dataset.lesson !== undefined && page.dataset.lesson !== '') pageData.lesson = parseInt(page.dataset.lesson);
             page.querySelectorAll('.widget').forEach(w => { pageData.widgets.push(serializeWidget(w)); });
@@ -4571,7 +4572,16 @@
         const resizer = document.createElement('div'); resizer.className = 'widget-resizer'; widget.appendChild(resizer);
         getActiveCanvasV6().appendChild(widget); makeDraggable(widget, header); makeBodyDraggable(widget, inner); makeResizable(widget, resizer);
         
-        header.querySelector('.widget-close-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; customConfirm("Vill du stänga rutan?", () => { widget.remove(); saveBoardState(); }); };
+        header.querySelector('.widget-close-icon').onclick = (e) => {
+            e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return;
+            // FIX: generiska "Vill du stänga rutan?" gav intrycket att data "försvann av sig själv"
+            // för widgetar med mycket inskrivet innehåll (t.ex. Terminsschema). Varna tydligt att
+            // stängning raderar innehållet permanent för just dessa, så man inte stänger av misstag.
+            const dataHeavyTypes = { 'TERMINSSCHEMA':'terminsschemat', 'VECKOSCHEMA':'veckoschemat', 'DAGENS SCHEMA':'schemat', 'DAGSSCHEMA':'schemat', 'CHECKLISTA':'checklistan' };
+            const label = dataHeavyTypes[widget.dataset.widgetType];
+            const msg = label ? `⚠️ Stänger du rutan raderas allt du skrivit i ${label} permanent. Vill du fortsätta?` : "Vill du stänga rutan?";
+            customConfirm(msg, () => { widget.remove(); saveBoardState(); });
+        };
         header.querySelector('.widget-dup-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; duplicateWidget(widget); };
         header.querySelector('.btn-min').onclick = (e) => {
             e.stopPropagation();
@@ -4757,7 +4767,7 @@
     }
 
     function createPageV6(isInitial = false) { const pageId = Date.now() + '-' + Math.random().toString(16).slice(2); const canvasPage = document.createElement('div'); canvasPage.className = 'canvas-page'; canvasPage.id = pageId; document.getElementById('canvas-container-v6').appendChild(canvasPage); pagesListV6.push({ id: pageId, canvas: canvasPage, name: '' }); if (isInitial) goToPageByIndexV6(0); else goToPageByIndexV6(pagesListV6.length - 1); renderSidePocket(); }
-    function goToPageByIndexV6(index) { if (index < 0 || index >= pagesListV6.length) return; const canvasPages = document.querySelectorAll('.canvas-page'); for(let i=0; i<canvasPages.length; i++) { canvasPages[i].classList.remove('active'); } pagesListV6[index].canvas.classList.add('active'); currentPageIndexV6 = index; updatePagesNavV6(); renderSidePocket(); }
+    function goToPageByIndexV6(index) { if (index < 0 || index >= pagesListV6.length) return; const canvasPages = document.querySelectorAll('.canvas-page'); for(let i=0; i<canvasPages.length; i++) { canvasPages[i].classList.remove('active'); } const activePage = pagesListV6[index].canvas; activePage.classList.add('active'); currentPageIndexV6 = index; document.getElementById('cb-app-wrapper').classList.toggle('no-watermark', activePage.dataset.bgNoWatermark === '1'); updatePagesNavV6(); renderSidePocket(); }
     function prevPageV6() { goToPageByIndexV6(currentPageIndexV6 - 1); saveBoardState(); } function nextPageV6() { goToPageByIndexV6(currentPageIndexV6 + 1); saveBoardState(); } function addPageV6() { createPageV6(); saveBoardState(); }
     function updatePagesNavV6() { const pc = document.getElementById('page-count-v6'); if(pc){ const nm = pagesListV6[currentPageIndexV6] ? pagesListV6[currentPageIndexV6].name : ''; pc.innerText = (nm ? nm + ' · ' : '') + (currentPageIndexV6 + 1) + ' / ' + pagesListV6.length; } const pb=document.getElementById('prev-page-btn-v6'); if(pb) pb.disabled = (currentPageIndexV6 <= 0); const nb=document.getElementById('next-page-btn-v6'); if(nb) nb.disabled = (currentPageIndexV6 >= pagesListV6.length - 1); }
 
@@ -11659,6 +11669,7 @@
         body.querySelector('.tp-add-subject').onclick = ()=>{ tp.subjects.push({ name:'', color:SCHEDULE_DEFAULT_COLOR, cells:[] }); persist(); renderGrid(); const last=body.querySelectorAll('.tp-subj-name'); if(last.length) last[last.length-1].focus(); };
         body.querySelector('.tp-share').onclick = openShareDialog;
         body.querySelector('.tp-print').onclick = ()=> printTermPlan(tp, weekNumbers());
+        if(!config) persist();
     }
 
     function printTermPlan(tp, weeks){
@@ -26728,32 +26739,52 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
               svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='co' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#bfe9ff'/><stop offset='40%' stop-color='#d9f4ff'/><stop offset='100%' stop-color='#2f9fc4'/></linearGradient></defs><rect width='1600' height='900' fill='url(#co)'/><circle cx='300' cy='150' r='60' fill='#fff2b8' opacity='0.9'/>${clouds(101)}<rect x='0' y='420' width='1600' height='250' fill='#4fb3d9'/>${waves(102)}<path d='M0 640 Q 420 590 840 635 T 1600 620 V900 H0 Z' fill='#f5e3b3'/>${grass(103,880,26,34,'#8aa63c')}</svg>` }
         ];
     })();
-    function injectBackgroundThemeCSS(){ if(document.getElementById('img-theme-style')) return; const st=document.createElement('style'); st.id='img-theme-style'; st.textContent = IMG_THEMES.map(t=>`#cb-app-wrapper.${t.cl} .canvas-page{background-image:url("data:image/svg+xml,${encodeURIComponent(t.svg)}") !important;background-size:cover !important;background-position:center !important;background-repeat:no-repeat !important;}`).join('\n'); document.head.appendChild(st); }
+    function injectBackgroundThemeCSS(){ if(document.getElementById('img-theme-style')) return; const st=document.createElement('style'); st.id='img-theme-style'; st.textContent = IMG_THEMES.map(t=>`#cb-app-wrapper.${t.cl} .canvas-page, .canvas-page.${t.cl}{background-image:url("data:image/svg+xml,${encodeURIComponent(t.svg)}") !important;background-size:cover !important;background-position:center !important;background-repeat:no-repeat !important;}`).join('\n'); document.head.appendChild(st); }
     injectBackgroundThemeCSS();
+
+    // Alla kända temaklassnamn (mönster + bildteman), används för att städa bort ev. tidigare
+    // vald bakgrund från en sida innan en ny appliceras.
+    const ALL_BG_THEME_CLASSES = ['theme-lined','theme-grid','theme-dark','theme-chalkboard','theme-blank','theme-blueprint','theme-purple','theme-cork'].concat(IMG_THEMES.map(t=>t.cl));
+
+    // FIX: bakgrund var tidigare EN gemensam inställning för hela tavlan (klass på #cb-app-wrapper),
+    // så att byta bakgrund på en sida ändrade den för ALLA sidor. Nu appliceras vald bakgrund bara på
+    // DEN AKTUELLA sidan (klass + dataset direkt på just den .canvas-page-elementet) och sparas per
+    // sida, så varje sida kan ha sin egen, personliga bakgrund. Vattenstämpeln (som styrs globalt av
+    // #cb-app-wrapper.no-watermark, eftersom det bara finns ETT vattenstämpelelement) synkas om varje
+    // gång man byter/aktiverar en sida - se goToPageByIndexV6().
+    function applyPageBackground(themeCl, noWatermark){
+        const page = getActiveCanvasV6(); if(!page) return;
+        ALL_BG_THEME_CLASSES.forEach(c => page.classList.remove(c));
+        if(themeCl) page.classList.add(themeCl);
+        page.dataset.bgTheme = themeCl || '';
+        page.dataset.bgNoWatermark = noWatermark ? '1' : '';
+        document.getElementById('cb-app-wrapper').classList.toggle('no-watermark', !!noWatermark);
+        saveBoardState();
+    }
 
     function createBgSelector(config){
         const body=createWidget('BAKGRUND',260,'',config); body.innerHTML=`<div class='bg-panel'></div>`; const p=body.firstChild;
         const themes = [
-            {n:'Standard',cl:'no-watermark',sw:'radial-gradient(#ccc 1.5px, transparent 1.5px)',size:'7px 7px',bg:'#fff'},
-            {n:'Linjerat',cl:'theme-lined no-watermark',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)'},
-            {n:'Rutigt',cl:'theme-grid no-watermark',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff'},
-            {n:'Mörkt',cl:'theme-dark no-watermark',sw:'radial-gradient(#444 1px, transparent 1px)',size:'6px 6px',bg:'#222'},
-            {n:'Grön tavla',cl:'theme-chalkboard no-watermark',sw:'#1e3f20'},
-            {n:'Blank',cl:'theme-blank no-watermark',sw:'#ffffff',border:'2px solid #d8d8dc'},
-            {n:'Vit rutig',cl:'theme-grid no-watermark',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff',border:'2px solid #d8d8dc'},
-            {n:'Vit linjär',cl:'theme-lined no-watermark',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)',border:'2px solid #d8d8dc'}
+            {n:'Standard',cl:'',sw:'radial-gradient(#ccc 1.5px, transparent 1.5px)',size:'7px 7px',bg:'#fff'},
+            {n:'Linjerat',cl:'theme-lined',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)'},
+            {n:'Rutigt',cl:'theme-grid',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff'},
+            {n:'Mörkt',cl:'theme-dark',sw:'radial-gradient(#444 1px, transparent 1px)',size:'6px 6px',bg:'#222'},
+            {n:'Grön tavla',cl:'theme-chalkboard',sw:'#1e3f20'},
+            {n:'Blank',cl:'theme-blank',sw:'#ffffff',border:'2px solid #d8d8dc'},
+            {n:'Vit rutig',cl:'theme-grid',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff',border:'2px solid #d8d8dc'},
+            {n:'Vit linjär',cl:'theme-lined',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)',border:'2px solid #d8d8dc'}
         ];
         themes.forEach(t=>{
             let d=document.createElement('div'); d.className='bg-dot'; d.title=t.n;
             d.style.background=t.sw; if(t.bg) d.style.backgroundColor=t.bg; if(t.size) d.style.backgroundSize=t.size; if(t.border) d.style.border=t.border;
-            d.onclick=()=>{ document.getElementById('cb-app-wrapper').className=t.cl; saveBoardState(); };
+            d.onclick=()=>{ applyPageBackground(t.cl, true); };
             p.appendChild(d);
         });
         // Temabakgrunder (bilder) – pricken förhandsvisar bakgrunden, utan vattenstämpel
         IMG_THEMES.forEach(t=>{
             let d=document.createElement('div'); d.className='bg-dot'; d.title=t.name;
             d.style.backgroundImage=`url("data:image/svg+xml,${encodeURIComponent(t.svg)}")`; d.style.backgroundSize='cover'; d.style.backgroundPosition='center';
-            d.onclick=()=>{ document.getElementById('cb-app-wrapper').className=t.cl+' no-watermark'; saveBoardState(); };
+            d.onclick=()=>{ applyPageBackground(t.cl, true); };
             p.appendChild(d);
         });
     }
@@ -28737,6 +28768,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
     window.initToolPocketSortable = initToolPocketSortable;
 
+    // Sätter en standardbakgrund (bildtema) på alla CURRENTLY existerande sidor - används bara för
+    // helt nya/tomma tavlor så förstagångsupplevelsen ser fin ut, precis som tidigare standardval.
+    function applyDefaultThemeToAllPages(themeCl){
+        document.querySelectorAll('.canvas-page').forEach(cp => {
+            cp.classList.add(themeCl); cp.dataset.bgTheme = themeCl; cp.dataset.bgNoWatermark = '1';
+        });
+    }
     function initBoard() {
         restoreToolbarOrder();
         // Bygg om verktygsfickan nu när rätt användare är inloggad – före
@@ -28746,13 +28784,28 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         let newDays = 0;
         if (savedData) {
             try {
-                const s = JSON.parse(savedData); document.getElementById('cb-app-wrapper').className = s.bodyClass || 'theme-img-summer no-watermark';
+                const s = JSON.parse(savedData);
+                // FIX: bakgrund var tidigare EN gemensam klass på #cb-app-wrapper för hela tavlan.
+                // Nu bor bakgrunden per sida (klass på respektive .canvas-page) istället, så
+                // wrapperns className ska INTE längre bära tema-klasser (annars skulle den gamla
+                // globala bakgrunden läcka igenom och gälla för alla sidor igen). Vi läser ändå ut
+                // den gamla klassen här som en FALLBACK åt sidor som saknar ett eget sparat val
+                // (dvs tavlor sparade innan den här ändringen), så inget befintligt schema tappar
+                // sin bakgrund.
+                document.getElementById('cb-app-wrapper').className = '';
+                const legacyClasses = (s.bodyClass || '').split(/\s+/).filter(Boolean);
+                const legacyThemeCl = legacyClasses.find(c => c.indexOf('theme-') === 0) || '';
+                const legacyNoWatermark = legacyClasses.indexOf('no-watermark') !== -1;
                 // Lista över nyligen utlagda widgetar följer med tavlan (så elever ser markeringen)
                 try { if (Array.isArray(s.nyaWidgetKnappar)) localStorage.setItem('nyaWidgetKnappar', JSON.stringify(s.nyaWidgetKnappar)); } catch(e){}
                 document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
                 s.pages.forEach((p) => {
                     const pageId = p.id || Date.now() + '-' + Math.random().toString(16).slice(2);
                     const cp = document.createElement('div'); cp.className = 'canvas-page'; cp.id = pageId; if(p.bgImage) cp.style.backgroundImage = p.bgImage; if(p.name) cp.dataset.pageName = p.name;
+                    const pageThemeCl = (p.bgTheme !== undefined) ? p.bgTheme : legacyThemeCl;
+                    const pageNoWatermark = (p.bgNoWatermark !== undefined) ? !!p.bgNoWatermark : legacyNoWatermark;
+                    if(pageThemeCl) cp.classList.add(pageThemeCl);
+                    cp.dataset.bgTheme = pageThemeCl || ''; cp.dataset.bgNoWatermark = pageNoWatermark ? '1' : '';
                     const hasDay = (p.day!==undefined && p.day!==null);
                     const hasLesson = (p.lesson!==undefined && p.lesson!==null);
                     if(hasDay) cp.dataset.day = String(p.day);
@@ -28766,8 +28819,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 let idx = s.activePageId ? pagesListV6.findIndex(pg=>pg.id===s.activePageId) : -1;
                 if(idx < 0) idx = (typeof s.activePage==='number' && s.activePage < pagesListV6.length) ? s.activePage : 0;
                 goToPageByIndexV6(idx);
-            } catch(e) { document.getElementById('cb-app-wrapper').className = 'theme-img-summer no-watermark'; document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
-        } else { document.getElementById('cb-app-wrapper').className = 'theme-img-summer no-watermark'; document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; goToPageByIndexV6(todayDayIndex()); }
+            } catch(e) { document.getElementById('cb-app-wrapper').className = ''; document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; applyDefaultThemeToAllPages('theme-img-summer'); goToPageByIndexV6(todayDayIndex()); }
+        } else { document.getElementById('cb-app-wrapper').className = ''; document.getElementById('canvas-container-v6').innerHTML=''; pagesListV6=[]; ensureFixedPages(); newDays=1; applyDefaultThemeToAllPages('theme-img-summer'); goToPageByIndexV6(todayDayIndex()); }
         window.isLoadingBoard = false;
         // FIX: koden ovan skriver av misstag över HELA className på #cb-app-wrapper (för att sätta
         // rätt bakgrundstema), vilket rensade bort klasser som .ej-admin/.viewer-mode/.toolbar-order-locked
