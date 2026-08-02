@@ -460,8 +460,12 @@
     .tpc-title { flex: 1; font-size: 12.5px; font-weight: 800; color: #2f5f8a; background: transparent; border: none; outline: none; min-width: 0; }
     .tpc-title:focus { text-decoration: underline; }
     .tpc-remove { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1px solid rgba(0,0,0,0.1); color: #9a4a4a; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-    .tpc-items { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 44px; }
+    .tpc-items { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 44px; overflow: hidden; max-height: 2000px; transition: max-height 0.25s ease, opacity 0.2s ease; }
     .tpc-items:empty::before { content: 'Släpp verktyg här'; grid-column: 1 / -1; font-size: 11px; color: #7ba3c9; text-align: center; padding: 12px 0; border: 1px dashed #aacbe8; border-radius: 10px; }
+    .tpc-header { cursor: pointer; }
+    .tpc-toggle { flex-shrink: 0; width: 16px; text-align: center; font-size: 11px; color: #2f5f8a; user-select: none; transition: transform 0.2s ease; }
+    .tool-pocket-category.collapsed .tpc-toggle { transform: rotate(-90deg); }
+    .tool-pocket-category.collapsed .tpc-items { max-height: 0; opacity: 0; min-height: 0; margin: 0; }
 
     /* När ordningen är låst för alla (även admin): dölj redigeringskontroller och visa vanlig muspekare */
     .toolbar-order-locked .tpd-remove,
@@ -24707,22 +24711,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             roundBtns.appendChild(addRoundBtn); roundBtns.appendChild(startBtn); root.appendChild(roundBtns);
         }
 
-        // ---- AI: lägg till genererade frågor i frågelistan (ersätter en enda tom standardfråga, annars läggs de på slutet) ----
+        // ---- AI: lägg till genererade frågor i frågelistan ----
         function questionsToRounds(questions){
             return questions.slice(0,20).map(q=>({
                 question: q.question,
                 options: q.options.map(t=>({text:t})),
                 correctIndex: q.correctIndex
             }));
-        }
-        function makeFromQuestions(questions, status, close){
-            if(!questions || !questions.length){ if(status) status.textContent='⚠️ Hittade inga användbara frågor.'; return false; }
-            const newRounds = questionsToRounds(questions);
-            const tomStandard = state.rounds.length===1 && !state.rounds[0].question.trim() && state.rounds[0].options.every(o=>!o.text.trim());
-            state.rounds = tomStandard ? newRounds : state.rounds.concat(newRounds);
-            if(state.rounds.length>20) state.rounds = state.rounds.slice(0,20);
-            if(close) close();
-            renderSetup(); persist(); return true;
         }
         function openQuizAiDialog(){
             const ov=document.createElement('div'); ov.className='cal-popup-overlay';
@@ -28298,10 +28293,30 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const safeLabel = (label||'Kategori').replace(/"/g,'&quot;');
         box.innerHTML = `<div class="tpc-header">
                 <span class="tpc-handle" title="Dra för att flytta rutan">⠿</span>
+                <span class="tpc-toggle" title="Visa/dölj verktygen i den här kategorin">▸</span>
                 <input type="text" class="tpc-title" value="${safeLabel}" placeholder="Kategorinamn" ${isAdmin ? '' : 'readonly'}>
                 <span class="tpc-remove" title="Ta bort rutan (verktygen läggs tillbaka i listan)">✕</span>
             </div>
             <div class="tpc-items"></div>`;
+        const toggleEl = box.querySelector('.tpc-toggle');
+        const setCollapsed = (collapsed)=>{ box.classList.toggle('collapsed', collapsed); toggleEl.textContent = collapsed ? '▸' : '▾'; };
+        box._tpcSetCollapsed = setCollapsed;
+        const toggleOpen = (e)=>{
+            e.stopPropagation();
+            const willOpen = box.classList.contains('collapsed');
+            if(willOpen){
+                // En kategori öppen åt gången: stäng alla syskon-kategorier i samma ficka
+                const parent = box.parentElement;
+                if(parent){ [...parent.children].forEach(sib=>{ if(sib!==box && sib.classList && sib.classList.contains('tool-pocket-category') && sib._tpcSetCollapsed) sib._tpcSetCollapsed(true); }); }
+            }
+            setCollapsed(!willOpen);
+        };
+        toggleEl.addEventListener('pointerdown', (e)=> e.stopPropagation());
+        toggleEl.addEventListener('click', toggleOpen);
+        box.querySelector('.tpc-header').addEventListener('click', (e)=>{
+            if(e.target.closest('.tpc-handle, .tpc-remove, .tpc-title')) return;
+            toggleOpen(e);
+        });
         const removeBtn = box.querySelector('.tpc-remove');
         const handle = box.querySelector('.tpc-handle');
         const titleInput = box.querySelector('.tpc-title');
@@ -28457,6 +28472,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 const btn = grid.querySelector(`.tool-btn[onclick="${onclickId}"]`);
                 if(btn) itemsEl.appendChild(btn); // append flyttar automatiskt bort knappen från sin gamla plats
             });
+            if(itemsEl.children.length > 0 && box._tpcSetCollapsed) box._tpcSetCollapsed(true);
         });
         saveToolPocketLayout();
     }
@@ -28521,6 +28537,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
             grid.innerHTML = '';
             grid.appendChild(frag);
+            // Rutor som redan har verktyg i sig startar hopfällda (dolda tills man klickar pilen).
+            // Tomma rutor lämnas öppna så "Släpp verktyg här"-platshållaren syns vid drag-och-släpp.
+            [...grid.children].forEach(box=>{
+                if(box.classList && box.classList.contains('tool-pocket-category') && box._tpcSetCollapsed){
+                    const items = box.querySelector('.tpc-items');
+                    if(items && items.children.length > 0) box._tpcSetCollapsed(true);
+                }
+            });
         } catch(e){
             console.warn('[MinTavla] Kunde inte rita om verktygsfickan - lämnar den orörd så inget försvinner:', e);
         }
