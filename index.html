@@ -2781,7 +2781,7 @@
     .gr-reveal.revealed { background:#d9f2df; color:#1f7a37; cursor:default; }
     .gr-protractor { position:absolute; width:220px; height:130px; cursor:grab; touch-action:none; z-index:50; }
     .gr-protractor:active { cursor:grabbing; }
-    .gr-prot-inner { width:100%; height:100%; pointer-events:none; }
+    .gr-prot-inner { width:100%; height:100%; pointer-events:none; transform-origin:50% 88.46%; }
     .gr-prot-inner svg { display:block; }
     .gr-prot-handle { position:absolute; left:197px; top:107px; width:16px; height:16px; border-radius:50%; background:#007aff; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.35); cursor:grab; touch-action:none; }
     .gr-prot-handle:active { cursor:grabbing; }
@@ -14218,11 +14218,37 @@
         slider.oninput=()=>{ valIn.value=slider.value; render(); };
         slider.onchange=()=>{ saveBoardState(); };
         const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
-        function slumpaEnhetPar(enheter){
-            let i=ri(0,enheter.length-1), j=i; while(j===i) j=ri(0,enheter.length-1);
+        function slumpaEnhetPar(enheter, tillatnaNamn, bagaBegransade){
+            let idxPool = enheter.map((_,idx)=>idx);
+            if(tillatnaNamn && tillatnaNamn.length){
+                const filtered = enheter.map(([u],idx)=>tillatnaNamn.includes(u)?idx:-1).filter(idx=>idx!==-1);
+                if(filtered.length) idxPool = filtered;
+            }
+            const i=idxPool[ri(0,idxPool.length-1)];
+            let jPool;
+            if(bagaBegransade){
+                // Båda värdena beskriver samma sorts sak (t.ex. två rep) - enheten för det andra
+                // värdet måste ALLTID vara en av de rimliga enheterna för scenariot. Finns bara en
+                // rimlig enhet (t.ex. löpbana = bara meter) används samma enhet för båda värdena
+                // istället för att falla tillbaka till en enhet som inte passar scenariot.
+                jPool = idxPool.filter(idx=>idx!==i);
+                if(!jPool.length) return [i,i];
+            } else {
+                jPool = enheter.map((_,idx)=>idx).filter(idx=>idx!==i);
+            }
+            let j = jPool[ri(0,jPool.length-1)];
             if(enheter[i][1]/enheter[j][1] > 1000 || enheter[j][1]/enheter[i][1] > 1000){ j = i>0 ? i-1 : i+1; } // hoppa inte hela trappan
             return [i,j];
         }
+        // FIX: värdet (t.ex. "87") ska också kännas rimligt ihop med den valda enheten - en stor
+        // enhet som mil/km/ton ska inte kunna slumpas fram med ett lika stort tal som en liten
+        // enhet (mm/g), annars blir svaret ändå orimligt även om enheten i sig passar scenariot.
+        function slumpaVardeForEnhet(enhetsNamn){
+            if(enhetsNamn==='mil' || enhetsNamn==='ton') return ri(1,15);
+            if(enhetsNamn==='km') return ri(1,30);
+            return ri(1,99);
+        }
+        
         body.querySelector('.enh-ova').onclick=()=>{
             const enheter=KAT[katSel.value].enheter;
             const [i,j]=slumpaEnhetPar(enheter);
@@ -14237,109 +14263,112 @@
         // ---- TEXTUPPGIFTER: vardagsnära räknesagor kring den aktuella enhetskategorin ----
         // Varje uppgift löses med ett av räknesätten: omvandling, addition, subtraktion,
         // multiplikation eller division - för variation i hur eleverna behöver tänka.
+        // FIX: varje scenario har nu en lista "units" med enheter som är RIMLIGA för just den
+        // saken (t.ex. en pulkabacke mäts i meter, inte i mil) - annars kunde slumpen para ihop
+        // vilken enhet/vilket värde som helst med scenariot, t.ex. "En pulkabacke är 87 mil lång".
         const TEXT_MALLAR = {
             langd: [
-                'Sträckan mellan skolan och affären är {v} {u1}. Hur många {u2} är det?',
-                'Ett rep är {v} {u1} långt. Hur många {u2} är det?',
-                'Ett staket är {v} {u1} högt. Hur många {u2} är det?',
-                'En pulkabacke är {v} {u1} lång. Hur många {u2} är det?',
-                'Bordet är {v} {u1} brett. Hur många {u2} är det?',
-                'Cykelturen var {v} {u1} lång. Hur många {u2} är det?',
-                'Trädet i trädgården är {v} {u1} högt. Hur många {u2} är det?',
-                'En löpbana är {v} {u1} lång. Hur många {u2} är det?',
-                'Simbassängen är {v} {u1} lång. Hur många {u2} är det?',
-                'Ett tygstycke mäter {v} {u1}. Hur många {u2} är det?'
+                { tpl:'Sträckan mellan skolan och affären är {v} {u1}. Hur många {u2} är det?', units:['m','km'] },
+                { tpl:'Ett rep är {v} {u1} långt. Hur många {u2} är det?', units:['mm','cm','dm','m'] },
+                { tpl:'Ett staket är {v} {u1} högt. Hur många {u2} är det?', units:['cm','dm','m'] },
+                { tpl:'En pulkabacke är {v} {u1} lång. Hur många {u2} är det?', units:['m'] },
+                { tpl:'Bordet är {v} {u1} brett. Hur många {u2} är det?', units:['cm','dm','m'] },
+                { tpl:'Cykelturen var {v} {u1} lång. Hur många {u2} är det?', units:['m','km'] },
+                { tpl:'Trädet i trädgården är {v} {u1} högt. Hur många {u2} är det?', units:['dm','m'] },
+                { tpl:'En löpbana är {v} {u1} lång. Hur många {u2} är det?', units:['m'] },
+                { tpl:'Simbassängen är {v} {u1} lång. Hur många {u2} är det?', units:['m'] },
+                { tpl:'Ett tygstycke mäter {v} {u1}. Hur många {u2} är det?', units:['cm','dm','m'] }
             ],
             vikt: [
-                'En säck potatis väger {v} {u1}. Hur många {u2} är det?',
-                'Hunden väger {v} {u1}. Hur många {u2} är det?',
-                'En låda äpplen väger {v} {u1}. Hur många {u2} är det?',
-                'Ryggsäcken väger {v} {u1}. Hur många {u2} är det?',
-                'Ett paket mjöl väger {v} {u1}. Hur många {u2} är det?',
-                'En vattenmelon väger {v} {u1}. Hur många {u2} är det?',
-                'Katten väger {v} {u1}. Hur många {u2} är det?',
-                'En kasse med bananer väger {v} {u1}. Hur många {u2} är det?',
-                'En bok väger {v} {u1}. Hur många {u2} är det?',
-                'Ett paket smör väger {v} {u1}. Hur många {u2} är det?'
+                { tpl:'En säck potatis väger {v} {u1}. Hur många {u2} är det?', units:['kg','hg'] },
+                { tpl:'Hunden väger {v} {u1}. Hur många {u2} är det?', units:['kg','hg'] },
+                { tpl:'En låda äpplen väger {v} {u1}. Hur många {u2} är det?', units:['kg','hg'] },
+                { tpl:'Ryggsäcken väger {v} {u1}. Hur många {u2} är det?', units:['kg','hg','g'] },
+                { tpl:'Ett paket mjöl väger {v} {u1}. Hur många {u2} är det?', units:['g','hg','kg'] },
+                { tpl:'En vattenmelon väger {v} {u1}. Hur många {u2} är det?', units:['kg','hg'] },
+                { tpl:'Katten väger {v} {u1}. Hur många {u2} är det?', units:['kg','hg'] },
+                { tpl:'En kasse med bananer väger {v} {u1}. Hur många {u2} är det?', units:['kg','hg','g'] },
+                { tpl:'En bok väger {v} {u1}. Hur många {u2} är det?', units:['g','hg'] },
+                { tpl:'Ett paket smör väger {v} {u1}. Hur många {u2} är det?', units:['g','hg'] }
             ],
             volym: [
-                'En hink rymmer {v} {u1}. Hur många {u2} är det?',
-                'En läskflaska rymmer {v} {u1}. Hur många {u2} är det?',
-                'Badkaret rymmer {v} {u1} vatten. Hur många {u2} är det?',
-                'En kastrull rymmer {v} {u1}. Hur många {u2} är det?',
-                'Ett akvarium rymmer {v} {u1} vatten. Hur många {u2} är det?',
-                'En mjölkkartong rymmer {v} {u1}. Hur många {u2} är det?',
-                'En vattenkanna rymmer {v} {u1}. Hur många {u2} är det?',
-                'Ett dricksglas rymmer {v} {u1}. Hur många {u2} är det?',
-                'En soppgryta rymmer {v} {u1}. Hur många {u2} är det?',
-                'En regnvattentunna rymmer {v} {u1}. Hur många {u2} är det?'
+                { tpl:'En hink rymmer {v} {u1}. Hur många {u2} är det?', units:['dl','l'] },
+                { tpl:'En läskflaska rymmer {v} {u1}. Hur många {u2} är det?', units:['cl','dl','l'] },
+                { tpl:'Badkaret rymmer {v} {u1} vatten. Hur många {u2} är det?', units:['l'] },
+                { tpl:'En kastrull rymmer {v} {u1}. Hur många {u2} är det?', units:['dl','l'] },
+                { tpl:'Ett akvarium rymmer {v} {u1} vatten. Hur många {u2} är det?', units:['l'] },
+                { tpl:'En mjölkkartong rymmer {v} {u1}. Hur många {u2} är det?', units:['dl','l'] },
+                { tpl:'En vattenkanna rymmer {v} {u1}. Hur många {u2} är det?', units:['dl','l'] },
+                { tpl:'Ett dricksglas rymmer {v} {u1}. Hur många {u2} är det?', units:['cl','dl'] },
+                { tpl:'En soppgryta rymmer {v} {u1}. Hur många {u2} är det?', units:['dl','l'] },
+                { tpl:'En regnvattentunna rymmer {v} {u1}. Hur många {u2} är det?', units:['l'] }
             ]
         };
         const OPS_MALLAR = {
             langd: {
                 addition: [
-                    'Ett rep är {v1} {u1}. Du kopplar ihop det med ett rep som är {v2} {u2}. Hur långa är replarna tillsammans, i {u2}?',
-                    'En vandring har två etapper: {v1} {u1} och {v2} {u2}. Hur lång är hela vandringen, i {u2}?',
-                    'Ett bord är {v1} {u1} brett. Bredvid står ett bord som är {v2} {u2} brett. Hur breda är borden tillsammans, i {u2}?'
+                    { tpl:'Ett rep är {v1} {u1}. Du kopplar ihop det med ett rep som är {v2} {u2}. Hur långa är replarna tillsammans, i {u2}?', units:['mm','cm','dm','m'] },
+                    { tpl:'En vandring har två etapper: {v1} {u1} och {v2} {u2}. Hur lång är hela vandringen, i {u2}?', units:['m','km'] },
+                    { tpl:'Ett bord är {v1} {u1} brett. Bredvid står ett bord som är {v2} {u2} brett. Hur breda är borden tillsammans, i {u2}?', units:['cm','dm','m'] }
                 ],
                 subtraktion: [
-                    'Ett tygstycke är {v1} {u1} långt. Du klipper bort {v2} {u2}. Hur mycket tyg är kvar, i {u2}?',
-                    'En stege är {v1} {u1} lång. En annan stege är {v2} {u2} kortare. Hur lång är den andra stegen, i {u2}?',
-                    'En löpbana är {v1} {u1} lång. Du har sprungit {v2} {u2}. Hur långt är kvar, i {u2}?'
+                    { tpl:'Ett tygstycke är {v1} {u1} långt. Du klipper bort {v2} {u2}. Hur mycket tyg är kvar, i {u2}?', units:['cm','dm','m'] },
+                    { tpl:'En stege är {v1} {u1} lång. En annan stege är {v2} {u2} kortare. Hur lång är den andra stegen, i {u2}?', units:['dm','m'] },
+                    { tpl:'En löpbana är {v1} {u1} lång. Du har sprungit {v2} {u2}. Hur långt är kvar, i {u2}?', units:['m'] }
                 ],
                 multiplikation: [
-                    'En planka är {v1} {u1} lång. Du lägger {n} likadana plankor efter varandra. Hur långa är plankorna tillsammans, i {u2}?',
-                    'Varje trappsteg är {v1} {u1} högt. Trappan har {n} steg. Hur hög är trappan totalt, i {u2}?',
-                    'Ett staketbräde är {v1} {u1} brett. Staketet består av {n} likadana bräder. Hur brett är staketet totalt, i {u2}?'
+                    { tpl:'En planka är {v1} {u1} lång. Du lägger {n} likadana plankor efter varandra. Hur långa är plankorna tillsammans, i {u2}?', units:['dm','m'] },
+                    { tpl:'Varje trappsteg är {v1} {u1} högt. Trappan har {n} steg. Hur hög är trappan totalt, i {u2}?', units:['cm','dm'] },
+                    { tpl:'Ett staketbräde är {v1} {u1} brett. Staketet består av {n} likadana bräder. Hur brett är staketet totalt, i {u2}?', units:['cm','dm'] }
                 ],
                 division: [
-                    'Ett rep som är {v1} {u1} klipps i {n} lika stora bitar. Hur lång är varje bit, i {u2}?',
-                    'En sträcka på {v1} {u1} delas upp i {n} lika långa etapper. Hur lång är varje etapp, i {u2}?',
-                    'Ett bord som är {v1} {u1} långt delas in i {n} lika breda fack. Hur brett är varje fack, i {u2}?'
+                    { tpl:'Ett rep som är {v1} {u1} klipps i {n} lika stora bitar. Hur lång är varje bit, i {u2}?', units:['dm','m'] },
+                    { tpl:'En sträcka på {v1} {u1} delas upp i {n} lika långa etapper. Hur lång är varje etapp, i {u2}?', units:['m','km'] },
+                    { tpl:'Ett bord som är {v1} {u1} långt delas in i {n} lika breda fack. Hur brett är varje fack, i {u2}?', units:['cm','dm','m'] }
                 ]
             },
             vikt: {
                 addition: [
-                    'En kasse väger {v1} {u1}. Du lägger i mer varor som väger {v2} {u2}. Hur mycket väger kassen totalt, i {u2}?',
-                    'En låda äpplen väger {v1} {u1}. En låda päron väger {v2} {u2}. Hur mycket väger lådorna tillsammans, i {u2}?',
-                    'En resväska väger {v1} {u1}. Du packar i saker som väger {v2} {u2}. Hur mycket väger resväskan totalt, i {u2}?'
+                    { tpl:'En kasse väger {v1} {u1}. Du lägger i mer varor som väger {v2} {u2}. Hur mycket väger kassen totalt, i {u2}?', units:['g','hg','kg'] },
+                    { tpl:'En låda äpplen väger {v1} {u1}. En låda päron väger {v2} {u2}. Hur mycket väger lådorna tillsammans, i {u2}?', units:['kg','hg'] },
+                    { tpl:'En resväska väger {v1} {u1}. Du packar i saker som väger {v2} {u2}. Hur mycket väger resväskan totalt, i {u2}?', units:['kg','hg'] }
                 ],
                 subtraktion: [
-                    'En säck mjöl väger {v1} {u1}. Du bakar och använder {v2} {u2}. Hur mycket mjöl är kvar, i {u2}?',
-                    'En låda med innehåll väger {v1} {u1}. Själva lådan väger {v2} {u2}. Hur mycket väger innehållet, i {u2}?',
-                    'En hund väger {v1} {u1}. Den går ner {v2} {u2} i vikt. Hur mycket väger hunden nu, i {u2}?'
+                    { tpl:'En säck mjöl väger {v1} {u1}. Du bakar och använder {v2} {u2}. Hur mycket mjöl är kvar, i {u2}?', units:['kg','hg'] },
+                    { tpl:'En låda med innehåll väger {v1} {u1}. Själva lådan väger {v2} {u2}. Hur mycket väger innehållet, i {u2}?', units:['kg','hg','g'] },
+                    { tpl:'En hund väger {v1} {u1}. Den går ner {v2} {u2} i vikt. Hur mycket väger hunden nu, i {u2}?', units:['kg','hg'] }
                 ],
                 multiplikation: [
-                    'Ett äpple väger {v1} {u1}. Du köper {n} likadana äpplen. Hur mycket väger äpplena tillsammans, i {u2}?',
-                    'En chokladkaka väger {v1} {u1}. Du köper {n} kakor. Hur mycket väger de tillsammans, i {u2}?',
-                    'Ett paket ris väger {v1} {u1}. Du köper {n} paket. Hur mycket väger alla paketen tillsammans, i {u2}?'
+                    { tpl:'Ett äpple väger {v1} {u1}. Du köper {n} likadana äpplen. Hur mycket väger äpplena tillsammans, i {u2}?', units:['g','hg'] },
+                    { tpl:'En chokladkaka väger {v1} {u1}. Du köper {n} kakor. Hur mycket väger de tillsammans, i {u2}?', units:['g','hg'] },
+                    { tpl:'Ett paket ris väger {v1} {u1}. Du köper {n} paket. Hur mycket väger alla paketen tillsammans, i {u2}?', units:['g','hg','kg'] }
                 ],
                 division: [
-                    'En påse med {v1} {u1} godis delas lika mellan {n} barn. Hur mycket godis får varje barn, i {u2}?',
-                    'En deg på {v1} {u1} delas i {n} lika stora bullar. Hur mycket väger varje bulle, i {u2}?',
-                    'En låda med {v1} {u1} skruvar delas lika i {n} burkar. Hur mycket väger skruvarna i varje burk, i {u2}?'
+                    { tpl:'En påse med {v1} {u1} godis delas lika mellan {n} barn. Hur mycket godis får varje barn, i {u2}?', units:['g','hg'] },
+                    { tpl:'En deg på {v1} {u1} delas i {n} lika stora bullar. Hur mycket väger varje bulle, i {u2}?', units:['g','hg','kg'] },
+                    { tpl:'En låda med {v1} {u1} skruvar delas lika i {n} burkar. Hur mycket väger skruvarna i varje burk, i {u2}?', units:['g','hg','kg'] }
                 ]
             },
             volym: {
                 addition: [
-                    'En kanna rymmer {v1} {u1}. Du häller i mer vätska, {v2} {u2}. Hur mycket vätska är det totalt, i {u2}?',
-                    'En hink innehåller {v1} {u1} vatten. Du fyller på med {v2} {u2} till. Hur mycket vatten är det totalt, i {u2}?',
-                    'Ett glas innehåller {v1} {u1}. Du häller i {v2} {u2} till. Hur mycket är det i glaset nu, i {u2}?'
+                    { tpl:'En kanna rymmer {v1} {u1}. Du häller i mer vätska, {v2} {u2}. Hur mycket vätska är det totalt, i {u2}?', units:['dl','l'] },
+                    { tpl:'En hink innehåller {v1} {u1} vatten. Du fyller på med {v2} {u2} till. Hur mycket vatten är det totalt, i {u2}?', units:['dl','l'] },
+                    { tpl:'Ett glas innehåller {v1} {u1}. Du häller i {v2} {u2} till. Hur mycket är det i glaset nu, i {u2}?', units:['cl','dl'] }
                 ],
                 subtraktion: [
-                    'En flaska innehåller {v1} {u1} saft. Du häller upp {v2} {u2}. Hur mycket saft är kvar i flaskan, i {u2}?',
-                    'Ett akvarium innehåller {v1} {u1} vatten. Du tappar ur {v2} {u2}. Hur mycket vatten är kvar, i {u2}?',
-                    'En gryta innehåller {v1} {u1} soppa. Ni äter upp {v2} {u2}. Hur mycket soppa är kvar, i {u2}?'
+                    { tpl:'En flaska innehåller {v1} {u1} saft. Du häller upp {v2} {u2}. Hur mycket saft är kvar i flaskan, i {u2}?', units:['cl','dl','l'] },
+                    { tpl:'Ett akvarium innehåller {v1} {u1} vatten. Du tappar ur {v2} {u2}. Hur mycket vatten är kvar, i {u2}?', units:['l'] },
+                    { tpl:'En gryta innehåller {v1} {u1} soppa. Ni äter upp {v2} {u2}. Hur mycket soppa är kvar, i {u2}?', units:['dl','l'] }
                 ],
                 multiplikation: [
-                    'Ett glas rymmer {v1} {u1}. Du fyller {n} likadana glas. Hur mycket vätska är det totalt, i {u2}?',
-                    'En flaska rymmer {v1} {u1}. Du köper {n} flaskor. Hur mycket är det totalt, i {u2}?',
-                    'En kopp rymmer {v1} {u1}. Du brygger {n} koppar kaffe. Hur mycket kaffe är det totalt, i {u2}?'
+                    { tpl:'Ett glas rymmer {v1} {u1}. Du fyller {n} likadana glas. Hur mycket vätska är det totalt, i {u2}?', units:['cl','dl'] },
+                    { tpl:'En flaska rymmer {v1} {u1}. Du köper {n} flaskor. Hur mycket är det totalt, i {u2}?', units:['cl','dl','l'] },
+                    { tpl:'En kopp rymmer {v1} {u1}. Du brygger {n} koppar kaffe. Hur mycket kaffe är det totalt, i {u2}?', units:['cl','dl'] }
                 ],
                 division: [
-                    'En hink med {v1} {u1} vatten fördelas lika i {n} mindre kärl. Hur mycket vatten får varje kärl, i {u2}?',
-                    '{v1} {u1} saft ska delas lika mellan {n} flaskor. Hur mycket saft blir det i varje flaska, i {u2}?',
-                    'Ett fat med {v1} {u1} olja fördelas jämnt i {n} burkar. Hur mycket olja blir det i varje burk, i {u2}?'
+                    { tpl:'En hink med {v1} {u1} vatten fördelas lika i {n} mindre kärl. Hur mycket vatten får varje kärl, i {u2}?', units:['dl','l'] },
+                    { tpl:'{v1} {u1} saft ska delas lika mellan {n} flaskor. Hur mycket saft blir det i varje flaska, i {u2}?', units:['dl','l'] },
+                    { tpl:'Ett fat med {v1} {u1} olja fördelas jämnt i {n} burkar. Hur mycket olja blir det i varje burk, i {u2}?', units:['dl','l'] }
                 ]
             }
         };
@@ -14356,24 +14385,24 @@
             if(typ==='omvandling'){
                 const mallar=TEXT_MALLAR[katSel.value];
                 const mall=mallar[ri(0,mallar.length-1)];
-                const [i,j]=slumpaEnhetPar(enheter);
-                const v=ri(1,99);
+                const [i,j]=slumpaEnhetPar(enheter, mall.units);
+                const v=slumpaVardeForEnhet(enheter[i][0]);
                 const svar=v*enheter[i][1]/enheter[j][1];
-                return { text: mall.replace('{v}',v).replace('{u1}',enheter[i][0]).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+                return { text: mall.tpl.replace('{v}',v).replace('{u1}',enheter[i][0]).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
             }
             if(typ==='addition'){
                 const mallar=OPS_MALLAR[katSel.value].addition;
                 const mall=mallar[ri(0,mallar.length-1)];
-                const [i,j]=slumpaEnhetPar(enheter);
+                const [i,j]=slumpaEnhetPar(enheter, mall.units, true);
                 const v1=ri(1,20), v2=ri(1,50);
                 const summaBas=v1*enheter[i][1]+v2*enheter[j][1];
                 const svar=summaBas/enheter[j][1];
-                return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
             }
             if(typ==='subtraktion'){
                 const mallar=OPS_MALLAR[katSel.value].subtraktion;
                 const mall=mallar[ri(0,mallar.length-1)];
-                let [i,j]=slumpaEnhetPar(enheter);
+                let [i,j]=slumpaEnhetPar(enheter, mall.units, true);
                 if(enheter[i][1] < enheter[j][1]){ const tmp=i; i=j; j=tmp; }
                 let v1=ri(5,30), v1Bas=v1*enheter[i][1];
                 let maxV2=Math.floor(v1Bas/enheter[j][1])-1, guard=0;
@@ -14381,25 +14410,25 @@
                 const v2=ri(1, Math.max(1, Math.min(maxV2,99)));
                 const diffBas=v1Bas - v2*enheter[j][1];
                 const svar=diffBas/enheter[j][1];
-                return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
             }
             if(typ==='multiplikation'){
                 const mallar=OPS_MALLAR[katSel.value].multiplikation;
                 const mall=mallar[ri(0,mallar.length-1)];
-                const [i,j]=slumpaEnhetPar(enheter);
+                const [i,j]=slumpaEnhetPar(enheter, mall.units);
                 const v1=ri(1,9), n=ri(2,9);
                 const totalBas=v1*n*enheter[i][1];
                 const svar=totalBas/enheter[j][1];
-                return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
             }
             // division
             const mallar=OPS_MALLAR[katSel.value].division;
             const mall=mallar[ri(0,mallar.length-1)];
-            const [i,j]=slumpaEnhetPar(enheter);
+            const [i,j]=slumpaEnhetPar(enheter, mall.units);
             const n=ri(2,9), v1=n*ri(1,9);
             const totalBas=v1*enheter[i][1];
             const svar=(totalBas/n)/enheter[j][1];
-            return { text: mall.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+            return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
         }
         function renderTextUppgifter(){
             const u=byggFraga(slumpaTyper(1)[0]);
