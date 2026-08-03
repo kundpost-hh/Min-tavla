@@ -2196,6 +2196,48 @@
     .cal-nav { width:34px; height:34px; border:none; border-radius:10px; background:#f0f0f5; color:#333; font-size:22px; line-height:1; cursor:pointer; transition:background .2s; flex-shrink:0; }
     .cal-nav:hover { background:#e0e0ea; }
     .cal-titlebox { display:flex; flex-direction:column; align-items:center; gap:3px; }
+    .cal-head-btns { display:flex; align-items:center; gap:6px; }
+    .cal-settings-btn { border:none; background:#f0f0f5; color:#333; font-size:13px; width:24px; height:24px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s; padding:0; }
+    .cal-settings-btn:hover { background:#e0e0ea; }
+    .cal-view-switch { display:flex; gap:4px; margin-bottom:8px; background:#f0f0f5; border-radius:10px; padding:2px; }
+    .cal-view-tab { flex:1; border:none; background:transparent; color:#666; font-size:11px; font-weight:700; padding:5px 0; border-radius:8px; cursor:pointer; transition:background .15s,color .15s; }
+    .cal-view-tab:hover { color:#1d1d1f; }
+    .cal-view-tab.active { background:#fff; color:#007aff; box-shadow:0 1px 4px rgba(0,0,0,.12); }
+    .cal-grid-week .cal-day { min-height:74px; }
+    .cal-grid-day { display:block !important; }
+    .cal-cell-tags { display:flex; flex-wrap:wrap; gap:1px; margin-top:auto; line-height:1; }
+    .cal-cell-tag { font-size:10px; }
+    .cal-day-view { border:1.5px solid #ececf0; border-radius:12px; padding:14px; cursor:pointer; min-height:120px; background:#fff; transition:border-color .15s,background .15s; }
+    .cal-day-view:hover { border-color:#007aff; background:#f5faff; }
+    .cal-day-view.cal-holiday-red { background:#fff5f5; border-color:#ffd6d6; }
+    .cal-day-view.cal-holiday-fest { background:#fffaf0; border-color:#ffe3b3; }
+    .cal-day-view-holiday { font-size:13px; font-weight:800; color:#ff3b30; margin-bottom:6px; }
+    .cal-day-view.cal-holiday-fest .cal-day-view-holiday { color:#e08600; }
+    .cal-day-view-nd { font-size:11px; color:#8e8e93; margin-bottom:6px; }
+    .cal-day-view-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+    .cal-day-view-note { font-size:13px; color:#1d1d1f; line-height:1.4; white-space:pre-wrap; }
+    .cal-day-view-empty { color:#b0b0b6; font-style:italic; }
+    .cal-tag-chip { display:inline-flex; align-items:center; gap:4px; border:1.5px solid #e0e0e6; background:#fff; border-radius:20px; padding:5px 10px; font-size:11px; font-weight:700; color:#8e8e93; cursor:pointer; transition:all .15s; }
+    .cal-tag-chip:hover { border-color:var(--tag-color,#007aff); }
+    .cal-tag-chip.active { background:var(--tag-color,#007aff); border-color:var(--tag-color,#007aff); color:#fff; }
+    .cal-popup-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .cal-settings-popup { width:min(420px,92vw); text-align:left; }
+    .cal-settings-section { margin-bottom:16px; }
+    .cal-settings-label { font-size:12px; font-weight:800; color:#666; margin-bottom:8px; }
+    .cal-startview-row { display:flex; gap:6px; }
+    .cal-startview-row .btn { flex:1; padding:8px 4px; font-size:12px; }
+    .cal-cat-list { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    .cal-cat-empty { font-size:12px; color:#b0b0b6; font-style:italic; padding:6px 0; }
+    .cal-cat-row { display:flex; align-items:center; gap:8px; background:#f7f7fa; border-left:4px solid var(--tag-color,#8e8e93); border-radius:8px; padding:6px 10px; }
+    .cal-cat-row-emoji { font-size:15px; }
+    .cal-cat-row-name { flex:1; font-size:13px; font-weight:600; color:#1d1d1f; }
+    .cal-cat-del-btn { border:none; background:transparent; color:#b0b0b6; font-size:13px; cursor:pointer; padding:2px 6px; border-radius:6px; }
+    .cal-cat-del-btn:hover { background:#ffe0e0; color:#ff3b30; }
+    .cal-cat-add-row { display:flex; gap:6px; align-items:center; }
+    .cal-cat-emoji-in { width:40px; text-align:center; border:2px solid #e0e0e6; border-radius:8px; padding:6px 2px; font-size:15px; }
+    .cal-cat-name-in { flex:1; min-width:0; border:2px solid #e0e0e6; border-radius:8px; padding:6px 8px; font-size:12px; }
+    .cal-cat-color-in { width:32px; height:32px; border:2px solid #e0e0e6; border-radius:8px; padding:0; cursor:pointer; }
+    .cal-cat-add-btn { white-space:nowrap; font-size:11px; padding:6px 10px; }
     .cal-month { font-size:16px; font-weight:800; color:#1d1d1f; white-space:nowrap; }
     .cal-today-btn { border:none; background:#007aff; color:#fff; font-size:10px; font-weight:700; padding:2px 12px; border-radius:20px; cursor:pointer; }
     .cal-today-btn:hover { background:#0062cc; }
@@ -2212,6 +2254,14 @@
     .cal-dnum { font-size:13px; font-weight:700; color:#1d1d1f; line-height:1.1; }
     .cal-nd { font-size:8.5px; color:#8e8e93; line-height:1.05; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .cal-day.cal-weekend .cal-dnum { color:#ff3b30; }
+    .cal-day.cal-holiday-red { background:#fff5f5; border-color:#ffd6d6; }
+    .cal-day.cal-holiday-red .cal-dnum { color:#ff3b30; }
+    .cal-day.cal-holiday-fest { background:#fffaf0; border-color:#ffe3b3; }
+    .cal-nd.cal-holiday-label { font-weight:800; }
+    .cal-day.cal-holiday-red .cal-nd.cal-holiday-label { color:#ff3b30; }
+    .cal-day.cal-holiday-fest .cal-nd.cal-holiday-label { color:#e08600; }
+    .cal-day.cal-today.cal-holiday-red, .cal-day.cal-today.cal-holiday-fest { background:#007aff !important; border-color:#007aff !important; }
+    .cal-day.cal-today .cal-nd.cal-holiday-label { color:#fff !important; }
     .cal-day.cal-today { background:#007aff !important; border-color:#007aff !important; }
     .cal-day.cal-today .cal-dnum, .cal-day.cal-today .cal-nd { color:#fff; }
     .cal-day.cal-hasnote { background:#fff4d6; border-color:#ffd84d; }
@@ -28037,8 +28087,36 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
 
     // ---- KALENDER (per-användare-noteringar, namnsdagar, veckonummer) ----
+    // Standard-etiketter som varje lärare kan använda direkt, plus lägga till egna i inställningarna.
+    const DEFAULT_CAL_CATEGORIES = [
+        { id:'fav',      emoji:'⭐', name:'Favorit',     color:'#ffcc00' },
+        { id:'birthday', emoji:'🎂', name:'Födelsedag',  color:'#ff6482' },
+        { id:'planning', emoji:'📚', name:'Planering',   color:'#5ac8fa' },
+        { id:'test',     emoji:'📝', name:'Prov',        color:'#ff3b30' },
+        { id:'off',      emoji:'🏖️', name:'Ledig',       color:'#34c759' }
+    ];
+    function calSettingsKey(){ return 'mintavla_calSettings_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
+    function loadCalSettings(){
+        let s=null; try { s=JSON.parse(localStorage.getItem(calSettingsKey())||'null'); } catch(e){}
+        const out = Object.assign({ startView:'month', categories: DEFAULT_CAL_CATEGORIES.map(c=>({...c})) }, s||{});
+        if(!Array.isArray(out.categories) || !out.categories.length) out.categories = DEFAULT_CAL_CATEGORIES.map(c=>({...c}));
+        return out;
+    }
+    function saveCalSettings(s){ try { localStorage.setItem(calSettingsKey(), JSON.stringify(s)); } catch(e){} if(typeof syncToCloud==='function') syncToCloud(); }
     function calNotesKey(){ return 'mintavla_calNotes_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
-    function loadCalNotes(){ try { return JSON.parse(localStorage.getItem(calNotesKey()) || '{}'); } catch(e){ return {}; } }
+    // FIX: anteckningar sparades tidigare som ren text ("2026-08-03": "Prata om..."). Nu kan varje
+    // dag även ha etiketter, så formatet är {text, tags:[...]} - gamla text-anteckningar läses ändå
+    // in korrekt (tolkas som {text: den gamla strängen, tags: []}) så inget befintligt försvinner.
+    function loadCalNotes(){
+        let raw=null; try { raw=JSON.parse(localStorage.getItem(calNotesKey()) || '{}'); } catch(e){ raw={}; }
+        const out={};
+        Object.keys(raw||{}).forEach(k=>{
+            const v=raw[k];
+            if(typeof v==='string') out[k]={ text:v, tags:[] };
+            else if(v && typeof v==='object') out[k]={ text:v.text||'', tags:Array.isArray(v.tags)?v.tags:[] };
+        });
+        return out;
+    }
     function saveCalNotes(obj){ try { localStorage.setItem(calNotesKey(), JSON.stringify(obj)); } catch(e){} if(typeof syncToCloud==='function') syncToCloud(); }
     function calIsoWeek(date){ const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())); const dayNum=(d.getUTCDay()+6)%7; d.setUTCDate(d.getUTCDate()-dayNum+3); const firstThu=new Date(Date.UTC(d.getUTCFullYear(),0,4)); const fdn=(firstThu.getUTCDay()+6)%7; firstThu.setUTCDate(firstThu.getUTCDate()-fdn+3); return 1+Math.round((d-firstThu)/(7*86400000)); }
 
@@ -28047,17 +28125,32 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     function hideCalTip(){ if(_calTip&&_calTip.parentNode) _calTip.parentNode.removeChild(_calTip); _calTip=null; }
 
     function openCalDayPopup(dateKey, label, onSaved){
-        const notes=loadCalNotes(); const existing=notes[dateKey]||'';
+        const notes=loadCalNotes(); const existing=notes[dateKey]||{text:'',tags:[]};
+        const categories=loadCalSettings().categories;
+        let selectedTags=existing.tags.slice();
         const ov=document.createElement('div'); ov.className='cal-popup-overlay';
         const box=document.createElement('div'); box.className='cal-popup';
-        box.innerHTML="<div class='cal-popup-title'></div><textarea class='cal-popup-ta' placeholder='Skriv vad du ska göra eller komma ihåg...'></textarea><div class='cal-popup-btns'></div>";
+        box.innerHTML="<div class='cal-popup-title'></div><div class='cal-popup-tags'></div><textarea class='cal-popup-ta' placeholder='Skriv vad du ska göra eller komma ihåg...'></textarea><div class='cal-popup-btns'></div>";
         box.querySelector('.cal-popup-title').textContent=label;
-        const ta=box.querySelector('.cal-popup-ta'); ta.value=existing;
+        const tagsWrap=box.querySelector('.cal-popup-tags');
+        function renderTagChips(){
+            tagsWrap.innerHTML='';
+            categories.forEach(cat=>{
+                const chip=document.createElement('button'); chip.type='button';
+                chip.className='cal-tag-chip'+(selectedTags.includes(cat.id)?' active':'');
+                chip.style.setProperty('--tag-color', cat.color||'#8e8e93');
+                chip.innerHTML="<span class='cal-tag-emoji'>"+cat.emoji+"</span><span class='cal-tag-name'>"+cat.name+"</span>";
+                chip.onclick=()=>{ selectedTags = selectedTags.includes(cat.id) ? selectedTags.filter(t=>t!==cat.id) : selectedTags.concat(cat.id); renderTagChips(); };
+                tagsWrap.appendChild(chip);
+            });
+        }
+        renderTagChips();
+        const ta=box.querySelector('.cal-popup-ta'); ta.value=existing.text||'';
         const btns=box.querySelector('.cal-popup-btns');
         const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
         const save=document.createElement('button'); save.className='btn btn-primary'; save.innerText='Spara';
-        save.onclick=()=>{ const v=ta.value.trim(); const n=loadCalNotes(); if(v) n[dateKey]=v; else delete n[dateKey]; saveCalNotes(n); close(); if(onSaved) onSaved(); };
-        const del=document.createElement('button'); del.className='btn'; del.innerText='Ta bort'; del.style.color='#ff3b30'; if(!existing) del.style.display='none';
+        save.onclick=()=>{ const v=ta.value.trim(); const n=loadCalNotes(); if(v||selectedTags.length) n[dateKey]={text:v, tags:selectedTags}; else delete n[dateKey]; saveCalNotes(n); close(); if(onSaved) onSaved(); };
+        const del=document.createElement('button'); del.className='btn'; del.innerText='Ta bort'; del.style.color='#ff3b30'; if(!existing.text && !existing.tags.length) del.style.display='none';
         del.onclick=()=>{ const n=loadCalNotes(); delete n[dateKey]; saveCalNotes(n); close(); if(onSaved) onSaved(); };
         const cancel=document.createElement('button'); cancel.className='btn'; cancel.innerText='Avbryt'; cancel.onclick=close;
         btns.appendChild(save); btns.appendChild(del); btns.appendChild(cancel);
@@ -28066,61 +28159,235 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         setTimeout(()=>ta.focus(),50);
     }
 
+    // ---- KALENDERNS INSTÄLLNINGAR (⚙️): egna etiketter/ikoner + startvy ----
+    function openCalSettingsPanel(onSaved){
+        const settings=loadCalSettings();
+        let categories=settings.categories.map(c=>({...c}));
+        let startView=settings.startView||'month';
+        const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+        const box=document.createElement('div'); box.className='cal-popup cal-settings-popup';
+        box.innerHTML=
+            "<div class='cal-popup-title'>⚙️ Kalenderinställningar</div>"+
+            "<div class='cal-settings-section'><div class='cal-settings-label'>📍 Startvy</div><div class='cal-startview-row'></div></div>"+
+            "<div class='cal-settings-section'><div class='cal-settings-label'>🏷️ Egna etiketter &amp; ikoner</div><div class='cal-cat-list'></div>"+
+            "<div class='cal-cat-add-row'><input type='text' class='cal-cat-emoji-in' maxlength='4' placeholder='📌'><input type='text' class='cal-cat-name-in' placeholder='Namn på etikett...'><input type='color' class='cal-cat-color-in' value='#5ac8fa'><button type='button' class='btn cal-cat-add-btn'>+ Lägg till</button></div></div>"+
+            "<div class='cal-popup-btns'></div>";
+        const viewRow=box.querySelector('.cal-startview-row');
+        [['day','📅 Dag'],['week','🗓️ Vecka'],['month','📆 Månad']].forEach(([val,lbl])=>{
+            const b=document.createElement('button'); b.type='button'; b.className='btn cal-view-choice '+(startView===val?'btn-primary':'btn-secondary'); b.textContent=lbl;
+            b.onclick=()=>{ startView=val; [...viewRow.children].forEach(c=>{ c.classList.toggle('btn-primary', c===b); c.classList.toggle('btn-secondary', c!==b); }); };
+            viewRow.appendChild(b);
+        });
+        const catList=box.querySelector('.cal-cat-list');
+        function renderCatList(){
+            catList.innerHTML='';
+            if(!categories.length){ const empty=document.createElement('div'); empty.className='cal-cat-empty'; empty.textContent='Inga etiketter ännu.'; catList.appendChild(empty); return; }
+            categories.forEach((cat,idx)=>{
+                const row=document.createElement('div'); row.className='cal-cat-row'; row.style.setProperty('--tag-color', cat.color||'#8e8e93');
+                row.innerHTML="<span class='cal-cat-row-emoji'>"+cat.emoji+"</span><span class='cal-cat-row-name'>"+cat.name+"</span>";
+                const del=document.createElement('button'); del.type='button'; del.className='cal-cat-del-btn'; del.textContent='✕'; del.title='Ta bort etikett';
+                del.onclick=()=>{ categories.splice(idx,1); renderCatList(); };
+                row.appendChild(del); catList.appendChild(row);
+            });
+        }
+        renderCatList();
+        const emojiIn=box.querySelector('.cal-cat-emoji-in'), nameIn=box.querySelector('.cal-cat-name-in'), colorIn=box.querySelector('.cal-cat-color-in');
+        box.querySelector('.cal-cat-add-btn').onclick=()=>{
+            const emoji=(emojiIn.value||'📌').trim().slice(0,4)||'📌';
+            const name=(nameIn.value||'').trim();
+            if(!name){ nameIn.focus(); return; }
+            categories.push({ id:'c'+Date.now()+Math.floor(Math.random()*1000), emoji, name, color:colorIn.value||'#5ac8fa' });
+            emojiIn.value=''; nameIn.value=''; renderCatList(); nameIn.focus();
+        };
+        nameIn.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); box.querySelector('.cal-cat-add-btn').click(); } });
+        const btns=box.querySelector('.cal-popup-btns');
+        const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        const save=document.createElement('button'); save.className='btn btn-primary'; save.innerText='Spara inställningar';
+        save.onclick=()=>{ saveCalSettings({ startView, categories }); close(); if(onSaved) onSaved(); };
+        const cancel=document.createElement('button'); cancel.className='btn'; cancel.innerText='Avbryt'; cancel.onclick=close;
+        btns.appendChild(save); btns.appendChild(cancel);
+        ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+    }
+
+    // ---- SVENSKA HELGDAGAR & HÖGTIDER ----
+    // Påskdagen beräknas med Gauss/Meeus algoritm (gregoriansk kalender), och alla rörliga
+    // helgdagar (långfredag, kristi himmelsfärd, pingst, midsommar, alla helgons dag m.fl.)
+    // räknas sedan ut som ett antal dagar/veckodagar relativt påsken eller ett fast datum,
+    // så listan blir korrekt automatiskt för VILKET år som helst - inte bara innevarande år.
+    function calcEaster(year){
+        const a=year%19, b=Math.floor(year/100), c=year%100, d=Math.floor(b/4), e=b%4,
+              f=Math.floor((b+8)/25), g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30,
+              i=Math.floor(c/4), k=c%4, l=(32+2*e+2*i-h-k)%7,
+              m=Math.floor((a+11*h+22*l)/451),
+              month=Math.floor((h+l-7*m+114)/31), day=((h+l-7*m+114)%31)+1;
+        return new Date(year, month-1, day);
+    }
+    function calAddDays(date, n){ const d=new Date(date); d.setDate(d.getDate()+n); return d; }
+    // Hittar närmaste datum PÅ ELLER EFTER startdatumet som infaller på en viss veckodag
+    // (0=söndag .. 6=lördag) - används för midsommar och alla helgons dag.
+    function calNextWeekday(date, dow){ const d=new Date(date); while(d.getDay()!==dow) d.setDate(d.getDate()+1); return d; }
+    const _swedishHolidayCache = {};
+    function swedishHolidaysForYear(year){
+        if(_swedishHolidayCache[year]) return _swedishHolidayCache[year];
+        const pad2=(n)=>(n<10?'0':'')+n;
+        const map = {};
+        // red:true = officiell "röd dag"/helgdag (ledig dag). red:false = känd svensk högtid/
+        // "afton" som traditionellt firas men INTE är en statlig helgdag.
+        const add=(date,name,red)=>{ map[pad2(date.getMonth()+1)+'-'+pad2(date.getDate())] = {name, red}; };
+        const easter = calcEaster(year);
+        add(new Date(year,0,1), 'Nyårsdagen', true);
+        add(new Date(year,0,5), 'Trettondagsafton', false);
+        add(new Date(year,0,6), 'Trettondedag jul', true);
+        add(calAddDays(easter,-47), 'Fettisdagen', false);
+        add(calAddDays(easter,-2), 'Långfredagen', true);
+        add(calAddDays(easter,-1), 'Påskafton', false);
+        add(easter, 'Påskdagen', true);
+        add(calAddDays(easter,1), 'Annandag påsk', true);
+        add(new Date(year,3,30), 'Valborgsmässoafton', false);
+        add(new Date(year,4,1), 'Första maj', true);
+        add(calAddDays(easter,39), 'Kristi himmelsfärdsdag', true);
+        add(calAddDays(easter,48), 'Pingstafton', false);
+        add(calAddDays(easter,49), 'Pingstdagen', true);
+        add(new Date(year,5,6), 'Sveriges nationaldag', true);
+        const midsommarafton = calNextWeekday(new Date(year,5,19), 5); // fredag 19-25 juni
+        add(midsommarafton, 'Midsommarafton', false);
+        add(calAddDays(midsommarafton,1), 'Midsommardagen', true);
+        add(calNextWeekday(new Date(year,9,31), 6), 'Alla helgons dag', true); // lördag 31 okt-6 nov
+        add(new Date(year,11,13), 'Lucia', false);
+        add(new Date(year,11,24), 'Julafton', false);
+        add(new Date(year,11,25), 'Juldagen', true);
+        add(new Date(year,11,26), 'Annandag jul', true);
+        add(new Date(year,11,31), 'Nyårsafton', false);
+        _swedishHolidayCache[year] = map;
+        return map;
+    }
+
     function createCalendarWidget(config){
         if(config===undefined) config=null;
         const body=createWidget('KALENDER', 360, 'calendar-widget', config);
         const MONTHS=['Januari','Februari','Mars','April','Maj','Juni','Juli','Augusti','September','Oktober','November','December'];
+        const WEEKDAY_FULL=['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'];
         const WD=['v.','Mån','Tis','Ons','Tor','Fre','Lör','Sön'];
         const today=new Date();
-        let viewY = today.getFullYear(), viewM = today.getMonth();
-        body.innerHTML="<div class='cal-wrap'><div class='cal-head'><button class='cal-nav cal-prev' title='Föregående månad'>‹</button><div class='cal-titlebox'><div class='cal-month'></div><button class='cal-today-btn'>Idag</button></div><button class='cal-nav cal-next' title='Nästa månad'>›</button></div><div class='cal-grid-head'></div><div class='cal-grid'></div></div>";
+        let calView = (config && config.data && config.data.view) || loadCalSettings().startView || 'month';
+        let viewY = today.getFullYear(), viewM = today.getMonth();      // för månadsvy
+        let weekAnchor = new Date(today);                                // valfritt datum i vald vecka
+        let dayAnchor = new Date(today);                                 // valt datum i dagvy
+        body.innerHTML="<div class='cal-wrap'><div class='cal-head'><button class='cal-nav cal-prev' title='Föregående'>‹</button><div class='cal-titlebox'><div class='cal-month'></div><div class='cal-head-btns'><button class='cal-today-btn'>Idag</button><button class='cal-settings-btn' title='Kalenderinställningar'>⚙️</button></div></div><button class='cal-nav cal-next' title='Nästa'>›</button></div><div class='cal-view-switch'><button class='cal-view-tab' data-view='day'>Dag</button><button class='cal-view-tab' data-view='week'>Vecka</button><button class='cal-view-tab' data-view='month'>Månad</button></div><div class='cal-grid-head'></div><div class='cal-grid'></div></div>";
         const monthEl=body.querySelector('.cal-month'), gridHead=body.querySelector('.cal-grid-head'), grid=body.querySelector('.cal-grid');
-        gridHead.innerHTML=WD.map((d,i)=>"<div class='cal-wd"+(i===0?' cal-wk':'')+(i>=6?' cal-we':'')+"'>"+d+"</div>").join('');
+        const viewTabs=[...body.querySelectorAll('.cal-view-tab')];
         const pad=(n)=>(n<10?'0':'')+n;
-        function render(){
+        function persistView(){ try{ widget.dataset.calView=calView; }catch(e){} saveBoardState(); }
+        const widget = body.parentElement.parentElement;
+
+        function buildDayCell(dateObj, notes, categories){
+            const cell=document.createElement('div'); cell.className='cal-cell cal-day';
+            const y=dateObj.getFullYear(), m=dateObj.getMonth(), dnum=dateObj.getDate();
+            const key=y+'-'+pad(m+1)+'-'+pad(dnum);
+            const mmdd=pad(m+1)+'-'+pad(dnum);
+            const nd=NAMEDAYS[mmdd]||'';
+            const hol=swedishHolidaysForYear(y)[mmdd];
+            const dow=(dateObj.getDay()+6)%7; // 0=mån..6=sön
+            if(dow>=5) cell.classList.add('cal-weekend');
+            if(hol){ cell.classList.add('cal-holiday'); cell.classList.add(hol.red?'cal-holiday-red':'cal-holiday-fest'); }
+            if(today.getFullYear()===y && today.getMonth()===m && today.getDate()===dnum) cell.classList.add('cal-today');
+            const dn=document.createElement('span'); dn.className='cal-dnum'; dn.textContent=dnum; cell.appendChild(dn);
+            const ndEl=document.createElement('span'); ndEl.className='cal-nd'+(hol?' cal-holiday-label':''); ndEl.textContent=hol?hol.name:nd; cell.appendChild(ndEl);
+            const noteObj=notes[key]; const text=noteObj?(noteObj.text||''):''; const tags=noteObj?(noteObj.tags||[]):[];
+            if(tags.length){
+                const tagRow=document.createElement('div'); tagRow.className='cal-cell-tags';
+                tags.forEach(tid=>{ const cat=categories.find(c=>c.id===tid); if(cat){ const s=document.createElement('span'); s.className='cal-cell-tag'; s.textContent=cat.emoji; s.title=cat.name; tagRow.appendChild(s); } });
+                cell.appendChild(tagRow);
+            }
+            const titleBase=hol?hol.name:nd;
+            if(text){
+                cell.classList.add('cal-hasnote'); cell.title=titleBase?(text+' · '+titleBase):text;
+                const dot=document.createElement('span'); dot.className='cal-note-dot'+(cell.classList.contains('cal-today')?' cal-note-dot-blink':''); cell.appendChild(dot);
+            } else if(titleBase){ cell.title=titleBase; }
+            const label=dnum+' '+MONTHS[m]+' '+y+(titleBase?(' · '+titleBase):'');
+            cell.onclick=()=>openCalDayPopup(key, label, render);
+            if(text){ cell.addEventListener('mouseenter',()=>showCalTip(cell,text)); cell.addEventListener('mouseleave',hideCalTip); }
+            return cell;
+        }
+
+        function renderMonth(){
+            gridHead.style.display=''; gridHead.innerHTML=WD.map((d,i)=>"<div class='cal-wd"+(i===0?' cal-wk':'')+(i>=6?' cal-we':'')+"'>"+d+"</div>").join('');
             monthEl.textContent=MONTHS[viewM]+' '+viewY;
-            grid.innerHTML='';
+            grid.innerHTML=''; grid.classList.remove('cal-grid-week','cal-grid-day');
             const first=new Date(viewY,viewM,1);
-            const startDow=(first.getDay()+6)%7;            // Måndag = 0
+            const startDow=(first.getDay()+6)%7;
             const daysInMonth=new Date(viewY,viewM+1,0).getDate();
             const rows=Math.ceil((startDow+daysInMonth)/7);
-            const notes=loadCalNotes();
+            const notes=loadCalNotes(); const categories=loadCalSettings().categories;
             let dayPtr=1-startDow;
             for(let row=0; row<rows; row++){
                 const rowMonday=new Date(viewY,viewM,dayPtr);
                 const wkCell=document.createElement('div'); wkCell.className='cal-cell cal-wknum'; wkCell.textContent=calIsoWeek(rowMonday); grid.appendChild(wkCell);
                 for(let col=0; col<7; col++){
-                    const cell=document.createElement('div'); cell.className='cal-cell cal-day';
-                    if(dayPtr<1 || dayPtr>daysInMonth){ cell.classList.add('cal-empty'); }
-                    else {
-                        const dnum=dayPtr;
-                        const key=viewY+'-'+pad(viewM+1)+'-'+pad(dnum);
-                        const mmdd=pad(viewM+1)+'-'+pad(dnum);
-                        const nd=NAMEDAYS[mmdd]||'';
-                        if(col>=5) cell.classList.add('cal-weekend');
-                        if(today.getFullYear()===viewY && today.getMonth()===viewM && today.getDate()===dnum) cell.classList.add('cal-today');
-                        const dn=document.createElement('span'); dn.className='cal-dnum'; dn.textContent=dnum; cell.appendChild(dn);
-                        const ndEl=document.createElement('span'); ndEl.className='cal-nd'; ndEl.textContent=nd; cell.appendChild(ndEl);
-                        const note=notes[key];
-                        if(note){
-                            cell.classList.add('cal-hasnote'); cell.title=note;
-                            const dot=document.createElement('span');
-                            dot.className='cal-note-dot'+(cell.classList.contains('cal-today') ? ' cal-note-dot-blink' : '');
-                            cell.appendChild(dot);
-                        }
-                        else if(nd){ cell.title=nd; }
-                        const label=dnum+' '+MONTHS[viewM]+' '+viewY+(nd?(' · '+nd):'');
-                        cell.onclick=()=>openCalDayPopup(key, label, render);
-                        if(note){ cell.addEventListener('mouseenter',()=>showCalTip(cell, note)); cell.addEventListener('mouseleave',hideCalTip); }
-                    }
-                    grid.appendChild(cell);
+                    if(dayPtr<1 || dayPtr>daysInMonth){ const empty=document.createElement('div'); empty.className='cal-cell cal-day cal-empty'; grid.appendChild(empty); }
+                    else { grid.appendChild(buildDayCell(new Date(viewY,viewM,dayPtr), notes, categories)); }
                     dayPtr++;
                 }
             }
         }
-        body.querySelector('.cal-prev').onclick=()=>{ viewM--; if(viewM<0){ viewM=11; viewY--; } hideCalTip(); render(); };
-        body.querySelector('.cal-next').onclick=()=>{ viewM++; if(viewM>11){ viewM=0; viewY++; } hideCalTip(); render(); };
-        body.querySelector('.cal-today-btn').onclick=()=>{ const t=new Date(); viewY=t.getFullYear(); viewM=t.getMonth(); hideCalTip(); render(); };
+        function renderWeek(){
+            gridHead.style.display=''; gridHead.innerHTML=WD.map((d,i)=>"<div class='cal-wd"+(i===0?' cal-wk':'')+(i>=6?' cal-we':'')+"'>"+d+"</div>").join('');
+            const monday=new Date(weekAnchor); const dow=(monday.getDay()+6)%7; monday.setDate(monday.getDate()-dow);
+            const sunday=new Date(monday); sunday.setDate(sunday.getDate()+6);
+            const wkNum=calIsoWeek(monday);
+            monthEl.textContent='Vecka '+wkNum+' · '+monday.getDate()+' '+MONTHS[monday.getMonth()].slice(0,3)+'–'+sunday.getDate()+' '+MONTHS[sunday.getMonth()].slice(0,3)+' '+sunday.getFullYear();
+            grid.innerHTML=''; grid.classList.remove('cal-grid-day'); grid.classList.add('cal-grid-week');
+            const notes=loadCalNotes(); const categories=loadCalSettings().categories;
+            const wkCell=document.createElement('div'); wkCell.className='cal-cell cal-wknum'; wkCell.textContent=wkNum; grid.appendChild(wkCell);
+            for(let col=0; col<7; col++){ const d=new Date(monday); d.setDate(d.getDate()+col); grid.appendChild(buildDayCell(d, notes, categories)); }
+        }
+        function renderDay(){
+            gridHead.style.display='none';
+            const d=dayAnchor;
+            monthEl.textContent=WEEKDAY_FULL[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear();
+            grid.innerHTML=''; grid.classList.remove('cal-grid-week'); grid.classList.add('cal-grid-day');
+            const notes=loadCalNotes(); const categories=loadCalSettings().categories;
+            const key=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+            const mmdd=pad(d.getMonth()+1)+'-'+pad(d.getDate());
+            const nd=NAMEDAYS[mmdd]||''; const hol=swedishHolidaysForYear(d.getFullYear())[mmdd];
+            const noteObj=notes[key]||{text:'',tags:[]};
+            const box=document.createElement('div'); box.className='cal-day-view';
+            if(hol) box.classList.add(hol.red?'cal-holiday-red':'cal-holiday-fest');
+            let html='';
+            if(hol) html+="<div class='cal-day-view-holiday'>"+hol.name+"</div>";
+            else if(nd) html+="<div class='cal-day-view-nd'>Namnsdag: "+nd+"</div>";
+            if(noteObj.tags.length){
+                html+="<div class='cal-day-view-tags'>"+noteObj.tags.map(tid=>{ const c=categories.find(cc=>cc.id===tid); return c?("<span class='cal-tag-chip active' style='--tag-color:"+c.color+"'><span class='cal-tag-emoji'>"+c.emoji+"</span><span class='cal-tag-name'>"+c.name+"</span></span>"):''; }).join('')+"</div>";
+            }
+            const escTxt=(noteObj.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+            html+="<div class='cal-day-view-note'>"+(escTxt?escTxt.replace(/\n/g,'<br>'):"<span class='cal-day-view-empty'>Inga anteckningar – klicka för att lägga till</span>")+"</div>";
+            box.innerHTML=html;
+            const label=d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear();
+            box.onclick=()=>openCalDayPopup(key, label, render);
+            grid.appendChild(box);
+        }
+        function render(){
+            viewTabs.forEach(t=>t.classList.toggle('active', t.dataset.view===calView));
+            if(calView==='week') renderWeek();
+            else if(calView==='day') renderDay();
+            else renderMonth();
+        }
+        viewTabs.forEach(t=> t.onclick=()=>{ calView=t.dataset.view; hideCalTip(); render(); persistView(); });
+        body.querySelector('.cal-settings-btn').onclick=()=> openCalSettingsPanel(()=>{ calView=loadCalSettings().startView||calView; hideCalTip(); render(); });
+        body.querySelector('.cal-prev').onclick=()=>{
+            if(calView==='month'){ viewM--; if(viewM<0){ viewM=11; viewY--; } }
+            else if(calView==='week'){ weekAnchor=new Date(weekAnchor); weekAnchor.setDate(weekAnchor.getDate()-7); }
+            else { dayAnchor=new Date(dayAnchor); dayAnchor.setDate(dayAnchor.getDate()-1); }
+            hideCalTip(); render();
+        };
+        body.querySelector('.cal-next').onclick=()=>{
+            if(calView==='month'){ viewM++; if(viewM>11){ viewM=0; viewY++; } }
+            else if(calView==='week'){ weekAnchor=new Date(weekAnchor); weekAnchor.setDate(weekAnchor.getDate()+7); }
+            else { dayAnchor=new Date(dayAnchor); dayAnchor.setDate(dayAnchor.getDate()+1); }
+            hideCalTip(); render();
+        };
+        body.querySelector('.cal-today-btn').onclick=()=>{ const t=new Date(); viewY=t.getFullYear(); viewM=t.getMonth(); weekAnchor=new Date(t); dayAnchor=new Date(t); hideCalTip(); render(); };
         render();
     }
 
