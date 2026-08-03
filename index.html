@@ -1610,6 +1610,15 @@
     .ok-facit-label { font-size:18px; font-weight:900; color:#1a7a34; margin-bottom:4px; }
     .ok-facit-word { font-size:14px; color:#333; margin-bottom:6px; }
     .ok-facit-forklaring { font-size:13px; color:#333; line-height:1.4; }
+    .ok-intro { padding:2px 0 4px; max-height:min(560px,75vh); overflow-y:auto; }
+    .ok-intro-title { font-size:18px; font-weight:900; color:#1d1d1f; text-align:center; margin-bottom:6px; }
+    .ok-intro-lead { font-size:13px; color:#666; text-align:center; line-height:1.4; margin:0 0 12px; }
+    .ok-intro-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+    .ok-intro-card { background:#f7f7fa; border:1.5px solid #ececf0; border-radius:12px; padding:10px 12px; }
+    .ok-intro-card-title { font-size:13px; font-weight:900; color:#007aff; margin-bottom:4px; }
+    .ok-intro-card-text { font-size:11.5px; color:#444; line-height:1.35; margin-bottom:6px; }
+    .ok-intro-card-ex { font-size:11px; font-weight:700; color:#8e8e93; }
+    .ok-intro-start { width:100%; padding:12px; font-size:15px; position:sticky; bottom:0; box-shadow:0 -8px 10px -4px rgba(255,255,255,0.9); }
     /* POSITIONSSYSTEMET */
     .ps-target { text-align:center; font-size:14px; font-weight:700; color:#555; margin-bottom:4px; }
     .ps-target b { font-size:34px; color:#1d1d1f; display:block; margin-top:2px; }
@@ -2824,7 +2833,12 @@
     .gr-protractor:active { cursor:grabbing; }
     .gr-prot-inner { width:100%; height:100%; pointer-events:none; transform-origin:50% 88.46%; }
     .gr-prot-inner svg { display:block; }
-    .gr-prot-handle { position:absolute; left:197px; top:107px; width:16px; height:16px; border-radius:50%; background:#007aff; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.35); cursor:grab; touch-action:none; }
+    /* FIX: handtaget var bara 16x16px - klick även bara några pixlar från mitten missade det
+       helt och drog istället hela gradskivan i stället för att vrida den (särskilt märkbart på
+       pekskärmar). Klickytan är nu 34x34px (samma mittpunkt som förut), medan den blå pricken
+       visuellt fortfarande är liten via en mindre inre cirkel (::after). */
+    .gr-prot-handle { position:absolute; left:188px; top:98px; width:34px; height:34px; border-radius:50%; cursor:grab; touch-action:none; display:flex; align-items:center; justify-content:center; }
+    .gr-prot-handle::after { content:''; width:16px; height:16px; border-radius:50%; background:#007aff; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.35); }
     .gr-prot-handle:active { cursor:grabbing; }
     .figx-fig { width:100%; height:96px; display:flex; align-items:center; justify-content:center; }
     .figx-fig svg { max-width:100%; max-height:96px; }
@@ -9653,6 +9667,11 @@
         ['framför','Preposition'],['bakom','Preposition'],['genom','Preposition'],['mot','Preposition'],['utan','Preposition'],['med','Preposition']
     ];
 
+    // Några exempelord per ordklass, hämtade ur banken - används i introduktionen som visas
+    // första gången man startar Ordklasspoker-fliken.
+    const ORDKLASS_EXEMPEL = {};
+    ORDKLASS_KLASSER.forEach(k=>{ ORDKLASS_EXEMPEL[k] = ORDKLASS_BANK.filter(p=>p[1]===k).slice(0,3).map(p=>p[0]); });
+
     // ---- ORD (sammanslagning av Ordklasspoker, Rimord, Motsatsord och Sammansatt ord) ----
     // Varje flik behåller sin ursprungliga funktion oförändrad.
     function createOrdWidget(config){
@@ -9701,9 +9720,9 @@
         const ordTabsWrap = body.querySelector('.ord-tabs-wrap');
         tabBtns.forEach(b=> b.onclick = ()=>{ activeTab=b.dataset.tab; ordTabsWrap.classList.remove('expanded'); renderTabs(); persist(); saveBoardState(); });
 
-        // ==== Flik: Ordklasspoker (oförändrad logik) ====
+        // ==== Flik: Ordklasspoker ====
         const pokerRoot=document.createElement('div'); pokerRoot.className='poll-root ok-root'; panePoker.appendChild(pokerRoot);
-        let pokerState = { word:'', correct:'', votes:{}, revealed:false };
+        let pokerState = { word:'', correct:'', votes:{}, revealed:false, introDone:false };
         if(config && config.data && config.data.poker && config.data.poker.word){ Object.assign(pokerState, config.data.poker); if(!pokerState.votes) pokerState.votes={}; }
         else { slumpaOrdPoker(false); }
         function slumpaOrdPoker(doPersist){
@@ -9711,7 +9730,30 @@
             pokerState.word=p[0]; pokerState.correct=p[1]; pokerState.votes={}; ORDKLASS_KLASSER.forEach(k=>pokerState.votes[k]=0); pokerState.revealed=false;
             if(doPersist!==false) persist();
         }
+        // Kort introduktion med exempel kring vad varje ordklass betyder - visas första gången
+        // man öppnar fliken, innan man börjar rösta/öva. Går att ta fram igen via ℹ️-knappen.
+        function renderPokerIntro(){
+            pokerRoot.innerHTML='';
+            const intro=document.createElement('div'); intro.className='ok-intro';
+            const title=document.createElement('div'); title.className='ok-intro-title'; title.textContent='📖 Vad är en ordklass?'; intro.appendChild(title);
+            const lead=document.createElement('p'); lead.className='ok-intro-lead'; lead.textContent='Alla ord i svenskan tillhör en ordklass, beroende på vilken funktion de har i meningen. Här är de sex ordklasserna som ingår i spelet:'; intro.appendChild(lead);
+            const grid=document.createElement('div'); grid.className='ok-intro-grid';
+            ORDKLASS_KLASSER.forEach(klass=>{
+                const card=document.createElement('div'); card.className='ok-intro-card';
+                const h=document.createElement('div'); h.className='ok-intro-card-title'; h.textContent=klass; card.appendChild(h);
+                const p=document.createElement('div'); p.className='ok-intro-card-text'; p.textContent=ORDKLASS_FORKLARING[klass]||''; card.appendChild(p);
+                const ex=ORDKLASS_EXEMPEL[klass]||[];
+                if(ex.length){ const exEl=document.createElement('div'); exEl.className='ok-intro-card-ex'; exEl.textContent='Exempel: '+ex.join(', '); card.appendChild(exEl); }
+                grid.appendChild(card);
+            });
+            intro.appendChild(grid);
+            const startBtn=document.createElement('button'); startBtn.className='btn btn-primary ok-intro-start'; startBtn.textContent='🎮 Starta övningar';
+            startBtn.onclick=()=>{ pokerState.introDone=true; persist(); saveBoardState(); renderPoker(); };
+            intro.appendChild(startBtn);
+            pokerRoot.appendChild(intro);
+        }
         function renderPoker(){
+            if(!pokerState.introDone){ renderPokerIntro(); return; }
             pokerRoot.innerHTML='';
             const wordCard=document.createElement('div'); wordCard.className='ok-word-card'; wordCard.textContent=pokerState.word; pokerRoot.appendChild(wordCard);
             const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Vilken ordklass tillhör ordet? Rösta genom att klicka!'; pokerRoot.appendChild(hint);
@@ -9744,7 +9786,9 @@
             const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Nytt ord'; nyBtn.onclick=()=>{ slumpaOrdPoker(); renderPoker(); saveBoardState(); };
             const resetBtn=document.createElement('button'); resetBtn.className='kw-btn kw-btn-warn'; resetBtn.textContent='🔄 Nollställ röster';
             resetBtn.onclick=()=>{ ORDKLASS_KLASSER.forEach(k=>pokerState.votes[k]=0); pokerState.revealed=false; renderPoker(); persist(); saveBoardState(); };
-            btns.appendChild(nyBtn); btns.appendChild(resetBtn);
+            const infoBtn=document.createElement('button'); infoBtn.className='kw-btn kw-btn-ghost'; infoBtn.textContent='ℹ️ Introduktion'; infoBtn.title='Visa introduktionen om ordklasser igen';
+            infoBtn.onclick=()=>{ renderPokerIntro(); };
+            btns.appendChild(nyBtn); btns.appendChild(resetBtn); btns.appendChild(infoBtn);
             if(!pokerState.revealed){
                 const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa facit';
                 revealBtn.onclick=()=>{ pokerState.revealed=true; renderPoker(); persist(); saveBoardState(); };
