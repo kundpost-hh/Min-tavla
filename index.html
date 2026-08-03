@@ -293,7 +293,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createChecklist()"><div class="icon">✅</div><div class="label">Checklista</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
-            <button class="tool-btn" data-cat="klassrum" onclick="createVeckansMal()"><div class="icon">🎯</div><div class="label">Veckens mål</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createVeckansMal()"><div class="icon">🎯</div><div class="label">Veckens stjärnmål ⭐</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createGoodWidget()"><div class="icon">👍</div><div class="label">Good</div></button>
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createRimlighet()"><div class="icon">🤔</div><div class="label">Rimlighet</div></button>
@@ -1405,7 +1405,7 @@
     .cr-goal { text-align: center; border: 1px solid #d1d1d6; border-radius: 6px; font-size: 13px; padding: 3px; }
     /* ---- VECKENS MÅL ---- */
     .vm-week-label { text-align:center; font-size:12px; font-weight:800; color:#8e8e93; margin-bottom:6px; }
-    .vm-goals-title { text-align:center; font-size:15px; font-weight:900; color:#1d1d1f; margin-bottom:8px; }
+    .vm-goals-title { text-align:center; font-size:19px; font-weight:900; color:#1d1d1f; margin-bottom:8px; }
     .vm-goals-list { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; max-height:220px; overflow-y:auto; }
     .vm-goals-empty { text-align:center; color:#b0b0b8; font-size:12px; font-weight:600; padding:10px 0; }
     .vm-goal-item { display:flex; align-items:center; gap:7px; background:#f7f7fa; border:1.5px solid #ececf0; border-radius:10px; padding:7px 10px; }
@@ -1414,15 +1414,31 @@
     .vm-goal-del { border:none; background:none; color:#f87171; cursor:pointer; font-size:12px; flex-shrink:0; padding:2px 4px; }
     .vm-goal-del:hover { color:#dc2626; }
     .vm-goal-add-row { display:flex; gap:6px; margin-bottom:14px; }
+    .vm-bank-row { margin-bottom:4px; }
+    .vm-bank-row .btn { width:100%; }
+    .vm-bank-count { text-align:center; font-size:11px; font-weight:700; color:#8e8e93; margin-bottom:10px; cursor:default; }
+    .vm-bank-count:hover { text-decoration:underline; cursor:pointer; }
+    .vm-goal-popup { text-align:center; width:min(360px,90vw); }
+    .vm-goal-popup-icon { font-size:44px; margin-bottom:4px; }
+    .vm-goal-popup-title { font-size:13px; font-weight:800; color:#8e8e93; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+    .vm-goal-popup-text { font-size:24px; font-weight:900; color:#1d1d1f; line-height:1.35; margin-bottom:20px; }
+    .vm-goal-popup-ok { width:100%; padding:13px; font-size:16px; }
     .vm-goal-input { flex:1; min-width:0; border:2px solid #e0e0e6; border-radius:8px; padding:7px 9px; font-size:13px; font-family:inherit; }
     .vm-goal-add-btn { white-space:nowrap; font-size:12px; padding:7px 12px; }
-    .vm-progress-wrap { margin-bottom:10px; }
-    .vm-progress-bar { width:100%; height:20px; border-radius:10px; background:#ececf0; overflow:hidden; }
-    .vm-progress-fill { height:100%; width:0%; background:#5ac8fa; transition:width .45s ease, background .45s ease; border-radius:10px; }
-    .vm-progress-text { text-align:center; font-size:13px; font-weight:800; color:#333; margin-top:6px; }
-    .vm-points-btns { display:flex; align-items:center; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
-    .vm-target-label { font-size:12px; font-weight:800; color:#666; }
-    .vm-target-input { width:54px; text-align:center; border:1px solid #d1d1d6; border-radius:6px; font-size:13px; padding:5px 2px; }
+    .vm-day-track { display:flex; gap:6px; margin-bottom:8px; }
+    .vm-day-box { flex:1; aspect-ratio:1; border-radius:12px; background:#f0f0f4; border:2px solid transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:background .2s ease, border-color .2s ease, transform .15s ease; user-select:none; }
+    .vm-day-box:hover { transform:translateY(-1px); }
+    .vm-day-box-label { font-size:11px; font-weight:800; color:#8e8e93; }
+    .vm-day-box-icon { font-size:17px; margin-top:3px; line-height:1; min-height:20px; }
+    .vm-day-box.point { background:#e3f9e8; border-color:#34c759; }
+    .vm-day-box.point .vm-day-box-label { color:#1a7a34; }
+    .vm-day-box.nopoint { background:#ffffff; border-color:#d1d1d6; }
+    .vm-day-box.nopoint .vm-day-box-icon { color:#c7c7cc; }
+    .vm-day-box.nopoint .vm-day-box-label { color:#b0b0b6; }
+    .vm-day-box.today { box-shadow:0 0 0 2px #007aff; }
+    .vm-progress-text { text-align:center; font-size:13px; font-weight:800; color:#333; margin-bottom:10px; }
+    .vm-day-btns { display:flex; gap:6px; margin-bottom:10px; }
+    .vm-day-btns .btn { flex:1; font-size:12px; padding:9px 4px; }
     .vm-footer-btns { display:flex; gap:8px; }
     .vm-footer-btns .btn { flex:1; font-size:12px; }
     .vm-history-popup { width:min(420px,92vw); text-align:left; max-height:80vh; overflow-y:auto; }
@@ -4396,7 +4412,7 @@
                 else if (type === 'TURORDNING') { try{ state.data = JSON.parse(w.dataset.turordning || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'UPPMÄRKSAMHETSSIGNAL') { try{ state.data = JSON.parse(w.dataset.uppmark || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BERÄTTARTÄRNING') { try{ state.data = JSON.parse(w.dataset.berattar || '{}'); }catch(e){ state.data={}; } }
-                else if (type === 'VECKANS MÅL') { try{ state.data = JSON.parse(w.dataset.veckansmal || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'Veckans stjärnmål ⭐' || type === 'VECKANS MÅL') { try{ state.data = JSON.parse(w.dataset.veckansmal || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
@@ -4509,7 +4525,7 @@
             else if (w.type === 'UPPMÄRKSAMHETSSIGNAL') createUppmarksamhetWidget(w);
             else if (w.type === 'BERÄTTARTÄRNING') createBerattarWidget(w);
             else if (w.type === 'KLASSPOÄNG') createClassReward(w);
-            else if (w.type === 'VECKANS MÅL') createVeckansMal(w);
+            else if (w.type === 'VECKANS MÅL' || w.type === 'Veckans stjärnmål ⭐') createVeckansMal(w);
             else if (w.type === 'KAMERA') createCamera(w);
             else if (w.type === 'STOPPUR') createStopwatch(w);
             else if (w.type === 'ÖVNINGSKLOCKA') createPracticeClock(w);
@@ -21855,39 +21871,110 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         upd(false);
     }
 
-    // ---- VECKANS MÅL: klassen sätter upp mål (i "jag"-form) för veckan, samlar poäng
-    // tillsammans mot ett gemensamt mål, och kan se statistik över tidigare veckor. ----
+    // ---- VECKANS STJÄRNMÅL ⭐: klassen sätter upp mål (t.ex. i "vi"-form) för veckan, samlar
+    // poäng tillsammans mot ett gemensamt mål, och kan se statistik över tidigare veckor. ----
+    const VECKANS_MAL_BANK = [
+        'Vi lyssnar på varandra.', 'Vi räcker upp handen.', 'Vi hjälper en kompis.', 'Vi använder vänliga ord.',
+        'Vi visar respekt.', 'Vi håller ordning.', 'Vi kommer i tid.', 'Vi vågar fråga.', 'Vi gör vårt bästa.',
+        'Vi ger inte upp.', 'Vi arbetar tillsammans.', 'Vi tar ansvar.', 'Vi håller arbetsro.', 'Vi följer instruktioner.',
+        'Vi är rädda om skolans saker.', 'Vi inkluderar alla.', 'Vi är ärliga.', 'Vi visar omtanke.', 'Vi uppmuntrar varandra.'
+    ];
     function veckansMalLabel(d){
         const wk = (typeof calIsoWeek==='function') ? calIsoWeek(d) : Math.ceil((((d-new Date(d.getFullYear(),0,1))/86400000)+new Date(d.getFullYear(),0,1).getDay()+1)/7);
         return 'Vecka '+wk+', '+d.getFullYear();
     }
+    const VM_DAY_KEYS=['mon','tue','wed','thu','fri'];
+    const VM_DAY_LABELS=['Mån','Tis','Ons','Tor','Fre'];
+    // Returnerar dagens nyckel (mon..fri) eller null om det är helg (ingen skoldag).
+    function vmTodayDayKey(){ const dow=new Date().getDay(); const idx=dow-1; return (idx>=0 && idx<=4) ? VM_DAY_KEYS[idx] : null; }
     function createVeckansMal(config){
         if(config===undefined) config=null;
-        const body = createWidget('VECKANS MÅL', 340, 'veckansmal-widget', config);
+        const body = createWidget('Veckans stjärnmål ⭐', 340, 'veckansmal-widget', config);
         const widget = body.parentElement.parentElement;
         body.innerHTML = "<div class='vm-wrap'>"+
             "<div class='vm-week-label'></div>"+
-            "<div class='vm-goals-title'>🎯 Veckans mål</div>"+
+            "<div class='vm-goals-title'>🎯 Veckans stjärnmål</div>"+
             "<div class='vm-goals-list'></div>"+
-            "<div class='vm-goal-add-row hover-menu'><input type='text' class='vm-goal-input' placeholder='Jag ... (skriv ett nytt mål)' maxlength='120'><button type='button' class='btn btn-primary vm-goal-add-btn'>+ Lägg till</button></div>"+
-            "<div class='vm-progress-wrap'><div class='vm-progress-bar'><div class='vm-progress-fill'></div></div><div class='vm-progress-text'></div></div>"+
-            "<div class='vm-points-btns hover-menu'><button type='button' class='btn btn-danger vm-minus'>➖</button><button type='button' class='btn btn-primary vm-plus'>⭐ Poäng</button><span class='vm-target-label'>Mål</span><input type='number' class='vm-target-input' min='1'></div>"+
+            "<div class='vm-bank-row hover-menu'><button type='button' class='btn btn-primary vm-bank-btn'>🎲 Slumpa mål från banken</button></div>"+
+            "<div class='vm-bank-count'></div>"+
+            "<div class='vm-goal-add-row hover-menu'><input type='text' class='vm-goal-input' placeholder='Vi ... (skriv ett eget mål)' maxlength='120'><button type='button' class='btn btn-primary vm-goal-add-btn'>+ Lägg till</button></div>"+
+            "<div class='vm-day-track'></div>"+
+            "<div class='vm-progress-text'></div>"+
+            "<div class='vm-day-btns hover-menu'><button type='button' class='btn btn-primary vm-day-point-btn'>⭐ Poäng idag</button><button type='button' class='btn vm-day-nopoint-btn'>⏭️ Ingen poäng idag</button></div>"+
             "<div class='vm-footer-btns hover-menu'><button type='button' class='btn vm-newweek-btn'>🔄 Ny vecka</button><button type='button' class='btn vm-history-btn'>📊 Historik</button></div>"+
             "</div>";
         const weekLabelEl=body.querySelector('.vm-week-label'), goalsList=body.querySelector('.vm-goals-list'), goalInput=body.querySelector('.vm-goal-input'),
-              progFill=body.querySelector('.vm-progress-fill'), progText=body.querySelector('.vm-progress-text'), targetInput=body.querySelector('.vm-target-input');
+              dayTrackEl=body.querySelector('.vm-day-track'), progText=body.querySelector('.vm-progress-text'),
+              bankCountEl=body.querySelector('.vm-bank-count');
 
-        let state = { goals:[], points:0, target:20, weekLabel: veckansMalLabel(new Date()), history:[] };
+        const VM_THRESHOLD=3, VM_TARGET=5; // minst 3 av 5 skoldagar (60%) ger veckans poäng
+        let state = { goals:[], points:0, target:VM_TARGET, weekLabel: veckansMalLabel(new Date()), history:[], bankRemaining: VECKANS_MAL_BANK.slice(), celebratedThisWeek:false, dayPoints:{mon:null,tue:null,wed:null,thu:null,fri:null} };
         if(config && config.data && Array.isArray(config.data.goals)) Object.assign(state, config.data);
         if(!Array.isArray(state.history)) state.history=[];
-        targetInput.value = state.target || 20;
-        weekLabelEl.textContent = '📅 '+(state.weekLabel || veckansMalLabel(new Date()));
+        // FIX: gamla sparade widgetar (från innan målbanken fanns) saknar bankRemaining - fyll då
+        // på med hela banken som startpunkt istället för att krascha eller stå tom.
+        if(!Array.isArray(state.bankRemaining)) state.bankRemaining = VECKANS_MAL_BANK.slice();
+        if(typeof state.celebratedThisWeek !== 'boolean') state.celebratedThisWeek = false;
+        // FIX: gamla widgetar (från innan dagsrutorna fanns) hade bara ett samlat poängtal, inget
+        // per dag. Migrera dem till dagsrutor så gammal data inte försvinner, genom att fylla på
+        // "poäng"-dagar från måndag och framåt upp till det gamla antalet. Måste kolla den RÅA
+        // sparade datan (config.data) - state.dayPoints har redan default-fyllts ovan och är
+        // därför alltid ett objekt, så det går inte att avgöra där om datan faktiskt var gammal.
+        if(config && config.data && !config.data.dayPoints && typeof config.data.points==='number'){
+            const legacy = Math.max(0, Math.min(5, config.data.points));
+            state.dayPoints = {mon:null,tue:null,wed:null,thu:null,fri:null};
+            VM_DAY_KEYS.forEach((k,i)=>{ if(i<legacy) state.dayPoints[k]=true; });
+        }
+        VM_DAY_KEYS.forEach(k=>{ if(!(k in state.dayPoints)) state.dayPoints[k]=null; });
+
+        // FIX: widgeten kände tidigare inte av när en ny vecka börjat - man var tvungen att komma
+        // ihåg att klicka "Ny vecka" själv. Nu jämförs sparad veckoetikett med DAGENS vecka varje
+        // gång widgeten öppnas: skiljer de sig har en ny vecka börjat, och förra veckan arkiveras
+        // automatiskt till historiken (precis som "Ny vecka"-knappen gör) innan dagsrutorna nollställs.
+        (function checkNewWeek(){
+            const nu = veckansMalLabel(new Date());
+            if(state.weekLabel && state.weekLabel !== nu){
+                const pts = VM_DAY_KEYS.filter(k=>state.dayPoints[k]===true).length;
+                state.history.push({ weekLabel: state.weekLabel, points: pts, target: VM_TARGET, reached: pts>=VM_THRESHOLD, goalsCount: state.goals.length, savedAt: Date.now() });
+                state.dayPoints={mon:null,tue:null,wed:null,thu:null,fri:null}; state.celebratedThisWeek = false; state.weekLabel = nu;
+            } else if(!state.weekLabel){ state.weekLabel = nu; }
+        })();
+
+        const VM_VECKODAGAR=['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'];
+        weekLabelEl.textContent = '📅 '+(state.weekLabel || veckansMalLabel(new Date()))+' · '+VM_VECKODAGAR[new Date().getDay()];
 
         function persist(){ widget.dataset.veckansmal = JSON.stringify(state); saveBoardState(); }
+
+        function updateBankCount(){
+            bankCountEl.textContent = state.bankRemaining.length+' av '+VECKANS_MAL_BANK.length+' mål kvar i banken'+(state.bankRemaining.length<VECKANS_MAL_BANK.length ? ' · ↺ Återställ banken' : '');
+        }
+        bankCountEl.onclick=()=>{
+            if(state.bankRemaining.length>=VECKANS_MAL_BANK.length) return; // inget att återställa
+            customConfirm('Återställ målbanken så att alla '+VECKANS_MAL_BANK.length+' mål kan slumpas fram igen?', ()=>{ state.bankRemaining=VECKANS_MAL_BANK.slice(); updateBankCount(); persist(); });
+        };
+        function showGoalPopup(goal){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup vm-goal-popup';
+            box.innerHTML = "<div class='vm-goal-popup-icon'>🎯</div><div class='vm-goal-popup-title'>Nytt mål tillagt!</div><div class='vm-goal-popup-text'></div><button type='button' class='btn btn-primary vm-goal-popup-ok'>Toppen!</button>";
+            box.querySelector('.vm-goal-popup-text').textContent = goal;
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            box.querySelector('.vm-goal-popup-ok').onclick=close;
+            ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            ov.appendChild(box);
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+        body.querySelector('.vm-bank-btn').onclick=()=>{
+            if(!state.bankRemaining.length){ customAlert('Alla mål i målbanken har redan använts! Klicka på "↺ Återställ banken" under knappen om du vill slumpa dem igen.', '🎯'); return; }
+            const idx=Math.floor(Math.random()*state.bankRemaining.length);
+            const goal=state.bankRemaining.splice(idx,1)[0];
+            state.goals.push(goal); renderGoals(); updateBankCount(); persist();
+            showGoalPopup(goal);
+        };
 
         function renderGoals(){
             goalsList.innerHTML='';
             if(!state.goals.length){
+
                 const empty=document.createElement('div'); empty.className='vm-goals-empty'; empty.textContent='Inga mål tillagda ännu. Lägg till några nedan!';
                 goalsList.appendChild(empty); return;
             }
@@ -21895,47 +21982,93 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 const row=document.createElement('div'); row.className='vm-goal-item';
                 const bullet=document.createElement('span'); bullet.className='vm-goal-bullet'; bullet.textContent='🎯';
                 const txt=document.createElement('span'); txt.className='vm-goal-text'; txt.textContent=g;
-                const del=document.createElement('button'); del.type='button'; del.className='vm-goal-del hover-menu'; del.textContent='✕'; del.title='Ta bort mål';
-                del.onclick=()=>{ state.goals.splice(idx,1); renderGoals(); persist(); };
+                const fromBank = VECKANS_MAL_BANK.includes(g);
+                const del=document.createElement('button'); del.type='button'; del.className='vm-goal-del hover-menu'; del.textContent='✕';
+                del.title = fromBank ? 'Ta bort mål (läggs tillbaka i banken)' : 'Ta bort mål';
+                del.onclick=()=>{
+                    state.goals.splice(idx,1);
+                    // FIX: mål som kom från banken ska kunna slumpas fram igen om man ångrar sig -
+                    // annars försvinner de permanent tills man återställer HELA banken.
+                    if(fromBank && !state.bankRemaining.includes(g)){ state.bankRemaining.push(g); updateBankCount(); }
+                    renderGoals(); persist();
+                };
                 row.appendChild(bullet); row.appendChild(txt); row.appendChild(del);
                 goalsList.appendChild(row);
             });
         }
         function addGoal(){
             let v=goalInput.value.trim(); if(!v) return;
-            // Lite hjälp på traven: om läraren glömmer "Jag" i början, lägg till det automatiskt.
-            if(!/^jag\b/i.test(v)) v = 'Jag '+v.charAt(0).toLowerCase()+v.slice(1);
+            // Lite hjälp på traven: om läraren glömmer "Vi" i början, lägg till det automatiskt
+            // (målbanken pratar i vi-form, så egna mål matchar samma ton).
+            if(!/^vi\b/i.test(v)) v = 'Vi '+v.charAt(0).toLowerCase()+v.slice(1);
             state.goals.push(v); goalInput.value=''; renderGoals(); persist(); goalInput.focus();
         }
         body.querySelector('.vm-goal-add-btn').onclick=addGoal;
         goalInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); addGoal(); } });
 
-        function updProgress(celebrate){
-            const target=Math.max(1, parseInt(targetInput.value)||20);
-            state.target=target;
-            state.points=Math.max(0, Math.min(state.points, target));
-            const pct=Math.round((state.points/target)*100);
-            progFill.style.width=pct+'%';
-            progFill.style.background = pct>=100 ? '#34c759' : pct>=60 ? '#ffcc00' : '#5ac8fa';
-            progText.textContent = state.points+' / '+target+' poäng'+(pct>=100 ? '  🎉 Målet nått!' : '');
-            if(celebrate && pct>=100) showWinnerPopup('Klassen har nått veckans mål! 🎉');
+        // FIX: firandet ska höra ihop med VECKANS resultat, inte den dag klassen råkar nå 3 poäng.
+        // Även om klassen redan nått målet på tisdag ska popupen vänta till fredag (veckans sista
+        // skoldag) innan den visas - annars firas det för tidigt och tappar sin poäng som avslutning
+        // på veckan. celebratedThisWeek ser till att den bara visas EN gång per vecka.
+        function checkFridayCelebration(){
+            const isFriday = new Date().getDay() === 5; // 0=sön,1=mån,...,5=fre,6=lör
+            const points = VM_DAY_KEYS.filter(k=>state.dayPoints[k]===true).length;
+            if(isFriday && points>=VM_THRESHOLD && !state.celebratedThisWeek){
+                state.celebratedThisWeek = true; persist();
+                showWinnerPopup('Klassen har nått veckans mål! 🎉');
+            }
         }
-        targetInput.oninput=()=>{ updProgress(false); persist(); };
-        body.querySelector('.vm-plus').onclick=()=>{
-            const target=Math.max(1, parseInt(targetInput.value)||20); const was=state.points;
-            state.points++; updProgress(state.points>=target && was<target); persist();
+        // FIX: dagsrutorna (Mån-Fre) visar varje dags resultat direkt - ⭐ om klassen fick poäng,
+        // ✕ (vit/grå ruta) om de inte gjorde det den dagen, annars tom om dagen inte avgjorts än.
+        // Klick på en ruta växlar mellan de tre lägena, så man kan rätta till en felklickad dag.
+        function renderDayTrack(){
+            dayTrackEl.innerHTML='';
+            const todayKey=vmTodayDayKey();
+            VM_DAY_KEYS.forEach((k,i)=>{
+                const val=state.dayPoints[k];
+                const box=document.createElement('div');
+                box.className='vm-day-box'+(val===true?' point':val===false?' nopoint':'')+(k===todayKey?' today':'');
+                box.title = VM_DAY_LABELS[i]+(k===todayKey?' (idag)':'');
+                box.innerHTML="<span class='vm-day-box-label'>"+VM_DAY_LABELS[i]+"</span><span class='vm-day-box-icon'>"+(val===true?'⭐':val===false?'✕':'')+"</span>";
+                box.onclick=()=>{
+                    state.dayPoints[k] = (val===true) ? false : (val===false) ? null : true;
+                    renderDayTrack(); updProgress(true); persist();
+                };
+                dayTrackEl.appendChild(box);
+            });
+        }
+        function updProgress(celebrate){
+            const points = VM_DAY_KEYS.filter(k=>state.dayPoints[k]===true).length;
+            state.points = points;
+            const isFriday = new Date().getDay()===5;
+            const reached = points>=VM_THRESHOLD;
+            // FIX: "✅ Veckans poäng nått"-status ska inte avslöjas förrän på fredag - annars vet
+            // klassen redan på tisdag att de är hemma, och tappar sporren att hålla i hela veckan.
+            progText.textContent = isFriday
+                ? (points+' / '+VM_TARGET+' poäng'+(reached ? '  ✅ Veckans poäng nått!' : '  (minst '+VM_THRESHOLD+' behövdes)'))
+                : (points+' / '+VM_TARGET+' poäng hittills denna vecka');
+            if(celebrate) checkFridayCelebration();
+        }
+        body.querySelector('.vm-day-point-btn').onclick=()=>{
+            const k=vmTodayDayKey();
+            if(!k){ customAlert('Idag är ingen skoldag (mån–fre), så det går inte att sätta en dagspoäng.', '📅'); return; }
+            state.dayPoints[k]=true; renderDayTrack(); updProgress(true); persist();
         };
-        body.querySelector('.vm-minus').onclick=()=>{ if(state.points>0) state.points--; updProgress(false); persist(); };
+        body.querySelector('.vm-day-nopoint-btn').onclick=()=>{
+            const k=vmTodayDayKey();
+            if(!k){ customAlert('Idag är ingen skoldag (mån–fre).', '📅'); return; }
+            state.dayPoints[k]=false; renderDayTrack(); updProgress(false); persist();
+        };
 
         // "Ny vecka": arkiverar poängen för den avslutade veckan i historiken och nollställer
-        // poängräknaren - målen (i-listan) ligger kvar så man slipper skriva om samma mål varje vecka.
+        // dagsrutorna - målen (i-listan) ligger kvar så man slipper skriva om samma mål varje vecka.
         body.querySelector('.vm-newweek-btn').onclick=()=>{
-            customConfirm('Avsluta "'+state.weekLabel+'" och spara till historiken? Poängen nollställs för en ny vecka (målen ligger kvar).', ()=>{
-                const target=Math.max(1, parseInt(targetInput.value)||20);
-                state.history.push({ weekLabel: state.weekLabel, points: state.points, target: target, reached: state.points>=target, goalsCount: state.goals.length, savedAt: Date.now() });
-                state.points=0; state.weekLabel=veckansMalLabel(new Date());
-                weekLabelEl.textContent='📅 '+state.weekLabel;
-                updProgress(false); persist();
+            customConfirm('Avsluta "'+state.weekLabel+'" och spara till historiken? Dagsrutorna nollställs för en ny vecka (målen ligger kvar).', ()=>{
+                const points = VM_DAY_KEYS.filter(k=>state.dayPoints[k]===true).length;
+                state.history.push({ weekLabel: state.weekLabel, points: points, target: VM_TARGET, reached: points>=VM_THRESHOLD, goalsCount: state.goals.length, savedAt: Date.now() });
+                state.dayPoints={mon:null,tue:null,wed:null,thu:null,fri:null}; state.celebratedThisWeek=false; state.weekLabel=veckansMalLabel(new Date());
+                weekLabelEl.textContent='📅 '+state.weekLabel+' · '+VM_VECKODAGAR[new Date().getDay()];
+                renderDayTrack(); updProgress(false); persist();
             });
         };
 
@@ -21974,7 +22107,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         }
         body.querySelector('.vm-history-btn').onclick=openHistory;
 
-        renderGoals(); updProgress(false);
+        renderGoals(); renderDayTrack(); updProgress(true); updateBankCount();
         if(!config) persist();
     }
 
