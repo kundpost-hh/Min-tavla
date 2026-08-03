@@ -28807,12 +28807,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         saveToolPocketLayout();
     }
     window.addToolPocketCategory = addToolPocketCategory;
-    // Skapar alla 7 fasta rutor (Lektion, Matematik, Svenska, NO, Teknik, Verktyg, Belöning) och
+    // Skapar alla 6 fasta rutor (Lektion, Matematik, Svenska, NO, Verktyg, Belöning) och
     // placerar sedan in de widgetar du bestämt i respektive ruta. RUTOR_MAPPNING fylls på allt
     // eftersom du berättar vilka widgetar som hör hemma var - byggs bara ut, aldrig om, så gamla
     // rutor du redan gett mig innehåll för rörs inte av att fler rutor läggs till senare.
     // Widgetar matchas på sin onclick-funktion (stabil, se toolBtnId-fixen ovan), inte på text.
-    const MINA_RUTOR_NAMN = ['Lektion','Matematik','Svenska','Engelska','NO','Teknik','Verktyg','Belöning'];
+    const MINA_RUTOR_NAMN = ['Lektion','Matematik','Svenska','Engelska','NO','Verktyg','Belöning'];
     const RUTOR_MAPPNING = {
         'Lektion': [
             "createLessonPlan()",      // Lektion
@@ -28890,19 +28890,17 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             "createKompisWidget()",   // En bra kompis!
             "createWorkSymbols()",    // Arbetssätt
             "createBirthdayWidget()", // Grattis
-            "createBgSelector()"      // Bakgrund
+            "createBgSelector()",     // Bakgrund
+            "createCamera()",         // Kamera (flyttad hit från Teknik-kategorin)
+            "createVideoWidget()",    // Video (flyttad hit från Teknik-kategorin)
+            "createQRCode()",         // QR-Kod (flyttad hit från Teknik-kategorin)
+            "createImageWidget()"     // Bild (flyttad hit från Teknik-kategorin)
         ],
         'Belöning': [
             "createClassReward()",  // Klasspoäng
             "createGoodWidget()",   // Good
             "createRewardSystem()", // Poäng
             "createExitTicket()"    // Exit ticket
-        ],
-        'Teknik': [
-            "createCamera()",      // Kamera
-            "createVideoWidget()", // Video
-            "createQRCode()",      // QR-Kod
-            "createImageWidget()"  // Bild
         ],
         'Engelska': [
             "createEngelskaMegaWidget()"  // Engelska (Ordet idag / Memory / Räkna)
