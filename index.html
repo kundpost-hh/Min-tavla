@@ -22009,11 +22009,15 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         // FIX: firandet ska höra ihop med VECKANS resultat, inte den dag klassen råkar nå 3 poäng.
         // Även om klassen redan nått målet på tisdag ska popupen vänta till fredag (veckans sista
         // skoldag) innan den visas - annars firas det för tidigt och tappar sin poäng som avslutning
-        // på veckan. celebratedThisWeek ser till att den bara visas EN gång per vecka.
+        // på veckan. Men om det är lov/studiedag på fredagen kanske man aldrig HAR en fredag att
+        // vänta på - därför firas det också så fort ALLA fem dagsrutor är ifyllda (oavsett veckodag),
+        // eftersom veckan då räknas som helt avklarad. celebratedThisWeek ser till att den bara
+        // visas EN gång per vecka.
+        function vmAllDaysFilled(){ return VM_DAY_KEYS.every(k => state.dayPoints[k]===true || state.dayPoints[k]===false); }
         function checkFridayCelebration(){
             const isFriday = new Date().getDay() === 5; // 0=sön,1=mån,...,5=fre,6=lör
             const points = VM_DAY_KEYS.filter(k=>state.dayPoints[k]===true).length;
-            if(isFriday && points>=VM_THRESHOLD && !state.celebratedThisWeek){
+            if((isFriday || vmAllDaysFilled()) && points>=VM_THRESHOLD && !state.celebratedThisWeek){
                 state.celebratedThisWeek = true; persist();
                 showWinnerPopup('Klassen har nått veckans mål! 🎉');
             }
@@ -22029,7 +22033,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 const box=document.createElement('div');
                 box.className='vm-day-box'+(val===true?' point':val===false?' nopoint':'')+(k===todayKey?' today':'');
                 box.title = VM_DAY_LABELS[i]+(k===todayKey?' (idag)':'');
-                box.innerHTML="<span class='vm-day-box-label'>"+VM_DAY_LABELS[i]+"</span><span class='vm-day-box-icon'>"+(val===true?'⭐':val===false?'✕':'')+"</span>";
+                box.innerHTML="<span class='vm-day-box-label'>"+VM_DAY_LABELS[i]+"</span><span class='vm-day-box-icon'>"+(val===true?'⭐':val===false?'😢':'')+"</span>";
                 box.onclick=()=>{
                     state.dayPoints[k] = (val===true) ? false : (val===false) ? null : true;
                     renderDayTrack(); updProgress(true); persist();
@@ -22042,9 +22046,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             state.points = points;
             const isFriday = new Date().getDay()===5;
             const reached = points>=VM_THRESHOLD;
-            // FIX: "✅ Veckans poäng nått"-status ska inte avslöjas förrän på fredag - annars vet
-            // klassen redan på tisdag att de är hemma, och tappar sporren att hålla i hela veckan.
-            progText.textContent = isFriday
+            // FIX: "✅ Veckans poäng nått"-status ska inte avslöjas förrän på fredag - ELLER tills
+            // alla fem dagar är ifyllda om det är lov/studiedag på fredagen - annars vet klassen
+            // redan på tisdag att de är hemma, och tappar sporren att hålla i hela veckan.
+            const reveal = isFriday || vmAllDaysFilled();
+            progText.textContent = reveal
                 ? (points+' / '+VM_TARGET+' poäng'+(reached ? '  ✅ Veckans poäng nått!' : '  (minst '+VM_THRESHOLD+' behövdes)'))
                 : (points+' / '+VM_TARGET+' poäng hittills denna vecka');
             if(celebrate) checkFridayCelebration();
