@@ -239,7 +239,6 @@
             <button class="tool-btn" data-cat="matte" onclick="createBrakjamforelse()"><div class="icon">🍕</div><div class="label">Bråkjämförelse</div></button>
             <button class="tool-btn" onclick="createTableWidget()"><div class="icon">📊</div><div class="label">Tabell</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createTidMegaWidget()"><div class="icon">🕰️</div><div class="label">Tid</div></button>
-            <button class="tool-btn" data-cat="klassrum" onclick="createReminderWidget()"><div class="icon">⏰</div><div class="label">Reminder</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createMultiplicationTable()"><div class="icon">✖️</div><div class="label">Multiplikation</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createTalfoljder()"><div class="icon">🔗</div><div class="label">Talföljder</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createDiagramWidget()"><div class="icon">📈</div><div class="label">Diagram</div></button>
@@ -2207,6 +2206,18 @@
     .cal-grid-day { display:block !important; }
     .cal-cell-tags { display:flex; flex-wrap:wrap; gap:1px; margin-top:auto; line-height:1; }
     .cal-cell-tag { font-size:10px; }
+    .cal-cell-reminder { position:absolute; top:2px; right:3px; font-size:10px; line-height:1; }
+    .cal-popup-rem-list { display:flex; flex-direction:column; gap:5px; margin-bottom:8px; }
+    .cal-popup-rem-item { display:flex; align-items:center; gap:6px; background:#fff7e6; border:1px solid #ffe1a8; border-radius:8px; padding:6px 9px; font-size:12px; }
+    .cal-popup-rem-time-label { font-weight:800; color:#ff9500; white-space:nowrap; }
+    .cal-popup-rem-text { flex:1; min-width:0; color:#333; overflow-wrap:break-word; }
+    .cal-popup-rem-del { border:none; background:none; color:#f87171; cursor:pointer; font-size:12px; flex-shrink:0; }
+    .cal-popup-rem-del:hover { color:#dc2626; }
+    .cal-popup-rem-add-row { display:flex; gap:6px; margin-bottom:6px; }
+    .cal-popup-rem-time { border:2px solid #e0e0e6; border-radius:8px; padding:6px 8px; font-size:12px; font-family:inherit; }
+    .cal-popup-rem-btn { white-space:nowrap; font-size:12px; padding:6px 12px; }
+    .cal-day-view-reminders { margin-bottom:8px; }
+    .cal-day-view-rem-item { font-size:12px; font-weight:700; color:#ff9500; background:#fff7e6; border:1px solid #ffe1a8; border-radius:8px; padding:5px 9px; margin-bottom:4px; }
     .cal-day-view { border:1.5px solid #ececf0; border-radius:12px; padding:14px; cursor:pointer; min-height:120px; background:#fff; transition:border-color .15s,background .15s; }
     .cal-day-view:hover { border-color:#007aff; background:#f5faff; }
     .cal-day-view.cal-holiday-red { background:#fff5f5; border-color:#ffd6d6; }
@@ -2532,27 +2543,7 @@
     .check-del { background:none; border:none; color:#f87171; cursor:pointer; font-size:13px; flex-shrink:0; }
     .check-del:hover { color:#dc2626; }
 
-    /* ---- REMINDER / PÅMINNELSER ---- */
-    .reminder-widget .rem-row { display:flex; gap:6px; margin-bottom:8px; }
-    .reminder-widget .rem-row input { flex:1; min-width:0; font-family:inherit; font-size:13px; font-weight:600; padding:7px 8px; border:1.5px solid #e5e5ea; border-radius:8px; background:#f9f9fb; color:#333; outline:none; }
-    .reminder-widget .rem-row input:focus { border-color:#007aff; background:#fff; }
-    .reminder-widget .rem-text { width:100%; min-height:52px; resize:vertical; border:1.5px solid #e5e5ea; border-radius:8px; background:#f9f9fb; font-family:inherit; font-size:13px; padding:8px; outline:none; margin-bottom:8px; box-sizing:border-box; }
-    .reminder-widget .rem-text:focus { border-color:#007aff; background:#fff; }
-    .rem-list { display:flex; flex-direction:column; gap:6px; margin-top:10px; max-height:220px; overflow-y:auto; }
-    .rem-empty { text-align:center; color:#b0b0b8; font-size:13px; font-weight:600; padding:8px 0; }
-    .rem-badge { position:absolute; top:-9px; right:-9px; min-width:20px; height:20px; padding:0 5px; border-radius:10px; background:#ff3b30; color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.25); z-index:25; pointer-events:none; opacity:0; transform:scale(0.5); transition:opacity .2s ease, transform .2s ease; }
-    .rem-badge.show { opacity:1; transform:scale(1); }
-    .rem-badge.pulse { animation:rem-badge-pulse 1s ease-in-out infinite; }
-    @keyframes rem-badge-pulse { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.18); } }
-    .rem-item { display:flex; align-items:center; gap:8px; background:#fff7e6; border:1px solid #ffe1a8; border-radius:10px; padding:7px 9px; }
-    .rem-item.fired { background:#f4f4f6; border-color:#e5e5ea; opacity:0.65; }
-    .rem-item-main { flex:1; min-width:0; }
-    .rem-item-when { font-size:12px; font-weight:800; color:#ff9500; }
-    .rem-item.fired .rem-item-when { color:#8e8e93; }
-    .rem-item-text { font-size:13px; color:#333; word-break:normal; overflow-wrap:break-word; }
-    .rem-del { background:none; border:none; color:#f87171; cursor:pointer; font-size:13px; flex-shrink:0; }
-    .rem-del:hover { color:#dc2626; }
-
+    /* ---- PÅMINNELSER: den blinkande popupen som visas när en påminnelse går av ---- */
     .reminder-popup-overlay { position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.55); backdrop-filter:blur(5px); z-index:99999999; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s ease; }
     .reminder-popup-overlay.show { opacity:1; }
     .reminder-popup-box { background:#fff; border-radius:22px; padding:34px 46px 28px; text-align:center; max-width:460px; width:90%; border:4px solid #ff3b30; transform:scale(0.6); transition:transform 0.45s cubic-bezier(0.175,0.885,0.32,1.275); animation:remBlink 1.1s ease-in-out infinite; }
@@ -4394,7 +4385,6 @@
                 else if (type === 'SKILJETECKEN') { try{ state.data = JSON.parse(w.dataset.skiljetecken || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'MENINGAR') { try{ state.data = JSON.parse(w.dataset.meningar || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'SAMMANSATT ORD') { try{ state.data = JSON.parse(w.dataset.sammansatt || '{}'); }catch(e){ state.data={}; } }
-                else if (type === 'REMINDER') { try{ state.data.items = (typeof remLoad==='function') ? remLoad() : JSON.parse(w.dataset.reminders || '[]'); }catch(e){ state.data.items = []; } }
                 else if (type === 'MULTIPLIKATION') { try{ state.data = JSON.parse(w.dataset.multi || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'HUNDRARUTA') { try{ state.data = JSON.parse(w.dataset.hundra || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'RÄKNA') { try{ state.data = JSON.parse(w.dataset.rakna || '{}'); }catch(e){ state.data={}; } }
@@ -4527,7 +4517,7 @@
             else if (w.type === 'SKILJETECKEN') createSkiljetecken(w);
             else if (w.type === 'MENINGAR') createMeningarWidget(w);
             else if (w.type === 'SAMMANSATT ORD') createSammansatt(w);
-            else if (w.type === 'REMINDER') createReminderWidget(w);
+            else if (w.type === 'REMINDER') { try{ if(w.data && Array.isArray(w.data.items) && typeof remMerge==='function') remMerge(w.data.items); }catch(e){} } // widgeten är borttagen (flyttad till Kalender) - migrerar bara ev. gamla sparade påminnelser in i det globala minnet så inget går förlorat
             else if (w.type === 'MULTIPLIKATION') createMultiplicationTable(w);
             else if (w.type === 'HUNDRARUTA') createHundredChart(w);
             else if (w.type === 'RÄKNA') createMathChallenge(w);
@@ -11834,81 +11824,10 @@
     setInterval(remCheckDue, 5000);      // central bevakare – körs alltid, oavsett widgetar
     setTimeout(remCheckDue, 2500);       // fångar direkt upp påminnelser som hann passera medan appen var stängd
 
-    function createReminderWidget(config){
-        if(config===undefined) config=null;
-        const body = createWidget('REMINDER', 300, 'reminder-widget', config);
-        const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='rem-compose hover-menu'><div class='rem-row'><input type='date' class='rem-date' title='Datum'><input type='time' class='rem-time' title='Klockslag'></div><textarea class='rem-text' placeholder='Vad vill du bli påmind om?'></textarea><button class='btn btn-primary rem-add' style='width:100%;'>+ Lägg till påminnelse</button></div><div class='rem-list'></div>`;
-        const dIn=body.querySelector('.rem-date'), tIn=body.querySelector('.rem-time'), txt=body.querySelector('.rem-text'), addBtn=body.querySelector('.rem-add'), list=body.querySelector('.rem-list');
-        const pad=n=>String(n).padStart(2,'0');
-
-        // Badge som alltid syns på widgeten (utanför widget-body), oavsett om rutan är
-        // minimerad eller inte - så man ser att det finns påminnelser även i minimerat läge.
-        const badge=document.createElement('div'); badge.className='rem-badge'; widget.appendChild(badge);
-        function updateBadge(items){
-            const nowT=Date.now();
-            const kommande=items.filter(it=>!it.fired).length;
-            const forfallna=items.filter(it=>!it.fired && new Date(it.when).getTime()<=nowT).length;
-            if(kommande>0){
-                badge.textContent = kommande>99?'99+':kommande;
-                badge.classList.add('show');
-                badge.classList.toggle('pulse', forfallna>0);
-                badge.title = forfallna>0 ? forfallna+' påminnelse(r) har gått av!' : kommande+' kommande påminnelse(r)';
-            } else {
-                badge.classList.remove('show','pulse');
-            }
-        }
-
-        // Flytta ev. påminnelser som låg sparade i widgetens gamla data in i det globala minnet
-        if(config && config.data && Array.isArray(config.data.items)) remMerge(config.data.items);
-
-        // Förifyll dagens datum och nuvarande tid + 5 min
-        const now=new Date();
-        dIn.value = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-        const def=new Date(now.getTime()+5*60000);
-        tIn.value = pad(def.getHours())+':'+pad(def.getMinutes());
-
-        const fmtWhen=(iso)=>{
-            const d=new Date(iso); const today=new Date(); const tom=new Date(today.getTime()+86400000);
-            const t=pad(d.getHours())+':'+pad(d.getMinutes());
-            if(d.toDateString()===today.toDateString()) return 'Idag '+t;
-            if(d.toDateString()===tom.toDateString()) return 'Imorgon '+t;
-            return d.toLocaleDateString('sv-SE',{day:'numeric',month:'short'})+' '+t;
-        };
-
-        function render(){
-            const items=remLoad();
-            widget.dataset.reminders = JSON.stringify(items); // så att tavlans spara/moln-synk också får med dem
-            updateBadge(items);
-            list.innerHTML='';
-            const sorted=[...items].sort((a,b)=> new Date(a.when)-new Date(b.when));
-            if(sorted.length===0){ list.innerHTML=`<div class='rem-empty'>⏰ Inga påminnelser ännu</div>`; return; }
-            sorted.forEach(it=>{
-                const row=document.createElement('div'); row.className='rem-item'+(it.fired?' fired':'');
-                row.innerHTML=`<div class='rem-item-main'><div class='rem-item-when'>${it.fired?'✓ ':''}${fmtWhen(it.when)}</div><div class='rem-item-text'></div></div><button class='rem-del hover-menu' title='Ta bort'>✕</button>`;
-                row.querySelector('.rem-item-text').textContent = it.text || '(utan text)';
-                row.querySelector('.rem-del').onclick=()=>{ remSave(remLoad().filter(x=>x.id!==it.id)); saveBoardState(); };
-                list.appendChild(row);
-            });
-        }
-        remRenderHooks.push(render); // låt det globala minnet hålla rutan uppdaterad
-
-        addBtn.onclick=()=>{
-            if(!dIn.value || !tIn.value){ customAlert('Välj både datum och klockslag.', '⏰'); return; }
-            const when=new Date(dIn.value+'T'+tIn.value);
-            if(isNaN(when.getTime())){ customAlert('Ogiltigt datum eller klockslag.', '⏰'); return; }
-            const items=remLoad();
-            items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: when.toISOString(), text: txt.value.trim(), fired:false });
-            txt.value=''; remSave(items); saveBoardState();
-        };
-
-        // Städa bara bort rutans render-koppling om rutan stängs – själva
-        // påminnelserna ligger kvar i det globala minnet och ringer ändå.
-        const obs=new MutationObserver(()=>{ if(!document.body.contains(widget)){ const i=remRenderHooks.indexOf(render); if(i>=0) remRenderHooks.splice(i,1); obs.disconnect(); } });
-        const cc=document.getElementById('canvas-container-v6'); if(cc) obs.observe(cc,{childList:true,subtree:true});
-
-        render();
-    }
+    // OBS: den fristående REMINDER-widgeten är borttagen - att skapa en påminnelse görs numera
+    // via Kalendern (klicka på en dag -> ⏰ Påminn). Det globala bevaknings-/avfyrningssystemet
+    // ovan (remLoad/remSave/remCheckDue/showReminderPopup m.fl.) ligger dock kvar oförändrat,
+    // eftersom påminnelser måste kunna ringa oavsett vilken widget eller sida man tittar på.
 
     // Fin, stilig och blinkande popup när en påminnelse går av
     function showReminderPopup(item, onSnooze){
@@ -28130,7 +28049,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         let selectedTags=existing.tags.slice();
         const ov=document.createElement('div'); ov.className='cal-popup-overlay';
         const box=document.createElement('div'); box.className='cal-popup';
-        box.innerHTML="<div class='cal-popup-title'></div><div class='cal-popup-tags'></div><textarea class='cal-popup-ta' placeholder='Skriv vad du ska göra eller komma ihåg...'></textarea><div class='cal-popup-btns'></div>";
+        box.innerHTML="<div class='cal-popup-title'></div><div class='cal-popup-tags'></div><textarea class='cal-popup-ta' placeholder='Skriv vad du ska göra eller komma ihåg...'></textarea><div class='cal-popup-rem-section'></div><div class='cal-popup-btns'></div>";
         box.querySelector('.cal-popup-title').textContent=label;
         const tagsWrap=box.querySelector('.cal-popup-tags');
         function renderTagChips(){
@@ -28146,6 +28065,53 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         }
         renderTagChips();
         const ta=box.querySelector('.cal-popup-ta'); ta.value=existing.text||'';
+
+        // ---- Påminnelse: skapas för DENNA dag + valt klockslag, med anteckningstexten som text.
+        // Ligger direkt ovanför Spara/Ta bort/Avbryt-raden. Påminnelsen sköts av samma globala
+        // bevakningssystem som tidigare drev Reminder-widgeten, så den ringer även om kalendern
+        // inte är öppen.
+        const remSection=box.querySelector('.cal-popup-rem-section');
+        const padT=n=>String(n).padStart(2,'0');
+        function dayReminders(){
+            return remLoad().filter(it=>{
+                if(it.fired) return false;
+                const d=new Date(it.when);
+                return (d.getFullYear()+'-'+padT(d.getMonth()+1)+'-'+padT(d.getDate()))===dateKey;
+            }).sort((a,b)=> new Date(a.when)-new Date(b.when));
+        }
+        function renderRemSection(){
+            remSection.innerHTML='';
+            const list=dayReminders();
+            if(list.length){
+                const wrap=document.createElement('div'); wrap.className='cal-popup-rem-list';
+                list.forEach(it=>{
+                    const d=new Date(it.when);
+                    const row=document.createElement('div'); row.className='cal-popup-rem-item';
+                    row.innerHTML="<span class='cal-popup-rem-time-label'>⏰ "+padT(d.getHours())+":"+padT(d.getMinutes())+"</span><span class='cal-popup-rem-text'></span>";
+                    row.querySelector('.cal-popup-rem-text').textContent=it.text||'';
+                    const del=document.createElement('button'); del.type='button'; del.className='cal-popup-rem-del'; del.textContent='✕'; del.title='Ta bort påminnelse';
+                    del.onclick=()=>{ remSave(remLoad().filter(x=>x.id!==it.id)); saveBoardState(); renderRemSection(); };
+                    row.appendChild(del); wrap.appendChild(row);
+                });
+                remSection.appendChild(wrap);
+            }
+            const addRow=document.createElement('div'); addRow.className='cal-popup-rem-add-row';
+            const timeIn=document.createElement('input'); timeIn.type='time'; timeIn.className='cal-popup-rem-time'; timeIn.value='08:00';
+            const remBtn=document.createElement('button'); remBtn.type='button'; remBtn.className='btn cal-popup-rem-btn'; remBtn.innerHTML='⏰ Påminn';
+            remBtn.onclick=()=>{
+                if(!timeIn.value){ timeIn.focus(); return; }
+                const when=new Date(dateKey+'T'+timeIn.value);
+                if(isNaN(when.getTime())) return;
+                const items=remLoad();
+                items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: when.toISOString(), text: ta.value.trim(), fired:false });
+                remSave(items); saveBoardState();
+                renderRemSection();
+            };
+            addRow.appendChild(timeIn); addRow.appendChild(remBtn);
+            remSection.appendChild(addRow);
+        }
+        renderRemSection();
+
         const btns=box.querySelector('.cal-popup-btns');
         const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
         const save=document.createElement('button'); save.className='btn btn-primary'; save.innerText='Spara';
@@ -28281,7 +28247,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         function persistView(){ try{ widget.dataset.calView=calView; }catch(e){} saveBoardState(); }
         const widget = body.parentElement.parentElement;
 
-        function buildDayCell(dateObj, notes, categories){
+        function buildDayCell(dateObj, notes, categories, reminders){
             const cell=document.createElement('div'); cell.className='cal-cell cal-day';
             const y=dateObj.getFullYear(), m=dateObj.getMonth(), dnum=dateObj.getDate();
             const key=y+'-'+pad(m+1)+'-'+pad(dnum);
@@ -28293,6 +28259,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             if(hol){ cell.classList.add('cal-holiday'); cell.classList.add(hol.red?'cal-holiday-red':'cal-holiday-fest'); }
             if(today.getFullYear()===y && today.getMonth()===m && today.getDate()===dnum) cell.classList.add('cal-today');
             const dn=document.createElement('span'); dn.className='cal-dnum'; dn.textContent=dnum; cell.appendChild(dn);
+            const hasReminder = reminders && reminders.some(it=>{ if(it.fired) return false; const d=new Date(it.when); return d.getFullYear()===y && d.getMonth()===m && d.getDate()===dnum; });
+            if(hasReminder){ const rb=document.createElement('span'); rb.className='cal-cell-reminder'; rb.textContent='⏰'; rb.title='Påminnelse inställd'; cell.appendChild(rb); }
             const ndEl=document.createElement('span'); ndEl.className='cal-nd'+(hol?' cal-holiday-label':''); ndEl.textContent=hol?hol.name:nd; cell.appendChild(ndEl);
             const noteObj=notes[key]; const text=noteObj?(noteObj.text||''):''; const tags=noteObj?(noteObj.tags||[]):[];
             if(tags.length){
@@ -28319,14 +28287,14 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const startDow=(first.getDay()+6)%7;
             const daysInMonth=new Date(viewY,viewM+1,0).getDate();
             const rows=Math.ceil((startDow+daysInMonth)/7);
-            const notes=loadCalNotes(); const categories=loadCalSettings().categories;
+            const notes=loadCalNotes(); const categories=loadCalSettings().categories; const reminders=remLoad();
             let dayPtr=1-startDow;
             for(let row=0; row<rows; row++){
                 const rowMonday=new Date(viewY,viewM,dayPtr);
                 const wkCell=document.createElement('div'); wkCell.className='cal-cell cal-wknum'; wkCell.textContent=calIsoWeek(rowMonday); grid.appendChild(wkCell);
                 for(let col=0; col<7; col++){
                     if(dayPtr<1 || dayPtr>daysInMonth){ const empty=document.createElement('div'); empty.className='cal-cell cal-day cal-empty'; grid.appendChild(empty); }
-                    else { grid.appendChild(buildDayCell(new Date(viewY,viewM,dayPtr), notes, categories)); }
+                    else { grid.appendChild(buildDayCell(new Date(viewY,viewM,dayPtr), notes, categories, reminders)); }
                     dayPtr++;
                 }
             }
@@ -28338,9 +28306,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const wkNum=calIsoWeek(monday);
             monthEl.textContent='Vecka '+wkNum+' · '+monday.getDate()+' '+MONTHS[monday.getMonth()].slice(0,3)+'–'+sunday.getDate()+' '+MONTHS[sunday.getMonth()].slice(0,3)+' '+sunday.getFullYear();
             grid.innerHTML=''; grid.classList.remove('cal-grid-day'); grid.classList.add('cal-grid-week');
-            const notes=loadCalNotes(); const categories=loadCalSettings().categories;
+            const notes=loadCalNotes(); const categories=loadCalSettings().categories; const reminders=remLoad();
             const wkCell=document.createElement('div'); wkCell.className='cal-cell cal-wknum'; wkCell.textContent=wkNum; grid.appendChild(wkCell);
-            for(let col=0; col<7; col++){ const d=new Date(monday); d.setDate(d.getDate()+col); grid.appendChild(buildDayCell(d, notes, categories)); }
+            for(let col=0; col<7; col++){ const d=new Date(monday); d.setDate(d.getDate()+col); grid.appendChild(buildDayCell(d, notes, categories, reminders)); }
         }
         function renderDay(){
             gridHead.style.display='none';
@@ -28352,6 +28320,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const mmdd=pad(d.getMonth()+1)+'-'+pad(d.getDate());
             const nd=NAMEDAYS[mmdd]||''; const hol=swedishHolidaysForYear(d.getFullYear())[mmdd];
             const noteObj=notes[key]||{text:'',tags:[]};
+            const dayRems=remLoad().filter(it=>{ if(it.fired) return false; const dd=new Date(it.when); return dd.getFullYear()===d.getFullYear() && dd.getMonth()===d.getMonth() && dd.getDate()===d.getDate(); }).sort((a,b)=>new Date(a.when)-new Date(b.when));
             const box=document.createElement('div'); box.className='cal-day-view';
             if(hol) box.classList.add(hol.red?'cal-holiday-red':'cal-holiday-fest');
             let html='';
@@ -28359,6 +28328,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             else if(nd) html+="<div class='cal-day-view-nd'>Namnsdag: "+nd+"</div>";
             if(noteObj.tags.length){
                 html+="<div class='cal-day-view-tags'>"+noteObj.tags.map(tid=>{ const c=categories.find(cc=>cc.id===tid); return c?("<span class='cal-tag-chip active' style='--tag-color:"+c.color+"'><span class='cal-tag-emoji'>"+c.emoji+"</span><span class='cal-tag-name'>"+c.name+"</span></span>"):''; }).join('')+"</div>";
+            }
+            if(dayRems.length){
+                const padT2=n=>String(n).padStart(2,'0');
+                html+="<div class='cal-day-view-reminders'>"+dayRems.map(it=>{ const dd=new Date(it.when); const t=padT2(dd.getHours())+':'+padT2(dd.getMinutes()); const txt=(it.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); return "<div class='cal-day-view-rem-item'>⏰ "+t+(txt?(' – '+txt):'')+"</div>"; }).join('')+"</div>";
             }
             const escTxt=(noteObj.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
             html+="<div class='cal-day-view-note'>"+(escTxt?escTxt.replace(/\n/g,'<br>'):"<span class='cal-day-view-empty'>Inga anteckningar – klicka för att lägga till</span>")+"</div>";
@@ -28863,7 +28836,6 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             "createChecklist()",      // Checklista
             "createTrafficLight()",   // Ljuset
             "createNoiseMeter()",     // Ljudnivå
-            "createReminderWidget()", // Reminder
             "createTidMegaWidget()",  // Tid
             "createWordSearch()",     // Ordgömma
             "createCrossword()",      // Korsord
