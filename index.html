@@ -293,6 +293,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createChecklist()"><div class="icon">✅</div><div class="label">Checklista</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createWheel()"><div class="icon">🎡</div><div class="label">Hjul</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createClassReward()"><div class="icon">🏆</div><div class="label">Klasspoäng</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createVeckansMal()"><div class="icon">🎯</div><div class="label">Veckens mål</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createGoodWidget()"><div class="icon">👍</div><div class="label">Good</div></button>
             <button class="tool-btn" onclick="createCamera()"><div class="icon">📷</div><div class="label">Kamera</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createRimlighet()"><div class="icon">🤔</div><div class="label">Rimlighet</div></button>
@@ -1402,6 +1403,40 @@
     .cr-jar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 36px; pointer-events: none; }
     .cr-count { text-align: center; font-weight: 800; font-size: 20px; color: #333; margin-top: 4px; }
     .cr-goal { text-align: center; border: 1px solid #d1d1d6; border-radius: 6px; font-size: 13px; padding: 3px; }
+    /* ---- VECKENS MÅL ---- */
+    .vm-week-label { text-align:center; font-size:12px; font-weight:800; color:#8e8e93; margin-bottom:6px; }
+    .vm-goals-title { text-align:center; font-size:15px; font-weight:900; color:#1d1d1f; margin-bottom:8px; }
+    .vm-goals-list { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; max-height:220px; overflow-y:auto; }
+    .vm-goals-empty { text-align:center; color:#b0b0b8; font-size:12px; font-weight:600; padding:10px 0; }
+    .vm-goal-item { display:flex; align-items:center; gap:7px; background:#f7f7fa; border:1.5px solid #ececf0; border-radius:10px; padding:7px 10px; }
+    .vm-goal-bullet { font-size:13px; flex-shrink:0; }
+    .vm-goal-text { flex:1; min-width:0; font-size:13px; font-weight:600; color:#333; overflow-wrap:break-word; }
+    .vm-goal-del { border:none; background:none; color:#f87171; cursor:pointer; font-size:12px; flex-shrink:0; padding:2px 4px; }
+    .vm-goal-del:hover { color:#dc2626; }
+    .vm-goal-add-row { display:flex; gap:6px; margin-bottom:14px; }
+    .vm-goal-input { flex:1; min-width:0; border:2px solid #e0e0e6; border-radius:8px; padding:7px 9px; font-size:13px; font-family:inherit; }
+    .vm-goal-add-btn { white-space:nowrap; font-size:12px; padding:7px 12px; }
+    .vm-progress-wrap { margin-bottom:10px; }
+    .vm-progress-bar { width:100%; height:20px; border-radius:10px; background:#ececf0; overflow:hidden; }
+    .vm-progress-fill { height:100%; width:0%; background:#5ac8fa; transition:width .45s ease, background .45s ease; border-radius:10px; }
+    .vm-progress-text { text-align:center; font-size:13px; font-weight:800; color:#333; margin-top:6px; }
+    .vm-points-btns { display:flex; align-items:center; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+    .vm-target-label { font-size:12px; font-weight:800; color:#666; }
+    .vm-target-input { width:54px; text-align:center; border:1px solid #d1d1d6; border-radius:6px; font-size:13px; padding:5px 2px; }
+    .vm-footer-btns { display:flex; gap:8px; }
+    .vm-footer-btns .btn { flex:1; font-size:12px; }
+    .vm-history-popup { width:min(420px,92vw); text-align:left; max-height:80vh; overflow-y:auto; }
+    .vm-history-empty { text-align:center; color:#b0b0b8; font-size:13px; padding:16px 0; }
+    .vm-history-summary { text-align:center; font-size:13px; font-weight:800; color:#34c759; background:#f0fff4; border:1.5px solid #d0f5dc; border-radius:10px; padding:8px; margin-bottom:12px; }
+    .vm-history-list { display:flex; flex-direction:column; gap:10px; }
+    .vm-history-row { background:#f7f7fa; border:1.5px solid #ececf0; border-radius:10px; padding:9px 12px; }
+    .vm-history-row-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+    .vm-history-week { font-size:13px; font-weight:800; color:#1d1d1f; }
+    .vm-history-badge { font-size:11px; font-weight:800; color:#8e8e93; }
+    .vm-history-badge.ok { color:#34c759; }
+    .vm-history-bar-track { width:100%; height:10px; border-radius:5px; background:#e5e5ea; overflow:hidden; margin-bottom:4px; }
+    .vm-history-bar-fill { height:100%; border-radius:5px; }
+    .vm-history-row-sub { font-size:11px; font-weight:600; color:#8e8e93; }
     /* Svaga platshållare i tomma resultatytor så de inte ser tomma ut i vila */
     .name-result:empty::before { content: '🎲 Tryck för att slumpa'; color: #c7c7cc; font-size: 14px; font-weight: 600; }
     .group-result:empty::before { content: '👥 Grupperna visas här'; color: #c7c7cc; font-size: 13px; font-weight: 600; display: block; text-align: center; padding: 16px 0; }
@@ -4361,6 +4396,7 @@
                 else if (type === 'TURORDNING') { try{ state.data = JSON.parse(w.dataset.turordning || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'UPPMÄRKSAMHETSSIGNAL') { try{ state.data = JSON.parse(w.dataset.uppmark || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BERÄTTARTÄRNING') { try{ state.data = JSON.parse(w.dataset.berattar || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'VECKANS MÅL') { try{ state.data = JSON.parse(w.dataset.veckansmal || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
@@ -4473,6 +4509,7 @@
             else if (w.type === 'UPPMÄRKSAMHETSSIGNAL') createUppmarksamhetWidget(w);
             else if (w.type === 'BERÄTTARTÄRNING') createBerattarWidget(w);
             else if (w.type === 'KLASSPOÄNG') createClassReward(w);
+            else if (w.type === 'VECKANS MÅL') createVeckansMal(w);
             else if (w.type === 'KAMERA') createCamera(w);
             else if (w.type === 'STOPPUR') createStopwatch(w);
             else if (w.type === 'ÖVNINGSKLOCKA') createPracticeClock(w);
@@ -21816,6 +21853,129 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         body.querySelector('.cr-plus').onclick=()=>{ const goal=Math.max(1,parseInt(goalInp.value)||20); const was=points; points++; bump(1); upd(points>=goal && was<goal); saveBoardState(); };
         body.querySelector('.cr-minus').onclick=()=>{ if(points>0){ points--; bump(-1); } upd(false); saveBoardState(); };
         upd(false);
+    }
+
+    // ---- VECKANS MÅL: klassen sätter upp mål (i "jag"-form) för veckan, samlar poäng
+    // tillsammans mot ett gemensamt mål, och kan se statistik över tidigare veckor. ----
+    function veckansMalLabel(d){
+        const wk = (typeof calIsoWeek==='function') ? calIsoWeek(d) : Math.ceil((((d-new Date(d.getFullYear(),0,1))/86400000)+new Date(d.getFullYear(),0,1).getDay()+1)/7);
+        return 'Vecka '+wk+', '+d.getFullYear();
+    }
+    function createVeckansMal(config){
+        if(config===undefined) config=null;
+        const body = createWidget('VECKANS MÅL', 340, 'veckansmal-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML = "<div class='vm-wrap'>"+
+            "<div class='vm-week-label'></div>"+
+            "<div class='vm-goals-title'>🎯 Veckans mål</div>"+
+            "<div class='vm-goals-list'></div>"+
+            "<div class='vm-goal-add-row hover-menu'><input type='text' class='vm-goal-input' placeholder='Jag ... (skriv ett nytt mål)' maxlength='120'><button type='button' class='btn btn-primary vm-goal-add-btn'>+ Lägg till</button></div>"+
+            "<div class='vm-progress-wrap'><div class='vm-progress-bar'><div class='vm-progress-fill'></div></div><div class='vm-progress-text'></div></div>"+
+            "<div class='vm-points-btns hover-menu'><button type='button' class='btn btn-danger vm-minus'>➖</button><button type='button' class='btn btn-primary vm-plus'>⭐ Poäng</button><span class='vm-target-label'>Mål</span><input type='number' class='vm-target-input' min='1'></div>"+
+            "<div class='vm-footer-btns hover-menu'><button type='button' class='btn vm-newweek-btn'>🔄 Ny vecka</button><button type='button' class='btn vm-history-btn'>📊 Historik</button></div>"+
+            "</div>";
+        const weekLabelEl=body.querySelector('.vm-week-label'), goalsList=body.querySelector('.vm-goals-list'), goalInput=body.querySelector('.vm-goal-input'),
+              progFill=body.querySelector('.vm-progress-fill'), progText=body.querySelector('.vm-progress-text'), targetInput=body.querySelector('.vm-target-input');
+
+        let state = { goals:[], points:0, target:20, weekLabel: veckansMalLabel(new Date()), history:[] };
+        if(config && config.data && Array.isArray(config.data.goals)) Object.assign(state, config.data);
+        if(!Array.isArray(state.history)) state.history=[];
+        targetInput.value = state.target || 20;
+        weekLabelEl.textContent = '📅 '+(state.weekLabel || veckansMalLabel(new Date()));
+
+        function persist(){ widget.dataset.veckansmal = JSON.stringify(state); saveBoardState(); }
+
+        function renderGoals(){
+            goalsList.innerHTML='';
+            if(!state.goals.length){
+                const empty=document.createElement('div'); empty.className='vm-goals-empty'; empty.textContent='Inga mål tillagda ännu. Lägg till några nedan!';
+                goalsList.appendChild(empty); return;
+            }
+            state.goals.forEach((g,idx)=>{
+                const row=document.createElement('div'); row.className='vm-goal-item';
+                const bullet=document.createElement('span'); bullet.className='vm-goal-bullet'; bullet.textContent='🎯';
+                const txt=document.createElement('span'); txt.className='vm-goal-text'; txt.textContent=g;
+                const del=document.createElement('button'); del.type='button'; del.className='vm-goal-del hover-menu'; del.textContent='✕'; del.title='Ta bort mål';
+                del.onclick=()=>{ state.goals.splice(idx,1); renderGoals(); persist(); };
+                row.appendChild(bullet); row.appendChild(txt); row.appendChild(del);
+                goalsList.appendChild(row);
+            });
+        }
+        function addGoal(){
+            let v=goalInput.value.trim(); if(!v) return;
+            // Lite hjälp på traven: om läraren glömmer "Jag" i början, lägg till det automatiskt.
+            if(!/^jag\b/i.test(v)) v = 'Jag '+v.charAt(0).toLowerCase()+v.slice(1);
+            state.goals.push(v); goalInput.value=''; renderGoals(); persist(); goalInput.focus();
+        }
+        body.querySelector('.vm-goal-add-btn').onclick=addGoal;
+        goalInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); addGoal(); } });
+
+        function updProgress(celebrate){
+            const target=Math.max(1, parseInt(targetInput.value)||20);
+            state.target=target;
+            state.points=Math.max(0, Math.min(state.points, target));
+            const pct=Math.round((state.points/target)*100);
+            progFill.style.width=pct+'%';
+            progFill.style.background = pct>=100 ? '#34c759' : pct>=60 ? '#ffcc00' : '#5ac8fa';
+            progText.textContent = state.points+' / '+target+' poäng'+(pct>=100 ? '  🎉 Målet nått!' : '');
+            if(celebrate && pct>=100) showWinnerPopup('Klassen har nått veckans mål! 🎉');
+        }
+        targetInput.oninput=()=>{ updProgress(false); persist(); };
+        body.querySelector('.vm-plus').onclick=()=>{
+            const target=Math.max(1, parseInt(targetInput.value)||20); const was=state.points;
+            state.points++; updProgress(state.points>=target && was<target); persist();
+        };
+        body.querySelector('.vm-minus').onclick=()=>{ if(state.points>0) state.points--; updProgress(false); persist(); };
+
+        // "Ny vecka": arkiverar poängen för den avslutade veckan i historiken och nollställer
+        // poängräknaren - målen (i-listan) ligger kvar så man slipper skriva om samma mål varje vecka.
+        body.querySelector('.vm-newweek-btn').onclick=()=>{
+            customConfirm('Avsluta "'+state.weekLabel+'" och spara till historiken? Poängen nollställs för en ny vecka (målen ligger kvar).', ()=>{
+                const target=Math.max(1, parseInt(targetInput.value)||20);
+                state.history.push({ weekLabel: state.weekLabel, points: state.points, target: target, reached: state.points>=target, goalsCount: state.goals.length, savedAt: Date.now() });
+                state.points=0; state.weekLabel=veckansMalLabel(new Date());
+                weekLabelEl.textContent='📅 '+state.weekLabel;
+                updProgress(false); persist();
+            });
+        };
+
+        function openHistory(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup vm-history-popup';
+            const nWeeks=state.history.length;
+            const nReached=state.history.filter(h=>h.reached).length;
+            let html="<div class='cal-popup-title'>📊 Historik – Veckens mål</div>";
+            if(!nWeeks){
+                html+="<div class='vm-history-empty'>Ingen historik ännu. Kör \"🔄 Ny vecka\" när en vecka är avslutad så dyker den upp här.</div>";
+            } else {
+                html+="<div class='vm-history-summary'>✅ Målet nått "+nReached+" av "+nWeeks+" vecka"+(nWeeks===1?'':'or')+"</div>";
+                html+="<div class='vm-history-list'>";
+                [...state.history].reverse().forEach(h=>{
+                    const pct=Math.min(100, Math.round((h.points/Math.max(1,h.target))*100));
+                    html+="<div class='vm-history-row'><div class='vm-history-row-top'><span class='vm-history-week'>"+h.weekLabel+"</span><span class='vm-history-badge "+(h.reached?'ok':'no')+"'>"+(h.reached?'✅ Nått':'—')+"</span></div>"+
+                          "<div class='vm-history-bar-track'><div class='vm-history-bar-fill' style='width:"+pct+"%;background:"+(h.reached?'#34c759':'#5ac8fa')+"'></div></div>"+
+                          "<div class='vm-history-row-sub'>"+h.points+" / "+h.target+" poäng</div></div>";
+                });
+                html+="</div>";
+            }
+            html+="<div class='cal-popup-btns'></div>";
+            box.innerHTML=html;
+            const btns=box.querySelector('.cal-popup-btns');
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const closeBtn=document.createElement('button'); closeBtn.className='btn btn-primary'; closeBtn.textContent='Stäng'; closeBtn.onclick=close;
+            if(nWeeks){
+                const clearBtn=document.createElement('button'); clearBtn.className='btn'; clearBtn.style.color='#ff3b30'; clearBtn.textContent='Rensa historik';
+                clearBtn.onclick=()=>{ customConfirm('Radera all sparad historik? Går inte att ångra.', ()=>{ state.history=[]; persist(); close(); openHistory(); }); };
+                btns.appendChild(clearBtn);
+            }
+            btns.appendChild(closeBtn);
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+        body.querySelector('.vm-history-btn').onclick=openHistory;
+
+        renderGoals(); updProgress(false);
+        if(!config) persist();
     }
 
     function createNoiseMeter(config){
