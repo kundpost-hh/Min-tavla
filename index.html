@@ -3496,7 +3496,15 @@
                 if (typeof d.locked === 'boolean'){ toolbarOrderLocked = d.locked; updateToolbarLockUI(); }
                 const hasOwnToolbar = !!localStorage.getItem('mintavla_toolbarOrder_' + currentUser);
                 const hasOwnPocket = !!localStorage.getItem('mintavla_toolPocketLayout_' + currentUser);
-                if (!hasOwnToolbar && !hasOwnPocket) applySharedToolbar(d); // ny enhet - hämta senast sparade som startpunkt
+                if (!hasOwnToolbar && !hasOwnPocket) { applySharedToolbar(d); return; } // ny enhet - hämta senast sparade som startpunkt
+                // FIX: en enhet (t.ex. mobilen) som redan har en EGEN lokal ordning sedan tidigare
+                // litade tidigare blint på den, även om ordningen senare ändrats och sparats på en
+                // ANNAN av adminens enheter (t.ex. datorn). Det gjorde att mobilen kunde köra en
+                // gammal ordning permanent utan att någonsin hämta den nyare. Nu jämförs tidsstämpeln
+                // för senaste ändring - är molnkopian nyare än det som sparades här SENAST, hämtas
+                // den nya ordningen istället, så alla adminens enheter hålls i synk.
+                const localTs = parseInt(localStorage.getItem('mintavla_toolbarOrder_ts_' + currentUser) || '0', 10);
+                if (typeof d.updatedAt === 'number' && d.updatedAt > localTs) applySharedToolbar(d);
                 return;
             }
             const snap = await fbDB.collection('config').doc('toolbar').get();
@@ -4046,6 +4054,15 @@
         if (!document.fullscreenElement) { appWrapper.requestFullscreen().catch(err => { customAlert('Kunde inte starta helskärmsläge: ' + err.message, '⚠️'); }); }
         else { document.exitFullscreen(); }
     }
+    // FIX: "📲 Installera app"-knappen är en ganska framträdande, ständigt synlig blå knapp.
+    // Under en lektion i helskärmsläge är det störande att ha den liggande framme hela tiden,
+    // så vi döljer den medan helskärm är aktivt och visar den igen (om den fortfarande är
+    // relevant, dvs appen inte redan installerats) när man går ur helskärmsläget.
+    document.addEventListener('fullscreenchange', () => {
+        const btn = document.getElementById('pwa-install-btn'); if (!btn) return;
+        if (document.fullscreenElement) { btn.style.display = 'none'; }
+        else if (_pwaDeferredPrompt) { btn.style.display = 'flex'; }
+    });
 
     // ==================== PWA: installera som app ====================
     // Chrome/Edge/Android skickar 'beforeinstallprompt' när sidan uppfyller kraven
@@ -28230,7 +28247,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const tc=document.getElementById('toolbar-container'); if(!tc) return;
         const fav=[...tc.querySelectorAll('.tool-fav .tool-btn')].map(toolBtnId);
         const extra=[...tc.querySelectorAll('.tool-extra .tool-btn')].map(toolBtnId);
-        try{ localStorage.setItem(toolbarOrderKey(), JSON.stringify({fav:fav, extra:extra})); }catch(e){}
+        try{
+            localStorage.setItem(toolbarOrderKey(), JSON.stringify({fav:fav, extra:extra}));
+            localStorage.setItem(toolbarOrderKey()+'_ts', String(Date.now()));
+        }catch(e){}
         if(typeof syncToCloud==='function') syncToCloud();
         if(typeof pushSharedToolbar==='function') pushSharedToolbar(); // adminens ordning delas till alla
     }
@@ -28390,7 +28410,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             console.warn('[MinTavla] Kunde inte läsa av verktygsfickans layout - sparar inte denna gång:', e);
             return;
         }
-        try { localStorage.setItem(toolPocketLayoutKey(), JSON.stringify(layout)); } catch(e){}
+        try {
+            localStorage.setItem(toolPocketLayoutKey(), JSON.stringify(layout));
+            localStorage.setItem(toolbarOrderKey()+'_ts', String(Date.now()));
+        } catch(e){}
         backupToolPocketLayout(layout);
         if(typeof syncToCloudImmediate==='function') syncToCloudImmediate();
         else if(typeof syncToCloud==='function') syncToCloud();
