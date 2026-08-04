@@ -2711,10 +2711,13 @@
     .dt-number { font-size:56px; font-weight:900; color:#1d1d1f; min-width:110px; text-align:center; line-height:1; font-variant-numeric:tabular-nums; }
     .dt-random-btn { background:#1d1d2e; color:#fff; border:none; border-radius:999px; padding:12px 22px; font-weight:800; font-size:13.5px; letter-spacing:.4px; cursor:pointer; text-transform:uppercase; }
     .dt-random-btn:hover { background:#2d2d44; }
-    .dt-double-btn { background:#fff; color:#1d1d1f; border:1.5px solid #d1d1d6; border-radius:999px; padding:10px 22px; font-weight:800; font-size:13px; cursor:pointer; }
-    .dt-double-btn:hover { border-color:#007aff; color:#007aff; }
-    .dt-facts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .dt-fact-card { background:#fff; border:1.5px solid #ececf0; border-radius:14px; padding:12px 14px; }
+    .dt-facts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:min(360px,50vh); overflow-y:auto; padding-right:2px; }
+    .dt-fact-card { background:#fff; border:1.5px solid #ececf0; border-radius:14px; padding:12px 14px; transition:border-color .15s,background .15s; }
+    .dt-fact-card.dt-fact-hidden { cursor:pointer; }
+    .dt-fact-card.dt-fact-hidden:hover { border-color:#007aff; background:#f5faff; }
+    .dt-fact-card.dt-fact-hidden .dt-fact-val { display:none; }
+    .dt-fact-hint { display:none; font-size:11px; font-weight:700; color:#007aff; background:#eaf4ff; border-radius:8px; padding:5px 9px; line-height:1.3; }
+    .dt-fact-card.dt-fact-hidden .dt-fact-hint { display:inline-block; }
     .dt-fact-wide { grid-column:1 / -1; }
     .dt-fact-head-row { display:flex; align-items:center; justify-content:space-between; }
     .dt-fact-label { font-size:11px; font-weight:800; color:#8e8e93; text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
@@ -12227,6 +12230,19 @@
     }
     function dtArPrimtal(n){ if(n<2) return false; return dtFaktorer(n).length===2; }
     function dtNarmasteRunt(n, steg){ return Math.round(n/steg)*steg; }
+    const DT_EN_ONES=['','one','two','three','four','five','six','seven','eight','nine'];
+    const DT_EN_TEENS=['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+    const DT_EN_TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+    function dtTalPaEngelska(n){
+        if(n===0) return 'zero';
+        if(n===1000) return 'one thousand';
+        const parts=[];
+        if(n>=100){ const h=Math.floor(n/100); parts.push(DT_EN_ONES[h]+' hundred'); n%=100; }
+        if(n>=20){ let s=DT_EN_TENS[Math.floor(n/10)]; const rest=n%10; if(rest>0) s+='-'+DT_EN_ONES[rest]; parts.push(s); }
+        else if(n>=10){ parts.push(DT_EN_TEENS[n-10]); }
+        else if(n>0){ parts.push(DT_EN_ONES[n]); }
+        return parts.join(' ');
+    }
 
     function createDagensTal(config){
         if(config===undefined) config=null;
@@ -12241,13 +12257,12 @@
             "<div class='dt-number-card'>"+
             "<div class='dt-number-row'><button type='button' class='dt-side-btn dt-minus'>−</button><div class='dt-number'></div><button type='button' class='dt-side-btn dt-plus'>+</button></div>"+
             "<button type='button' class='btn dt-random-btn'>🔄 Slumpa nytt</button>"+
-            "<button type='button' class='btn dt-double-btn'>×2 Dubbel</button>"+
             "</div>"+
             "<div class='dt-facts-grid'></div>"+
             "</div>";
         const tabs=[...body.querySelectorAll('.dt-tab')], numberEl=body.querySelector('.dt-number'),
               minusBtn=body.querySelector('.dt-minus'), plusBtn=body.querySelector('.dt-plus'),
-              randomBtn=body.querySelector('.dt-random-btn'), doubleBtn=body.querySelector('.dt-double-btn'), factsGrid=body.querySelector('.dt-facts-grid'),
+              randomBtn=body.querySelector('.dt-random-btn'), factsGrid=body.querySelector('.dt-facts-grid'),
               infoBtn=body.querySelector('.dt-info-btn');
 
         let rangeMax = 100, current = Math.floor(Math.random()*101);
@@ -12275,16 +12290,23 @@
             cards.push(['Primtal?', n<2 ? 'Nej' : (dtArPrimtal(n) ? 'Ja' : 'Nej')]);
             cards.push(['Romerska siffror', dtRomerska(n)]);
             cards.push(['I ord', dtTalIOrd(n)]);
+            cards.push(['På engelska', dtTalPaEngelska(n)]);
+            // FIX: svaren döljs nu tills man själv klickar för att visa dem, ett och ett - bra för
+            // att låta eleverna gissa/räkna ut svaret innan facit avslöjas. Byter man tal (via
+            // +/-, Slumpa nytt, Dubbel eller intervall) döljs alla kort på nytt eftersom
+            // renderFacts() alltid bygger om rutnätet från grunden.
             cards.forEach(([label,val])=>{
-                const card=document.createElement('div'); card.className='dt-fact-card';
-                card.innerHTML = "<div class='dt-fact-label'></div><div class='dt-fact-val'></div>";
+                const card=document.createElement('div'); card.className='dt-fact-card dt-fact-hidden';
+                card.innerHTML = "<div class='dt-fact-label'></div><div class='dt-fact-val'></div><div class='dt-fact-hint'>👁️ Tryck för att visa</div>";
                 card.querySelector('.dt-fact-label').textContent = label;
                 card.querySelector('.dt-fact-val').textContent = val;
+                card.onclick=()=>{ card.classList.remove('dt-fact-hidden'); };
                 factsGrid.appendChild(card);
             });
-            // Faktorer - egen bred ruta, kan visa/dölja fler om det är många
+            // Faktorer - egen bred ruta, döljs på samma sätt tills man klickar, och kan sedan
+            // visa/dölja fler om det är många.
             const faktorer = dtFaktorer(n);
-            const fCard=document.createElement('div'); fCard.className='dt-fact-card dt-fact-wide';
+            const fCard=document.createElement('div'); fCard.className='dt-fact-card dt-fact-wide dt-fact-hidden';
             const headRow=document.createElement('div'); headRow.className='dt-fact-head-row';
             const lbl=document.createElement('div'); lbl.className='dt-fact-label'; lbl.textContent='Faktorer';
             headRow.appendChild(lbl);
@@ -12293,12 +12315,14 @@
             if(faktorer.length>8) headRow.appendChild(toggleBtn);
             fCard.appendChild(headRow);
             const valEl=document.createElement('div'); valEl.className='dt-fact-val dt-factors-val'; fCard.appendChild(valEl);
+            const hintEl=document.createElement('div'); hintEl.className='dt-fact-hint'; hintEl.textContent='👁️ Tryck för att visa'; fCard.appendChild(hintEl);
             function renderFaktorVal(){
                 const visa = expanded ? faktorer : faktorer.slice(0,8);
                 valEl.textContent = faktorer.length ? visa.join(', ')+(!expanded && faktorer.length>8 ? ' …' : '') : '–';
                 toggleBtn.textContent = expanded ? '▲' : '…';
             }
-            toggleBtn.onclick=()=>{ expanded=!expanded; renderFaktorVal(); };
+            toggleBtn.onclick=(e)=>{ e.stopPropagation(); expanded=!expanded; renderFaktorVal(); };
+            fCard.onclick=()=>{ fCard.classList.remove('dt-fact-hidden'); };
             renderFaktorVal();
             factsGrid.appendChild(fCard);
         }
@@ -12317,7 +12341,6 @@
         minusBtn.onclick=()=>{ if(current>0){ current--; render(); persist(); } };
         plusBtn.onclick=()=>{ if(current<rangeMax){ current++; render(); persist(); } };
         randomBtn.onclick=()=>{ current = Math.floor(Math.random()*(rangeMax+1)); render(); persist(); };
-        doubleBtn.onclick=()=>{ current = Math.min(rangeMax, current*2); render(); persist(); };
         infoBtn.onclick=()=>{
             const ov=document.createElement('div'); ov.className='cal-popup-overlay';
             const box=document.createElement('div'); box.className='cal-popup'; box.style.textAlign='left';
@@ -14039,7 +14062,7 @@
         if(config===undefined) config=null;
         const body = createWidget('GEOMETRI', 380, 'geo-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu geo-ctrl'><select class='editor-select geo-shape'><option value='kvadrat'>Kvadrat</option><option value='rektangel'>Rektangel</option><option value='triangel'>Triangel (rätvinklig)</option><option value='cirkel'>Cirkel</option></select><button class='btn btn-secondary geo-figurer' title='Utforska 2D- och 3D-figurer'>🔷 Figurer</button><label class='tal-hopp-lbl'><input type='checkbox' class='geo-practice'> Öva-läge</label></div><svg class='geo-svg' viewBox='0 0 360 260' xmlns='http://www.w3.org/2000/svg'></svg><div class='geo-formler'></div><div class='geo-facts'></div><div class='pengar-tips'>Dra i de orangea punkterna för att ändra storlek – 1 ruta = 1 cm</div>`;
+        body.innerHTML = `<div class='hover-menu geo-ctrl'><select class='editor-select geo-shape'><option value='kvadrat'>Kvadrat</option><option value='rektangel'>Rektangel</option><option value='triangel'>Triangel (rätvinklig)</option><option value='cirkel'>Cirkel</option></select><button class='btn btn-secondary geo-figurer' title='Utforska 2D- och 3D-figurer'>🔷 Former</button><label class='tal-hopp-lbl'><input type='checkbox' class='geo-practice'> Öva-läge</label></div><svg class='geo-svg' viewBox='0 0 360 260' xmlns='http://www.w3.org/2000/svg'></svg><div class='geo-formler'></div><div class='geo-facts'></div><div class='pengar-tips'>Dra i de orangea punkterna för att ändra storlek – 1 ruta = 1 cm</div>`;
         const shapeSel=body.querySelector('.geo-shape'), practiceCb=body.querySelector('.geo-practice'), svg=body.querySelector('.geo-svg'), facts=body.querySelector('.geo-facts'), formler=body.querySelector('.geo-formler');
         body.querySelector('.geo-figurer').onclick = openFigurutforskare;
         const NS='http://www.w3.org/2000/svg', U=20, X0=58, Y0=230; // bred vänstermarginal så höjdetiketten (t.ex. ”10 cm”) ryms helt
@@ -14324,7 +14347,7 @@
                 Object.keys(figs).forEach(namn=>{ grid.appendChild(ritaKort(namn, figs[namn], props[namn])); });
             }
             const t2=document.createElement('button'); t2.className='figx-tab active'; t2.textContent='▱ 2D-figurer';
-            const t3=document.createElement('button'); t3.className='figx-tab'; t3.textContent='⬡ 3D-figurer';
+            const t3=document.createElement('button'); t3.className='figx-tab'; t3.textContent='⬡ 3D-kroppar';
             const t4=document.createElement('button'); t4.className='figx-tab'; t4.textContent='📐 Vinklar';
             const t5=document.createElement('button'); t5.className='figx-tab'; t5.textContent='📏 Gradskiva';
             const alla=[t2,t3,t4,t5];
