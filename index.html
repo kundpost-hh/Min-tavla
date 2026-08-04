@@ -213,6 +213,7 @@
             <button class="tool-btn" onclick="createTextEditor()"><div class="icon">📝</div><div class="label">Text</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createAlphabetWidget()"><div class="icon">🔤</div><div class="label">Alfabet</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createMatteBegrepp()"><div class="icon">🔢</div><div class="label">MatteBegrepp</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createDagensTal()"><div class="icon">🎲</div><div class="label">Dagens Tal</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createKompisWidget()"><div class="icon">💛</div><div class="label">En bra kompis!</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createCrossword()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2.5' y='2.5' width='19' height='19' rx='2' fill='none' stroke='#3a3a3c' stroke-width='1.6'/><line x1='2.5' y1='9' x2='21.5' y2='9' stroke='#3a3a3c' stroke-width='1.1'/><line x1='2.5' y1='15.5' x2='21.5' y2='15.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='9' y1='2.5' x2='9' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><line x1='15.5' y1='2.5' x2='15.5' y2='21.5' stroke='#3a3a3c' stroke-width='1.1'/><rect x='2.9' y='2.9' width='5.7' height='5.7' fill='#3a3a3c'/><rect x='15.9' y='15.9' width='5.2' height='5.2' fill='#3a3a3c'/></svg></div><div class="label">Korsord</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createWordSearch()"><div class="icon"><svg viewBox='0 0 24 24' width='23' height='23' style='display:block;margin:0 auto;'><rect x='2' y='2' width='15' height='15' rx='1.5' fill='none' stroke='#3a3a3c' stroke-width='1.4'/><line x1='2' y1='6.75' x2='17' y2='6.75' stroke='#3a3a3c' stroke-width='0.8'/><line x1='2' y1='11.5' x2='17' y2='11.5' stroke='#3a3a3c' stroke-width='0.8'/><line x1='6.75' y1='2' x2='6.75' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><line x1='11.5' y1='2' x2='11.5' y2='17' stroke='#3a3a3c' stroke-width='0.8'/><circle cx='17.3' cy='17.3' r='4.3' fill='#fff' stroke='#3a3a3c' stroke-width='1.6'/><line x1='20.4' y1='20.4' x2='23' y2='23' stroke='#3a3a3c' stroke-width='1.8' stroke-linecap='round'/></svg></div><div class="label">Ordgömma</div></button>
@@ -2140,6 +2141,26 @@
     .exit-atk-block h4 { margin:0; font-size:12px; color:#666; text-align:center; font-weight:800; }
     .exit-atk-fraga-box { min-height:36px; text-align:center; font-size:13.5px; font-weight:700; color:#1d1d1f; background:#fff; border-radius:8px; padding:8px 10px; display:flex; align-items:center; justify-content:center; }
     .exit-atk-elev-box { min-height:20px; text-align:center; font-size:15px; font-weight:800; color:#007aff; background:#fff; border-radius:8px; padding:8px 10px; }
+    .exit-panel-live { display:flex; flex-direction:column; width:100%; gap:10px; }
+    .exit-live-question { width:100%; box-sizing:border-box; border:1.5px solid #d1d1d6; border-radius:10px; padding:9px 12px; font-size:14px; font-family:inherit; }
+    .exit-live-question:focus { border-color:#007aff; outline:none; }
+    .exit-live-need-cloud { display:none; text-align:center; font-size:12px; color:#8e8e93; background:#f7f7f9; border-radius:10px; padding:10px; }
+    .exit-live-session { display:none; flex-direction:column; gap:10px; }
+    .exit-live-code-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .exit-live-code { font-weight:900; font-size:15px; letter-spacing:1px; background:#f2f2f7; border-radius:8px; padding:5px 10px; color:#1d1d1f; }
+    .exit-live-status { font-weight:800; font-size:13px; border-radius:20px; padding:4px 10px; }
+    .exit-live-status.open { background:#e3f9e8; color:#1a7a34; }
+    .exit-live-status.closed { background:#ffe3e3; color:#c0392b; }
+    .exit-live-count { margin-left:auto; font-size:12.5px; font-weight:700; color:#8e8e93; }
+    .exit-live-body { display:flex; gap:14px; flex-wrap:wrap; }
+    .exit-live-qr-wrap { flex:0 0 auto; text-align:center; }
+    .exit-live-qr { width:120px; height:120px; border-radius:10px; border:1.5px solid #ececf0; background:#fff; padding:6px; box-sizing:border-box; }
+    .exit-live-qr-hint { font-size:11px; color:#8e8e93; font-weight:700; margin-top:4px; }
+    .exit-live-answers { flex:1; min-width:140px; max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
+    .exit-live-empty { color:#b0b0b6; font-size:12.5px; font-style:italic; text-align:center; padding:10px 0; }
+    .exit-live-answer-card { background:#f7f7f9; border-radius:10px; padding:8px 10px; font-size:13px; color:#1d1d1f; word-break:break-word; }
+    .exit-live-controls { display:flex; gap:8px; }
+    .exit-live-controls .btn { flex:1; font-size:12px; padding:8px 4px; }
     .poll-widget .widget-inner { background:#fff; }
     .poll-root { display:flex; flex-direction:column; width:100%; }
     .poll-opt-input { flex:1; border:1px solid #d1d1d6; border-radius:8px; padding:6px 8px; font-size:13px; outline:none; font-family:inherit; background:#fff; }
@@ -2674,6 +2695,35 @@
     .pri-task.rakna-task .rakna-ans, .neg-task.rakna-task .rakna-ans { font-size:17px; white-space:normal; word-break:break-word; max-width:100%; line-height:1.5; }
     .bkr-task.rakna-task, .prc-task.rakna-task { font-size:24px; }
     .bkr-task.rakna-task .rakna-ans, .prc-task.rakna-task .rakna-ans { font-size:17px; white-space:normal; word-break:break-word; max-width:100%; line-height:1.5; }
+    /* ---- DAGENS TAL ---- */
+    .dt-wrap { display:flex; flex-direction:column; gap:12px; width:100%; }
+    .dt-tabs-row { display:flex; align-items:center; gap:8px; }
+    .dt-tabs { display:flex; gap:4px; background:#f0f0f5; border-radius:10px; padding:3px; flex:1; }
+    .dt-tab { flex:1; border:none; background:transparent; padding:7px 4px; border-radius:8px; font-weight:800; font-size:12.5px; color:#8e8e93; cursor:pointer; font-family:inherit; }
+    .dt-tab.active { background:#fff; color:#007aff; box-shadow:0 1px 4px rgba(0,0,0,.12); }
+    .dt-info-btn { flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1.5px solid #d1d1d6; background:#fff; color:#8e8e93; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .dt-info-btn:hover { border-color:#007aff; color:#007aff; }
+    .dt-number-card { position:relative; overflow:hidden; border:1.5px solid #ececf0; border-radius:16px; padding:22px 14px 18px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+    .dt-number-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,#5ac8fa,#af52de); }
+    .dt-number-row { display:flex; align-items:center; justify-content:center; gap:20px; width:100%; }
+    .dt-side-btn { width:38px; height:38px; border-radius:50%; border:none; background:#f0f0f5; color:#8e8e93; font-size:20px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .15s; }
+    .dt-side-btn:hover { background:#e2e2ea; color:#1d1d1f; }
+    .dt-number { font-size:56px; font-weight:900; color:#1d1d1f; min-width:110px; text-align:center; line-height:1; font-variant-numeric:tabular-nums; }
+    .dt-random-btn { background:#1d1d2e; color:#fff; border:none; border-radius:999px; padding:12px 22px; font-weight:800; font-size:13.5px; letter-spacing:.4px; cursor:pointer; text-transform:uppercase; }
+    .dt-random-btn:hover { background:#2d2d44; }
+    .dt-double-btn { background:#fff; color:#1d1d1f; border:1.5px solid #d1d1d6; border-radius:999px; padding:10px 22px; font-weight:800; font-size:13px; cursor:pointer; }
+    .dt-double-btn:hover { border-color:#007aff; color:#007aff; }
+    .dt-facts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .dt-fact-card { background:#fff; border:1.5px solid #ececf0; border-radius:14px; padding:12px 14px; }
+    .dt-fact-wide { grid-column:1 / -1; }
+    .dt-fact-head-row { display:flex; align-items:center; justify-content:space-between; }
+    .dt-fact-label { font-size:11px; font-weight:800; color:#8e8e93; text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
+    .dt-fact-val { font-size:19px; font-weight:800; color:#1d1d1f; }
+    .dt-factors-val { font-size:15px; font-weight:700; line-height:1.5; }
+    .dt-fact-toggle { border:none; background:#f0f0f5; color:#8e8e93; border-radius:8px; width:26px; height:22px; font-size:12px; cursor:pointer; margin-bottom:4px; }
+    .dt-info-list { display:flex; flex-direction:column; gap:10px; font-size:13px; color:#333; line-height:1.4; margin-bottom:14px; }
+    .dt-info-list b { color:#1d1d1f; }
+
     .mathtool-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
     .mathtool-tab-btn { flex:1 1 calc(50% - 3px); min-width:0; }
     .mathtool-pane { animation: mathtool-fade .2s ease; }
@@ -4452,6 +4502,7 @@
                 else if (type === 'MENINGAR') { try{ state.data = JSON.parse(w.dataset.meningar || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'SAMMANSATT ORD') { try{ state.data = JSON.parse(w.dataset.sammansatt || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'MULTIPLIKATION') { try{ state.data = JSON.parse(w.dataset.multi || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'DAGENS TAL') { try{ state.data = JSON.parse(w.dataset.dagenstal || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'HUNDRARUTA') { try{ state.data = JSON.parse(w.dataset.hundra || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'RÄKNA') { try{ state.data = JSON.parse(w.dataset.rakna || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'STARTUPPGIFT') { try{ state.data = JSON.parse(w.dataset.startuppgift || '[]'); }catch(e){ state.data=[]; } }
@@ -4587,6 +4638,7 @@
             else if (w.type === 'REMINDER') { try{ if(w.data && Array.isArray(w.data.items) && typeof remMerge==='function') remMerge(w.data.items); }catch(e){} } // widgeten är borttagen (flyttad till Kalender) - migrerar bara ev. gamla sparade påminnelser in i det globala minnet så inget går förlorat
             else if (w.type === 'MULTIPLIKATION') createMultiplicationTable(w);
             else if (w.type === 'HUNDRARUTA') createHundredChart(w);
+            else if (w.type === 'DAGENS TAL') createDagensTal(w);
             else if (w.type === 'RÄKNA') createMathChallenge(w);
             else if (w.type === 'STARTUPPGIFT') createStartuppgift(w);
             else if (w.type === 'STARTUPPGIFT SVENSKA') createStartuppgiftSvenska(w);
@@ -12147,6 +12199,150 @@
             default: return false;
         }
     }
+    // ---- DAGENS TAL: ett tal (0-20/0-100/0-1000) med massor av matematiska egenskaper ----
+    const DT_ONES=['','ett','två','tre','fyra','fem','sex','sju','åtta','nio'];
+    const DT_TEENS=['tio','elva','tolv','tretton','fjorton','femton','sexton','sjutton','arton','nitton'];
+    const DT_TENS=['','','tjugo','trettio','fyrtio','femtio','sextio','sjuttio','åttio','nittio'];
+    function dtTalIOrd(n){
+        if(n===0) return 'noll';
+        if(n===1000) return 'tusen';
+        let s='';
+        if(n>=100){ const h=Math.floor(n/100); s += (h>1?DT_ONES[h]:'')+'hundra'; n%=100; }
+        if(n>=20){ s += DT_TENS[Math.floor(n/10)]; n%=10; if(n>0) s+=DT_ONES[n]; }
+        else if(n>=10){ s += DT_TEENS[n-10]; }
+        else if(n>0){ s += DT_ONES[n]; }
+        return s;
+    }
+    function dtRomerska(n){
+        if(n<=0) return '–';
+        const vals=[1000,900,500,400,100,90,50,40,10,9,5,4,1], syms=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+        let s='', m=n;
+        for(let i=0;i<vals.length;i++){ while(m>=vals[i]){ s+=syms[i]; m-=vals[i]; } }
+        return s;
+    }
+    function dtFaktorer(n){
+        if(n<=0) return [];
+        const f=[]; for(let i=1;i<=n;i++){ if(n%i===0) f.push(i); }
+        return f;
+    }
+    function dtArPrimtal(n){ if(n<2) return false; return dtFaktorer(n).length===2; }
+    function dtNarmasteRunt(n, steg){ return Math.round(n/steg)*steg; }
+
+    function createDagensTal(config){
+        if(config===undefined) config=null;
+        const body = createWidget('DAGENS TAL', 360, 'dagenstal-widget', config);
+        const widget = body.parentElement.parentElement;
+        body.innerHTML =
+            "<div class='dt-wrap'>"+
+            "<div class='dt-tabs-row'>"+
+            "<div class='dt-tabs'><button type='button' class='dt-tab' data-max='20'>0-20</button><button type='button' class='dt-tab' data-max='100'>0-100</button><button type='button' class='dt-tab' data-max='1000'>0-1000</button></div>"+
+            "<button type='button' class='dt-info-btn' title='Vad betyder orden?'>ⓘ</button>"+
+            "</div>"+
+            "<div class='dt-number-card'>"+
+            "<div class='dt-number-row'><button type='button' class='dt-side-btn dt-minus'>−</button><div class='dt-number'></div><button type='button' class='dt-side-btn dt-plus'>+</button></div>"+
+            "<button type='button' class='btn dt-random-btn'>🔄 Slumpa nytt</button>"+
+            "<button type='button' class='btn dt-double-btn'>×2 Dubbel</button>"+
+            "</div>"+
+            "<div class='dt-facts-grid'></div>"+
+            "</div>";
+        const tabs=[...body.querySelectorAll('.dt-tab')], numberEl=body.querySelector('.dt-number'),
+              minusBtn=body.querySelector('.dt-minus'), plusBtn=body.querySelector('.dt-plus'),
+              randomBtn=body.querySelector('.dt-random-btn'), doubleBtn=body.querySelector('.dt-double-btn'), factsGrid=body.querySelector('.dt-facts-grid'),
+              infoBtn=body.querySelector('.dt-info-btn');
+
+        let rangeMax = 100, current = Math.floor(Math.random()*101);
+        if(config && config.data){
+            if([20,100,1000].includes(config.data.rangeMax)) rangeMax = config.data.rangeMax;
+            if(typeof config.data.current==='number') current = config.data.current;
+        }
+        current = Math.max(0, Math.min(rangeMax, current));
+
+        function persist(){ widget.dataset.dagenstal = JSON.stringify({ rangeMax, current }); saveBoardState(); }
+
+        function kompisLabel(){ return rangeMax===20 ? 'Tjugokompis' : rangeMax===100 ? 'Hundrakompis' : 'Tusenkompis'; }
+
+        function renderFacts(){
+            factsGrid.innerHTML='';
+            const n = current;
+            const cards = [];
+            cards.push(['Udda / Jämnt', n%2===0 ? 'Jämnt' : 'Udda']);
+            cards.push([kompisLabel(), String(rangeMax - n)]);
+            cards.push(['Hälften', String(n/2)]);
+            cards.push(['Dubbelt', String(n*2)]);
+            cards.push(['Grannar', (n-1)+' och '+(n+1)]);
+            cards.push(['Närmaste 10-tal', String(dtNarmasteRunt(n,10))]);
+            if(rangeMax>=100) cards.push(['Närmaste 100-tal', String(dtNarmasteRunt(n,100))]);
+            cards.push(['Primtal?', n<2 ? 'Nej' : (dtArPrimtal(n) ? 'Ja' : 'Nej')]);
+            cards.push(['Romerska siffror', dtRomerska(n)]);
+            cards.push(['I ord', dtTalIOrd(n)]);
+            cards.forEach(([label,val])=>{
+                const card=document.createElement('div'); card.className='dt-fact-card';
+                card.innerHTML = "<div class='dt-fact-label'></div><div class='dt-fact-val'></div>";
+                card.querySelector('.dt-fact-label').textContent = label;
+                card.querySelector('.dt-fact-val').textContent = val;
+                factsGrid.appendChild(card);
+            });
+            // Faktorer - egen bred ruta, kan visa/dölja fler om det är många
+            const faktorer = dtFaktorer(n);
+            const fCard=document.createElement('div'); fCard.className='dt-fact-card dt-fact-wide';
+            const headRow=document.createElement('div'); headRow.className='dt-fact-head-row';
+            const lbl=document.createElement('div'); lbl.className='dt-fact-label'; lbl.textContent='Faktorer';
+            headRow.appendChild(lbl);
+            let expanded = faktorer.length<=8;
+            const toggleBtn=document.createElement('button'); toggleBtn.type='button'; toggleBtn.className='dt-fact-toggle'; toggleBtn.textContent='…';
+            if(faktorer.length>8) headRow.appendChild(toggleBtn);
+            fCard.appendChild(headRow);
+            const valEl=document.createElement('div'); valEl.className='dt-fact-val dt-factors-val'; fCard.appendChild(valEl);
+            function renderFaktorVal(){
+                const visa = expanded ? faktorer : faktorer.slice(0,8);
+                valEl.textContent = faktorer.length ? visa.join(', ')+(!expanded && faktorer.length>8 ? ' …' : '') : '–';
+                toggleBtn.textContent = expanded ? '▲' : '…';
+            }
+            toggleBtn.onclick=()=>{ expanded=!expanded; renderFaktorVal(); };
+            renderFaktorVal();
+            factsGrid.appendChild(fCard);
+        }
+        function render(){
+            tabs.forEach(t=> t.classList.toggle('active', parseInt(t.dataset.max)===rangeMax));
+            numberEl.textContent = current;
+            renderFacts();
+        }
+        tabs.forEach(t=>{
+            t.onclick=()=>{
+                rangeMax = parseInt(t.dataset.max);
+                if(current>rangeMax) current = rangeMax;
+                render(); persist();
+            };
+        });
+        minusBtn.onclick=()=>{ if(current>0){ current--; render(); persist(); } };
+        plusBtn.onclick=()=>{ if(current<rangeMax){ current++; render(); persist(); } };
+        randomBtn.onclick=()=>{ current = Math.floor(Math.random()*(rangeMax+1)); render(); persist(); };
+        doubleBtn.onclick=()=>{ current = Math.min(rangeMax, current*2); render(); persist(); };
+        infoBtn.onclick=()=>{
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.textAlign='left';
+            box.innerHTML =
+                "<div class='cal-popup-title'>ⓘ Vad betyder orden?</div>"+
+                "<div class='dt-info-list'>"+
+                "<div><b>"+kompisLabel()+"</b> - talet som tillsammans med Dagens Tal blir "+rangeMax+".</div>"+
+                "<div><b>Hälften/Dubbelt</b> - talet delat med 2, respektive gånger 2.</div>"+
+                "<div><b>Grannar</b> - talet precis före och precis efter.</div>"+
+                "<div><b>Närmaste 10-/100-tal</b> - vilket runt tal som ligger närmast.</div>"+
+                "<div><b>Primtal</b> - ett tal större än 1 som bara går jämnt att dela med 1 och sig själv.</div>"+
+                "<div><b>Faktorer</b> - alla tal som går jämnt att dela Dagens Tal med.</div>"+
+                "</div><div class='cal-popup-btns'></div>";
+            const btns=box.querySelector('.cal-popup-btns');
+            const closeBtn=document.createElement('button'); closeBtn.className='btn btn-primary'; closeBtn.textContent='Stäng';
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            closeBtn.onclick=close; btns.appendChild(closeBtn);
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        };
+
+        render();
+        if(!config) persist();
+    }
+
     function createHundredChart(config){
         if(config===undefined) config=null;
         const body = createWidget('HUNDRARUTA', 340, 'hundra-widget mathtool-widget', config);
@@ -26009,20 +26205,27 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(config && config.data){
             if(typeof config.data.question === 'string') question = config.data.question;
             if(Array.isArray(config.data.counts) && config.data.counts.length===options.length) counts = config.data.counts.map(n=>parseInt(n)||0);
-            if(config.data.läge==='atk') läge = 'atk';
+            if(config.data.läge==='atk'||config.data.läge==='live'||config.data.läge==='utv') läge = config.data.läge;
             if(typeof config.data.atkList === 'string') atkListVald = config.data.atkList;
         }
 
         const root=document.createElement('div'); root.className='exit-root'; body.appendChild(root);
 
-        // ---- Flikar: Utvärdera / Återkoppla ----
+        // ---- Flikar: Utvärdera / Återkoppla / Live-svar ----
         const tabsEl=document.createElement('div'); tabsEl.className='exit-tabs'; root.appendChild(tabsEl);
         const tUtv=document.createElement('button'); tUtv.type='button'; tUtv.className='exit-tab'; tUtv.textContent='😀 Utvärdera';
         const tAtk=document.createElement('button'); tAtk.type='button'; tAtk.className='exit-tab'; tAtk.textContent='💬 Återkoppla';
-        tabsEl.appendChild(tAtk); tabsEl.appendChild(tUtv);
+        const tLive=document.createElement('button'); tLive.type='button'; tLive.className='exit-tab'; tLive.textContent='📱 Live-svar';
+        // TILLFÄLLIGT DOLD: Live-svar kräver att exit-svara.html hostas separat (se
+        // EXIT-TICKET-LIVE-SVAR-SETUP.md) - inte gjort ännu, så fliken/knapparna göms tills vidare
+        // för att inte visa funktioner som inte fungerar. Ta bara bort raden nedan för att slå på
+        // fliken igen när hostingen är klar - all övrig kod ligger orörd och klar att användas.
+        tLive.style.display = 'none';
+        tabsEl.appendChild(tAtk); tabsEl.appendChild(tUtv); tabsEl.appendChild(tLive);
 
         const panelUtv=document.createElement('div'); panelUtv.className='exit-panel-utv'; root.appendChild(panelUtv);
         const panelAtk=document.createElement('div'); panelAtk.className='exit-panel-atk'; root.appendChild(panelAtk);
+        const panelLive=document.createElement('div'); panelLive.className='exit-panel-live'; root.appendChild(panelLive);
 
         // ---- UTVÄRDERA: befintlig emoji-koll, oförändrad funktion ----
         const qInput=document.createElement('input'); qInput.type='text'; qInput.className='exit-question'; qInput.value=question; qInput.placeholder='Skriv din fråga...'; panelUtv.appendChild(qInput);
@@ -26043,8 +26246,118 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const atkListSel = elevBlock.querySelector('.exit-atk-listval');
         const elevBox = elevBlock.querySelector('.exit-atk-elev-box');
 
+        // ---- LIVE-SVAR: eleverna skannar en QR-kod (eller går in med kod) på SIN EGEN enhet,
+        // utan inloggning, och skriver ett fritextsvar som strömmar in här i realtid via Firestore.
+        // Kräver molnanslutning (samma projekt som resten av appen) OCH att den separata elevsidan
+        // "exit-svara.html" ligger hostad på samma domän (t.ex. Firebase Hosting) som appen själv.
+        panelLive.innerHTML =
+            "<div class='exit-live-setup'>"+
+            "<input type='text' class='exit-live-question' placeholder='Skriv din fråga...' />"+
+            "<button type='button' class='btn btn-primary exit-live-open-btn' style='width:100%;'>📡 Öppna för elever</button>"+
+            "<div class='exit-live-need-cloud'>📡 Live-svar kräver att du är inloggad på webben (molnanslutning) - fungerar inte i offline-läget.</div>"+
+            "</div>"+
+            "<div class='exit-live-session'>"+
+            "<div class='exit-live-code-row'>"+
+            "<div class='exit-live-code'></div>"+
+            "<div class='exit-live-status'></div>"+
+            "<div class='exit-live-count'></div>"+
+            "</div>"+
+            "<div class='exit-live-body'>"+
+            "<div class='exit-live-qr-wrap'><img class='exit-live-qr' alt='QR-kod'><div class='exit-live-qr-hint'>Skanna för att svara</div></div>"+
+            "<div class='exit-live-answers'></div>"+
+            "</div>"+
+            "<div class='exit-live-controls hover-menu'>"+
+            "<button type='button' class='btn exit-live-toggle-btn'></button>"+
+            "<button type='button' class='btn kw-btn-warn exit-live-new-btn'>🔁 Ny fråga</button>"+
+            "</div>"+
+            "</div>";
+        const liveQInput=panelLive.querySelector('.exit-live-question'), liveOpenBtn=panelLive.querySelector('.exit-live-open-btn'),
+              liveSetupEl=panelLive.querySelector('.exit-live-setup'), liveSessionEl=panelLive.querySelector('.exit-live-session'),
+              liveCodeEl=panelLive.querySelector('.exit-live-code'), liveStatusEl=panelLive.querySelector('.exit-live-status'),
+              liveCountEl=panelLive.querySelector('.exit-live-count'), liveQrImg=panelLive.querySelector('.exit-live-qr'),
+              liveAnswersEl=panelLive.querySelector('.exit-live-answers'), liveToggleBtn=panelLive.querySelector('.exit-live-toggle-btn'),
+              liveNewBtn=panelLive.querySelector('.exit-live-new-btn'), liveNeedCloudEl=panelLive.querySelector('.exit-live-need-cloud');
+
+        let liveCode='', liveOpen=false, liveQuestion='Vad tar du med dig från lektionen?', liveAnswers=[], liveUnsub=null;
+        if(config && config.data && config.data.live){
+            const d=config.data.live;
+            if(typeof d.code==='string') liveCode=d.code;
+            if(typeof d.open==='boolean') liveOpen=d.open;
+            if(typeof d.question==='string') liveQuestion=d.question;
+        }
+        liveQInput.value = liveQuestion;
+
+        // FIX: QR-koden pekar på en SEPARAT, publikt hostad elevsida (exit-svara.html) som måste
+        // ligga i samma katalog/domän som denna app (t.ex. samma Firebase Hosting-projekt) - annars
+        // pekar QR-koden på ingenting. Se den medskickade filen och instruktionerna för hur den läggs upp.
+        function exitLiveStudentUrl(code){ return location.origin + '/exit-svara.html?code=' + encodeURIComponent(code); }
+        function exitLiveGenCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<6;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s; }
+
+        function exitLiveRenderAnswers(){
+            liveAnswersEl.innerHTML='';
+            if(!liveAnswers.length){ liveAnswersEl.innerHTML='<div class="exit-live-empty">Inga svar än...</div>'; }
+            else { liveAnswers.forEach(a=>{ const card=document.createElement('div'); card.className='exit-live-answer-card'; card.textContent=a.text||''; liveAnswersEl.appendChild(card); }); }
+            liveCountEl.textContent = liveAnswers.length+' svar';
+        }
+        function exitLiveStartListening(){
+            if(liveUnsub){ liveUnsub(); liveUnsub=null; }
+            if(!liveCode || !window.cloudReady || !fbDB) return;
+            liveUnsub = fbDB.collection('exitTickets').doc(liveCode).collection('answers').orderBy('ts','asc')
+                .onSnapshot(snap=>{ liveAnswers=[]; snap.forEach(d=>liveAnswers.push(d.data())); exitLiveRenderAnswers(); },
+                            err=>console.warn('[MinTavla] exitTicket-lyssning misslyckades:', err));
+        }
+        function exitLiveRenderSession(){
+            const active = !!liveCode;
+            liveSetupEl.style.display = active ? 'none' : '';
+            liveSessionEl.style.display = active ? '' : 'none';
+            if(!active) return;
+            liveCodeEl.textContent = liveCode;
+            liveStatusEl.textContent = liveOpen ? '🟢 Öppen' : '🔴 Stängd';
+            liveStatusEl.className = 'exit-live-status '+(liveOpen?'open':'closed');
+            liveToggleBtn.textContent = liveOpen ? '⏸️ Stäng för fler svar' : '▶️ Öppna igen';
+            liveQrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(exitLiveStudentUrl(liveCode));
+            exitLiveRenderAnswers();
+        }
+        function stampLive(){ return { code:liveCode, open:liveOpen, question:liveQuestion }; }
+
+        liveOpenBtn.onclick=async ()=>{
+            if(!window.cloudReady || !fbDB){ customAlert('Live-svar kräver att du är inloggad på webben (molnanslutning).', '📡'); return; }
+            liveQuestion = liveQInput.value.trim() || 'Vad tar du med dig från lektionen?';
+            liveOpenBtn.disabled=true; liveOpenBtn.textContent='Öppnar...';
+            try{
+                let code = exitLiveGenCode(), tries=0;
+                while(tries<5){ const doc = await fbDB.collection('exitTickets').doc(code).get(); if(!doc.exists) break; code = exitLiveGenCode(); tries++; }
+                await fbDB.collection('exitTickets').doc(code).set({ question: liveQuestion, open: true, createdAt: Date.now(), teacher: (typeof currentUser!=='undefined'?currentUser:'') });
+                liveCode = code; liveOpen = true; liveAnswers = [];
+                exitLiveStartListening(); exitLiveRenderSession(); persist();
+            } catch(e){ console.warn(e); customAlert('Kunde inte öppna för elever just nu. Försök igen.', '⚠️'); }
+            liveOpenBtn.disabled=false; liveOpenBtn.textContent='📡 Öppna för elever';
+        };
+        liveToggleBtn.onclick=()=>{
+            if(!liveCode || !fbDB) return;
+            liveOpen = !liveOpen;
+            fbDB.collection('exitTickets').doc(liveCode).update({ open: liveOpen }).catch(e=>console.warn(e));
+            exitLiveRenderSession(); persist();
+        };
+        liveNewBtn.onclick=()=>{
+            customConfirm('Starta en ny fråga? Den gamla koden slutar fungera och elever som redan öppnat den gamla länken kan inte längre svara.', ()=>{
+                if(liveUnsub){ liveUnsub(); liveUnsub=null; }
+                liveCode=''; liveOpen=false; liveAnswers=[]; liveQInput.value=liveQuestion;
+                exitLiveRenderSession(); persist();
+            });
+        };
+        // Om läraren inte är inloggad mot molnet: visa tydligt varför-meddelande och dölj knappen
+        // för att öppna en ny session (går ändå inte att använda utan molnanslutning).
+        if(!window.cloudReady){ liveOpenBtn.style.display='none'; liveNeedCloudEl.style.display='block'; } else { liveNeedCloudEl.style.display='none'; }
+        exitLiveRenderSession();
+        if(liveCode && window.cloudReady) exitLiveStartListening();
+        // Städa upp Firestore-lyssnaren när widgeten tas bort, så den inte fortsätter köra i onödan.
+        const widgetElRefLive = widgetEl;
+        const liveCleanupObs=new MutationObserver(()=>{ if(!document.body.contains(widgetElRefLive)){ if(liveUnsub) liveUnsub(); liveCleanupObs.disconnect(); } });
+        { const cc=document.getElementById('canvas-container-v6'); if(cc) liveCleanupObs.observe(cc,{childList:true,subtree:true}); }
+
         const widgetElRef = widgetEl;
-        const stamp=()=>{ widgetElRef.dataset.exitTicket = JSON.stringify({ question, counts, läge, atkList: atkListSel.value }); };
+        const stamp=()=>{ widgetElRef.dataset.exitTicket = JSON.stringify({ question, counts, läge, atkList: atkListSel.value, live: stampLive() }); };
         const persist=()=>{ stamp(); saveBoardState(); };
 
         function renderBars(){
@@ -26265,13 +26578,17 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             läge = l;
             tUtv.classList.toggle('active', l==='utv');
             tAtk.classList.toggle('active', l==='atk');
+            tLive.classList.toggle('active', l==='live');
             panelUtv.style.display = l==='utv' ? '' : 'none';
             panelAtk.style.display = l==='atk' ? '' : 'none';
+            panelLive.style.display = l==='live' ? '' : 'none';
             if(l==='atk') loadAtkLists(); // uppdatera ifall nya elevlistor sparats sedan widgeten skapades
             persist();
         }
         tUtv.onclick=()=>visaLäge('utv');
         tAtk.onclick=()=>visaLäge('atk');
+        tLive.onclick=()=>visaLäge('live');
+        if(läge==='live' && tLive.style.display==='none') läge='atk'; // fliken är dold just nu - fastna inte på en otillgänglig panel
         visaLäge(läge);
 
         renderBars();
