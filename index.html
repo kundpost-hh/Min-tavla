@@ -852,6 +852,9 @@
     /* SANT ELLER FALSKT */
     .sf-pastaende{ font-size:18px; font-weight:800; color:#1d1d1f; text-align:center; line-height:1.4; padding:4px 6px 14px; }
     .sf-knappar{ display:flex; gap:10px; margin-bottom:10px; }
+    .sf-amne-grid { display:flex; flex-direction:column; gap:10px; }
+    .sf-amne-btn { padding:14px; font-size:15px; }
+    .sf-amne-current { text-align:center; font-size:11px; font-weight:800; color:#8e8e93; text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
     .sf-knapp{ flex:1; }
     /* RYMDEN */
     .ry-emoji{ font-size:64px; text-align:center; line-height:1.1; margin-bottom:4px; }
@@ -5908,38 +5911,31 @@
     // minnesregel ("kom ihåg"). Begreppet byts automatiskt varje dag (baserat på
     // dagens datum, samma för hela klassen), men går även att slumpa manuellt.
     const BEGREPPSKORT_BANK = [
-        { ord:'Fotosyntes', emoji:'🌱', forklaring:'Processen där gröna växter omvandlar solljus, vatten och koldioxid till socker (näring) och syre.', exempel:'Ett träds gröna blad fångar solljus och gör om det till energi som trädet växer av.', komihag:'Växter "äter" solljus – det är så de gör sin egen mat!' },
-        { ord:'Näringskedja', emoji:'🔗', forklaring:'En kedja som visar vem som äter vem i naturen, från växt till rovdjur.', exempel:'Gräs äts av kanin, kaninen äts av räv.', komihag:'Energin vandrar vidare varje gång något äts upp.' },
-        { ord:'Avdunstning', emoji:'💨', forklaring:'När vatten värms upp och övergår från flytande form till osynlig vattenånga i luften.', exempel:'Vattenpölar på gatan försvinner en solig dag eftersom vattnet avdunstar.', komihag:'Värme får vatten att "försvinna" upp i luften.' },
-        { ord:'Kretslopp', emoji:'🔄', forklaring:'En process som upprepas om och om igen i naturen, till exempel vattnets väg mellan hav, moln och regn.', exempel:'Vattnets kretslopp: avdunstning → moln → regn → sjöar och hav → avdunstning igen.', komihag:'Naturen återanvänder – inget vatten försvinner, det bara byter form.' },
-        { ord:'Magnetism', emoji:'🧲', forklaring:'En osynlig kraft som gör att vissa metaller dras till eller stöts bort från varandra.', exempel:'En magnet kan lyfta ett gem utan att röra det.', komihag:'Lika poler stöter bort varandra, olika poler drar till sig varandra.' },
-        { ord:'Friktion', emoji:'🛞', forklaring:'En kraft som bromsar rörelse när två ytor gnids mot varandra.', exempel:'Det är svårare att glida på asfalt än på is, eftersom asfalt har mer friktion.', komihag:'Mer friktion = mer motstånd = svårare att röra sig.' },
-        { ord:'Gravitation', emoji:'🍎', forklaring:'Den kraft som drar allt mot jordens mitt – det som gör att saker faller nedåt.', exempel:'Ett äpple som lossnar från trädet faller alltid rakt ner mot marken.', komihag:'Jorden "drar" i allt – därför flyger inget iväg ut i rymden.' },
-        { ord:'Ekosystem', emoji:'🌳', forklaring:'Alla levande varelser och miljön de lever i, tillsammans, på en plats.', exempel:'En skog är ett ekosystem med träd, djur, svampar och insekter som lever tillsammans.', komihag:'Allt hänger ihop – ändras en sak i ekosystemet påverkas allt annat.' },
-        { ord:'Fossil', emoji:'🦴', forklaring:'Rester eller avtryck av växter eller djur som levt för mycket länge sedan, bevarade i sten.', exempel:'Dinosaurieben som hittats i berg är fossil.', komihag:'Fossil är naturens egna, urgamla "foton" av forntida liv.' },
-        { ord:'Kondensation', emoji:'💧', forklaring:'När vattenånga i luften kyls ner och blir till flytande vatten igen.', exempel:'Imma på ett kallt glas läsk en varm dag är kondenserat vatten.', komihag:'Motsatsen till avdunstning – ångan blir vatten igen när det kyls av.' },
-        { ord:'Elektricitet', emoji:'⚡', forklaring:'Energi som kan flöda genom sladdar och få saker som lampor och apparater att fungera.', exempel:'När du trycker på strömbrytaren flödar elektricitet till lampan så den lyser.', komihag:'Elektricitet måste ha en sluten krets (bana) för att kunna flöda.' },
-        { ord:'Fast form', emoji:'❄️', forklaring:'Ett tillstånd hos material där partiklarna sitter tätt och stilla – ämnet har en bestämd form.', exempel:'Is är vatten i fast form.', komihag:'Fast = stelt, håller formen av sig själv.' },
-        { ord:'Flytande form', emoji:'💦', forklaring:'Ett tillstånd hos material där partiklarna kan röra sig och glida – ämnet tar formen av sin behållare.', exempel:'Vatten i ett glas är i flytande form.', komihag:'Flytande ämnen "rinner" och anpassar sig efter kärlet.' },
-        { ord:'Gasform', emoji:'☁️', forklaring:'Ett tillstånd hos material där partiklarna rör sig fritt och sprids ut – ämnet fyller hela sitt utrymme.', exempel:'Vattenånga och luften vi andas är gaser.', komihag:'Gaser syns oftast inte, men de finns runt omkring oss.' },
-        { ord:'Pollinering', emoji:'🐝', forklaring:'När pollen flyttas från en blomma till en annan, ofta med hjälp av insekter, så att växten kan bilda frön.', exempel:'En bi som flyger mellan blommor pollinerar dem samtidigt som den samlar nektar.', komihag:'Utan pollinerare som bin skulle många växter inte kunna föröka sig.' },
-        { ord:'Klorofyll', emoji:'🍃', forklaring:'Det gröna ämnet i växters blad som fångar upp solens energi.', exempel:'Det är klorofyllet som gör att blad ser gröna ut.', komihag:'Klorofyll = växtens egen "solpanel".' },
-        { ord:'Nedbrytare', emoji:'🍄', forklaring:'Organismer, som svampar och bakterier, som bryter ner döda växter och djur till näring i jorden.', exempel:'Svampar på skogsbotten bryter ner fallna löv och grenar.', komihag:'Nedbrytare är naturens egen återvinningscentral.' },
-        { ord:'Solsystemet', emoji:'☀️', forklaring:'Solen och alla planeter, månar och andra himlakroppar som kretsar runt den.', exempel:'Jorden är en av åtta planeter i vårt solsystem.', komihag:'Allt i solsystemet snurrar runt solen, som är i mitten.' },
-        { ord:'Rotation', emoji:'🌍', forklaring:'När jorden snurrar runt sin egen axel, vilket tar ett dygn (24 timmar).', exempel:'Det blir dag och natt för att jorden roterar runt sig själv.', komihag:'Rotation ger oss dag och natt.' },
-        { ord:'Organ', emoji:'🫀', forklaring:'En kroppsdel som gör ett visst jobb i kroppen, till exempel hjärtat som pumpar blod.', exempel:'Hjärtat, lungorna och hjärnan är alla organ.', komihag:'Varje organ har sin egen viktiga uppgift i kroppen.' },
-        { ord:'Cell', emoji:'🔬', forklaring:'Den minsta byggstenen som allt levande är uppbyggt av.', exempel:'Din kropp består av miljarder små celler.', komihag:'Celler är kroppens minsta "byggklossar".' },
-        { ord:'Livscykel', emoji:'🐛', forklaring:'De olika stadierna en växt eller ett djur går igenom under sitt liv, från att det föds eller gror till att det dör.', exempel:'En fjärils livscykel: ägg → larv → puppa → fjäril.', komihag:'Alla levande varelser föds, växer, förökar sig och dör – det är en livscykel.' },
-        { ord:'Ryggradsdjur', emoji:'🐟', forklaring:'Djur som har en ryggrad (skelett) inuti kroppen, till exempel fiskar, fåglar, groddjur, kräldjur och däggdjur.', exempel:'En katt, en groda och en örn är alla ryggradsdjur, fast de ser mycket olika ut.', komihag:'Har djuret ett skelett med ryggrad inuti – då är det ett ryggradsdjur.' },
-        { ord:'Nederbörd', emoji:'🌧️', forklaring:'Vatten som faller från molnen ner till marken, till exempel som regn, snö eller hagel.', exempel:'På vintern kommer nederbörden ofta som snö istället för regn, eftersom det är kallare.', komihag:'Nederbörd är alla former av vatten som faller från himlen.' }
+        { ord:'Fotosyntes', emoji:'🌱', forklaring:'Processen där gröna växter omvandlar solljus, vatten och koldioxid till socker (näring) och syre.', exempel:'Ett träds gröna blad fångar solljus och gör om det till energi som trädet växer av.', komihag:'Växter "äter" solljus – det är så de gör sin egen mat!', amne:'biologi' },
+        { ord:'Näringskedja', emoji:'🔗', forklaring:'En kedja som visar vem som äter vem i naturen, från växt till rovdjur.', exempel:'Gräs äts av kanin, kaninen äts av räv.', komihag:'Energin vandrar vidare varje gång något äts upp.', amne:'biologi' },
+        { ord:'Avdunstning', emoji:'💨', forklaring:'När vatten värms upp och övergår från flytande form till osynlig vattenånga i luften.', exempel:'Vattenpölar på gatan försvinner en solig dag eftersom vattnet avdunstar.', komihag:'Värme får vatten att "försvinna" upp i luften.', amne:'kemi' },
+        { ord:'Kretslopp', emoji:'🔄', forklaring:'En process som upprepas om och om igen i naturen, till exempel vattnets väg mellan hav, moln och regn.', exempel:'Vattnets kretslopp: avdunstning → moln → regn → sjöar och hav → avdunstning igen.', komihag:'Naturen återanvänder – inget vatten försvinner, det bara byter form.', amne:'kemi' },
+        { ord:'Magnetism', emoji:'🧲', forklaring:'En osynlig kraft som gör att vissa metaller dras till eller stöts bort från varandra.', exempel:'En magnet kan lyfta ett gem utan att röra det.', komihag:'Lika poler stöter bort varandra, olika poler drar till sig varandra.', amne:'fysik' },
+        { ord:'Friktion', emoji:'🛞', forklaring:'En kraft som bromsar rörelse när två ytor gnids mot varandra.', exempel:'Det är svårare att glida på asfalt än på is, eftersom asfalt har mer friktion.', komihag:'Mer friktion = mer motstånd = svårare att röra sig.', amne:'fysik' },
+        { ord:'Gravitation', emoji:'🍎', forklaring:'Den kraft som drar allt mot jordens mitt – det som gör att saker faller nedåt.', exempel:'Ett äpple som lossnar från trädet faller alltid rakt ner mot marken.', komihag:'Jorden "drar" i allt – därför flyger inget iväg ut i rymden.', amne:'fysik' },
+        { ord:'Ekosystem', emoji:'🌳', forklaring:'Alla levande varelser och miljön de lever i, tillsammans, på en plats.', exempel:'En skog är ett ekosystem med träd, djur, svampar och insekter som lever tillsammans.', komihag:'Allt hänger ihop – ändras en sak i ekosystemet påverkas allt annat.', amne:'biologi' },
+        { ord:'Fossil', emoji:'🦴', forklaring:'Rester eller avtryck av växter eller djur som levt för mycket länge sedan, bevarade i sten.', exempel:'Dinosaurieben som hittats i berg är fossil.', komihag:'Fossil är naturens egna, urgamla "foton" av forntida liv.', amne:'biologi' },
+        { ord:'Kondensation', emoji:'💧', forklaring:'När vattenånga i luften kyls ner och blir till flytande vatten igen.', exempel:'Imma på ett kallt glas läsk en varm dag är kondenserat vatten.', komihag:'Motsatsen till avdunstning – ångan blir vatten igen när det kyls av.', amne:'kemi' },
+        { ord:'Elektricitet', emoji:'⚡', forklaring:'Energi som kan flöda genom sladdar och få saker som lampor och apparater att fungera.', exempel:'När du trycker på strömbrytaren flödar elektricitet till lampan så den lyser.', komihag:'Elektricitet måste ha en sluten krets (bana) för att kunna flöda.', amne:'fysik' },
+        { ord:'Fast form', emoji:'❄️', forklaring:'Ett tillstånd hos material där partiklarna sitter tätt och stilla – ämnet har en bestämd form.', exempel:'Is är vatten i fast form.', komihag:'Fast = stelt, håller formen av sig själv.', amne:'kemi' },
+        { ord:'Flytande form', emoji:'💦', forklaring:'Ett tillstånd hos material där partiklarna kan röra sig och glida – ämnet tar formen av sin behållare.', exempel:'Vatten i ett glas är i flytande form.', komihag:'Flytande ämnen "rinner" och anpassar sig efter kärlet.', amne:'kemi' },
+        { ord:'Gasform', emoji:'☁️', forklaring:'Ett tillstånd hos material där partiklarna rör sig fritt och sprids ut – ämnet fyller hela sitt utrymme.', exempel:'Vattenånga och luften vi andas är gaser.', komihag:'Gaser syns oftast inte, men de finns runt omkring oss.', amne:'kemi' },
+        { ord:'Pollinering', emoji:'🐝', forklaring:'När pollen flyttas från en blomma till en annan, ofta med hjälp av insekter, så att växten kan bilda frön.', exempel:'En bi som flyger mellan blommor pollinerar dem samtidigt som den samlar nektar.', komihag:'Utan pollinerare som bin skulle många växter inte kunna föröka sig.', amne:'biologi' },
+        { ord:'Klorofyll', emoji:'🍃', forklaring:'Det gröna ämnet i växters blad som fångar upp solens energi.', exempel:'Det är klorofyllet som gör att blad ser gröna ut.', komihag:'Klorofyll = växtens egen "solpanel".', amne:'biologi' },
+        { ord:'Nedbrytare', emoji:'🍄', forklaring:'Organismer, som svampar och bakterier, som bryter ner döda växter och djur till näring i jorden.', exempel:'Svampar på skogsbotten bryter ner fallna löv och grenar.', komihag:'Nedbrytare är naturens egen återvinningscentral.', amne:'biologi' },
+        { ord:'Solsystemet', emoji:'☀️', forklaring:'Solen och alla planeter, månar och andra himlakroppar som kretsar runt den.', exempel:'Jorden är en av åtta planeter i vårt solsystem.', komihag:'Allt i solsystemet snurrar runt solen, som är i mitten.', amne:'fysik' },
+        { ord:'Rotation', emoji:'🌍', forklaring:'När jorden snurrar runt sin egen axel, vilket tar ett dygn (24 timmar).', exempel:'Det blir dag och natt för att jorden roterar runt sig själv.', komihag:'Rotation ger oss dag och natt.', amne:'fysik' },
+        { ord:'Organ', emoji:'🫀', forklaring:'En kroppsdel som gör ett visst jobb i kroppen, till exempel hjärtat som pumpar blod.', exempel:'Hjärtat, lungorna och hjärnan är alla organ.', komihag:'Varje organ har sin egen viktiga uppgift i kroppen.', amne:'biologi' },
+        { ord:'Cell', emoji:'🔬', forklaring:'Den minsta byggstenen som allt levande är uppbyggt av.', exempel:'Din kropp består av miljarder små celler.', komihag:'Celler är kroppens minsta "byggklossar".', amne:'biologi' },
+        { ord:'Livscykel', emoji:'🐛', forklaring:'De olika stadierna en växt eller ett djur går igenom under sitt liv, från att det föds eller gror till att det dör.', exempel:'En fjärils livscykel: ägg → larv → puppa → fjäril.', komihag:'Alla levande varelser föds, växer, förökar sig och dör – det är en livscykel.', amne:'biologi' },
+        { ord:'Ryggradsdjur', emoji:'🐟', forklaring:'Djur som har en ryggrad (skelett) inuti kroppen, till exempel fiskar, fåglar, groddjur, kräldjur och däggdjur.', exempel:'En katt, en groda och en örn är alla ryggradsdjur, fast de ser mycket olika ut.', komihag:'Har djuret ett skelett med ryggrad inuti – då är det ett ryggradsdjur.', amne:'biologi' },
+        { ord:'Nederbörd', emoji:'🌧️', forklaring:'Vatten som faller från molnen ner till marken, till exempel som regn, snö eller hagel.', exempel:'På vintern kommer nederbörden ofta som snö istället för regn, eftersom det är kallare.', komihag:'Nederbörd är alla former av vatten som faller från himlen.', amne:'kemi' }
     ];
-    function begreppskortDagensIndex(){
-        const now = new Date();
-        const start = new Date(now.getFullYear(), 0, 0);
-        const diff = now - start;
-        const dagensDagIÅret = Math.floor(diff / 86400000);
-        return dagensDagIÅret % BEGREPPSKORT_BANK.length;
-    }
     function begreppskortHtml(b){
         return `<div class='gotd-kort bg-kort'>
             <div class='bg-word'>${gotdEsc(b.ord)}</div>
@@ -5953,35 +5949,50 @@
         </div>`;
     }
     // ---- AI: generera ett nytt begreppskort (samma mönster som källkritik/rimlighet) ----
-    function parseBegreppskort(text){
-        if(!text) return null;
-        let obj=tryParseLooseJson(text);
-        if(obj){
-            const ord = String(obj.ord||obj.begrepp||'').trim();
-            const emoji = String(obj.emoji||'📖').trim() || '📖';
-            const forklaring = String(obj.forklaring||'').trim();
-            const exempel = String(obj.exempel||'').trim();
-            const komihag = String(obj.komihag||obj['kom ihåg']||'').trim();
-            if(ord && forklaring) return { ord, emoji, forklaring, exempel, komihag };
+    function parseBegreppskortList(text){
+        if(!text) return [];
+        let obj=tryParseLooseJson(text, true);
+        let arr=null;
+        if(Array.isArray(obj)) arr=obj;
+        else if(obj && Array.isArray(obj.begrepp)) arr=obj.begrepp;
+        else if(obj && Array.isArray(obj.kort)) arr=obj.kort;
+        else if(obj && (obj.ord||obj.begrepp)) arr=[obj];
+        if(Array.isArray(arr)){
+            const r = arr.map(o=>{
+                if(!o || typeof o!=='object') return null;
+                const ord = String(o.ord||o.begrepp||'').trim();
+                const emoji = String(o.emoji||'📖').trim() || '📖';
+                const forklaring = String(o.forklaring||'').trim();
+                const exempel = String(o.exempel||'').trim();
+                const komihag = String(o.komihag||o['kom ihåg']||'').trim();
+                return (ord && forklaring) ? { ord, emoji, forklaring, exempel, komihag } : null;
+            }).filter(Boolean);
+            if(r.length) return r;
         }
-        const lines = text.split(/\r?\n/).map(mdCleanLine).filter(Boolean);
-        let ord='', emoji='📖', forklaring='', exempel='', komihag='';
-        lines.forEach(line=>{
-            const m1 = line.match(/^(?:BEGREPP|ORD)\s*[:\-]\s*(.+)$/i); if(m1){ ord=m1[1].trim(); return; }
-            const m2 = line.match(/^(?:FÖRKLARING|FORKLARING)\s*[:\-]\s*(.+)$/i); if(m2){ forklaring=m2[1].trim(); return; }
-            const m3 = line.match(/^(?:EXEMPEL)\s*[:\-]\s*(.+)$/i); if(m3){ exempel=m3[1].trim(); return; }
-            const m4 = line.match(/^(?:KOM\s*IHÅG|KOMIHAG|MINNESREGEL)\s*[:\-]\s*(.+)$/i); if(m4){ komihag=m4[1].trim(); return; }
+        // Textblock: BEGREPP:/FÖRKLARING:/EXEMPEL:/KOM IHÅG:-block separerade med tomrad (flera på en gång)
+        const blocks = text.split(/\r?\n\s*\r?\n/).map(b=>b.trim()).filter(Boolean);
+        const out=[];
+        blocks.forEach(block=>{
+            const lines = block.split(/\r?\n/).map(mdCleanLine).filter(Boolean);
+            let ord='', emoji='📖', forklaring='', exempel='', komihag='';
+            lines.forEach(line=>{
+                const m1 = line.match(/^(?:BEGREPP|ORD)\s*[:\-]\s*(.+)$/i); if(m1){ ord=m1[1].trim(); return; }
+                const m2 = line.match(/^(?:FÖRKLARING|FORKLARING)\s*[:\-]\s*(.+)$/i); if(m2){ forklaring=m2[1].trim(); return; }
+                const m3 = line.match(/^(?:EXEMPEL)\s*[:\-]\s*(.+)$/i); if(m3){ exempel=m3[1].trim(); return; }
+                const m4 = line.match(/^(?:KOM\s*IHÅG|KOMIHAG|MINNESREGEL)\s*[:\-]\s*(.+)$/i); if(m4){ komihag=m4[1].trim(); return; }
+            });
+            if(ord && forklaring) out.push({ ord, emoji, forklaring, exempel, komihag });
         });
-        if(ord && forklaring) return { ord, emoji, forklaring, exempel, komihag };
-        return null;
+        return out;
     }
+    function parseBegreppskort(text){ const l=parseBegreppskortList(text); return l.length ? l[0] : null; }
     function buildBegreppskortChatPrompt(desc){
         desc = withArskurs(desc);
-        return desc.trim() + "\n\nSvara ENDAST i exakt detta format, inget annat:\nBEGREPP: <ett begrepp/ord>\nFÖRKLARING: <kort, tydlig förklaring>\nEXEMPEL: <ett konkret exempel från vardagen>\nKOM IHÅG: <en kort minnesregel>\n\nAllt ska vara på svenska och passa den årskurs/det ämne som anges. Om ingen årskurs anges, anta mellanstadienivå (åk 4–6, ca 10–12 år).";
+        return desc.trim() + "\n\nSvara ENDAST med begreppen, i exakt detta format och inget annat, ett begrepp per block med en tom rad mellan varje block:\nBEGREPP: <ett begrepp/ord>\nFÖRKLARING: <kort, tydlig förklaring>\nEXEMPEL: <ett konkret exempel från vardagen>\nKOM IHÅG: <en kort minnesregel>\n\nSkapa så många som anges i uppgiften, annars 5 st. Allt ska vara på svenska och passa den årskurs/det ämne som anges. Om ingen årskurs anges, anta mellanstadienivå (åk 4–6, ca 10–12 år).";
     }
-    async function aiGenerateBegreppskort(userPrompt, apiKey){
+    async function aiGenerateBegreppskortList(userPrompt, apiKey){
         userPrompt = withArskurs(userPrompt);
-        const instruction = "Du är en lärarassistent som skapar begreppskort för klassrummet. Returnera ENDAST giltig JSON i formen {\"ord\":\"begreppet\",\"emoji\":\"en passande emoji\",\"forklaring\":\"kort förklaring\",\"exempel\":\"konkret exempel\",\"komihag\":\"kort minnesregel\"}. Allt på svenska, anpassat till angiven årskurs/ämne. Om ingen årskurs anges i uppgiften, anta mellanstadienivå (åk 4–6, ca 10–12 år) som standard. Ingen annan text, ingen markdown.";
+        const instruction = "Du är en lärarassistent som skapar begreppskort för klassrummet. Returnera ENDAST giltig JSON i formen {\"begrepp\":[{\"ord\":\"begreppet\",\"emoji\":\"en passande emoji\",\"forklaring\":\"kort förklaring\",\"exempel\":\"konkret exempel\",\"komihag\":\"kort minnesregel\"}]}. Allt på svenska, anpassat till angiven årskurs/ämne. Skapa så många som anges i uppgiften, annars 5 st. Om ingen årskurs anges i uppgiften, anta mellanstadienivå (åk 4–6, ca 10–12 år) som standard. Ingen annan text, ingen markdown.";
         const models = ["gemini-2.0-flash","gemini-1.5-flash-latest","gemini-1.5-flash"];
         const bodyObj = { contents:[{ parts:[{ text: instruction + "\n\nUppgift: " + userPrompt }] }], generationConfig:{ temperature:0.9, responseMimeType:"application/json" } };
         let lastErr='';
@@ -5992,25 +6003,37 @@
                 if(!r.ok){ const t=await r.text().catch(()=> ''); if(/API key not valid|API_KEY_INVALID|invalid.*key/i.test(t)) throw new Error('Ogiltig API-nyckel.'); lastErr='Servern svarade ' + r.status; continue; }
                 const data = await r.json();
                 const text = (((data.candidates||[])[0]||{}).content||{}).parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : '';
-                const ex = parseBegreppskort(text);
-                if(ex) return ex;
+                const list = parseBegreppskortList(text);
+                if(list.length) return list;
                 lastErr='Kunde inte tolka AI-svaret.';
             }catch(e){ if(e && e.message==='Ogiltig API-nyckel.') throw e; lastErr=(e&&e.message)||'nätverksfel'; }
         }
         throw new Error(lastErr || 'Kunde inte kontakta AI-tjänsten.');
     }
 
+    function begreppskortDagensIndexForBank(bank){
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now - start;
+        const dagensDagIÅret = Math.floor(diff / 86400000);
+        return bank.length ? dagensDagIÅret % bank.length : 0;
+    }
     function createBegreppskort(config){
         const body = createWidget('BEGREPPSKORT', 320, 'word-widget bg-widget', config);
         const widget = body.parentElement.parentElement;
-        let idx = (config && config.data && typeof config.data.idx==='number') ? config.data.idx : begreppskortDagensIndex();
-        if(idx<-1 || idx>=BEGREPPSKORT_BANK.length) idx = begreppskortDagensIndex();
+        const BK_AMNEN = [ ['biologi','🧬 Biologi'], ['fysik','🔭 Fysik'], ['kemi','⚗️ Kemi'] ];
+        let amne = (config && config.data && config.data.amne) ? config.data.amne : null;
+        let idx = (config && config.data && typeof config.data.idx==='number') ? config.data.idx : -1;
         let custom = (config && config.data && config.data.custom) ? config.data.custom : null;
-        if(idx===-1 && !custom) idx = begreppskortDagensIndex();
+        // FIX: giltighetskoll ifall sparad data pekar på ett kort som inte längre matchar valt
+        // ämne (t.ex. om banken ändras i en framtida uppdatering).
+        if(amne && idx>=0 && (!BEGREPPSKORT_BANK[idx] || BEGREPPSKORT_BANK[idx].amne!==amne)) idx=-1;
 
         const ctrl=document.createElement('div'); ctrl.className='hover-menu'; ctrl.style.padding='8px 8px 0'; ctrl.style.display='flex'; ctrl.style.gap='6px';
         const slumpBtn=document.createElement('button'); slumpBtn.type='button'; slumpBtn.className='btn btn-secondary'; slumpBtn.style.flex='1'; slumpBtn.textContent='🎲 Slumpa nytt begrepp';
         ctrl.appendChild(slumpBtn);
+        const amneBtn=document.createElement('button'); amneBtn.type='button'; amneBtn.className='kw-btn kw-btn-ghost'; amneBtn.textContent='🔄 Byt ämne'; amneBtn.title='Välj ett annat NO-ämne';
+        ctrl.appendChild(amneBtn);
         const aiBtn=document.createElement('button'); aiBtn.type='button'; aiBtn.className='kw-btn kw-btn-ai'; aiBtn.textContent='✨ AI'; aiBtn.title='Skapa begrepp med AI';
         ctrl.appendChild(aiBtn);
         body.appendChild(ctrl);
@@ -6018,23 +6041,67 @@
         const kortWrap = document.createElement('div'); kortWrap.style.padding='10px';
         body.appendChild(kortWrap);
 
-        function persist(){ widget.dataset.begrepp = JSON.stringify({ idx: idx, custom: custom }); saveBoardState(); }
+        // Kö med AI-skapade begrepp som ännu inte visats. Lever bara i minnet (sparas INTE), så
+        // den försvinner när widgeten stängs/laddas om - och körs klart innan de blandas med
+        // den vanliga ämnesbanken igen.
+        let aiQueue = [];
+
+        function persist(){ widget.dataset.begrepp = JSON.stringify({ idx: idx, custom: custom, amne: amne }); saveBoardState(); }
+        // FIX: begreppen är nu taggade per NO-ämne (biologi/fysik/kemi). Läraren väljer ämne
+        // INNAN några begreppskort visas, och bara begrepp ur det valda ämnet visas/slumpas fram.
+        function bankForAmne(){ return BEGREPPSKORT_BANK.filter(b=>b.amne===amne); }
+        function valjAmne(key){
+            amne = key; custom = null; aiQueue = [];
+            const bank = bankForAmne();
+            idx = bank.length ? BEGREPPSKORT_BANK.indexOf(bank[begreppskortDagensIndexForBank(bank)]) : -1;
+            render(); persist();
+        }
+        function renderAmnesval(){
+            ctrl.style.display='none';
+            kortWrap.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🌱 Vilket ämne vill du öva begrepp inom?'; kortWrap.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='sf-amne-grid';
+            BK_AMNEN.forEach(([key,label])=>{
+                const b=document.createElement('button'); b.type='button'; b.className='btn btn-primary sf-amne-btn'; b.textContent=label;
+                b.onclick=()=>valjAmne(key);
+                grid.appendChild(b);
+            });
+            kortWrap.appendChild(grid);
+        }
         function render(){
-            const b = (idx===-1 && custom) ? custom : BEGREPPSKORT_BANK[idx];
-            kortWrap.innerHTML = begreppskortHtml(b);
+            if(!amne){ renderAmnesval(); return; }
+            const bank = bankForAmne();
+            const b = (idx===-1 && custom) ? custom : (idx>=0 && BEGREPPSKORT_BANK[idx] ? BEGREPPSKORT_BANK[idx] : null);
+            if(!b){ renderAmnesval(); return; }
+            ctrl.style.display='flex';
+            const amneLabel = (BK_AMNEN.find(a=>a[0]===amne)||[])[1] || '';
+            kortWrap.innerHTML = "<div class='sf-amne-current'>"+amneLabel+"</div>" + begreppskortHtml(b);
             wireGotdKort(kortWrap, b.ord);
+            // FIX: AI-genererade begrepp körs klart (ett i taget via "Slumpa nytt begrepp") innan
+            // de blandas med den vanliga ämnesbanken igen - samma mönster som Källkritik m.fl.
+            if(aiQueue.length){
+                const kw=document.createElement('div'); kw.className='kw-ai-help'; kw.style.textAlign='center'; kw.style.marginTop='8px';
+                kw.textContent = '✨ ' + aiQueue.length + ' AI-begrepp till i kön - tryck 🎲 Slumpa nytt begrepp för nästa.';
+                kortWrap.appendChild(kw);
+            }
         }
         slumpBtn.onclick=()=>{
-            let ny; do { ny=Math.floor(Math.random()*BEGREPPSKORT_BANK.length); } while(BEGREPPSKORT_BANK.length>1 && ny===idx);
+            if(aiQueue.length){
+                custom = aiQueue.shift(); idx=-1; render(); persist(); return;
+            }
+            const bank = bankForAmne();
+            if(!bank.length) return;
+            let ny; do { ny=Math.floor(Math.random()*BEGREPPSKORT_BANK.length); } while(BEGREPPSKORT_BANK[ny].amne!==amne || (bank.length>1 && ny===idx));
             idx=ny; custom=null; render(); persist();
         };
+        amneBtn.onclick=()=>{ amne=null; render(); persist(); };
         aiBtn.onclick = openBegreppskortAiDialog;
         function openBegreppskortAiDialog(){
             const ov=document.createElement('div'); ov.className='cal-popup-overlay';
             const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
             const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
             const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa begreppskort med AI'; box.appendChild(title);
-            const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv ämnet, t.ex.:\nEtt begrepp inom kemi för åk 6.'; box.appendChild(ta);
+            const ta=document.createElement('textarea'); ta.className='kw-ai-ta'; ta.placeholder='Beskriv ämnet, t.ex.:\nSkapa 5 begrepp inom kemi för åk 6.'; box.appendChild(ta);
             const status=document.createElement('div'); status.className='kw-ai-status';
 
             const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
@@ -6046,12 +6113,16 @@
                 catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
-            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – kortet fylls i automatiskt...'; box.appendChild(pasteTa);
-            const anvand=(ex, st)=>{ if(!ex){ if(st) st.textContent='⚠️ Hittade inget användbart begrepp i svaret.'; return; } custom=ex; idx=-1; close(); render(); persist(); };
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const ex=parseBegreppskort(pasteTa.value); if(ex) anvand(ex, status); },60); });
+            const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – begreppen fylls i automatiskt, ett i taget...'; box.appendChild(pasteTa);
+            const anvand=(list, st)=>{
+                if(!list || !list.length){ if(st) st.textContent='⚠️ Hittade inget användbart begrepp i svaret.'; return; }
+                aiQueue = list.slice(1, 30);
+                custom=list[0]; idx=-1; close(); render(); persist();
+            };
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseBegreppskortList(pasteTa.value); if(list.length) anvand(list, status); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
-            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd begreppet';
-            makePasteBtn.onclick=()=>{ const ex=parseBegreppskort(pasteTa.value); if(!ex){ status.textContent='⚠️ Hittade inget användbart begrepp. Kolla att formatet stämmer.'; return; } anvand(ex, status); };
+            const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd begreppen';
+            makePasteBtn.onclick=()=>{ const list=parseBegreppskortList(pasteTa.value); if(!list.length){ status.textContent='⚠️ Hittade inget användbart begrepp. Kolla att formatet stämmer.'; return; } anvand(list, status); };
             row1b.appendChild(makePasteBtn); box.appendChild(row1b);
 
             const orEl=document.createElement('div'); orEl.className='kw-ai-or'; orEl.textContent='— ELLER —'; box.appendChild(orEl);
@@ -6068,7 +6139,7 @@
             const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.title='Öppnar Google AI Studio – du är redan inloggad'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); status.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
             const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='Skapa automatiskt (ett klick)';
             autoBtn.onclick=async ()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv en beskrivning först.'; return; } let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } } if(!key){ status.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
-                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar begreppet..."; try{ const ex=await aiGenerateBegreppskort(d, key); anvand(ex, status); }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
+                autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar begreppen..."; try{ const list=await aiGenerateBegreppskortList(d, key); anvand(list, status); }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
             row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
 
             box.appendChild(status);
@@ -6087,43 +6158,43 @@
     // En kort startfråga för NO-lektionen, med ett dolt (logiskt förklarat) svar
     // bakom en Visa-knapp. Byts automatiskt varje dag, går även att slumpa manuellt.
     const NOFRAGA_BANK = [
-        { fraga:'Varför flyter en båt av stål?', svar:'Båtens form gör att den trycker undan mycket vatten, och det ger en uppåtriktad kraft (uppdrift) som är stark nog att bära båten, fast stålet i sig är tungt.' },
-        { fraga:'Vad behöver en växt för att leva?', svar:'Vatten, solljus, koldioxid från luften och näring från jorden.' },
-        { fraga:'Varför blir det dag och natt?', svar:'Jorden snurrar runt sin egen axel (roterar), så olika delar av jorden vänds mot eller bort från solen under dygnet.' },
-        { fraga:'Vad händer när vatten fryser?', svar:'Vattnet övergår från flytande form till fast form (is) när temperaturen sjunker under 0 grader.' },
-        { fraga:'Varför syns blixten före du hör åskan?', svar:'Ljus färdas mycket snabbare än ljud, så blixten hinner fram till ögat innan mullret hinner fram till örat.' },
-        { fraga:'Vad är skillnaden på ett ryggradsdjur och ett ryggradslöst djur?', svar:'Ryggradsdjur har ett skelett med ryggrad inuti kroppen, som fiskar och fåglar. Ryggradslösa djur, som insekter och maskar, saknar det.' },
-        { fraga:'Varför behöver vi andas in syre?', svar:'Kroppens celler behöver syre för att kunna omvandla maten vi äter till energi.' },
-        { fraga:'Vad är fotosyntes?', svar:'Processen där gröna växter använder solljus för att tillverka socker och syre av vatten och koldioxid.' },
-        { fraga:'Varför smälter is snabbare i solen än i skuggan?', svar:'Solens värmestrålning värmer upp isen snabbare, vilket gör att den smälter fortare.' },
-        { fraga:'Vad är en näringskedja?', svar:'En kedja som visar vem som äter vem i naturen, till exempel gräs → kanin → räv.' },
-        { fraga:'Varför känns metall kallare än trä, fast de har samma temperatur?', svar:'Metall leder bort värme från handen snabbare än trä, vilket gör att metallen känns kallare vid beröring.' },
-        { fraga:'Vad gör hjärtat i kroppen?', svar:'Hjärtat pumpar runt blod i kroppen, vilket för med sig syre och näring till alla kroppens celler.' },
-        { fraga:'Varför flyter is på vatten istället för att sjunka?', svar:'Is är lättare (mindre tätt packat) än flytande vatten, så isen flyter ovanpå.' },
-        { fraga:'Vad är skillnaden mellan väder och årstid?', svar:'Väder är hur det är just nu, till exempel regn idag. Årstid handlar om längre perioder, som vår, sommar, höst och vinter.' },
-        { fraga:'Varför behöver bin blommor?', svar:'Bin samlar nektar och pollen från blommor som mat, och hjälper samtidigt till att pollinera blommorna.' },
-        { fraga:'Vad händer med vatten när det kokar?', svar:'Vattnet värms upp så mycket att det övergår från flytande form till gasform (vattenånga).' },
-        { fraga:'Varför fastnar ett gem på en magnet men inte en tallrik av plast?', svar:'Gemmet är gjort av en metall som dras till magneter, medan plast inte påverkas av magnetism.' },
-        { fraga:'Vad är skillnaden på ett rovdjur och ett bytesdjur?', svar:'Ett rovdjur jagar och äter andra djur, medan ett bytesdjur är det djur som blir uppätet.' },
-        { fraga:'Varför blir det svårare att cykla i sand än på asfalt?', svar:'Sand ger mer friktion (motstånd) mot cykelns däck än den jämna asfalten, vilket bromsar rörelsen.' },
-        { fraga:'Vad är ett fossil?', svar:'Rester eller avtryck av växter eller djur som levt för mycket länge sedan, bevarade i sten.' },
-        { fraga:'Varför svettas vi när det är varmt?', svar:'Svetten avdunstar från huden och kyler kroppen, vilket hjälper oss att inte bli överhettade.' },
-        { fraga:'Vad behöver ett frö för att gro?', svar:'Vatten, syre och lagom temperatur (värme).' },
-        { fraga:'Varför syns månen ibland på himlen mitt på dagen?', svar:'Månen reflekterar solljus och kan synas oavsett om det är dag eller natt, beroende på var den befinner sig på himlen.' },
-        { fraga:'Vad är skillnaden på fast, flytande och gasform?', svar:'Fast form har en bestämd form (till exempel is), flytande form tar formen av sin behållare (till exempel vatten), och gasform sprider ut sig fritt (till exempel vattenånga).' },
-        { fraga:'Varför väger samma sten olika mycket på jorden och på månen?', svar:'Månens gravitation (dragningskraft) är svagare än jordens, så allt väger mindre där.' },
-        { fraga:'Vad gör lungorna?', svar:'Lungorna tar upp syre från luften vi andas in, och släpper ut koldioxid när vi andas ut.' },
-        { fraga:'Varför rostar järn men inte plast?', svar:'Järn reagerar med syre och fukt i luften och bildar rost, medan plast inte reagerar på samma sätt.' },
-        { fraga:'Vad är skillnaden mellan ett ekosystem och en näringskedja?', svar:'Ett ekosystem är alla levande varelser och miljön tillsammans på en plats, medan en näringskedja bara visar vem som äter vem.' },
-        { fraga:'Varför är det kallare på vintern än på sommaren i Sverige?', svar:'Under vintern lutar jordens norra halvklot bort från solen, så solens strålar träffar marken mer snett och ger mindre värme.' },
-        { fraga:'Vad är skillnaden på ett ledande och ett isolerande material?', svar:'Ett ledande material, som metall, släpper lätt igenom el. Ett isolerande material, som gummi eller plast, stoppar elen.' }
+        { fraga:'Varför flyter en båt av stål?', svar:'Båtens form gör att den trycker undan mycket vatten, och det ger en uppåtriktad kraft (uppdrift) som är stark nog att bära båten, fast stålet i sig är tungt.', amne:'fysik' },
+        { fraga:'Vad behöver en växt för att leva?', svar:'Vatten, solljus, koldioxid från luften och näring från jorden.', amne:'biologi' },
+        { fraga:'Varför blir det dag och natt?', svar:'Jorden snurrar runt sin egen axel (roterar), så olika delar av jorden vänds mot eller bort från solen under dygnet.', amne:'fysik' },
+        { fraga:'Vad händer när vatten fryser?', svar:'Vattnet övergår från flytande form till fast form (is) när temperaturen sjunker under 0 grader.', amne:'kemi' },
+        { fraga:'Varför syns blixten före du hör åskan?', svar:'Ljus färdas mycket snabbare än ljud, så blixten hinner fram till ögat innan mullret hinner fram till örat.', amne:'fysik' },
+        { fraga:'Vad är skillnaden på ett ryggradsdjur och ett ryggradslöst djur?', svar:'Ryggradsdjur har ett skelett med ryggrad inuti kroppen, som fiskar och fåglar. Ryggradslösa djur, som insekter och maskar, saknar det.', amne:'biologi' },
+        { fraga:'Varför behöver vi andas in syre?', svar:'Kroppens celler behöver syre för att kunna omvandla maten vi äter till energi.', amne:'biologi' },
+        { fraga:'Vad är fotosyntes?', svar:'Processen där gröna växter använder solljus för att tillverka socker och syre av vatten och koldioxid.', amne:'biologi' },
+        { fraga:'Varför smälter is snabbare i solen än i skuggan?', svar:'Solens värmestrålning värmer upp isen snabbare, vilket gör att den smälter fortare.', amne:'kemi' },
+        { fraga:'Vad är en näringskedja?', svar:'En kedja som visar vem som äter vem i naturen, till exempel gräs → kanin → räv.', amne:'biologi' },
+        { fraga:'Varför känns metall kallare än trä, fast de har samma temperatur?', svar:'Metall leder bort värme från handen snabbare än trä, vilket gör att metallen känns kallare vid beröring.', amne:'fysik' },
+        { fraga:'Vad gör hjärtat i kroppen?', svar:'Hjärtat pumpar runt blod i kroppen, vilket för med sig syre och näring till alla kroppens celler.', amne:'biologi' },
+        { fraga:'Varför flyter is på vatten istället för att sjunka?', svar:'Is är lättare (mindre tätt packat) än flytande vatten, så isen flyter ovanpå.', amne:'kemi' },
+        { fraga:'Vad är skillnaden mellan väder och årstid?', svar:'Väder är hur det är just nu, till exempel regn idag. Årstid handlar om längre perioder, som vår, sommar, höst och vinter.', amne:'fysik' },
+        { fraga:'Varför behöver bin blommor?', svar:'Bin samlar nektar och pollen från blommor som mat, och hjälper samtidigt till att pollinera blommorna.', amne:'biologi' },
+        { fraga:'Vad händer med vatten när det kokar?', svar:'Vattnet värms upp så mycket att det övergår från flytande form till gasform (vattenånga).', amne:'kemi' },
+        { fraga:'Varför fastnar ett gem på en magnet men inte en tallrik av plast?', svar:'Gemmet är gjort av en metall som dras till magneter, medan plast inte påverkas av magnetism.', amne:'fysik' },
+        { fraga:'Vad är skillnaden på ett rovdjur och ett bytesdjur?', svar:'Ett rovdjur jagar och äter andra djur, medan ett bytesdjur är det djur som blir uppätet.', amne:'biologi' },
+        { fraga:'Varför blir det svårare att cykla i sand än på asfalt?', svar:'Sand ger mer friktion (motstånd) mot cykelns däck än den jämna asfalten, vilket bromsar rörelsen.', amne:'fysik' },
+        { fraga:'Vad är ett fossil?', svar:'Rester eller avtryck av växter eller djur som levt för mycket länge sedan, bevarade i sten.', amne:'biologi' },
+        { fraga:'Varför svettas vi när det är varmt?', svar:'Svetten avdunstar från huden och kyler kroppen, vilket hjälper oss att inte bli överhettade.', amne:'biologi' },
+        { fraga:'Vad behöver ett frö för att gro?', svar:'Vatten, syre och lagom temperatur (värme).', amne:'biologi' },
+        { fraga:'Varför syns månen ibland på himlen mitt på dagen?', svar:'Månen reflekterar solljus och kan synas oavsett om det är dag eller natt, beroende på var den befinner sig på himlen.', amne:'fysik' },
+        { fraga:'Vad är skillnaden på fast, flytande och gasform?', svar:'Fast form har en bestämd form (till exempel is), flytande form tar formen av sin behållare (till exempel vatten), och gasform sprider ut sig fritt (till exempel vattenånga).', amne:'kemi' },
+        { fraga:'Varför väger samma sten olika mycket på jorden och på månen?', svar:'Månens gravitation (dragningskraft) är svagare än jordens, så allt väger mindre där.', amne:'fysik' },
+        { fraga:'Vad gör lungorna?', svar:'Lungorna tar upp syre från luften vi andas in, och släpper ut koldioxid när vi andas ut.', amne:'biologi' },
+        { fraga:'Varför rostar järn men inte plast?', svar:'Järn reagerar med syre och fukt i luften och bildar rost, medan plast inte reagerar på samma sätt.', amne:'kemi' },
+        { fraga:'Vad är skillnaden mellan ett ekosystem och en näringskedja?', svar:'Ett ekosystem är alla levande varelser och miljön tillsammans på en plats, medan en näringskedja bara visar vem som äter vem.', amne:'biologi' },
+        { fraga:'Varför är det kallare på vintern än på sommaren i Sverige?', svar:'Under vintern lutar jordens norra halvklot bort från solen, så solens strålar träffar marken mer snett och ger mindre värme.', amne:'fysik' },
+        { fraga:'Vad är skillnaden på ett ledande och ett isolerande material?', svar:'Ett ledande material, som metall, släpper lätt igenom el. Ett isolerande material, som gummi eller plast, stoppar elen.', amne:'fysik' }
     ];
-    function nofragaDagensIndex(){
+    function nofragaDagensIndexForBank(bank){
         const now = new Date();
         const start = new Date(now.getFullYear(), 0, 0);
         const diff = now - start;
         const dagensDagIÅret = Math.floor(diff / 86400000);
-        return dagensDagIÅret % NOFRAGA_BANK.length;
+        return bank.length ? dagensDagIÅret % bank.length : 0;
     }
     // ---- AI: generera flera NO-frågor på en gång, körs i kö efter varandra (samma mönster som övriga) ----
     function parseNoFragaList(text){
@@ -6188,20 +6259,45 @@
         if(!config){ widget.style.height = '340px'; }
         const root=document.createElement('div'); body.appendChild(root);
 
-        let idx = (config && config.data && typeof config.data.idx==='number') ? config.data.idx : nofragaDagensIndex();
-        if(idx<-1 || idx>=NOFRAGA_BANK.length) idx = nofragaDagensIndex();
+        const NF_AMNEN = [ ['biologi','🧬 Biologi'], ['fysik','🔭 Fysik'], ['kemi','⚗️ Kemi'] ];
+        let amne = (config && config.data && config.data.amne) ? config.data.amne : null;
+        let idx = (config && config.data && typeof config.data.idx==='number') ? config.data.idx : -1;
         let custom = (config && config.data && config.data.custom) ? config.data.custom : null;
-        if(idx===-1 && !custom) idx = nofragaDagensIndex();
         let revealed = (config && config.data && config.data.revealed) || false;
+        if(amne && idx>=0 && (!NOFRAGA_BANK[idx] || NOFRAGA_BANK[idx].amne!==amne)) idx=-1;
         // Kö med AI-skapade frågor som ännu inte visats. Lever bara i minnet (sparas INTE),
-        // så den försvinner när widgeten stängs/laddas om - och blandas aldrig med bankfrågorna.
+        // så den försvinner när widgeten stängs/laddas om - och körs klart innan de blandas
+        // med den vanliga ämnesbanken igen.
         let aiQueue = [];
 
-        const persist=()=>{ widget.dataset.nofraga = JSON.stringify({ idx: idx, custom: custom, revealed: revealed }); saveBoardState(); };
-
-        function render(){
+        const persist=()=>{ widget.dataset.nofraga = JSON.stringify({ idx: idx, custom: custom, revealed: revealed, amne: amne }); saveBoardState(); };
+        // FIX: frågorna är nu taggade per NO-ämne (biologi/fysik/kemi). Läraren väljer ämne
+        // INNAN någon fråga visas, och bara frågor ur det valda ämnet visas/slumpas fram.
+        function bankForAmne(){ return NOFRAGA_BANK.filter(q=>q.amne===amne); }
+        function valjAmne(key){
+            amne = key; custom=null; aiQueue=[]; revealed=false;
+            const bank = bankForAmne();
+            idx = bank.length ? NOFRAGA_BANK.indexOf(bank[nofragaDagensIndexForBank(bank)]) : -1;
+            render(); persist();
+        }
+        function renderAmnesval(){
             root.innerHTML='';
-            const q = (idx===-1 && custom) ? custom : NOFRAGA_BANK[idx];
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🔬 Vilket ämne vill du ha dagens fråga inom?'; root.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='sf-amne-grid';
+            NF_AMNEN.forEach(([key,label])=>{
+                const b=document.createElement('button'); b.type='button'; b.className='btn btn-primary sf-amne-btn'; b.textContent=label;
+                b.onclick=()=>valjAmne(key);
+                grid.appendChild(b);
+            });
+            root.appendChild(grid);
+        }
+        function render(){
+            if(!amne){ renderAmnesval(); return; }
+            const q = (idx===-1 && custom) ? custom : (idx>=0 && NOFRAGA_BANK[idx] ? NOFRAGA_BANK[idx] : null);
+            if(!q){ renderAmnesval(); return; }
+            root.innerHTML='';
+            const amneLabel = (NF_AMNEN.find(a=>a[0]===amne)||[])[1] || '';
+            const amneRow=document.createElement('div'); amneRow.className='sf-amne-current'; amneRow.textContent=amneLabel; root.appendChild(amneRow);
             const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🔬 Dagens fråga att fundera över tillsammans innan lektionen börjar:'; root.appendChild(hint);
             const fragaEl=document.createElement('div'); fragaEl.className='nf-fraga'; fragaEl.textContent=q.fraga; root.appendChild(fragaEl);
 
@@ -6218,12 +6314,17 @@
                 if(aiQueue.length){
                     custom = aiQueue.shift(); idx=-1;
                 } else {
-                    let ny; do { ny=Math.floor(Math.random()*NOFRAGA_BANK.length); } while(NOFRAGA_BANK.length>1 && ny===idx);
+                    const bank = bankForAmne();
+                    if(!bank.length){ render(); return; }
+                    let ny; do { ny=Math.floor(Math.random()*NOFRAGA_BANK.length); } while(NOFRAGA_BANK[ny].amne!==amne || (bank.length>1 && ny===idx));
                     idx=ny; custom=null;
                 }
                 revealed=false; render(); persist();
             };
             btns.appendChild(nyBtn);
+            const amneBtn=document.createElement('button'); amneBtn.className='kw-btn kw-btn-ghost'; amneBtn.textContent='🔄 Byt ämne'; amneBtn.title='Välj ett annat NO-ämne';
+            amneBtn.onclick=()=>{ amne=null; render(); persist(); };
+            btns.appendChild(amneBtn);
             const aiBtn=document.createElement('button'); aiBtn.className='kw-btn kw-btn-ai'; aiBtn.textContent='✨ AI'; aiBtn.title='Skapa fråga med AI';
             aiBtn.onclick=openNoFragaAiDialog;
             btns.appendChild(aiBtn);
@@ -6305,36 +6406,72 @@
     // Slumpar fram ett NO-påstående (sant eller falskt) som eleverna får fundera
     // över och rösta på, innan facit och motivering avslöjas.
     const SANTFALSKT_BANK = [
-        { text:'Alla magneter fastnar på metall.', korrekt:false, motivering:'Magneter fastnar bara på vissa metaller, som järn, nickel och kobolt – inte på till exempel aluminium eller koppar.' },
-        { text:'Månen lyser av sig själv.', korrekt:false, motivering:'Månen har inget eget ljus, den reflekterar bara solens ljus.' },
-        { text:'Is är lättare än vatten.', korrekt:true, motivering:'Is är mindre tätt packat (har lägre densitet) än flytande vatten, därför flyter is på vatten.' },
-        { text:'Växter behöver solljus för att leva.', korrekt:true, motivering:'Växter använder solljus för fotosyntesen, där de tillverkar sin egen näring.' },
-        { text:'Alla djur med skelett kallas ryggradsdjur.', korrekt:true, motivering:'Djur som har ett skelett med en ryggrad inuti kroppen kallas ryggradsdjur, till exempel fiskar, fåglar och däggdjur.' },
-        { text:'Vatten kokar alltid vid exakt samma temperatur oavsett var man är.', korrekt:false, motivering:'Vatten kokar vid en lägre temperatur högt uppe i bergen, eftersom lufttrycket är lägre där.' },
-        { text:'Blixten syns alltid före man hör åskan.', korrekt:true, motivering:'Ljus färdas mycket snabbare än ljud, så blixten syns innan mullret från åskan hörs, även om de skapas samtidigt.' },
-        { text:'Alla fåglar kan flyga.', korrekt:false, motivering:'Vissa fåglar, som strutsen och pingvinen, kan inte flyga.' },
-        { text:'Solen är en stjärna.', korrekt:true, motivering:'Solen är den stjärna som är närmast jorden.' },
-        { text:'Jorden är den enda planeten i solsystemet.', korrekt:false, motivering:'Det finns åtta planeter i solsystemet – jorden är bara en av dem.' },
-        { text:'Syre behövs för att en eld ska brinna.', korrekt:true, motivering:'Eld behöver syre, bränsle och värme för att kunna brinna – tas syret bort slocknar elden.' },
-        { text:'Alla insekter har sex ben.', korrekt:true, motivering:'Insekter kännetecknas bland annat av att de har exakt sex ben.' },
-        { text:'Ljud kan färdas genom rymden precis som på jorden.', korrekt:false, motivering:'Ljud behöver ett medium (som luft) för att färdas, och i rymden finns nästan ingen luft, så ljud kan inte färdas där.' },
-        { text:'Fotosyntes sker bara på natten.', korrekt:false, motivering:'Fotosyntes sker när det finns solljus, alltså på dagen.' },
-        { text:'Regnbågar bildas när solljus bryts i vattendroppar.', korrekt:true, motivering:'När solljus träffar och bryts i regndroppar i luften kan det bilda en regnbåge.' },
-        { text:'Alla växter har blommor.', korrekt:false, motivering:'Vissa växter, som ormbunkar och mossor, har inga blommor.' },
-        { text:'Metall leder elektricitet bättre än plast.', korrekt:true, motivering:'Metaller är oftast bra ledare av elektricitet, medan plast är en isolator som stoppar strömmen.' },
-        { text:'En magnet har bara en pol.', korrekt:false, motivering:'En magnet har alltid två poler, en nordpol och en sydpol.' },
-        { text:'Månen har en egen atmosfär precis som jorden.', korrekt:false, motivering:'Månen har nästan ingen atmosfär alls, till skillnad från jorden.' },
-        { text:'Vatten övergår till gasform när det avdunstar.', korrekt:true, motivering:'När vatten avdunstar övergår det från flytande form till osynlig vattenånga (gasform).' },
-        { text:'Alla djur föder levande ungar.', korrekt:false, motivering:'Många djur, som fåglar, fiskar och reptiler, lägger ägg istället för att föda levande ungar.' },
-        { text:'Ett ekosystem kan bestå av både djur, växter och miljön de lever i.', korrekt:true, motivering:'Ett ekosystem är alla levande varelser tillsammans med den miljö de lever i, på en viss plats.' },
-        { text:'Ett fossil är alltid av ett djur.', korrekt:false, motivering:'Fossil kan vara rester eller avtryck av både djur och växter.' },
-        { text:'Jordens rotation orsakar dag och natt.', korrekt:true, motivering:'När jorden snurrar runt sin egen axel vänds olika delar mot och bort från solen, vilket ger dag och natt.' },
-        { text:'Alla ämnen krymper när de fryser till fast form.', korrekt:false, motivering:'Vatten är ovanligt eftersom det utvidgas (blir större) när det fryser till is, till skillnad från de flesta andra ämnen.' },
-        { text:'Solen roterar runt jorden.', korrekt:false, motivering:'Det är jorden som roterar runt solen, inte tvärtom.' },
-        { text:'Näringskedjor visar vem som äter vem i naturen.', korrekt:true, motivering:'En näringskedja visar hur energi förs vidare genom att djur och växter äter varandra.' },
-        { text:'Alla svampar är växter.', korrekt:false, motivering:'Svampar tillhör en egen grupp av organismer – de räknas varken som växter eller djur.' },
-        { text:'Friktion kan göra det svårare att röra sig.', korrekt:true, motivering:'Friktion är en kraft som bromsar rörelse när två ytor gnids mot varandra.' },
-        { text:'Kroppens celler behöver syre för att fungera.', korrekt:true, motivering:'Cellerna i kroppen använder syre för att omvandla mat till energi.' }
+        { text:'Alla magneter fastnar på metall.', korrekt:false, motivering:'Magneter fastnar bara på vissa metaller, som järn, nickel och kobolt – inte på till exempel aluminium eller koppar.', amne:'fysik' },
+        { text:'Månen lyser av sig själv.', korrekt:false, motivering:'Månen har inget eget ljus, den reflekterar bara solens ljus.', amne:'fysik' },
+        { text:'Is är lättare än vatten.', korrekt:true, motivering:'Is är mindre tätt packat (har lägre densitet) än flytande vatten, därför flyter is på vatten.', amne:'kemi' },
+        { text:'Växter behöver solljus för att leva.', korrekt:true, motivering:'Växter använder solljus för fotosyntesen, där de tillverkar sin egen näring.', amne:'biologi' },
+        { text:'Alla djur med skelett kallas ryggradsdjur.', korrekt:true, motivering:'Djur som har ett skelett med en ryggrad inuti kroppen kallas ryggradsdjur, till exempel fiskar, fåglar och däggdjur.', amne:'biologi' },
+        { text:'Vatten kokar alltid vid exakt samma temperatur oavsett var man är.', korrekt:false, motivering:'Vatten kokar vid en lägre temperatur högt uppe i bergen, eftersom lufttrycket är lägre där.', amne:'kemi' },
+        { text:'Blixten syns alltid före man hör åskan.', korrekt:true, motivering:'Ljus färdas mycket snabbare än ljud, så blixten syns innan mullret från åskan hörs, även om de skapas samtidigt.', amne:'fysik' },
+        { text:'Alla fåglar kan flyga.', korrekt:false, motivering:'Vissa fåglar, som strutsen och pingvinen, kan inte flyga.', amne:'biologi' },
+        { text:'Solen är en stjärna.', korrekt:true, motivering:'Solen är den stjärna som är närmast jorden.', amne:'fysik' },
+        { text:'Jorden är den enda planeten i solsystemet.', korrekt:false, motivering:'Det finns åtta planeter i solsystemet – jorden är bara en av dem.', amne:'fysik' },
+        { text:'Syre behövs för att en eld ska brinna.', korrekt:true, motivering:'Eld behöver syre, bränsle och värme för att kunna brinna – tas syret bort slocknar elden.', amne:'kemi' },
+        { text:'Alla insekter har sex ben.', korrekt:true, motivering:'Insekter kännetecknas bland annat av att de har exakt sex ben.', amne:'biologi' },
+        { text:'Ljud kan färdas genom rymden precis som på jorden.', korrekt:false, motivering:'Ljud behöver ett medium (som luft) för att färdas, och i rymden finns nästan ingen luft, så ljud kan inte färdas där.', amne:'fysik' },
+        { text:'Fotosyntes sker bara på natten.', korrekt:false, motivering:'Fotosyntes sker när det finns solljus, alltså på dagen.', amne:'biologi' },
+        { text:'Regnbågar bildas när solljus bryts i vattendroppar.', korrekt:true, motivering:'När solljus träffar och bryts i regndroppar i luften kan det bilda en regnbåge.', amne:'fysik' },
+        { text:'Alla växter har blommor.', korrekt:false, motivering:'Vissa växter, som ormbunkar och mossor, har inga blommor.', amne:'biologi' },
+        { text:'Metall leder elektricitet bättre än plast.', korrekt:true, motivering:'Metaller är oftast bra ledare av elektricitet, medan plast är en isolator som stoppar strömmen.', amne:'fysik' },
+        { text:'En magnet har bara en pol.', korrekt:false, motivering:'En magnet har alltid två poler, en nordpol och en sydpol.', amne:'fysik' },
+        { text:'Månen har en egen atmosfär precis som jorden.', korrekt:false, motivering:'Månen har nästan ingen atmosfär alls, till skillnad från jorden.', amne:'fysik' },
+        { text:'Vatten övergår till gasform när det avdunstar.', korrekt:true, motivering:'När vatten avdunstar övergår det från flytande form till osynlig vattenånga (gasform).', amne:'kemi' },
+        { text:'Alla djur föder levande ungar.', korrekt:false, motivering:'Många djur, som fåglar, fiskar och reptiler, lägger ägg istället för att föda levande ungar.', amne:'biologi' },
+        { text:'Ett ekosystem kan bestå av både djur, växter och miljön de lever i.', korrekt:true, motivering:'Ett ekosystem är alla levande varelser tillsammans med den miljö de lever i, på en viss plats.', amne:'biologi' },
+        { text:'Ett fossil är alltid av ett djur.', korrekt:false, motivering:'Fossil kan vara rester eller avtryck av både djur och växter.', amne:'biologi' },
+        { text:'Jordens rotation orsakar dag och natt.', korrekt:true, motivering:'När jorden snurrar runt sin egen axel vänds olika delar mot och bort från solen, vilket ger dag och natt.', amne:'fysik' },
+        { text:'Alla ämnen krymper när de fryser till fast form.', korrekt:false, motivering:'Vatten är ovanligt eftersom det utvidgas (blir större) när det fryser till is, till skillnad från de flesta andra ämnen.', amne:'kemi' },
+        { text:'Solen roterar runt jorden.', korrekt:false, motivering:'Det är jorden som roterar runt solen, inte tvärtom.', amne:'fysik' },
+        { text:'Näringskedjor visar vem som äter vem i naturen.', korrekt:true, motivering:'En näringskedja visar hur energi förs vidare genom att djur och växter äter varandra.', amne:'biologi' },
+        { text:'Alla svampar är växter.', korrekt:false, motivering:'Svampar tillhör en egen grupp av organismer – de räknas varken som växter eller djur.', amne:'biologi' },
+        { text:'Friktion kan göra det svårare att röra sig.', korrekt:true, motivering:'Friktion är en kraft som bromsar rörelse när två ytor gnids mot varandra.', amne:'fysik' },
+        { text:'Kroppens celler behöver syre för att fungera.', korrekt:true, motivering:'Cellerna i kroppen använder syre för att omvandla mat till energi.', amne:'biologi' },
+        { text:'Valar är fiskar.', korrekt:false, motivering:'Valar är däggdjur - de andas luft med lungor och föder levande ungar, till skillnad från fiskar.', amne:'biologi' },
+        { text:'Bin hjälper till att pollinera blommor.', korrekt:true, motivering:'När bin flyger mellan blommor för de med sig pollen, vilket gör att växter kan bilda frön.', amne:'biologi' },
+        { text:'Grodor kan andas genom huden.', korrekt:true, motivering:'Grodor kan ta upp syre genom sin fuktiga hud, utöver att andas med lungorna.', amne:'biologi' },
+        { text:'Alla träd fäller sina löv på hösten.', korrekt:false, motivering:'Barrträd som gran och tall behåller sina barr året runt och är gröna även på vintern.', amne:'biologi' },
+        { text:'En larv kan förvandlas till en fjäril.', korrekt:true, motivering:'Det kallas metamorfos - en fullständig omvandling från larv via puppa till fjäril.', amne:'biologi' },
+        { text:'Hajar är däggdjur.', korrekt:false, motivering:'Hajar är fiskar (broskfiskar), inte däggdjur.', amne:'biologi' },
+        { text:'Daggmaskar hjälper till att göra jorden bördig.', korrekt:true, motivering:'Daggmaskar luckrar upp jorden och bryter ner växtdelar, vilket gör jorden bättre för växter att växa i.', amne:'biologi' },
+        { text:'Pandor äter mest bambu.', korrekt:true, motivering:'Jättepandor lever nästan uteslutande på bambu, trots att de tillhör björnfamiljen.', amne:'biologi' },
+        { text:'Alla spindlar är insekter.', korrekt:false, motivering:'Spindlar är spindeldjur med åtta ben, medan insekter har sex ben - de tillhör olika djurgrupper.', amne:'biologi' },
+        { text:'Korallrev byggs av levande djur.', korrekt:true, motivering:'Koraller är små djur, kallade polyper, som tillsammans bygger upp revet.', amne:'biologi' },
+        { text:'Människan har samma antal ben som en insekt.', korrekt:false, motivering:'Människan har två ben, medan insekter har sex ben.', amne:'biologi' },
+        { text:'Ljus färdas snabbare än ljud.', korrekt:true, motivering:'Ljusets hastighet är mycket högre än ljudets, därför ser man blixten före man hör åskan.', amne:'fysik' },
+        { text:'Ett föremål väger lika mycket på månen som på jorden.', korrekt:false, motivering:'Tyngdkraften är svagare på månen, så samma föremål väger mindre där, även om mängden material (massan) är samma.', amne:'fysik' },
+        { text:'Varm luft stiger uppåt.', korrekt:true, motivering:'Varm luft är lättare än kall luft och stiger därför uppåt.', amne:'fysik' },
+        { text:'Ljud kan färdas genom ett vakuum (tomrum utan luft).', korrekt:false, motivering:'Ljud behöver ett medium, som luft, för att färdas - i ett vakuum finns ingen luft att föra ljudet vidare.', amne:'fysik' },
+        { text:'Utan luftmotstånd faller alla föremål lika snabbt, oavsett hur tunga de är.', korrekt:true, motivering:'I fritt fall utan luftmotstånd påverkas alla föremål av samma tyngdacceleration, oavsett vikt.', amne:'fysik' },
+        { text:'Vatten med salter i, som kranvatten, kan leda elektricitet.', korrekt:true, motivering:'Salter och mineraler i vattnet gör att det leder ström, vilket gör vatten och elektricitet farligt att blanda.', amne:'fysik' },
+        { text:'En regnbåge visar sju olika färger.', korrekt:true, motivering:'En regnbåge visar färgspektrumet: rött, orange, gult, grönt, blått, indigo och violett.', amne:'fysik' },
+        { text:'Ljud kan bara färdas genom luft.', korrekt:false, motivering:'Ljud kan även färdas genom fasta ämnen och vätskor, ofta snabbare än genom luft.', amne:'fysik' },
+        { text:'Norrsken uppstår när partiklar från solen möter jordens magnetfält.', korrekt:true, motivering:'När solvindens partiklar kolliderar med jordens atmosfär kan det bilda ett norrsken.', amne:'fysik' },
+        { text:'Ett svart tyg blir varmare i solen än ett vitt tyg.', korrekt:true, motivering:'Svart färg absorberar mer ljus och värme, medan vitt reflekterar bort mer av solljuset.', amne:'fysik' },
+        { text:'Tyngdkraften finns bara på jorden.', korrekt:false, motivering:'Tyngdkraften finns överallt i universum, men hur stark den är beror på hur mycket massa ett föremål har.', amne:'fysik' },
+        { text:'Ett flygplans vingar hjälper till att skapa lyftkraft med hjälp av luftens tryckskillnader.', korrekt:true, motivering:'Vingens form gör att luften rör sig olika fort över och under vingen, vilket skapar en lyftkraft uppåt.', amne:'fysik' },
+        { text:'Vatten består av väte och syre.', korrekt:true, motivering:'En vattenmolekyl (H2O) består av två väteatomer och en syreatom.', amne:'kemi' },
+        { text:'Alla metaller är magnetiska.', korrekt:false, motivering:'Bara vissa metaller, som järn, nickel och kobolt, är magnetiska - till exempel guld och aluminium är det inte.', amne:'kemi' },
+        { text:'Salt löser sig i vatten.', korrekt:true, motivering:'Saltkristaller bryts isär och sprids ut i vattnet, en process som kallas att lösas upp.', amne:'kemi' },
+        { text:'Rost bildas när järn reagerar med syre och fukt.', korrekt:true, motivering:'Rost är resultatet av en kemisk reaktion (oxidation) mellan järn, syre och vatten.', amne:'kemi' },
+        { text:'Man kan blanda olja och vatten så att de bildar en jämn blandning.', korrekt:false, motivering:'Olja och vatten blandas inte utan separeras i olika lager, eftersom de har olika densitet.', amne:'kemi' },
+        { text:'Bakpulver och ättika reagerar och bildar koldioxidgas.', korrekt:true, motivering:'Det är en syra-bas-reaktion som skapar bubblor av koldioxidgas.', amne:'kemi' },
+        { text:'Guld är ett grundämne.', korrekt:true, motivering:'Guld (kemiskt tecken Au) är ett rent grundämne i det periodiska systemet.', amne:'kemi' },
+        { text:'Ett kemiskt tecken är samma sak som ämnets hela namn.', korrekt:false, motivering:'Ett kemiskt tecken är en kort förkortning, till exempel "O" för syre, inte hela namnet utskrivet.', amne:'kemi' },
+        { text:'Luft är en blandning av flera olika gaser.', korrekt:true, motivering:'Luft består mest av kväve och syre, samt lite koldioxid och andra gaser.', amne:'kemi' },
+        { text:'Socker försvinner helt när det löses i vatten.', korrekt:false, motivering:'Sockret finns kvar, men delat i så små, osynliga delar (molekyler) att man inte kan se dem längre.', amne:'kemi' },
+        { text:'En kemisk reaktion kan varken skapa eller förstöra atomer, bara omgruppera dem.', korrekt:true, motivering:'Det kallas lagen om massans bevarande - atomerna finns kvar, men i nya kombinationer.', amne:'kemi' },
+        { text:'Alla syror är farliga att röra vid.', korrekt:false, motivering:'Vissa syror, som citronsyra i citroner, är milda och ofarliga i vardagen, medan andra syror är starkt frätande.', amne:'kemi' },
+        { text:'Is, vatten och vattenånga är samma ämne fast i olika former.', korrekt:true, motivering:'Det är samma kemiska ämne (H2O), bara i olika aggregationstillstånd: fast, flytande och gas.', amne:'kemi' }
     ];
     // ---- AI: generera flera sant/falskt-påståenden på en gång, körs i kö efter varandra ----
     function parseSantFalsktList(text){
@@ -6404,27 +6541,58 @@
         if(!config){ widget.style.height = '420px'; }
         const root=document.createElement('div'); root.className='poll-root sf-root'; body.appendChild(root);
 
-        let state = { idx:0, custom:null, votesSant:0, votesFalskt:0, revealed:false };
+        const SF_AMNEN = [ ['biologi','🧬 Biologi'], ['fysik','🔭 Fysik'], ['kemi','⚗️ Kemi'] ];
+        let state = { idx:0, custom:null, votesSant:0, votesFalskt:0, revealed:false, amne:null };
         if(config && config.data && typeof config.data.idx==='number'){ Object.assign(state, config.data); }
-        else { state.idx = Math.floor(Math.random()*SANTFALSKT_BANK.length); }
+        if(!config || typeof state.idx!=='number' || state.idx<0){ /* index väljs när ämne valts, se valjAmne() */ }
         // Kö med AI-skapade påståenden som ännu inte visats. Lever bara i minnet (sparas INTE),
         // så den försvinner när widgeten stängs/laddas om - och blandas aldrig med bankens påståenden.
         let aiQueue = [];
 
         const persist=()=>{ widget.dataset.santfalskt = JSON.stringify(state); saveBoardState(); };
+        // FIX: bankens 30 påståenden är nu taggade per NO-ämne (biologi/fysik/kemi). Läraren väljer
+        // ämne INNAN några påståenden visas, och bara påståenden ur det valda ämnet slumpas fram.
+        function bankForAmne(){ return SANTFALSKT_BANK.filter(p=>p.amne===state.amne); }
         function nyttPastaende(){
+            const bank = bankForAmne();
             if(aiQueue.length){
                 state.custom = aiQueue.shift(); state.idx=-1;
-            } else {
-                let ny; do { ny=Math.floor(Math.random()*SANTFALSKT_BANK.length); } while(SANTFALSKT_BANK.length>1 && ny===state.idx);
+            } else if(bank.length){
+                let ny; do { ny = Math.floor(Math.random()*SANTFALSKT_BANK.length); } while(SANTFALSKT_BANK[ny].amne!==state.amne || (SANTFALSKT_BANK.length>1 && ny===state.idx));
                 state.idx=ny; state.custom=null;
             }
             state.votesSant=0; state.votesFalskt=0; state.revealed=false;
         }
+        function valjAmne(amne){
+            state.amne = amne; state.custom=null;
+            const bank = bankForAmne();
+            state.idx = bank.length ? SANTFALSKT_BANK.indexOf(bank[Math.floor(Math.random()*bank.length)]) : 0;
+            state.votesSant=0; state.votesFalskt=0; state.revealed=false;
+            render(); persist();
+        }
+
+        function renderAmnesval(){
+            root.innerHTML='';
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🧠 Vilket ämne vill du öva sant/falskt inom?'; root.appendChild(hint);
+            const grid=document.createElement('div'); grid.className='sf-amne-grid';
+            SF_AMNEN.forEach(([key,label])=>{
+                const b=document.createElement('button'); b.type='button'; b.className='btn btn-primary sf-amne-btn'; b.textContent=label;
+                b.onclick=()=>valjAmne(key);
+                grid.appendChild(b);
+            });
+            root.appendChild(grid);
+        }
 
         function render(){
+            // Om inget ämne valts än (ny widget, eller gammal sparad data utan ämne) - visa
+            // ämnesvalet först, innan några påståenden visas.
+            if(!state.amne){ renderAmnesval(); return; }
             root.innerHTML='';
-            const p = (state.idx===-1 && state.custom) ? state.custom : SANTFALSKT_BANK[state.idx];
+            const bank = bankForAmne();
+            const p = (state.idx===-1 && state.custom) ? state.custom : (bank.length ? SANTFALSKT_BANK[state.idx] : null);
+            if(!p){ renderAmnesval(); return; }
+            const amneLabel = (SF_AMNEN.find(a=>a[0]===state.amne)||[])[1] || '';
+            const amneRow=document.createElement('div'); amneRow.className='sf-amne-current'; amneRow.textContent=amneLabel; root.appendChild(amneRow);
             const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🧠 Är påståendet sant eller falskt? Fundera och rösta!'; root.appendChild(hint);
             const pEl=document.createElement('div'); pEl.className='sf-pastaende'; pEl.textContent='"'+p.text+'"'; root.appendChild(pEl);
 
@@ -6464,9 +6632,11 @@
             nyBtn.onclick=()=>{ nyttPastaende(); render(); persist(); };
             const aiBtn=document.createElement('button'); aiBtn.className='kw-btn kw-btn-ai'; aiBtn.textContent='✨ AI'; aiBtn.title='Skapa påstående med AI';
             aiBtn.onclick=openSantFalsktAiDialog;
+            const amneBtn=document.createElement('button'); amneBtn.className='kw-btn kw-btn-ghost'; amneBtn.textContent='🔄 Byt ämne'; amneBtn.title='Välj ett annat NO-ämne';
+            amneBtn.onclick=()=>{ state.amne=null; render(); persist(); };
             const resetBtn=document.createElement('button'); resetBtn.className='kw-btn kw-btn-warn'; resetBtn.textContent='🔄 Nollställ röster';
             resetBtn.onclick=()=>{ state.votesSant=0; state.votesFalskt=0; state.revealed=false; render(); persist(); };
-            btns.appendChild(nyBtn); btns.appendChild(aiBtn); btns.appendChild(resetBtn);
+            btns.appendChild(nyBtn); btns.appendChild(aiBtn); btns.appendChild(amneBtn); btns.appendChild(resetBtn);
             if(!state.revealed){
                 const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa facit';
                 revealBtn.onclick=()=>{ state.revealed=true; render(); persist(); };
@@ -21609,8 +21779,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             }
         }
         const TAB_DEFS = [ ['naturmiljoer','🌍 Naturen'], ['skogen','🌲 Skogen'], ['trad','🌳 Träd'], ['vaxter','🌱 Växter'], ['vader','🌦️ Väder'], ['blommor','🌸 Blommor'], ['bar','🫐 Bär'], ['djur','🦌 Djur'], ['svampar','🍄 Svampar'], ['insekter','🐝 Insekter'], ['fiskar','🐟 Fiskar'], ['begrepp','📖 Begrepp'], ['quiz','❓ Quiz'] ];
-        const tabBtns = TAB_DEFS.map(([key,label],i)=>{
-            const t=document.createElement('button'); t.className='figx-tab'+(i===0?' active':''); t.textContent=label;
+        const tabBtns = TAB_DEFS.map(([key,label])=>{
+            // FIX: den markerade fliken matchades tidigare bara mot POSITIONEN (alltid första
+            // fliken "Naturen"), oavsett vilket läge widgeten faktiskt startade i (hårdkodat till
+            // 'skogen'). Det gjorde att "Naturen" syntes markerad samtidigt som innehållet som
+            // visades tillhörde "Skogen" - tills man klickade och det rättade till sig självt.
+            // Matcha istället mot det VERKLIGA startläget så markeringen stämmer direkt.
+            const t=document.createElement('button'); t.className='figx-tab'+(key===läge?' active':''); t.textContent=label;
             t.onclick=()=>{ läge=key; tabBtns.forEach(x=>x.classList.remove('active')); t.classList.add('active'); render(); };
             tabsEl.appendChild(t);
             return t;
