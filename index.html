@@ -1509,7 +1509,7 @@
     .bio-begrepp-pill:hover{ background:#d7f3df; border-color:#3cb45f; }
 
     /* ---- LÄSFÖRSTÅELSE ---- */
-    .lasf-widget .widget-header{ background:linear-gradient(135deg,#5856d6,#4644b8) !important; }
+    .lasf-widget .widget-header{ background:#ff3b30 !important; }
     .lasf-body{ padding:14px 14px 12px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; overflow-x:hidden; }
     .lasf-root{ display:flex; flex-direction:column; gap:10px; }
     .lasf-hem-rubrik{ text-align:center; font-size:15px; font-weight:800; color:#3d3c8f; margin:2px 0 0; }
@@ -1848,6 +1848,7 @@
 
     /* ---- KEMI ÅK 4 ---- */
     .kemi-widget .widget-header{ background:linear-gradient(135deg,#8b5cf6,#6d3fd4) !important; }
+    .yrke-widget .widget-header{ background:#ff3b30 !important; }
     .kemi-body{ padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
     .kemi-tabs{ display:flex; flex-wrap:wrap; gap:8px; }
     .kemi-tab{ border:1px solid #e4e2ea; background:#f5f4f7; color:#2a2632; padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s ease; white-space:nowrap; font-family:inherit; }
@@ -2215,6 +2216,11 @@
     .rml-problem { font-size:15px; line-height:1.4; padding:2px 4px 10px; }
     .rml-vote-btn { font-size:14.5px; }
     .rml-facit { margin-top:10px; padding:12px 14px; border-radius:12px; text-align:center; animation:pclockPop .35s ease; }
+    .ovanligt-begrepp-box { background:#f0f6ff; border:1.5px solid #d0e4ff; border-radius:12px; padding:10px 12px; margin-top:10px; text-align:left; }
+    .ovanligt-begrepp-head { font-size:11px; font-weight:800; color:#007aff; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
+    .ovanligt-begrepp-rad { font-size:12.5px; color:#333; line-height:1.45; margin-bottom:4px; }
+    .ovanligt-begrepp-rad:last-child { margin-bottom:0; }
+    .ovanligt-begrepp-rad b { color:#1d1d1f; }
     .rml-facit-yes { background:#d2f8dc; border:1.5px solid #34c759; }
     .rml-facit-no { background:#ffe1df; border:1.5px solid #ff3b30; }
     .rml-facit-icon { font-size:28px; line-height:1; margin-bottom:2px; }
@@ -2909,6 +2915,8 @@
     .figx-box { background:#fff; border-radius:18px; width:min(880px,96vw); max-height:92vh; overflow:auto; box-shadow:0 24px 60px -12px rgba(0,0,0,0.4); padding:20px; }
     .figx-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
     .figx-head h2 { margin:0; font-size:19px; color:#1a1a2e; }
+    .yrke-namn-hint { border:none; background:#eaf4ff; color:#007aff; font-weight:700; font-size:13px; padding:7px 12px; border-radius:10px; cursor:pointer; font-family:inherit; }
+    .yrke-namn-hint:hover { background:#d8ecff; }
     .figx-close { border:none; background:#f2f2f7; width:34px; height:34px; border-radius:50%; font-size:17px; cursor:pointer; color:#555; }
     .figx-close:hover { background:#e5e5ea; }
     .figx-sub { margin:0 0 14px; color:#7a7a86; font-size:13px; }
@@ -6441,6 +6449,8 @@
 
             const totalEl=document.createElement('div'); totalEl.className='exit-total'; totalEl.textContent = total===0 ? 'Inga röster än' : total+' röster totalt'; root.appendChild(totalEl);
 
+            renderOvanligaBegreppNotis(root, p.text);
+
             if(state.revealed){
                 const facit=document.createElement('div'); facit.className='rml-facit '+(p.korrekt?'rml-facit-yes':'rml-facit-no');
                 const icon=document.createElement('div'); icon.className='rml-facit-icon'; icon.textContent=p.korrekt?'✅':'❌'; facit.appendChild(icon);
@@ -7953,6 +7963,7 @@
             falsktBtn.onclick=()=>{ if(sfVal!==null) return; sfVal=false; renderSf(); persist(); };
             knappar.appendChild(santBtn); knappar.appendChild(falsktBtn);
             kortWrap.appendChild(knappar);
+            renderOvanligaBegreppNotis(kortWrap, p.text);
             if(sfVal!==null){
                 const facit=document.createElement('div'); facit.className='rml-facit '+(p.ratt?'rml-facit-yes':'rml-facit-no');
                 const icon=document.createElement('div'); icon.className='rml-facit-icon'; icon.textContent=p.ratt?'✅':'❌'; facit.appendChild(icon);
@@ -10209,6 +10220,71 @@
         if(!config) persist();
     }
 
+    // ---- OVANLIGA BEGREPP: känner igen lite svårare ord i påståenden/frågor (t.ex. "paleontolog")
+    // och visar en liten ordlista längst ner som förklarar dem, så eleverna inte fastnar på ett
+    // ord de inte kan. Delad funktion som återanvänds i Källkritik, Sant/Falskt, Rimlighet m.fl.
+    const OVANLIGA_BEGREPP = {
+        'paleontolog': 'en forskare som studerar fossil och förhistoriska djur och växter, t.ex. dinosaurier.',
+        'arkeolog': 'en forskare som studerar gamla föremål och lämningar för att lära sig hur människor levde förr.',
+        'meteorolog': 'en expert på väder som förutspår och förklarar hur vädret kommer att bli.',
+        'astronom': 'en forskare som studerar rymden, stjärnor och planeter.',
+        'biolog': 'en forskare som studerar djur, växter och annat levande.',
+        'geolog': 'en forskare som studerar jordens uppbyggnad, berg och stenar.',
+        'historiker': 'en person som forskar om och har stor kunskap om historiska händelser.',
+        'opartisk': 'att inte ta någons sida, utan vara rättvis och neutral.',
+        'trovärdig': 'något man kan lita på och tro är sant.',
+        'anonym': 'okänd - man vet inte vem som ligger bakom, t.ex. ett meddelande utan avsändare.',
+        'källkritik': 'att undersöka och tänka kritiskt på varifrån information kommer, och om den går att lita på.',
+        'propaganda': 'information som sprids för att påverka vad man tycker, ofta på ett vinklat eller osant sätt.',
+        'manipulerad': 'ändrad eller redigerad, ofta för att lura eller vilseleda någon.',
+        'vilseledande': 'sådant som får en att tro fel, ofta med flit.',
+        'myndighet': 'en statlig organisation som sköter viktiga samhällsuppgifter, t.ex. Skolverket eller SMHI.',
+        'redaktör': 'en person som granskar och godkänner texter innan de publiceras.',
+        'etablerat': 'välkänt och som funnits länge, och som därför ofta räknas som pålitligt.',
+        'expertis': 'särskild kunskap och erfarenhet inom ett visst område.',
+        'granskad': 'noggrant kontrollerad av någon innan den godkänns eller publiceras.',
+        'vetenskaplig': 'grundad på forskning och undersökningar, inte bara på tyckande.',
+        'sponsrad': 'betald av ett företag, ofta i utbyte mot att produkten omnämns positivt.',
+        'fossil': 'rester eller avtryck av djur och växter som levt för mycket länge sedan, bevarade i sten.',
+        'referens': 'en hänvisning till varifrån en uppgift kommer, t.ex. en bok eller webbsida.',
+        'objektiv': 'sakligt och rättvist, utan att låta egna åsikter styra.',
+        'subjektiv': 'färgat av egna åsikter eller känslor, inte helt neutralt.',
+        'auktoritet': 'någon med makt, kunskap eller erfarenhet som gör att andra litar på personen.',
+        'plagiat': 'att kopiera någon annans arbete och påstå att det är ens eget.',
+        'desinformation': 'medvetet falsk information som sprids för att vilseleda.',
+        'algoritm': 'en uppsättning regler en dator följer för att lösa ett problem, t.ex. vilka inlägg du ser i sociala medier.',
+        'influencer': 'en person med många följare på sociala medier som kan påverka vad andra tycker eller köper.',
+        'stereotyp': 'en förenklad och ofta orättvis bild av en grupp människor.',
+        'fenomen': 'något som händer eller syns, ofta ovanligt eller intressant att studera.',
+        'reservoar': 'ett naturligt eller konstgjort förråd, t.ex. av vatten.',
+        'ekosystem': 'allt levande och icke-levande på en plats som påverkar varandra, t.ex. en skog eller sjö.',
+        'mikroorganism': 'en mycket liten levande varelse som man bara kan se i mikroskop, t.ex. bakterier.',
+        'atmosfär': 'lagret av luft/gaser som omger jorden eller en planet.'
+    };
+    function findOvanligaBegrepp(text){
+        if(!text) return [];
+        const lower = text.toLowerCase();
+        const found = [];
+        Object.keys(OVANLIGA_BEGREPP).forEach(ord=>{
+            if(new RegExp('\\b'+ord,'i').test(lower)) found.push({ ord, forklaring: OVANLIGA_BEGREPP[ord] });
+        });
+        return found;
+    }
+    function renderOvanligaBegreppNotis(container, text){
+        const found = findOvanligaBegrepp(text);
+        if(!found.length) return;
+        const box=document.createElement('div'); box.className='ovanligt-begrepp-box';
+        const head=document.createElement('div'); head.className='ovanligt-begrepp-head'; head.textContent='📘 Svåra ord i texten';
+        box.appendChild(head);
+        found.forEach(f=>{
+            const row=document.createElement('div'); row.className='ovanligt-begrepp-rad';
+            const b=document.createElement('b'); b.textContent = f.ord.charAt(0).toUpperCase()+f.ord.slice(1)+': ';
+            row.appendChild(b); row.appendChild(document.createTextNode(f.forklaring));
+            box.appendChild(row);
+        });
+        container.appendChild(box);
+    }
+
     // ---- KÄLLKRITIK ----
     // Samma rösta+facit-mekanik som Rimlighet. Ett kort påstående/"nyhet" visas,
     // klassen röstar om källan verkar trovärdig, sedan avslöjas facit + motivering.
@@ -10412,6 +10488,8 @@
             root.appendChild(mkVoteBtn(false));
 
             const totalEl=document.createElement('div'); totalEl.className='exit-total'; totalEl.textContent = total===0 ? 'Inga röster än' : total + ' röster totalt'; root.appendChild(totalEl);
+
+            renderOvanligaBegreppNotis(root, state.text);
 
             if(state.revealed){
                 const facit=document.createElement('div'); facit.className='rml-facit '+(state.correct?'rml-facit-yes':'rml-facit-no');
@@ -13520,7 +13598,7 @@
         // widgetType och alla serialize/deserialize-kopplingar) lämnas orört, annars skulle redan
         // utplacerade Startuppgift-widgetar på lärares tavlor sluta gå att läsa in efter uppdateringen.
         const suHeaderSpan = widget.querySelector('.widget-header > span'); if(suHeaderSpan) suHeaderSpan.textContent = 'Startuppgift Matematik';
-        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är lite klurigare!</div><div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Åk 4</option><option value='ak5'>Åk 5</option><option value='ak6'>Åk 6</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
+        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är lite klurigare!</div><div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
         const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista'), nivaSelSU = body.querySelector('.su-niva');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
         function gcdSU(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a||1; }
@@ -13660,7 +13738,7 @@
         if(config===undefined) config=null;
         const body = createWidget('STARTUPPGIFT SVENSKA', 400, 'startuppgift-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är en klurig gåta!</div><div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Åk 4</option><option value='ak5'>Åk 5</option><option value='ak6'>Åk 6</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>📖 Dagens uppgift</button><div class='su-lista'></div>`;
+        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är en klurig gåta!</div><div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>📖 Dagens uppgift</button><div class='su-lista'></div>`;
         const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista'), nivaSelSU = body.querySelector('.su-niva');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
         const val = (arr)=> arr[ri(0, arr.length-1)];
@@ -15773,11 +15851,14 @@
             });
         }
         function renderGrid(){
-            footEl.style.display='block'; footEl.textContent='Klicka på ett yrke för att se förklaringen';
+            footEl.style.display='block'; footEl.textContent='Klicka på en symbol för att gissa yrket!';
             gridEl.innerHTML = '';
             bank[currentCat].forEach(item=>{
                 const tile = document.createElement('div'); tile.className='kemi-tile';
-                tile.innerHTML = `<span class="kemi-emoji">${item.emoji}</span><span class="kemi-lbl">${item.namn}</span>`;
+                // FIX: bara ikonen visas på huvudsidan nu (inget namn) - eleverna ska gissa yrket
+                // utifrån symbolen, och sedan avslöja svaret själva i popupen.
+                tile.innerHTML = `<span class="kemi-emoji">${item.emoji}</span>`;
+                tile.title = 'Klicka för att gissa och testa dig själv';
                 tile.onclick = ()=> openYrkePopup(item);
                 gridEl.appendChild(tile);
             });
@@ -15788,7 +15869,12 @@
             const stang=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
             ov.addEventListener('click', e=>{ if(e.target===ov) stang(); });
             const head=document.createElement('div'); head.className='figx-head';
-            const h2=document.createElement('h2'); h2.textContent = item.namn;
+            const h2=document.createElement('h2');
+            // FIX: yrkesnamnet döljs bakom en klickbar "tryck för att visa"-etikett tills man
+            // själv väljer att avslöja svaret - bra för att testa eleverna innan facit visas.
+            const nameHint=document.createElement('button'); nameHint.type='button'; nameHint.className='yrke-namn-hint'; nameHint.textContent='👁️ Tryck för att visa yrket';
+            nameHint.onclick=()=>{ h2.textContent = item.namn; };
+            h2.appendChild(nameHint);
             const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
             head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
             const emoji=document.createElement('div'); emoji.style.cssText='font-size:48px;margin:6px 0 4px;'; emoji.textContent=item.emoji;
@@ -25772,6 +25858,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             root.appendChild(mkVoteBtn(false));
 
             const totalEl=document.createElement('div'); totalEl.className='exit-total'; totalEl.textContent = total===0 ? 'Inga röster än' : total + ' röster totalt'; root.appendChild(totalEl);
+
+            renderOvanligaBegreppNotis(root, state.text);
 
             if(state.revealed){
                 const facit=document.createElement('div'); facit.className='rml-facit '+(state.correct?'rml-facit-yes':'rml-facit-no');
