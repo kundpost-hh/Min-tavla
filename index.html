@@ -222,6 +222,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createRewardSystem()"><div class="icon">⭐</div><div class="label">Poäng</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createStickyNote()"><div class="icon">🗒️</div><div class="label">Lapp</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createElevWidget()"><div class="icon">🧑‍🎓</div><div class="label">Elever</div></button>
+            <button class="tool-btn" data-cat="klassrum" onclick="createLararschema()"><div class="icon">📅</div><div class="label">Lärarschema</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createUppmarksamhetWidget()"><div class="icon">🤫</div><div class="label">Uppmärksamhet</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createBerattarverkstad()"><div class="icon">🎲</div><div class="label">Berättarverkstad</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createWordOfTheDay()"><div class="icon">💡</div><div class="label">Dagens ord</div></button>
@@ -1677,6 +1678,60 @@
     /* POSITIONSSYSTEMET */
     .ps-target { text-align:center; font-size:14px; font-weight:700; color:#555; margin-bottom:4px; }
     .ps-target b { font-size:34px; color:#1d1d1f; display:block; margin-top:2px; }
+    .ps-varde-tal { display:flex; justify-content:center; gap:6px; margin:14px 0 10px; }
+    .ps-varde-siffra { font-size:40px; font-weight:900; color:#1d1d1f; width:48px; height:58px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:#f7f7f9; border:2px solid #ececf0; font-variant-numeric:tabular-nums; }
+    .ps-varde-siffra-vald { background:#eaf4ff; border-color:#007aff; color:#007aff; transform:scale(1.08); }
+    .ps-varde-plats { text-align:center; font-size:13px; font-weight:700; color:#666; margin-bottom:10px; }
+
+    /* ---- LÄRARSCHEMA ---- */
+    .ls-view-switch { display:flex; gap:4px; background:#f0f0f5; border-radius:10px; padding:3px; margin-bottom:10px; }
+    .ls-view-tab { flex:1; border:none; background:transparent; padding:8px 4px; border-radius:8px; font-weight:800; font-size:12.5px; color:#8e8e93; cursor:pointer; font-family:inherit; }
+    .ls-view-tab.active { background:#fff; color:#007aff; box-shadow:0 1px 4px rgba(0,0,0,.12); }
+    .ls-next-banner { background:linear-gradient(135deg,#007aff,#5ac8fa); border-radius:14px; padding:14px 16px; color:#fff; margin-bottom:10px; }
+    .ls-next-label { font-size:11px; font-weight:800; letter-spacing:.5px; opacity:.9; margin-bottom:4px; }
+    .ls-next-main { font-size:19px; font-weight:900; margin-bottom:2px; }
+    .ls-next-sub { font-size:13px; opacity:.95; }
+    .ls-next-empty { font-size:13px; opacity:.9; }
+    .ls-overview { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+    .ls-stat { background:#f7f7f9; border-radius:12px; padding:10px 6px; text-align:center; }
+    .ls-stat-icon { font-size:18px; }
+    .ls-stat-val { font-size:16px; font-weight:900; color:#1d1d1f; }
+    .ls-stat-lbl { font-size:9.5px; font-weight:700; color:#8e8e93; margin-top:2px; }
+    .ls-next-task { background:#fff8e6; border:1.5px solid #ffe6a8; border-radius:10px; padding:8px 10px; font-size:12.5px; margin-bottom:10px; }
+    .ls-lessons { display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; margin-bottom:10px; padding-right:2px; }
+    .ls-day-head { font-size:11px; font-weight:800; color:#8e8e93; text-transform:uppercase; letter-spacing:.5px; margin-top:6px; }
+    .ls-empty { text-align:center; color:#b0b0b6; font-size:12.5px; font-style:italic; padding:10px 4px; }
+    .ls-empty-small { padding:4px 0; }
+    .ls-lesson { display:flex; gap:10px; background:#fff; border:1.5px solid #ececf0; border-radius:12px; padding:10px 12px; align-items:flex-start; cursor:pointer; transition:border-color .15s; }
+    .ls-lesson:hover { border-color:#007aff; }
+    .ls-lesson-cancelled { opacity:.55; }
+    .ls-lesson-moved { border-color:#ff9500; background:#fff8ec; }
+    .ls-lesson-time { font-size:12px; font-weight:800; color:#007aff; white-space:nowrap; line-height:1.4; flex-shrink:0; width:44px; }
+    .ls-lesson-main { flex:1; min-width:0; }
+    .ls-lesson-top { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .ls-lesson-top b { font-size:14px; color:#1d1d1f; }
+    .ls-lesson-sub { font-size:12px; color:#666; margin-top:2px; }
+    .ls-lesson-notes { font-size:11px; color:#8e8e93; margin-top:4px; overflow-wrap:break-word; }
+    .ls-lesson-actions { display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
+    .ls-icon-btn { border:none; background:#f0f0f5; width:26px; height:26px; border-radius:8px; font-size:13px; cursor:pointer; }
+    .ls-icon-btn:hover { background:#e2e2ea; }
+    .ls-badge { font-size:10px; font-weight:800; padding:2px 7px; border-radius:20px; white-space:nowrap; }
+    .ls-badge-cancelled { background:#ffe3e3; color:#c0392b; }
+    .ls-badge-moved { background:#fff3d6; color:#b8790a; }
+    .ls-form-row { margin-bottom:10px; }
+    .ls-form-row label { display:block; font-size:11px; font-weight:800; color:#666; margin-bottom:3px; text-transform:uppercase; letter-spacing:.3px; }
+    .ls-form-row input, .ls-form-row select, .ls-form-row textarea { width:100%; box-sizing:border-box; border:1.5px solid #d1d1d6; border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit; }
+    .ls-form-row textarea { min-height:60px; resize:vertical; }
+    .ls-form-row-split { display:flex; gap:8px; margin-bottom:10px; }
+    .ls-form-row-split > div { flex:1; }
+    .ls-form-row-split label { display:block; font-size:11px; font-weight:800; color:#666; margin-bottom:3px; text-transform:uppercase; letter-spacing:.3px; }
+    .ls-form-row-split input { width:100%; box-sizing:border-box; border:1.5px solid #d1d1d6; border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit; }
+    .ls-elevlista { display:flex; flex-direction:column; gap:5px; max-height:280px; overflow-y:auto; margin-bottom:14px; }
+    .ls-elev-item { background:#f7f7f9; border-radius:8px; padding:6px 10px; font-size:13px; }
+    .ls-elevlista-empty { font-size:13px; color:#666; line-height:1.5; margin-bottom:14px; }
+    .ls-msg-ta { width:100%; box-sizing:border-box; min-height:120px; border:1.5px solid #d1d1d6; border-radius:10px; padding:10px; font-size:13px; font-family:inherit; margin-bottom:14px; resize:vertical; }
+    .ls-plan-item { background:#f7f7f9; border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px; line-height:1.5; }
+    .ls-plan-item > div { color:#555; margin-top:3px; }
     .ps-total { text-align:center; font-size:15px; font-weight:800; color:#8a8a90; margin:6px 0 14px; }
     .ps-total.ratt { color:#1a7a34; }
     .ps-addrow { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px; }
@@ -4460,6 +4515,7 @@
                 else if (type === 'ORDKLASSPOKER') { try{ state.data = JSON.parse(w.dataset.ordklass || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'KÄLLKRITIK') { try{ state.data = JSON.parse(w.dataset.kallkritik || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'POSITIONSSYSTEMET') { try{ state.data = JSON.parse(w.dataset.pos || '{}'); }catch(e){ state.data={}; } }
+                else if (type === '📅 LÄRARSCHEMA') { try{ state.data = JSON.parse(w.dataset.lararschema || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'SUDOKU') { try{ state.data = JSON.parse(w.dataset.sudoku || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ÖVERSLAGSRÄKNING') { try{ state.data = JSON.parse(w.dataset.overslag || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'AVRUNDNING') { try{ state.data = JSON.parse(w.dataset.avrundning || '{}'); }catch(e){ state.data={}; } }
@@ -4630,6 +4686,7 @@
             else if (w.type === 'ORDKLASSPOKER') createOrdklasspoker(w);
             else if (w.type === 'KÄLLKRITIK') createKallkritik(w);
             else if (w.type === 'POSITIONSSYSTEMET') createPositionssystemet(w);
+            else if (w.type === '📅 LÄRARSCHEMA') createLararschema(w);
             else if (w.type === 'SUDOKU') createSudoku(w);
             else if (w.type === 'ÖVERSLAGSRÄKNING') createOverslagsrakning(w);
             else if (w.type === 'AVRUNDNING') createAvrundning(w);
@@ -12758,18 +12815,31 @@
     }
 
     // ---- POSITIONSSYSTEMET ----
-    // Visuella "tiobas-klossar" (tusental/hundratal/tiotal/ental) som eleverna bygger tal med.
+    // Visuella "tiobas-klossar" (tusental/hundratal/tiotal/ental) som eleverna bygger tal med,
+    // samt en flik "Talets värde" där man tränar på vad en specifik siffra i ett femsiffrigt tal
+    // faktiskt är värd (t.ex. att 3:an i 47 382 är värd 300, eftersom den står på hundratalsplatsen).
+    const PS_PLATSNAMN = ['ental','tiotal','hundratal','tusental','tiotusental'];
     function createPositionssystemet(config){
         if(config===undefined) config=null;
         const body = createWidget('POSITIONSSYSTEMET', 380, 'ps-widget', config);
         const widget = body.parentElement.parentElement;
         if(!config){ widget.style.height = '540px'; }
+        const tabsEl=document.createElement('div'); tabsEl.className='exit-tabs'; body.appendChild(tabsEl);
+        const tBygg=document.createElement('button'); tBygg.type='button'; tBygg.className='exit-tab'; tBygg.textContent='🧱 Bygg tal';
+        const tVarde=document.createElement('button'); tVarde.type='button'; tVarde.className='exit-tab'; tVarde.textContent='🔢 Talets värde';
+        tabsEl.appendChild(tBygg); tabsEl.appendChild(tVarde);
         const root=document.createElement('div'); body.appendChild(root);
         const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
 
-        let state = { level:'3', target:0, built:{th:0,h:0,t:0,o:0} };
-        if(config && config.data && config.data.target){ Object.assign(state, config.data); if(!state.built) state.built={th:0,h:0,t:0,o:0}; }
-        else { nyttTal('3', false); }
+        let state = { läge:'bygg', level:'3', target:0, built:{th:0,h:0,t:0,o:0}, vTal:0, vPos:0, vRevealed:false };
+        if(config && config.data && (config.data.target || config.data.vTal)){
+            Object.assign(state, config.data);
+            if(!state.built) state.built={th:0,h:0,t:0,o:0};
+            if(!state.läge) state.läge='bygg';
+        }
+        else { nyttTal('3', false); nyttVarde(false); }
+        if(!state.target) nyttTal(state.level, false);
+        if(!state.vTal) nyttVarde(false);
 
         function nyttTal(level, doPersist){
             const ranges = { '2':[10,99], '3':[100,999], '4':[1000,9999] };
@@ -12778,11 +12848,24 @@
             state.level=level; state.target=t; state.built={th:0,h:0,t:0,o:0};
             if(doPersist!==false) persist();
         }
+        function nyttVarde(doPersist){
+            let t; do { t=ri(10000,99999); } while(t===state.vTal);
+            state.vTal=t; state.vPos=Math.floor(Math.random()*5); state.vRevealed=false;
+            if(doPersist!==false) persist();
+        }
         const persist=()=>{ widget.dataset.pos = JSON.stringify(state); saveBoardState(); };
         const totalBuilt=()=> state.built.th*1000 + state.built.h*100 + state.built.t*10 + state.built.o;
 
-        function render(){
-            root.innerHTML='';
+        function visaLäge(l){
+            state.läge=l;
+            tBygg.classList.toggle('active', l==='bygg');
+            tVarde.classList.toggle('active', l==='varde');
+            render(); persist();
+        }
+        tBygg.onclick=()=>visaLäge('bygg');
+        tVarde.onclick=()=>visaLäge('varde');
+
+        function renderBygg(){
             const ctrl=document.createElement('div'); ctrl.className='hover-menu sam-ctrl'; ctrl.style.marginBottom='8px';
             const nivaSel=document.createElement('select'); nivaSel.className='editor-select';
             [['2','2 siffror (10–99)'],['3','3 siffror (100–999)'],['4','4 siffror (1000–9999)']].forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; if(v===state.level) o.selected=true; nivaSel.appendChild(o); });
@@ -12840,6 +12923,59 @@
             btns.appendChild(clearBtn); btns.appendChild(nyBtn);
             root.appendChild(btns);
         }
+
+        // FIX (ny flik): "Talets värde" - flera olika femsiffriga tal slumpas fram, och för varje
+        // tal markeras en specifik siffra som eleverna ska räkna ut platsvärdet för (t.ex. att 3:an
+        // i 47 382 står på hundratalsplatsen och därför är värd 300, inte bara "3").
+        function renderVarde(){
+            const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🔢 Vilket värde har den markerade siffran i talet?'; root.appendChild(hint);
+
+            const talStr = String(state.vTal);
+            const highlightFromLeft = talStr.length - 1 - state.vPos; // vPos räknas från höger (0=ental)
+            const numEl=document.createElement('div'); numEl.className='ps-varde-tal';
+            talStr.split('').forEach((ch,i)=>{
+                const span=document.createElement('span'); span.className='ps-varde-siffra'+(i===highlightFromLeft?' ps-varde-siffra-vald':'');
+                span.textContent=ch;
+                numEl.appendChild(span);
+            });
+            root.appendChild(numEl);
+
+            const platsEl=document.createElement('div'); platsEl.className='ps-varde-plats';
+            platsEl.textContent = 'Den markerade siffran står på ' + PS_PLATSNAMN[state.vPos] + 'splatsen.';
+            root.appendChild(platsEl);
+
+            if(state.vRevealed){
+                const siffra = Math.floor(state.vTal / Math.pow(10, state.vPos)) % 10;
+                const varde = siffra * Math.pow(10, state.vPos);
+                const facit=document.createElement('div'); facit.className='rml-facit rml-facit-yes';
+                const icon=document.createElement('div'); icon.className='rml-facit-icon'; icon.textContent='✅'; facit.appendChild(icon);
+                const label=document.createElement('div'); label.className='rml-facit-label'; label.textContent='Värde: '+varde; facit.appendChild(label);
+                const mot=document.createElement('div'); mot.className='rml-facit-mot'; mot.textContent='Siffran '+siffra+' står på '+PS_PLATSNAMN[state.vPos]+'splatsen, så den är värd '+siffra+' × '+Math.pow(10,state.vPos)+' = '+varde+'.'; facit.appendChild(mot);
+                root.appendChild(facit);
+            }
+
+            const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
+            const nyBtn=document.createElement('button'); nyBtn.className='kw-btn kw-btn-primary'; nyBtn.textContent='🎲 Nytt tal';
+            nyBtn.onclick=()=>{ nyttVarde(); render(); };
+            btns.appendChild(nyBtn);
+            if(!state.vRevealed){
+                const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa svar';
+                revealBtn.onclick=()=>{ state.vRevealed=true; render(); persist(); };
+                btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj svar';
+                hideBtn.onclick=()=>{ state.vRevealed=false; render(); persist(); };
+                btns.appendChild(hideBtn);
+            }
+            root.appendChild(btns);
+        }
+
+        function render(){
+            root.innerHTML='';
+            if(state.läge==='varde') renderVarde(); else renderBygg();
+        }
+        tBygg.classList.toggle('active', state.läge==='bygg');
+        tVarde.classList.toggle('active', state.läge==='varde');
         render();
         if(!config) persist();
     }
@@ -12847,6 +12983,313 @@
     // ---- ÖVERSLAGSRÄKNING ----
     // Ett tal visas ("387 + 214 ≈"), klassen rundar av och uppskattar svaret innan
     // de räknar exakt - tränar känslan för rimliga svar.
+    // ---- LÄRARSCHEMA ----
+    // Ett schema läraren själv bygger upp med lektioner (dag, tid, klass, ämne, sal), som visar
+    // dagens/veckans lektioner, nästa lektion högst upp, en översikt, och kopplar automatiskt in
+    // sig i appens globala påminnelsesystem (samma motor som Veckans stjärnmål/Exit ticket m.fl.
+    // redan använder) för notiser 10 minuter innan varje lektion, samt vid salbyten/inställda
+    // lektioner.
+    const LS_DAG_NAMN = ['Måndag','Tisdag','Onsdag','Torsdag','Fredag'];
+    function lsEsc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+    function createLararschema(config){
+        if(config===undefined) config=null;
+        const body = createWidget('📅 LÄRARSCHEMA', 420, 'lararschema-widget', config);
+        const widget = body.parentElement.parentElement;
+        if(!config){ widget.style.height = '640px'; }
+        const root=document.createElement('div'); body.appendChild(root);
+
+        let state = { lessons: [], view: 'today' };
+        if(config && config.data){ Object.assign(state, config.data); if(!Array.isArray(state.lessons)) state.lessons=[]; }
+
+        function persist(){ widget.dataset.lararschema = JSON.stringify(state); saveBoardState(); }
+        function idagIndex(){ return (new Date().getDay()+6)%7; } // 0=mån..6=sön
+        function nuMin(){ const n=new Date(); return n.getHours()*60+n.getMinutes(); }
+        function tidTillMin(t){ const p=(t||'0:0').split(':').map(Number); return (p[0]||0)*60+(p[1]||0); }
+        function lessonsForDay(day){ return state.lessons.filter(l=>l.day===day).sort((a,b)=>tidTillMin(a.start)-tidTillMin(b.start)); }
+        function nextLesson(){
+            const now=new Date(), today=idagIndex(), nowMin=nuMin();
+            for(let off=0; off<8; off++){
+                const d=(today+off)%7; if(d>4) continue;
+                const list=lessonsForDay(d).filter(l=>l.status!=='installd');
+                for(const l of list){
+                    if(off===0 && tidTillMin(l.start)<=nowMin) continue;
+                    return { lesson:l, day:d, isToday: off===0 };
+                }
+            }
+            return null;
+        }
+        function totalHoursThisWeek(){ let m=0; state.lessons.forEach(l=>{ if(l.status!=='installd') m+=Math.max(0,tidTillMin(l.end)-tidTillMin(l.start)); }); return m/60; }
+        function todayCount(){ return idagIndex()<=4 ? lessonsForDay(idagIndex()).filter(l=>l.status!=='installd').length : 0; }
+        function freeTimeToday(){
+            if(idagIndex()>4) return 0;
+            const list=lessonsForDay(idagIndex()).filter(l=>l.status!=='installd');
+            let free=0; for(let i=1;i<list.length;i++){ free+=Math.max(0, tidTillMin(list[i].start)-tidTillMin(list[i-1].end)); }
+            return free;
+        }
+
+        // ---- Påminnelser: skapar/uppdaterar automatiskt dagens lektionspåminnelser i det globala
+        // påminnelsesystemet (samma som visar den blinkande "Påminnelse!"-popupen). Körs vid start
+        // och sedan var 5:e minut, så det räcker att ha tavlan öppen någon gång under dagen.
+        function ensureTodayReminders(){
+            if(typeof remLoad!=='function' || typeof remSave!=='function') return;
+            const today=idagIndex(); if(today>4) return;
+            const now=new Date();
+            const dateStr=now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+            const items=remLoad();
+            const existingIds=new Set(items.map(i=>i.id));
+            let changed=false;
+            lessonsForDay(today).forEach(l=>{
+                const remId='larschema_'+l.id+'_'+dateStr;
+                if(existingIds.has(remId)) return;
+                const [h,m]=l.start.split(':').map(Number);
+                const whenDate=new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, (m||0)-10, 0);
+                if(whenDate.getTime()<Date.now()) return; // hann redan passera - skapa ingen påminnelse i efterhand
+                let text;
+                if(l.status==='installd') text='❌ '+l.subject+' med '+l.klass+' är INSTÄLLD idag.';
+                else if(l.status==='flyttad') text='📍 OBS! '+l.subject+' med '+l.klass+' är flyttad'+(l.flyttadInfo?(': '+l.flyttadInfo):'')+'.';
+                else text='⏰ '+l.subject+' med '+l.klass+' börjar om 10 minuter (sal '+(l.sal||'–')+').';
+                items.push({ id:remId, when: whenDate.toISOString(), text, fired:false });
+                changed=true;
+            });
+            if(changed) remSave(items);
+        }
+
+        function showElevlista(klass){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.textAlign='left';
+            const savedLists = JSON.parse(localStorage.getItem('savedClassLists_'+(typeof currentUser!=='undefined'?currentUser:''))||'{}');
+            const matchKey = Object.keys(savedLists).find(k=>k.toLowerCase()===String(klass).toLowerCase());
+            let html = "<div class='cal-popup-title'>👥 Elevlista – "+lsEsc(klass)+"</div>";
+            if(matchKey){
+                const names=(savedLists[matchKey]||'').split('\n').map(n=>n.trim()).filter(Boolean);
+                html += "<div class='ls-elevlista'>"+(names.length? names.map(n=>"<div class='ls-elev-item'>"+lsEsc(n)+"</div>").join('') : "<div class='ls-elevlista-empty'>Listan är tom.</div>")+"</div>";
+            } else {
+                html += "<div class='ls-elevlista-empty'>Ingen sparad elevlista hittades för \""+lsEsc(klass)+"\". Skapa en via widgeten <b>Elever</b> (spara listan med samma namn som klassen), så dyker den upp här automatiskt.</div>";
+            }
+            html += "<div class='cal-popup-btns'></div>";
+            box.innerHTML = html;
+            const btns=box.querySelector('.cal-popup-btns');
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const closeBtn=document.createElement('button'); closeBtn.className='btn btn-primary'; closeBtn.textContent='Stäng'; closeBtn.onclick=close;
+            btns.appendChild(closeBtn);
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+        function showMeddelandeCompose(klass){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.textAlign='left';
+            box.innerHTML = "<div class='cal-popup-title'>💬 Meddelande till "+lsEsc(klass)+"</div><textarea class='ls-msg-ta' placeholder='Skriv ditt meddelande här...'></textarea><div class='cal-popup-btns'></div>";
+            const btns=box.querySelector('.cal-popup-btns');
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const copyBtn=document.createElement('button'); copyBtn.className='btn btn-primary'; copyBtn.textContent='📋 Kopiera meddelande';
+            copyBtn.onclick=()=>{
+                const ta=box.querySelector('.ls-msg-ta');
+                if(!ta.value.trim()){ ta.focus(); return; }
+                navigator.clipboard.writeText(ta.value).then(()=>{ copyBtn.textContent='✅ Kopierat!'; setTimeout(()=>{ copyBtn.textContent='📋 Kopiera meddelande'; },1500); }).catch(()=>{ customAlert('Kunde inte kopiera automatiskt - markera texten och kopiera manuellt (Ctrl/Cmd+C).', '⚠️'); });
+            };
+            const cancelBtn=document.createElement('button'); cancelBtn.className='btn'; cancelBtn.textContent='Stäng'; cancelBtn.onclick=close;
+            btns.appendChild(copyBtn); btns.appendChild(cancelBtn);
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+        function showTodayPlanning(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.textAlign='left'; box.style.maxHeight='80vh'; box.style.overflowY='auto';
+            const today=idagIndex();
+            let html = "<div class='cal-popup-title'>📋 Dagens planering – "+(today<=4?LS_DAG_NAMN[today]:'Helg')+"</div>";
+            if(today>4){ html += "<div class='ls-empty'>Det är helg, inga lektioner idag.</div>"; }
+            else {
+                const list=lessonsForDay(today);
+                if(!list.length) html += "<div class='ls-empty'>Inga lektioner inlagda för idag.</div>";
+                else list.forEach(l=>{
+                    html += "<div class='ls-plan-item'><b>"+l.start+"–"+l.end+" · "+lsEsc(l.subject)+" ("+lsEsc(l.klass)+")</b>";
+                    if(l.status==='installd') html += " <span class='ls-badge ls-badge-cancelled'>❌ Inställd</span>";
+                    else if(l.status==='flyttad') html += " <span class='ls-badge ls-badge-moved'>📍 Flyttad</span>";
+                    if(l.material) html += "<div>📦 "+lsEsc(l.material)+"</div>";
+                    if(l.notes) html += "<div>📝 "+lsEsc(l.notes)+"</div>";
+                    html += "</div>";
+                });
+            }
+            html += "<div class='cal-popup-btns'></div>";
+            box.innerHTML = html;
+            const btns=box.querySelector('.cal-popup-btns');
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const closeBtn=document.createElement('button'); closeBtn.className='btn btn-primary'; closeBtn.textContent='Stäng'; closeBtn.onclick=close;
+            btns.appendChild(closeBtn);
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        function openLessonEditor(lesson){
+            const isNew=!lesson;
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(420px,94vw)'; box.style.textAlign='left'; box.style.maxHeight='85vh'; box.style.overflowY='auto';
+            box.innerHTML =
+                "<div class='cal-popup-title'>"+(isNew?'+ Lägg till lektion':'✏️ Redigera lektion')+"</div>"+
+                "<div class='ls-form-row'><label>Dag</label><select class='ls-f-day'></select></div>"+
+                "<div class='ls-form-row-split'><div><label>Start</label><input type='time' class='ls-f-start'></div><div><label>Slut</label><input type='time' class='ls-f-end'></div></div>"+
+                "<div class='ls-form-row'><label>Ämne</label><input type='text' class='ls-f-subject' placeholder='t.ex. Matematik'></div>"+
+                "<div class='ls-form-row'><label>Klass/grupp</label><input type='text' class='ls-f-klass' placeholder='t.ex. 6A'></div>"+
+                "<div class='ls-form-row'><label>Sal</label><input type='text' class='ls-f-sal' placeholder='t.ex. Sal 12'></div>"+
+                "<div class='ls-form-row'><label>Material</label><input type='text' class='ls-f-material' placeholder='t.ex. Miniräknare, arbetsbok s. 45'></div>"+
+                "<div class='ls-form-row'><label>Anteckningar</label><textarea class='ls-f-notes' placeholder='Egna anteckningar...'></textarea></div>"+
+                "<div class='ls-form-row'><label>Länk till klassrum (Teams/Google Classroom)</label><input type='text' class='ls-f-url' placeholder='https://...'></div>"+
+                "<div class='ls-form-row'><label>Status</label><select class='ls-f-status'><option value='normal'>Normal</option><option value='installd'>Inställd</option><option value='flyttad'>Flyttad</option></select></div>"+
+                "<div class='ls-form-row ls-f-flyttad-row' style='display:none;'><label>Info om flytt</label><input type='text' class='ls-f-flyttad-info' placeholder='t.ex. Ny tid 13:00, sal 4'></div>"+
+                "<div class='cal-popup-btns'></div>";
+            const daySel=box.querySelector('.ls-f-day');
+            LS_DAG_NAMN.forEach((n,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=n; daySel.appendChild(o); });
+            const statusSel=box.querySelector('.ls-f-status'), flyttadRow=box.querySelector('.ls-f-flyttad-row');
+            statusSel.onchange=()=>{ flyttadRow.style.display = statusSel.value==='flyttad' ? '' : 'none'; };
+            if(lesson){
+                daySel.value=lesson.day;
+                box.querySelector('.ls-f-start').value=lesson.start;
+                box.querySelector('.ls-f-end').value=lesson.end;
+                box.querySelector('.ls-f-subject').value=lesson.subject||'';
+                box.querySelector('.ls-f-klass').value=lesson.klass||'';
+                box.querySelector('.ls-f-sal').value=lesson.sal||'';
+                box.querySelector('.ls-f-material').value=lesson.material||'';
+                box.querySelector('.ls-f-notes').value=lesson.notes||'';
+                box.querySelector('.ls-f-url').value=lesson.classroomUrl||'';
+                statusSel.value=lesson.status||'normal';
+                box.querySelector('.ls-f-flyttad-info').value=lesson.flyttadInfo||'';
+                flyttadRow.style.display = lesson.status==='flyttad' ? '' : 'none';
+            } else {
+                box.querySelector('.ls-f-start').value='08:15';
+                box.querySelector('.ls-f-end').value='09:00';
+            }
+            const btns=box.querySelector('.cal-popup-btns');
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const save=document.createElement('button'); save.className='btn btn-primary'; save.textContent='Spara';
+            save.onclick=()=>{
+                const subject=box.querySelector('.ls-f-subject').value.trim();
+                const klass=box.querySelector('.ls-f-klass').value.trim();
+                const start=box.querySelector('.ls-f-start').value;
+                const end=box.querySelector('.ls-f-end').value;
+                if(!subject||!klass||!start||!end){ customAlert('Fyll i minst ämne, klass, start- och sluttid.', '⚠️'); return; }
+                const data={ day:parseInt(daySel.value), start, end, subject, klass,
+                    sal: box.querySelector('.ls-f-sal').value.trim(),
+                    material: box.querySelector('.ls-f-material').value.trim(),
+                    notes: box.querySelector('.ls-f-notes').value.trim(),
+                    classroomUrl: box.querySelector('.ls-f-url').value.trim(),
+                    status: statusSel.value,
+                    flyttadInfo: box.querySelector('.ls-f-flyttad-info').value.trim() };
+                if(lesson){ Object.assign(lesson, data); }
+                else { data.id='ls'+Date.now()+Math.floor(Math.random()*1000); state.lessons.push(data); }
+                close(); ensureTodayReminders(); render(); persist();
+            };
+            btns.appendChild(save);
+            if(lesson){
+                const del=document.createElement('button'); del.className='btn'; del.style.color='#ff3b30'; del.textContent='Ta bort';
+                del.onclick=()=>{ customConfirm('Ta bort den här lektionen?', ()=>{ state.lessons=state.lessons.filter(x=>x!==lesson); close(); render(); persist(); }); };
+                btns.appendChild(del);
+            }
+            const cancel=document.createElement('button'); cancel.className='btn'; cancel.textContent='Avbryt'; cancel.onclick=close;
+            btns.appendChild(cancel);
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        }
+
+        function buildLessonRow(l){
+            const row=document.createElement('div'); row.className='ls-lesson'+(l.status==='installd'?' ls-lesson-cancelled':'')+(l.status==='flyttad'?' ls-lesson-moved':'');
+            let statusBadge='';
+            if(l.status==='installd') statusBadge="<span class='ls-badge ls-badge-cancelled'>❌ Inställd</span>";
+            else if(l.status==='flyttad') statusBadge="<span class='ls-badge ls-badge-moved'>📍 Flyttad"+(l.flyttadInfo?(': '+lsEsc(l.flyttadInfo)):'')+"</span>";
+            row.innerHTML =
+                "<div class='ls-lesson-time'>"+l.start+"<br>"+l.end+"</div>"+
+                "<div class='ls-lesson-main'><div class='ls-lesson-top'><b>"+lsEsc(l.subject)+"</b>"+statusBadge+"</div>"+
+                "<div class='ls-lesson-sub'>"+lsEsc(l.klass)+" · 📍 "+lsEsc(l.sal||'–')+"</div>"+
+                ((l.material||l.notes) ? ("<div class='ls-lesson-notes'>"+(l.material?('📦 '+lsEsc(l.material)):'')+(l.material&&l.notes?' · ':'')+(l.notes?('📝 '+lsEsc(l.notes)):'')+"</div>") : '')+
+                "</div><div class='ls-lesson-actions'></div>";
+            const actions=row.querySelector('.ls-lesson-actions');
+            const mkIconBtn=(icon,title,fn)=>{ const b=document.createElement('button'); b.type='button'; b.className='ls-icon-btn'; b.textContent=icon; b.title=title; b.onclick=(e)=>{ e.stopPropagation(); fn(); }; return b; };
+            actions.appendChild(mkIconBtn('👥','Elevlista', ()=>showElevlista(l.klass)));
+            if(l.classroomUrl) actions.appendChild(mkIconBtn('🖥️','Öppna klassrum', ()=>window.open(l.classroomUrl,'_blank')));
+            actions.appendChild(mkIconBtn('💬','Skicka meddelande', ()=>showMeddelandeCompose(l.klass)));
+            row.querySelector('.ls-lesson-main').onclick=()=>openLessonEditor(l);
+            return row;
+        }
+
+        function render(){
+            root.innerHTML='';
+            const viewRow=document.createElement('div'); viewRow.className='ls-view-switch';
+            [['today','📅 Idag'],['week','📆 Vecka']].forEach(([v,l])=>{
+                const b=document.createElement('button'); b.type='button'; b.className='ls-view-tab'+(state.view===v?' active':''); b.textContent=l;
+                b.onclick=()=>{ state.view=v; render(); persist(); };
+                viewRow.appendChild(b);
+            });
+            root.appendChild(viewRow);
+
+            // Nästa lektion högst upp
+            const nl=nextLesson();
+            const nb=document.createElement('div'); nb.className='ls-next-banner';
+            if(nl){
+                const mins = nl.isToday ? Math.max(0, tidTillMin(nl.lesson.start)-nuMin()) : null;
+                nb.innerHTML =
+                    "<div class='ls-next-label'>⏭️ NÄSTA LEKTION"+(nl.isToday?(' · om '+mins+' min'):(' · '+LS_DAG_NAMN[nl.day]))+"</div>"+
+                    "<div class='ls-next-main'>"+lsEsc(nl.lesson.subject)+" · "+lsEsc(nl.lesson.klass)+"</div>"+
+                    "<div class='ls-next-sub'>🕐 "+nl.lesson.start+"–"+nl.lesson.end+" · 📍 "+lsEsc(nl.lesson.sal||'–')+"</div>"+
+                    (nl.lesson.status==='flyttad' ? "<div class='ls-badge ls-badge-moved' style='margin-top:6px;display:inline-block;'>📍 Flyttad"+(nl.lesson.flyttadInfo?(': '+lsEsc(nl.lesson.flyttadInfo)):'')+"</div>" : '');
+            } else {
+                nb.innerHTML = "<div class='ls-next-label'>⏭️ NÄSTA LEKTION</div><div class='ls-next-empty'>Inga fler lektioner inlagda ännu.</div>";
+            }
+            root.appendChild(nb);
+
+            // Översikt
+            const ov=document.createElement('div'); ov.className='ls-overview';
+            [['📚', todayCount(), 'Lektioner idag'], ['⏳', freeTimeToday()+' min', 'Ledig tid idag'], ['🕐', totalHoursThisWeek().toFixed(1)+' h', 'Denna vecka']].forEach(([icon,val,lbl])=>{
+                const c=document.createElement('div'); c.className='ls-stat';
+                c.innerHTML = "<div class='ls-stat-icon'>"+icon+"</div><div class='ls-stat-val'>"+val+"</div><div class='ls-stat-lbl'>"+lbl+"</div>";
+                ov.appendChild(c);
+            });
+            root.appendChild(ov);
+
+            if(nl && (nl.lesson.material || nl.lesson.notes)){
+                const nt=document.createElement('div'); nt.className='ls-next-task';
+                nt.innerHTML = "<b>🎯 Nästa uppgift:</b> "+lsEsc(nl.lesson.material||nl.lesson.notes);
+                root.appendChild(nt);
+            }
+
+            // Lektionslista (dag eller vecka)
+            const listWrap=document.createElement('div'); listWrap.className='ls-lessons';
+            if(state.view==='today'){
+                const today=idagIndex();
+                if(today>4){ listWrap.innerHTML="<div class='ls-empty'>🎉 Helg! Inga lektioner idag.</div>"; }
+                else {
+                    const list=lessonsForDay(today);
+                    if(!list.length) listWrap.innerHTML="<div class='ls-empty'>Inga lektioner inlagda för "+LS_DAG_NAMN[today]+" än. Klicka på \"+ Lägg till lektion\" nedan.</div>";
+                    else list.forEach(l=>listWrap.appendChild(buildLessonRow(l)));
+                }
+            } else {
+                for(let d=0; d<=4; d++){
+                    const dayHead=document.createElement('div'); dayHead.className='ls-day-head'; dayHead.textContent=LS_DAG_NAMN[d];
+                    listWrap.appendChild(dayHead);
+                    const list=lessonsForDay(d);
+                    if(!list.length){ const e=document.createElement('div'); e.className='ls-empty ls-empty-small'; e.textContent='Inga lektioner.'; listWrap.appendChild(e); }
+                    else list.forEach(l=>listWrap.appendChild(buildLessonRow(l)));
+                }
+            }
+            root.appendChild(listWrap);
+
+            const footer=document.createElement('div'); footer.className='kw-btnrow hover-menu';
+            const addBtn=document.createElement('button'); addBtn.className='kw-btn kw-btn-primary'; addBtn.textContent='+ Lägg till lektion';
+            addBtn.onclick=()=>openLessonEditor(null);
+            const planBtn=document.createElement('button'); planBtn.className='kw-btn kw-btn-ghost'; planBtn.textContent='📋 Visa dagens planering';
+            planBtn.onclick=showTodayPlanning;
+            footer.appendChild(addBtn); footer.appendChild(planBtn);
+            root.appendChild(footer);
+        }
+
+        ensureTodayReminders();
+        render();
+        if(!config) persist();
+        // Håll påminnelserna uppdaterade under dagen, och städa upp när widgeten stängs.
+        const remCheckIv = setInterval(ensureTodayReminders, 5*60*1000);
+        const widgetElRefLS = widget;
+        const lsCleanupObs = new MutationObserver(()=>{ if(!document.body.contains(widgetElRefLS)){ clearInterval(remCheckIv); lsCleanupObs.disconnect(); } });
+        const ccLS = document.getElementById('canvas-container-v6'); if(ccLS) lsCleanupObs.observe(ccLS,{childList:true,subtree:true});
+    }
+
     function createOverslagsrakning(config){
         if(config===undefined) config=null;
         const body = createWidget('ÖVERSLAGSRÄKNING', 380, 'os-widget', config);
@@ -27731,9 +28174,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             {n:'Rutigt',cl:'theme-grid',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff'},
             {n:'Mörkt',cl:'theme-dark',sw:'radial-gradient(#444 1px, transparent 1px)',size:'6px 6px',bg:'#222'},
             {n:'Grön tavla',cl:'theme-chalkboard',sw:'#1e3f20'},
-            {n:'Blank',cl:'theme-blank',sw:'#ffffff',border:'2px solid #d8d8dc'},
-            {n:'Vit rutig',cl:'theme-grid',sw:'linear-gradient(#cce0ff 1px,transparent 1px),linear-gradient(90deg,#cce0ff 1px,transparent 1px)',size:'7px 7px',bg:'#fff',border:'2px solid #d8d8dc'},
-            {n:'Vit linjär',cl:'theme-lined',sw:'repeating-linear-gradient(#fff,#fff 4px,#a8d5ff 4px,#a8d5ff 5px)',border:'2px solid #d8d8dc'}
+            {n:'Blank',cl:'theme-blank',sw:'#ffffff',border:'2px solid #d8d8dc'}
         ];
         themes.forEach(t=>{
             let d=document.createElement('div'); d.className='bg-dot'; d.title=t.n;
