@@ -4825,10 +4825,11 @@
             // för widgetar med mycket inskrivet innehåll (t.ex. Terminsschema). Varna tydligt att
             // stängning raderar innehållet permanent för just dessa, så man inte stänger av misstag.
             const dataHeavyTypes = { 'TERMINSSCHEMA':'terminsschemat', 'VECKOSCHEMA':'veckoschemat', 'DAGENS SCHEMA':'schemat', 'DAGSSCHEMA':'schemat', 'CHECKLISTA':'checklistan' };
-            // Lärarschemat sparar sitt innehåll separat (se createLararschema) - att stänga rutan
-            // raderar INTE lektionerna, så den får ett eget, lugnare meddelande istället för
-            // skräck-varningen ovan som (felaktigt) skulle antyda permanent dataförlust.
-            const safeReopenTypes = { '📅 LÄRARSCHEMA':'Lärarschemat' };
+            // Lärarschemat och Kalendern sparar sitt innehåll separat (se createLararschema/
+            // createCalendarWidget) - att stänga rutan raderar INTE lektionerna/anteckningarna,
+            // så de får ett eget, lugnare meddelande istället för skräck-varningen ovan som
+            // (felaktigt) skulle antyda permanent dataförlust.
+            const safeReopenTypes = { '📅 LÄRARSCHEMA':'Lärarschemat', 'KALENDER':'Kalenderns innehåll' };
             const heavyLabel = dataHeavyTypes[widget.dataset.widgetType];
             const safeLabel = safeReopenTypes[widget.dataset.widgetType];
             const msg = heavyLabel ? `⚠️ Stänger du rutan raderas allt du skrivit i ${heavyLabel} permanent. Vill du fortsätta?`
@@ -13011,11 +13012,30 @@
         // till läraren, inte till widget-rutan) - stängs rutan finns schemat ändå kvar, och
         // återkommer automatiskt nästa gång man lägger till Lärarschema-widgeten igen.
         function lsStorageKey(){ return 'mintavla_lararschema_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
+        // FIX: currentUser sätts asynkront efter sidladdning (inloggningen blir klar en liten
+        // stund efter att sidan öppnats). Skrev man in en lektion innan inloggningen hunnit bli
+        // klar kunde schemat råka sparas under nyckeln "lokal" istället för det riktiga kontot -
+        // och sågs då som "försvunnet" när man senare öppnade widgeten (inloggad) och letade under
+        // fel nyckel. Denna funktion letar därför även under "lokal" som reservplats, och flyttar
+        // automatiskt över datan till rätt konto-nyckel så den inte blir kvar på fel plats.
+        function lsLoadStable(){
+            try{
+                const key = lsStorageKey();
+                let raw = localStorage.getItem(key);
+                if(!raw && key !== 'mintavla_lararschema_lokal'){
+                    const fallback = localStorage.getItem('mintavla_lararschema_lokal');
+                    if(fallback){ raw = fallback; try{ localStorage.setItem(key, fallback); }catch(e){} }
+                }
+                const saved = JSON.parse(raw||'null');
+                return (saved && Array.isArray(saved.lessons)) ? saved : null;
+            }catch(e){ return null; }
+        }
         let state = { lessons: [], view: 'today' };
         if(config && config.data && Array.isArray(config.data.lessons) && config.data.lessons.length){
             Object.assign(state, config.data);
         } else {
-            try{ const saved=JSON.parse(localStorage.getItem(lsStorageKey())||'null'); if(saved && Array.isArray(saved.lessons)) Object.assign(state, saved); }catch(e){}
+            const saved = lsLoadStable();
+            if(saved) Object.assign(state, saved);
         }
         if(!Array.isArray(state.lessons)) state.lessons=[];
 
