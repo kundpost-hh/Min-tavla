@@ -4825,8 +4825,15 @@
             // för widgetar med mycket inskrivet innehåll (t.ex. Terminsschema). Varna tydligt att
             // stängning raderar innehållet permanent för just dessa, så man inte stänger av misstag.
             const dataHeavyTypes = { 'TERMINSSCHEMA':'terminsschemat', 'VECKOSCHEMA':'veckoschemat', 'DAGENS SCHEMA':'schemat', 'DAGSSCHEMA':'schemat', 'CHECKLISTA':'checklistan' };
-            const label = dataHeavyTypes[widget.dataset.widgetType];
-            const msg = label ? `⚠️ Stänger du rutan raderas allt du skrivit i ${label} permanent. Vill du fortsätta?` : "Vill du stänga rutan?";
+            // Lärarschemat sparar sitt innehåll separat (se createLararschema) - att stänga rutan
+            // raderar INTE lektionerna, så den får ett eget, lugnare meddelande istället för
+            // skräck-varningen ovan som (felaktigt) skulle antyda permanent dataförlust.
+            const safeReopenTypes = { '📅 LÄRARSCHEMA':'Lärarschemat' };
+            const heavyLabel = dataHeavyTypes[widget.dataset.widgetType];
+            const safeLabel = safeReopenTypes[widget.dataset.widgetType];
+            const msg = heavyLabel ? `⚠️ Stänger du rutan raderas allt du skrivit i ${heavyLabel} permanent. Vill du fortsätta?`
+                : safeLabel ? `Rutan stängs, men ${safeLabel.toLowerCase()} är sparat - lägg till widgeten igen när du vill se det. Vill du stänga?`
+                : "Vill du stänga rutan?";
             customConfirm(msg, () => { widget.remove(); saveBoardState(); });
         };
         header.querySelector('.widget-dup-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; duplicateWidget(widget); };
@@ -12998,10 +13005,25 @@
         if(!config){ widget.style.height = '640px'; }
         const root=document.createElement('div'); body.appendChild(root);
 
+        // FIX: schemat sparades tidigare ENDAST inuti widget-rutan (widget.dataset) - stängde man
+        // rutan (även med varning/bekräftelse) försvann all data eftersom den bara existerade i
+        // just den rutan. Nu sparas schemat ÄVEN i en egen, stabil plats i localStorage (kopplad
+        // till läraren, inte till widget-rutan) - stängs rutan finns schemat ändå kvar, och
+        // återkommer automatiskt nästa gång man lägger till Lärarschema-widgeten igen.
+        function lsStorageKey(){ return 'mintavla_lararschema_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
         let state = { lessons: [], view: 'today' };
-        if(config && config.data){ Object.assign(state, config.data); if(!Array.isArray(state.lessons)) state.lessons=[]; }
+        if(config && config.data && Array.isArray(config.data.lessons) && config.data.lessons.length){
+            Object.assign(state, config.data);
+        } else {
+            try{ const saved=JSON.parse(localStorage.getItem(lsStorageKey())||'null'); if(saved && Array.isArray(saved.lessons)) Object.assign(state, saved); }catch(e){}
+        }
+        if(!Array.isArray(state.lessons)) state.lessons=[];
 
-        function persist(){ widget.dataset.lararschema = JSON.stringify(state); saveBoardState(); }
+        function persist(){
+            widget.dataset.lararschema = JSON.stringify(state);
+            try{ localStorage.setItem(lsStorageKey(), JSON.stringify(state)); }catch(e){}
+            saveBoardState();
+        }
         function idagIndex(){ return (new Date().getDay()+6)%7; } // 0=mån..6=sön
         function nuMin(){ const n=new Date(); return n.getHours()*60+n.getMinutes(); }
         function tidTillMin(t){ const p=(t||'0:0').split(':').map(Number); return (p[0]||0)*60+(p[1]||0); }
@@ -30130,12 +30152,18 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             e.preventDefault(); e.stopPropagation();
             if(typeof isBoardAdmin === 'function' && !isBoardAdmin()) return;
             if(typeof isToolbarOrderLocked === 'function' && isToolbarOrderLocked()) return;
-            const grid = document.getElementById('tool-pocket-grid');
-            const items = box.querySelector('.tpc-items');
-            // Flytta ut verktygen till huvudlistan innan rutan tas bort, så inget försvinner
-            [...items.children].forEach(child => grid.insertBefore(child, box));
-            box.remove();
-            saveToolPocketLayout();
+            const label = titleInput.value.trim() || 'den här kategorin';
+            // FIX: kategori-rutan togs tidigare bort direkt vid klick, utan någon bekräftelse -
+            // lätt att råka klicka fel och tappa bort en hel kategori av misstag. Nu krävs ett
+            // aktivt "Ja" i en bekräftelseruta innan den faktiskt tas bort.
+            customConfirm('Ta bort kategorin "'+label+'"? Verktygen i den läggs tillbaka i listan (de försvinner inte), men själva kategori-rutan tas bort.', ()=>{
+                const grid = document.getElementById('tool-pocket-grid');
+                const items = box.querySelector('.tpc-items');
+                // Flytta ut verktygen till huvudlistan innan rutan tas bort, så inget försvinner
+                [...items.children].forEach(child => grid.insertBefore(child, box));
+                box.remove();
+                saveToolPocketLayout();
+            });
         });
         titleInput.addEventListener('pointerdown', (e)=> e.stopPropagation());
         titleInput.addEventListener('change', ()=> saveToolPocketLayout());
