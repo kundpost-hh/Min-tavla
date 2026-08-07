@@ -4392,6 +4392,17 @@
         initBoard();
     }
     window.enterGuestMode = enterGuestMode;
+    // ---- Gästläge: minnesbaserad "låtsas-lagring" ----
+    // window.isGuestMode ska stoppa ALL bestående lagring (se kommentar ovan vid enterGuestMode).
+    // Några widgetar (Kalendern, Påminnelser) läser dock om sin data från lagringen varje gång de
+    // behöver den, istället för att hålla den i minnet - skulle man bara blockera deras skrivningar
+    // helt skulle det de skrev in försvinna direkt, mitt i besöket. Dessa två hjälpfunktioner låter
+    // dem fungera precis som vanligt UNDER ett gästbesök (spara/läsa fritt), men allt hamnar bara i
+    // denna vanliga JS-variabel - aldrig i webbläsarens localStorage - så det är garanterat borta
+    // så fort sidan stängs eller laddas om, precis som resten av gästläget.
+    const guestMemoryStore = {};
+    function guestStoreGet(key){ return Object.prototype.hasOwnProperty.call(guestMemoryStore, key) ? guestMemoryStore[key] : null; }
+    function guestStoreSet(key, value){ guestMemoryStore[key] = value; }
     function showLocalLoginOption(){
         const note = document.getElementById('login-local-note');
         if(!note || window.cloudReady) return;
@@ -12075,7 +12086,9 @@
 
         function persist(){
             widgetEl.dataset.termplan = JSON.stringify(tp);
-            try{ localStorage.setItem(tpStorageKey(), JSON.stringify(tp)); }catch(e){}
+            // FIX: samma spärr som Lärarschemat - i gästläge sparas inget bestående, terminsplanen
+            // lever bara i minnet (tp ovan) under besöket.
+            if(!window.isGuestMode){ try{ localStorage.setItem(tpStorageKey(), JSON.stringify(tp)); }catch(e){} }
             saveBoardState();
         }
 
@@ -12337,9 +12350,12 @@
     // annan sida eller har stängts helt.
     const remRenderHooks = [];
     function remStoreKey(){ return 'reminderStoreV1_' + (currentUser || 'local'); }
-    function remLoad(){ try { return JSON.parse(localStorage.getItem(remStoreKey()) || '[]'); } catch(e){ return []; } }
+    // FIX: i gästläge läses/sparas påminnelserna via minnesbaserad "låtsas-lagring" (guestMemoryStore)
+    // istället för localStorage, så funktionen fungerar som vanligt under besöket men inget blir kvar.
+    function remLoad(){ try { return JSON.parse((window.isGuestMode ? guestStoreGet(remStoreKey()) : localStorage.getItem(remStoreKey())) || '[]'); } catch(e){ return []; } }
     function remSave(items){
-        try { localStorage.setItem(remStoreKey(), JSON.stringify(items)); } catch(e){}
+        if(window.isGuestMode){ guestStoreSet(remStoreKey(), JSON.stringify(items)); }
+        else { try { localStorage.setItem(remStoreKey(), JSON.stringify(items)); } catch(e){} }
         remRenderHooks.forEach(fn=>{ try{ fn(); }catch(e){} }); // uppdatera alla öppna Reminder-rutor
     }
     function remMerge(list){
@@ -13121,7 +13137,10 @@
 
         function persist(){
             widget.dataset.lararschema = JSON.stringify(state);
-            try{ localStorage.setItem(lsStorageKey(), JSON.stringify(state)); }catch(e){}
+            // FIX: i gästläge ska INGET sparas bestående (window.isGuestMode) - schemat ligger kvar
+            // i minnet (state ovan) så widgeten fungerar precis som vanligt under besöket, men
+            // skrivs aldrig till localStorage och finns därför inte kvar efter att sidan stängs.
+            if(!window.isGuestMode){ try{ localStorage.setItem(lsStorageKey(), JSON.stringify(state)); }catch(e){} }
             saveBoardState();
         }
         function idagIndex(){ return (new Date().getDay()+6)%7; } // 0=mån..6=sön
@@ -29525,18 +29544,25 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     ];
     function calSettingsKey(){ return 'mintavla_calSettings_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
     function loadCalSettings(){
-        let s=null; try { s=JSON.parse(localStorage.getItem(calSettingsKey())||'null'); } catch(e){}
+        // FIX: i gästläge läses inställningarna från minnesbaserad "låtsas-lagring" (guestMemoryStore)
+        // istället för localStorage - se guestStoreGet/guestStoreSet-kommentaren ovan.
+        let s=null; try { s=JSON.parse((window.isGuestMode ? guestStoreGet(calSettingsKey()) : localStorage.getItem(calSettingsKey()))||'null'); } catch(e){}
         const out = Object.assign({ startView:'month', categories: DEFAULT_CAL_CATEGORIES.map(c=>({...c})) }, s||{});
         if(!Array.isArray(out.categories) || !out.categories.length) out.categories = DEFAULT_CAL_CATEGORIES.map(c=>({...c}));
         return out;
     }
-    function saveCalSettings(s){ try { localStorage.setItem(calSettingsKey(), JSON.stringify(s)); } catch(e){} if(typeof syncToCloud==='function') syncToCloud(); }
+    function saveCalSettings(s){
+        // FIX: i gästläge sparas inget bestående - hamnar bara i minnet så widgeten fungerar under besöket.
+        if(window.isGuestMode){ guestStoreSet(calSettingsKey(), JSON.stringify(s)); return; }
+        try { localStorage.setItem(calSettingsKey(), JSON.stringify(s)); } catch(e){} if(typeof syncToCloud==='function') syncToCloud();
+    }
     function calNotesKey(){ return 'mintavla_calNotes_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
     // FIX: anteckningar sparades tidigare som ren text ("2026-08-03": "Prata om..."). Nu kan varje
     // dag även ha etiketter, så formatet är {text, tags:[...]} - gamla text-anteckningar läses ändå
     // in korrekt (tolkas som {text: den gamla strängen, tags: []}) så inget befintligt försvinner.
     function loadCalNotes(){
-        let raw=null; try { raw=JSON.parse(localStorage.getItem(calNotesKey()) || '{}'); } catch(e){ raw={}; }
+        // FIX: samma minnesfallback i gästläge som loadCalSettings ovan.
+        let raw=null; try { raw=JSON.parse((window.isGuestMode ? guestStoreGet(calNotesKey()) : localStorage.getItem(calNotesKey())) || '{}'); } catch(e){ raw={}; }
         const out={};
         Object.keys(raw||{}).forEach(k=>{
             const v=raw[k];
@@ -29545,7 +29571,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         });
         return out;
     }
-    function saveCalNotes(obj){ try { localStorage.setItem(calNotesKey(), JSON.stringify(obj)); } catch(e){} if(typeof syncToCloud==='function') syncToCloud(); }
+    function saveCalNotes(obj){
+        // FIX: i gästläge sparas inget bestående - anteckningarna hamnar bara i minnet under besöket.
+        if(window.isGuestMode){ guestStoreSet(calNotesKey(), JSON.stringify(obj)); return; }
+        try { localStorage.setItem(calNotesKey(), JSON.stringify(obj)); } catch(e){} if(typeof syncToCloud==='function') syncToCloud();
+    }
     function calIsoWeek(date){ const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())); const dayNum=(d.getUTCDay()+6)%7; d.setUTCDate(d.getUTCDate()-dayNum+3); const firstThu=new Date(Date.UTC(d.getUTCFullYear(),0,4)); const fdn=(firstThu.getUTCDay()+6)%7; firstThu.setUTCDate(firstThu.getUTCDate()-fdn+3); return 1+Math.round((d-firstThu)/(7*86400000)); }
 
     let _calTip=null;
