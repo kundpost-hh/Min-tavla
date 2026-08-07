@@ -2344,6 +2344,12 @@
     .lunch-spin { width:26px; height:26px; border:3px solid #e0e0e6; border-top-color:#ff9500; border-radius:50%; animation:lunchspin .8s linear infinite; margin:20px auto; }
     @keyframes lunchspin { to { transform:rotate(360deg); } }
     .lunch-src { font-size:9px; color:#c7c7cc; text-align:center; margin-top:8px; }
+    /* Ny iframe-baserad version: visar mateos EGEN sida direkt istället för att extrahera data via API/proxy. */
+    .lunch-widget .lunch-wrap { gap:8px; }
+    .lunch-iframe-wrap { width:100%; height:420px; border-radius:12px; overflow:hidden; background:#f7f7fa; border:1px solid #ececf1; }
+    .lunch-iframe { width:100%; height:100%; border:none; display:block; }
+    .lunch-wrap .lunch-src { display:block; font-size:11px; color:#8e8e93; text-decoration:none; font-weight:600; }
+    .lunch-wrap .lunch-src:hover { color:#007aff; text-decoration:underline; }
 
     /* ---- KALENDER ---- */
     .calendar-widget .widget-inner { background:#fff; }
@@ -5035,8 +5041,13 @@
             // länge sen) dök upp igen just på Hem-sidan - och gjorde ljusa bakgrunder (prickig/
             // rutig/linjär) svåra att se/använda. Ärv därför samma på/av-inställning som en redan
             // existerande sida på tavlan har, istället för att alltid starta om med vattenstämpeln
-            // synlig. Själva bakgrundstemat (bilder m.m.) ärvs INTE - Hem ska ändå kännas som en
-            // egen, neutral sida, bara utan att vattenstämpeln oväntat dyker upp igen.
+            // synlig.
+            // FIX: sidan fick tidigare INGEN bakgrund alls här (varken tema eller vattenstämpel-
+            // inställning), vilket gjorde att den prickiga standardbakgrunden (CSS-fallbacken när
+            // inget tema är satt) dök upp istället för det trevliga Sommar-temat som en helt ny
+            // tavla annars alltid startar med. Ge därför Sommar som standard även här - precis
+            // samma standardval som applyDefaultThemeToAllPages ger nya, tomma tavlor.
+            cp.classList.add('theme-img-summer'); cp.dataset.bgTheme='theme-img-summer'; cp.dataset.bgNoWatermark='1';
             const refPage = dayPages[0] || Object.keys(dayPages).map(k=>dayPages[k])[0] || regular[0];
             if(refPage && refPage.canvas && refPage.canvas.dataset.bgNoWatermark){
                 cp.dataset.bgNoWatermark = refPage.canvas.dataset.bgNoWatermark;
@@ -5047,6 +5058,9 @@
             if(!dayPages[d.idx]){
                 const pageId = 'day-'+d.idx+'-'+Math.random().toString(16).slice(2);
                 const cp = document.createElement('div'); cp.className='canvas-page'; cp.id=pageId; cp.dataset.day=String(d.idx); cp.dataset.pageName=d.name;
+                // FIX: samma sak som Hem-sidan ovan - utan detta fick nya vecko-sidor den prickiga
+                // standardbakgrunden istället för Sommar-temat.
+                cp.classList.add('theme-img-summer'); cp.dataset.bgTheme='theme-img-summer'; cp.dataset.bgNoWatermark='1';
                 container.appendChild(cp); dayPages[d.idx] = { id: pageId, canvas: cp, name: d.name, day: d.idx }; created++;
             } else { const pg = dayPages[d.idx]; pg.day=d.idx; pg.canvas.dataset.day=String(d.idx); if(!pg.name) pg.name=d.name; }
         });
@@ -5056,6 +5070,8 @@
                 if(!lessonPages[key]){
                     const pageId = 'lesson-'+d.idx+'-'+l.idx+'-'+Math.random().toString(16).slice(2);
                     const cp = document.createElement('div'); cp.className='canvas-page'; cp.id=pageId; cp.dataset.day=String(d.idx); cp.dataset.lesson=String(l.idx); cp.dataset.pageName=d.name+' – '+l.name;
+                    // FIX: samma sak - nya lektionssidor ska också starta med Sommar-temat, inte prickar.
+                    cp.classList.add('theme-img-summer'); cp.dataset.bgTheme='theme-img-summer'; cp.dataset.bgNoWatermark='1';
                     container.appendChild(cp); lessonPages[key] = { id: pageId, canvas: cp, name: l.name, day: d.idx, lesson: l.idx }; created++;
                 } else {
                     const pg = lessonPages[key]; pg.day=d.idx; pg.lesson=l.idx; pg.canvas.dataset.day=String(d.idx); pg.canvas.dataset.lesson=String(l.idx); if(!pg.name) pg.name=l.name;
@@ -5069,7 +5085,7 @@
         return created;
     }
 
-    function createPageV6(isInitial = false) { const pageId = Date.now() + '-' + Math.random().toString(16).slice(2); const canvasPage = document.createElement('div'); canvasPage.className = 'canvas-page'; canvasPage.id = pageId; document.getElementById('canvas-container-v6').appendChild(canvasPage); pagesListV6.push({ id: pageId, canvas: canvasPage, name: '' }); if (isInitial) goToPageByIndexV6(0); else goToPageByIndexV6(pagesListV6.length - 1); renderSidePocket(); }
+    function createPageV6(isInitial = false) { const pageId = Date.now() + '-' + Math.random().toString(16).slice(2); const canvasPage = document.createElement('div'); canvasPage.className = 'canvas-page'; canvasPage.id = pageId; canvasPage.classList.add('theme-img-summer'); canvasPage.dataset.bgTheme='theme-img-summer'; canvasPage.dataset.bgNoWatermark='1'; document.getElementById('canvas-container-v6').appendChild(canvasPage); pagesListV6.push({ id: pageId, canvas: canvasPage, name: '' }); if (isInitial) goToPageByIndexV6(0); else goToPageByIndexV6(pagesListV6.length - 1); renderSidePocket(); }
     function goToPageByIndexV6(index) { if (index < 0 || index >= pagesListV6.length) return; const canvasPages = document.querySelectorAll('.canvas-page'); for(let i=0; i<canvasPages.length; i++) { canvasPages[i].classList.remove('active'); } const activePage = pagesListV6[index].canvas; activePage.classList.add('active'); currentPageIndexV6 = index; document.getElementById('cb-app-wrapper').classList.toggle('no-watermark', activePage.dataset.bgNoWatermark === '1'); updatePagesNavV6(); renderSidePocket(); }
     function prevPageV6() { goToPageByIndexV6(currentPageIndexV6 - 1); saveBoardState(); } function nextPageV6() { goToPageByIndexV6(currentPageIndexV6 + 1); saveBoardState(); } function addPageV6() { createPageV6(); saveBoardState(); }
     function updatePagesNavV6() { const pc = document.getElementById('page-count-v6'); if(pc){ const nm = pagesListV6[currentPageIndexV6] ? pagesListV6[currentPageIndexV6].name : ''; pc.innerText = (nm ? nm + ' · ' : '') + (currentPageIndexV6 + 1) + ' / ' + pagesListV6.length; } const pb=document.getElementById('prev-page-btn-v6'); if(pb) pb.disabled = (currentPageIndexV6 <= 0); const nb=document.getElementById('next-page-btn-v6'); if(nb) nb.disabled = (currentPageIndexV6 >= pagesListV6.length - 1); }
@@ -29451,87 +29467,30 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         render();
     }
 
-    // ---- LUNCH: matmeny för dagen från meny.mateo.se (enhet 61, Linköping) ----
+    // ---- LUNCH: matmeny (enhet 61, Linköping) ----
+    // FIX: hämtade tidigare menydatan via mateos interna API (meny-api.mateo.se), vilket krävde att
+    // man kringgick deras CORS-spärr (Access-Control-Allow-Origin: bara https://meny.mateo.se) med
+    // en egen proxy och flera publika reserv-proxyer. Det är ett API inte avsett för tredjepartsbruk,
+    // och att gå runt spärren är juridiskt oklart (avtalsbrott mot deras användarvillkor, oavsett
+    // källhänvisning). Nu visas istället deras EGEN publika sida direkt i en iframe - exakt samma
+    // information, men utan att extrahera/mellanlagra någon data eller kringgå några spärrar. Ingen
+    // proxy, inget eget API-anrop, ingen cache. Byt LUNCH_MUNICIPALITY/LUNCH_UNIT_ID om skolan har en
+    // annan kommun/enhet på meny.mateo.se (finns i adressen där, t.ex. meny.mateo.se/linkoping/61).
+    const LUNCH_MUNICIPALITY = 'linkoping';
     const LUNCH_UNIT_ID = '61';
-    function lunchCacheKey(id, d){ return 'mateoCache_' + id + '_' + d; }
-    async function mateoFetchDay(id, dateStr){
-        const api = 'https://meny-api.mateo.se/api/v1/days/' + id + '?from=' + dateStr + '&to=' + dateStr;
-        // OBS: mateo-api:et svarar med Access-Control-Allow-Origin: https://meny.mateo.se,
-        // dvs det tillåter bara anrop från deras egen sajt. Ett direktanrop härifrån blockeras
-        // alltid av webbläsarens CORS-skydd. Vi använder därför i första hand vår egen
-        // Cloudflare Worker-proxy (pålitlig, under egen kontroll), med publika proxyer
-        // och direktanropet som reservlösningar om workern skulle vara nere.
-        const ownProxy = 'https://mateo-lunch-proxy.mintavla-se.workers.dev/?id=' + encodeURIComponent(id) + '&from=' + encodeURIComponent(dateStr) + '&to=' + encodeURIComponent(dateStr);
-        const sources = [
-            ownProxy,
-            'https://api.allorigins.win/raw?url=' + encodeURIComponent(api),
-            'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(api),
-            'https://corsproxy.io/?url=' + encodeURIComponent(api),
-            api // sista chansen, ifall CORS-policyn skulle ändras i framtiden
-        ];
-        const fetchWithTimeout = (url, ms) => {
-            const ctrl = new AbortController();
-            const t = setTimeout(()=>ctrl.abort(), ms);
-            return fetch(url, { headers:{ 'Accept':'application/json' }, signal: ctrl.signal }).finally(()=>clearTimeout(t));
-        };
-        let lastErr = null;
-        for(const u of sources){
-            try {
-                const r = await fetchWithTimeout(u, 6000);
-                if(!r.ok) { lastErr = new Error('HTTP ' + r.status); continue; }
-                const text = await r.text();
-                const data = JSON.parse(text);
-                if(Array.isArray(data)){ try{ localStorage.setItem(lunchCacheKey(id,dateStr), JSON.stringify(data)); }catch(e){} return data; }
-                lastErr = new Error('Oväntat svarsformat');
-            } catch(e){ lastErr = e; /* prova nästa källa */ }
-        }
-        // Sista utväg: visa senast sparade (om vi hämtat denna dag tidigare)
-        try { const c = localStorage.getItem(lunchCacheKey(id,dateStr)); if(c) return JSON.parse(c); } catch(e){}
-        console.warn('Lunch: kunde inte hämta menyn', lastErr);
-        throw new Error('Kunde inte hämta menyn');
-    }
+    function lunchMenuUrl(){ return 'https://meny.mateo.se/' + LUNCH_MUNICIPALITY + '/' + LUNCH_UNIT_ID; }
 
     function createLunchWidget(config){
         if(config===undefined) config=null;
-        const body = createWidget('LUNCH', 300, 'lunch-widget', config);
-        const MONTHS=['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'];
-        const WDAYS=['söndag','måndag','tisdag','onsdag','torsdag','fredag','lördag'];
-        let viewDate = new Date();
-        body.innerHTML="<div class='lunch-wrap'><div class='lunch-head'><button class='lunch-nav lunch-prev' title='Föregående dag'>‹</button><div class='lunch-datebox'><div class='lunch-date'></div><button class='lunch-today-btn'>Idag</button></div><button class='lunch-nav lunch-next' title='Nästa dag'>›</button></div><div class='lunch-body'></div><div class='lunch-src'>Källa: meny.mateo.se</div></div>";
-        const dateEl=body.querySelector('.lunch-date'), bodyEl=body.querySelector('.lunch-body');
-        const fmtDate=(d)=> WDAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
-        const ymd=(d)=>{ const p=n=>(n<10?'0':'')+n; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); };
-        let reqToken=0;
-        async function load(){
-            const my=++reqToken;
-            dateEl.textContent=fmtDate(viewDate);
-            bodyEl.innerHTML="<div class='lunch-spin'></div>";
-            const ds=ymd(viewDate);
-            try {
-                const days=await mateoFetchDay(LUNCH_UNIT_ID, ds);
-                if(my!==reqToken) return;
-                const day=days.find(x=>(x.date||'').slice(0,10)===ds) || days[0];
-                const meals=(day && day.meals) || [];
-                if(!meals.length){ bodyEl.innerHTML="<div class='lunch-msg'>🍽️ Ingen lunch serveras denna dag.</div>"; return; }
-                bodyEl.innerHTML='';
-                meals.forEach(m=>{
-                    const el=document.createElement('div'); el.className='lunch-meal';
-                    const t=document.createElement('div'); t.className='lunch-meal-type'; t.textContent=m.type||'Lunch'; el.appendChild(t);
-                    const n=document.createElement('div'); n.className='lunch-meal-name'; n.textContent=m.name||''; el.appendChild(n);
-                    const labels=(m.labels||[]).map(l=>l&&l.name).filter(Boolean);
-                    if(labels.length){ const tags=document.createElement('div'); tags.className='lunch-tags'; labels.forEach(l=>{ const s=document.createElement('span'); s.className='lunch-tag'; s.textContent=l; tags.appendChild(s); }); el.appendChild(tags); }
-                    bodyEl.appendChild(el);
-                });
-            } catch(e){
-                if(my!==reqToken) return;
-                bodyEl.innerHTML="<div class='lunch-msg'>Kunde inte hämta menyn just nu.<br><span style='font-size:11px'>Kontrollera internet och försök igen.</span></div>";
-            }
-        }
-        body.querySelector('.lunch-prev').onclick=()=>{ viewDate.setDate(viewDate.getDate()-1); load(); };
-        body.querySelector('.lunch-next').onclick=()=>{ viewDate.setDate(viewDate.getDate()+1); load(); };
-        body.querySelector('.lunch-today-btn').onclick=()=>{ viewDate=new Date(); load(); };
-        load();
+        const body = createWidget('LUNCH', 320, 'lunch-widget', config);
+        const url = lunchMenuUrl();
+        body.innerHTML =
+            "<div class='lunch-wrap'>" +
+                "<div class='lunch-iframe-wrap'><iframe class='lunch-iframe' src='" + url + "' loading='lazy' referrerpolicy='no-referrer' title='Lunchmeny från meny.mateo.se'></iframe></div>" +
+                "<a class='lunch-src' href='" + url + "' target='_blank' rel='noopener'>Öppna menyn på meny.mateo.se ↗</a>" +
+            "</div>";
     }
+
 
     // ---- KALENDER (per-användare-noteringar, namnsdagar, veckonummer) ----
     // Standard-etiketter som varje lärare kan använda direkt, plus lägga till egna i inställningarna.
