@@ -850,6 +850,9 @@
     .gotd-reveal-btn:hover{ background:#dfeaff; }
     .gotd-panel-body{ margin-top:6px; font-size:14px; color:#333; line-height:1.4; text-align:center; word-break:normal; overflow-wrap:break-word; }
     .gotd-panel-body img{ display:block; margin:0 auto; max-width:100%; max-height:160px; border-radius:10px; }
+    .wiki-src { font-size:10px; color:#b0b0b6; text-align:center; margin-top:6px; }
+    .wiki-src a { color:inherit; text-decoration:underline; }
+    .wiki-src-inline { font-size:11px; color:#8e8e93; text-decoration:underline; }
     .gotd-loading{ color:#8e8e93; font-style:italic; font-size:13px; }
     .gotd-tom{ color:#8e8e93; font-style:italic; font-size:13px; }
     .gotd-reveal-all{ width:100%; }
@@ -5941,6 +5944,7 @@
                 ${gotdPanelHtml('synonym','🔄','synonym')}
             </div>
             <button class='gotd-reveal-all btn btn-secondary' type='button'>👁️ Visa allt</button>
+            <div class='wiki-src' style='display:none;'></div>
         </div>`;
     }
     function wireGotdKort(container, word){
@@ -5959,6 +5963,18 @@
             };
         }
     }
+    // FIX: förklaringar/bilder som hämtas härifrån kommer från Wikipedia/Wiktionary (CC BY-SA),
+    // vilket kräver källhänvisning när innehållet återges - lägger till en liten synlig länk till
+    // just det uppslagna ordets sida, men bara när informationen faktiskt kommer därifrån.
+    function gotdKallhanvisning(container, word, wiki, ordbok){
+        const el = container.querySelector('.wiki-src'); if(!el) return;
+        const lankar = [];
+        if(ordbok) lankar.push(`<a href="https://sv.wiktionary.org/wiki/${encodeURIComponent(word)}" target="_blank" rel="noopener">Wiktionary</a>`);
+        if(wiki) lankar.push(`<a href="https://sv.wikipedia.org/wiki/${encodeURIComponent(word)}" target="_blank" rel="noopener">Wikipedia</a>`);
+        if(!lankar.length){ el.style.display='none'; return; }
+        el.innerHTML = 'Källa: ' + lankar.join(' & ');
+        el.style.display='block';
+    }
     async function fyllGotdKort(container, word){
         const bildBody = container.querySelector('.gotd-panel[data-kind="bild"] .gotd-panel-body');
         const exBody = container.querySelector('.gotd-panel[data-kind="exempel"] .gotd-panel-body');
@@ -5970,6 +5986,7 @@
         if(forkBody) forkBody.innerHTML = forklaringText ? gotdEsc(forklaringText) : `<span class='gotd-tom'>Ingen förklaring hittades.</span>`;
         if(exBody) exBody.innerHTML = gotdEsc((ordbok && ordbok.exempel) ? ordbok.exempel : ('Vi läste om ordet "'+word+'" i skolan och pratade om vad det betyder.'));
         if(synBody) synBody.innerHTML = (ordbok && ordbok.synonym) ? gotdEsc(ordbok.synonym) : `<span class='gotd-tom'>Inga synonymer hittades.</span>`;
+        gotdKallhanvisning(container, word, wiki, ordbok);
         saveBoardState();
     }
     function createWordOfTheDay(config){
@@ -12093,11 +12110,16 @@
                 return (saved && Array.isArray(saved.subjects)) ? saved : null;
             }catch(e){ return null; }
         }
-        if(config && config.data && Array.isArray(config.data.subjects)){
+        // FIX: samma allvarliga bugg som i Lärarschemat - config.data (widget-rutans egen kopia)
+        // användes alltid när rutan redan låg på tavlan, oavsett om den var tom, utan att någonsin
+        // kolla den stabila backupen i localStorage. Läs därför ALLTID från den stabila backupen
+        // först om den finns något sparat där - den skrivs alltid tillsammans med widget-rutans
+        // kopia i persist() och är alltså minst lika färsk.
+        const savedStable = tpLoadStable();
+        if(savedStable){
+            tp = Object.assign(tp, savedStable);
+        } else if(config && config.data && Array.isArray(config.data.subjects)){
             tp = Object.assign(tp, config.data);
-        } else if(!config){
-            const saved = tpLoadStable();
-            if(saved) tp = Object.assign(tp, saved);
         }
 
         function persist(){
@@ -13143,11 +13165,20 @@
             }catch(e){ return null; }
         }
         let state = { lessons: [], view: 'today' };
-        if(config && config.data && Array.isArray(config.data.lessons)){
+        // FIX: Om widgeten redan låg på tavlan (config finns) användes ENDAST kopian i widget-rutan
+        // (config.data) - och om den kopian av någon anledning var tom (t.ex. en tavla som laddats
+        // från en lite äldre molnbackup, eller att sparningen till rutan hann inte bli klar innan
+        // sidan laddades om) hoppade koden ALDRIG till den stabila backupen i localStorage, trots
+        // att den fanns kvar där med rätt data. Schemat "återställdes" tyst till tomt - precis det
+        // dataförlust-beteendet som rapporterats. Den stabila backupen (lsLoadStable) skrivs alltid
+        // tillsammans med widget-rutans kopia i persist() nedan och är alltså minst lika färsk, om
+        // inte färskare - läs därför ALLTID därifrån först om den finns något sparat, och använd
+        // bara widget-rutans kopia som sista utväg om den stabila backupen skulle vara helt tom.
+        const savedStable = lsLoadStable();
+        if(savedStable){
+            Object.assign(state, savedStable);
+        } else if(config && config.data && Array.isArray(config.data.lessons)){
             Object.assign(state, config.data);
-        } else if(!config){
-            const saved = lsLoadStable();
-            if(saved) Object.assign(state, saved);
         }
         if(!Array.isArray(state.lessons)) state.lessons=[];
 
@@ -15866,6 +15897,9 @@
         spara('saknas'); return null;
     }
 
+    // Liten återanvändbar källänk för de widgetar (Verb, Substantiv, Adjektiv) som slår upp
+    // böjningar/synonymer/betydelser mot sv.wiktionary.org - samma CC BY-SA-krav som för Dagens ord.
+    function wikSrcLink(ord){ return ` · <a class="wiki-src-inline" href="https://sv.wiktionary.org/wiki/${encodeURIComponent(ord)}" target="_blank" rel="noopener">Wiktionary</a>`; }
     function createVerbWidget(config){
         if(config===undefined) config=null;
         const body = createWidget('VERB', 320, 'verb-widget', config);
@@ -15908,6 +15942,7 @@
         function rita(p){
             rowsEl.innerHTML='';
             typEl.textContent = p.typ + (p.träff==='regel' ? ' – automatiskt böjt' : '');
+            if(p.träff==='regel' && p.typ==='sv.wiktionary.org') typEl.insertAdjacentHTML('beforeend', wikSrcLink(p.inf));
             const P=practiceCb.checked;
             rowsEl.appendChild(rad('Infinitiv','att',p.inf,true,false));
             rowsEl.appendChild(rad('Presens','idag:',p.pres,false,P));
@@ -15923,6 +15958,7 @@
                 if(mittNr!==defNr) return; // ett nyare uppslag har redan gjorts
                 defEl.classList.remove('laddar');
                 defEl.textContent = def ? ('📖 '+def) : ('📖 Ingen förklaring hittades för "'+inf+'" – prova att slå upp ordet i en ordbok.');
+                if(def) defEl.insertAdjacentHTML('beforeend', wikSrcLink(inf));
             });
         }
         bojBtn.onclick=()=>{ render(); saveBoardState(); };
@@ -16118,14 +16154,14 @@
             return r;
         }
         let uppslagNr=0, synNr=0;
-        function synRad(state){
+        function synRad(state, ord){
             synEl.classList.remove('laddar');
             if(state==='laddar'){ synEl.classList.add('laddar'); synEl.textContent='Slår upp synonymer…'; return; }
             if(!state){ synEl.innerHTML=''; return; }
             if(state.typ==='synonymer'){
-                synEl.innerHTML = `<span class='sub-syn-lbl'>Synonymer</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('');
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Synonymer</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('') + wikSrcLink(ord||inp.value);
             } else if(state.typ==='forklaring'){
-                synEl.innerHTML = `<span class='sub-syn-lbl'>Betyder</span>${state.varde}`;
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Betyder</span>${state.varde}` + wikSrcLink(ord||inp.value);
             } else { synEl.innerHTML=''; }
         }
         function render(){
@@ -16156,12 +16192,13 @@
             synRad('laddar');
             subSynonymer(ord).then(s=>{
                 if(mittSynNr!==synNr || inp.value!==ordDaaSyn) return; // användaren hann skriva nytt
-                synRad(s);
+                synRad(s, ord);
             });
         }
         function rita(p){
             rowsEl.innerHTML='';
             typEl.textContent=(p.a==='e'?'EN-ord':'ETT-ord')+' · '+p.typ;
+            if(p.typ==='sv.wiktionary.org') typEl.insertAdjacentHTML('beforeend', wikSrcLink(p.sg));
             const P=practiceCb.checked;
             const art = p.a==='e' ? 'en' : 'ett';
             const artHtml = `<span class='sub-artikel ${p.a==='e'?'en':'ett'}'>${art.toUpperCase()}</span>`;
@@ -16326,14 +16363,14 @@
             return r;
         }
         let synNr=0;
-        function synRad(state){
+        function synRad(state, viaWiki, ord){
             synEl.classList.remove('laddar');
             if(state==='laddar'){ synEl.classList.add('laddar'); synEl.textContent='Slår upp…'; return; }
             if(!state){ synEl.innerHTML=''; return; }
             if(state.typ==='synonymer'){
-                synEl.innerHTML = `<span class='sub-syn-lbl'>Synonymer</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('');
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Synonymer</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('') + (viaWiki? wikSrcLink(ord) : '');
             } else if(state.typ==='motsats'){
-                synEl.innerHTML = `<span class='sub-syn-lbl'>Motsats</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('');
+                synEl.innerHTML = `<span class='sub-syn-lbl'>Motsats</span>` + state.varde.map(s=>`<span class='sub-syn-chip'>${s}</span>`).join('') + (viaWiki? wikSrcLink(ord) : '');
             } else { synEl.innerHTML=''; }
         }
         function render(){
@@ -16357,7 +16394,7 @@
                 synRad('laddar');
                 jmfSynonymer(res.positiv).then(s=>{
                     if(mittSynNr!==synNr || inp.value!==ordDaaSyn) return; // användaren hann skriva nytt
-                    synRad(s);
+                    synRad(s, true, res.positiv);
                 });
             }
         }
