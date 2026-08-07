@@ -1715,6 +1715,14 @@
     .ls-next-task { background:#fff8e6; border:1.5px solid #ffe6a8; border-radius:10px; padding:8px 10px; font-size:12.5px; margin-bottom:10px; }
     .ls-lessons { display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; margin-bottom:10px; padding-right:2px; }
     .ls-day-head { font-size:11px; font-weight:800; color:#8e8e93; text-transform:uppercase; letter-spacing:.5px; margin-top:6px; }
+    /* Ram + svag bakgrundsfärg per dag i veckovyn, så dagarna blir lättare att skilja åt */
+    .ls-day-group { border-radius:12px; border:1.5px solid; padding:8px; margin-top:4px; }
+    .ls-day-group .ls-day-head { margin-top:0; }
+    .ls-day-group[data-day="0"] { background:#eaf3ff; border-color:#bfdcff; }
+    .ls-day-group[data-day="1"] { background:#eafaf0; border-color:#b9ecc9; }
+    .ls-day-group[data-day="2"] { background:#fff8ea; border-color:#ffe3a8; }
+    .ls-day-group[data-day="3"] { background:#f5edff; border-color:#ddc7ff; }
+    .ls-day-group[data-day="4"] { background:#ffeef3; border-color:#ffc7d6; }
     .ls-empty { text-align:center; color:#b0b0b6; font-size:12.5px; font-style:italic; padding:10px 4px; }
     .ls-empty-small { padding:4px 0; }
     .ls-lesson { display:flex; gap:10px; background:#fff; border:1.5px solid #ececf0; border-radius:12px; padding:10px 12px; align-items:flex-start; cursor:pointer; transition:border-color .15s; }
@@ -13450,11 +13458,13 @@
                 }
             } else {
                 for(let d=0; d<=4; d++){
+                    const dayGroup=document.createElement('div'); dayGroup.className='ls-day-group'; dayGroup.dataset.day=String(d);
                     const dayHead=document.createElement('div'); dayHead.className='ls-day-head'; dayHead.textContent=LS_DAG_NAMN[d];
-                    listWrap.appendChild(dayHead);
+                    dayGroup.appendChild(dayHead);
                     const list=lessonsForDay(d);
-                    if(!list.length){ const e=document.createElement('div'); e.className='ls-empty ls-empty-small'; e.textContent='Inga lektioner.'; listWrap.appendChild(e); }
-                    else list.forEach(l=>listWrap.appendChild(buildLessonRow(l)));
+                    if(!list.length){ const e=document.createElement('div'); e.className='ls-empty ls-empty-small'; e.textContent='Inga lektioner.'; dayGroup.appendChild(e); }
+                    else list.forEach(l=>dayGroup.appendChild(buildLessonRow(l)));
+                    listWrap.appendChild(dayGroup);
                 }
             }
             root.appendChild(listWrap);
