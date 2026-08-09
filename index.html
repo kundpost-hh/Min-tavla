@@ -1691,6 +1691,14 @@
     .ok-intro-card-ex { font-size:11px; font-weight:700; color:#8e8e93; }
     .ok-intro-start { width:100%; padding:12px; font-size:15px; position:sticky; bottom:0; box-shadow:0 -8px 10px -4px rgba(255,255,255,0.9); }
     /* POSITIONSSYSTEMET */
+    .ps-illust { margin-bottom:14px; padding-bottom:12px; border-bottom:1.5px solid #ececf0; }
+    .ps-illust-intro { text-align:center; font-size:13px; color:#333; line-height:1.5; margin-bottom:10px; }
+    .ps-illust-intro i { color:#6d28d9; font-style:italic; }
+    .ps-illust-boxrow { display:flex; justify-content:center; gap:5px; }
+    .ps-illust-box { width:44px; height:44px; border-radius:8px; background:#7c3aed; color:#fff; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; transition:transform .12s, background .12s; }
+    .ps-illust-box:hover, .ps-illust-box:focus { background:#5b21b6; transform:scale(1.1); outline:none; }
+    .ps-illust-readout { margin-top:10px; text-align:center; font-size:13px; color:#6d28d9; min-height:20px; }
+    .ps-illust-readout b { color:#1d1d1f; }
     .ps-target { text-align:center; font-size:14px; font-weight:700; color:#555; margin-bottom:4px; }
     .ps-target b { font-size:34px; color:#1d1d1f; display:block; margin-top:2px; }
     .ps-varde-tal { display:flex; justify-content:center; gap:6px; margin:14px 0 10px; }
@@ -2855,6 +2863,7 @@
     .tal-ctrl .btn { padding:6px 9px; font-size:12px; margin-left:auto; }
     .tal-svg { width:100%; height:auto; display:block; touch-action:none; cursor:crosshair; }
     .tal-tips { font-size:11px; color:#b0b0b8; font-weight:600; text-align:center; margin-top:2px; }
+    .tal-placering-info { font-size:12.5px; color:#1f7a37; background:#eaf6ec; border-radius:8px; padding:6px 10px; margin-bottom:6px; text-align:center; line-height:1.4; }
 
     /* ---- PENGAR ---- */
     .pengar-bank { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
@@ -3032,6 +3041,11 @@
     .gr-protractor:active { cursor:grabbing; }
     .gr-prot-inner { width:100%; height:100%; pointer-events:none; transform-origin:50% 88.46%; }
     .gr-prot-inner svg { display:block; }
+    /* FIX: "Vänd gradskivan" speglade hela SVG:n (inklusive gradtalen) med scaleX(-1), vilket
+       gjorde siffrorna baklänges/ospegelvända och svåra att läsa. Vänder nu tillbaka bara
+       text-elementen ett extra varv så siffrorna hamnar rättvända igen, medan själva
+       gradskive-formen fortfarande vänds som avsett. */
+    .gr-prot-inner.flipped text { transform: scaleX(-1); transform-origin: center; transform-box: fill-box; }
     /* FIX: handtaget var bara 16x16px - klick även bara några pixlar från mitten missade det
        helt och drog istället hela gradskivan i stället för att vrida den (särskilt märkbart på
        pekskärmar). Klickytan är nu 34x34px (samma mittpunkt som förut), medan den blå pricken
@@ -6285,7 +6299,7 @@
                 aiQueue = list.slice(1, 30);
                 custom=list[0]; idx=-1; close(); render(); persist();
             };
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseBegreppskortList(pasteTa.value); if(list.length) anvand(list, status); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseBegreppskortList(pasteTa.value); anvand(list, status); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd begreppen';
             makePasteBtn.onclick=()=>{ const list=parseBegreppskortList(pasteTa.value); if(!list.length){ status.textContent='⚠️ Hittade inget användbart begrepp. Kolla att formatet stämmer.'; return; } anvand(list, status); };
@@ -6533,7 +6547,7 @@
                 aiQueue = list.slice(1, 30);
                 custom = list[0]; idx=-1; revealed=false; close(); render(); persist();
             };
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseNoFragaList(pasteTa.value); if(list.length) anvand(list, status); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseNoFragaList(pasteTa.value); anvand(list, status); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd frågorna';
             makePasteBtn.onclick=()=>{ const list=parseNoFragaList(pasteTa.value); if(!list.length){ status.textContent='⚠️ Hittade ingen användbar fråga. Kolla att formatet stämmer.'; return; } anvand(list, status); };
@@ -6843,7 +6857,7 @@
                 aiQueue = list.slice(1, 30);
                 state.custom=list[0]; state.idx=-1; state.votesSant=0; state.votesFalskt=0; state.revealed=false; close(); render(); persist();
             };
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseSantFalsktList(pasteTa.value); if(list.length) anvand(list, status); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseSantFalsktList(pasteTa.value); anvand(list, status); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd påståendena';
             makePasteBtn.onclick=()=>{ const list=parseSantFalsktList(pasteTa.value); if(!list.length){ status.textContent='⚠️ Hittade inget användbart påstående. Kolla att formatet stämmer.'; return; } anvand(list, status); };
@@ -9459,7 +9473,7 @@
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – de nya skrivstarterna ersätter automatiskt de nuvarande...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseSkrivstartList(pasteTa.value); if(list.length>=1){ leggTillSkrivstarter(list, status, close); } },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseSkrivstartList(pasteTa.value); if(list.length>=1){ leggTillSkrivstarter(list, status, close); } else { status.textContent='⚠️ Hittade inga skrivstarter i svaret.'; } },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd skrivstarterna';
             makePasteBtn.onclick=()=>{ const list=parseSkrivstartList(pasteTa.value); if(list.length<1){ status.textContent='⚠️ Hittade inga skrivstarter i svaret.'; return; } leggTillSkrivstarter(list, status, close); };
@@ -9934,7 +9948,7 @@
             window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
         row1.appendChild(copyBtn); box.appendChild(row1);
         const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – meningarna läggs till automatiskt...'; box.appendChild(pasteTa);
-        pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseMeningsbyggnadList(pasteTa.value, lvlSel.value); if(list.length>=1) leggTill(list, statusEl); },60); });
+        pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseMeningsbyggnadList(pasteTa.value, lvlSel.value); leggTill(list, statusEl); },60); });
         const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
         const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Lägg till meningarna';
         makePasteBtn.onclick=()=>{ const list=parseMeningsbyggnadList(pasteTa.value, lvlSel.value); if(list.length<1){ statusEl.textContent='⚠️ Hittade inga meningar. Kolla att varje rad har rätt antal delar separerade med |.'; return; } leggTill(list, statusEl); };
@@ -10876,7 +10890,7 @@
                 aiQueue = list.slice(1, 30);
                 const ex = list[0]; state.text=ex.text; state.correct=ex.correct; state.motivering=ex.motivering; facitOpen=true; close(); renderEdit(); persist();
             };
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseKallkritikList(pasteTa.value); if(list.length) anvand(list, status); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseKallkritikList(pasteTa.value); anvand(list, status); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd exemplen';
             makePasteBtn.onclick=()=>{ const list=parseKallkritikList(pasteTa.value); if(!list.length){ status.textContent='⚠️ Hittade inget användbart exempel. Kolla att formatet stämmer.'; return; } anvand(list, status); };
@@ -12976,7 +12990,7 @@
         if(!config){ widget.style.height = '540px'; }
         const tabsEl=document.createElement('div'); tabsEl.className='exit-tabs'; body.appendChild(tabsEl);
         const tBygg=document.createElement('button'); tBygg.type='button'; tBygg.className='exit-tab'; tBygg.textContent='🧱 Bygg tal';
-        const tVarde=document.createElement('button'); tVarde.type='button'; tVarde.className='exit-tab'; tVarde.textContent='🔢 Talets värde';
+        const tVarde=document.createElement('button'); tVarde.type='button'; tVarde.className='exit-tab'; tVarde.textContent='🔢 Platsvärde';
         tabsEl.appendChild(tBygg); tabsEl.appendChild(tVarde);
         const root=document.createElement('div'); body.appendChild(root);
         const ri=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
@@ -13077,7 +13091,38 @@
         // FIX (ny flik): "Talets värde" - flera olika femsiffriga tal slumpas fram, och för varje
         // tal markeras en specifik siffra som eleverna ska räkna ut platsvärdet för (t.ex. att 3:an
         // i 47 382 står på hundratalsplatsen och därför är värd 300, inte bara "3").
+        // Illustration i toppen av fliken "Platsvärde": ett fast exempeltal (13456) i klickbara/
+        // hovringsbara rutor - man hovrar (eller klickar/tappar på mobil) på en siffra för att se
+        // dess platsnamn och värde i en gemensam avläsningsruta under, istället för att visa alla
+        // fem svar samtidigt i ett statiskt diagram.
+        function renderPlatsvardeIllustration(){
+            const wrap=document.createElement('div'); wrap.className='ps-illust';
+            const introHint=document.createElement('div'); introHint.className='ps-illust-intro';
+            introHint.innerHTML = 'I <i>positionssystem</i> är det en siffras plats i ett tal som avgör vilket värde den har. Man säger att siffran har ett <i>platsvärde</i>.';
+            wrap.appendChild(introHint);
+
+            const digits=['1','3','4','5','6'];
+            const platsnamn=['tiotusental','tusental','hundratal','tiotal','ental'];
+            const varden=['10 000','3 000','400','50','6'];
+
+            const boxRow=document.createElement('div'); boxRow.className='ps-illust-boxrow';
+            const readout=document.createElement('div'); readout.className='ps-illust-readout';
+            readout.textContent='👆 Hovra över (eller klicka på) en siffra ovan för att se dess platsvärde.';
+            digits.forEach((d,i)=>{
+                const box=document.createElement('div'); box.className='ps-illust-box'; box.textContent=d; box.tabIndex=0;
+                const visa=()=>{ readout.innerHTML = '<b>'+d+'</b> är <b>'+platsnamn[i]+'ssiffra</b> och har värdet <b>'+varden[i]+'</b>.'; };
+                box.addEventListener('mouseenter', visa);
+                box.addEventListener('focus', visa);
+                box.addEventListener('click', visa);
+                boxRow.appendChild(box);
+            });
+            wrap.appendChild(boxRow);
+            wrap.appendChild(readout);
+            root.appendChild(wrap);
+        }
+
         function renderVarde(){
+            renderPlatsvardeIllustration();
             const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='🔢 Vilket värde har den markerade siffran i talet?'; root.appendChild(hint);
 
             const talStr = String(state.vTal);
@@ -14746,10 +14791,13 @@
         if(config===undefined) config=null;
         const body = createWidget('TALLINJE', 460, 'tallinje-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu tal-ctrl'>Från <input type='number' class='tal-from' value='0'> Till <input type='number' class='tal-to' value='100'> <label class='tal-hopp-lbl'><input type='checkbox' class='tal-hopp'> Visa hopp</label> <button class='btn btn-secondary tal-clear'>Rensa</button></div><svg class='tal-svg' viewBox='0 0 600 156' xmlns='http://www.w3.org/2000/svg'></svg><div class='tal-tips'>Klicka på linjen för att sätta ut ett tal – klicka på talet igen för att ta bort det</div>`;
+        body.innerHTML = `<div class='hover-menu tal-ctrl'>Från <input type='number' class='tal-from' value='0'> Till <input type='number' class='tal-to' value='100'> <label class='tal-hopp-lbl'><input type='checkbox' class='tal-hopp'> Visa hopp</label> <button class='btn btn-secondary tal-ovningar'>🏋️ Övningar</button> <button class='btn btn-primary tal-ratta' style='display:none;'>✅ Rätta</button> <button class='btn btn-secondary tal-clear'>Rensa</button></div><div class='tal-placering-info' style='display:none;'></div><svg class='tal-svg' viewBox='0 0 600 156' xmlns='http://www.w3.org/2000/svg'></svg><div class='tal-tips'>Klicka på linjen för att sätta ut ett tal – klicka på talet igen för att ta bort det</div>`;
         const fromIn=body.querySelector('.tal-from'), toIn=body.querySelector('.tal-to'), hoppCb=body.querySelector('.tal-hopp'), svg=body.querySelector('.tal-svg');
+        const infoEl=body.querySelector('.tal-placering-info'), rattaBtn=body.querySelector('.tal-ratta');
         const W=600, PAD=34, Y=88, NS='http://www.w3.org/2000/svg';
         let markers=[]; // i utplaceringsordning
+        // ---- ÖVNING "Placera tal": facit (talen eleven ska placera ut), och resultat efter rättning ----
+        let placeringsFacit=null, placeringsChecked=false, placeringsMatched=[], placeringsMissed=[];
         if(config && config.data){
             if(config.data.from!==undefined) fromIn.value=config.data.from;
             if(config.data.to!==undefined) toIn.value=config.data.to;
@@ -14789,14 +14837,26 @@
                 }
             }
             // markörer
-            markers.forEach(v=>{
+            markers.forEach((v,mi)=>{
                 if(v<from||v>to) return;
                 const x=vx(v);
-                svg.appendChild(el('circle',{cx:x,cy:Y,r:9,fill:'#ff9500',stroke:'#fff','stroke-width':2.5,'class':'tal-marker'}));
+                const ratt = placeringsChecked && placeringsMatched[mi];
+                const fel = placeringsChecked && !placeringsMatched[mi] && placeringsFacit;
+                const col = ratt ? '#34c759' : (fel ? '#ff3b30' : '#ff9500');
+                svg.appendChild(el('circle',{cx:x,cy:Y,r:9,fill:col,stroke:'#fff','stroke-width':2.5,'class':'tal-marker'}));
                 const t=fmt(v), tw=Math.max(26, t.length*9+10);
-                svg.appendChild(el('rect',{x:x-tw/2,y:Y+30,width:tw,height:20,rx:7,fill:'#ff9500'}));
+                svg.appendChild(el('rect',{x:x-tw/2,y:Y+30,width:tw,height:20,rx:7,fill:col}));
                 svg.appendChild(el('text',{x:x,y:Y+44.5,'text-anchor':'middle','font-size':13,'font-weight':800,fill:'#fff','font-family':'inherit'},t));
             });
+            // saknade facit-tal (bara efter rättning, om eleven missat något tal)
+            if(placeringsChecked && placeringsMissed.length){
+                placeringsMissed.forEach(v=>{
+                    if(v<from||v>to) return;
+                    const x=vx(v);
+                    svg.appendChild(el('circle',{cx:x,cy:Y,r:11,fill:'none',stroke:'#ff3b30','stroke-width':2,'stroke-dasharray':'3,3'}));
+                    svg.appendChild(el('text',{x:x,y:Y-16,'text-anchor':'middle','font-size':12,'font-weight':800,fill:'#ff3b30','font-family':'inherit'},fmt(v)));
+                });
+            }
         }
         svg.addEventListener('pointerdown',(e)=>{
             const from=getFrom(), to=getTo(); if(!isFinite(from)||!isFinite(to)||to<=from) return;
@@ -14812,12 +14872,145 @@
             const tresk=range*0.015;
             const idx=markers.findIndex(m=>Math.abs(m-v)<=tresk);
             if(idx>=0) markers.splice(idx,1); else markers.push(v);
+            placeringsChecked=false; // eleven ändrar sin placering - visa inte gammal rättning längre
             render(); saveBoardState();
         });
         fromIn.onchange=()=>{ render(); saveBoardState(); };
         toIn.onchange=()=>{ render(); saveBoardState(); };
         hoppCb.onchange=()=>{ render(); saveBoardState(); };
-        body.querySelector('.tal-clear').onclick=()=>{ markers=[]; render(); saveBoardState(); };
+        body.querySelector('.tal-clear').onclick=()=>{ markers=[]; placeringsFacit=null; placeringsChecked=false; infoEl.style.display='none'; rattaBtn.style.display='none'; render(); saveBoardState(); };
+
+        // Rättar elevens utplacerade markörer mot facit-talen i en aktiv "Placera tal"-övning:
+        // matchar varje markör mot närmsta ej redan matchade facit-tal inom en liten marginal.
+        function rattaPlacering(){
+            if(!placeringsFacit) return;
+            const range = getTo()-getFrom();
+            const tol = Math.max(range*0.02, 0.5);
+            const kvar = placeringsFacit.slice();
+            placeringsMatched = markers.map(()=>false);
+            markers.forEach((v,mi)=>{
+                let bestIdx=-1, bestDist=Infinity;
+                kvar.forEach((f,fi)=>{ if(f===null) return; const d=Math.abs(f-v); if(d<=tol && d<bestDist){ bestDist=d; bestIdx=fi; } });
+                if(bestIdx>=0){ placeringsMatched[mi]=true; kvar[bestIdx]=null; }
+            });
+            placeringsMissed = kvar.filter(f=>f!==null);
+            placeringsChecked = true;
+            const rattAntal = placeringsMatched.filter(Boolean).length;
+            infoEl.innerHTML = (rattAntal===placeringsFacit.length && placeringsMissed.length===0)
+                ? '🎉 Alla '+placeringsFacit.length+' tal rätt placerade!'
+                : '👉 '+rattAntal+' av '+placeringsFacit.length+' tal rätt placerade. De tal du missade visas nu med en röd prickad ring.';
+            render();
+        }
+        rattaBtn.onclick=rattaPlacering;
+
+        // ---- ÖVNINGAR: flera olika övningstyper kring att hoppa fram- och bakåt på tallinjen ----
+        const talRi=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
+        function talGenUppgift(typ, niva){
+            if(typ==='blandat') typ = ['framat','bakat','hurmanga','placera'][talRi(0,3)];
+            const range = niva==='latt' ? {min:0,max:20,steg:[1,5]} : niva==='svar' ? {min:-20,max:50,steg:[1,15]} : {min:0,max:50,steg:[1,10]};
+            let start, steg, mal, fraga, svar, forklaring, visaFrom, visaTo, visaMarkers, targets;
+            if(typ==='framat'){
+                steg = talRi(range.steg[0], range.steg[1]);
+                start = talRi(range.min, range.max-steg);
+                mal = start+steg;
+                fraga = 'Du står på talet <b>'+fmt(start)+'</b>. Hoppa <b>'+steg+'</b> steg framåt (åt höger) på tallinjen. Vilket tal hamnar du på?';
+                svar = fmt(mal);
+                forklaring = fmt(start)+' + '+steg+' = '+fmt(mal);
+                visaFrom=range.min; visaTo=range.max; visaMarkers=[start,mal];
+            } else if(typ==='bakat'){
+                steg = talRi(range.steg[0], range.steg[1]);
+                start = talRi(range.min+steg, range.max);
+                mal = start-steg;
+                fraga = 'Du står på talet <b>'+fmt(start)+'</b>. Hoppa <b>'+steg+'</b> steg bakåt (åt vänster) på tallinjen. Vilket tal hamnar du på?';
+                svar = fmt(mal);
+                forklaring = fmt(start)+' − '+steg+' = '+fmt(mal);
+                visaFrom=range.min; visaTo=range.max; visaMarkers=[start,mal];
+            } else if(typ==='placera'){
+                const antal = niva==='svar' ? 4 : 3;
+                const minGap = (range.max-range.min)/(antal*3.5); // så talen inte hamnar för nära varandra
+                targets=[];
+                let försök=0;
+                while(targets.length<antal && försök<200){
+                    försök++;
+                    const kandidat = talRi(range.min, range.max);
+                    if(targets.every(t=>Math.abs(t-kandidat)>=minGap)) targets.push(kandidat);
+                }
+                targets.sort((a,b)=>a-b);
+                fraga = 'Placera talen <b>'+targets.map(fmt).join(', ')+'</b> på tallinjen genom att klicka på rätt platser. Klicka sedan på <b>✅ Rätta</b> i verktygsraden.';
+                svar = targets.map(fmt).join(', ');
+                forklaring = '';
+                visaFrom=range.min; visaTo=range.max; visaMarkers=[];
+            } else { // hurmanga
+                start = talRi(range.min, range.max);
+                mal = talRi(range.min, range.max);
+                while(mal===start) mal = talRi(range.min, range.max);
+                const diff = mal-start; const riktning = diff>0 ? 'framåt (åt höger)' : 'bakåt (åt vänster)';
+                fraga = 'Du står på talet <b>'+fmt(start)+'</b> och vill hoppa till talet <b>'+fmt(mal)+'</b>. Hur många steg är det, och åt vilket håll?';
+                svar = Math.abs(diff)+' steg '+riktning;
+                forklaring = fmt(mal)+' − '+fmt(start)+' = '+(diff>0?'+':'')+diff;
+                visaFrom=range.min; visaTo=range.max; visaMarkers=[start,mal];
+            }
+            return { typ, fraga, svar, forklaring, visaFrom, visaTo, visaMarkers, targets };
+        }
+        function showOvningar(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.textAlign='left';
+            box.innerHTML = `<div class='cal-popup-title'>🏋️ Övningar – hoppa på tallinjen</div>
+                <div class='hover-menu' style='margin-bottom:10px;'>
+                    <select class='editor-select tal-ov-typ'>
+                        <option value='framat'>➡️ Hoppa framåt</option>
+                        <option value='bakat'>⬅️ Hoppa bakåt</option>
+                        <option value='hurmanga'>❓ Hur många steg?</option>
+                        <option value='placera'>📍 Placera tal på linjen</option>
+                        <option value='blandat' selected>🎲 Blandat</option>
+                    </select>
+                    <select class='editor-select tal-ov-niva'>
+                        <option value='latt'>Lätt</option>
+                        <option value='medel' selected>Medel</option>
+                        <option value='svar'>Svår</option>
+                    </select>
+                </div>
+                <div class='tal-ov-fraga' style='font-size:14px;line-height:1.5;min-height:44px;'></div>
+                <div class='tal-ov-svar' style='display:none;margin-top:8px;padding:8px 10px;background:#eaf6ec;border-radius:10px;font-size:13.5px;'></div>
+                <div class='cal-popup-btns'></div>`;
+            const fragaEl=box.querySelector('.tal-ov-fraga'), svarEl=box.querySelector('.tal-ov-svar');
+            const typSel=box.querySelector('.tal-ov-typ'), nivaSel=box.querySelector('.tal-ov-niva');
+            const btns=box.querySelector('.cal-popup-btns');
+            let uppgift=null;
+            function nyUppgift(){
+                uppgift = talGenUppgift(typSel.value, nivaSel.value);
+                fragaEl.innerHTML = uppgift.fraga;
+                svarEl.style.display='none'; svarEl.textContent='';
+            }
+            const nyBtn=document.createElement('button'); nyBtn.className='btn btn-secondary'; nyBtn.textContent='🎲 Ny uppgift'; nyBtn.onclick=nyUppgift;
+            const svarBtn=document.createElement('button'); svarBtn.className='btn btn-secondary'; svarBtn.textContent='👁️ Visa svar';
+            svarBtn.onclick=()=>{ if(!uppgift) return; svarEl.style.display='block'; svarEl.innerHTML='<b>Svar:</b> '+uppgift.svar+'<br><span style="opacity:.75">'+uppgift.forklaring+'</span>'; };
+            const visaBtn=document.createElement('button'); visaBtn.className='btn btn-primary'; visaBtn.textContent='📍 Visa på tallinjen';
+            visaBtn.onclick=()=>{
+                if(!uppgift) return;
+                fromIn.value=uppgift.visaFrom; toIn.value=uppgift.visaTo;
+                if(uppgift.typ==='placera'){
+                    // Sätt upp en tom tallinje med facit-talen dolda - eleven ska själv klicka ut dem.
+                    markers=[]; placeringsFacit=uppgift.targets.slice(); placeringsChecked=false; hoppCb.checked=false;
+                    infoEl.style.display='block'; infoEl.innerHTML='📍 Placera talen <b>'+uppgift.targets.map(fmt).join(', ')+'</b> på tallinjen. Klicka på rätt platser, klicka sedan på ✅ Rätta.';
+                    rattaBtn.style.display='';
+                } else {
+                    markers=uppgift.visaMarkers.slice(); hoppCb.checked=true;
+                    placeringsFacit=null; placeringsChecked=false; infoEl.style.display='none'; rattaBtn.style.display='none';
+                }
+                render(); saveBoardState();
+                close();
+            };
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const closeBtn=document.createElement('button'); closeBtn.className='btn'; closeBtn.textContent='Stäng'; closeBtn.onclick=close;
+            typSel.onchange=nyUppgift; nivaSel.onchange=nyUppgift;
+            btns.appendChild(nyBtn); btns.appendChild(svarBtn); btns.appendChild(visaBtn); btns.appendChild(closeBtn);
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            nyUppgift();
+        }
+        body.querySelector('.tal-ovningar').onclick=showOvningar;
+
         render();
     }
 
@@ -15183,7 +15376,7 @@
 
                 let px=20, py=20, rotation=0, flipped=false;
                 const applyPos=()=>{ prot.style.left=px+'px'; prot.style.top=py+'px'; };
-                const applyTransform=()=>{ protInner.style.transform = `rotate(${rotation}deg) scaleX(${flipped?-1:1})`; };
+                const applyTransform=()=>{ protInner.style.transform = `rotate(${rotation}deg) scaleX(${flipped?-1:1})`; protInner.classList.toggle('flipped', flipped); };
                 applyPos(); applyTransform();
 
                 let dragging=false, dragStartX=0, dragStartY=0, dragOrigX=0, dragOrigY=0;
@@ -18554,7 +18747,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – hela övningen skapas automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const pkt=parseLasfAiPaket(pasteTa.value); if(pkt) anvand(pkt, statusEl, pasteTa.value); },60); });
+            // FIX: vid inklistring anropades anvand() bara OM tolkningen lyckades (if(pkt)) - misslyckades
+            // tolkningen (t.ex. för att bara en del av Geminis svar klistrats in) hände absolut ingenting,
+            // inte ens ett felmeddelande, vilket ser ut som att klistra in inte gör något alls. Den manuella
+            // "Skapa övningen från svaret"-knappen anropar alltid anvand() och visar då ett hjälpsamt
+            // felmeddelande - gör nu samma sak automatiskt vid inklistring, så man alltid får feedback.
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const pkt=parseLasfAiPaket(pasteTa.value); anvand(pkt, statusEl, pasteTa.value); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Skapa övningen från svaret';
             makePasteBtn.onclick=()=>{ const pkt=parseLasfAiPaket(pasteTa.value); anvand(pkt, statusEl, pasteTa.value); };
@@ -22454,99 +22652,99 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
         // ---- TAL ----
         const MB_TAL = [
-            { namn:'Siffra', emoji:'🔢', def:'Ett tecken som används för att skriva tal, till exempel 0, 1, 2, 3 ... 9. Genom att kombinera siffror kan man skriva alla tal.' },
-            { namn:'Tal', emoji:'🔢', def:'Ett värde som visar hur mycket eller hur många. Tal byggs upp av en eller flera siffror, till exempel 7 eller 42.' },
-            { namn:'Talsystem', emoji:'🧮', def:'Ett sätt att skriva och ordna tal. Vi använder oftast tiosystemet (decimalsystemet), som bygger på talet 10.' },
-            { namn:'Tallinje', emoji:'📏', def:'En linje där tal placeras i ordning, oftast med mindre tal till vänster och större tal till höger.' },
-            { namn:'Positionssystem', emoji:'🏷️', def:'Ett talsystem där en siffras värde beror på vilken plats (position) den står på i talet, till exempel att siffran 3 i talet 300 betyder tre hundra.' },
-            { namn:'Ental', emoji:'1️⃣', def:'Den sista siffran i ett tal, som visar hur många ental (0-9) talet har utöver hela tiotal.' },
-            { namn:'Tiotal', emoji:'🔟', def:'En position i ett tal som visar hur många grupper om tio talet innehåller.' },
-            { namn:'Hundratal', emoji:'💯', def:'En position i ett tal som visar hur många grupper om hundra talet innehåller.' },
-            { namn:'Tusental', emoji:'🔢', def:'En position i ett tal som visar hur många grupper om tusen talet innehåller.' },
-            { namn:'Decimaltal', emoji:'🔟', def:'Ett tal som har en decimalkomma och därmed innehåller delar av en enhet, till exempel 2,5.' },
-            { namn:'Bråk', emoji:'½', def:'Ett tal som visar en del av en helhet, skrivet som täljare genom nämnare, till exempel 1/2 (en halv).' },
-            { namn:'Procent (introduktion)', emoji:'%', def:'Ett sätt att ange en andel av hundra, skrivet med tecknet %. Till exempel betyder 50% samma sak som hälften.' }
+            { namn:'Siffra', emoji:'🔢', def:'Ett tecken som används för att skriva tal, till exempel 0, 1, 2, 3 ... 9. Genom att kombinera siffror kan man skriva alla tal.', exempel:'Talet 25 är byggt av siffrorna 2 och 5.' },
+            { namn:'Tal', emoji:'🔢', def:'Ett värde som visar hur mycket eller hur många. Tal byggs upp av en eller flera siffror, till exempel 7 eller 42.', exempel:'42 är ett tal - det talar om att det finns fyrtiotvå av något, till exempel 42 kulor.' },
+            { namn:'Talsystem', emoji:'🧮', def:'Ett sätt att skriva och ordna tal. Vi använder oftast tiosystemet (decimalsystemet), som bygger på talet 10.', exempel:'I tiosystemet skrivs talet trettiofem som 35, uppbyggt av 3 tiotal och 5 ental.' },
+            { namn:'Tallinje', emoji:'📏', def:'En linje där tal placeras i ordning, oftast med mindre tal till vänster och större tal till höger.', exempel:'På en tallinje från 0 till 10 ligger talet 4 fyra steg till höger om 0.' },
+            { namn:'Positionssystem', emoji:'🏷️', def:'Ett talsystem där en siffras värde beror på vilken plats (position) den står på i talet, till exempel att siffran 3 i talet 300 betyder tre hundra.', exempel:'I talet 352 betyder 3:an 300, eftersom den står på hundratalsplatsen - inte bara "3".' },
+            { namn:'Ental', emoji:'1️⃣', def:'Den sista siffran i ett tal, som visar hur många ental (0-9) talet har utöver hela tiotal.', exempel:'I talet 47 är 7 entalssiffran - det finns 7 ental utöver de fyra tiotalen.' },
+            { namn:'Tiotal', emoji:'🔟', def:'En position i ett tal som visar hur många grupper om tio talet innehåller.', exempel:'I talet 63 är 6 tiotalssiffran, vilket betyder 6 grupper om tio (60).' },
+            { namn:'Hundratal', emoji:'💯', def:'En position i ett tal som visar hur många grupper om hundra talet innehåller.', exempel:'I talet 452 är 4 hundratalssiffran, vilket betyder 4 grupper om hundra (400).' },
+            { namn:'Tusental', emoji:'🔢', def:'En position i ett tal som visar hur många grupper om tusen talet innehåller.', exempel:'I talet 3 218 är 3 tusentalssiffran, vilket betyder 3 grupper om tusen (3 000).' },
+            { namn:'Decimaltal', emoji:'🔟', def:'Ett tal som har en decimalkomma och därmed innehåller delar av en enhet, till exempel 2,5.', exempel:'3,75 liter mjölk är ett decimaltal - det är mer än 3 liter men mindre än 4 liter.' },
+            { namn:'Bråk', emoji:'½', def:'Ett tal som visar en del av en helhet, skrivet som täljare genom nämnare, till exempel 1/2 (en halv).', exempel:'Om en pizza delas i 4 lika stora bitar och du äter 1 bit, har du ätit 1/4 av pizzan.' },
+            { namn:'Procent (introduktion)', emoji:'%', def:'Ett sätt att ange en andel av hundra, skrivet med tecknet %. Till exempel betyder 50% samma sak som hälften.', exempel:'Om 50% av eleverna i klassen är pojkar, betyder det att hälften av eleverna är pojkar.' }
         ];
 
         // ---- RÄKNESÄTT ----
         const MB_RAKNESATT = [
-            { namn:'Addition', emoji:'➕', def:'Räknesättet som handlar om att lägga ihop tal, till exempel 3 + 4 = 7. Kallas ofta "plus".' },
-            { namn:'Term', emoji:'🔹', def:'Ett tal som ingår i en addition eller subtraktion. I 3 + 4 = 7 är 3 och 4 termer.' },
-            { namn:'Summa', emoji:'🟰', def:'Svaret man får vid addition, alltså resultatet när man lägger ihop tal. I 3 + 4 = 7 är 7 summan.' },
-            { namn:'Subtraktion', emoji:'➖', def:'Räknesättet som handlar om att ta bort eller jämföra tal, till exempel 7 - 3 = 4. Kallas ofta "minus".' },
-            { namn:'Differens', emoji:'🔻', def:'Svaret man får vid subtraktion, alltså resultatet när man tar bort ett tal från ett annat. I 7 - 3 = 4 är 4 differensen.' },
-            { namn:'Multiplikation', emoji:'✖️', def:'Räknesättet som handlar om upprepad addition, till exempel 3 × 4 betyder 3 fyra gånger = 12. Kallas ofta "gånger".' },
-            { namn:'Faktor', emoji:'🔢', def:'Ett tal som ingår i en multiplikation. I 3 × 4 = 12 är 3 och 4 faktorer.' },
-            { namn:'Produkt', emoji:'🟰', def:'Svaret man får vid multiplikation, alltså resultatet när man multiplicerar tal. I 3 × 4 = 12 är 12 produkten.' },
-            { namn:'Division', emoji:'➗', def:'Räknesättet som handlar om att dela upp ett tal i lika stora delar, till exempel 12 ÷ 3 = 4. Kallas ofta "delat med".' },
-            { namn:'Dividend', emoji:'🔢', def:'Det tal som delas vid division. I 12 ÷ 3 = 4 är 12 dividenden.' },
-            { namn:'Divisor', emoji:'🔢', def:'Det tal man delar med vid division. I 12 ÷ 3 = 4 är 3 divisorn.' },
-            { namn:'Kvot', emoji:'🟰', def:'Svaret man får vid division, alltså resultatet när man delar ett tal med ett annat. I 12 ÷ 3 = 4 är 4 kvoten.' },
-            { namn:'Täljare', emoji:'🔼', def:'Talet högst upp i ett bråk, som visar hur många delar man har. I bråket 3/4 är 3 täljaren.' },
-            { namn:'Nämnare', emoji:'🔽', def:'Talet längst ner i ett bråk, som visar hur många delar det hela är delat i. I bråket 3/4 är 4 nämnaren.' },
-            { namn:'Prioriteringsregler (introduktion)', emoji:'📋', def:'Regler för i vilken ordning man ska räkna ut ett tal med flera räknesätt, till exempel att multiplikation och division räknas före addition och subtraktion.' }
+            { namn:'Addition', emoji:'➕', def:'Räknesättet som handlar om att lägga ihop tal, till exempel 3 + 4 = 7. Kallas ofta "plus".', exempel:'3 äpplen + 4 äpplen = 7 äpplen.' },
+            { namn:'Term', emoji:'🔹', def:'Ett tal som ingår i en addition eller subtraktion. I 3 + 4 = 7 är 3 och 4 termer.', exempel:'I uppgiften 5 + 8 = 13 är 5 och 8 termerna.' },
+            { namn:'Summa', emoji:'🟰', def:'Svaret man får vid addition, alltså resultatet när man lägger ihop tal. I 3 + 4 = 7 är 7 summan.', exempel:'När man räknar ut 6 + 9 = 15 är 15 summan.' },
+            { namn:'Subtraktion', emoji:'➖', def:'Räknesättet som handlar om att ta bort eller jämföra tal, till exempel 7 - 3 = 4. Kallas ofta "minus".', exempel:'Du har 10 kr och köper något för 4 kr: 10 - 4 = 6 kr kvar.' },
+            { namn:'Differens', emoji:'🔻', def:'Svaret man får vid subtraktion, alltså resultatet när man tar bort ett tal från ett annat. I 7 - 3 = 4 är 4 differensen.', exempel:'Skillnaden mellan 12 och 5 är differensen: 12 - 5 = 7.' },
+            { namn:'Multiplikation', emoji:'✖️', def:'Räknesättet som handlar om upprepad addition, till exempel 3 × 4 betyder 3 fyra gånger = 12. Kallas ofta "gånger".', exempel:'4 påsar med 3 bullar i varje ger 4 × 3 = 12 bullar totalt.' },
+            { namn:'Faktor', emoji:'🔢', def:'Ett tal som ingår i en multiplikation. I 3 × 4 = 12 är 3 och 4 faktorer.', exempel:'I uppgiften 6 × 7 = 42 är 6 och 7 faktorer.' },
+            { namn:'Produkt', emoji:'🟰', def:'Svaret man får vid multiplikation, alltså resultatet när man multiplicerar tal. I 3 × 4 = 12 är 12 produkten.', exempel:'När man räknar ut 5 × 8 = 40 är 40 produkten.' },
+            { namn:'Division', emoji:'➗', def:'Räknesättet som handlar om att dela upp ett tal i lika stora delar, till exempel 12 ÷ 3 = 4. Kallas ofta "delat med".', exempel:'12 godisar ska delas lika mellan 3 kompisar: 12 ÷ 3 = 4 godisar var.' },
+            { namn:'Dividend', emoji:'🔢', def:'Det tal som delas vid division. I 12 ÷ 3 = 4 är 12 dividenden.', exempel:'I uppgiften 20 ÷ 4 = 5 är 20 dividenden - talet som delas.' },
+            { namn:'Divisor', emoji:'🔢', def:'Det tal man delar med vid division. I 12 ÷ 3 = 4 är 3 divisorn.', exempel:'I uppgiften 20 ÷ 4 = 5 är 4 divisorn - talet man delar med.' },
+            { namn:'Kvot', emoji:'🟰', def:'Svaret man får vid division, alltså resultatet när man delar ett tal med ett annat. I 12 ÷ 3 = 4 är 4 kvoten.', exempel:'När man räknar ut 15 ÷ 3 = 5 är 5 kvoten.' },
+            { namn:'Täljare', emoji:'🔼', def:'Talet högst upp i ett bråk, som visar hur många delar man har. I bråket 3/4 är 3 täljaren.', exempel:'I bråket 2/5 är 2 täljaren - du har 2 av delarna.' },
+            { namn:'Nämnare', emoji:'🔽', def:'Talet längst ner i ett bråk, som visar hur många delar det hela är delat i. I bråket 3/4 är 4 nämnaren.', exempel:'I bråket 2/5 är 5 nämnaren - det hela är delat i 5 delar.' },
+            { namn:'Prioriteringsregler (introduktion)', emoji:'📋', def:'Regler för i vilken ordning man ska räkna ut ett tal med flera räknesätt, till exempel att multiplikation och division räknas före addition och subtraktion.', exempel:'I uppgiften 2 + 3 × 4 räknar man först 3 × 4 = 12, och sedan 2 + 12 = 14.' }
         ];
 
         // ---- GEOMETRI ----
         const MB_GEOMETRI = [
-            { namn:'Punkt', emoji:'📍', def:'En exakt plats utan storlek, ofta markerad med en liten prick.' },
-            { namn:'Linje', emoji:'📏', def:'En rak sträcka som fortsätter i oändlighet åt båda hållen.' },
-            { namn:'Linjesegment', emoji:'📏', def:'En del av en linje mellan två bestämda punkter.' },
-            { namn:'Sträcka', emoji:'📏', def:'Den kortaste vägen mellan två punkter, med en bestämd längd.' },
-            { namn:'Vinkel', emoji:'📐', def:'Det utrymme som bildas mellan två linjer som möts i en punkt, mätt i grader.' },
-            { namn:'Rät vinkel', emoji:'📐', def:'En vinkel som är exakt 90 grader, som ett hörn på en fyrkant.' },
-            { namn:'Triangel', emoji:'🔺', def:'En figur med tre sidor och tre hörn.' },
-            { namn:'Fyrhörning', emoji:'🟦', def:'En figur med fyra sidor och fyra hörn, till exempel en kvadrat eller rektangel.' },
-            { namn:'Kvadrat', emoji:'⬛', def:'En fyrhörning där alla fyra sidor är lika långa och alla vinklar är räta.' },
-            { namn:'Rektangel', emoji:'▬', def:'En fyrhörning med fyra räta vinklar, där motstående sidor är lika långa.' },
-            { namn:'Parallellogram', emoji:'▱', def:'En fyrhörning där motstående sidor är parallella och lika långa.' },
-            { namn:'Cirkel', emoji:'⭕', def:'En rund figur där alla punkter på kanten ligger lika långt från mittpunkten.' },
-            { namn:'Diameter', emoji:'⭕', def:'Den längsta sträckan tvärs över en cirkel, genom mittpunkten.' },
-            { namn:'Radie', emoji:'⭕', def:'Sträckan från cirkelns mittpunkt till kanten - hälften så lång som diametern.' },
-            { namn:'Omkrets', emoji:'🔁', def:'Längden runt en figur, till exempel runt en cirkel eller fyrhörning.' },
-            { namn:'Area', emoji:'🟩', def:'Hur stor yta en figur täcker, mätt i till exempel kvadratcentimeter (cm²).' },
-            { namn:'Symmetri', emoji:'🦋', def:'När en figur ser likadan ut på båda sidor om en tänkt linje (symmetrilinje), som en spegelbild.' },
-            { namn:'Passare', svg:'<circle cx="60" cy="24" r="5" fill="#8a8a8a" stroke="#5a5a5a" stroke-width="1.5"/><line x1="60" y1="24" x2="36" y2="98" stroke="#6a6a6a" stroke-width="6" stroke-linecap="round"/><line x1="60" y1="24" x2="84" y2="98" stroke="#6a6a6a" stroke-width="6" stroke-linecap="round"/><circle cx="36" cy="100" r="3" fill="#2a2a2a"/><polygon points="79,90 91,90 85,104" fill="#f4c542" stroke="#8a6a1a" stroke-width="1.5"/><path d="M18,100 A42,42 0 0,1 102,100" stroke="#9a9a9a" stroke-width="2" fill="none" stroke-dasharray="3 4"/>', def:'Ett ritverktyg med två ben, ett med en spets och ett med en penna, som används för att rita cirklar och mäta ut lika långa sträckor.' },
-            { namn:'Gradskiva', emoji:'📐', def:'Ett verktyg format som en halvcirkel med gradmarkeringar, som används för att mäta och rita vinklar.' }
+            { namn:'Punkt', emoji:'📍', def:'En exakt plats utan storlek, ofta markerad med en liten prick.', exempel:'En prick på ett papper som markerar var ett hörn i en triangel börjar.' },
+            { namn:'Linje', emoji:'📏', def:'En rak sträcka som fortsätter i oändlighet åt båda hållen.', exempel:'En rät linje ritad med linjal, som (om vi tänker oss den) fortsätter för evigt åt båda hållen.' },
+            { namn:'Linjesegment', emoji:'📏', def:'En del av en linje mellan två bestämda punkter.', exempel:'Sträckan mellan hörn A och hörn B i en fyrhörning är ett linjesegment.' },
+            { namn:'Sträcka', emoji:'📏', def:'Den kortaste vägen mellan två punkter, med en bestämd längd.', exempel:'Avståndet mellan skolan och ditt hem, mätt i en rak linje, är en sträcka.' },
+            { namn:'Vinkel', emoji:'📐', def:'Det utrymme som bildas mellan två linjer som möts i en punkt, mätt i grader.', exempel:'Två klockvisare som pekar åt olika håll bildar en vinkel mellan sig.' },
+            { namn:'Rät vinkel', emoji:'📐', def:'En vinkel som är exakt 90 grader, som ett hörn på en fyrkant.', exempel:'Hörnen på ett vanligt pappersark är räta vinklar (90°).' },
+            { namn:'Triangel', emoji:'🔺', def:'En figur med tre sidor och tre hörn.', exempel:'En pizzabit har oftast formen av en triangel, med tre sidor och tre hörn.' },
+            { namn:'Fyrhörning', emoji:'🟦', def:'En figur med fyra sidor och fyra hörn, till exempel en kvadrat eller rektangel.', exempel:'En dörr har formen av en fyrhörning - fyra sidor och fyra hörn.' },
+            { namn:'Kvadrat', emoji:'⬛', def:'En fyrhörning där alla fyra sidor är lika långa och alla vinklar är räta.', exempel:'Ett schackbrädes ruta är en kvadrat - alla fyra sidor lika långa.' },
+            { namn:'Rektangel', emoji:'▬', def:'En fyrhörning med fyra räta vinklar, där motstående sidor är lika långa.', exempel:'Ett vanligt A4-papper är en rektangel - motstående sidor lika långa, alla vinklar räta.' },
+            { namn:'Parallellogram', emoji:'▱', def:'En fyrhörning där motstående sidor är parallella och lika långa.', exempel:'En lutande brevlåda-lucka där motstående sidor ändå är parallella är ett parallellogram.' },
+            { namn:'Cirkel', emoji:'⭕', def:'En rund figur där alla punkter på kanten ligger lika långt från mittpunkten.', exempel:'Urtavlan på en klocka är en cirkel.' },
+            { namn:'Diameter', emoji:'⭕', def:'Den längsta sträckan tvärs över en cirkel, genom mittpunkten.', exempel:'Om du mäter tvärs över en rund pizza, genom mitten, mäter du diametern.' },
+            { namn:'Radie', emoji:'⭕', def:'Sträckan från cirkelns mittpunkt till kanten - hälften så lång som diametern.', exempel:'Avståndet från mitten av en rund pizza till kanten är radien - hälften av diametern.' },
+            { namn:'Omkrets', emoji:'🔁', def:'Längden runt en figur, till exempel runt en cirkel eller fyrhörning.', exempel:'Om du går ett helt varv runt en rektangulär fotbollsplan mäter du omkretsen.' },
+            { namn:'Area', emoji:'🟩', def:'Hur stor yta en figur täcker, mätt i till exempel kvadratcentimeter (cm²).', exempel:'Hur många kvadratcentimeter ett foto täcker är dess area.' },
+            { namn:'Symmetri', emoji:'🦋', def:'När en figur ser likadan ut på båda sidor om en tänkt linje (symmetrilinje), som en spegelbild.', exempel:'En fjärils vingmönster är symmetriskt - höger och vänster sida är varandras spegelbild.' },
+            { namn:'Passare', svg:'<circle cx="60" cy="24" r="5" fill="#8a8a8a" stroke="#5a5a5a" stroke-width="1.5"/><line x1="60" y1="24" x2="36" y2="98" stroke="#6a6a6a" stroke-width="6" stroke-linecap="round"/><line x1="60" y1="24" x2="84" y2="98" stroke="#6a6a6a" stroke-width="6" stroke-linecap="round"/><circle cx="36" cy="100" r="3" fill="#2a2a2a"/><polygon points="79,90 91,90 85,104" fill="#f4c542" stroke="#8a6a1a" stroke-width="1.5"/><path d="M18,100 A42,42 0 0,1 102,100" stroke="#9a9a9a" stroke-width="2" fill="none" stroke-dasharray="3 4"/>', def:'Ett ritverktyg med två ben, ett med en spets och ett med en penna, som används för att rita cirklar och mäta ut lika långa sträckor.', exempel:'Man använder en passare för att rita en perfekt cirkel på ett papper.' },
+            { namn:'Gradskiva', emoji:'📐', def:'Ett verktyg format som en halvcirkel med gradmarkeringar, som används för att mäta och rita vinklar.', exempel:'Man lägger en gradskiva mot en vinkel för att läsa av att den är 45 grader.' }
         ];
 
         // ---- MÄTNING ----
         const MB_MATNING = [
-            { namn:'Längd', emoji:'📏', def:'Hur lång eller kort något är, mäts till exempel i millimeter, centimeter, meter eller kilometer.' },
-            { namn:'Massa', emoji:'⚖️', def:'Hur mycket något väger, mäts till exempel i gram eller kilogram. Kallas ofta vardagligt för "vikt".' },
-            { namn:'Volym', emoji:'🧴', def:'Hur mycket något rymmer eller tar upp för plats, mäts till exempel i milliliter eller liter.' },
-            { namn:'Tid', emoji:'⏰', def:'Hur länge något varar eller när något sker, mäts i till exempel sekunder, minuter, timmar, dygn eller år.' },
-            { namn:'Temperatur', emoji:'🌡️', def:'Hur varmt eller kallt något är, mäts oftast i grader Celsius (°C).' },
-            { namn:'Skala', emoji:'🗺️', def:'Förhållandet mellan storleken på en ritning eller karta och verkligheten, till exempel att 1 cm på kartan kan motsvara 1 km i verkligheten.' }
+            { namn:'Längd', emoji:'📏', def:'Hur lång eller kort något är, mäts till exempel i millimeter, centimeter, meter eller kilometer.', exempel:'En penna kan vara 15 centimeter lång.' },
+            { namn:'Massa', emoji:'⚖️', def:'Hur mycket något väger, mäts till exempel i gram eller kilogram. Kallas ofta vardagligt för "vikt".', exempel:'En påse mjöl väger ofta 1 kilogram.' },
+            { namn:'Volym', emoji:'🧴', def:'Hur mycket något rymmer eller tar upp för plats, mäts till exempel i milliliter eller liter.', exempel:'En mjölkförpackning rymmer oftast 1 liter.' },
+            { namn:'Tid', emoji:'⏰', def:'Hur länge något varar eller när något sker, mäts i till exempel sekunder, minuter, timmar, dygn eller år.', exempel:'En lektion i skolan brukar vara 60 minuter.' },
+            { namn:'Temperatur', emoji:'🌡️', def:'Hur varmt eller kallt något är, mäts oftast i grader Celsius (°C).', exempel:'En varm sommardag kan det vara 25 grader Celsius ute.' },
+            { namn:'Skala', emoji:'🗺️', def:'Förhållandet mellan storleken på en ritning eller karta och verkligheten, till exempel att 1 cm på kartan kan motsvara 1 km i verkligheten.', exempel:'På en karta med skalan 1:100 000 motsvarar 1 cm på kartan 1 km i verkligheten.' }
         ];
 
         // ---- STATISTIK ----
         const MB_STATISTIK = [
-            { namn:'Tabell', emoji:'📋', def:'Ett sätt att ordna information i rader och kolumner, så det blir lättare att jämföra och läsa av.' },
-            { namn:'Diagram', emoji:'📊', def:'Ett sätt att visa information med hjälp av bilder, staplar eller linjer istället för bara siffror.' },
-            { namn:'Stapeldiagram', emoji:'📊', def:'Ett diagram där information visas med staplar av olika höjd - ju högre stapel, desto större värde.' },
-            { namn:'Cirkeldiagram', emoji:'🥧', def:'Ett diagram format som en cirkel, uppdelad i bitar (som en tårta) som visar hur stor andel varje del utgör av helheten.' },
-            { namn:'Medelvärde', emoji:'➗', def:'Ett genomsnittligt värde man räknar ut genom att lägga ihop alla tal och dela med hur många tal det är.' },
-            { namn:'Median', emoji:'📍', def:'Det mittersta värdet i en samling tal som sorterats i storleksordning. Om det är jämnt antal tal räknar man ut medelvärdet av de två mittersta talen.' },
-            { namn:'Typvärde', emoji:'🔁', def:'Det värde som förekommer flest gånger i en samling data.' }
+            { namn:'Tabell', emoji:'📋', def:'Ett sätt att ordna information i rader och kolumner, så det blir lättare att jämföra och läsa av.', exempel:'En tabell över klassens favoritfärger kan visa hur många som gillar rött, blått och grönt i rader och kolumner.' },
+            { namn:'Diagram', emoji:'📊', def:'Ett sätt att visa information med hjälp av bilder, staplar eller linjer istället för bara siffror.', exempel:'Ett diagram kan visa hur många glassar som såldes varje dag under en vecka.' },
+            { namn:'Stapeldiagram', emoji:'📊', def:'Ett diagram där information visas med staplar av olika höjd - ju högre stapel, desto större värde.', exempel:'Ett stapeldiagram kan visa hur många elever som har varje husdjur - en stapel per djurslag.' },
+            { namn:'Cirkeldiagram', emoji:'🥧', def:'Ett diagram format som en cirkel, uppdelad i bitar (som en tårta) som visar hur stor andel varje del utgör av helheten.', exempel:'Ett cirkeldiagram kan visa hur klassens fritidsintressen fördelar sig, som bitar av en tårta.' },
+            { namn:'Medelvärde', emoji:'➗', def:'Ett genomsnittligt värde man räknar ut genom att lägga ihop alla tal och dela med hur många tal det är.', exempel:'Om tre elever har 4, 6 och 8 poäng är medelvärdet (4+6+8) ÷ 3 = 6.' },
+            { namn:'Median', emoji:'📍', def:'Det mittersta värdet i en samling tal som sorterats i storleksordning. Om det är jämnt antal tal räknar man ut medelvärdet av de två mittersta talen.', exempel:'Om talen 3, 7, 9 sorteras i storleksordning är 7 medianen - det mittersta talet.' },
+            { namn:'Typvärde', emoji:'🔁', def:'Det värde som förekommer flest gånger i en samling data.', exempel:'Om skostorlekarna i klassen är 36, 37, 37, 38 och 37 är 37 typvärdet - det som förekommer flest gånger.' }
         ];
 
         // ---- EKONOMI ----
         const MB_EKONOMI = [
-            { namn:'Pengar', emoji:'💰', def:'Det vi använder för att köpa och sälja saker, till exempel sedlar och mynt, eller pengar på ett kort eller konto.' },
-            { namn:'Sedlar', emoji:'💵', def:'Papperspengar (eller plastpengar) med olika värden, till exempel 20-, 50-, 100-, 200- och 500-kronorssedlar.' },
-            { namn:'Mynt', emoji:'🪙', def:'Runda metallpengar med olika värden, till exempel 1-, 2-, 5- och 10-kronor.' },
-            { namn:'Växel', emoji:'💱', def:'De pengar man får tillbaka om man betalar mer än det något kostar.' },
-            { namn:'Pris', emoji:'🏷️', def:'Hur mycket pengar något kostar.' },
-            { namn:'Rabatt (enkel nivå)', emoji:'🔖', def:'En sänkning av priset, så att något blir billigare än det ursprungliga priset.' }
+            { namn:'Pengar', emoji:'💰', def:'Det vi använder för att köpa och sälja saker, till exempel sedlar och mynt, eller pengar på ett kort eller konto.', exempel:'Du kan betala för en glass med pengar, till exempel en 20-kronorssedel.' },
+            { namn:'Sedlar', emoji:'💵', def:'Papperspengar (eller plastpengar) med olika värden, till exempel 20-, 50-, 100-, 200- och 500-kronorssedlar.', exempel:'En 100-kronorssedel är en sedel.' },
+            { namn:'Mynt', emoji:'🪙', def:'Runda metallpengar med olika värden, till exempel 1-, 2-, 5- och 10-kronor.', exempel:'En 10-krona är ett mynt.' },
+            { namn:'Växel', emoji:'💱', def:'De pengar man får tillbaka om man betalar mer än det något kostar.', exempel:'Om du betalar 50 kr för något som kostar 35 kr, får du 15 kr i växel.' },
+            { namn:'Pris', emoji:'🏷️', def:'Hur mycket pengar något kostar.', exempel:'Priset på en glass i kiosken kan vara 25 kr.' },
+            { namn:'Rabatt (enkel nivå)', emoji:'🔖', def:'En sänkning av priset, så att något blir billigare än det ursprungliga priset.', exempel:'Om en tröja som kostar 200 kr säljs med rabatt för 150 kr, har priset sänkts med 50 kr.' }
         ];
 
         // ---- PROBLEMLÖSNING ----
         const MB_PROBLEMLOSNING = [
-            { namn:'Strategi', emoji:'🧩', def:'Ett sätt eller en plan för hur man löser ett problem eller en uppgift.' },
-            { namn:'Rimlighet', emoji:'✅', def:'Att kontrollera om ett svar verkar vettigt och stämmer med vad man kan förvänta sig, till exempel att ett svar inte är orimligt stort eller litet.' },
-            { namn:'Uppskattning', emoji:'🤔', def:'Att göra en ungefärlig gissning av ett antal eller värde, utan att räkna exakt.' },
-            { namn:'Mönster', emoji:'🔁', def:'Något som upprepar sig på ett förutsägbart sätt, till exempel en talföljd eller ett mönster av former och färger.' }
+            { namn:'Strategi', emoji:'🧩', def:'Ett sätt eller en plan för hur man löser ett problem eller en uppgift.', exempel:'Att rita en bild av problemet innan man räknar kan vara en bra strategi för att förstå vad uppgiften frågar efter.' },
+            { namn:'Rimlighet', emoji:'✅', def:'Att kontrollera om ett svar verkar vettigt och stämmer med vad man kan förvänta sig, till exempel att ett svar inte är orimligt stort eller litet.', exempel:'Om du räknar ut att en penna kostar 500 kr är svaret orimligt - priset borde kontrolleras igen.' },
+            { namn:'Uppskattning', emoji:'🤔', def:'Att göra en ungefärlig gissning av ett antal eller värde, utan att räkna exakt.', exempel:'Innan du räknar exakt kan du uppskatta att 29 + 31 är ungefär 60.' },
+            { namn:'Mönster', emoji:'🔁', def:'Något som upprepar sig på ett förutsägbart sätt, till exempel en talföljd eller ett mönster av former och färger.', exempel:'2, 4, 6, 8, 10 ... är ett mönster där varje tal är 2 mer än det förra.' }
         ];
 
         body.innerHTML = `<div class='figx-tabs mb-tabs'></div><div class='figx-grid mb-grid'></div>`;
@@ -22581,6 +22779,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             box.appendChild(bild);
             const txt=document.createElement('p'); txt.style.fontSize='16px'; txt.style.color='#333'; txt.style.lineHeight='1.5'; txt.textContent = item.def;
             box.appendChild(txt);
+            if(item.exempel){
+                const ex=document.createElement('div'); ex.style.marginTop='10px'; ex.style.padding='8px 12px'; ex.style.background='#eaf6ec'; ex.style.borderRadius='10px'; ex.style.fontSize='14px'; ex.style.color='#1f7a37'; ex.style.textAlign='left';
+                ex.innerHTML = '<b>Exempel:</b> '+item.exempel;
+                box.appendChild(ex);
+            }
             ov.appendChild(box);
             (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
         }
@@ -23877,7 +24080,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – temaseten fylls i automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const tema=parseBerattarTema(pasteTa.value); if(tema) anvand(tema, statusEl); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const tema=parseBerattarTema(pasteTa.value); anvand(tema, statusEl); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd temaseten';
             makePasteBtn.onclick=()=>{ const tema=parseBerattarTema(pasteTa.value); if(!tema){ statusEl.textContent='⚠️ Hittade inget användbart temaset. Kolla att hela svaret klistrades in.'; return; } anvand(tema, statusEl); };
@@ -24012,7 +24215,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – temaseten fylls i automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const tema=parseBerattarTema(pasteTa.value); if(tema) anvand(tema, statusEl); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const tema=parseBerattarTema(pasteTa.value); anvand(tema, statusEl); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd temaseten';
             makePasteBtn.onclick=()=>{ const tema=parseBerattarTema(pasteTa.value); if(!tema){ statusEl.textContent='⚠️ Hittade inget användbart temaset. Kolla att hela svaret klistrades in.'; return; } anvand(tema, statusEl); };
@@ -24162,7 +24365,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – de nya skrivstarterna ersätter automatiskt de nuvarande...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseSkrivstartList(pasteTa.value); if(list.length>=1){ leggTillSkrivstarter(list, status, close); } },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseSkrivstartList(pasteTa.value); if(list.length>=1){ leggTillSkrivstarter(list, status, close); } else { status.textContent='⚠️ Hittade inga skrivstarter i svaret.'; } },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd skrivstarterna';
             makePasteBtn.onclick=()=>{ const list=parseSkrivstartList(pasteTa.value); if(list.length<1){ status.textContent='⚠️ Hittade inga skrivstarter i svaret.'; return; } leggTillSkrivstarter(list, status, close); };
@@ -26056,7 +26259,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – frågan fylls i automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const q=parsePollFraga(pasteTa.value); if(q) anvand(q, statusEl); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const q=parsePollFraga(pasteTa.value); anvand(q, statusEl); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd frågan';
             makePasteBtn.onclick=()=>{ const q=parsePollFraga(pasteTa.value); if(!q){ statusEl.textContent='⚠️ Hittade ingen användbar fråga. Kolla att formatet stämmer.'; return; } anvand(q, statusEl); };
@@ -26334,7 +26537,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='100px'; pasteTa.placeholder='Klistra in Geminis svar här – frågorna läggs till automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length>=1){ handleAiQuestions(qs, status); } },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length>=1){ handleAiQuestions(qs, status); } else { status.textContent='⚠️ Hittade inga frågor i svaret. Kolla att formatet stämmer.'; } },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Lägg till frågorna';
             makePasteBtn.onclick=()=>{ const qs=parseQuizList(pasteTa.value); if(qs.length<1){ status.textContent='⚠️ Hittade inga frågor i svaret. Kolla att formatet stämmer.'; return; } handleAiQuestions(qs, status); };
@@ -26727,7 +26930,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 aiQueue = list.slice(1, 30);
                 const ex = list[0]; state.text=ex.text; state.correct=ex.correct; state.motivering=ex.motivering; facitOpen=true; close(); renderEdit(); persist();
             };
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseRimlighetList(pasteTa.value); if(list.length) anvand(list, status); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseRimlighetList(pasteTa.value); anvand(list, status); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd exemplen';
             makePasteBtn.onclick=()=>{ const list=parseRimlighetList(pasteTa.value); if(!list.length){ status.textContent='⚠️ Hittade inget användbart exempel. Kolla att formatet stämmer.'; return; } anvand(list, status); };
@@ -27456,7 +27659,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – de nya frågorna ersätter automatiskt de nuvarande...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseExitFragorList(pasteTa.value); if(list.length>=1) leggTill(list, statusEl); },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const list=parseExitFragorList(pasteTa.value); leggTill(list, statusEl); },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Använd frågorna';
             makePasteBtn.onclick=()=>{ const list=parseExitFragorList(pasteTa.value); if(list.length<1){ statusEl.textContent='⚠️ Hittade inga frågor i svaret.'; return; } leggTill(list, statusEl); };
@@ -29131,7 +29334,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – korsordet skapas automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=2){ makeFromWords(words, status, close); } },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=1){ makeFromWords(words, status, close); } else { status.textContent='⚠️ Hittade inga ord i svaret. Kolla att det står ett ord + ledtråd per rad.'; } },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Skapa korsord från svaret';
             makePasteBtn.onclick=()=>{ const words=parseWordList(pasteTa.value); if(words.length<1){ status.textContent='⚠️ Hittade inga ord i svaret. Kolla att det står ett ord + ledtråd per rad.'; return; } makeFromWords(words, status, close); };
@@ -29477,7 +29680,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
             row1.appendChild(copyBtn); box.appendChild(row1);
             const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='80px'; pasteTa.placeholder='Klistra in Geminis svar här – ordgömman skapas automatiskt...'; box.appendChild(pasteTa);
-            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=1){ makeFromWords(words, status, close); } },60); });
+            pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const words=parseWordList(pasteTa.value); if(words.length>=1){ makeFromWords(words, status, close); } else { status.textContent='⚠️ Hittade inga ord i svaret. Kolla att det står ett ord per rad.'; } },60); });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Skapa ordgömma från svaret';
             makePasteBtn.onclick=()=>{ const words=parseWordList(pasteTa.value); if(words.length<1){ status.textContent='⚠️ Hittade inga ord i svaret. Kolla att det står ett ord per rad.'; return; } makeFromWords(words, status, close); };
