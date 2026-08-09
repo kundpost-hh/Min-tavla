@@ -2845,6 +2845,8 @@
     .su-lista { display:flex; flex-direction:column; gap:10px; margin-top:12px; max-height:440px; overflow-y:auto; overflow-x:hidden; padding-right:4px; }
     .su-rad { background:#f7f7fa; border-radius:12px; padding:10px 12px; border:1.5px solid transparent; }
     .su-rad.su-klurig { background:#fdf3ff; border-color:#e9c6f5; }
+    /* Skiljer övningsfrågan (i t.ex. Tidsenheter-popupen) visuellt från faktarutorna ovanför. */
+    .su-rad.su-ovningsrad { background:#eaf3ff; border-color:#bfdcff; }
     .su-tagg { display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:#7c3aed; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:6px; }
     .su-klurig-lbl { color:#c026d3; text-transform:none; letter-spacing:0; margin-left:2px; }
     .su-fraga-rad { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
@@ -18356,13 +18358,15 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         }
 
         // ---- UTSKRIFT ----
-        function skrivUt(){
-            const t = aktuellText(); if(!t) return;
+        // FIX: bryter ut själva arbetsblads-innehållet (text, ordbank, frågor, sammanfattning,
+        // självskattning) till en egen funktion, så att BÅDE utskrifts-fönstret (skrivUt) och den
+        // nya "Spara som PDF"-knappen (sparaSomPDF) återanvänder exakt samma innehåll istället för
+        // att ha två separata kopior som kan råka bli olika över tid.
+        function buildArbetsbladInnehall(){
+            const t = aktuellText(); if(!t) return null;
             const raw = t.niv[st.niva] || t.niv.mellan || '';
             const stycken = raw.split(/\n\n+/).map(p=>'<p>'+esc(p).replace(/\n/g,'<br>')+'</p>').join('');
-            let html = '<!DOCTYPE html><html lang="sv"><head><meta charset="utf-8"><title>Arbetsblad – '+esc(t.titel)+'</title>';
-            html += '<style>body{font-family:Georgia,serif;max-width:720px;margin:24px auto;padding:0 18px;color:#222;line-height:1.6;}h1{font-size:22px;border-bottom:3px solid #5856d6;padding-bottom:6px;}h2{font-size:15px;margin:22px 0 8px;color:#4644b8;}.meta{color:#666;font-size:12px;margin-bottom:14px;}.text{border:1px solid #ccc;border-radius:8px;padding:14px 16px;font-size:14px;}.linje{border-bottom:1px solid #999;height:26px;}.fr{margin:8px 0 2px;font-size:13.5px;font-weight:bold;}ul{font-size:13px;}.ruta{display:inline-block;width:13px;height:13px;border:1.5px solid #444;margin-right:8px;vertical-align:-2px;}@media print{.noprint{display:none;}}</style></head><body>';
-            html += '<h1>📚 Läsförståelse: '+esc(t.titel)+'</h1>';
+            let html = '<h1>📚 Läsförståelse: '+esc(t.titel)+'</h1>';
             html += '<div class="meta">'+esc(typNamn(t.typ))+' · Nivå: '+esc(st.niva==='latt'?'Lätt':(st.niva==='utmaning'?'Utmaning':'Mellan'))+' · Namn: ________________________</div>';
             html += '<h2>📖 Läs texten</h2><div class="text">'+stycken+'</div>';
             if(t.begrepp && t.begrepp.length){ html += '<h2>🔤 Ordbank</h2><ul>'+t.begrepp.map(b=>'<li><b>'+esc(b.ord)+'</b> – '+esc(b.forklaring)+'</li>').join('')+'</ul>'; }
@@ -18372,12 +18376,55 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             html += skrivFragor('🔴 Bortom raderna – koppla till dig själv', t.fragor.bortom);
             html += '<h2>📝 Sammanfatta texten med egna ord</h2><div class="linje"></div><div class="linje"></div><div class="linje"></div><div class="linje"></div>';
             html += '<h2>⭐ Självskattning</h2><div class="fr"><span class="ruta"></span>Jag förstod texten.</div><div class="fr"><span class="ruta"></span>Jag lärde mig nya ord.</div><div class="fr"><span class="ruta"></span>Jag kunde svara på frågorna.</div><div class="fr"><span class="ruta"></span>Jag behöver läsa en gång till.</div>';
+            return { titel: t.titel, html: html };
+        }
+        const ARBETSBLAD_CSS = 'body{font-family:Georgia,serif;max-width:720px;margin:24px auto;padding:0 18px;color:#222;line-height:1.6;}h1{font-size:22px;border-bottom:3px solid #5856d6;padding-bottom:6px;}h2{font-size:15px;margin:22px 0 8px;color:#4644b8;}.meta{color:#666;font-size:12px;margin-bottom:14px;}.text{border:1px solid #ccc;border-radius:8px;padding:14px 16px;font-size:14px;}.linje{border-bottom:1px solid #999;height:26px;}.fr{margin:8px 0 2px;font-size:13.5px;font-weight:bold;}ul{font-size:13px;}.ruta{display:inline-block;width:13px;height:13px;border:1.5px solid #444;margin-right:8px;vertical-align:-2px;}@media print{.noprint{display:none;}}';
+        function skrivUt(){
+            const built = buildArbetsbladInnehall(); if(!built) return;
+            let html = '<!DOCTYPE html><html lang="sv"><head><meta charset="utf-8"><title>Arbetsblad – '+esc(built.titel)+'</title>';
+            html += '<style>'+ARBETSBLAD_CSS+'</style></head><body>';
+            html += built.html;
             html += '<div class="noprint" style="margin-top:20px;"><button onclick="window.print()" style="padding:10px 18px;font-size:14px;cursor:pointer;">🖨️ Skriv ut</button></div>';
             html += '<div style="margin-top:24px;text-align:center;font-size:11px;color:#999;"><a href="https://www.min-tavla.se" style="color:#999;text-decoration:none;">www.min-tavla.se</a></div>';
             html += '</body></html>';
             const w = window.open('', 'lasfUtskrift', 'width=840,height=920,scrollbars=yes,resizable=yes');
             if(!w){ customAlert('Webbläsaren blockerade utskriftsfönstret. Tillåt popup-fönster och försök igen.', 'ℹ️'); return; }
             w.document.write(html); w.document.close(); try{ w.focus(); }catch(e){}
+        }
+        // Renderar samma arbetsblad osynligt (utanför skärmen), skärmdumpar det med html2canvas och
+        // lägger in det i en jsPDF - delat över flera A4-sidor om innehållet är för högt för en sida.
+        async function sparaSomPDF(btn){
+            const built = buildArbetsbladInnehall(); if(!built) return;
+            const wrap=document.createElement('div');
+            wrap.style.cssText='position:fixed; left:-9999px; top:0; width:720px; background:#fff;';
+            wrap.innerHTML = '<style>'+ARBETSBLAD_CSS+'</style>'+built.html;
+            document.body.appendChild(wrap);
+            const origTxt = btn ? btn.textContent : null;
+            if(btn){ btn.disabled=true; btn.textContent='⏳'; }
+            try{
+                if(!window.html2canvas) await _loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+                if(typeof jspdf === 'undefined' || !jspdf.jsPDF){ customAlert('Kunde inte skapa PDF just nu. Kontrollera internetanslutningen och försök igen.', '⚠️'); return; }
+                const canvas = await window.html2canvas(wrap, { backgroundColor:'#ffffff', scale:2, useCORS:true, logging:false });
+                const pdf = new jspdf.jsPDF({ orientation:'portrait', unit:'pt', format:'a4' });
+                const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
+                const margin = 24;
+                const usableW = pageW - margin*2;
+                const scale = usableW / canvas.width; // skala källpixlar -> PDF-punkter
+                const usableHpx = (pageH - margin*2) / scale; // hur många källpixlar (höjd) som får plats per sida
+                let renderedPx = 0, first = true;
+                while(renderedPx < canvas.height){
+                    const sliceH = Math.min(usableHpx, canvas.height - renderedPx);
+                    const sliceCanvas = document.createElement('canvas');
+                    sliceCanvas.width = canvas.width; sliceCanvas.height = sliceH;
+                    sliceCanvas.getContext('2d').drawImage(canvas, 0, renderedPx, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+                    if(!first) pdf.addPage(); first=false;
+                    pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, usableW, sliceH*scale);
+                    renderedPx += sliceH;
+                }
+                try { pdf.setFontSize(9); pdf.setTextColor(150); const linkY=pageH-14; if(typeof pdf.textWithLink==='function') pdf.textWithLink('www.min-tavla.se', pageW/2, linkY, { url:'https://www.min-tavla.se', align:'center' }); else pdf.text('www.min-tavla.se', pageW/2, linkY, { align:'center' }); } catch(_){}
+                pdf.save(sanitizeFileName('Läsförståelse - '+built.titel, 'arbetsblad')+'.pdf');
+            } catch(e){ customAlert('Kunde inte skapa PDF:en just nu. Kontrollera internetanslutningen och försök igen.', '⚠️'); }
+            finally { wrap.remove(); if(btn){ btn.disabled=false; btn.textContent=origTxt; } }
         }
 
         // ---- HUVUDRENDER ----
@@ -18813,6 +18860,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const printBtn = document.createElement('button'); printBtn.className='lasf-ikonknapp'; printBtn.textContent='🖨️'; printBtn.title='Skriv ut arbetsblad med text och frågor';
             printBtn.onclick = skrivUt;
             top.appendChild(printBtn);
+
+            const pdfBtn = document.createElement('button'); pdfBtn.className='lasf-ikonknapp'; pdfBtn.textContent='💾'; pdfBtn.title='Spara arbetsblad med text och frågor som PDF';
+            pdfBtn.onclick = ()=>sparaSomPDF(pdfBtn);
+            top.appendChild(pdfBtn);
             root.appendChild(top);
 
             // Sektionschips
@@ -25787,11 +25838,24 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
             const exempelWrap=document.createElement('div'); exempelWrap.className='su-lista'; exempelWrap.style.marginBottom='16px';
             const EXEMPEL = ['60 sekunder = 1 minut','60 minuter = 1 timme','24 timmar = 1 dygn','7 dygn = 1 vecka','12 månader = 1 år','ca 365 dygn = 1 år'];
+            // FIX: talet i varje faktarad göms tills man själv klickar och vill se det (samma
+            // "Visa svar"-mönster som redan används för övningsfrågorna nedanför), istället för att
+            // stå synligt direkt - eleverna kan då själva försöka minnas/gissa talet först.
             EXEMPEL.forEach(rad=>{
+                const m = rad.match(/^(ca\s+)?(\d+)(.*)$/);
                 const r=document.createElement('div'); r.className='su-rad';
                 const r2=document.createElement('div'); r2.className='su-fraga-rad';
-                const fr=document.createElement('div'); fr.className='su-fraga'; fr.style.fontWeight='700'; fr.textContent='⏱️ '+rad;
-                r2.appendChild(fr); r.appendChild(r2); exempelWrap.appendChild(r);
+                const fr=document.createElement('div'); fr.className='su-fraga'; fr.style.fontWeight='700';
+                if(m){
+                    const prefix=m[1]||'', tal=m[2], rest=m[3];
+                    fr.textContent = '⏱️ '+prefix+'❓'+rest;
+                    const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa tal'; sv.title='Klicka för att visa talet';
+                    sv.onclick=()=>{ fr.textContent='⏱️ '+prefix+tal+rest; sv.textContent=tal; sv.classList.add('revealed'); sv.onclick=null; };
+                    r2.appendChild(fr); r2.appendChild(sv);
+                } else {
+                    fr.textContent='⏱️ '+rad; r2.appendChild(fr);
+                }
+                r.appendChild(r2); exempelWrap.appendChild(r);
             });
             box.appendChild(exempelWrap);
 
@@ -25809,7 +25873,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 raknare.textContent='Uppgift '+nr;
                 lista.innerHTML='';
                 const u=nyaEnhetsuppgifter(1)[0];
-                const rad=document.createElement('div'); rad.className='su-rad';
+                const rad=document.createElement('div'); rad.className='su-rad su-ovningsrad';
                 const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
                 const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
                 const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret och uträkningen';
