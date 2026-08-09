@@ -12118,17 +12118,17 @@
                 return (saved && Array.isArray(saved.subjects)) ? saved : null;
             }catch(e){ return null; }
         }
-        // FIX: samma allvarliga bugg som i Lärarschemat - config.data (widget-rutans egen kopia)
-        // användes alltid när rutan redan låg på tavlan, oavsett om den var tom, utan att någonsin
-        // kolla den stabila backupen i localStorage. Läs därför ALLTID från den stabila backupen
-        // först om den finns något sparat där - den skrivs alltid tillsammans med widget-rutans
-        // kopia i persist() och är alltså minst lika färsk.
+        // FIX (rättad version): samma bugg-korrigering som i Lärarschemat - jämför vilken av den
+        // stabila lokala backupen och molndatan (config.data) som FAKTISKT har flest ämnen/rader,
+        // istället för att bara kolla om backupen "finns" (den räknas som "finns" även tom). En tom
+        // lokal backup på en enhet som aldrig fyllts i där (t.ex. mobilen) fick annars alltid
+        // företräde framför den riktiga, ifyllda datan från molnet.
         const savedStable = tpLoadStable();
-        if(savedStable){
-            tp = Object.assign(tp, savedStable);
-        } else if(config && config.data && Array.isArray(config.data.subjects)){
-            tp = Object.assign(tp, config.data);
-        }
+        const cloudData = (config && config.data && Array.isArray(config.data.subjects)) ? config.data : null;
+        const stableCount = savedStable ? savedStable.subjects.length : -1;
+        const cloudCount = cloudData ? cloudData.subjects.length : -1;
+        const chosenTp = (stableCount > cloudCount) ? savedStable : (cloudCount > -1 ? cloudData : savedStable);
+        if(chosenTp) tp = Object.assign(tp, chosenTp);
 
         function persist(){
             widgetEl.dataset.termplan = JSON.stringify(tp);
@@ -13173,21 +13173,20 @@
             }catch(e){ return null; }
         }
         let state = { lessons: [], view: 'today' };
-        // FIX: Om widgeten redan låg på tavlan (config finns) användes ENDAST kopian i widget-rutan
-        // (config.data) - och om den kopian av någon anledning var tom (t.ex. en tavla som laddats
-        // från en lite äldre molnbackup, eller att sparningen till rutan hann inte bli klar innan
-        // sidan laddades om) hoppade koden ALDRIG till den stabila backupen i localStorage, trots
-        // att den fanns kvar där med rätt data. Schemat "återställdes" tyst till tomt - precis det
-        // dataförlust-beteendet som rapporterats. Den stabila backupen (lsLoadStable) skrivs alltid
-        // tillsammans med widget-rutans kopia i persist() nedan och är alltså minst lika färsk, om
-        // inte färskare - läs därför ALLTID därifrån först om den finns något sparat, och använd
-        // bara widget-rutans kopia som sista utväg om den stabila backupen skulle vara helt tom.
+        // FIX (rättad version): förra fixen jämförde bara "finns den stabila backupen" (den är ett
+        // objekt även när den är tom, t.ex. {lessons:[]}) - inte om den faktiskt HADE några lektioner
+        // i sig. Det gjorde att en tom lokal backup på en enhet (t.ex. mobilen, om widgeten öppnats
+        // där innan man någonsin hunnit lägga in lektioner) alltid vann över den riktiga, ifyllda
+        // datan som redan fanns i molnet/widget-rutan (config.data) - exakt det som gjorde att
+        // mobilen visade tomt fast datorn hade allt sparat. Jämför nu istället vilken av de två
+        // källorna som FAKTISKT innehåller flest lektioner, och använd den. Bara om båda är tomma
+        // (eller saknas) faller vi tillbaka på den ena som ändå finns, som tidigare.
         const savedStable = lsLoadStable();
-        if(savedStable){
-            Object.assign(state, savedStable);
-        } else if(config && config.data && Array.isArray(config.data.lessons)){
-            Object.assign(state, config.data);
-        }
+        const cloudData = (config && config.data && Array.isArray(config.data.lessons)) ? config.data : null;
+        const stableCount = savedStable ? savedStable.lessons.length : -1;
+        const cloudCount = cloudData ? cloudData.lessons.length : -1;
+        const chosen = (stableCount > cloudCount) ? savedStable : (cloudCount > -1 ? cloudData : savedStable);
+        if(chosen) Object.assign(state, chosen);
         if(!Array.isArray(state.lessons)) state.lessons=[];
 
         function persist(){
