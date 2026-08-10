@@ -3069,6 +3069,9 @@
     .figx-props .pv { font-weight:700; color:#222; line-height:1.4; }
     .figx-ovning { margin-top:20px; padding-top:16px; border-top:2px dashed #e6e7ee; }
     .figx-ov-rubrik { margin:0 0 10px; font-size:15px; color:#1a1a2e; }
+    /* Extra bakgrund bara för Tidsenheter-rubriken "Öva: Omvandla tidsenheter", så den syns tydligt
+       som en egen sektion - rör inte .figx-ov-rubrik i sig eftersom Geometri-widgeten delar klassen. */
+    .su-ov-rubrik { background:#eaf3ff; border:1.5px solid #bfdcff; border-radius:10px; padding:8px 12px; margin-bottom:10px !important; }
     .figx-ov-panel { display:flex; flex-direction:column; align-items:center; gap:10px; max-width:340px; margin:0 auto; }
     .figx-ov-fig { width:130px; height:130px; }
     .figx-ov-fig svg { width:100%; height:100%; }
@@ -14039,7 +14042,7 @@
                 </div>
             </div>
             <div class='mathtool-pane mathtool-ekvationer' style='display:none;'>
-                <div class='hover-menu rakna-ctrl'><select class='editor-select ekv-niva'><option value='ak4'>Åk 4</option><option value='ak5'>Åk 5</option><option value='ak6'>Åk 6</option></select></div>
+                <div class='hover-menu rakna-ctrl'><select class='editor-select ekv-niva'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div>
                 <div class='ekv-task rakna-task' style='margin-bottom:12px;'></div>
                 <div class='hover-menu'><button class='btn btn-primary ekv-next'>Ny ekvation ▶</button></div>
                 <div class='ekv-count rakna-count' style='margin-top:10px;'></div>
@@ -14212,7 +14215,14 @@
                 const isFirst = i===0;
                 const colEl=document.createElement('div'); colEl.className='upp-col';
                 let carryHtml='';
-                if((uppOp==='+'||uppOp==='×') && c.carryIn>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-carry'>+${c.carryIn}</span>`;
+                // FIX: minnessiffran visades tidigare som "carryIn" på NÄSTA kolumn (den som tar emot
+                // minnet) - vilket gjorde att den inte dök upp förrän man klickat vidare ytterligare
+                // ett steg, alltså en hel kolumn FÖRSENAD jämfört med när den faktiskt räknades fram.
+                // Visa istället "carryOut" på SAMMA kolumn som räknar fram den - då dyker minnessiffran
+                // upp direkt tillsammans med den produkten/summan (t.ex. "+2" bredvid "1" när 7×3=21
+                // räknas ut), precis som när man räknar för hand. Längst till vänster (i===0) visas
+                // ingen egen minnessiffra här eftersom den redan blir den extra "uppExtraDigit"-rutan.
+                if((uppOp==='+'||uppOp==='×') && !isFirst && c.carryOut>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-carry'>+${c.carryOut}</span>`;
                 if(uppOp==='-' && c.borrowOut===1 && revealed) carryHtml = `<span class='upp-chip upp-chip-borrow'>+10</span>`;
                 let topHtml = `<span class='upp-digit'>${c.topDigit}</span>`;
                 if(uppOp==='-' && c.borrowIn>0 && revealed){
@@ -14519,16 +14529,18 @@
                 gen: function(niva){
                     const val = ri(0,2);
                     if(niva==='ak4'){
-                        if(val===0){ const namnare=[2,4,5,10][ri(0,3)]; const multipel=ri(1,8)*namnare; return { fraga:'1/'+namnare+' av '+multipel+' =', svar:String(multipel/namnare) }; }
+                        // FIX: visar nu uträkningen (t.ex. "20 ÷ 4 = 5") istället för bara slutsvaret,
+                        // så eleven ser HUR man kommer fram till svaret, inte bara vad det blir.
+                        if(val===0){ const namnare=[2,4,5,10][ri(0,3)]; const multipel=ri(1,8)*namnare; return { fraga:'1/'+namnare+' av '+multipel+' =', svar:multipel+' ÷ '+namnare+' = '+(multipel/namnare) }; }
                         if(val===1){ const tal=ri(11,989); const svar=Math.round(tal/10)*10; return { fraga:'Avrunda '+tal+' till närmaste tiotal:', svar:String(svar) }; }
                         const tal=ri(1,200); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
                     }
                     if(niva==='ak5'){
-                        if(val===0){ const namnare=[2,3,4,5,6,8,10][ri(0,6)]; const taljare=ri(1,namnare-1); const multipel=ri(2,9)*namnare; return { fraga:taljare+'/'+namnare+' av '+multipel+' =', svar:String(multipel*taljare/namnare) }; }
+                        if(val===0){ const namnare=[2,3,4,5,6,8,10][ri(0,6)]; const taljare=ri(1,namnare-1); const multipel=ri(2,9)*namnare; return { fraga:taljare+'/'+namnare+' av '+multipel+' =', svar:multipel+' × '+taljare+' ÷ '+namnare+' = '+(multipel*taljare/namnare) }; }
                         if(val===1){ const tal=ri(101,9899); const svar=Math.round(tal/100)*100; return { fraga:'Avrunda '+tal+' till närmaste hundratal:', svar:String(svar) }; }
                         const tal=ri(200,2000); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
                     }
-                    if(val===0){ const p=[10,20,25,50,75][ri(0,4)]; const mult=100/gcdSU(100,p); const bas=ri(1,15)*mult; return { fraga:p+' % av '+bas+' =', svar:String(bas*p/100) }; }
+                    if(val===0){ const p=[10,20,25,50,75][ri(0,4)]; const mult=100/gcdSU(100,p); const bas=ri(1,15)*mult; return { fraga:p+' % av '+bas+' =', svar:bas+' × '+p+' ÷ 100 = '+(bas*p/100) }; }
                     if(val===1){ const tal=ri(1001,98999); const svar=Math.round(tal/1000)*1000; return { fraga:'Avrunda '+tal+' till närmaste tusental:', svar:String(svar) }; }
                     const tal=ri(2000,20000); return { fraga:'Är '+tal+' ett jämnt eller udda tal?', svar:(tal%2===0?'Jämnt':'Udda') };
                 }
@@ -14537,41 +14549,46 @@
                 namn:'Geometri, mätning & klockan', emoji:'📐',
                 gen: function(niva){
                     const val = ri(0,2);
+                    // FIX: area/omkrets/volym-svaren visade tidigare bara slutresultatet (t.ex. "24 cm²"),
+                    // utan att visa vad som multiplicerades/adderades - visar nu alltid själva uträkningen
+                    // med de riktiga talen (t.ex. "6 cm × 4 cm = 24 cm²").
                     if(niva==='ak4'){
-                        if(val===0){ const l=ri(3,20), b=ri(3,20); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:(2*(l+b))+' cm' }; }
+                        if(val===0){ const l=ri(3,20), b=ri(3,20); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:'2 × ('+l+' + '+b+') = '+(2*(l+b))+' cm' }; }
                         if(val===1){ const h=ri(1,12), halv=Math.random()<0.5; const fraga = halv ? ('Vad är klockan en halvtimme efter '+h+':00?') : ('Vad är klockan en timme efter '+h+':00?'); const svarH = (h%12)+1; const svar = halv ? (h+':30') : (svarH+':00'); return { fraga:fraga, svar:svar }; }
-                        const l=ri(3,15), b=ri(3,15); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:(l*b)+' cm²' };
+                        const l=ri(3,15), b=ri(3,15); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:l+' cm × '+b+' cm = '+(l*b)+' cm²' };
                     }
                     if(niva==='ak5'){
-                        if(val===0){ const l=ri(10,40), b=ri(10,40); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:(l*b)+' cm²' }; }
+                        if(val===0){ const l=ri(10,40), b=ri(10,40); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:l+' cm × '+b+' cm = '+(l*b)+' cm²' }; }
                         if(val===1){ const h=ri(1,12); const kvart=[15,30,45][ri(0,2)]; return { fraga:'Vad är klockan om vi lägger till '+kvart+' minuter till '+h+':00?', svar:h+':'+String(kvart).padStart(2,'0') }; }
-                        const bas=ri(6,30), hojd=ri(Math.ceil(4/2),Math.floor(20/2))*2; return { fraga:'En triangel har basen '+bas+' cm och höjden '+hojd+' cm. Vad är arean? (bas × höjd ÷ 2)', svar:(bas*hojd/2)+' cm²' };
+                        const bas=ri(6,30), hojd=ri(Math.ceil(4/2),Math.floor(20/2))*2; return { fraga:'En triangel har basen '+bas+' cm och höjden '+hojd+' cm. Vad är arean? (bas × höjd ÷ 2)', svar:bas+' × '+hojd+' ÷ 2 = '+(bas*hojd/2)+' cm²' };
                     }
-                    if(val===0){ const l=ri(15,80), b=ri(15,80); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:(2*(l+b))+' cm' }; }
-                    if(val===1){ const l=ri(4,15), b=ri(4,15), h=ri(2,10); return { fraga:'En låda är '+l+' cm lång, '+b+' cm bred och '+h+' cm hög. Vad är volymen? (l × b × h)', svar:(l*b*h)+' cm³' }; }
-                    const bas=ri(8,40), hojd=ri(Math.ceil(6/2),Math.floor(30/2))*2; return { fraga:'En triangel har basen '+bas+' cm och höjden '+hojd+' cm. Vad är arean?', svar:(bas*hojd/2)+' cm²' };
+                    if(val===0){ const l=ri(15,80), b=ri(15,80); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:'2 × ('+l+' + '+b+') = '+(2*(l+b))+' cm' }; }
+                    if(val===1){ const l=ri(4,15), b=ri(4,15), h=ri(2,10); return { fraga:'En låda är '+l+' cm lång, '+b+' cm bred och '+h+' cm hög. Vad är volymen? (l × b × h)', svar:l+' × '+b+' × '+h+' = '+(l*b*h)+' cm³' }; }
+                    const bas=ri(8,40), hojd=ri(Math.ceil(6/2),Math.floor(30/2))*2; return { fraga:'En triangel har basen '+bas+' cm och höjden '+hojd+' cm. Vad är arean?', svar:bas+' × '+hojd+' ÷ 2 = '+(bas*hojd/2)+' cm²' };
                 }
             },
             klurig: {
                 namn:'Klurig utmaning', emoji:'🧩',
                 gen: function(niva){
                     const val = ri(0,3);
+                    // FIX: samma sak här - kluriga textproblem visade bara slutsvaret, nu visas hela
+                    // uträkningen steg för steg, så eleven ser hur man löser den typen av problem.
                     if(niva==='ak4'){
-                        if(val===0){ const pris=ri(5,40), antal=ri(2,6); const kostnad=pris*antal; const pengar=kostnad+ri(10,150); return { fraga:'Alex har '+pengar+' kr. Hen köper '+antal+' block som kostar '+pris+' kr styck. Hur mycket pengar har Alex kvar?', svar:(pengar-kostnad)+' kr' }; }
-                        if(val===1){ const elever=ri(20,30), grupper=[2,3,4,5][ri(0,3)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever i klassen. De delas in i lika stora grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever i klassen. Läraren delar dem i grupper om '+grupper+' elever. Hur många elever blir över?'); return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' grupper' : rest+' elever' }; }
-                        if(val===2){ const start=ri(2000,2015), alder=ri(6,12); return { fraga:'Ebba föddes år '+start+'. Hur gammal är hon år '+(start+alder)+'?', svar:alder+' år' }; }
-                        const a=ri(15,60), b=ri(15,60), c=ri(5,30); return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:(a+b-c)+' frukter' };
+                        if(val===0){ const pris=ri(5,40), antal=ri(2,6); const kostnad=pris*antal; const pengar=kostnad+ri(10,150); return { fraga:'Alex har '+pengar+' kr. Hen köper '+antal+' block som kostar '+pris+' kr styck. Hur mycket pengar har Alex kvar?', svar:pris+' × '+antal+' = '+kostnad+' kr. '+pengar+' − '+kostnad+' = '+(pengar-kostnad)+' kr' }; }
+                        if(val===1){ const elever=ri(20,30), grupper=[2,3,4,5][ri(0,3)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever i klassen. De delas in i lika stora grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever i klassen. Läraren delar dem i grupper om '+grupper+' elever. Hur många elever blir över?'); const svar = rest===0 ? (elever+' ÷ '+grupper+' = '+(elever/grupper)+' grupper') : (elever+' ÷ '+grupper+' = '+Math.floor(elever/grupper)+' grupper, '+rest+' elever över'); return { fraga:fraga, svar:svar }; }
+                        if(val===2){ const start=ri(2000,2015), alder=ri(6,12); return { fraga:'Ebba föddes år '+start+'. Hur gammal är hon år '+(start+alder)+'?', svar:(start+alder)+' − '+start+' = '+alder+' år' }; }
+                        const a=ri(15,60), b=ri(15,60), c=ri(5,30); return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:a+' + '+b+' − '+c+' = '+(a+b-c)+' frukter' };
                     }
                     if(niva==='ak5'){
-                        if(val===0){ const pris=ri(15,80), antal=ri(3,9); const kostnad=pris*antal; const pengar=kostnad+ri(50,400); return { fraga:'Jonas har '+pengar+' kr. Han köper '+antal+' böcker som kostar '+pris+' kr styck. Hur mycket pengar har han kvar?', svar:(pengar-kostnad)+' kr' }; }
-                        if(val===1){ const elever=ri(60,120), grupper=[4,5,6,7,8][ri(0,4)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever på skolan som ska åka buss. Varje buss rymmer '+grupper+' elever och alla bussar fylls helt. Hur många bussar behövs?') : ('Det är '+elever+' elever som ska delas i grupper om '+grupper+'. Hur många elever blir över efter de fulla grupperna?'); return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' bussar' : rest+' elever' }; }
-                        if(val===2){ const start=ri(1990,2015), alder=ri(10,25); return { fraga:'Filip föddes år '+start+'. Hur gammal är han år '+(start+alder)+'?', svar:alder+' år' }; }
-                        const a=ri(100,400), b=ri(100,400), c=ri(30,150); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+c+' pennor säljs. Hur många pennor finns kvar totalt?', svar:(a+b-c)+' pennor' };
+                        if(val===0){ const pris=ri(15,80), antal=ri(3,9); const kostnad=pris*antal; const pengar=kostnad+ri(50,400); return { fraga:'Jonas har '+pengar+' kr. Han köper '+antal+' böcker som kostar '+pris+' kr styck. Hur mycket pengar har han kvar?', svar:pris+' × '+antal+' = '+kostnad+' kr. '+pengar+' − '+kostnad+' = '+(pengar-kostnad)+' kr' }; }
+                        if(val===1){ const elever=ri(60,120), grupper=[4,5,6,7,8][ri(0,4)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever på skolan som ska åka buss. Varje buss rymmer '+grupper+' elever och alla bussar fylls helt. Hur många bussar behövs?') : ('Det är '+elever+' elever som ska delas i grupper om '+grupper+'. Hur många elever blir över efter de fulla grupperna?'); const svar = rest===0 ? (elever+' ÷ '+grupper+' = '+(elever/grupper)+' bussar') : (elever+' ÷ '+grupper+' = '+Math.floor(elever/grupper)+' fulla grupper, '+rest+' elever över'); return { fraga:fraga, svar:svar }; }
+                        if(val===2){ const start=ri(1990,2015), alder=ri(10,25); return { fraga:'Filip föddes år '+start+'. Hur gammal är han år '+(start+alder)+'?', svar:(start+alder)+' − '+start+' = '+alder+' år' }; }
+                        const a=ri(100,400), b=ri(100,400), c=ri(30,150); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+c+' pennor säljs. Hur många pennor finns kvar totalt?', svar:a+' + '+b+' − '+c+' = '+(a+b-c)+' pennor' };
                     }
-                    if(val===0){ const pris=ri(50,300), antal=ri(4,12); const rabatt=[10,15,20,25][ri(0,3)]; const kostnadFore=pris*antal; const kostnadEfter=Math.round(kostnadFore*(100-rabatt)/100); return { fraga:'En klass köper '+antal+' biljetter á '+pris+' kr. De får '+rabatt+'% rabatt på hela summan. Vad kostar det totalt efter rabatt?', svar:kostnadEfter+' kr' }; }
-                    if(val===1){ const elever=ri(150,400), grupper=[6,7,8,9,12][ri(0,4)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever på skolan. De delas jämnt i grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever som delas i grupper om '+grupper+'. Hur många elever blir över?'); return { fraga:fraga, svar: rest===0 ? (elever/grupper)+' grupper' : rest+' elever' }; }
-                    if(val===2){ const start=ri(1980,2010), alder=ri(15,40); return { fraga:'Nora föddes år '+start+'. Hur gammal blir hon år '+(start+alder)+'?', svar:alder+' år' }; }
-                    const a=ri(500,2000), b=ri(500,2000), pct=[10,20,25,50][ri(0,3)]; const salda=Math.round((a+b)*pct/100); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+pct+'% av alla pennor säljs. Hur många pennor säljs?', svar:salda+' pennor' };
+                    if(val===0){ const pris=ri(50,300), antal=ri(4,12); const rabatt=[10,15,20,25][ri(0,3)]; const kostnadFore=pris*antal; const kostnadEfter=Math.round(kostnadFore*(100-rabatt)/100); return { fraga:'En klass köper '+antal+' biljetter á '+pris+' kr. De får '+rabatt+'% rabatt på hela summan. Vad kostar det totalt efter rabatt?', svar:pris+' × '+antal+' = '+kostnadFore+' kr. '+kostnadFore+' × (100 − '+rabatt+') ÷ 100 = '+kostnadEfter+' kr' }; }
+                    if(val===1){ const elever=ri(150,400), grupper=[6,7,8,9,12][ri(0,4)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever på skolan. De delas jämnt i grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever som delas i grupper om '+grupper+'. Hur många elever blir över?'); const svar = rest===0 ? (elever+' ÷ '+grupper+' = '+(elever/grupper)+' grupper') : (elever+' ÷ '+grupper+' = '+Math.floor(elever/grupper)+' grupper, '+rest+' elever över'); return { fraga:fraga, svar:svar }; }
+                    if(val===2){ const start=ri(1980,2010), alder=ri(15,40); return { fraga:'Nora föddes år '+start+'. Hur gammal blir hon år '+(start+alder)+'?', svar:(start+alder)+' − '+start+' = '+alder+' år' }; }
+                    const a=ri(500,2000), b=ri(500,2000), pct=[10,20,25,50][ri(0,3)]; const salda=Math.round((a+b)*pct/100); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+pct+'% av alla pennor säljs. Hur många pennor säljs?', svar:'('+a+' + '+b+') × '+pct+' ÷ 100 = '+salda+' pennor' };
                 }
             }
         };
@@ -15791,13 +15808,19 @@
         }
         function byggFraga(typ){
             const enheter=KAT[katSel.value].enheter;
+            // Hjälpfunktion: omvandlar ett värde från enhet-index i till enhet-index j, med samma
+            // formel som facit-uträkningarna nedan redan bygger på.
+            const konvertera=(v,i,j)=> v*enheter[i][1]/enheter[j][1];
             if(typ==='omvandling'){
                 const mallar=TEXT_MALLAR[katSel.value];
                 const mall=mallar[ri(0,mallar.length-1)];
                 const [i,j]=slumpaEnhetPar(enheter, mall.units);
                 const v=slumpaVardeForEnhet(enheter[i][0]);
                 const svar=v*enheter[i][1]/enheter[j][1];
-                return { text: mall.tpl.replace('{v}',v).replace('{u1}',enheter[i][0]).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+                const faktor=enheter[i][1]/enheter[j][1];
+                const svarStr=fmtNum(svar)+' '+enheter[j][0];
+                return { text: mall.tpl.replace('{v}',v).replace('{u1}',enheter[i][0]).replace(/\{u2\}/g,enheter[j][0]), svar: svarStr,
+                    uträkning: v+' '+enheter[i][0]+' = '+v+' × '+fmtNum(faktor)+' = '+svarStr };
             }
             if(typ==='addition'){
                 const mallar=OPS_MALLAR[katSel.value].addition;
@@ -15806,7 +15829,12 @@
                 const v1=ri(1,20), v2=ri(1,50);
                 const summaBas=v1*enheter[i][1]+v2*enheter[j][1];
                 const svar=summaBas/enheter[j][1];
-                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+                const svarStr=fmtNum(svar)+' '+enheter[j][0];
+                const v1j=konvertera(v1,i,j);
+                const uträkning = (i===j)
+                    ? (v1+' '+enheter[i][0]+' + '+v2+' '+enheter[j][0]+' = '+svarStr)
+                    : (v1+' '+enheter[i][0]+' = '+fmtNum(v1j)+' '+enheter[j][0]+'. '+fmtNum(v1j)+' '+enheter[j][0]+' + '+v2+' '+enheter[j][0]+' = '+svarStr);
+                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: svarStr, uträkning };
             }
             if(typ==='subtraktion'){
                 const mallar=OPS_MALLAR[katSel.value].subtraktion;
@@ -15819,7 +15847,12 @@
                 const v2=ri(1, Math.max(1, Math.min(maxV2,99)));
                 const diffBas=v1Bas - v2*enheter[j][1];
                 const svar=diffBas/enheter[j][1];
-                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+                const svarStr=fmtNum(svar)+' '+enheter[j][0];
+                const v1j=konvertera(v1,i,j);
+                const uträkning = (i===j)
+                    ? (v1+' '+enheter[i][0]+' − '+v2+' '+enheter[j][0]+' = '+svarStr)
+                    : (v1+' '+enheter[i][0]+' = '+fmtNum(v1j)+' '+enheter[j][0]+'. '+fmtNum(v1j)+' '+enheter[j][0]+' − '+v2+' '+enheter[j][0]+' = '+svarStr);
+                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{v2}',v2).replace(/\{u2\}/g,enheter[j][0]), svar: svarStr, uträkning };
             }
             if(typ==='multiplikation'){
                 const mallar=OPS_MALLAR[katSel.value].multiplikation;
@@ -15828,7 +15861,12 @@
                 const v1=ri(1,9), n=ri(2,9);
                 const totalBas=v1*n*enheter[i][1];
                 const svar=totalBas/enheter[j][1];
-                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+                const svarStr=fmtNum(svar)+' '+enheter[j][0];
+                const totalI=v1*n;
+                const uträkning = (i===j)
+                    ? (v1+' '+enheter[i][0]+' × '+n+' = '+svarStr)
+                    : (v1+' '+enheter[i][0]+' × '+n+' = '+fmtNum(totalI)+' '+enheter[i][0]+'. Omvandlat: '+fmtNum(totalI)+' '+enheter[i][0]+' = '+svarStr);
+                return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: svarStr, uträkning };
             }
             // division
             const mallar=OPS_MALLAR[katSel.value].division;
@@ -15837,15 +15875,22 @@
             const n=ri(2,9), v1=n*ri(1,9);
             const totalBas=v1*enheter[i][1];
             const svar=(totalBas/n)/enheter[j][1];
-            return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: fmtNum(svar)+' '+enheter[j][0] };
+            const svarStr=fmtNum(svar)+' '+enheter[j][0];
+            const perDelI=v1/n;
+            const uträkning = (i===j)
+                ? (v1+' ÷ '+n+' = '+svarStr)
+                : (v1+' ÷ '+n+' = '+fmtNum(perDelI)+' '+enheter[i][0]+'. Omvandlat: '+fmtNum(perDelI)+' '+enheter[i][0]+' = '+svarStr);
+            return { text: mall.tpl.replace('{v1}',v1).replace('{u1}',enheter[i][0]).replace('{n}',n).replace(/\{u2\}/g,enheter[j][0]), svar: svarStr, uträkning };
         }
         function renderTextUppgifter(){
             const u=byggFraga(slumpaTyper(1)[0]);
             textLista.innerHTML='';
             const rad=document.createElement('div'); rad.className='enh-text-rad';
             const q=document.createElement('span'); q.className='enh-text-fraga'; q.textContent=u.text+' ';
-            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa svaret';
-            a.onclick=()=>{ a.textContent=u.svar; a.classList.add('revealed'); a.onclick=null; };
+            const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa uträkningen';
+            // FIX: visade tidigare bara slutsvaret (t.ex. "37 cm") - visar nu hela uträkningen som
+            // ledde fram till svaret (t.ex. "5 m = 500 cm. 500 cm + 37 cm = 537 cm").
+            a.onclick=()=>{ a.textContent=u.uträkning; a.classList.add('revealed'); a.onclick=null; };
             rad.appendChild(q); rad.appendChild(a);
             textLista.appendChild(rad);
         }
@@ -19189,8 +19234,26 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         // ---- Bygger ett exempel på sammanfattning utifrån textens "Hitta i texten"-svar,
         // som redan finns för varje text (fast/AI-skapad/egen). ----
         function lasfSammanfattningsmodell(t){
-            const delar = ((t && t.hitta) || []).map(h => String((h && h.svar) || '').trim()).filter(Boolean);
-            return { delar: (t && t.hitta) || [], text: delar.join(' ') };
+            const items = (t && t.hitta) || [];
+            // FIX: byggde tidigare "sammanhängande sammanfattning" genom att bara klistra ihop
+            // svaren på varandra med mellanslag, helt utan sammanhang ("Elin Den stora vita
+            // byggnaden Det pirrade i magen ... Leo") - obegripligt. Etiketterna är däremot alltid
+            // formulerade som en uppmaning i stil med "Hitta huvudpersonen" - det kan vi utnyttja:
+            // ta bort "Hitta "-delen och bygg en riktig mening av typen "Huvudpersonen är Elin." -
+            // det blir grammatiskt vettig svenska nästan alltid, eftersom etiketten redan är
+            // formulerad som precis den sortens påstående.
+            const meningar = items.map(h=>{
+                const svar = String((h && h.svar) || '').trim();
+                if(!svar) return null;
+                let label = String((h && h.label) || '').trim();
+                label = label.replace(/^[^\p{L}]+/u, '').trim(); // ta bort inledande emoji/symboler
+                label = label.replace(/^Hitta\s+/i, '').trim();
+                if(!label) return svar.match(/[.!?]$/) ? svar : svar+'.';
+                const meningStart = label.charAt(0).toUpperCase()+label.slice(1);
+                const punkt = svar.match(/[.!?]$/) ? '' : '.';
+                return meningStart+' är '+svar+punkt;
+            }).filter(Boolean);
+            return { delar: items, text: meningar.join(' ') };
         }
         function sekSammanfatta(el, t){
             const tabsWrap = document.createElement('div'); tabsWrap.className='exit-tabs'; tabsWrap.style.marginBottom='12px';
@@ -23083,6 +23146,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     <option value='100'>×100</option>
                 </select>
             </div>
+            <button class='btn btn-secondary sim-ovningar' style='width:100%;margin-bottom:6px;'>🏋️ Övningar</button>
             <div class='sim-anim'>🎲</div>
             <button class='btn btn-primary sim-kasta' style='width:100%;'>🎲 Kasta ×20</button>
             <div class='sim-chart'></div>
@@ -23165,6 +23229,96 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         kastaBtn.textContent = (typSel.value==='tarning'?'🎲 Kasta ':'🪙 Singla ')+'×'+antalSel.value;
         animEl.textContent = typSel.value==='tarning' ? '🎲' : '🪙';
         renderChart(); syncData();
+
+        // ---- ÖVNINGAR: enkla teoretiska sannolikhetsfrågor kring tärning och slant ----
+        const simRi=(min,max)=> min + Math.floor(Math.random()*(max-min+1));
+        function simGcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a||1; }
+        function simFormatBrak(taljare, namnare){ const g=simGcd(taljare,namnare); const t=taljare/g, n=namnare/g; return t+'/'+n; }
+        function simGenUppgift(typ){
+            if(typ==='blandat') typ = ['tal','jamn_udda','storre_mindre','slant','forvantat'][simRi(0,4)];
+            let fraga, svar, forklaring, kopplaTyp=null, kopplaAntal=null;
+            if(typ==='tal'){
+                const tal=simRi(1,6);
+                fraga = 'Vad är sannolikheten att få en '+tal+':a om du kastar en vanlig sexsidig tärning en gång?';
+                svar = simFormatBrak(1,6)+' (ca '+Math.round(100/6)+'%)';
+                forklaring = 'Det finns 6 lika möjliga utfall (1–6), och bara ett av dem är '+tal+'. Sannolikheten blir alltså 1/6.';
+                kopplaTyp='tarning'; kopplaAntal='20';
+            } else if(typ==='jamn_udda'){
+                const jamn = Math.random()<0.5;
+                fraga = 'Vad är sannolikheten att få ett '+(jamn?'jämnt':'udda')+' tal om du kastar en vanlig tärning en gång?';
+                svar = '3/6 = 1/2 (50%)';
+                forklaring = (jamn ? 'De jämna talen är 2, 4 och 6' : 'De udda talen är 1, 3 och 5')+' - alltså 3 av 6 möjliga utfall, vilket är samma som 1/2.';
+                kopplaTyp='tarning'; kopplaAntal='20';
+            } else if(typ==='storre_mindre'){
+                const grans=simRi(2,5); const storre=Math.random()<0.5;
+                const antalUtfall = storre ? (6-grans) : (grans-1);
+                fraga = 'Vad är sannolikheten att få ett tal som är '+(storre?'större än':'mindre än')+' '+grans+' om du kastar en tärning en gång?';
+                svar = simFormatBrak(antalUtfall,6)+' (ca '+Math.round(antalUtfall/6*100)+'%)';
+                forklaring = storre
+                    ? ('Talen större än '+grans+' är '+Array.from({length:6-grans},(_,i)=>grans+1+i).join(', ')+' - alltså '+antalUtfall+' av 6 möjliga utfall.')
+                    : ('Talen mindre än '+grans+' är '+Array.from({length:grans-1},(_,i)=>i+1).join(', ')+' - alltså '+antalUtfall+' av 6 möjliga utfall.');
+                kopplaTyp='tarning'; kopplaAntal='20';
+            } else if(typ==='slant'){
+                const val = Math.random()<0.5 ? 'krona' : 'klave';
+                fraga = 'Vad är sannolikheten att få '+val+' om du singlar slant en gång?';
+                svar = '1/2 (50%)';
+                forklaring = 'Ett myntkast har bara två lika möjliga utfall, krona eller klave, så chansen för vilketdera som helst är 1 av 2.';
+                kopplaTyp='slant'; kopplaAntal='20';
+            } else { // forvantat
+                const antal = [30,60,90,120][simRi(0,3)];
+                fraga = 'Om du kastar en tärning '+antal+' gånger, ungefär hur många av kasten förväntar du dig bli en sexa?';
+                svar = String(antal/6);
+                forklaring = 'Sannolikheten för en sexa är 1/6 varje kast, så på '+antal+' kast förväntas det bli ungefär '+antal+' × 1/6 = '+(antal/6)+' sexor.';
+                kopplaTyp='tarning'; kopplaAntal = antal>=100 ? '100' : String(antal>=50?50:(antal>=20?20:10));
+            }
+            return { fraga, svar, forklaring, kopplaTyp, kopplaAntal };
+        }
+        function showSimOvningar(){
+            const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+            const box=document.createElement('div'); box.className='cal-popup'; box.style.textAlign='left';
+            box.innerHTML = `<div class='cal-popup-title'>🏋️ Övningar – sannolikhet</div>
+                <div class='hover-menu' style='margin-bottom:10px;'>
+                    <select class='editor-select sim-ov-typ'>
+                        <option value='tal'>🎲 Ett visst tal</option>
+                        <option value='jamn_udda'>🎲 Jämnt/udda</option>
+                        <option value='storre_mindre'>🎲 Större/mindre än</option>
+                        <option value='slant'>🪙 Slant</option>
+                        <option value='forvantat'>🔢 Förväntat antal</option>
+                        <option value='blandat' selected>🎲 Blandat</option>
+                    </select>
+                </div>
+                <div class='sim-ov-fraga' style='font-size:14px;line-height:1.5;min-height:44px;'></div>
+                <div class='sim-ov-svar' style='display:none;margin-top:8px;padding:8px 10px;background:#eaf6ec;border-radius:10px;font-size:13.5px;'></div>
+                <div class='cal-popup-btns'></div>`;
+            const fragaEl=box.querySelector('.sim-ov-fraga'), svarEl=box.querySelector('.sim-ov-svar');
+            const typSelOv=box.querySelector('.sim-ov-typ');
+            const btns=box.querySelector('.cal-popup-btns');
+            let uppgift=null;
+            function nyUppgift(){
+                uppgift = simGenUppgift(typSelOv.value);
+                fragaEl.textContent = uppgift.fraga;
+                svarEl.style.display='none'; svarEl.textContent='';
+            }
+            const nyBtn=document.createElement('button'); nyBtn.className='btn btn-secondary'; nyBtn.textContent='🎲 Ny uppgift'; nyBtn.onclick=nyUppgift;
+            const svarBtn=document.createElement('button'); svarBtn.className='btn btn-secondary'; svarBtn.textContent='👁️ Visa svar';
+            svarBtn.onclick=()=>{ if(!uppgift) return; svarEl.style.display='block'; svarEl.innerHTML='<b>Svar:</b> '+uppgift.svar+'<br><span style="opacity:.75">'+uppgift.forklaring+'</span>'; };
+            const testaBtn=document.createElement('button'); testaBtn.className='btn btn-primary'; testaBtn.textContent='🎲 Testa i simulatorn';
+            testaBtn.onclick=()=>{
+                if(!uppgift) return;
+                typSel.value=uppgift.kopplaTyp; antalSel.value=uppgift.kopplaAntal;
+                typSel.onchange(); antalSel.onchange();
+                close();
+                kasta();
+            };
+            const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+            const closeBtn=document.createElement('button'); closeBtn.className='btn'; closeBtn.textContent='Stäng'; closeBtn.onclick=close;
+            typSelOv.onchange=nyUppgift;
+            btns.appendChild(nyBtn); btns.appendChild(svarBtn); btns.appendChild(testaBtn); btns.appendChild(closeBtn);
+            ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+            nyUppgift();
+        }
+        body.querySelector('.sim-ovningar').onclick=showSimOvningar;
     }
     window.createSannolikhet = createSannolikhet;
 
@@ -25896,7 +26050,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             });
             box.appendChild(exempelWrap);
 
-            const ovRubrik=document.createElement('h3'); ovRubrik.className='figx-ov-rubrik'; ovRubrik.textContent='🎯 Öva: Omvandla tidsenheter';
+            const ovRubrik=document.createElement('h3'); ovRubrik.className='figx-ov-rubrik su-ov-rubrik'; ovRubrik.textContent='🎯 Öva: Omvandla tidsenheter';
             box.appendChild(ovRubrik);
             const lista=document.createElement('div'); lista.className='su-lista';
             box.appendChild(lista);
@@ -27002,6 +27156,21 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa facit';
                 revealBtn.onclick=()=>{ state.revealed=true; renderPlay(); persist(); };
                 btns.appendChild(revealBtn);
+            }
+            // FIX: istället för att behöva klicka Redigera → Slumpa exempel → Starta för varje ny
+            // AI-genererad fråga, visas nu en direkt "Nästa fråga"-knapp här i spelvyn så länge det
+            // finns fler frågor kvar i AI-kön (aiQueue). Den hoppar direkt till nästa fråga och
+            // nollställer röster/facit automatiskt. När kön är tom (alla t.ex. fem frågor klara)
+            // försvinner knappen igen av sig själv.
+            if(aiQueue.length){
+                const nextQBtn=document.createElement('button'); nextQBtn.className='kw-btn kw-btn-primary'; nextQBtn.textContent='▶️ Nästa fråga ('+aiQueue.length+' kvar)';
+                nextQBtn.onclick=()=>{
+                    const ex=aiQueue.shift();
+                    state.text=ex.text; state.correct=ex.correct; state.motivering=ex.motivering;
+                    state.votesYes=0; state.votesNo=0; state.revealed=false; state.mode='play';
+                    render(); persist();
+                };
+                btns.appendChild(nextQBtn);
             }
             root.appendChild(btns);
         }
