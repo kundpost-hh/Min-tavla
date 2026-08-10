@@ -5307,7 +5307,24 @@
             if(inStr){
                 if(esc){ out+=c; esc=false; continue; }
                 if(c==='\\'){ out+=c; esc=true; continue; }
-                if(c==='"'){ inStr=false; out+=c; continue; }
+                if(c==='"'){
+                    // FIX: AI-svar innehåller ibland ett OESCAPAT citattecken MITT I en text, t.ex.
+                    // en fråga som citerar ett ord ("Vad betyder ordet "snabb"?"). Det citattecknet
+                    // ska egentligen skrivits \" men glöms ibland bort av AI:n. Ett sånt citattecken
+                    // kraschade hela tolkningen (bara när just den slumpade texten råkade innehålla
+                    // ett citat) - vilket gjorde att inklistringen "ibland funkade, ibland inte",
+                    // beroende på vad AI:n råkat skriva just den gången. Kolla därför vad som kommer
+                    // EFTER citattecknet: avslutar det verkligen strängen (följs av , : } ] eller
+                    // slutet av texten)? I så fall är det den riktiga stränggränsen. Annars är det
+                    // troligen ett citattecken mitt i texten - behandla det som en del av texten
+                    // istället för att avsluta strängen där.
+                    let j=i+1; while(j<s.length && /\s/.test(s[j])) j++;
+                    const nextCh = s[j];
+                    if(nextCh===','||nextCh===':'||nextCh==='}'||nextCh===']'||j>=s.length){
+                        inStr=false; out+=c; continue;
+                    }
+                    out+='\\"'; continue;
+                }
                 if(c==='\n'){ out+='\\n'; continue; }
                 if(c==='\r'){ continue; }
                 if(c==='\t'){ out+='\\t'; continue; }
@@ -12139,11 +12156,16 @@
         // istället för att bara kolla om backupen "finns" (den räknas som "finns" även tom). En tom
         // lokal backup på en enhet som aldrig fyllts i där (t.ex. mobilen) fick annars alltid
         // företräde framför den riktiga, ifyllda datan från molnet.
+        // FIX (rättad version 2): samma tie-break-bugg som i Lärarschemat rättad - vid OAVGJORT
+        // antal (bara en befintlig rad redigerad, inte tillagd/borttagen) vann annars alltid
+        // molndatan istället för den lokala backupen, vilket kunde tappa en redigering som ännu
+        // inte hunnit synkas till molnet (1,2 sek debounce). Lokal backup vinner nu så fort den
+        // inte har STRIKT FÄRRE ämnen än molnet.
         const savedStable = tpLoadStable();
         const cloudData = (config && config.data && Array.isArray(config.data.subjects)) ? config.data : null;
         const stableCount = savedStable ? savedStable.subjects.length : -1;
         const cloudCount = cloudData ? cloudData.subjects.length : -1;
-        const chosenTp = (stableCount > cloudCount) ? savedStable : (cloudCount > -1 ? cloudData : savedStable);
+        const chosenTp = (cloudCount > stableCount) ? cloudData : (savedStable || cloudData);
         if(chosenTp) tp = Object.assign(tp, chosenTp);
 
         function persist(){
@@ -13220,19 +13242,21 @@
             }catch(e){ return null; }
         }
         let state = { lessons: [], view: 'today' };
-        // FIX (rättad version): förra fixen jämförde bara "finns den stabila backupen" (den är ett
-        // objekt även när den är tom, t.ex. {lessons:[]}) - inte om den faktiskt HADE några lektioner
-        // i sig. Det gjorde att en tom lokal backup på en enhet (t.ex. mobilen, om widgeten öppnats
-        // där innan man någonsin hunnit lägga in lektioner) alltid vann över den riktiga, ifyllda
-        // datan som redan fanns i molnet/widget-rutan (config.data) - exakt det som gjorde att
-        // mobilen visade tomt fast datorn hade allt sparat. Jämför nu istället vilken av de två
-        // källorna som FAKTISKT innehåller flest lektioner, och använd den. Bara om båda är tomma
-        // (eller saknas) faller vi tillbaka på den ena som ändå finns, som tidigare.
+        // FIX (rättad version 2): förra fixen jämförde antalet lektioner, men vid OAVGJORT (lika
+        // många lektioner i båda källorna) valde koden ändå molndatan (config.data) - inte den
+        // lokala backupen. Problemet: om man bara REDIGERAR en befintlig lektion (byter t.ex. tid
+        // eller ämne) ändras inte antalet lektioner alls, bara innehållet i en av dem. Hann inte den
+        // fördröjda moln-synkningen (1,2 sek debounce) bli klar innan sidan laddades om, fanns den
+        // nya redigeringen bara i den lokala backupen - men eftersom antalet var OFÖRÄNDRAT (oavgjort)
+        // valdes ändå den gamla, oredigerade molnkopian, och just den ändringen "försvann" tyst. Det
+        // är precis det scenariot som gjorde att en enskild lektion (inte hela schemat) kunde tappas.
+        // Låt därför den LOKALA backupen vinna så fort den inte har STRIKT FÄRRE lektioner än molnet -
+        // molnet vinner bara om det bevisligen har MER innehåll (t.ex. tillagt från en annan enhet).
         const savedStable = lsLoadStable();
         const cloudData = (config && config.data && Array.isArray(config.data.lessons)) ? config.data : null;
         const stableCount = savedStable ? savedStable.lessons.length : -1;
         const cloudCount = cloudData ? cloudData.lessons.length : -1;
-        const chosen = (stableCount > cloudCount) ? savedStable : (cloudCount > -1 ? cloudData : savedStable);
+        const chosen = (cloudCount > stableCount) ? cloudData : (savedStable || cloudData);
         if(chosen) Object.assign(state, chosen);
         if(!Array.isArray(state.lessons)) state.lessons=[];
 
@@ -18167,7 +18191,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             + "{\"typ\":\"sant\",\"q\":\"ett påstående\",\"ratt\":true},"
             + "{\"typ\":\"fyll\",\"fore\":\"meningen före luckan\",\"efter\":\"efter luckan (kan vara tomt)\",\"alt\":[\"RÄTT ORD FÖRST\",\"fel ord\",\"fel ord\"]},"
             + "{\"typ\":\"para\",\"par\":[[\"a\",\"b\"],[\"c\",\"d\"],[\"e\",\"f\"],[\"g\",\"h\"]]}]}"
-            + "\n\nRegler: 4-6 begrepp, 3 frågor i varje nivå (på/mellan/bortom), 4 hitta-punkter, 4-6 händelser i ordning (kronologisk ordning från texten), 3 samtalsfrågor - varje samtalsfråga ska ha ett kort, vetenskapligt och rimligt exempel på svar i \"svar\"-fältet, minst 4 quiz-frågor av blandad typ (flerval, sant/falskt, fyll i, para ihop). Skriv alltid det RÄTTA svaret/ordet FÖRST i alt-listan för flerval och fyll. Texten ska ha flera stycken (skilj med tomrad) och passande längd för texttypen. Allt på svenska, anpassat till angiven årskurs/ämne. Om ingen årskurs anges, anta mellanstadienivå (åk 4–6, ca 10–12 år) som standard.";
+            + "\n\nRegler: 4-6 begrepp, 3 frågor i varje nivå (på/mellan/bortom), 4 hitta-punkter, 4-6 händelser i ordning (kronologisk ordning från texten), 3 samtalsfrågor - varje samtalsfråga ska ha ett kort, vetenskapligt och rimligt exempel på svar i \"svar\"-fältet, minst 4 quiz-frågor av blandad typ (flerval, sant/falskt, fyll i, para ihop). Skriv alltid det RÄTTA svaret/ordet FÖRST i alt-listan för flerval och fyll. Texten ska ha flera stycken (skilj med tomrad) och passande längd för texttypen. Allt på svenska, anpassat till angiven årskurs/ämne. Om ingen årskurs anges, anta mellanstadienivå (åk 4–6, ca 10–12 år) som standard. VIKTIGT för giltig JSON: om du citerar ett ord eller en fras inom någon text, använd ALDRIG raka citattecken (\") inuti texten - skriv istället med kursiv/enkla citattecken (t.ex. 'ordet') eller \\\" om du måste använda raka citattecken, annars blir JSON:en trasig.";
     }
     function parseLasfAiPaket(text){
         if(!text) return null;
@@ -18800,6 +18824,19 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             // "Skapa övningen från svaret"-knappen anropar alltid anvand() och visar då ett hjälpsamt
             // felmeddelande - gör nu samma sak automatiskt vid inklistring, så man alltid får feedback.
             pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ const pkt=parseLasfAiPaket(pasteTa.value); anvand(pkt, statusEl, pasteTa.value); },60); });
+            // FIX 2: på vissa enheter/webbläsare (särskilt mobilens egen "Klistra in"-meny i vissa
+            // appar/webbvyer) utlöses aldrig webbläsarens "paste"-händelse, trots att texten faktiskt
+            // klistras in i fältet - då kördes ingenting alls ovan heller. Lyssna därför ÄVEN på den
+            // betydligt bredare "input"-händelsen (som utlöses av i princip alla sätt text hamnar i
+            // fältet på: inklistring, tal-till-text, drag-och-släpp osv) som ett extra skyddsnät.
+            // Körs bara TYST i bakgrunden och skapar övningen automatiskt om tolkningen lyckas - visar
+            // inget felmeddelande här (det vore störande medan man fortfarande skriver/klistrar in),
+            // det sköter "paste"-lyssnaren och den manuella knappen ovan.
+            let lasfInputTimer=null;
+            pasteTa.addEventListener('input', ()=>{
+                clearTimeout(lasfInputTimer);
+                lasfInputTimer=setTimeout(()=>{ const pkt=parseLasfAiPaket(pasteTa.value); if(pkt) anvand(pkt, statusEl, pasteTa.value); },250);
+            });
             const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
             const makePasteBtn=document.createElement('button'); makePasteBtn.className='kw-btn kw-btn-primary'; makePasteBtn.textContent='Skapa övningen från svaret';
             makePasteBtn.onclick=()=>{ const pkt=parseLasfAiPaket(pasteTa.value); anvand(pkt, statusEl, pasteTa.value); };
