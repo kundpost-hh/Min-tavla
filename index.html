@@ -12449,6 +12449,18 @@
         body.querySelector('.tp-share').onclick = openShareDialog;
         body.querySelector('.tp-print').onclick = ()=> printTermPlan(tp, weekNumbers());
         if(!config) persist();
+        // FIX: samma skydd mot tajmnings-race som Lärarschemat - kolla en gång till efter några
+        // sekunder ifall mer komplett data hunnit bli tillgänglig sedan sidan laddades.
+        setTimeout(()=>{
+            if(!document.body.contains(widgetEl)) return;
+            try{
+                const recheck = tpLoadStable();
+                if(recheck && Array.isArray(recheck.subjects) && recheck.subjects.length > (tp.subjects ? tp.subjects.length : 0)){
+                    tp = Object.assign(tp, recheck);
+                    renderGrid(); persist();
+                }
+            }catch(e){}
+        }, 3000);
     }
 
     function printTermPlan(tp, weeks){
@@ -13631,6 +13643,23 @@
         ensureTodayReminders();
         render();
         if(!config) persist();
+        // FIX: skydd mot ett tajmnings-race vid sidladdning - currentUser sätts asynkront en liten
+        // stund efter att sidan öppnats (inloggningen blir klar lite senare), och beroende på
+        // nätverkshastighet kan den här widgeten hinna läsa in sitt schema INNAN inloggningen är
+        // helt klar, vilket ibland gjorde att den visade en tom platshållare trots att rätt data
+        // fanns sparad. Kolla därför en gång till efter några sekunder (när allt hunnit bli klart)
+        // om det nu går att hitta mer komplett data än det som visas - hittas det, uppdateras
+        // widgeten tyst. Skriver ALDRIG över med mindre data än det som redan visas.
+        setTimeout(()=>{
+            if(!document.body.contains(widget)) return; // widgeten borttagen under tiden
+            try{
+                const recheck = lsLoadStable();
+                if(recheck && Array.isArray(recheck.lessons) && recheck.lessons.length > (state.lessons ? state.lessons.length : 0)){
+                    Object.assign(state, recheck);
+                    ensureTodayReminders(); render(); persist();
+                }
+            }catch(e){}
+        }, 3000);
         // Håll påminnelserna uppdaterade under dagen, och städa upp när widgeten stängs.
         const remCheckIv = setInterval(ensureTodayReminders, 5*60*1000);
         const widgetElRefLS = widget;
