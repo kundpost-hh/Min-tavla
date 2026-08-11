@@ -4615,7 +4615,28 @@
                 else if (type === 'ORDKLASSPOKER') { try{ state.data = JSON.parse(w.dataset.ordklass || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'KÄLLKRITIK') { try{ state.data = JSON.parse(w.dataset.kallkritik || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'POSITIONSSYSTEMET') { try{ state.data = JSON.parse(w.dataset.pos || '{}'); }catch(e){ state.data={}; } }
-                else if (type === '📅 LÄRARSCHEMA') { try{ state.data = JSON.parse(w.dataset.lararschema || '{}'); }catch(e){ state.data={}; } }
+                else if (type === '📅 LÄRARSCHEMA') {
+                    // FIX: den verkliga, återkommande orsaken till att Lärarschemat "tappade" data
+                    // igen och igen ("kommer och går"): om en GAMMAL flik legat öppen ett tag (utan
+                    // att man rört just Lärarschema-widgeten i den fliken), håller den flikens
+                    // widget-ruta kvar den INAKTUELLA datan i sitt eget dataset. Gör man SEDAN NÅGON
+                    // helt annan ändring på tavlan i just den gamla fliken (flyttar en annan widget,
+                    // lägger till en sida osv), sparas HELA tavlan - och då fångades av misstag den
+                    // gamla flikens föråldrade schema-kopia med, vilket skrev över den egentligen
+                    // nyare och mer kompletta datan (sparad från en annan, senare aktiv flik/enhet).
+                    // Jämför därför HÄR - varje gång tavlan sparas, oavsett anledning - den här
+                    // widget-rutans egen kopia mot den delade, stabila backupen, och använd den som
+                    // faktiskt har flest lektioner. Det gör att en inaktuell flik aldrig kan skriva
+                    // över en redan sparad, mer komplett version.
+                    try{ state.data = JSON.parse(w.dataset.lararschema || '{}'); }catch(e){ state.data={}; }
+                    try{
+                        const stableKey = 'mintavla_lararschema_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal');
+                        const stable = JSON.parse(localStorage.getItem(stableKey) || 'null');
+                        if(stable && Array.isArray(stable.lessons) && (!Array.isArray(state.data.lessons) || stable.lessons.length > state.data.lessons.length)){
+                            state.data = stable;
+                        }
+                    }catch(e){}
+                }
                 else if (type === 'SUDOKU') { try{ state.data = JSON.parse(w.dataset.sudoku || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ÖVERSLAGSRÄKNING') { try{ state.data = JSON.parse(w.dataset.overslag || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'AVRUNDNING') { try{ state.data = JSON.parse(w.dataset.avrundning || '{}'); }catch(e){ state.data={}; } }
@@ -4647,7 +4668,18 @@
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VIDEO') { state.data.kind = w.dataset.videoKind || ''; state.data.src = w.dataset.videoSrc || ''; }
-                else if (type === 'TERMINSSCHEMA') { try{ state.data = JSON.parse(w.dataset.termplan || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'TERMINSSCHEMA') {
+                    // FIX: samma skydd som Lärarschemat ovan - en inaktuell flik ska aldrig kunna
+                    // skriva över en redan sparad, mer komplett terminsplan.
+                    try{ state.data = JSON.parse(w.dataset.termplan || '{}'); }catch(e){ state.data={}; }
+                    try{
+                        const stableKey = 'mintavla_termplan_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal');
+                        const stable = JSON.parse(localStorage.getItem(stableKey) || 'null');
+                        if(stable && Array.isArray(stable.subjects) && (!Array.isArray(state.data.subjects) || stable.subjects.length > state.data.subjects.length)){
+                            state.data = stable;
+                        }
+                    }catch(e){}
+                }
                 else if (type === 'VECKOSCHEMA') {
                     const conts = [...w.querySelectorAll('.week-rows')];
                     state.data.days = conts.map(cont => [...cont.querySelectorAll('.week-row')].map(r => ({
