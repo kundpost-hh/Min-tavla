@@ -11691,6 +11691,30 @@
     }
 
     // GREJ OF THE DAY WIDGET - HELT KLART OCH INTEGRERAT MED STEG-POPUP OCH MINNE
+    // FIX: en inbyggd GOTD-lista "Skolord" (20 poster om skolans egen värld) som alltid ska finnas
+    // med bland övriga sparade ämnen i rullgardinsmenyn - läggs in i savedGOTDLists_ automatiskt
+    // första gången widgeten laddas, om den inte redan finns där (t.ex. om läraren själv råkat
+    // spara över namnet med eget innehåll - då rörs INTE deras version).
+    const GOTD_SKOLORD = 'Jag är den bästa stunden på skoldagen / Jag är ofta 15-20 minuter lång / Du får springa och leka fritt under mig / Jag finns oftast mellan lektionerna / Rast\n'
+        + 'Jag är ett rum fullt av bord och stolar / Det doftar mat härifrån / Alla elever kommer hit vid lunchtid / Jag serverar mat varje skoldag / Matsal\n'
+        + 'Jag är fylld med tusentals böcker / Du kan låna med dig böcker hem härifrån / Här ska man helst vara tyst / En bibliotekarie jobbar här / Skolbibliotek\n'
+        + 'Jag ges av läraren / Du gör mig oftast hemma / Jag hjälper dig träna på det du lärt dig / Ibland glömmer elever bort mig / Läxa\n'
+        + 'Jag är utomhus / Här finns ofta gungor och en fotbollsplan / Eleverna är här på rasten / Jag ligger precis utanför skolbyggnaden / Skolgård\n'
+        + 'Jag är ett stort rum med högt i tak / Här spelar man bollsporter / Man byter om innan man kommer in i mig / Jag har ofta ribbstolar på väggarna / Idrottshall\n'
+        + 'Jag visar vilka lektioner du har varje dag / Jag talar om vilken tid en lektion börjar / Jag ser olika ut varje veckodag / Läraren och eleverna följer mig / Skolschema\n'
+        + 'Jag är liten och gjord av gummi / Jag tar bort det du skrivit med blyertspenna / Du gnuggar mig mot pappret / Jag finns ofta i ett pennskrin / Suddgummi\n'
+        + 'Jag gör slöa blyertspennor vassa igen / Jag har ett litet blad inuti mig / Du snurrar pennan i mig / Jag skapar spån / Pennvässare\n'
+        + 'Jag är en stor, vit tavla / Läraren skriver på mig med speciella pennor / Man kan sudda bort det som skrivs på mig / Jag hänger ofta längst fram i klassrummet / Whiteboard\n'
+        + 'Jag består av elever som blivit valda / Jag för fram elevernas åsikter till skolan / Jag har möten regelbundet / Jag jobbar för att förbättra skolan / Elevråd\n'
+        + 'Jag är chef för hela skolan / Jag bestämmer mycket om hur skolan fungerar / Lärarna rapporterar till mig / Mitt kontor finns ofta nära entrén / Rektor\n'
+        + 'Jag är rummet där lektionerna oftast hålls / Jag har bänkar, stolar och en tavla / Din klass har lektioner i mig / Läraren undervisar i mig / Klassrum\n'
+        + 'Jag är dagen då skolan börjar efter sommarlovet / Jag brukar vara i mitten eller slutet av augusti / Eleverna längtar ofta efter mig / Nya scheman delas ofta ut runt mig / Skolstart\n'
+        + 'Jag är ett möte mellan lärare, elev och vårdnadshavare / Vi pratar om hur det går i skolan / Jag hålls oftast en gång per termin / Jag handlar om elevens utveckling / Utvecklingssamtal\n'
+        + 'Jag finns för yngre elever / Du kan vara här före och efter skoldagen / Här leker och pysslar barn tillsammans / Jag finns ofta i samma byggnad som skolan / Fritids\n'
+        + 'Jag kör elever till och från skolan / Jag har många säten / En chaufför kör mig varje morgon / Jag stannar vid olika hållplatser / Skolbuss\n'
+        + 'Jag visar när terminerna börjar och slutar / Jag visar också när loven är / Skolan planerar utifrån mig / Föräldrar och elever kollar ofta på mig / Läsårsschema\n'
+        + 'Jag är gjord av papper / Jag samlar bilder på alla elever och lärare / Man kan bläddra i mig för att se vilka som går i skolan / Jag ges ofta ut en gång per år / Skolkatalog\n'
+        + 'Jag är en liten väska eller ask / Pennor, suddgummi och linjal förvaras i mig / Jag ligger ofta i skolväskan / Du öppnar mig varje dag på lektionerna / Pennskrin';
     function createGOTD(config){
         const body = createWidget('GREJ OF THE DAY', 320, 'word-widget', config);
         body.innerHTML = `
@@ -11701,9 +11725,16 @@
                 <textarea class='name-input' placeholder='En grej per rad:&#10;Ledtråd / Fakta 1 / Fakta 2 / Fakta 3 / Ord&#10;&#10;Ex: Jag är rund åt alla håll / En boll har min form / Jag har inga kanter / Jag kan rulla / Klot'></textarea>
             </div>
             <button class='btn btn-primary btn-roll-g' style='width:100%'>🎲 Slumpa grej!</button>
+            <label class='hover-menu gotd-no-repeat-lbl' style='display:flex;align-items:center;gap:6px;font-size:12px;color:#666;margin:6px 0 2px;cursor:pointer;'><input type='checkbox' class='gotd-no-repeat'> Undvik upprepning just nu</label>
             <div class='name-result' style='min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:18px;text-align:center;gap:6px;'></div>`;
 
         const sel = body.querySelector('select'), txt = body.querySelector('textarea'), res = body.querySelector('.name-result'), ni = body.querySelector('.list-name-input'), btnRoll = body.querySelector('.btn-roll-g');
+        const noRepeatCb = body.querySelector('.gotd-no-repeat');
+        // FIX: "Undvik upprepning just nu" - håller koll på vilka grejer som redan visats under den
+        // HÄR sittningen (rensas om man byter lista eller stänger/öppnar widgeten igen - alltså inte
+        // sparat permanent, bara "just i stunden" som efterfrågat). När alla grejer i listan har
+        // visats en gång, börjar den om på nytt av sig själv.
+        let gotdVisade = new Set();
         const editToggle = body.querySelector('.gotd-edit-toggle'), editSection = body.querySelector('.gotd-edit-section');
         const widgetEl = body.parentElement.parentElement;
         // Visa/dölj listan så att eleverna inte ser svaren
@@ -11716,11 +11747,12 @@
         const loadG = ()=>{ 
             sel.innerHTML='<option value="">-- Välj lista --</option>'; 
             let l=JSON.parse(localStorage.getItem('savedGOTDLists_'))||{}; 
+            if(!('Skolord' in l)){ l['Skolord']=GOTD_SKOLORD; try{ localStorage.setItem('savedGOTDLists_', JSON.stringify(l)); }catch(e){} }
             Object.keys(l).forEach(k=>{let o=document.createElement('option');o.value=k;o.innerText=k;sel.appendChild(o);}); 
         }; 
         loadG();
         
-        sel.onchange=()=>{ if(!sel.value) return; const l=JSON.parse(localStorage.getItem('savedGOTDLists_'))||{}; txt.value=l[sel.value]||''; res.innerHTML=''; btnRoll.innerHTML = '🎲 Slumpa grej!'; };
+        sel.onchange=()=>{ if(!sel.value) return; const l=JSON.parse(localStorage.getItem('savedGOTDLists_'))||{}; txt.value=l[sel.value]||''; res.innerHTML=''; btnRoll.innerHTML = '🎲 Slumpa grej!'; gotdVisade.clear(); };
         body.querySelector('.btn-save-g').onclick=()=>{ let t=ni.value.trim(), cn=txt.value.trim(); if(!t||!cn)return; let l=JSON.parse(localStorage.getItem('savedGOTDLists_'))||{}; l[t]=cn; localStorage.setItem('savedGOTDLists_',JSON.stringify(l)); ni.value=''; loadG(); sel.value=t; saveBoardState(); };
         body.querySelector('.btn-del-g').onclick=()=>{ if(!sel.value)return; customConfirm('Radera?',()=>{ let l=JSON.parse(localStorage.getItem('savedGOTDLists_'))||{}; delete l[sel.value]; localStorage.setItem('savedGOTDLists_',JSON.stringify(l)); txt.value=''; res.innerHTML=''; loadG(); saveBoardState(); }); };
         
@@ -11747,7 +11779,16 @@
                 ct++;
                 if(ct > 10){
                     clearInterval(iv);
-                    let line = n[Math.floor(Math.random()*n.length)];
+                    // Om "Undvik upprepning" är ikryssad: välj bland de grejer som INTE redan visats
+                    // i den här sittningen. Har alla redan visats en gång, börja om från noll.
+                    let pool = n;
+                    if(noRepeatCb && noRepeatCb.checked){
+                        const ovisade = n.filter(x=>!gotdVisade.has(x));
+                        if(ovisade.length===0) gotdVisade.clear();
+                        pool = ovisade.length ? ovisade : n;
+                    }
+                    let line = pool[Math.floor(Math.random()*pool.length)];
+                    if(noRepeatCb && noRepeatCb.checked) gotdVisade.add(line);
                     let parts = line.split(/[\/|]/).map(x=>x.trim()).filter(x=>x.length>0);
                     let clue, facts, answer;
                     if(parts.length <= 1){
