@@ -3428,7 +3428,8 @@
     .kompis-widget .widget-inner { border:2.5px solid #e5233d !important; }
     .kompis-print-btn { position:absolute; left:50%; bottom:4px; transform:translateX(-50%); background:none; border:none; font-size:20px; cursor:pointer; opacity:0.1; transition:opacity .2s ease; padding:4px 10px; }
     .kompis-print-btn:hover { opacity:1; }
-    .kompis-ring-wrap { position:relative; width:380px; height:270px; max-width:100%; }
+    .kompis-fit { width:100%; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .kompis-ring-wrap { position:relative; width:380px; height:270px; flex:none; transform-origin:top center; }
     .kompis-heart-guide { position:absolute; inset:0; width:100%; height:100%; }
     .kompis-face-svg { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); filter:drop-shadow(0 3px 6px rgba(0,0,0,0.15)); transition:filter .3s ease; }
     .kompis-chip { position:absolute; transform:translate(-50%,-50%); background:#fff0f5; border:1.5px solid #ff8fab; color:#c2185b; font-weight:800; font-size:10.5px; padding:3px 8px; border-radius:13px; white-space:nowrap; box-shadow:0 2px 5px rgba(0,0,0,0.12); animation:kompisPop .35s ease; }
@@ -13677,7 +13678,47 @@
             addBtn.onclick=()=>openLessonEditor(null);
             const planBtn=document.createElement('button'); planBtn.className='kw-btn kw-btn-ghost'; planBtn.textContent='📋 Visa dagens planering';
             planBtn.onclick=showTodayPlanning;
-            footer.appendChild(addBtn); footer.appendChild(planBtn);
+            // FIX: en riktig säkerhetsventil i väntan på att grundorsaken till att schemat ibland
+            // tappas hittas - exportera schemat till en fil man kan spara själv (på datorn, mailen,
+            // molnet - var man vill), och läs enkelt in den filen igen om något skulle försvinna.
+            // Helt oberoende av appens egen synk/lagring, så den fungerar även om den skulle strula.
+            const exportBtn=document.createElement('button'); exportBtn.className='kw-btn kw-btn-ghost'; exportBtn.textContent='📤 Exportera';
+            exportBtn.title='Spara ner schemat som en fil - bra att göra då och då som säkerhetskopia';
+            exportBtn.onclick=()=>{
+                try{
+                    const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    const datum = new Date().toISOString().slice(0,10);
+                    a.href = url; a.download = 'lararschema-sakerhetskopia-'+datum+'.json';
+                    document.body.appendChild(a); a.click(); a.remove();
+                    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+                } catch(e){ customAlert('Kunde inte exportera schemat just nu.', '⚠️'); }
+            };
+            const importBtn=document.createElement('button'); importBtn.className='kw-btn kw-btn-ghost'; importBtn.textContent='📥 Importera';
+            importBtn.title='Läs in en tidigare exporterad säkerhetskopia och ersätt schemat med den';
+            importBtn.onclick=()=>{
+                const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json,.json';
+                inp.onchange = ()=>{
+                    const file = inp.files && inp.files[0]; if(!file) return;
+                    const reader = new FileReader();
+                    reader.onload = ()=>{
+                        try{
+                            const parsed = JSON.parse(reader.result);
+                            if(!parsed || !Array.isArray(parsed.lessons)) throw new Error('fel format');
+                            customConfirm('Ersätta det nuvarande schemat (' + state.lessons.length + ' lektioner) med filen (' + parsed.lessons.length + ' lektioner)?', (ok)=>{
+                                if(!ok) return;
+                                state.lessons = parsed.lessons; if(parsed.view) state.view = parsed.view;
+                                ensureTodayReminders(); render(); persist();
+                                customAlert('Schemat är importerat!', '✅');
+                            });
+                        } catch(e){ customAlert('Kunde inte läsa filen - kontrollera att det är en säkerhetskopia som exporterats härifrån.', '⚠️'); }
+                    };
+                    reader.readAsText(file);
+                };
+                inp.click();
+            };
+            footer.appendChild(addBtn); footer.appendChild(planBtn); footer.appendChild(exportBtn); footer.appendChild(importBtn);
             root.appendChild(footer);
         }
 
@@ -23156,17 +23197,19 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         guideD += 'Z';
 
         body.innerHTML = `
-            <div class="kompis-ring-wrap">
-                <svg class="kompis-heart-guide" viewBox="0 0 380 270"><path d="${guideD}" fill="none" stroke="#ffd1de" stroke-width="2.5" stroke-dasharray="6 5"/></svg>
-                <svg class="kompis-face-svg" viewBox="0 0 180 180" width="150" height="150">
-                    <circle cx="90" cy="92" r="66" fill="#ffce54" stroke="#e0a92c" stroke-width="3"/>
-                    <path d="M28,58 Q90,10 152,58 Q140,74 90,66 Q40,74 28,58 Z" fill="#7a5230"/>
-                    <circle cx="63" cy="88" r="7" fill="#3a3a3a"/><circle cx="117" cy="88" r="7" fill="#3a3a3a"/>
-                    <circle cx="42" cy="108" r="9" fill="#ff8fa0" opacity="0.4"/><circle cx="138" cy="108" r="9" fill="#ff8fa0" opacity="0.4"/>
-                    <path class="kompis-mouth" d="M58,120 Q90,148 122,120" stroke="#3a3a3a" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-                </svg>
-                <div class="kompis-kiss-burst">❤️</div>
-                <div class="kompis-chips"></div>
+            <div class="kompis-fit">
+                <div class="kompis-ring-wrap">
+                    <svg class="kompis-heart-guide" viewBox="0 0 380 270"><path d="${guideD}" fill="none" stroke="#ffd1de" stroke-width="2.5" stroke-dasharray="6 5"/></svg>
+                    <svg class="kompis-face-svg" viewBox="0 0 180 180" width="150" height="150">
+                        <circle cx="90" cy="92" r="66" fill="#ffce54" stroke="#e0a92c" stroke-width="3"/>
+                        <path d="M28,58 Q90,10 152,58 Q140,74 90,66 Q40,74 28,58 Z" fill="#7a5230"/>
+                        <circle cx="63" cy="88" r="7" fill="#3a3a3a"/><circle cx="117" cy="88" r="7" fill="#3a3a3a"/>
+                        <circle cx="42" cy="108" r="9" fill="#ff8fa0" opacity="0.4"/><circle cx="138" cy="108" r="9" fill="#ff8fa0" opacity="0.4"/>
+                        <path class="kompis-mouth" d="M58,120 Q90,148 122,120" stroke="#3a3a3a" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+                    </svg>
+                    <div class="kompis-kiss-burst">❤️</div>
+                    <div class="kompis-chips"></div>
+                </div>
             </div>
             <div class="kompis-btn-wrap">
                 <button type="button" class="btn btn-primary kompis-btn" style="width:100%;margin-top:8px;">💬 Min kompis är..</button>
@@ -23176,7 +23219,22 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             <p class="kompis-samtal">Samtala kring orden, förklara vad det betyder för dig och ge ett exempel.</p>
             <button type="button" class="kompis-print-btn" title="Skriv ut hjärtat med orden">🖨️</button>
         `;
+        const kompisFit = body.querySelector('.kompis-fit');
         const wrap = body.querySelector('.kompis-ring-wrap');
+        // FIX: hjärtat/ansiktet/orden ritades tidigare med FASTA pixelmått (380×270 respektive
+        // 150×150), helt oberoende av widget-rutans storlek - drog man i hörnet blev bara ramen
+        // större, innehållet stod kvar i samma litenhet. Skalar nu HELA .kompis-ring-wrap som EN
+        // enhet efter tillgänglig bredd (samma teknik som redan används i Klocka-widgeten), så
+        // hjärtat, ansiktet och alla ord växer/krymper tillsammans i takt med rutan.
+        const KOMPIS_BASE_W = 380, KOMPIS_BASE_H = 270;
+        const kompisFitScale = ()=>{
+            const aw = kompisFit.clientWidth; if(!aw) return;
+            const s = Math.max(0.4, aw / KOMPIS_BASE_W);
+            wrap.style.transform = 'scale(' + s + ')';
+            kompisFit.style.height = (KOMPIS_BASE_H * s) + 'px';
+        };
+        if(window.ResizeObserver){ const kompisRo = new ResizeObserver(kompisFitScale); kompisRo.observe(kompisFit); }
+        setTimeout(kompisFitScale, 60);
         const chipsEl = body.querySelector('.kompis-chips');
         const btn = body.querySelector('.kompis-btn');
         const resetBtn = body.querySelector('.kompis-reset');
