@@ -26900,7 +26900,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const max = Math.max(...state.teams.map(t=>t.score));
             state.teams.forEach((t,i)=>{
                 const chip=document.createElement('div'); chip.className='qt-chip'+((t.score===max && max>0)?' leader':'');
-                chip.innerHTML = `<span class='qt-team-dot' style='width:10px;height:10px;background:${QT_TEAM_COLORS[i%QT_TEAM_COLORS.length]}'></span>${t.name||('Lag '+(i+1))}: ${t.score}`;
+                chip.innerHTML = `<span class='qt-team-dot' style='width:10px;height:10px;background:${QT_TEAM_COLORS[i%QT_TEAM_COLORS.length]}'></span>${escapeHtml(t.name||('Lag '+(i+1)))}: ${t.score}`;
                 board.appendChild(chip);
             });
             container.appendChild(board);
