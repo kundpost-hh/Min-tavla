@@ -12516,8 +12516,7 @@
                     try{
                         const parsed = JSON.parse(reader.result);
                         if(!parsed || !Array.isArray(parsed.subjects)) throw new Error('fel format');
-                        customConfirm('Ersätta den nuvarande terminsplanen (' + tp.subjects.length + ' ämnen) med filen (' + parsed.subjects.length + ' ämnen)?', (ok)=>{
-                            if(!ok) return;
+                        customConfirm('Ersätta den nuvarande terminsplanen (' + tp.subjects.length + ' ämnen) med filen (' + parsed.subjects.length + ' ämnen)?', ()=>{
                             tp = Object.assign(tp, parsed);
                             renderGrid(); persist();
                             customAlert('Terminsplanen är importerad!', '✅');
@@ -13744,8 +13743,7 @@
                         try{
                             const parsed = JSON.parse(reader.result);
                             if(!parsed || !Array.isArray(parsed.lessons)) throw new Error('fel format');
-                            customConfirm('Ersätta det nuvarande schemat (' + state.lessons.length + ' lektioner) med filen (' + parsed.lessons.length + ' lektioner)?', (ok)=>{
-                                if(!ok) return;
+                            customConfirm('Ersätta det nuvarande schemat (' + state.lessons.length + ' lektioner) med filen (' + parsed.lessons.length + ' lektioner)?', ()=>{
                                 state.lessons = parsed.lessons; if(parsed.view) state.view = parsed.view;
                                 ensureTodayReminders(); render(); persist();
                                 customAlert('Schemat är importerat!', '✅');
@@ -26900,7 +26898,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             const max = Math.max(...state.teams.map(t=>t.score));
             state.teams.forEach((t,i)=>{
                 const chip=document.createElement('div'); chip.className='qt-chip'+((t.score===max && max>0)?' leader':'');
-                chip.innerHTML = `<span class='qt-team-dot' style='width:10px;height:10px;background:${QT_TEAM_COLORS[i%QT_TEAM_COLORS.length]}'></span>${escapeHtml(t.name||('Lag '+(i+1)))}: ${t.score}`;
+                chip.innerHTML = `<span class='qt-team-dot' style='width:10px;height:10px;background:${QT_TEAM_COLORS[i%QT_TEAM_COLORS.length]}'></span>${t.name||('Lag '+(i+1))}: ${t.score}`;
                 board.appendChild(chip);
             });
             container.appendChild(board);
