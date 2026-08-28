@@ -4654,7 +4654,21 @@
                 else if (type === 'TURORDNING') { try{ state.data = JSON.parse(w.dataset.turordning || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'UPPMÄRKSAMHETSSIGNAL') { try{ state.data = JSON.parse(w.dataset.uppmark || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BERÄTTARTÄRNING') { try{ state.data = JSON.parse(w.dataset.berattar || '{}'); }catch(e){ state.data={}; } }
-                else if (type === 'Veckans stjärnmål ⭐' || type === 'VECKANS MÅL') { try{ state.data = JSON.parse(w.dataset.veckansmal || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'Veckans stjärnmål ⭐' || type === 'VECKANS MÅL') {
+                    // FIX: samma mönster som redan löser motsvarande problem för Lärarschema -
+                    // jämför widget-rutans egen kopia mot den stabila backupen varje gång HELA
+                    // tavlan sparas (oavsett anledning), så en inaktuell flik aldrig kan skriva
+                    // över en redan sparad, mer komplett version.
+                    try{ state.data = JSON.parse(w.dataset.veckansmal || '{}'); }catch(e){ state.data={}; }
+                    try{
+                        const stableKey = 'mintavla_veckansmal_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal');
+                        const stable = JSON.parse(localStorage.getItem(stableKey) || 'null');
+                        const score = s => { if(!s) return -1; const g=Array.isArray(s.goals)?s.goals.length:0; const d=s.dayPoints?Object.keys(s.dayPoints).filter(k=>s.dayPoints[k]===true||s.dayPoints[k]===false).length:0; const h=Array.isArray(s.history)?s.history.length:0; return g*100+d*10+h; };
+                        if(stable && Array.isArray(stable.goals) && score(stable) > score(state.data)){
+                            state.data = stable;
+                        }
+                    }catch(e){}
+                }
                 else if (type === 'KLASSPOÄNG') { state.data.points = parseInt(w.querySelector('.cr-count')?.textContent) || 0; state.data.goal = w.querySelector('.cr-goal')?.value || '20'; state.data.reward = w.querySelector('.cr-reward')?.value || ''; }
                 else if (type === 'KORSORD') { try{ state.data = JSON.parse(w.querySelector('.korsord-root')?.dataset.kw || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'ORDGÖMMA') { try{ state.data = JSON.parse(w.querySelector('.og-root')?.dataset.og || '{}'); }catch(e){ state.data={}; } }
@@ -14940,7 +14954,7 @@
         };
         const MENING_BAS = {
             ak4: [
-                'det regnar ute', 'jag gillar att spela fotboll', 'min bästa kompis heter alex',
+                'det regnar ute', 'jag gillar att spela fotboll', 'min bästa kompis heter Alex',
                 'vi ska åka till mormor i helgen', 'skolan börjar klockan åtta', 'hunden heter bella',
                 'imorgon ska vi ha idrott', 'katten sitter i fönstret', 'vi läser en bok om rymden'
             ],
@@ -23720,8 +23734,39 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
               bankCountEl=body.querySelector('.vm-bank-count');
 
         const VM_THRESHOLD=3, VM_TARGET=5; // minst 3 av 5 skoldagar (60%) ger veckans poäng
+        // FIX: samma mönster som redan löste motsvarande problem för Lärarschema-widgeten.
+        // Sparas ENDAST i widget-rutan (widget.dataset) kunde en gammal, inaktuell flik som legat
+        // öppen skriva över en nyare/mer komplett version med sin egen föråldrade kopia så fort
+        // NÅGON ändring gjordes på tavlan i den gamla fliken (hela tavlan sparas då på nytt).
+        // Nu finns även en egen, stabil kopia i localStorage (kopplad till läraren, inte till
+        // widget-rutan), och vid uppstart jämförs den mot molnkopian - den som bevisligen har MEST
+        // innehåll vinner. Den lokala backupen vinner vid oavgjort, eftersom en ren REDIGERING
+        // (t.ex. byta stjärnpoäng för en dag utan att lägga till/ta bort mål) inte ändrar antalet.
+        function vmStorageKey(){ return 'mintavla_veckansmal_' + (typeof currentUser!=='undefined' && currentUser ? currentUser : 'lokal'); }
+        function vmLoadStable(){
+            try{
+                const key = vmStorageKey();
+                let raw = localStorage.getItem(key);
+                if(!raw && key !== 'mintavla_veckansmal_lokal'){
+                    const fallback = localStorage.getItem('mintavla_veckansmal_lokal');
+                    if(fallback){ raw = fallback; try{ localStorage.setItem(key, fallback); }catch(e){} }
+                }
+                const saved = JSON.parse(raw||'null');
+                return (saved && Array.isArray(saved.goals)) ? saved : null;
+            }catch(e){ return null; }
+        }
+        function vmScore(s){
+            if(!s) return -1;
+            const goalsN = Array.isArray(s.goals) ? s.goals.length : 0;
+            const daysN = s.dayPoints ? Object.keys(s.dayPoints).filter(k=>s.dayPoints[k]===true||s.dayPoints[k]===false).length : 0;
+            const histN = Array.isArray(s.history) ? s.history.length : 0;
+            return goalsN*100 + daysN*10 + histN;
+        }
         let state = { goals:[], points:0, target:VM_TARGET, weekLabel: veckansMalLabel(new Date()), history:[], bankRemaining: VECKANS_MAL_BANK.slice(), celebratedThisWeek:false, dayPoints:{mon:null,tue:null,wed:null,thu:null,fri:null} };
-        if(config && config.data && Array.isArray(config.data.goals)) Object.assign(state, config.data);
+        const vmSavedStable = vmLoadStable();
+        const vmCloudData = (config && config.data && Array.isArray(config.data.goals)) ? config.data : null;
+        const vmChosen = (vmScore(vmCloudData) > vmScore(vmSavedStable)) ? vmCloudData : (vmSavedStable || vmCloudData);
+        if(vmChosen) Object.assign(state, vmChosen);
         if(!Array.isArray(state.history)) state.history=[];
         // FIX: gamla sparade widgetar (från innan målbanken fanns) saknar bankRemaining - fyll då
         // på med hela banken som startpunkt istället för att krascha eller stå tom.
@@ -23729,11 +23774,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         if(typeof state.celebratedThisWeek !== 'boolean') state.celebratedThisWeek = false;
         // FIX: gamla widgetar (från innan dagsrutorna fanns) hade bara ett samlat poängtal, inget
         // per dag. Migrera dem till dagsrutor så gammal data inte försvinner, genom att fylla på
-        // "poäng"-dagar från måndag och framåt upp till det gamla antalet. Måste kolla den RÅA
-        // sparade datan (config.data) - state.dayPoints har redan default-fyllts ovan och är
-        // därför alltid ett objekt, så det går inte att avgöra där om datan faktiskt var gammal.
-        if(config && config.data && !config.data.dayPoints && typeof config.data.points==='number'){
-            const legacy = Math.max(0, Math.min(5, config.data.points));
+        // "poäng"-dagar från måndag och framåt upp till det gamla antalet. Måste kolla den valda
+        // rådatan (vmChosen) - state.dayPoints har redan default-fyllts ovan och är därför alltid
+        // ett objekt, så det går inte att avgöra där om datan faktiskt var gammal.
+        if(vmChosen && !vmChosen.dayPoints && typeof vmChosen.points==='number'){
+            const legacy = Math.max(0, Math.min(5, vmChosen.points));
             state.dayPoints = {mon:null,tue:null,wed:null,thu:null,fri:null};
             VM_DAY_KEYS.forEach((k,i)=>{ if(i<legacy) state.dayPoints[k]=true; });
         }
@@ -23755,7 +23800,13 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         const VM_VECKODAGAR=['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'];
         weekLabelEl.textContent = '📅 '+(state.weekLabel || veckansMalLabel(new Date()))+' · '+VM_VECKODAGAR[new Date().getDay()];
 
-        function persist(){ widget.dataset.veckansmal = JSON.stringify(state); saveBoardState(); }
+        function persist(){
+            widget.dataset.veckansmal = JSON.stringify(state);
+            // FIX: i gästläge ska INGET sparas bestående - state (ovan) håller widgeten fungerande
+            // under besöket, men skrivs aldrig till localStorage och finns inte kvar efteråt.
+            if(!window.isGuestMode){ try{ localStorage.setItem(vmStorageKey(), JSON.stringify(state)); }catch(e){} }
+            saveBoardState();
+        }
 
         function updateBankCount(){
             bankCountEl.textContent = state.bankRemaining.length+' av '+VECKANS_MAL_BANK.length+' mål kvar i banken'+(state.bankRemaining.length<VECKANS_MAL_BANK.length ? ' · ↺ Återställ banken' : '');
