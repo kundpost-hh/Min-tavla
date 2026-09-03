@@ -14727,7 +14727,7 @@
         // widgetType och alla serialize/deserialize-kopplingar) lämnas orört, annars skulle redan
         // utplacerade Startuppgift-widgetar på lärares tavlor sluta gå att läsa in efter uppdateringen.
         const suHeaderSpan = widget.querySelector('.widget-header > span'); if(suHeaderSpan) suHeaderSpan.textContent = 'Startuppgift Matematik';
-        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är lite klurigare!</div><div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
+        body.innerHTML = `<div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
         const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista'), nivaSelSU = body.querySelector('.su-niva');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
         function gcdSU(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a||1; }
@@ -14874,7 +14874,7 @@
         if(config===undefined) config=null;
         const body = createWidget('STARTUPPGIFT SVENSKA', 400, 'startuppgift-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='su-intro'>Klicka på knappen för att få fem nya uppgifter – den femte är en klurig gåta!</div><div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>📖 Dagens uppgift</button><div class='su-lista'></div>`;
+        body.innerHTML = `<div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>📖 Dagens uppgift</button><div class='su-lista'></div>`;
         const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista'), nivaSelSU = body.querySelector('.su-niva');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
         const val = (arr)=> arr[ri(0, arr.length-1)];
