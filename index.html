@@ -5984,9 +5984,9 @@
     function gotdEsc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     async function gotdWikipedia(ord){
         const w=(ord||'').trim(); if(!w) return null;
-        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdWikiCacheV1')||'{}'); }catch(e){}
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdWikiCacheV2')||'{}'); }catch(e){}
         if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
-        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdWikiCacheV1', JSON.stringify(cache)); }catch(e){} };
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdWikiCacheV2', JSON.stringify(cache)); }catch(e){} };
         let j;
         try{
             const url='https://sv.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(w);
@@ -6010,9 +6010,9 @@
     }
     async function gotdOrdbok(ord){
         const w=(ord||'').toLowerCase().trim(); if(!w) return null;
-        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdOrdbokCacheV2')||'{}'); }catch(e){}
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdOrdbokCacheV3')||'{}'); }catch(e){}
         if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
-        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdOrdbokCacheV2', JSON.stringify(cache)); }catch(e){} };
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdOrdbokCacheV3', JSON.stringify(cache)); }catch(e){} };
         let j;
         try{
             const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
@@ -6031,13 +6031,23 @@
             }
             return null;
         };
-        let synonym=null, exempel=null;
+        let synonym=null, motsats=null, exempel=null;
         const synRub = rubriker.find(h=>/^synonym/i.test(h.textContent||''));
         if(synRub){
             const lista = listaEfterRubrik(synRub);
             if(lista){
                 const items=[...lista.querySelectorAll('li')].map(li=>clean(li.textContent)).filter(Boolean);
                 if(items.length) synonym = items.slice(0,2).join(', ');
+            }
+        }
+        // Motsatsord: används som reserv i widgeten när ordet saknar synonymer (t.ex. "stor"
+        // har ofta ingen riktig synonym, men ett tydligt motsatsord: "liten").
+        const motRub = rubriker.find(h=>/^(motsats|antonym)/i.test(h.textContent||''));
+        if(motRub){
+            const lista = listaEfterRubrik(motRub);
+            if(lista){
+                const items=[...lista.querySelectorAll('li')].map(li=>clean(li.textContent)).filter(Boolean);
+                if(items.length) motsats = items.slice(0,2).join(', ');
             }
         }
         // Exempel + förklaring hämtas från SAMMA betydelse (första <li> i första betydelselistan)
@@ -6060,8 +6070,8 @@
                 if(gloss && gloss.length>2) forklaring = gloss;
             }
         }
-        if(!synonym && !exempel && !forklaring){ sparaCache('saknas'); return null; }
-        const res={ synonym:synonym, exempel:exempel, forklaring:forklaring };
+        if(!synonym && !motsats && !exempel && !forklaring){ sparaCache('saknas'); return null; }
+        const res={ synonym:synonym, motsats:motsats, exempel:exempel, forklaring:forklaring };
         sparaCache(res); return res;
     }
     function gotdPanelHtml(kind, icon, label){
@@ -6111,17 +6121,167 @@
         el.innerHTML = 'Källa: ' + lankar.join(' & ');
         el.style.display='block';
     }
+    // FIX: många vanliga svenska ord har flera helt olika betydelser (t.ex. "val" = val/election
+    // ELLER val/whale, "art" = konst ELLER biologisk art, "cell" = biologisk cell ELLER fängelsecell).
+    // Wikipedias sök-API väljer automatiskt EN artikel per sökord och kan då råka välja fel
+    // betydelse helt - vilket gav t.ex. en Bibel-förklaring på ett ord läraren menade som biologiord.
+    // Den här listan kollas ALLTID FÖRST och innehåller garanterat korta, ämnesrelevanta
+    // förklaringar för vanliga skolord (åk 4-6) - bara om ordet INTE finns här görs en osäker
+    // sökning mot Wikipedia/Wiktionary istället. "motsats" används när ordet saknar en bra synonym.
+    const GOTD_KANDA_ORD = {
+        'val': { forklaring:'Ett stort havsdjur som lever i havet och andas med lungor.', synonym:'valdjur' },
+        'art': { forklaring:'En grupp djur eller växter som liknar varandra och kan få ungar tillsammans.', synonym:'sort' },
+        'cell': { forklaring:'Den minsta levande byggstenen som allt liv är uppbyggt av.', synonym:'byggsten' },
+        'organ': { forklaring:'En del av kroppen som gör ett visst jobb, t.ex. hjärtat eller lungorna.', synonym:'kroppsdel' },
+        'krona': { forklaring:'Svensk valuta (pengar), eller den övre delen av ett träd med grenar och löv.', synonym:'valuta' },
+        'stam': { forklaring:'Den upprätta, hårda delen av ett träd som bär upp grenarna.', synonym:'trädstam' },
+        'blad': { forklaring:'Den gröna, platta delen på en växt som gör fotosyntes.', synonym:'löv' },
+        'get': { forklaring:'Ett tamdjur med horn som ger mjölk, släkt med fåret.', synonym:'bockdjur' },
+        'ryggrad': { forklaring:'Den långa raden av ben som går längs ryggen och skyddar ryggmärgen.', synonym:'ryggben' },
+        'rovdjur': { forklaring:'Ett djur som jagar och äter andra djur.', motsats:'växtätare' },
+        'ekosystem': { forklaring:'Alla växter, djur och deras miljö som hör ihop på en plats.', synonym:'naturmiljö' },
+        'fotosyntes': { forklaring:'Processen där växter gör socker och syre med hjälp av solljus.', synonym:'ljusprocess' },
+        'kontinent': { forklaring:'En av jordens sju stora landmassor, t.ex. Europa eller Afrika.', synonym:'världsdel' },
+        'huvudstad': { forklaring:'Den viktigaste staden i ett land, där regeringen ofta finns.', synonym:'centralort' },
+        'klimat': { forklaring:'Det typiska vädret på en plats under lång tid.', synonym:'väderlag' },
+        'öken': { forklaring:'Ett mycket torrt område där det knappt regnar alls.', motsats:'regnskog' },
+        'halvö': { forklaring:'Ett landområde som har vatten på nästan alla sidor.', synonym:'udde' },
+        'area': { forklaring:'Hur stor en yta är, mäts t.ex. i kvadratmeter.', synonym:'yta' },
+        'omkrets': { forklaring:'Längden runt om en figur, t.ex. runt en kvadrat.', synonym:'periferi' },
+        'bråk': { forklaring:'Ett tal som visar en del av något helt, t.ex. en halv eller en fjärdedel.', synonym:'del av tal' },
+        'vinkel': { forklaring:'Utrymmet mellan två linjer som möts i en punkt, mäts i grader.', synonym:'grad' },
+        'substantiv': { forklaring:'Ett ordklass för namn på saker, personer, djur eller platser.', synonym:'namnord' },
+        'adjektiv': { forklaring:'En ordklass som beskriver hur något är, t.ex. "stor" eller "röd".', synonym:'beskrivande ord' },
+        'verb': { forklaring:'En ordklass för vad någon gör, t.ex. "springa" eller "läsa".', synonym:'görandeord' },
+        'metafor': { forklaring:'Ett sätt att beskriva något genom att jämföra det med något annat.', synonym:'bildspråk' },
+        'demokrati': { forklaring:'Ett styrelsesätt där folket röstar fram vilka som ska bestämma.', motsats:'diktatur' },
+        'monarki': { forklaring:'Ett land som styrs eller symboliskt leds av en kung eller drottning.', synonym:'kungadöme' },
+        'industrialisering': { forklaring:'När fabriker och maskiner började göra sådant som förr gjordes för hand.', synonym:'fabriksutveckling' },
+        'arv': { forklaring:'Egenskaper som förs vidare från föräldrar till barn, t.ex. ögonfärg.', synonym:'nedärvning' },
+        'ljus': { forklaring:'Det som gör att vi kan se, kommer t.ex. från solen eller en lampa.', motsats:'mörker' },
+
+        // ---- BIOLOGI ----
+        'växtätare': { forklaring:'Ett djur som bara äter växter.', motsats:'rovdjur' },
+        'allätare': { forklaring:'Ett djur som äter både växter och andra djur.', synonym:'omnivor' },
+        'näringskedja': { forklaring:'Visar vem som äter vem i naturen, från växt till rovdjur.', synonym:'födokedja' },
+        'klorofyll': { forklaring:'Det gröna ämnet i växter som fångar upp solljus.', synonym:'bladgrönt' },
+        'pollinering': { forklaring:'När pollen förs över till en blomma så att frukt eller frö kan bildas.', synonym:'befruktning hos växter' },
+        'bakterie': { forklaring:'En mycket liten encellig organism som finns nästan överallt.', synonym:'mikroorganism' },
+        'virus': { forklaring:'Ett mycket litet smittämne som kan göra att man blir sjuk.', synonym:'smittämne' },
+        'skelett': { forklaring:'Alla ben i kroppen tillsammans, som ger stöd och skydd.', synonym:'benstomme' },
+        'muskel': { forklaring:'En kroppsdel som drar ihop sig och gör att vi kan röra oss.', synonym:'muskelvävnad' },
+        'syre': { forklaring:'En gas i luften som vi måste andas in för att leva.', synonym:'oxygen' },
+        'koldioxid': { forklaring:'En gas som vi andas ut, och som växter tar upp vid fotosyntes.', synonym:'CO2' },
+        'matspjälkning': { forklaring:'Processen där kroppen bryter ner maten till näring.', synonym:'digestion' },
+        'blodomlopp': { forklaring:'Systemet som pumpar blod runt i hela kroppen.', synonym:'cirkulation' },
+        'nervsystem': { forklaring:'Systemet i kroppen som skickar signaler mellan hjärnan och kroppen.', synonym:'nervbanor' },
+        'larv': { forklaring:'Ett ungt stadium hos t.ex. en fjäril, innan den blir fullvuxen.', synonym:'insektsunge' },
+        'evolution': { forklaring:'Hur arter förändras och utvecklas långsamt under mycket lång tid.', synonym:'utveckling' },
+        'population': { forklaring:'Alla individer av samma art som lever på samma plats.', synonym:'bestånd' },
+        'symbios': { forklaring:'När två olika arter lever nära varandra och hjälper varandra.', synonym:'samliv' },
+        'parasit': { forklaring:'Ett djur eller en organism som lever på eller i ett annat djur och skadar det.', synonym:'snyltare' },
+        'nedbrytare': { forklaring:'Organismer som bryter ner döda växter och djur till näring i marken.', synonym:'destruent' },
+        'ryggradsdjur': { forklaring:'Djur som har ett skelett med ryggrad inuti kroppen.', motsats:'ryggradslöst djur' },
+
+        // ---- FYSIK ----
+        'kraft': { forklaring:'Något som får ett föremål att röra sig, stanna eller ändra riktning.', synonym:'påverkan' },
+        'energi': { forklaring:'Det som krävs för att kunna utföra ett arbete eller skapa rörelse.', synonym:'kraftkälla' },
+        'friktion': { forklaring:'Motståndet som uppstår när två ytor gnids mot varandra.', synonym:'motstånd' },
+        'tyngdkraft': { forklaring:'Kraften som drar allt neråt mot jorden.', synonym:'gravitation' },
+        'elektricitet': { forklaring:'En form av energi som gör att t.ex. lampor kan lysa.', synonym:'ström' },
+        'magnet': { forklaring:'Ett föremål som drar till sig järn och andra magneter.', synonym:'magnetisk kropp' },
+        'krets': { forklaring:'En sluten bana som el kan flöda genom, t.ex. i en ficklampa.', synonym:'strömkrets' },
+        'reflektion': { forklaring:'När ljus eller ljud studsar tillbaka från en yta.', synonym:'återkastning' },
+        'temperatur': { forklaring:'Ett mått på hur varmt eller kallt något är.', synonym:'värmegrad' },
+        'densitet': { forklaring:'Hur tungt något är i förhållande till hur mycket plats det tar.', synonym:'täthet' },
+        'hastighet': { forklaring:'Hur snabbt något rör sig, t.ex. mätt i km/h.', synonym:'fart' },
+        'acceleration': { forklaring:'Hur snabbt farten på något ökar eller minskar.', synonym:'fartökning' },
+        'massa': { forklaring:'Hur mycket materia något innehåller, mäts t.ex. i kilogram.', synonym:'vikt (i vardagligt tal)' },
+        'atom': { forklaring:'Den minsta byggstenen som allt material i universum består av.', synonym:'grundpartikel' },
+        'ljudvåg': { forklaring:'Det som ljud rör sig genom luften som, ungefär som ringar på vatten.', synonym:'ljudsignal' },
+
+        // ---- KEMI ----
+        'grundämne': { forklaring:'Ett ämne som bara består av en sorts atomer, t.ex. syre eller guld.', synonym:'element' },
+        'förening': { forklaring:'Ett ämne som bildas när flera grundämnen binds ihop, t.ex. vatten.', synonym:'kemisk förening' },
+        'molekyl': { forklaring:'Flera atomer som sitter ihop och bildar en enhet.', synonym:'atomklunga' },
+        'syra': { forklaring:'Ett ämne som smakar surt och kan fräta, t.ex. i citron eller batterier.', motsats:'bas' },
+        'lösning': { forklaring:'När ett ämne löser sig helt i en vätska, t.ex. socker i vatten.', synonym:'blandning' },
+        'kristall': { forklaring:'Ett fast ämne med en tydlig, regelbunden form, t.ex. is eller salt.', synonym:'kristallform' },
+        'reaktion': { forklaring:'När ämnen möts och bildar något nytt, t.ex. när järn rostar.', synonym:'kemisk process' },
+        'smältpunkt': { forklaring:'Temperaturen där ett fast ämne blir flytande.', motsats:'kokpunkt' },
+        'kokpunkt': { forklaring:'Temperaturen där en vätska börjar koka och bli gas.', motsats:'smältpunkt' },
+
+        // ---- TEKNIK ----
+        'konstruktion': { forklaring:'Något som är byggt eller sammansatt, t.ex. en bro eller maskin.', synonym:'byggnadsverk' },
+        'mekanism': { forklaring:'De rörliga delarna i en maskin som gör att den fungerar.', synonym:'mekanik' },
+        'kugghjul': { forklaring:'Ett hjul med taggar som griper i ett annat hjul för att överföra rörelse.', synonym:'tandhjul' },
+        'hävstång': { forklaring:'En stång som gör det lättare att lyfta tunga saker med hjälp av en vridpunkt.', synonym:'spak' },
+        'kretskort': { forklaring:'En skiva med elektroniska delar som styr t.ex. en dator eller leksak.', synonym:'elektronikkort' },
+        'uppfinning': { forklaring:'Något helt nytt som någon har kommit på och skapat.', synonym:'innovation' },
+        'robot': { forklaring:'En maskin som kan utföra uppgifter automatiskt, ofta styrd av ett program.', synonym:'automat' },
+        'program': { forklaring:'En lista med instruktioner som talar om för en dator vad den ska göra.', synonym:'kod' },
+
+        // ---- MATEMATIK ----
+        'decimal': { forklaring:'Ett tal med siffror efter kommatecknet, t.ex. 3,5.', synonym:'decimaltal' },
+        'primtal': { forklaring:'Ett tal som bara går jämnt att dela med 1 och sig självt.', motsats:'sammansatt tal' },
+        'multiplikation': { forklaring:'Räknesätt där man upprepar addition, t.ex. 3 grupper med 4 i varje.', synonym:'gångertal' },
+        'division': { forklaring:'Räknesätt där man delar upp ett tal i lika stora delar.', motsats:'multiplikation' },
+        'ekvation': { forklaring:'Ett matematiskt uttryck med ett likhetstecken, t.ex. x + 2 = 5.', synonym:'matematisk likhet' },
+        'koordinat': { forklaring:'Ett talpar som visar en exakt punkt i ett rutnät eller på en karta.', synonym:'positionsangivelse' },
+        'medelvärde': { forklaring:'Summan av flera tal delat med antalet tal.', synonym:'genomsnitt' },
+        'sannolikhet': { forklaring:'Hur troligt det är att något ska hända, ofta mätt i procent.', synonym:'chans' },
+        'procent': { forklaring:'En del av hundra, skrivs med tecknet %.', synonym:'hundradel' },
+        'volym': { forklaring:'Hur mycket utrymme något tar upp i tre dimensioner, mäts t.ex. i liter.', synonym:'rymd' },
+        'symmetri': { forklaring:'När en figur ser likadan ut på båda sidor om en tänkt linje.', motsats:'asymmetri' },
+        'polygon': { forklaring:'En platt figur med raka sidor, t.ex. en triangel eller femhörning.', synonym:'månghörning' },
+        'tallinje': { forklaring:'En linje där tal placeras i ordning, t.ex. från minus till plus.', synonym:'nummerlinje' },
+        'negativa tal': { forklaring:'Tal som är mindre än noll, t.ex. minus fem.', motsats:'positiva tal' },
+
+        // ---- SVENSKA ----
+        'adverb': { forklaring:'En ordklass som beskriver hur, när eller var något sker, t.ex. "snabbt".', synonym:'beskrivande ord' },
+        'pronomen': { forklaring:'Ett ord som ersätter ett namn, t.ex. "hon" eller "den".', synonym:'ersättningsord' },
+        'preposition': { forklaring:'Ett ord som visar var eller när något är, t.ex. "på" eller "under".', synonym:'lägesord' },
+        'konjunktion': { forklaring:'Ett ord som binder ihop meningar eller ord, t.ex. "och" eller "men".', synonym:'bindeord' },
+        'huvudsats': { forklaring:'En mening som kan stå ensam och betyda något komplett.', motsats:'bisats' },
+        'bisats': { forklaring:'En del av en mening som inte kan stå ensam, börjar ofta med "att" eller "som".', motsats:'huvudsats' },
+        'subjekt': { forklaring:'Den som gör något i en mening, t.ex. "hunden" i "hunden springer".', synonym:'grundled' },
+        'predikat': { forklaring:'Den del av meningen som talar om vad som görs, ofta ett verb.', synonym:'verbled' },
+        'stavelse': { forklaring:'En ljudenhet i ett ord, t.ex. har "solsken" två stavelser.', synonym:'ordled' },
+        'rim': { forklaring:'När två ord slutar likadant, t.ex. "katt" och "hatt".', synonym:'slutrim' },
+        'novell': { forklaring:'En kort skönlitterär berättelse.', synonym:'kortberättelse' },
+        'liknelse': { forklaring:'Ett sätt att jämföra två saker med ordet "som", t.ex. "stark som en björn".', synonym:'jämförelse' },
+        'dialog': { forklaring:'Ett samtal mellan två eller flera personer i en text.', synonym:'samtal' },
+        'genre': { forklaring:'En typ eller kategori av text, t.ex. deckare eller saga.', synonym:'texttyp' }
+    };
     async function fyllGotdKort(container, word){
         const bildBody = container.querySelector('.gotd-panel[data-kind="bild"] .gotd-panel-body');
         const exBody = container.querySelector('.gotd-panel[data-kind="exempel"] .gotd-panel-body');
         const forkBody = container.querySelector('.gotd-panel[data-kind="forklaring"] .gotd-panel-body');
         const synBody = container.querySelector('.gotd-panel[data-kind="synonym"] .gotd-panel-body');
+        const kant = GOTD_KANDA_ORD[(word||'').toLowerCase().trim()];
+        if(kant){
+            // Känt, kvalitetssäkrat ord - använd ALLTID den här texten, hämta aldrig live för det ordet.
+            if(bildBody) bildBody.innerHTML = `<span class='gotd-tom'>Ingen bild för det här ordet.</span>`;
+            if(forkBody) forkBody.innerHTML = gotdEsc(kant.forklaring);
+            if(exBody) exBody.innerHTML = gotdEsc('Vi läste om ordet "'+word+'" i skolan och pratade om vad det betyder.');
+            if(synBody){
+                if(kant.synonym) synBody.innerHTML = gotdEsc(kant.synonym);
+                else if(kant.motsats) synBody.innerHTML = '<em>Motsatsord:</em> ' + gotdEsc(kant.motsats);
+                else synBody.innerHTML = `<span class='gotd-tom'>Ingen synonym eller motsats hittades.</span>`;
+            }
+            saveBoardState();
+            return;
+        }
         const [wiki, ordbok] = await Promise.all([gotdWikipedia(word), gotdOrdbok(word)]);
         if(bildBody) bildBody.innerHTML = (wiki && wiki.bild) ? `<img src="${wiki.bild}" alt="${gotdEsc(word)}">` : `<span class='gotd-tom'>Ingen bild hittades.</span>`;
         const forklaringText = (ordbok && ordbok.forklaring) ? ordbok.forklaring : ((wiki && wiki.forklaring) ? wiki.forklaring : null);
         if(forkBody) forkBody.innerHTML = forklaringText ? gotdEsc(forklaringText) : `<span class='gotd-tom'>Ingen förklaring hittades.</span>`;
         if(exBody) exBody.innerHTML = gotdEsc((ordbok && ordbok.exempel) ? ordbok.exempel : ('Vi läste om ordet "'+word+'" i skolan och pratade om vad det betyder.'));
-        if(synBody) synBody.innerHTML = (ordbok && ordbok.synonym) ? gotdEsc(ordbok.synonym) : `<span class='gotd-tom'>Inga synonymer hittades.</span>`;
+        if(synBody){
+            if(ordbok && ordbok.synonym){ synBody.innerHTML = gotdEsc(ordbok.synonym); }
+            else if(ordbok && ordbok.motsats){ synBody.innerHTML = '<em>Motsatsord:</em> ' + gotdEsc(ordbok.motsats); }
+            else { synBody.innerHTML = `<span class='gotd-tom'>Ingen synonym eller motsats hittades.</span>`; }
+        }
         gotdKallhanvisning(container, word, wiki, ordbok);
         saveBoardState();
     }
