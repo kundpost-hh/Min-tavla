@@ -6010,9 +6010,9 @@
     }
     async function gotdOrdbok(ord){
         const w=(ord||'').toLowerCase().trim(); if(!w) return null;
-        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdOrdbokCacheV3')||'{}'); }catch(e){}
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('gotdOrdbokCacheV4')||'{}'); }catch(e){}
         if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
-        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdOrdbokCacheV3', JSON.stringify(cache)); }catch(e){} };
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('gotdOrdbokCacheV4', JSON.stringify(cache)); }catch(e){} };
         let j;
         try{
             const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
@@ -6021,18 +6021,26 @@
         if(!j || !j.parse || !j.parse.text){ sparaCache('saknas'); return null; }
         const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
         const clean=(txt)=> (txt||'').replace(/\[\d+\]/g,'').replace(/\s+/g,' ').trim();
-        const rubriker=[...doc.querySelectorAll('.mw-headline')];
+        // FIX: Wikipedia/Wiktionary bytte 2024-2025 HTML-struktur för alla rubriker (MediaWiki
+        // 1.44) - span med klassen "mw-headline" finns inte längre på nyare sidor, vilket gjorde
+        // att den gamla koden aldrig hittade NÅGON rubrik alls där, och därmed missade synonymer/
+        // motsatsord/förklaringar helt (t.ex. "acceleration"). Samma robusta lösning som redan
+        // fungerar i Adjektiv-widgeten: läs rubriktexten direkt från h-taggen (funkar i båda
+        // fallen) och hitta rätt "ankarnod" (wrapper-div:en om den finns, annars h-taggen själv).
+        const headingEls=[...doc.querySelectorAll('h2,h3,h4,h5,h6')];
+        const rubriker = headingEls.map(h=>({ el:h, text:(h.textContent||'').replace(/\[[^\]]*\]/g,'').trim() }));
+        const isRubrikGrans=(node)=> /^H[2-6]$/.test(node.tagName) || (node.classList && node.classList.contains('mw-heading'));
         const listaEfterRubrik=(rub)=>{
-            let node = rub.closest('h2,h3,h4,h5'); if(!node) return null;
-            let sib = node.nextElementSibling;
-            while(sib && !/^H[2-5]$/.test(sib.tagName)){
+            const ankare = rub.el.closest('.mw-heading') || rub.el;
+            let sib = ankare.nextElementSibling;
+            while(sib && !isRubrikGrans(sib)){
                 if(sib.tagName==='UL' || sib.tagName==='OL') return sib;
                 sib = sib.nextElementSibling;
             }
             return null;
         };
         let synonym=null, motsats=null, exempel=null;
-        const synRub = rubriker.find(h=>/^synonym/i.test(h.textContent||''));
+        const synRub = rubriker.find(h=>/^synonym/i.test(h.text||''));
         if(synRub){
             const lista = listaEfterRubrik(synRub);
             if(lista){
@@ -6042,7 +6050,7 @@
         }
         // Motsatsord: används som reserv i widgeten när ordet saknar synonymer (t.ex. "stor"
         // har ofta ingen riktig synonym, men ett tydligt motsatsord: "liten").
-        const motRub = rubriker.find(h=>/^(motsats|antonym)/i.test(h.textContent||''));
+        const motRub = rubriker.find(h=>/^(motsats|antonym)/i.test(h.text||''));
         if(motRub){
             const lista = listaEfterRubrik(motRub);
             if(lista){
@@ -6162,42 +6170,42 @@
 
         // ---- BIOLOGI ----
         'växtätare': { forklaring:'Ett djur som bara äter växter.', motsats:'rovdjur' },
-        'allätare': { forklaring:'Ett djur som äter både växter och andra djur.', synonym:'omnivor' },
+        'allätare': { forklaring:'Ett djur som äter både växter och andra djur.', motsats:'köttätare' },
         'näringskedja': { forklaring:'Visar vem som äter vem i naturen, från växt till rovdjur.', synonym:'födokedja' },
         'klorofyll': { forklaring:'Det gröna ämnet i växter som fångar upp solljus.', synonym:'bladgrönt' },
         'pollinering': { forklaring:'När pollen förs över till en blomma så att frukt eller frö kan bildas.', synonym:'befruktning hos växter' },
-        'bakterie': { forklaring:'En mycket liten encellig organism som finns nästan överallt.', synonym:'mikroorganism' },
-        'virus': { forklaring:'Ett mycket litet smittämne som kan göra att man blir sjuk.', synonym:'smittämne' },
+        'bakterie': { forklaring:'En mycket liten levande sak, alldeles för liten för att se, som finns nästan överallt.', synonym:'mikroorganism' },
+        'virus': { forklaring:'Något mycket litet som kan göra dig sjuk om det kommer in i kroppen.', synonym:'smittämne' },
         'skelett': { forklaring:'Alla ben i kroppen tillsammans, som ger stöd och skydd.', synonym:'benstomme' },
         'muskel': { forklaring:'En kroppsdel som drar ihop sig och gör att vi kan röra oss.', synonym:'muskelvävnad' },
         'syre': { forklaring:'En gas i luften som vi måste andas in för att leva.', synonym:'oxygen' },
         'koldioxid': { forklaring:'En gas som vi andas ut, och som växter tar upp vid fotosyntes.', synonym:'CO2' },
-        'matspjälkning': { forklaring:'Processen där kroppen bryter ner maten till näring.', synonym:'digestion' },
+        'matspjälkning': { forklaring:'Det som händer i kroppen när maten du ätit bryts ner så kroppen kan använda den.', synonym:'digestion' },
         'blodomlopp': { forklaring:'Systemet som pumpar blod runt i hela kroppen.', synonym:'cirkulation' },
         'nervsystem': { forklaring:'Systemet i kroppen som skickar signaler mellan hjärnan och kroppen.', synonym:'nervbanor' },
         'larv': { forklaring:'Ett ungt stadium hos t.ex. en fjäril, innan den blir fullvuxen.', synonym:'insektsunge' },
-        'evolution': { forklaring:'Hur arter förändras och utvecklas långsamt under mycket lång tid.', synonym:'utveckling' },
+        'evolution': { forklaring:'Hur djur och växter sakta förändras lite i taget under mycket lång tid.', synonym:'utveckling' },
         'population': { forklaring:'Alla individer av samma art som lever på samma plats.', synonym:'bestånd' },
         'symbios': { forklaring:'När två olika arter lever nära varandra och hjälper varandra.', synonym:'samliv' },
         'parasit': { forklaring:'Ett djur eller en organism som lever på eller i ett annat djur och skadar det.', synonym:'snyltare' },
-        'nedbrytare': { forklaring:'Organismer som bryter ner döda växter och djur till näring i marken.', synonym:'destruent' },
+        'nedbrytare': { forklaring:'Djur och svampar som bryter ner döda växter och djur till näring i jorden.', synonym:'destruent' },
         'ryggradsdjur': { forklaring:'Djur som har ett skelett med ryggrad inuti kroppen.', motsats:'ryggradslöst djur' },
 
         // ---- FYSIK ----
         'kraft': { forklaring:'Något som får ett föremål att röra sig, stanna eller ändra riktning.', synonym:'påverkan' },
-        'energi': { forklaring:'Det som krävs för att kunna utföra ett arbete eller skapa rörelse.', synonym:'kraftkälla' },
+        'energi': { forklaring:'Det som gör att saker kan röra sig, lysa eller bli varma.', synonym:'kraftkälla' },
         'friktion': { forklaring:'Motståndet som uppstår när två ytor gnids mot varandra.', synonym:'motstånd' },
         'tyngdkraft': { forklaring:'Kraften som drar allt neråt mot jorden.', synonym:'gravitation' },
         'elektricitet': { forklaring:'En form av energi som gör att t.ex. lampor kan lysa.', synonym:'ström' },
         'magnet': { forklaring:'Ett föremål som drar till sig järn och andra magneter.', synonym:'magnetisk kropp' },
-        'krets': { forklaring:'En sluten bana som el kan flöda genom, t.ex. i en ficklampa.', synonym:'strömkrets' },
+        'krets': { forklaring:'En rundgång som el kan gå genom, t.ex. i en ficklampa.', synonym:'strömkrets' },
         'reflektion': { forklaring:'När ljus eller ljud studsar tillbaka från en yta.', synonym:'återkastning' },
         'temperatur': { forklaring:'Ett mått på hur varmt eller kallt något är.', synonym:'värmegrad' },
-        'densitet': { forklaring:'Hur tungt något är i förhållande till hur mycket plats det tar.', synonym:'täthet' },
+        'densitet': { forklaring:'Hur tungt något är jämfört med hur mycket plats det tar.', synonym:'täthet' },
         'hastighet': { forklaring:'Hur snabbt något rör sig, t.ex. mätt i km/h.', synonym:'fart' },
         'acceleration': { forklaring:'Hur snabbt farten på något ökar eller minskar.', synonym:'fartökning' },
-        'massa': { forklaring:'Hur mycket materia något innehåller, mäts t.ex. i kilogram.', synonym:'vikt (i vardagligt tal)' },
-        'atom': { forklaring:'Den minsta byggstenen som allt material i universum består av.', synonym:'grundpartikel' },
+        'massa': { forklaring:'Ungefär detsamma som hur mycket något väger, mäts t.ex. i kilogram.', synonym:'vikt (i vardagligt tal)' },
+        'atom': { forklaring:'Den allra minsta byggstenen som allting runt omkring oss är gjort av.', synonym:'grundpartikel' },
         'ljudvåg': { forklaring:'Det som ljud rör sig genom luften som, ungefär som ringar på vatten.', synonym:'ljudsignal' },
 
         // ---- KEMI ----
@@ -6213,9 +6221,9 @@
 
         // ---- TEKNIK ----
         'konstruktion': { forklaring:'Något som är byggt eller sammansatt, t.ex. en bro eller maskin.', synonym:'byggnadsverk' },
-        'mekanism': { forklaring:'De rörliga delarna i en maskin som gör att den fungerar.', synonym:'mekanik' },
+        'mekanism': { forklaring:'De rörliga delarna inuti en maskin som gör att den fungerar.', synonym:'mekanik' },
         'kugghjul': { forklaring:'Ett hjul med taggar som griper i ett annat hjul för att överföra rörelse.', synonym:'tandhjul' },
-        'hävstång': { forklaring:'En stång som gör det lättare att lyfta tunga saker med hjälp av en vridpunkt.', synonym:'spak' },
+        'hävstång': { forklaring:'En stång som gör det lättare att lyfta tunga saker, t.ex. en gungbräda.', synonym:'spak' },
         'kretskort': { forklaring:'En skiva med elektroniska delar som styr t.ex. en dator eller leksak.', synonym:'elektronikkort' },
         'uppfinning': { forklaring:'Något helt nytt som någon har kommit på och skapat.', synonym:'innovation' },
         'robot': { forklaring:'En maskin som kan utföra uppgifter automatiskt, ofta styrd av ett program.', synonym:'automat' },
@@ -6227,11 +6235,11 @@
         'multiplikation': { forklaring:'Räknesätt där man upprepar addition, t.ex. 3 grupper med 4 i varje.', synonym:'gångertal' },
         'division': { forklaring:'Räknesätt där man delar upp ett tal i lika stora delar.', motsats:'multiplikation' },
         'ekvation': { forklaring:'Ett matematiskt uttryck med ett likhetstecken, t.ex. x + 2 = 5.', synonym:'matematisk likhet' },
-        'koordinat': { forklaring:'Ett talpar som visar en exakt punkt i ett rutnät eller på en karta.', synonym:'positionsangivelse' },
+        'koordinat': { forklaring:'Två tal som tillsammans visar exakt var en punkt är, t.ex. i ett rutnät.', synonym:'positionsangivelse' },
         'medelvärde': { forklaring:'Summan av flera tal delat med antalet tal.', synonym:'genomsnitt' },
         'sannolikhet': { forklaring:'Hur troligt det är att något ska hända, ofta mätt i procent.', synonym:'chans' },
         'procent': { forklaring:'En del av hundra, skrivs med tecknet %.', synonym:'hundradel' },
-        'volym': { forklaring:'Hur mycket utrymme något tar upp i tre dimensioner, mäts t.ex. i liter.', synonym:'rymd' },
+        'volym': { forklaring:'Hur mycket något rymmer eller tar upp för plats, mäts t.ex. i liter.', synonym:'rymd' },
         'symmetri': { forklaring:'När en figur ser likadan ut på båda sidor om en tänkt linje.', motsats:'asymmetri' },
         'polygon': { forklaring:'En platt figur med raka sidor, t.ex. en triangel eller femhörning.', synonym:'månghörning' },
         'tallinje': { forklaring:'En linje där tal placeras i ordning, t.ex. från minus till plus.', synonym:'nummerlinje' },
@@ -16539,9 +16547,9 @@
 
     // ---- BETYDELSEFÖRKLARING FÖR VERB (hämtas separat från sv.wiktionary.org) ----
     async function verbHamtaBetydelse(ord){
-        let cache={}; try{ cache=JSON.parse(localStorage.getItem('verbBetydelseCacheV1')||'{}'); }catch(e){}
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('verbBetydelseCacheV3')||'{}'); }catch(e){}
         if(cache[ord]!==undefined) return cache[ord]==='saknas' ? null : cache[ord];
-        const spara=(v)=>{ try{ cache[ord]=v; localStorage.setItem('verbBetydelseCacheV1', JSON.stringify(cache)); }catch(e){} };
+        const spara=(v)=>{ try{ cache[ord]=v; localStorage.setItem('verbBetydelseCacheV3', JSON.stringify(cache)); }catch(e){} };
         let j;
         try{
             const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(ord);
@@ -16551,18 +16559,29 @@
         const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
         const stadaTxt=(li)=>{ const d=li.cloneNode(true); d.querySelectorAll('ul,ol,sup,.reference').forEach(s=>s.remove()); return d.textContent.replace(/\s+/g,' ').trim(); };
         // Leta upp rubriken "Verb" (ordklass) och ta första numrerade betydelsen strax under den.
-        const headers=[...doc.querySelectorAll('h3,h4,h5')];
+        // FIX: Wikipedia/Wiktionary bytte 2024-2025 HTML-struktur för ALLA rubriker (MediaWiki
+        // 1.44) - rubriken paketeras numera in i en <div class="mw-heading">-wrapper tillsammans
+        // med redigera-länken, istället för att stå fritt som förut. Det gjorde att den gamla
+        // koden (som letade bland h-taggens EGNA syskon) slutade hitta innehållet för i princip
+        // alla ord samtidigt, eftersom h-taggens enda syskon numera ligger INUTI wrappern.
+        // Nu hanteras båda strukturerna: om rubriken sitter i en sådan wrapper, letar vi bland
+        // WRAPPERNS syskon istället, och stannar även om vi stöter på nästa wrapper-div.
+        const headers=[...doc.querySelectorAll('h2,h3,h4,h5')];
         const verbH=headers.find(h=>/^verb$/i.test((h.textContent||'').replace(/\[redigera\]/i,'').trim()));
         let def=null;
         if(verbH){
-            let node=verbH.nextElementSibling;
+            const wrapper = verbH.closest('div.mw-heading');
+            let node = wrapper ? wrapper.nextElementSibling : verbH.nextElementSibling;
             let steg=0;
-            while(node && !/^H[2-5]$/.test(node.tagName) && steg<8){
+            while(node && !/^H[2-5]$/.test(node.tagName) && !(node.tagName==='DIV' && /mw-heading/.test(node.className||'')) && steg<8){
                 if(node.tagName==='OL'){ const li=node.querySelector('li'); if(li) def=stadaTxt(li); break; }
                 node=node.nextElementSibling; steg++;
             }
         }
-        if(!def){ const li=doc.querySelector('ol li'); if(li) def=stadaTxt(li); }
+        // FIX: tidigare fanns en reservlösning här som plockade den FÖRSTA definitionen på hela
+        // Wiktionary-sidan om verb-avsnittet inte hittades - oavsett ordklass. Det gav helt fel
+        // betydelser för ord som har flera ordklasser (t.ex. "vara" som substantiv = handelsvara,
+        // jämfört med verbet "att vara"). Nu visas hellre ingen förklaring alls än fel ordklass.
         if(def && def.length>220) def=def.slice(0,217)+'…';
         if(def){ spara(def); return def; }
         spara('saknas'); return null;
@@ -16739,9 +16758,9 @@
     // Egen cache/nätanrop, helt fristående från subWiktionary ovan.
     async function subSynonymer(ord){
         const w=(ord||'').toLowerCase().trim(); if(!w) return null;
-        let cache={}; try{ cache=JSON.parse(localStorage.getItem('subSynCacheV3')||'{}'); }catch(e){}
+        let cache={}; try{ cache=JSON.parse(localStorage.getItem('subSynCacheV4')||'{}'); }catch(e){}
         if(cache[w]!==undefined) return cache[w]==='saknas' ? null : cache[w];
-        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('subSynCacheV3', JSON.stringify(cache)); }catch(e){} };
+        const sparaCache=(v)=>{ try{ cache[w]=v; localStorage.setItem('subSynCacheV4', JSON.stringify(cache)); }catch(e){} };
         let j;
         try{
             const url='https://sv.wiktionary.org/w/api.php?action=parse&format=json&origin=*&redirects=1&prop=text&page='+encodeURIComponent(w);
@@ -16752,28 +16771,36 @@
         const clean=(txt)=> (txt||'').replace(/\[\d+\]/g,'').replace(/\s+/g,' ').trim();
         // Begränsa till det svenska avsnittet om sidan täcker flera språk (t.ex. även tyska/danska),
         // så vi aldrig råkar plocka synonymer från fel språk.
+        // FIX: Wikipedia/Wiktionary bytte 2024-2025 HTML-struktur för alla rubriker (MediaWiki
+        // 1.44) - span med klassen "mw-headline" finns inte längre på nyare sidor. Läser numera
+        // rubriktexten direkt från h-taggen (funkar i båda fallen) och hittar rätt "ankarnod"
+        // (wrapper-div:en om den finns, annars h-taggen själv) - samma lösning som redan
+        // fungerar i Adjektiv-widgeten.
         let scopeEl = doc.body;
-        const h2headlines=[...doc.querySelectorAll('h2 .mw-headline')];
-        const svHeadline = h2headlines.find(h=>/^svenska$/i.test((h.textContent||'').trim()));
-        if(svHeadline){
-            const startH2 = svHeadline.closest('h2');
+        const isH2Grans=(node)=> node.tagName==='H2' || (node.classList && node.classList.contains('mw-heading2'));
+        const h2s=[...doc.querySelectorAll('h2')];
+        const svHeading = h2s.find(h=>/^svenska$/i.test((h.textContent||'').trim()));
+        if(svHeading){
+            const ankare = svHeading.closest('.mw-heading') || svHeading;
             const frag = document.createElement('div');
-            let sib = startH2 ? startH2.nextElementSibling : null;
-            while(sib && sib.tagName!=='H2'){ frag.appendChild(sib.cloneNode(true)); sib = sib.nextElementSibling; }
+            let sib = ankare.nextElementSibling;
+            while(sib && !isH2Grans(sib)){ frag.appendChild(sib.cloneNode(true)); sib = sib.nextElementSibling; }
             scopeEl = frag;
         }
         // 1) Egen rubrik "Synonymer" (äldre/mer utförliga uppslag)
-        const rubriker=[...scopeEl.querySelectorAll('.mw-headline')];
+        const headingEls=[...scopeEl.querySelectorAll('h2,h3,h4,h5,h6')];
+        const rubriker = headingEls.map(h=>({ el:h, text:(h.textContent||'').replace(/\[[^\]]*\]/g,'').trim() }));
+        const isRubrikGrans=(node)=> /^H[2-6]$/.test(node.tagName) || (node.classList && node.classList.contains('mw-heading'));
         const listaEfterRubrik=(rub)=>{
-            let node = rub.closest('h2,h3,h4,h5'); if(!node) return null;
-            let sib = node.nextElementSibling;
-            while(sib && !/^H[2-5]$/.test(sib.tagName)){
+            const ankare = rub.el.closest('.mw-heading') || rub.el;
+            let sib = ankare.nextElementSibling;
+            while(sib && !isRubrikGrans(sib)){
                 if(sib.tagName==='UL' || sib.tagName==='OL') return sib;
                 sib = sib.nextElementSibling;
             }
             return null;
         };
-        const synRub = rubriker.find(h=>/^synonym/i.test(h.textContent||''));
+        const synRub = rubriker.find(h=>/^synonym/i.test(h.text||''));
         if(synRub){
             const lista = listaEfterRubrik(synRub);
             if(lista){
@@ -16789,7 +16816,7 @@
             if(items.length){ const res={ typ:'synonymer', varde: items.slice(0,2) }; sparaCache(res); return res; }
         }
         // 3) Inga riktiga synonymer hittades – visa istället en kort förklaring ur ordets första betydelse
-        const substRub = rubriker.find(h=>/^substantiv/i.test(h.textContent||''));
+        const substRub = rubriker.find(h=>/^substantiv/i.test(h.text||''));
         let defLista = substRub ? listaEfterRubrik(substRub) : null;
         if(!defLista) defLista = scopeEl.querySelector('ol');
         if(defLista){
