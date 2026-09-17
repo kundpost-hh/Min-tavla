@@ -61,6 +61,15 @@
     <!-- NYTT: manuell "hämta senaste version"-knapp, för den som vill tvinga fram en uppdatering
          direkt (t.ex. precis efter att man bytt till en annan dator) utan att vänta på live-synken. -->
     <button id="manual-refresh-btn" onclick="manualRefreshFromCloud()" title="Hämta senaste sparade version från molnet" style="display:none;align-items:center;justify-content:center;position:fixed;bottom:14px;left:14px;z-index:9999;background:#1a73e8;color:#fff;border:none;border-radius:50%;width:42px;height:42px;font-size:18px;box-shadow:0 2px 10px rgba(0,0,0,0.16);cursor:pointer;">🔄</button>
+    <style>
+        /* Knappen är osynlig (opacity:0) tills man för musen över dess hörn - visas då mjukt.
+           Måste sättas här (inte som inline style="") eftersom en inline-opacity annars alltid
+           skulle vinna över :hover-regeln nedan, oavsett CSS-specificitet.
+           display:none/flex styrs fortfarande separat av JS (updateManualRefreshButtonVisibility)
+           för att bara finnas där överhuvudtaget när man är inloggad och inte i gästläge. */
+        #manual-refresh-btn { opacity:0; transition:opacity .18s ease; }
+        #manual-refresh-btn:hover, #manual-refresh-btn:focus-visible { opacity:1; }
+    </style>
     <div id="guest-mode-badge" style="display:none;position:fixed;bottom:14px;right:14px;z-index:9999;background:#1d1d1f;color:#fff;border-radius:20px;padding:7px 16px;font-size:12.5px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,0.16);">👀 Gästläge - inget sparas</div>
     <div id="custom-confirm-overlay" style="display: none;">
         <div class="custom-confirm-box">
