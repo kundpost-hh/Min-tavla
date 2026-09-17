@@ -50,6 +50,17 @@
 <div id="cb-app-wrapper" class="no-watermark ej-admin viewer-mode">
     <div id="watermark"></div>
     <div id="cloud-sync-status" class="cloud-sync-status" style="display:none;"></div>
+    <!-- NYTT: live-synk mellan datorer (se startBoardLiveSync/_writeBoardToCloud i skriptet).
+         Bannern visas ENDAST när en annan dator hunnit spara en nyare version MEDAN den här
+         enheten själv hade egna, ännu osparade ändringar på gång - då skrivs ingenting över
+         automatiskt (för att inte radera något), utan man väljer själv att hämta den nya versionen. -->
+    <div id="remote-update-banner" style="display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9998;background:#1a73e8;color:#fff;border-radius:24px;padding:10px 10px 10px 18px;font-size:13px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.2);align-items:center;gap:12px;max-width:90vw;">
+        <span>☁️ En annan dator har sparat nya ändringar</span>
+        <button id="remote-update-refresh-btn" onclick="applyPendingRemoteBoard()" style="background:#fff;color:#1a73e8;border:none;border-radius:16px;padding:7px 14px;font-weight:800;font-size:12.5px;cursor:pointer;white-space:nowrap;">Uppdatera nu</button>
+    </div>
+    <!-- NYTT: manuell "hämta senaste version"-knapp, för den som vill tvinga fram en uppdatering
+         direkt (t.ex. precis efter att man bytt till en annan dator) utan att vänta på live-synken. -->
+    <button id="manual-refresh-btn" onclick="manualRefreshFromCloud()" title="Hämta senaste sparade version från molnet" style="display:none;align-items:center;justify-content:center;position:fixed;bottom:14px;left:14px;z-index:9999;background:#1a73e8;color:#fff;border:none;border-radius:50%;width:42px;height:42px;font-size:18px;box-shadow:0 2px 10px rgba(0,0,0,0.16);cursor:pointer;">🔄</button>
     <div id="guest-mode-badge" style="display:none;position:fixed;bottom:14px;right:14px;z-index:9999;background:#1d1d1f;color:#fff;border-radius:20px;padding:7px 16px;font-size:12.5px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,0.16);">👀 Gästläge - inget sparas</div>
     <div id="custom-confirm-overlay" style="display: none;">
         <div class="custom-confirm-box">
@@ -3653,6 +3664,110 @@
         // toolbarOrder/toolPocketLayout hanteras inte längre här - se kommentar i cloudGatherData().
     }
 
+    /* =========================================================================================
+       LIVE-SYNK MELLAN DATORER + SKYDD MOT ATT RÅKA SKRIVA ÖVER EN NYARE VERSION
+       -----------------------------------------------------------------------------------------
+       Tidigare hämtades tavlan bara EN gång (vid inloggning) och sparades sedan blint - vem som
+       sparade sist "vann" alltid, oavsett om en annan dator hunnit spara en nyare version
+       emellan. Det gav två problem: (1) en dator som redan var öppen såg aldrig ändringar som
+       gjordes på en annan dator förrän man laddade om sidan, och (2) i värsta fall kunde en gammal,
+       öppen flik skriva över och radera nyss gjort arbete på en annan enhet helt utan varning.
+
+       _lastKnownCloudUpdatedAt håller reda på den 'updatedAt' vi VET är sparad i molnet just nu
+       (satt vid inloggning, vid varje egen lyckad sparning, och när vi tar emot en nyare version
+       från en annan enhet). Innan vi sparar jämför vi mot den i en transaktion (_writeBoardToCloud)
+       - om molnet hunnit bli nyare än det vi senast visste om, avbryts VÅR skrivning i stället för
+       att skriva över, och den nyare versionen visas istället (banner om vi hade egna osparade
+       ändringar på gång, annars ritas den om direkt). Samma 'updatedAt' används av en live-lyssnare
+       (startBoardLiveSync) som automatiskt upptäcker ändringar från andra enheter medan appen är
+       öppen, samt av en manuell "Hämta senaste version"-knapp för den som inte vill vänta.
+       ========================================================================================= */
+    let _lastKnownCloudUpdatedAt = 0;
+    let _boardLiveUnsub = null;
+    let _pendingRemoteBoardData = null; // väntande nyare molnversion - visas som banner tills användaren väljer att hämta den
+
+    function _hasUnsavedLocalWork(){ return !!cloudSyncTimer || _pendingCloudWrites > 0; }
+
+    function showRemoteUpdateBanner(show){
+        const el = document.getElementById('remote-update-banner');
+        if(el) el.style.display = show ? 'flex' : 'none';
+    }
+
+    // Tar emot och ritar upp en nyare molnversion (byggd om till widgetar på riktigt via initBoard()).
+    function _applyRemoteBoardData(d){
+        if(!d) return;
+        cloudApplyData(d);
+        _lastKnownCloudUpdatedAt = (typeof d.updatedAt === 'number') ? d.updatedAt : Date.now();
+        _pendingRemoteBoardData = null;
+        showRemoteUpdateBanner(false);
+        if(typeof initBoard === 'function') initBoard();
+    }
+    window.applyPendingRemoteBoard = function(){
+        if(_pendingRemoteBoardData) _applyRemoteBoardData(_pendingRemoteBoardData);
+    };
+
+    // Startar en LEVANDE lyssnare på den inloggade användarens tavla, så att ändringar som en
+    // ANNAN dator sparar dyker upp här automatiskt - utan att man behöver ladda om sidan.
+    // Skriver ALDRIG över egna, ännu osparade ändringar automatiskt (se _hasUnsavedLocalWork).
+    function startBoardLiveSync(){
+        if (!window.cloudReady || !fbDB || !currentUser || window.isGuestMode) return;
+        if (_boardLiveUnsub) { try{ _boardLiveUnsub(); }catch(e){} _boardLiveUnsub = null; }
+        try {
+            _boardLiveUnsub = fbDB.collection('boards').doc(emailKey(currentUser)).onSnapshot(snap => {
+                if (!snap.exists) return;
+                if (snap.metadata.hasPendingWrites) return; // ekot av vår egen, ännu obekräftade skrivning - ignorera
+                const d = snap.data();
+                if (!d || typeof d.updatedAt !== 'number') return;
+                if (d.updatedAt <= _lastKnownCloudUpdatedAt) return; // inget nytt (eller ekot av det vi själva just sparade)
+                if (_hasUnsavedLocalWork()){
+                    // Vi har egna ändringar på väg just nu - vänta med att rita om, visa en banner istället
+                    // så man själv väljer när det är läge att hämta den nya versionen.
+                    _pendingRemoteBoardData = d;
+                    showRemoteUpdateBanner(true);
+                } else {
+                    _applyRemoteBoardData(d);
+                }
+            }, err => { console.warn('[MinTavla] Live-synk av tavlan kunde inte startas:', err); });
+        } catch(e){ console.warn('[MinTavla] Live-synk av tavlan kunde inte startas:', e); }
+    }
+    function stopBoardLiveSync(){
+        if (_boardLiveUnsub){ try{ _boardLiveUnsub(); }catch(e){} _boardLiveUnsub = null; }
+        _pendingRemoteBoardData = null; showRemoteUpdateBanner(false);
+    }
+
+    // Manuell "Hämta senaste version"-knapp - för den som vill tvinga fram en uppdatering direkt
+    // (t.ex. precis efter att man bytt till en annan dator) utan att vänta på live-lyssnaren.
+    window.manualRefreshFromCloud = async function(){
+        if (!window.cloudReady || !fbDB || !currentUser || window.isGuestMode) return;
+        const btn = document.getElementById('manual-refresh-btn');
+        if(btn) btn.style.pointerEvents = 'none';
+        try {
+            const snap = await fbDB.collection('boards').doc(emailKey(currentUser)).get();
+            if (snap.exists){
+                const d = snap.data();
+                if (typeof d.updatedAt === 'number' && d.updatedAt <= _lastKnownCloudUpdatedAt){
+                    customAlert('Du har redan den senaste versionen.', '✅');
+                } else if (_hasUnsavedLocalWork()){
+                    customConfirm('Du har egna osparade ändringar på gång just nu. Hämtar du den senaste molnversionen nu skrivs dina egna ändringar över. Fortsätta ändå?', () => _applyRemoteBoardData(d));
+                } else {
+                    _applyRemoteBoardData(d);
+                    customAlert('Tavlan är uppdaterad till senaste version.', '☁️');
+                }
+            } else {
+                customAlert('Ingen sparad tavla hittades i molnet ännu.', 'ℹ️');
+            }
+        } catch(err){
+            console.warn('[MinTavla] Manuell uppdatering misslyckades:', err);
+            customAlert('Kunde inte hämta senaste version just nu. Kontrollera internetuppkopplingen.', '⚠️');
+        } finally {
+            if(btn) btn.style.pointerEvents = '';
+        }
+    };
+    function updateManualRefreshButtonVisibility(){
+        const btn = document.getElementById('manual-refresh-btn');
+        if(btn) btn.style.display = (window.cloudReady && currentUser && !window.isGuestMode) ? 'flex' : 'none';
+    }
+
     // Gör om e-post till en säker dokument-nyckel (Firestore tillåter inte vissa tecken)
     function emailKey(email){ return (email||'').toLowerCase().replace(/[^a-z0-9]/g, '_'); }
 
@@ -3683,7 +3798,13 @@
         if (!window.cloudReady || !user) return;
         try {
             const snap = await fbDB.collection('boards').doc(emailKey(user)).get();
-            if (snap.exists) cloudApplyData(snap.data());
+            if (snap.exists){
+                const d = snap.data();
+                cloudApplyData(d);
+                // NYTT: minns vilken molnversion vi just läste in, så framtida sparningar kan
+                // upptäcka om en annan dator hunnit spara något nyare (se _writeBoardToCloud).
+                _lastKnownCloudUpdatedAt = (typeof d.updatedAt === 'number') ? d.updatedAt : Date.now();
+            }
         } catch(err){ console.warn('[MinTavla] Kunde inte hämta från molnet:', err); }
     }
 
@@ -3699,21 +3820,55 @@
         if(state==='saving'){ el.className='cloud-sync-status status-saving'; el.textContent='⏳ Sparar…'; }
         else if(state==='saved'){ el.className='cloud-sync-status status-saved'; el.textContent='☁️ Sparat'; _cloudStatusHideTimer=setTimeout(()=>{ el.style.display='none'; }, 2500); }
         else if(state==='error'){ el.className='cloud-sync-status status-error'; el.textContent='⚠️ Kunde inte spara i molnet'; }
+        else if(state==='conflict'){ el.className='cloud-sync-status status-error'; el.textContent='⚠️ Nyare version finns - uppdatera'; _cloudStatusHideTimer=setTimeout(()=>{ el.style.display='none'; }, 6000); }
     }
     let _pendingCloudWrites = 0; // FIX: räknar PÅGÅENDE nätverksbegäranden (inte bara väntande timers),
     // så vi kan varna innan sidan stängs/laddas om medan en sparning fortfarande är på väg till molnet.
+
+    // NYTT: gemensam skrivfunktion med skydd mot att av misstag skriva över en NYARE version som en
+    // annan dator hunnit spara i molnet emellan (samma princip som redan användes för den delade
+    // verktygsordningen i startSharedToolbarSync, men nu tillämpad på själva tavlan). Görs som en
+    // Firestore-transaktion: läser molnets 'updatedAt' och jämför mot _lastKnownCloudUpdatedAt -
+    // bara om vår kopia faktiskt är minst lika ny som molnets skrivs våra ändringar igenom. Är
+    // molnet nyare avbryts skrivningen MEDVETET (så vårt eget, ev. inaktuella state inte tar bort
+    // det som redan sparats någon annanstans), och den nyare versionen visas istället.
+    async function _writeBoardToCloud(){
+        if (!window.cloudReady || !currentUser || window.isGuestMode) return;
+        const payload = cloudGatherData();
+        const ref = fbDB.collection('boards').doc(emailKey(currentUser));
+        _pendingCloudWrites++;
+        try {
+            const result = await fbDB.runTransaction(async (tx) => {
+                const snap = await tx.get(ref);
+                const remoteUpdatedAt = (snap.exists && typeof snap.data().updatedAt === 'number') ? snap.data().updatedAt : 0;
+                if (remoteUpdatedAt > _lastKnownCloudUpdatedAt){
+                    return { conflict: true, remoteData: snap.data() };
+                }
+                const now = Date.now();
+                payload.updatedAt = now;
+                tx.set(ref, payload, { merge: true });
+                return { conflict: false, updatedAt: now };
+            });
+            if (result.conflict){
+                setCloudSyncStatus('conflict');
+                _pendingRemoteBoardData = result.remoteData;
+                showRemoteUpdateBanner(true);
+            } else {
+                _lastKnownCloudUpdatedAt = result.updatedAt;
+                setCloudSyncStatus('saved');
+            }
+        } catch(err){
+            console.warn('[MinTavla] Molnsparning misslyckades:', err);
+            setCloudSyncStatus('error');
+        } finally {
+            _pendingCloudWrites--;
+        }
+    }
     function syncToCloud(){
         if (!window.cloudReady || !currentUser || window.isGuestMode) return;
         clearTimeout(cloudSyncTimer);
         setCloudSyncStatus('saving');
-        cloudSyncTimer = setTimeout(()=>{
-            const payload = cloudGatherData(); payload.updatedAt = Date.now();
-            _pendingCloudWrites++;
-            fbDB.collection('boards').doc(emailKey(currentUser)).set(payload, { merge:true })
-                .then(()=> setCloudSyncStatus('saved'))
-                .catch(err => { console.warn('[MinTavla] Molnsparning misslyckades:', err); setCloudSyncStatus('error'); })
-                .finally(()=>{ _pendingCloudWrites--; });
-        }, 1200);
+        cloudSyncTimer = setTimeout(()=>{ cloudSyncTimer = null; _writeBoardToCloud(); }, 1200);
     }
     // FIX: direkt (odämpad) molnsparning – för sällanintraffande, medvetna ändringar
     // som att dra om verktygsordningen. Här finns ingen risk för att spamma Firestore
@@ -3721,14 +3876,9 @@
     // riskera att en snabb sidladdning hinner före den vanliga 1,2s-fördröjningen.
     function syncToCloudImmediate(){
         if (!window.cloudReady || !currentUser || window.isGuestMode) return Promise.resolve();
-        clearTimeout(cloudSyncTimer);
+        clearTimeout(cloudSyncTimer); cloudSyncTimer = null;
         setCloudSyncStatus('saving');
-        const payload = cloudGatherData(); payload.updatedAt = Date.now();
-        _pendingCloudWrites++;
-        return fbDB.collection('boards').doc(emailKey(currentUser)).set(payload, { merge:true })
-            .then(()=> setCloudSyncStatus('saved'))
-            .catch(err => { console.warn('[MinTavla] Molnsparning misslyckades:', err); setCloudSyncStatus('error'); })
-            .finally(()=>{ _pendingCloudWrites--; });
+        return _writeBoardToCloud();
     }
 
     // ---- ADMINENS VERKTYGSLÅDA GÄLLER ALLA ----
@@ -4076,6 +4226,8 @@
             migrateOldLists(currentUser); initBoard();
             updateAdminButton();
             startSharedToolbarSync(); // adminens ordning i verktygslådan gäller alla användare
+            startBoardLiveSync(); // NYTT: håll tavlan synkad live mellan öppna datorer/flikar
+            updateManualRefreshButtonVisibility();
             _boardInitializedForUser = email;
         } catch(err){
             // FIX: om något oväntat går fel här, visa knappen igen istället för att tyst lämna
@@ -4420,6 +4572,7 @@
         document.getElementById('login-overlay').style.display = 'none';
         if(typeof hideBootCover==='function') hideBootCover();
         migrateOldLists(currentUser); initBoard();
+        updateManualRefreshButtonVisibility(); // gömd i lokalt läge - ingen molnkoppling finns
     }
     // Öppen gästdemo (ONLINE-versionen): ingen inloggning krävs, och absolut inget sparas - varken
     // lokalt eller i molnet. Varje besök börjar helt blankt. currentUser sätts till ett SLUMPAT
@@ -4464,6 +4617,7 @@
         // kvoten och kostar i praktiken ingenting oavsett hur många som provar gästläget.
         if (typeof startSharedToolbarSync === 'function'){ try { await startSharedToolbarSync(); } catch(e){} }
         initBoard();
+        updateManualRefreshButtonVisibility(); // gömd i gästläge - inget sparas eller synkas
     }
     window.enterGuestMode = enterGuestMode;
     // ---- Gästläge: minnesbaserad "låtsas-lagring" ----
@@ -4555,7 +4709,10 @@
             window.isGuestMode = false;
             const guestBadge = document.getElementById('guest-mode-badge'); if(guestBadge) guestBadge.style.display = 'none';
             if (_sharedToolbarUnsub){ try{ _sharedToolbarUnsub(); }catch(e){} _sharedToolbarUnsub = null; }
+            stopBoardLiveSync(); // NYTT: sluta lyssna på den utloggade användarens tavla
+            _lastKnownCloudUpdatedAt = 0;
             currentUser = null; localStorage.removeItem('classboardzUser');
+            updateManualRefreshButtonVisibility();
             document.getElementById('canvas-container-v6').innerHTML = ''; pagesListV6 = [];
             updateAdminButton();
             if (wasGuest){
