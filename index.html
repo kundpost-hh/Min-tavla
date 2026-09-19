@@ -71,6 +71,19 @@
         #manual-refresh-btn:hover, #manual-refresh-btn:focus-visible { opacity:1; }
     </style>
     <div id="guest-mode-badge" style="display:none;position:fixed;bottom:14px;right:14px;z-index:9999;background:#1d1d1f;color:#fff;border-radius:20px;padding:7px 16px;font-size:12.5px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,0.16);">👀 Gästläge - inget sparas</div>
+    <!-- NYTT: visas ENDAST om den allra första molnhämtningen vid inloggning misslyckas trots
+         flera automatiska omförsök (se syncFromCloudWithRetry). Utan den här varningen skulle
+         appen annars tyst fortsätta med en TOM lokal tavla vid t.ex. ett kort nätverksstrul -
+         vilket ser ut exakt som att "allt raderats", trots att molnet har datan orörd kvar. -->
+    <div id="cloud-fetch-error-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:2147483000;align-items:center;justify-content:center;">
+        <div style="background:#fff;padding:26px 24px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);text-align:center;max-width:320px;width:90%;">
+            <div style="font-size:34px;margin-bottom:8px;">☁️⚠️</div>
+            <div style="font-size:15.5px;font-weight:700;color:#1d1d1f;margin-bottom:6px;">Kunde inte hämta din tavla från molnet</div>
+            <div style="font-size:13px;color:#6e6e73;margin-bottom:18px;line-height:1.4;">Ingenting är raderat - din data ligger kvar sparad i molnet precis som förut. Kontrollera internetanslutningen och försök igen.</div>
+            <button id="cloud-fetch-retry-btn" onclick="_retryCloudFetchAfterLogin()" style="width:100%;padding:11px 0;border:none;border-radius:10px;background:#1a73e8;color:#fff;font-weight:800;font-size:14px;cursor:pointer;margin-bottom:8px;">🔄 Försök igen</button>
+            <button id="cloud-fetch-continue-btn" onclick="_continueOfflineAfterFailedFetch()" style="width:100%;padding:9px 0;border:none;border-radius:10px;background:#e5e5ea;color:#333;font-weight:700;font-size:12.5px;cursor:pointer;">Fortsätt ändå (sparar inget förrän det lyckas)</button>
+        </div>
+    </div>
     <div id="custom-confirm-overlay" style="display: none;">
         <div class="custom-confirm-box">
             <div id="custom-confirm-text" class="custom-confirm-text">Är du säker?</div>
@@ -3694,6 +3707,11 @@
     let _lastKnownCloudUpdatedAt = 0;
     let _boardLiveUnsub = null;
     let _pendingRemoteBoardData = null; // väntande nyare molnversion - visas som banner tills användaren väljer att hämta den
+    // NYTT: satt till true FRÅN inloggningens start tills den första molnhämtningen lyckats.
+    // Så länge den är true vägrar _writeBoardToCloud spara NÅGOT till molnet - annars skulle en
+    // (eventuellt tom) lokal vy, uppbyggd innan vi ens vet vad molnet innehåller, kunna skriva
+    // över riktig data om användaren hinner göra en ändring innan hämtningen är klar.
+    let _cloudSyncBlocked = false;
 
     function _hasUnsavedLocalWork(){ return !!cloudSyncTimer || _pendingCloudWrites > 0; }
 
@@ -3757,8 +3775,9 @@
                 if (typeof d.updatedAt === 'number' && d.updatedAt <= _lastKnownCloudUpdatedAt){
                     customAlert('Du har redan den senaste versionen.', '✅');
                 } else if (_hasUnsavedLocalWork()){
-                    customConfirm('Du har egna osparade ändringar på gång just nu. Hämtar du den senaste molnversionen nu skrivs dina egna ändringar över. Fortsätta ändå?', () => _applyRemoteBoardData(d));
+                    customConfirm('Du har egna osparade ändringar på gång just nu. Hämtar du den senaste molnversionen nu skrivs dina egna ändringar över. Fortsätta ändå?', () => { _cloudSyncBlocked = false; _applyRemoteBoardData(d); });
                 } else {
+                    _cloudSyncBlocked = false;
                     _applyRemoteBoardData(d);
                     customAlert('Tavlan är uppdaterad till senaste version.', '☁️');
                 }
@@ -3776,6 +3795,44 @@
         const btn = document.getElementById('manual-refresh-btn');
         if(btn) btn.style.display = (window.cloudReady && currentUser && !window.isGuestMode) ? 'flex' : 'none';
     }
+
+    // ---- NYTT: hantering av misslyckad molnhämtning vid inloggning (se handleSignedIn) ----
+    let _pendingSignedInUser = null; // e-post att försöka hämta igen om "Försök igen" trycks
+    function showCloudFetchErrorOverlay(show){
+        const el = document.getElementById('cloud-fetch-error-overlay');
+        if(el) el.style.display = show ? 'flex' : 'none';
+    }
+    // Sista steget av inloggningen - körs efter en LYCKAD (eller medvetet överhoppad) molnhämtning.
+    async function _finishSignInAfterCloudFetch(email){
+        migrateLocalLayoutIfNeeded(); // fix: ärv den lokala verktygs-ordningen om kontot ännu inte har någon egen
+        document.getElementById('login-overlay').style.display = 'none';
+        if(typeof hideBootCover==='function') hideBootCover();
+        migrateOldLists(currentUser); initBoard();
+        updateAdminButton();
+        startSharedToolbarSync(); // adminens ordning i verktygslådan gäller alla användare
+        startBoardLiveSync(); // håll tavlan synkad live mellan öppna datorer/flikar
+        updateManualRefreshButtonVisibility();
+        _boardInitializedForUser = email;
+    }
+    window._retryCloudFetchAfterLogin = async function(){
+        const btn = document.getElementById('cloud-fetch-retry-btn');
+        if(btn){ btn.disabled = true; btn.textContent = 'Försöker…'; }
+        const ok = await syncFromCloudWithRetry(_pendingSignedInUser, 2);
+        if(btn){ btn.disabled = false; btn.textContent = '🔄 Försök igen'; }
+        if (ok){
+            _cloudSyncBlocked = false;
+            showCloudFetchErrorOverlay(false);
+            await _finishSignInAfterCloudFetch(_pendingSignedInUser);
+        }
+        // Misslyckas det igen ligger overlayen kvar - användaren kan trycka på nytt.
+    };
+    window._continueOfflineAfterFailedFetch = async function(){
+        // Fortsätter med det som redan finns lokalt (kan vara tomt på en ny enhet) - men
+        // _cloudSyncBlocked förblir true, så INGET skrivs till molnet förrän en hämtning väl
+        // lyckas (t.ex. via 🔄-knappen senare) - det skyddar den riktiga molndatan under tiden.
+        showCloudFetchErrorOverlay(false);
+        await _finishSignInAfterCloudFetch(_pendingSignedInUser);
+    };
 
     // Gör om e-post till en säker dokument-nyckel (Firestore tillåter inte vissa tecken)
     function emailKey(email){ return (email||'').toLowerCase().replace(/[^a-z0-9]/g, '_'); }
@@ -3804,7 +3861,10 @@
 
     // Hämta ner användarens data från molnet vid inloggning
     async function syncFromCloud(user){
-        if (!window.cloudReady || !user) return;
+        // Returnerar true vid lyckad hämtning (även om dokumentet ännu inte finns, t.ex. ny
+        // användare) och false vid ETT nätverks-/molnfel - så att anroparen (se
+        // syncFromCloudWithRetry) kan skilja på "tomt konto" och "kunde inte nå molnet".
+        if (!window.cloudReady || !user) return true;
         try {
             const snap = await fbDB.collection('boards').doc(emailKey(user)).get();
             if (snap.exists){
@@ -3814,7 +3874,22 @@
                 // upptäcka om en annan dator hunnit spara något nyare (se _writeBoardToCloud).
                 _lastKnownCloudUpdatedAt = (typeof d.updatedAt === 'number') ? d.updatedAt : Date.now();
             }
-        } catch(err){ console.warn('[MinTavla] Kunde inte hämta från molnet:', err); }
+            return true;
+        } catch(err){ console.warn('[MinTavla] Kunde inte hämta från molnet:', err); return false; }
+    }
+
+    // NYTT: en enstaka kort nätverksstrul ska inte kunna få en persons hela tavla att se
+    // "raderad" ut. Försöker upp till `attempts` gånger (med stigande paus) innan vi ger upp
+    // och låter handleSignedIn visa ett tydligt felmeddelande i stället för att tyst fortsätta
+    // med en tom lokal tavla.
+    async function syncFromCloudWithRetry(user, attempts){
+        attempts = attempts || 3;
+        for (let i = 0; i < attempts; i++){
+            const ok = await syncFromCloud(user);
+            if (ok) return true;
+            if (i < attempts - 1) await new Promise(r => setTimeout(r, 900 * (i + 1)));
+        }
+        return false;
     }
 
     // Spara upp till molnet (fördröjt så vi inte skickar vid varje tangenttryck)
@@ -3843,6 +3918,7 @@
     // det som redan sparats någon annanstans), och den nyare versionen visas istället.
     async function _writeBoardToCloud(){
         if (!window.cloudReady || !currentUser || window.isGuestMode) return;
+        if (_cloudSyncBlocked) { console.warn('[MinTavla] Molnsparning väntar - inledande hämtning har inte lyckats än.'); return; }
         const payload = cloudGatherData();
         const ref = fbDB.collection('boards').doc(emailKey(currentUser));
         _pendingCloudWrites++;
@@ -4228,16 +4304,19 @@
             localStorage.setItem('classboardzUser', currentUser);
             applyAdminUIMode();
             await registerUser(email, name);
-            await syncFromCloud(email);
-            migrateLocalLayoutIfNeeded(); // fix: ärv den lokala verktygs-ordningen om kontot ännu inte har någon egen
-            document.getElementById('login-overlay').style.display = 'none';
-            if(typeof hideBootCover==='function') hideBootCover();
-            migrateOldLists(currentUser); initBoard();
-            updateAdminButton();
-            startSharedToolbarSync(); // adminens ordning i verktygslådan gäller alla användare
-            startBoardLiveSync(); // NYTT: håll tavlan synkad live mellan öppna datorer/flikar
-            updateManualRefreshButtonVisibility();
-            _boardInitializedForUser = email;
+            // NYTT: blockera all molnsparning och försök hämta tavlan upp till 3 gånger innan vi
+            // ger upp - se kommentaren ovanför _cloudSyncBlocked och syncFromCloudWithRetry.
+            _cloudSyncBlocked = true;
+            _pendingSignedInUser = email;
+            const cloudFetchOk = await syncFromCloudWithRetry(email, 3);
+            if (!cloudFetchOk){
+                // Misslyckades trots flera försök - visa ett tydligt val istället för att tyst
+                // fortsätta med en (möjligen tom) lokal tavla som om ingenting hänt.
+                showCloudFetchErrorOverlay(true);
+                return;
+            }
+            _cloudSyncBlocked = false;
+            await _finishSignInAfterCloudFetch(email);
         } catch(err){
             // FIX: om något oväntat går fel här, visa knappen igen istället för att tyst lämna
             // laddningsvyn ("Loggar in, vänta...") stående för evigt utan att man kan göra något.
