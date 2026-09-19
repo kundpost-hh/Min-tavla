@@ -2228,6 +2228,18 @@
     .ai-lek-ab-title { font-size:16px; font-weight:800; margin-bottom:12px; outline:none; }
     .ai-lek-ab-title:focus { background:#fafafd; border-radius:6px; }
     .ai-lek-empty-tab { padding:6px 2px; }
+    .ai-lek-head-edit { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:8px; }
+    .ai-lek-meta-inp { border:1.5px solid transparent; background:#f5f5f7; border-radius:7px; padding:4px 8px; font-size:12px; font-weight:700; color:#3a3a3c; outline:none; font-family:inherit; max-width:160px; }
+    .ai-lek-meta-inp:hover, .ai-lek-meta-inp:focus { border-color:#d7d9fb; background:#fff; }
+    .ai-lek-meta-tidwrap { display:flex; align-items:center; gap:3px; }
+    .ai-lek-meta-inp-tid { width:52px; }
+    .ai-lek-meta-unit { font-size:11px; color:#8e8e93; font-weight:700; }
+    .ai-lek-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+    .ai-lek-card-del { flex:0 0 auto; background:none; border:none; color:#ff3b30; font-size:14px; cursor:pointer; font-weight:800; padding:0 2px; opacity:.7; }
+    .ai-lek-card-del:hover { opacity:1; }
+    .ai-lek-ab-add-btn { width:100%; margin-top:4px; }
+    .ai-lek-pres-ta { width:100%; min-height:220px; border:1.5px solid #e0e0e6; border-radius:12px; padding:12px; font-size:12.5px; line-height:1.5; font-family:inherit; resize:vertical; box-sizing:border-box; white-space:pre-wrap; outline:none; }
+    .ai-lek-pres-ta:focus { border-color:#7048e8; }
     .kw-gridwrap { width:100%; overflow-x:hidden; overflow-y:visible; margin-bottom:10px; display:flex; justify-content:center; }
     .kw-grid { display:grid; gap:2px; justify-content:center; margin:0 auto; }
     .kw-cell { width:var(--kw-cell); height:var(--kw-cell); position:relative; background:#fff; border:1.5px solid #9aa0aa; box-sizing:border-box; border-radius:3px; }
@@ -28700,13 +28712,33 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         } catch(e){ console.warn('[MinTavla] PDF-export av arbetsbladet misslyckades:', e); customAlert('Kunde inte skapa PDF just nu. Försök igen.', '⚠️'); }
     }
 
+    // ---- PRESENTATION (flik i AI-LEKTION): bygger en färdig, kopierbar prompt att klistra in i
+    // Gemini (t.ex. sidopanelen i Google Presentationer, eller gemini.google.com) för att skapa en
+    // presentation med bildstöd utifrån den redan genererade lektionen. Ingen egen AI-anrop krävs
+    // här - det är bara textihopsättning - så tabben fungerar direkt utan extra API-nyckel/dialog. ----
+    function buildAiPresentationPrompt(f, lesson){
+        lesson = lesson || {};
+        return "Skapa en presentation i Google Presentationer på SVENSKA om lektionen nedan, med 7-9 bilder och BILDSTÖD (en passande bild eller illustration) till varje bild. Anpassa språk och bilder efter årskursen. Håll texten på varje bild kort och tydlig (punktlista) - innehållet nedan är bakgrundsinformation åt dig, inte text som ska klistras in ordagrant.\n\n"
+            + "Ämne: " + f.amne + "\n"
+            + "Område/tema: " + f.omrade + "\n"
+            + "Årskurs: " + f.arskurs + "\n\n"
+            + "Bygg presentationen enligt denna struktur, en bild per punkt, och lägg till EN bild/illustration som passar innehållet på varje bild:\n"
+            + "1. Titelbild - " + f.omrade + " (en bild som fångar temat)\n"
+            + "2. Lärandemål - " + (lesson.mal || '') + "\n"
+            + "3. Startaktivitet - " + (lesson.start || '') + "\n"
+            + "4. Genomgång - " + (lesson.genomgang || '') + " (dela gärna upp på 1-2 bilder om det är mycket innehåll)\n"
+            + "5. Elevuppgift - " + (lesson.uppgift || '') + "\n"
+            + "6. Par-/gruppaktivitet - " + (lesson.par || '') + "\n"
+            + "7. Exit ticket - " + (lesson.exit || '');
+    }
+
     function createAiLektion(config){
         if(config===undefined) config=null;
         const body = createWidget('AI-LEKTION', 480, 'ai-lektion-widget', config);
         const widget = body.parentElement.parentElement;
         if(!config){ widget.style.height = '640px'; }
 
-        let state = { step:'form', form:{ amne:'', omrade:'', arskurs: arskursValue()||'Åk 4', tid:'40' }, lesson:null, worksheet:null, activeTab:'lektion', presentMode:false, slideIndex:0 };
+        let state = { step:'form', form:{ amne:'', omrade:'', arskurs: arskursValue()||'Åk 4', tid:'40' }, lesson:null, worksheet:null, presentationPrompt:null, activeTab:'lektion', presentMode:false, slideIndex:0 };
         if(config && config.data && Object.keys(config.data).length) Object.assign(state, config.data);
         const persist = ()=>{ widget.dataset.aiLektion = JSON.stringify(state); };
         persist();
@@ -28748,12 +28780,34 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             body.innerHTML = '';
             const f = state.form;
             const wrap = document.createElement('div'); wrap.className = 'ai-lek-result';
-            const head = document.createElement('div'); head.className = 'ai-lek-head';
-            head.innerHTML = '<div class="ai-lek-head-meta"><b>'+escapeHtml(f.amne)+'</b> · '+escapeHtml(f.omrade)+' · '+escapeHtml(f.arskurs)+' · '+escapeHtml(String(f.tid))+' min</div>';
+
+            // Redigerbar rubrikrad - ämne/område/årskurs/tid går att ändra utan att behöva
+            // skapa om hela lektionen (mutera f:s EGNA fält, inte ersätta state.form, så att alla
+            // funktioner nedan som redan håller en referens till f automatiskt ser ändringen).
+            const head = document.createElement('div'); head.className = 'ai-lek-head-edit';
+            const amneInp2 = document.createElement('input'); amneInp2.type = 'text'; amneInp2.className = 'ai-lek-meta-inp'; amneInp2.value = f.amne; amneInp2.setAttribute('list','ai-lek-amnen-result'); amneInp2.title = 'Ämne';
+            const dl2 = document.createElement('datalist'); dl2.id = 'ai-lek-amnen-result'; dl2.innerHTML = AI_LEKTION_AMNEN.map(a=>'<option value="'+a+'">').join('');
+            const omradeInp2 = document.createElement('input'); omradeInp2.type = 'text'; omradeInp2.className = 'ai-lek-meta-inp'; omradeInp2.style.maxWidth = '220px'; omradeInp2.value = f.omrade; omradeInp2.title = 'Område/tema';
+            const arskursSel2 = document.createElement('select'); arskursSel2.className = 'ai-lek-meta-inp'; arskursSel2.title = 'Årskurs';
+            arskursSel2.innerHTML = ['Förskoleklass','Åk 1','Åk 2','Åk 3','Åk 4','Åk 5','Åk 6','Åk 7','Åk 8','Åk 9','Gymnasiet'].map(a=>'<option value="'+a+'">'+a+'</option>').join('');
+            arskursSel2.value = f.arskurs;
+            const tidWrap = document.createElement('span'); tidWrap.className = 'ai-lek-meta-tidwrap';
+            const tidInp2 = document.createElement('input'); tidInp2.type = 'number'; tidInp2.className = 'ai-lek-meta-inp ai-lek-meta-inp-tid'; tidInp2.min = '5'; tidInp2.max = '240'; tidInp2.step = '5'; tidInp2.value = f.tid; tidInp2.title = 'Tid';
+            const tidLbl = document.createElement('span'); tidLbl.className = 'ai-lek-meta-unit'; tidLbl.textContent = 'min';
+            tidWrap.appendChild(tidInp2); tidWrap.appendChild(tidLbl);
+            head.appendChild(amneInp2); head.appendChild(omradeInp2); head.appendChild(arskursSel2); head.appendChild(tidWrap); head.appendChild(dl2);
             wrap.appendChild(head);
+            const saveMeta = ()=>{
+                f.amne = amneInp2.value.trim() || f.amne;
+                f.omrade = omradeInp2.value.trim() || f.omrade;
+                f.arskurs = arskursSel2.value;
+                f.tid = tidInp2.value || f.tid;
+                persist(); saveBoardState();
+            };
+            [amneInp2, omradeInp2, arskursSel2, tidInp2].forEach(el => el.addEventListener('change', saveMeta));
 
             const tabs = document.createElement('div'); tabs.className = 'ai-lek-tabs hover-menu';
-            tabs.innerHTML = '<button type="button" class="ai-lek-tab-btn" data-tab="lektion">📋 Lektionsplan</button><button type="button" class="ai-lek-tab-btn" data-tab="arbetsblad">📝 Arbetsblad</button>';
+            tabs.innerHTML = '<button type="button" class="ai-lek-tab-btn" data-tab="lektion">📋 Lektionsplan</button><button type="button" class="ai-lek-tab-btn" data-tab="arbetsblad">📝 Arbetsblad</button><button type="button" class="ai-lek-tab-btn" data-tab="presentation">🖼️ Presentation</button>';
             wrap.appendChild(tabs);
             [...tabs.querySelectorAll('.ai-lek-tab-btn')].forEach(b => b.onclick = () => { state.activeTab = b.dataset.tab; persist(); saveBoardState(); renderActiveTab(); });
 
@@ -28766,6 +28820,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             function renderActiveTab(){
                 [...tabs.querySelectorAll('.ai-lek-tab-btn')].forEach(b => b.classList.toggle('active', b.dataset.tab === state.activeTab));
                 if(state.activeTab === 'arbetsblad') renderArbetsbladTab();
+                else if(state.activeTab === 'presentation') renderPresentationTab();
                 else renderLektionTab();
             }
 
@@ -28812,8 +28867,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 toolbar.querySelector('.ai-lek-pdf-btn').onclick = () => exportAiLektionPDF(state);
                 toolbar.querySelector('.ai-lek-new-btn').onclick = () => {
                     if(typeof canEditBoard === 'function' && !canEditBoard()) return;
-                    customConfirm('Skapa en ny lektion? Både lektionsplanen och ev. arbetsblad försvinner (om du inte redan sparat dem som PDF).', () => {
-                        state = { step:'form', form: state.form, lesson:null, worksheet:null, activeTab:'lektion', presentMode:false, slideIndex:0 };
+                    customConfirm('Skapa en ny lektion? Lektionsplanen, arbetsbladet och presentationsprompten försvinner (om du inte redan sparat dem).', () => {
+                        state = { step:'form', form: state.form, lesson:null, worksheet:null, presentationPrompt:null, activeTab:'lektion', presentMode:false, slideIndex:0 };
                         persist(); saveBoardState(); renderForm();
                     });
                 };
@@ -28846,15 +28901,29 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 content.appendChild(titleEl);
                 (state.worksheet.uppgifter||[]).forEach((u, i) => {
                     const card = document.createElement('div'); card.className = 'ai-lek-card';
-                    const titleRow = document.createElement('div'); titleRow.className = 'ai-lek-card-title'; titleRow.contentEditable = 'true'; titleRow.spellcheck = false;
+                    const headRow = document.createElement('div'); headRow.className = 'ai-lek-card-head';
+                    const titleRow = document.createElement('div'); titleRow.className = 'ai-lek-card-title'; titleRow.contentEditable = 'true'; titleRow.spellcheck = false; titleRow.style.flex = '1';
                     titleRow.textContent = u.rubrik || ('Uppgift ' + (i+1));
                     titleRow.addEventListener('blur', ()=>{ u.rubrik = titleRow.textContent.trim(); persist(); saveBoardState(); });
+                    const delBtn = document.createElement('button'); delBtn.type = 'button'; delBtn.className = 'ai-lek-card-del'; delBtn.title = 'Ta bort uppgiften'; delBtn.textContent = '✕';
+                    delBtn.onclick = () => {
+                        if(typeof canEditBoard === 'function' && !canEditBoard()) return;
+                        state.worksheet.uppgifter.splice(i, 1); persist(); saveBoardState(); renderArbetsbladTab();
+                    };
+                    headRow.appendChild(titleRow); headRow.appendChild(delBtn);
                     const textEl = document.createElement('div'); textEl.className = 'ai-lek-card-text'; textEl.contentEditable = 'true'; textEl.spellcheck = false;
                     textEl.textContent = u.text || '';
                     textEl.addEventListener('blur', ()=>{ u.text = textEl.textContent.trim(); persist(); saveBoardState(); });
-                    card.appendChild(titleRow); card.appendChild(textEl);
+                    card.appendChild(headRow); card.appendChild(textEl);
                     content.appendChild(card);
                 });
+                const addBtn = document.createElement('button'); addBtn.type = 'button'; addBtn.className = 'kw-btn kw-btn-ghost ai-lek-ab-add-btn'; addBtn.textContent = '+ Lägg till uppgift';
+                addBtn.onclick = () => {
+                    if(typeof canEditBoard === 'function' && !canEditBoard()) return;
+                    state.worksheet.uppgifter.push({ rubrik: 'Uppgift ' + (state.worksheet.uppgifter.length + 1), text: '' });
+                    persist(); saveBoardState(); renderArbetsbladTab();
+                };
+                content.appendChild(addBtn);
 
                 toolbar.querySelector('.ai-lek-ab-pdf-btn').onclick = () => exportAiArbetsbladPDF(state);
                 toolbar.querySelector('.ai-lek-ab-new-btn').onclick = () => {
@@ -28863,6 +28932,27 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                         state.worksheet = null; persist(); saveBoardState(); renderArbetsbladTab();
                     });
                 };
+            }
+
+            function renderPresentationTab(){
+                toolbar.innerHTML = '<button type="button" class="kw-btn kw-btn-ghost ai-lek-presn-copy-btn">📋 Kopiera prompt</button>'
+                    + '<button type="button" class="kw-btn kw-btn-ghost ai-lek-presn-open-btn">📊 Öppna ny Google Presentation</button>';
+                content.innerHTML = '';
+                content.classList.remove('ai-lek-present');
+                const hint = document.createElement('div'); hint.className = 'kw-edit-hint'; hint.style.marginBottom = '10px';
+                hint.innerHTML = 'Kopiera prompten nedan och klistra in den i <b>Gemini</b> - antingen i sidopanelen i Google Presentationer, eller på gemini.google.com - så byggs en presentation med bildstöd automatiskt. Du kan redigera texten innan du kopierar.';
+                content.appendChild(hint);
+                if(!state.presentationPrompt) state.presentationPrompt = buildAiPresentationPrompt(f, state.lesson);
+                const ta = document.createElement('textarea'); ta.className = 'ai-lek-pres-ta'; ta.value = state.presentationPrompt; ta.spellcheck = false;
+                ta.addEventListener('blur', ()=>{ state.presentationPrompt = ta.value; persist(); saveBoardState(); });
+                content.appendChild(ta);
+
+                toolbar.querySelector('.ai-lek-presn-copy-btn').onclick = () => {
+                    const val = ta.value;
+                    try{ navigator.clipboard.writeText(val).then(()=>{ customAlert('Prompten är kopierad! Klistra in den i Gemini för att skapa presentationen.', '✅'); }, ()=>{ ta.select(); customAlert('Kunde inte kopiera automatiskt - texten är markerad, kopiera manuellt (Ctrl/Cmd+C).', 'ℹ️'); }); }
+                    catch(e){ ta.select(); customAlert('Markera texten och kopiera manuellt (Ctrl/Cmd+C).', 'ℹ️'); }
+                };
+                toolbar.querySelector('.ai-lek-presn-open-btn').onclick = () => { window.open('https://slides.new/', '_blank', 'noopener'); };
             }
 
             renderActiveTab();
