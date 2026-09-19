@@ -2207,7 +2207,7 @@
     .ai-lek-inp:focus { border-color:#7048e8; }
     .ai-lek-head-meta { font-size:12.5px; color:#6e6e73; margin-bottom:8px; }
     .ai-lek-toolbar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
-    .ai-lek-content { max-height:420px; overflow-y:auto; }
+    .ai-lek-content { max-height:520px; overflow-y:auto; }
     .ai-lek-card { border:1.5px solid #e5e5ea; border-radius:12px; padding:12px 14px; margin-bottom:10px; background:#fafafd; }
     .ai-lek-card-title { font-size:13px; font-weight:800; margin-bottom:6px; }
     .ai-lek-card-text { font-size:13px; line-height:1.55; white-space:pre-wrap; outline:none; }
@@ -28434,7 +28434,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     }
 
     function buildAiLektionPrompt(f){
-        return "Du är en erfaren svensk lärare och pedagogisk assistent. Skapa ett komplett, konkret och direkt användbart lektionsmaterial på SVENSKA för EN lektion, utifrån uppgifterna nedan. Fördela lektionens totala tid rimligt mellan delarna (ange gärna ungefärlig tidsåtgång inom parentes för varje del) och skriv med ett språk och en svårighetsgrad som passar den angivna årskursen.\n\n"
+        return "Du är en erfaren svensk lärare och pedagogisk assistent. Skapa FÄRDIGT undervisningsmaterial på SVENSKA för EN lektion, utifrån uppgifterna nedan - INTE en kort planeringsskiss som bara beskriver vad läraren ska göra, utan det faktiska innehållet, färdigskrivet och redo att använda direkt i klassrummet.\n\n"
+            + "Mycket viktigt - för varje del nedan:\n"
+            + "- Skriv ut hela innehållet i sin helhet, inte bara en sammanfattning av vad det ska handla om. Om en del behöver en text att läsa, ett exempel, en uppgiftstext eller konkreta frågor - skriv ut ALLT det ordagrant, inte bara \"eleverna läser en text och svarar på frågor\".\n"
+            + "- Formulera riktiga, färdiga frågor/instruktioner med exakt ordalydelse som läraren kan läsa upp eller visa rakt av.\n"
+            + "- Anpassa språk, svårighetsgrad och längd noga efter angiven årskurs.\n"
+            + "- Fördela lektionens totala tid rimligt mellan delarna och ange ungefärlig tidsåtgång inom parentes för varje del.\n\n"
             + "Ämne: " + f.amne + "\n"
             + "Område/tema: " + f.omrade + "\n"
             + "Årskurs: " + f.arskurs + "\n"
@@ -28442,18 +28447,18 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             + "Svara ENDAST med ett giltigt JSON-objekt (ingen text före eller efter, inga kodstaket) med EXAKT dessa nycklar och svenskt innehåll:\n"
             + "{\n"
             + '  "mal": "1-3 tydliga, konkreta lärandemål, ett per rad",\n'
-            + '  "start": "En kort, konkret startaktivitet som väcker intresse",\n'
-            + '  "genomgang": "En kort lärarledd genomgång av området med de viktigaste punkterna",\n'
-            + '  "uppgift": "En tydlig elevuppgift som eleverna arbetar med enskilt",\n'
-            + '  "par": "En par- eller gruppaktivitet kopplad till området",\n'
-            + '  "exit": "En kort exit ticket-fråga eller uppgift eleverna gör sist för att visa vad de lärt sig",\n'
-            + '  "anpassning": "Konkreta, praktiska förslag på anpassning/extra stöd för elever som behöver det"\n'
+            + '  "start": "Den FÄRDIGA startaktiviteten (ange tidsåtgång): skriv ut exakt vad läraren ska säga/fråga, eller den fullständiga instruktionen eleverna ska följa - inte bara vilken typ av aktivitet det är",\n'
+            + '  "genomgang": "Den FÄRDIGA lärarledda genomgången (ange tidsåtgång): skriv den som en kort, sammanhängande text/manus med de viktigaste fakta och förklaringarna utskrivna i sin helhet, som läraren kan läsa eller visa nästan ordagrant - inte en punktlista över ämnen som ska tas upp",\n'
+            + '  "uppgift": "Den FÄRDIGA elevuppgiften (ange tidsåtgång): skriv ut hela uppgiftstexten eleverna ska få, inklusive ev. exempeltext att läsa/utgå från och alla konkreta frågor/deluppgifter i sin helhet - eleven ska kunna börja jobba direkt utan att läraren behöver skriva något mer",\n'
+            + '  "par": "Den FÄRDIGA par- eller gruppaktiviteten (ange tidsåtgång): skriv ut de exakta diskussionsfrågorna, instruktionerna eller uppgiften ordagrant",\n'
+            + '  "exit": "Den eller de FÄRDIGA exit ticket-frågorna, skrivna exakt som de ska visas/delas ut till eleverna sist på lektionen",\n'
+            + '  "anpassning": "Ett FÄRDIGT, konkret anpassat material/stöd för elever som behöver mer hjälp inom just detta område och den här årskursen - t.ex. en förenklad version av texten/uppgiften, färdiga meningsstartare, eller en ordbank - inte bara ett allmänt råd om att \\"ge extra stöd\\""\n'
             + "}";
     }
 
     async function aiGenerateLektion(prompt, apiKey){
         const models = ["gemini-2.0-flash","gemini-1.5-flash-latest","gemini-1.5-flash"];
-        const bodyObj = { contents:[{ parts:[{ text: prompt }] }], generationConfig:{ temperature:0.7, responseMimeType:"application/json" } };
+        const bodyObj = { contents:[{ parts:[{ text: prompt }] }], generationConfig:{ temperature:0.7, responseMimeType:"application/json", maxOutputTokens: 8192 } };
         let lastErr='';
         for(const m of models){
             try{
@@ -28489,6 +28494,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         };
 
         const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
+        const sec1note=document.createElement('div'); sec1note.className='kw-ai-help'; sec1note.style.marginBottom='6px'; sec1note.textContent='Materialet blir ganska långt. Se till att markera och kopiera HELA Geminis svar (från första { till sista }) - annars kan delar saknas.'; box.appendChild(sec1note);
         const row1=document.createElement('div'); row1.className='kw-btnrow'; row1.style.margin='0 0 8px'; row1.style.justifyContent='flex-start';
         const copyBtn=document.createElement('button'); copyBtn.className='kw-btn kw-btn-ai'; copyBtn.textContent='📋 Kopiera fråga & öppna Gemini';
         copyBtn.onclick=()=>{
@@ -28557,9 +28563,9 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
     function createAiLektion(config){
         if(config===undefined) config=null;
-        const body = createWidget('AI-LEKTION', 460, 'ai-lektion-widget', config);
+        const body = createWidget('AI-LEKTION', 480, 'ai-lektion-widget', config);
         const widget = body.parentElement.parentElement;
-        if(!config){ widget.style.height = '560px'; }
+        if(!config){ widget.style.height = '640px'; }
 
         let state = { step:'form', form:{ amne:'', omrade:'', arskurs: arskursValue()||'Åk 4', tid:'40' }, lesson:null, presentMode:false, slideIndex:0 };
         if(config && config.data && Object.keys(config.data).length) Object.assign(state, config.data);
@@ -28569,7 +28575,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         function renderForm(){
             body.innerHTML = '';
             const wrap = document.createElement('div'); wrap.className = 'ai-lek-form';
-            wrap.innerHTML = '<div class="kw-edit-hint" style="margin-bottom:12px;">Fyll i uppgifterna nedan – AI:n skapar sedan ett komplett, färdigt lektionsmaterial (mål, aktiviteter, uppgift, exit ticket och anpassning) som du kan visa direkt på tavlan eller spara som PDF.</div>'
+            wrap.innerHTML = '<div class="kw-edit-hint" style="margin-bottom:12px;">Fyll i uppgifterna nedan – AI:n skapar ett HELT FÄRDIGT lektionsmaterial: färdigskrivna texter, frågor och uppgifter (inte bara en planeringsskiss) som du kan visa direkt på tavlan eller spara som PDF.</div>'
                 + '<label class="ai-lek-lbl">Ämne</label>'
                 + '<input type="text" class="ai-lek-inp" list="ai-lek-amnen" id="ai-lek-amne" placeholder="t.ex. Svenska">'
                 + '<datalist id="ai-lek-amnen">' + AI_LEKTION_AMNEN.map(a=>'<option value="'+a+'">').join('') + '</datalist>'
