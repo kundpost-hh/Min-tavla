@@ -18248,7 +18248,8 @@
             {id:'dagbok', namn:'Dagbok', emoji:'📔'},
             {id:'instruktion', namn:'Instruktion', emoji:'📋'},
             {id:'fabel', namn:'Fabel', emoji:'🐭'},
-            {id:'dikt', namn:'Dikt', emoji:'📜'}
+            {id:'dikt', namn:'Dikt', emoji:'📜'},
+            {id:'aterberattande', namn:'Återberättande text', emoji:'🔁'}
         ];
     }
     function lasfBank(){
@@ -18980,6 +18981,87 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 {typ:'flerval', q:'Varför sjönk Vasa?', alt:['Det var för smalt och tungt högst upp','Det krockade med ett isberg','Pirater sänkte det'], ratt:0},
                 {typ:'fyll', fore:'Ett fartygs allra första resa kallas ', efter:'.', alt:['jungfruresa','långresa','provtur'], ratt:0},
                 {typ:'para', par:[['1628','året då Vasa sjönk'],['1961','året då Vasa bärgades'],['Gustav II Adolf','kungen som beställde skeppet'],['Vasamuseet','där skeppet står i dag']]}
+            ]
+        },
+        {
+            id:'skogsutflykten', typ:'aterberattande', tema:'Vänskap', titel:'Utflykten till skogen', bild:'🌲',
+            niv:{
+                latt:`På tisdagen gick hela klassen till skogen. Vi startade vid skolan klockan nio.
+
+Först gick vi längs stigen. Sedan stannade vi vid en bäck. Vi tittade på vattnet och hittade fina stenar.
+
+Efter det åt vi fika på en stor sten. Alla fick en smörgås och lite saft.
+
+Sist lekte vi kurragömma bland träden. Klockan elva gick vi tillbaka till skolan.
+
+Det var en rolig dag i skogen tillsammans med klassen.`,
+                mellan:`På tisdagen gick hela klass 4B på utflykt till skogen bakom skolan. Vi startade klockan nio, direkt efter morgonsamlingen.
+
+Först vandrade vi längs den smala stigen genom granskogen. Läraren berättade om olika träd och djurspår vi såg på vägen. Efter en stund kom vi fram till en liten bäck, och vi stannade för att titta på det klara vattnet. Några av oss hittade fina, runda stenar att ta med hem.
+
+Vid elvatiden satte vi oss på en stor, platt sten och åt fika. Alla fick en smörgås, en frukt och lite saft. Det kändes härligt att sitta i solen och prata med kompisarna.
+
+Innan vi gick tillbaka fick vi leka en stund bland träden. Vi lekte kurragömma, och det var svårt att hitta varandra bland alla buskar! Klockan halv tolv var vi tillbaka på skolgården, trötta men glada.
+
+Det blev en dag full av äventyr, frisk luft och skratt tillsammans med klasskompisarna.`,
+                utmaning:`På tisdagsmorgonen samlades hela klass 4B på skolgården, redo för dagens utflykt till skogen bakom skolan. Redan klockan nio, strax efter morgonsamlingen, gav sig klassen iväg tillsammans med sin lärare.
+
+Vandringen började längs den smala, slingrande stigen genom den täta granskogen. Läraren pekade ut olika trädslag och visade spår efter rådjur och harar som korsat stigen. Efter ungefär tjugo minuters promenad nådde gruppen en liten bäck där vattnet porlade klart över stenarna. Flera elever stannade för att undersöka bäcken noggrant och plockade med sig några ovanligt fint slipade stenar som minne.
+
+Vid elvatiden slog sällskapet sig ner på en stor, platt klippa för att äta fika. Var och en hade fått med sig en smörgås, en frukt och en flaska saft. Stämningen var glad och avslappnad medan klasskompisarna satt i solen, pratade och skrattade tillsammans.
+
+Innan hemfärden fick eleverna en stunds fri lek bland träden, och det blev snabbt en intensiv omgång kurragömma. Det visade sig vara förvånansvärt svårt att hitta varandra bland de täta buskarna och de knotiga trädstammarna. Till slut, klockan halv tolv, återvände den trötta men förnöjda klassen till skolgården.
+
+Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemenskap – precis den sortens minne som eleverna säkert kommer att prata om länge.`
+            },
+            begrepp:[
+                {ord:'stig', former:['stigen','stigar','stigarna'], bild:'🥾', forklaring:'En smal gångväg, oftast i naturen, som man går på till fots.', exempel:'Vi följde stigen genom skogen.'},
+                {ord:'porla', former:['porlade','porlar'], bild:'💧', forklaring:'Det mjuka ljud som rinnande vatten gör, till exempel i en bäck.', exempel:'Bäcken porlade fint mellan stenarna.'},
+                {ord:'slingrande', former:['slingra','slingrade'], bild:'🌀', forklaring:'Något som böjer sig fram i kurvor istället för att gå rakt fram.', exempel:'Stigen var smal och slingrande genom skogen.'},
+                {ord:'gemenskap', former:['gemenskapen'], bild:'🤝', forklaring:'Känslan av att höra ihop och göra saker tillsammans med andra.', exempel:'Utflykten gav en fin känsla av gemenskap i klassen.'},
+                {ord:'förnöjd', former:['förnöjt','förnöjda'], bild:'😊', forklaring:'Nöjd och glad över hur något blev.', exempel:'Klassen var trött men förnöjd efter utflykten.'}
+            ],
+            fragor:{
+                pa:[
+                    {q:'Vilken dag gick klassen på utflykt?', a:'På tisdagen.'},
+                    {q:'Vad hittade eleverna vid bäcken?', a:'Fina, runda stenar.'},
+                    {q:'Vad åt klassen på den stora stenen?', a:'En smörgås, en frukt och saft.'}
+                ],
+                mellan:[
+                    {q:'Varför stannade eleverna extra länge vid bäcken?', tips:'Tänk på vad de gjorde där - vad var det som var spännande eller roligt?'},
+                    {q:'Hur verkar stämningen ha varit under utflykten?', tips:'Titta på ord som beskriver hur eleverna kände sig och vad de gjorde tillsammans.'},
+                    {q:'Varför var det svårt att hitta varandra när de lekte kurragömma?', tips:'Tänk på hur skogen såg ut - vad fanns det gott om bland träden?'}
+                ],
+                bortom:[
+                    {q:'Har du varit på en liknande utflykt? Berätta vad ni gjorde.'},
+                    {q:'Vad hade du helst velat göra om du fick bestämma under en klassutflykt till skogen?'},
+                    {q:'Varför tror du att lärare ofta tar med klasser ut i naturen?'}
+                ]
+            },
+            hitta:[
+                {label:'👤 Hitta vilka som var med', svar:'Hela klass 4B och läraren.'},
+                {label:'📍 Hitta platsen', svar:'Skogen bakom skolan - vid en bäck och på en stor sten.'},
+                {label:'⏰ Hitta när utflykten började och slutade', svar:'Den började klockan nio och de var tillbaka omkring halv tolv.'},
+                {label:'✅ Hitta vad de gjorde sist', svar:'De lekte kurragömma bland träden innan de gick tillbaka.'}
+            ],
+            ordning:[
+                'Klassen samlas på skolgården och startar utflykten klockan nio.',
+                'De vandrar längs stigen genom skogen.',
+                'De stannar vid bäcken och hittar stenar.',
+                'De äter fika på en stor, platt sten.',
+                'De leker kurragömma och går sedan tillbaka till skolan.'
+            ],
+            samtal:[
+                {q:'Varför är det bra att gå ut i naturen tillsammans som klass?', svar:'Svaren kan variera, men man kan till exempel lyfta att frisk luft och rörelse gör gott, och att man lär känna varandra på ett annat sätt utanför klassrummet.'},
+                {q:'Vad tycker du är roligast med en utflykt - resan dit, aktiviteterna eller fikat? Motivera.', svar:'Svaren kan variera beroende på vad eleven själv tycker mest om, men uppmuntra eleven att motivera sitt svar med ett konkret exempel.'},
+                {q:'Hur kan man vara en bra kompis under en utflykt?', svar:'Till exempel genom att hjälpa varandra att hitta vägen, dela med sig av fikat och se till att alla får vara med i lekarna.'}
+            ],
+            quiz:[
+                {typ:'flerval', q:'Vart gick klassen på utflykt?', alt:['Till skogen','Till stranden','Till museet'], ratt:0},
+                {typ:'sant', q:'Klassen startade utflykten klockan tolv.', ratt:false},
+                {typ:'flerval', q:'Vad hittade eleverna vid bäcken?', alt:['Fina stenar','Fjärilar','Svampar'], ratt:0},
+                {typ:'fyll', fore:'Innan de gick tillbaka fick eleverna ', efter:' bland träden.', alt:['leka kurragömma','sova','sjunga'], ratt:0},
+                {typ:'para', par:[['stigen','vägen genom skogen'],['bäcken','där de hittade stenar'],['den platta stenen','där de åt fika'],['kurragömma','leken de lekte sist']]}
             ]
         }
         ];
