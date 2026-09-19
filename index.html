@@ -2222,6 +2222,12 @@
     .ai-lek-dots { display:flex; gap:6px; }
     .ai-lek-dot { width:8px; height:8px; border-radius:50%; background:#d7d9fb; cursor:pointer; }
     .ai-lek-dot.active { background:#7048e8; }
+    .ai-lek-tabs { display:flex; gap:6px; margin-bottom:10px; }
+    .ai-lek-tab-btn { flex:1; border:1.5px solid #e0e0e6; background:#fff; border-radius:9px; padding:7px 10px; font-size:12.5px; font-weight:700; cursor:pointer; color:#6e6e73; }
+    .ai-lek-tab-btn.active { background:#7048e8; border-color:#7048e8; color:#fff; }
+    .ai-lek-ab-title { font-size:16px; font-weight:800; margin-bottom:12px; outline:none; }
+    .ai-lek-ab-title:focus { background:#fafafd; border-radius:6px; }
+    .ai-lek-empty-tab { padding:6px 2px; }
     .kw-gridwrap { width:100%; overflow-x:hidden; overflow-y:visible; margin-bottom:10px; display:flex; justify-content:center; }
     .kw-grid { display:grid; gap:2px; justify-content:center; margin:0 auto; }
     .kw-cell { width:var(--kw-cell); height:var(--kw-cell); position:relative; background:#fff; border:1.5px solid #9aa0aa; box-sizing:border-box; border-radius:3px; }
@@ -28561,13 +28567,146 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         } catch(e){ console.warn('[MinTavla] PDF-export av AI-lektionen misslyckades:', e); customAlert('Kunde inte skapa PDF just nu. Försök igen.', '⚠️'); }
     }
 
+    /* ---- ARBETSBLAD (flik i AI-LEKTION): ett fristående, tryckbart arbetsblad med varierade
+       uppgifter kring samma område - egen AI-generering och egen PDF-export, se createAiLektion. ---- */
+    function parseAiArbetsbladResponse(text){
+        const obj = tryParseLooseJson(text, false);
+        if(!obj || typeof obj !== 'object' || !Array.isArray(obj.uppgifter)) return null;
+        const uppgifter = obj.uppgifter.map(u => ({
+            rubrik: cleanAiLektionText(u && u.rubrik),
+            text: cleanAiLektionText(u && u.text)
+        })).filter(u => u.text);
+        if(uppgifter.length < 2) return null;
+        return { titel: cleanAiLektionText(obj.titel) || 'Arbetsblad', uppgifter: uppgifter };
+    }
+
+    function buildAiArbetsbladPrompt(f){
+        return "Du är en erfaren svensk lärare. Skapa ett FÄRDIGT, tryckbart arbetsblad på SVENSKA med flera VARIERADE uppgifter kring området nedan, som eleverna kan arbeta med på egen hand (blanda gärna olika typer: öppna frågor, kortsvarsfrågor, en skrivuppgift, fyll-i-luckan eller sant/falskt). Anpassa språk och svårighetsgrad efter årskursen och skriv ut ALLA uppgiftstexter/frågor i sin helhet, färdiga att använda direkt - inte bara typ av uppgift.\n\n"
+            + "Ämne: " + f.amne + "\n"
+            + "Område/tema: " + f.omrade + "\n"
+            + "Årskurs: " + f.arskurs + "\n\n"
+            + "Svara ENDAST med ett giltigt JSON-objekt (ingen text före/efter, inga kodstaket) med EXAKT denna form:\n"
+            + "{\n"
+            + '  "titel": "Kort rubrik för arbetsbladet",\n'
+            + '  "uppgifter": [\n'
+            + '    { "rubrik": "kort rubrik för uppgiften, t.ex. Uppgift 1", "text": "hela den färdiga uppgiftstexten/frågorna" }\n'
+            + '  ]\n'
+            + "}\n"
+            + "Skapa 5-8 uppgifter totalt, av varierade typer.";
+    }
+
+    async function aiGenerateArbetsblad(prompt, apiKey){
+        const models = ["gemini-2.0-flash","gemini-1.5-flash-latest","gemini-1.5-flash"];
+        const bodyObj = { contents:[{ parts:[{ text: prompt }] }], generationConfig:{ temperature:0.8, responseMimeType:"application/json", maxOutputTokens: 8192 } };
+        let lastErr='';
+        for(const m of models){
+            try{
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(apiKey);
+                const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(bodyObj) });
+                if(!r.ok){ const t=await r.text().catch(()=> ''); if(/API key not valid|API_KEY_INVALID|invalid.*key/i.test(t)) throw new Error('Ogiltig API-nyckel.'); lastErr='Servern svarade ' + r.status; continue; }
+                const data = await r.json();
+                const text = (((data.candidates||[])[0]||{}).content||{}).parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : '';
+                const ws = parseAiArbetsbladResponse(text);
+                if(ws) return ws;
+                lastErr='Kunde inte tolka AI-svaret.';
+            }catch(e){ if(e && e.message==='Ogiltig API-nyckel.') throw e; lastErr=(e&&e.message)||'nätverksfel'; }
+        }
+        throw new Error(lastErr || 'Kunde inte kontakta AI-tjänsten.');
+    }
+
+    function openAiArbetsbladDialog(form, onReady){
+        const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+        const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
+        const closeDlg=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent='✨ Skapa arbetsblad med AI'; box.appendChild(title);
+        const summary=document.createElement('div'); summary.className='kw-ai-help'; summary.style.marginBottom='10px';
+        summary.innerHTML = '<b>'+escapeHtml(form.amne)+'</b> · '+escapeHtml(form.omrade)+' · '+escapeHtml(form.arskurs);
+        box.appendChild(summary);
+        const statusEl=document.createElement('div'); statusEl.className='kw-ai-status';
+        const prompt = buildAiArbetsbladPrompt(form);
+
+        const anvand=(text)=>{
+            const ws = parseAiArbetsbladResponse(text);
+            if(!ws){ statusEl.textContent='⚠️ Hittade inga användbara uppgifter i svaret. Kolla att HELA svaret (från { till }) klistrades in.'; return; }
+            closeDlg();
+            onReady(ws);
+        };
+
+        const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
+        const sec1note=document.createElement('div'); sec1note.className='kw-ai-help'; sec1note.style.marginBottom='6px'; sec1note.textContent='Arbetsbladet kan bli ganska långt. Se till att markera och kopiera HELA Geminis svar (från första { till sista }) - annars kan uppgifter saknas.'; box.appendChild(sec1note);
+        const row1=document.createElement('div'); row1.className='kw-btnrow'; row1.style.margin='0 0 8px'; row1.style.justifyContent='flex-start';
+        const copyBtn=document.createElement('button'); copyBtn.className='kw-btn kw-btn-ai'; copyBtn.textContent='📋 Kopiera fråga & öppna Gemini';
+        copyBtn.onclick=()=>{
+            const done=()=>{ statusEl.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera HELA svaret och klistra in det nedan.'; };
+            try{ navigator.clipboard.writeText(prompt).then(done, ()=>{ statusEl.textContent='Kunde inte kopiera automatiskt - öppna Gemini och beskriv arbetsbladet själv istället.'; }); }
+            catch(e){ statusEl.textContent='Kunde inte kopiera automatiskt.'; }
+            window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes');
+        };
+        row1.appendChild(copyBtn); box.appendChild(row1);
+        const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='90px'; pasteTa.placeholder='Klistra in Geminis svar här – arbetsbladet skapas automatiskt...'; box.appendChild(pasteTa);
+        pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ anvand(pasteTa.value); }, 60); });
+        const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
+        const useBtn=document.createElement('button'); useBtn.className='kw-btn kw-btn-primary'; useBtn.textContent='Skapa arbetsbladet från svaret';
+        useBtn.onclick=()=> anvand(pasteTa.value);
+        row1b.appendChild(useBtn); box.appendChild(row1b);
+
+        const orEl=document.createElement('div'); orEl.className='kw-ai-or'; orEl.textContent='— ELLER —'; box.appendChild(orEl);
+        const advBtn=document.createElement('button'); advBtn.className='kw-ai-adv'; advBtn.textContent='Alternativ 2 – ett klick varje gång (engångsnyckel, ~30 sek) ▾'; box.appendChild(advBtn);
+        const adv=document.createElement('div'); adv.style.display='none'; box.appendChild(adv);
+        advBtn.onclick=()=>{ adv.style.display = adv.style.display==='none'?'block':'none'; };
+        const keyWrap=document.createElement('div'); adv.appendChild(keyWrap);
+        const keyInp=document.createElement('input'); keyInp.className='kw-ai-key'; keyInp.type='password'; keyInp.placeholder='Klistra in din Google AI (Gemini) API-nyckel';
+        const help=document.createElement('div'); help.className='kw-ai-help'; help.innerHTML="Hämta en gratis nyckel på <a href='https://aistudio.google.com/app/apikey' target='_blank' rel='noopener'>aistudio.google.com</a>. Nyckeln sparas bara på den här enheten.";
+        const showKeyField=()=>{ keyWrap.innerHTML=''; keyWrap.appendChild(keyInp); keyWrap.appendChild(help); };
+        if(aiKeyGet()){ const note=document.createElement('div'); note.className='kw-ai-help'; note.innerHTML="🔑 API-nyckel sparad. <a href='#' class='kw-ai-change'>Byt nyckel</a>"; keyWrap.appendChild(note); note.querySelector('.kw-ai-change').onclick=(e)=>{ e.preventDefault(); showKeyField(); }; }
+        else { showKeyField(); }
+        const row2=document.createElement('div'); row2.className='kw-btnrow'; row2.style.margin='8px 0 0'; row2.style.justifyContent='flex-start';
+        const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.title='Öppnar Google AI Studio – du är redan inloggad'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); statusEl.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
+        const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='Skapa automatiskt (ett klick)';
+        autoBtn.onclick=async ()=>{
+            let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } }
+            if(!key){ statusEl.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
+            autoBtn.disabled=true; statusEl.innerHTML="<span class='kw-ai-spin'></span> AI skapar arbetsbladet – det kan ta en liten stund...";
+            try{ const ws = await aiGenerateArbetsblad(prompt, key); closeDlg(); onReady(ws); }
+            catch(e){ statusEl.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; }
+        };
+        row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
+
+        box.appendChild(statusEl);
+        const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
+        const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Avbryt'; cancel.onclick=closeDlg; foot.appendChild(cancel); box.appendChild(foot);
+
+        ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) closeDlg(); };
+        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+    }
+
+    // Exporterar arbetsbladet som en egen, fristående PDF - med plats för namn/datum längst upp,
+    // så det går att skriva ut direkt till eleverna.
+    async function exportAiArbetsbladPDF(state){
+        try{
+            if(!window.html2canvas) await _loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+            const f = state.form || {}; const ws = state.worksheet || {};
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:800px;background:#fff;padding:32px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1d1d1f;';
+            wrap.innerHTML = '<div style="font-size:22px;font-weight:800;margin-bottom:4px;">📝 ' + escapeHtml(ws.titel||'Arbetsblad') + '</div>'
+                + '<div style="font-size:13px;color:#6e6e73;margin-bottom:18px;">' + escapeHtml(f.amne||'') + ' · ' + escapeHtml(f.omrade||'') + ' · ' + escapeHtml(f.arskurs||'') + '</div>'
+                + '<div style="display:flex;gap:28px;font-size:13px;color:#3a3a3c;margin-bottom:24px;border-bottom:1.5px solid #e5e5ea;padding-bottom:14px;"><span>Namn: ______________________</span><span>Datum: ____________</span></div>'
+                + (ws.uppgifter||[]).map((u,i) => '<div style="margin-bottom:20px;"><div style="font-size:14px;font-weight:800;margin-bottom:5px;">' + (i+1) + '. ' + escapeHtml(u.rubrik||'') + '</div><div style="font-size:13px;line-height:1.55;white-space:pre-wrap;">' + escapeHtml(u.text||'') + '</div></div>').join('');
+            document.body.appendChild(wrap);
+            const canvas = await window.html2canvas(wrap, { backgroundColor:'#ffffff', scale:2, useCORS:true, logging:false });
+            wrap.remove();
+            const fname = sanitizeFileName([f.amne, f.omrade, 'arbetsblad'].filter(Boolean).join('-') || 'arbetsblad', 'arbetsblad') + '.pdf';
+            downloadCanvasAsPDF(canvas, fname);
+        } catch(e){ console.warn('[MinTavla] PDF-export av arbetsbladet misslyckades:', e); customAlert('Kunde inte skapa PDF just nu. Försök igen.', '⚠️'); }
+    }
+
     function createAiLektion(config){
         if(config===undefined) config=null;
         const body = createWidget('AI-LEKTION', 480, 'ai-lektion-widget', config);
         const widget = body.parentElement.parentElement;
         if(!config){ widget.style.height = '640px'; }
 
-        let state = { step:'form', form:{ amne:'', omrade:'', arskurs: arskursValue()||'Åk 4', tid:'40' }, lesson:null, presentMode:false, slideIndex:0 };
+        let state = { step:'form', form:{ amne:'', omrade:'', arskurs: arskursValue()||'Åk 4', tid:'40' }, lesson:null, worksheet:null, activeTab:'lektion', presentMode:false, slideIndex:0 };
         if(config && config.data && Object.keys(config.data).length) Object.assign(state, config.data);
         const persist = ()=>{ widget.dataset.aiLektion = JSON.stringify(state); };
         persist();
@@ -28607,64 +28746,126 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
         function renderResult(){
             body.innerHTML = '';
-            const f = state.form; const lesson = state.lesson || {};
+            const f = state.form;
             const wrap = document.createElement('div'); wrap.className = 'ai-lek-result';
             const head = document.createElement('div'); head.className = 'ai-lek-head';
             head.innerHTML = '<div class="ai-lek-head-meta"><b>'+escapeHtml(f.amne)+'</b> · '+escapeHtml(f.omrade)+' · '+escapeHtml(f.arskurs)+' · '+escapeHtml(String(f.tid))+' min</div>';
             wrap.appendChild(head);
 
-            const toolbar = document.createElement('div'); toolbar.className = 'ai-lek-toolbar hover-menu';
-            toolbar.innerHTML = '<button type="button" class="kw-btn kw-btn-ghost ai-lek-pres-btn">' + (state.presentMode ? '📖 Visa alla' : '🖥️ Presentationsläge') + '</button>'
-                + '<button type="button" class="kw-btn kw-btn-ghost ai-lek-pdf-btn">🖨️ Spara som PDF</button>'
-                + '<button type="button" class="kw-btn kw-btn-ghost ai-lek-new-btn">🔁 Ny lektion</button>';
-            wrap.appendChild(toolbar);
+            const tabs = document.createElement('div'); tabs.className = 'ai-lek-tabs hover-menu';
+            tabs.innerHTML = '<button type="button" class="ai-lek-tab-btn" data-tab="lektion">📋 Lektionsplan</button><button type="button" class="ai-lek-tab-btn" data-tab="arbetsblad">📝 Arbetsblad</button>';
+            wrap.appendChild(tabs);
+            [...tabs.querySelectorAll('.ai-lek-tab-btn')].forEach(b => b.onclick = () => { state.activeTab = b.dataset.tab; persist(); saveBoardState(); renderActiveTab(); });
 
+            const toolbar = document.createElement('div'); toolbar.className = 'ai-lek-toolbar hover-menu';
+            wrap.appendChild(toolbar);
             const content = document.createElement('div'); content.className = 'ai-lek-content';
             wrap.appendChild(content);
             body.appendChild(wrap);
 
-            function renderContent(){
-                content.innerHTML = '';
-                if(state.presentMode){
-                    content.classList.add('ai-lek-present');
-                    const idx = Math.max(0, Math.min(state.slideIndex||0, AI_LEKTION_SECTIONS.length-1));
-                    const sec = AI_LEKTION_SECTIONS[idx];
-                    const slide = document.createElement('div'); slide.className = 'ai-lek-slide';
-                    slide.innerHTML = '<div class="ai-lek-slide-emoji">'+sec.emoji+'</div><div class="ai-lek-slide-title">'+escapeHtml(sec.title)+'</div><div class="ai-lek-slide-text" contenteditable="true" spellcheck="false">'+escapeHtml(lesson[sec.key]||'')+'</div>';
-                    const nav = document.createElement('div'); nav.className = 'ai-lek-slide-nav';
-                    const prevBtn = document.createElement('button'); prevBtn.type='button'; prevBtn.className='kw-btn kw-btn-ghost'; prevBtn.textContent='◀'; prevBtn.disabled = idx===0;
-                    const dots = document.createElement('div'); dots.className='ai-lek-dots';
-                    AI_LEKTION_SECTIONS.forEach((s,i)=>{ const d=document.createElement('span'); d.className='ai-lek-dot'+(i===idx?' active':''); d.title=s.title; d.onclick=()=>{ state.slideIndex=i; persist(); saveBoardState(); renderContent(); }; dots.appendChild(d); });
-                    const nextBtn = document.createElement('button'); nextBtn.type='button'; nextBtn.className='kw-btn kw-btn-ghost'; nextBtn.textContent='▶'; nextBtn.disabled = idx===AI_LEKTION_SECTIONS.length-1;
-                    prevBtn.onclick=()=>{ state.slideIndex=Math.max(0,idx-1); persist(); saveBoardState(); renderContent(); };
-                    nextBtn.onclick=()=>{ state.slideIndex=Math.min(AI_LEKTION_SECTIONS.length-1,idx+1); persist(); saveBoardState(); renderContent(); };
-                    slide.querySelector('.ai-lek-slide-text').addEventListener('blur', (e)=>{ lesson[sec.key] = e.target.innerText.trim(); state.lesson = lesson; persist(); saveBoardState(); });
-                    nav.appendChild(prevBtn); nav.appendChild(dots); nav.appendChild(nextBtn);
-                    content.appendChild(slide); content.appendChild(nav);
-                } else {
-                    content.classList.remove('ai-lek-present');
-                    AI_LEKTION_SECTIONS.forEach(sec => {
-                        const card = document.createElement('div'); card.className = 'ai-lek-card';
-                        card.innerHTML = '<div class="ai-lek-card-title">'+sec.emoji+' '+escapeHtml(sec.title)+'</div>';
-                        const textEl = document.createElement('div'); textEl.className = 'ai-lek-card-text'; textEl.contentEditable = 'true'; textEl.spellcheck = false;
-                        textEl.textContent = lesson[sec.key] || '';
-                        textEl.addEventListener('blur', ()=>{ lesson[sec.key] = textEl.textContent.trim(); state.lesson = lesson; persist(); saveBoardState(); });
-                        card.appendChild(textEl);
-                        content.appendChild(card);
-                    });
-                }
+            function renderActiveTab(){
+                [...tabs.querySelectorAll('.ai-lek-tab-btn')].forEach(b => b.classList.toggle('active', b.dataset.tab === state.activeTab));
+                if(state.activeTab === 'arbetsblad') renderArbetsbladTab();
+                else renderLektionTab();
             }
-            renderContent();
 
-            toolbar.querySelector('.ai-lek-pres-btn').onclick = () => { state.presentMode = !state.presentMode; persist(); saveBoardState(); renderResult(); };
-            toolbar.querySelector('.ai-lek-pdf-btn').onclick = () => exportAiLektionPDF(state);
-            toolbar.querySelector('.ai-lek-new-btn').onclick = () => {
-                if(typeof canEditBoard === 'function' && !canEditBoard()) return;
-                customConfirm('Skapa en ny lektion? Den nuvarande lektionens innehåll försvinner (om du inte redan sparat den som PDF).', () => {
-                    state = { step:'form', form: state.form, lesson:null, presentMode:false, slideIndex:0 };
-                    persist(); saveBoardState(); renderForm();
+            function renderLektionTab(){
+                const lesson = state.lesson || {};
+                toolbar.innerHTML = '<button type="button" class="kw-btn kw-btn-ghost ai-lek-pres-btn">' + (state.presentMode ? '📖 Visa alla' : '🖥️ Presentationsläge') + '</button>'
+                    + '<button type="button" class="kw-btn kw-btn-ghost ai-lek-pdf-btn">🖨️ Spara som PDF</button>'
+                    + '<button type="button" class="kw-btn kw-btn-ghost ai-lek-new-btn">🔁 Ny lektion</button>';
+
+                function renderLektionContent(){
+                    content.innerHTML = '';
+                    content.classList.remove('ai-lek-present');
+                    if(state.presentMode){
+                        content.classList.add('ai-lek-present');
+                        const idx = Math.max(0, Math.min(state.slideIndex||0, AI_LEKTION_SECTIONS.length-1));
+                        const sec = AI_LEKTION_SECTIONS[idx];
+                        const slide = document.createElement('div'); slide.className = 'ai-lek-slide';
+                        slide.innerHTML = '<div class="ai-lek-slide-emoji">'+sec.emoji+'</div><div class="ai-lek-slide-title">'+escapeHtml(sec.title)+'</div><div class="ai-lek-slide-text" contenteditable="true" spellcheck="false">'+escapeHtml(lesson[sec.key]||'')+'</div>';
+                        const nav = document.createElement('div'); nav.className = 'ai-lek-slide-nav';
+                        const prevBtn = document.createElement('button'); prevBtn.type='button'; prevBtn.className='kw-btn kw-btn-ghost'; prevBtn.textContent='◀'; prevBtn.disabled = idx===0;
+                        const dots = document.createElement('div'); dots.className='ai-lek-dots';
+                        AI_LEKTION_SECTIONS.forEach((s,i)=>{ const d=document.createElement('span'); d.className='ai-lek-dot'+(i===idx?' active':''); d.title=s.title; d.onclick=()=>{ state.slideIndex=i; persist(); saveBoardState(); renderLektionContent(); }; dots.appendChild(d); });
+                        const nextBtn = document.createElement('button'); nextBtn.type='button'; nextBtn.className='kw-btn kw-btn-ghost'; nextBtn.textContent='▶'; nextBtn.disabled = idx===AI_LEKTION_SECTIONS.length-1;
+                        prevBtn.onclick=()=>{ state.slideIndex=Math.max(0,idx-1); persist(); saveBoardState(); renderLektionContent(); };
+                        nextBtn.onclick=()=>{ state.slideIndex=Math.min(AI_LEKTION_SECTIONS.length-1,idx+1); persist(); saveBoardState(); renderLektionContent(); };
+                        slide.querySelector('.ai-lek-slide-text').addEventListener('blur', (e)=>{ lesson[sec.key] = e.target.innerText.trim(); state.lesson = lesson; persist(); saveBoardState(); });
+                        nav.appendChild(prevBtn); nav.appendChild(dots); nav.appendChild(nextBtn);
+                        content.appendChild(slide); content.appendChild(nav);
+                    } else {
+                        AI_LEKTION_SECTIONS.forEach(sec => {
+                            const card = document.createElement('div'); card.className = 'ai-lek-card';
+                            card.innerHTML = '<div class="ai-lek-card-title">'+sec.emoji+' '+escapeHtml(sec.title)+'</div>';
+                            const textEl = document.createElement('div'); textEl.className = 'ai-lek-card-text'; textEl.contentEditable = 'true'; textEl.spellcheck = false;
+                            textEl.textContent = lesson[sec.key] || '';
+                            textEl.addEventListener('blur', ()=>{ lesson[sec.key] = textEl.textContent.trim(); state.lesson = lesson; persist(); saveBoardState(); });
+                            card.appendChild(textEl);
+                            content.appendChild(card);
+                        });
+                    }
+                }
+                renderLektionContent();
+
+                toolbar.querySelector('.ai-lek-pres-btn').onclick = () => { state.presentMode = !state.presentMode; persist(); saveBoardState(); renderLektionTab(); };
+                toolbar.querySelector('.ai-lek-pdf-btn').onclick = () => exportAiLektionPDF(state);
+                toolbar.querySelector('.ai-lek-new-btn').onclick = () => {
+                    if(typeof canEditBoard === 'function' && !canEditBoard()) return;
+                    customConfirm('Skapa en ny lektion? Både lektionsplanen och ev. arbetsblad försvinner (om du inte redan sparat dem som PDF).', () => {
+                        state = { step:'form', form: state.form, lesson:null, worksheet:null, activeTab:'lektion', presentMode:false, slideIndex:0 };
+                        persist(); saveBoardState(); renderForm();
+                    });
+                };
+            }
+
+            function renderArbetsbladTab(){
+                if(!state.worksheet){
+                    toolbar.innerHTML = '';
+                    content.innerHTML = '';
+                    content.classList.remove('ai-lek-present');
+                    const box = document.createElement('div'); box.className = 'ai-lek-empty-tab';
+                    box.innerHTML = '<div class="kw-edit-hint" style="margin-bottom:12px;">Skapa ett fristående arbetsblad med varierade uppgifter kring <b>'+escapeHtml(f.omrade||'')+'</b> - klart att skriva ut eller spara som PDF.</div>'
+                        + '<button type="button" class="kw-btn kw-btn-ai ai-lek-ab-gen-btn" style="width:100%;">✨ Skapa arbetsblad med AI</button>';
+                    content.appendChild(box);
+                    box.querySelector('.ai-lek-ab-gen-btn').onclick = () => {
+                        if(typeof canEditBoard === 'function' && !canEditBoard()) return;
+                        openAiArbetsbladDialog(f, (worksheet) => {
+                            state.worksheet = worksheet; persist(); saveBoardState(); renderArbetsbladTab();
+                        });
+                    };
+                    return;
+                }
+                toolbar.innerHTML = '<button type="button" class="kw-btn kw-btn-ghost ai-lek-ab-pdf-btn">🖨️ Spara som PDF</button>'
+                    + '<button type="button" class="kw-btn kw-btn-ghost ai-lek-ab-new-btn">🔁 Nytt arbetsblad</button>';
+                content.innerHTML = '';
+                content.classList.remove('ai-lek-present');
+                const titleEl = document.createElement('div'); titleEl.className = 'ai-lek-ab-title'; titleEl.contentEditable = 'true'; titleEl.spellcheck = false;
+                titleEl.textContent = state.worksheet.titel || '';
+                titleEl.addEventListener('blur', ()=>{ state.worksheet.titel = titleEl.textContent.trim(); persist(); saveBoardState(); });
+                content.appendChild(titleEl);
+                (state.worksheet.uppgifter||[]).forEach((u, i) => {
+                    const card = document.createElement('div'); card.className = 'ai-lek-card';
+                    const titleRow = document.createElement('div'); titleRow.className = 'ai-lek-card-title'; titleRow.contentEditable = 'true'; titleRow.spellcheck = false;
+                    titleRow.textContent = u.rubrik || ('Uppgift ' + (i+1));
+                    titleRow.addEventListener('blur', ()=>{ u.rubrik = titleRow.textContent.trim(); persist(); saveBoardState(); });
+                    const textEl = document.createElement('div'); textEl.className = 'ai-lek-card-text'; textEl.contentEditable = 'true'; textEl.spellcheck = false;
+                    textEl.textContent = u.text || '';
+                    textEl.addEventListener('blur', ()=>{ u.text = textEl.textContent.trim(); persist(); saveBoardState(); });
+                    card.appendChild(titleRow); card.appendChild(textEl);
+                    content.appendChild(card);
                 });
-            };
+
+                toolbar.querySelector('.ai-lek-ab-pdf-btn').onclick = () => exportAiArbetsbladPDF(state);
+                toolbar.querySelector('.ai-lek-ab-new-btn').onclick = () => {
+                    if(typeof canEditBoard === 'function' && !canEditBoard()) return;
+                    customConfirm('Skapa ett nytt arbetsblad? Det nuvarande försvinner (om du inte redan sparat det som PDF).', () => {
+                        state.worksheet = null; persist(); saveBoardState(); renderArbetsbladTab();
+                    });
+                };
+            }
+
+            renderActiveTab();
         }
 
         if(state.step === 'result' && state.lesson) renderResult(); else renderForm();
