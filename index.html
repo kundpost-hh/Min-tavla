@@ -28721,7 +28721,8 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
     // "styrprompt" till Studio-panelens Slide Deck-verktyg, eller i chatten efter att ha lagt till
     // en källa om ämnet).
     function buildAiPresentationPrompt(f){
-        return "Skapa en presentation med bildstöd om ämnet nedan. Det ska vara en KORT SAMMANFATTNING av området i några få bilder - INTE en fullständig lektionsplanering eller ett arbetsblad. Håll texten på varje bild kort (några punkter, inte hela meningar) och anpassa språk och innehåll efter årskursen. Lägg till EN bild eller illustration som passar innehållet på varje bild.\n\n"
+        return "Skapa en presentation med bildstöd om ämnet nedan. Det ska vara en KORT SAMMANFATTNING av området i några få bilder - INTE en fullständig lektionsplanering eller ett arbetsblad. Håll texten på varje bild kort (några punkter, inte hela meningar) och anpassa språk och innehåll efter årskursen.\n\n"
+            + "Jag har inte laddat upp någon källa om det här ämnet - sök därför själv på webben efter fakta och information om området innan du bygger presentationen. Skapa också egna bilder/illustrationer som passar innehållet på varje bild (en bild per bild).\n\n"
             + "Ämne: " + f.amne + "\n"
             + "Område/tema: " + f.omrade + "\n"
             + "Årskurs: " + f.arskurs + "\n\n"
@@ -28940,7 +28941,7 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                 content.innerHTML = '';
                 content.classList.remove('ai-lek-present');
                 const hint = document.createElement('div'); hint.className = 'kw-edit-hint'; hint.style.marginBottom = '10px';
-                hint.innerHTML = 'En färdig prompt som ber <b>NotebookLM</b> skapa en KORT sammanfattande presentation (några få bilder) med bilder/illustrationer som passar innehållet - inte hela lektionen eller arbetsbladet. Klistra in prompten i chatten i NotebookLM (lägg gärna till en källa om ämnet först för bättre resultat). Du kan redigera texten innan du kopierar.';
+                hint.innerHTML = 'En färdig prompt som ber <b>NotebookLM</b> skapa en KORT sammanfattande presentation (några få bilder) - inte hela lektionen eller arbetsbladet. Prompten ber NotebookLM att själv söka på webben efter fakta (eftersom ingen källa är uppladdad) och skapa egna bilder/illustrationer som passar innehållet. Klistra bara in prompten i chatten i NotebookLM. Du kan redigera texten innan du kopierar.';
                 content.appendChild(hint);
                 if(!state.presentationPrompt) state.presentationPrompt = buildAiPresentationPrompt(f);
                 const ta = document.createElement('textarea'); ta.className = 'ai-lek-pres-ta'; ta.value = state.presentationPrompt; ta.spellcheck = false;
@@ -28953,7 +28954,11 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
                     try{ navigator.clipboard.writeText(val).then(done, ()=>{ ta.select(); customAlert('Kunde inte kopiera automatiskt - texten är markerad, kopiera manuellt (Ctrl/Cmd+C).', 'ℹ️'); }); }
                     catch(e){ ta.select(); customAlert('Markera texten och kopiera manuellt (Ctrl/Cmd+C).', 'ℹ️'); }
                     // Öppnar NotebookLM SAMTIDIGT som prompten kopieras, så man slipper klicka två gånger.
-                    window.open('https://notebooklm.google.com/', '_blank', 'noopener');
+                    // I en liten popup-ruta (samma mönster som Gemini-fönstret på andra ställen i appen)
+                    // istället för en hel flik. OBS: Google saknar en riktig "ny anteckningsbok"-URL att
+                    // länka direkt till (till skillnad från t.ex. docs.new), så rutan öppnar startsidan -
+                    // tryck "+ Ny anteckningsbok"/"Skapa ny" där för en helt tom chatt.
+                    window.open('https://notebook.google.com/', 'notebooklmWin', 'noopener,width=480,height=680,left='+(screen.width-500)+',top=60,resizable=yes,scrollbars=yes');
                 };
             }
 
