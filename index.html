@@ -70,6 +70,13 @@
         #manual-refresh-btn { opacity:0; transition:opacity .18s ease; }
         #manual-refresh-btn:hover, #manual-refresh-btn:focus-visible { opacity:1; }
     </style>
+    <!-- NYTT: sidoöverskridande urklipp för widgetar - se addWidgetToClipboard/pasteWidgetClipboard.
+         Man klickar 📋 på en eller flera widgetar (på vilken sida som helst), byter sida, och
+         trycker sedan på den här knappen för att klistra in alla på en gång. -->
+    <button id="widget-clipboard-btn" onclick="pasteWidgetClipboard()" title="Klistra in kopierade widgetar på den här sidan" style="display:none;align-items:center;gap:8px;position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:9999;background:#1d1d1f;color:#fff;border:none;border-radius:24px;padding:9px 8px 9px 16px;font-size:13px;font-weight:700;box-shadow:0 2px 12px rgba(0,0,0,0.25);cursor:pointer;">
+        <span>📋 Klistra in <span id="widget-clipboard-count">0</span></span>
+        <span onclick="event.stopPropagation(); clearWidgetClipboard();" title="Töm urklipp" style="background:rgba(255,255,255,0.18);border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;">✕</span>
+    </button>
     <div id="guest-mode-badge" style="display:none;position:fixed;bottom:14px;right:14px;z-index:9999;background:#1d1d1f;color:#fff;border-radius:20px;padding:7px 16px;font-size:12.5px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,0.16);">👀 Gästläge - inget sparas</div>
     <!-- NYTT: visas ENDAST om den allra första molnhämtningen vid inloggning misslyckas trots
          flera automatiska omförsök (se syncFromCloudWithRetry). Utan den här varningen skulle
@@ -5175,6 +5182,53 @@
         } catch(e){ console.warn('[MinTavla] Kunde inte duplicera widgeten:', e); }
     }
 
+    /* ---- NYTT: KOPIERA WIDGETAR MELLAN SIDOR ----
+       Ett litet urklipp som fungerar sidoöverskridande: klicka 📋 på en eller flera widgetar
+       (på vilken sida man vill, i valfri ordning), byt sedan till EN ANNAN sida och tryck på
+       "📋 Klistra in"-knappen som dyker upp längst ned - då läggs alla ihopsamlade widgetarna
+       till på den sidan i ett svep. Bygger vidare på samma serializeWidget/spawnWidgetFromState
+       som redan används av duplicateWidget (samma sida) och duplicatePageV6 (hel sida). Urklippet
+       finns bara i minnet under tiden man jobbar - sparas inte till molnet eller mellan sessioner. */
+    let _widgetClipboard = [];
+    function addWidgetToClipboard(widgetEl){
+        try {
+            _widgetClipboard.push(serializeWidget(widgetEl));
+            updateWidgetClipboardUI();
+            showWidgetClipboardToast('📋 Kopierad (' + _widgetClipboard.length + ' st i urklipp) - byt sida och tryck "Klistra in"');
+        } catch(e){ console.warn('[MinTavla] Kunde inte kopiera widgeten:', e); }
+    }
+    function pasteWidgetClipboard(){
+        if (!_widgetClipboard.length) return;
+        if (typeof canEditBoard === 'function' && !canEditBoard()) return;
+        _widgetClipboard.forEach((st, i) => {
+            const copy = Object.assign({}, st, { x: (st.x || 0) + i * 18, y: (st.y || 0) + i * 18 });
+            spawnWidgetFromState(copy);
+        });
+        const n = _widgetClipboard.length;
+        _widgetClipboard = [];
+        updateWidgetClipboardUI();
+        saveBoardState();
+        showWidgetClipboardToast('✅ ' + n + (n === 1 ? ' widget' : ' widgetar') + ' inklistrade på den här sidan');
+    }
+    function clearWidgetClipboard(){ _widgetClipboard = []; updateWidgetClipboardUI(); }
+    function updateWidgetClipboardUI(){
+        const btn = document.getElementById('widget-clipboard-btn');
+        const count = document.getElementById('widget-clipboard-count');
+        if (!btn) return;
+        if (_widgetClipboard.length > 0){ btn.style.display = 'flex'; if(count) count.textContent = _widgetClipboard.length; }
+        else { btn.style.display = 'none'; }
+    }
+    function showWidgetClipboardToast(msg){
+        let t = document.getElementById('widget-clipboard-toast');
+        if (!t){
+            t = document.createElement('div'); t.id = 'widget-clipboard-toast';
+            t.style.cssText = 'position:fixed;bottom:64px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:9px 16px;border-radius:20px;font-size:12.5px;font-weight:700;z-index:10000;box-shadow:0 2px 10px rgba(0,0,0,0.22);opacity:0;transition:opacity .2s ease;pointer-events:none;max-width:88vw;text-align:center;';
+            document.body.appendChild(t);
+        }
+        t.textContent = msg; t.style.opacity = '1';
+        clearTimeout(t._hideTimer); t._hideTimer = setTimeout(()=>{ t.style.opacity = '0'; }, 2400);
+    }
+
     // BASE DRAG ENGINE
     function createWidget(title, width, customClass, config) {
         if(!customClass) customClass = ''; widgetCount++;
@@ -5209,7 +5263,7 @@
         const inner = document.createElement('div'); inner.className = 'widget-inner';
         const header = document.createElement('div'); header.className = 'widget-header';
         
-        header.innerHTML = `<span>${title}</span><div class='widget-controls'><span class='widget-ctrl-icon widget-dup-icon' title='Duplicera'>⧉</span><span class='widget-ctrl-icon btn-min'>➖</span><span class='widget-ctrl-icon btn-lck'>🔓</span><span class='widget-ctrl-icon widget-close-icon'>✖</span></div>`;
+        header.innerHTML = `<span>${title}</span><div class='widget-controls'><span class='widget-ctrl-icon widget-copy-icon' title='Kopiera (klistra in på en annan sida)'>📋</span><span class='widget-ctrl-icon widget-dup-icon' title='Duplicera'>⧉</span><span class='widget-ctrl-icon btn-min'>➖</span><span class='widget-ctrl-icon btn-lck'>🔓</span><span class='widget-ctrl-icon widget-close-icon'>✖</span></div>`;
         const lockIcon = header.querySelector('.btn-lck'); lockIcon.innerHTML = widget.classList.contains('locked') ? '🔒' : '🔓';
         
         inner.appendChild(body); widget.appendChild(header); widget.appendChild(inner);
@@ -5235,6 +5289,7 @@
                 : "Vill du stänga rutan?";
             customConfirm(msg, () => { widget.remove(); saveBoardState(); });
         };
+        header.querySelector('.widget-copy-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; addWidgetToClipboard(widget); };
         header.querySelector('.widget-dup-icon').onclick = (e) => { e.stopPropagation(); if(typeof canEditBoard === 'function' && !canEditBoard()) return; duplicateWidget(widget); };
         header.querySelector('.btn-min').onclick = (e) => {
             e.stopPropagation();
