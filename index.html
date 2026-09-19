@@ -28712,24 +28712,51 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
         } catch(e){ console.warn('[MinTavla] PDF-export av arbetsbladet misslyckades:', e); customAlert('Kunde inte skapa PDF just nu. Försök igen.', '⚠️'); }
     }
 
-    // ---- PRESENTATION (flik i AI-LEKTION): bygger en färdig, kopierbar prompt att klistra in i
-    // Gemini (t.ex. sidopanelen i Google Presentationer, eller gemini.google.com) för att skapa en
-    // presentation med bildstöd utifrån den redan genererade lektionen. Ingen egen AI-anrop krävs
-    // här - det är bara textihopsättning - så tabben fungerar direkt utan extra API-nyckel/dialog. ----
+    // ---- PRESENTATION (flik i AI-LEKTION): bygger ett kompakt, punktformat källmaterial att
+    // klistra in som KÄLLA i NotebookLM (notebooklm.google.com). NotebookLM:s Studio-panel har ett
+    // eget "Slide Deck"-verktyg som skapar bildspel med bildstöd direkt från källor, så tabben
+    // behöver inte konstruera en instruktionsprompt till Gemini - bara ett kort, punktvis
+    // källunderlag (INTE sammanhängande löptext) som NotebookLM kan bygga bilderna utifrån. Ingen
+    // egen AI-anrop krävs - det är bara textihopsättning - så tabben fungerar direkt.
+    function aiLektionToBullets(text){
+        text = String(text||'').trim();
+        if(!text) return '';
+        // Om texten redan är radbruten (t.ex. lärandemål, en rad per punkt) - använd raderna som de är.
+        let lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+        if(lines.length < 2){
+            // Annars: dela upp löpande text i meningar så varje mening blir en egen kort punkt.
+            lines = text.split(/(?<=[.!?])\s+/).map(l=>l.trim()).filter(Boolean);
+        }
+        return lines.map(l => '- ' + l.replace(/^[-•]\s*/, '')).join('\n');
+    }
     function buildAiPresentationPrompt(f, lesson){
         lesson = lesson || {};
-        return "Skapa en presentation i Google Presentationer på SVENSKA om lektionen nedan, med 7-9 bilder och BILDSTÖD (en passande bild eller illustration) till varje bild. Anpassa språk och bilder efter årskursen. Håll texten på varje bild kort och tydlig (punktlista) - innehållet nedan är bakgrundsinformation åt dig, inte text som ska klistras in ordagrant.\n\n"
-            + "Ämne: " + f.amne + "\n"
-            + "Område/tema: " + f.omrade + "\n"
-            + "Årskurs: " + f.arskurs + "\n\n"
-            + "Bygg presentationen enligt denna struktur, en bild per punkt, och lägg till EN bild/illustration som passar innehållet på varje bild:\n"
-            + "1. Titelbild - " + f.omrade + " (en bild som fångar temat)\n"
-            + "2. Lärandemål - " + (lesson.mal || '') + "\n"
-            + "3. Startaktivitet - " + (lesson.start || '') + "\n"
-            + "4. Genomgång - " + (lesson.genomgang || '') + " (dela gärna upp på 1-2 bilder om det är mycket innehåll)\n"
-            + "5. Elevuppgift - " + (lesson.uppgift || '') + "\n"
-            + "6. Par-/gruppaktivitet - " + (lesson.par || '') + "\n"
-            + "7. Exit ticket - " + (lesson.exit || '');
+        const rows = [
+            (f.omrade || '').toUpperCase(),
+            f.amne + ' · ' + f.arskurs + ' · ' + f.tid + ' min',
+            '',
+            'BILD 1 – TITEL',
+            '- ' + f.omrade,
+            '',
+            'BILD 2 – LÄRANDEMÅL',
+            aiLektionToBullets(lesson.mal),
+            '',
+            'BILD 3 – STARTAKTIVITET',
+            aiLektionToBullets(lesson.start),
+            '',
+            'BILD 4 – GENOMGÅNG',
+            aiLektionToBullets(lesson.genomgang),
+            '',
+            'BILD 5 – ELEVUPPGIFT',
+            aiLektionToBullets(lesson.uppgift),
+            '',
+            'BILD 6 – PAR-/GRUPPAKTIVITET',
+            aiLektionToBullets(lesson.par),
+            '',
+            'BILD 7 – EXIT TICKET',
+            aiLektionToBullets(lesson.exit)
+        ];
+        return rows.join('\n');
     }
 
     function createAiLektion(config){
@@ -28935,12 +28962,12 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
             }
 
             function renderPresentationTab(){
-                toolbar.innerHTML = '<button type="button" class="kw-btn kw-btn-ghost ai-lek-presn-copy-btn">📋 Kopiera prompt</button>'
-                    + '<button type="button" class="kw-btn kw-btn-ghost ai-lek-presn-open-btn">📊 Öppna ny Google Presentation</button>';
+                toolbar.innerHTML = '<button type="button" class="kw-btn kw-btn-ghost ai-lek-presn-copy-btn">📋 Kopiera källmaterial</button>'
+                    + '<button type="button" class="kw-btn kw-btn-ghost ai-lek-presn-open-btn">📓 Öppna NotebookLM</button>';
                 content.innerHTML = '';
                 content.classList.remove('ai-lek-present');
                 const hint = document.createElement('div'); hint.className = 'kw-edit-hint'; hint.style.marginBottom = '10px';
-                hint.innerHTML = 'Kopiera prompten nedan och klistra in den i <b>Gemini</b> - antingen i sidopanelen i Google Presentationer, eller på gemini.google.com - så byggs en presentation med bildstöd automatiskt. Du kan redigera texten innan du kopierar.';
+                hint.innerHTML = 'Kopiera det kompakta källmaterialet nedan och lägg till det som en <b>källa</b> i <b>NotebookLM</b> (Lägg till källa → Klistra in text). Gå sedan till Studio-panelen och välj <b>Slide Deck</b> (Presenter Slides) för att få en presentation med bildstöd automatiskt. Du kan redigera texten innan du kopierar.';
                 content.appendChild(hint);
                 if(!state.presentationPrompt) state.presentationPrompt = buildAiPresentationPrompt(f, state.lesson);
                 const ta = document.createElement('textarea'); ta.className = 'ai-lek-pres-ta'; ta.value = state.presentationPrompt; ta.spellcheck = false;
@@ -28949,10 +28976,10 @@ I dag vilar Vasa i sin egen byggnad, Vasamuseet i Stockholm – ett av världens
 
                 toolbar.querySelector('.ai-lek-presn-copy-btn').onclick = () => {
                     const val = ta.value;
-                    try{ navigator.clipboard.writeText(val).then(()=>{ customAlert('Prompten är kopierad! Klistra in den i Gemini för att skapa presentationen.', '✅'); }, ()=>{ ta.select(); customAlert('Kunde inte kopiera automatiskt - texten är markerad, kopiera manuellt (Ctrl/Cmd+C).', 'ℹ️'); }); }
+                    try{ navigator.clipboard.writeText(val).then(()=>{ customAlert('Källmaterialet är kopierat! Lägg till det som en källa i NotebookLM och skapa ett Slide Deck.', '✅'); }, ()=>{ ta.select(); customAlert('Kunde inte kopiera automatiskt - texten är markerad, kopiera manuellt (Ctrl/Cmd+C).', 'ℹ️'); }); }
                     catch(e){ ta.select(); customAlert('Markera texten och kopiera manuellt (Ctrl/Cmd+C).', 'ℹ️'); }
                 };
-                toolbar.querySelector('.ai-lek-presn-open-btn').onclick = () => { window.open('https://slides.new/', '_blank', 'noopener'); };
+                toolbar.querySelector('.ai-lek-presn-open-btn').onclick = () => { window.open('https://notebooklm.google.com/', '_blank', 'noopener'); };
             }
 
             renderActiveTab();
