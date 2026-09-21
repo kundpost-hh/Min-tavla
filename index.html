@@ -4366,6 +4366,11 @@
             if (!cloudFetchOk){
                 // Misslyckades trots flera försök - visa ett tydligt val istället för att tyst
                 // fortsätta med en (möjligen tom) lokal tavla som om ingenting hänt.
+                // FIX: boot-cover (startskärmens snurra) har ALLRA högst z-index och täcker annars
+                // felrutan helt osynligt - utan denna rad fastnar appen på en evig, osynlig
+                // laddningsskärm när molnhämtningen misslyckas, precis som "inloggningsrutan eller
+                // den färdiga tavlan" redan gjorde vid lyckad inloggning (se _finishSignInAfterCloudFetch).
+                if(typeof hideBootCover==='function') hideBootCover();
                 showCloudFetchErrorOverlay(true);
                 return;
             }
