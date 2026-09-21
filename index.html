@@ -3592,7 +3592,7 @@
     async function loadAdminEmails(){
         try{
             if (!window.cloudReady || !fbDB) return;
-            const snap = await fbDB.collection('config').doc('admins').get();
+            const snap = await fsTimeout(fbDB.collection('config').doc('admins').get(), 8000, 'hämta adminlista');
             if (snap.exists){ const d = snap.data(); if (Array.isArray(d.emails)) adminEmailsCache = d.emails; }
         } catch(e){ console.warn('[MinTavla] Kunde inte hämta adminlistan:', e); }
     }
@@ -3908,13 +3908,25 @@
     }
 
     // Hämta ner användarens data från molnet vid inloggning
+    // NYTT: delad hjälpfunktion - Firestore kan i vissa lägen (t.ex. om enheten uppfattas som
+    // offline) låta EN förfrågan varken lyckas ELLER misslyckas, den bara hänger tyst för evigt
+    // utan att kasta något fel att fånga. Alla molnanrop i INLOGGNINGSKEDJAN (som annars skulle
+    // kunna fastna hela appen på "Loggar in, vänta...” för alltid) körs därför via den här
+    // funktionen, som tvingar fram ett (kontrollerat) fel efter `ms` millisekunder istället.
+    function fsTimeout(promise, ms, label){
+        ms = ms || 10000;
+        return Promise.race([
+            promise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Tidsgräns överskreds' + (label ? (' (' + label + ')') : '') + ' - molnet svarade inte inom ' + Math.round(ms/1000) + ' sekunder')), ms))
+        ]);
+    }
     async function syncFromCloud(user){
         // Returnerar true vid lyckad hämtning (även om dokumentet ännu inte finns, t.ex. ny
         // användare) och false vid ETT nätverks-/molnfel - så att anroparen (se
         // syncFromCloudWithRetry) kan skilja på "tomt konto" och "kunde inte nå molnet".
         if (!window.cloudReady || !user) return true;
         try {
-            const snap = await fbDB.collection('boards').doc(emailKey(user)).get();
+            const snap = await fsTimeout(fbDB.collection('boards').doc(emailKey(user)).get(), 8000, 'hämta tavla');
             if (snap.exists){
                 const d = snap.data();
                 cloudApplyData(d);
@@ -3971,7 +3983,7 @@
         const ref = fbDB.collection('boards').doc(emailKey(currentUser));
         _pendingCloudWrites++;
         try {
-            const result = await fbDB.runTransaction(async (tx) => {
+            const result = await fsTimeout(fbDB.runTransaction(async (tx) => {
                 const snap = await tx.get(ref);
                 const remoteUpdatedAt = (snap.exists && typeof snap.data().updatedAt === 'number') ? snap.data().updatedAt : 0;
                 if (remoteUpdatedAt > _lastKnownCloudUpdatedAt){
@@ -3988,7 +4000,7 @@
                 _lastKnownCloudUpdatedAt = now;
                 tx.set(ref, payload, { merge: true });
                 return { conflict: false, updatedAt: now };
-            });
+            }), 15000, 'spara tavla');
             if (result.conflict){
                 setCloudSyncStatus('conflict');
                 _pendingRemoteBoardData = result.remoteData;
@@ -4087,7 +4099,7 @@
         if (!window.cloudReady || !fbDB) return;
         try {
             if (typeof isBoardAdmin === 'function' && isBoardAdmin()){
-                const snap = await fbDB.collection('config').doc('toolbar').get();
+                const snap = await fsTimeout(fbDB.collection('config').doc('toolbar').get(), 8000, 'hämta verktygsordning');
                 if (!snap.exists){ pushSharedToolbar(); return; } // dela ut adminens ordning första gången
                 const d = snap.data();
                 if (typeof d.locked === 'boolean'){ toolbarOrderLocked = d.locked; updateToolbarLockUI(); }
@@ -4104,7 +4116,7 @@
                 if (typeof d.updatedAt === 'number' && d.updatedAt > localTs) applySharedToolbar(d);
                 return;
             }
-            const snap = await fbDB.collection('config').doc('toolbar').get();
+            const snap = await fsTimeout(fbDB.collection('config').doc('toolbar').get(), 8000, 'hämta verktygsordning');
             if (snap.exists) applySharedToolbar(snap.data());
         } catch(e){
             // FIX: gäster loggar aldrig in mot Firebase, så om Firestore-reglerna kräver inloggning
@@ -4146,11 +4158,11 @@
     async function registerUser(email, name){
         try {
             const ref = fbDB.collection('users').doc(emailKey(email));
-            const snap = await ref.get();
+            const snap = await fsTimeout(ref.get(), 8000, 'registrera användare');
             const now = Date.now();
             const data = { email: email, name: name || '', lastSeen: now };
             if (!snap.exists || !snap.data().firstSeen) data.firstSeen = now;
-            await ref.set(data, { merge:true });
+            await fsTimeout(ref.set(data, { merge:true }), 8000, 'registrera användare');
         } catch(err){ console.warn('[MinTavla] Kunde inte registrera användare:', err); }
     }
 
@@ -4346,7 +4358,7 @@
             if(typeof applyAdminUIMode === 'function') applyAdminUIMode(); // rätt ej-admin/viewer-klasser så fort listan finns
             // Borttagen/blockerad av admin?
             try {
-                const usnap = await fbDB.collection('users').doc(emailKey(email)).get();
+                const usnap = await fsTimeout(fbDB.collection('users').doc(emailKey(email)).get(), 8000, 'kontrollera åtkomst');
                 if (usnap.exists && usnap.data().blocked && !isAdminEmail(email)){
                     await fbAuth.signOut();
                     customAlert('Din åtkomst till Min Tavla har tagits bort. Kontakta administratören om det är fel.', '🔒');
@@ -4362,7 +4374,7 @@
             // ger upp - se kommentaren ovanför _cloudSyncBlocked och syncFromCloudWithRetry.
             _cloudSyncBlocked = true;
             _pendingSignedInUser = email;
-            const cloudFetchOk = await syncFromCloudWithRetry(email, 3);
+            const cloudFetchOk = await syncFromCloudWithRetry(email, 2);
             if (!cloudFetchOk){
                 // Misslyckades trots flera försök - visa ett tydligt val istället för att tyst
                 // fortsätta med en (möjligen tom) lokal tavla som om ingenting hänt.
