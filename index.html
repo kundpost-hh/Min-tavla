@@ -3773,7 +3773,7 @@
        öppen, samt av en manuell "Hämta senaste version"-knapp för den som inte vill vänta.
        ========================================================================================= */
     let _lastKnownCloudUpdatedAt = 0;
-    let _boardLiveUnsub = null;
+    let _boardLivePollTimer = null;
     let _pendingRemoteBoardData = null; // väntande nyare molnversion - visas som banner tills användaren väljer att hämta den
     // NYTT: satt till true FRÅN inloggningens start tills den första molnhämtningen lyckats.
     // Så länge den är true vägrar _writeBoardToCloud spara NÅGOT till molnet - annars skulle en
@@ -3806,14 +3806,23 @@
     // Skriver ALDRIG över egna, ännu osparade ändringar automatiskt (se _hasUnsavedLocalWork).
     function startBoardLiveSync(){
         if (!window.cloudReady || !fbDB || !currentUser || window.isGuestMode) return;
-        if (_boardLiveUnsub) { try{ _boardLiveUnsub(); }catch(e){} _boardLiveUnsub = null; }
-        try {
-            _boardLiveUnsub = fbDB.collection('boards').doc(emailKey(currentUser)).onSnapshot(snap => {
+        stopBoardLiveSync(); // rensa ev. tidigare timer innan en ny startas
+        // FIX: bytt från en IHÅLLANDE "Listen"-ström (onSnapshot) till enkel periodisk kontroll med
+        // vanliga engångshämtningar (samma typ av anrop som redan alltid fungerat överallt annars i
+        // appen). En ihållande Listen-ström visade sig kunna gå sönder på vissa datorer/nätverk
+        // (syntes som "WebChannelConnection ... Listen ... transport errored" och upprepade 400-fel
+        // i webbläsarens konsol) - och värre: när den gick sönder verkade Firestore missuppfatta HELA
+        // anslutningen som nere, vilket fick även helt vanliga hämtningar (inloggning, hämta tavlan)
+        // att börja hänga sig i onödan. Polling var 25:e sekund ger nästan samma upplevelse (en
+        // ändring på en annan dator märks inom en halv minut) men utan den risken.
+        const poll = async () => {
+            if (!window.cloudReady || !fbDB || !currentUser || window.isGuestMode) return;
+            try {
+                const snap = await fsTimeout(fbDB.collection('boards').doc(emailKey(currentUser)).get(), 12000, 'live-synk');
                 if (!snap.exists) return;
-                if (snap.metadata.hasPendingWrites) return; // ekot av vår egen, ännu obekräftade skrivning - ignorera
                 const d = snap.data();
                 if (!d || typeof d.updatedAt !== 'number') return;
-                if (d.updatedAt <= _lastKnownCloudUpdatedAt) return; // inget nytt (eller ekot av det vi själva just sparade)
+                if (d.updatedAt <= _lastKnownCloudUpdatedAt) return; // inget nytt (eller ekot av det vi själva sparat)
                 if (_hasUnsavedLocalWork()){
                     // Vi har egna ändringar på väg just nu - vänta med att rita om, visa en banner istället
                     // så man själv väljer när det är läge att hämta den nya versionen.
@@ -3822,11 +3831,12 @@
                 } else {
                     _applyRemoteBoardData(d);
                 }
-            }, err => { console.warn('[MinTavla] Live-synk av tavlan kunde inte startas:', err); });
-        } catch(e){ console.warn('[MinTavla] Live-synk av tavlan kunde inte startas:', e); }
+            } catch(e){ /* nätverksstrul - försöker igen vid nästa poll, stör inte användaren för det */ }
+        };
+        _boardLivePollTimer = setInterval(poll, 25000);
     }
     function stopBoardLiveSync(){
-        if (_boardLiveUnsub){ try{ _boardLiveUnsub(); }catch(e){} _boardLiveUnsub = null; }
+        if (_boardLivePollTimer){ clearInterval(_boardLivePollTimer); _boardLivePollTimer = null; }
         _pendingRemoteBoardData = null; showRemoteUpdateBanner(false);
     }
 
@@ -5897,13 +5907,22 @@
     function setupFeedListener(){
         if(!window.cloudReady || !fbDB || window.isGuestMode){ renderFeed(); return; }
         if(feedListening) return; feedListening = true;
-        try {
-            fbDB.collection('feed').orderBy('ts','desc').limit(60).onSnapshot(snap => {
+        // FIX: bytt från en ihållande "Listen"-ström (onSnapshot) till periodisk polling med vanliga
+        // engångshämtningar - samma orsak och princip som för startBoardLiveSync (se kommentaren där).
+        // Den här lyssnaren startades tidigare OVILLKORLIGEN vid varje inloggning (via initBoard ->
+        // refreshPocketData), så en trasig Listen-ström här kunde ensam få HELA inloggningen att
+        // hänga sig, även innan live-synken för tavlan fanns.
+        const poll = async () => {
+            if(!window.cloudReady || !fbDB || window.isGuestMode) return;
+            try {
+                const snap = await fsTimeout(fbDB.collection('feed').orderBy('ts','desc').limit(60).get(), 12000, 'flöde');
                 feedMessages = []; snap.forEach(d => feedMessages.push(Object.assign({id:d.id}, d.data())));
                 feedMessages.reverse();
                 renderFeed(); updateFeedDot(); pruneOldFeed();
-            }, err => console.warn('[MinTavla] flöde-fel:', err));
-        } catch(e){ console.warn(e); feedListening = false; }
+            } catch(e){ console.warn('[MinTavla] flöde-fel:', e); }
+        };
+        poll(); // hämta direkt en första gång, väntar inte på första pollningen
+        setInterval(poll, 25000);
     }
     function renderFeed(){
         const el = document.getElementById('sp-feed'); if(!el) return;
