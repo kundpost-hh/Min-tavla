@@ -3592,7 +3592,7 @@
     async function loadAdminEmails(){
         try{
             if (!window.cloudReady || !fbDB) return;
-            const snap = await fsTimeout(fbDB.collection('config').doc('admins').get(), 8000, 'hämta adminlista');
+            const snap = await fsTimeout(fbDB.collection('config').doc('admins').get(), 12000, 'hämta adminlista');
             if (snap.exists){ const d = snap.data(); if (Array.isArray(d.emails)) adminEmailsCache = d.emails; }
         } catch(e){ console.warn('[MinTavla] Kunde inte hämta adminlistan:', e); }
     }
@@ -3685,8 +3685,28 @@
             if (typeof firebase === 'undefined') { console.warn('[MinTavla] Firebase-SDK kunde inte laddas – kör lokalt.'); return; }
             firebase.initializeApp(firebaseConfig);
             fbAuth = firebase.auth(); fbDB = firebase.firestore();
+            // FIX: en del nätverk (vanligt bakom skolors brandväggar/innehållsfilter) hanterar inte
+            // Firestores normala, långlivade "streaming"-anslutning (WebChannel) korrekt - man ser då
+            // upprepade "400"-fel och "transport errored" i konsolen, och ALLA molnanrop går i
+            // timeout eftersom anslutningen aldrig kommer upp, även om internet i övrigt fungerar
+            // fint. Genom att tvinga fram långpolling istället (Googles egen rekommenderade lösning
+            // för just detta) går trafiken via vanliga, korta HTTP-förfrågningar som nästan alla
+            // brandväggar/proxyservrar hanterar utan problem. Något långsammare än streaming, men
+            // stabilt även på restriktiva nätverk. autoDetect provar streaming först och faller
+            // tillbaka automatiskt om det inte fungerar.
+            try { fbDB.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){ console.warn('[MinTavla] Kunde inte sätta Firestore-inställningar:', e); }
             window.cloudReady = true;
             console.info('[MinTavla] Central molnlagring aktiv ✔');
+            // NYTT: "värmer upp" anslutningen mot molnet direkt, redan innan användaren hunnit
+            // klicka på inloggningsknappen - helt osynligt, ingen väntan visas för detta. Den allra
+            // FÖRSTA kontakten med Firestore i en session tar ofta några extra sekunder (bygga upp
+            // anslutningen), särskilt bakom skolors brandväggar/nätverksfilter. Utan uppvärmning
+            // betalas den kostnaden av det FÖRSTA riktiga anropet i inloggningskedjan (adminlistan)
+            // istället, vilket kunde göra att just den allra första inloggningen i en ny flik/session
+            // hann gå i timeout trots att allt i grunden fungerade. Om uppvärmningen misslyckas
+            // (t.ex. permission-denied) struntar vi helt i det - riktiga anrop har ändå sin egen
+            // tidsgräns och felhantering.
+            try { fbDB.collection('config').doc('admins').get().catch(()=>{}); } catch(e){}
         } catch(e){ console.warn('[MinTavla] Kunde inte starta Firebase, kör lokalt:', e); window.cloudReady = false; }
     })();
 
@@ -3852,10 +3872,12 @@
     }
     // Sista steget av inloggningen - körs efter en LYCKAD (eller medvetet överhoppad) molnhämtning.
     async function _finishSignInAfterCloudFetch(email){
+        if(typeof _loginLog==='function') _loginLog('bygger tavlan (_finishSignInAfterCloudFetch)...');
         migrateLocalLayoutIfNeeded(); // fix: ärv den lokala verktygs-ordningen om kontot ännu inte har någon egen
         document.getElementById('login-overlay').style.display = 'none';
         if(typeof hideBootCover==='function') hideBootCover();
         migrateOldLists(currentUser); initBoard();
+        if(typeof _loginLog==='function') _loginLog('tavlan byggd, klart!');
         updateAdminButton();
         startSharedToolbarSync(); // adminens ordning i verktygslådan gäller alla användare
         startBoardLiveSync(); // håll tavlan synkad live mellan öppna datorer/flikar
@@ -3926,10 +3948,12 @@
         // syncFromCloudWithRetry) kan skilja på "tomt konto" och "kunde inte nå molnet".
         if (!window.cloudReady || !user) return true;
         try {
-            const snap = await fsTimeout(fbDB.collection('boards').doc(emailKey(user)).get(), 8000, 'hämta tavla');
+            const snap = await fsTimeout(fbDB.collection('boards').doc(emailKey(user)).get(), 12000, 'hämta tavla');
+            if(typeof _loginLog==='function') _loginLog('    ...svar mottaget från molnet, bearbetar data...');
             if (snap.exists){
                 const d = snap.data();
                 cloudApplyData(d);
+                if(typeof _loginLog==='function') _loginLog('    ...data bearbetad och sparad lokalt');
                 // NYTT: minns vilken molnversion vi just läste in, så framtida sparningar kan
                 // upptäcka om en annan dator hunnit spara något nyare (se _writeBoardToCloud).
                 _lastKnownCloudUpdatedAt = (typeof d.updatedAt === 'number') ? d.updatedAt : Date.now();
@@ -3945,7 +3969,9 @@
     async function syncFromCloudWithRetry(user, attempts){
         attempts = attempts || 3;
         for (let i = 0; i < attempts; i++){
+            if(typeof _loginLog==='function') _loginLog('  molnhämtning försök ' + (i+1) + '/' + attempts + '...');
             const ok = await syncFromCloud(user);
+            if(typeof _loginLog==='function') _loginLog('  molnhämtning försök ' + (i+1) + ' -> ' + ok);
             if (ok) return true;
             if (i < attempts - 1) await new Promise(r => setTimeout(r, 900 * (i + 1)));
         }
@@ -4099,7 +4125,7 @@
         if (!window.cloudReady || !fbDB) return;
         try {
             if (typeof isBoardAdmin === 'function' && isBoardAdmin()){
-                const snap = await fsTimeout(fbDB.collection('config').doc('toolbar').get(), 8000, 'hämta verktygsordning');
+                const snap = await fsTimeout(fbDB.collection('config').doc('toolbar').get(), 12000, 'hämta verktygsordning');
                 if (!snap.exists){ pushSharedToolbar(); return; } // dela ut adminens ordning första gången
                 const d = snap.data();
                 if (typeof d.locked === 'boolean'){ toolbarOrderLocked = d.locked; updateToolbarLockUI(); }
@@ -4116,7 +4142,7 @@
                 if (typeof d.updatedAt === 'number' && d.updatedAt > localTs) applySharedToolbar(d);
                 return;
             }
-            const snap = await fsTimeout(fbDB.collection('config').doc('toolbar').get(), 8000, 'hämta verktygsordning');
+            const snap = await fsTimeout(fbDB.collection('config').doc('toolbar').get(), 12000, 'hämta verktygsordning');
             if (snap.exists) applySharedToolbar(snap.data());
         } catch(e){
             // FIX: gäster loggar aldrig in mot Firebase, så om Firestore-reglerna kräver inloggning
@@ -4158,11 +4184,11 @@
     async function registerUser(email, name){
         try {
             const ref = fbDB.collection('users').doc(emailKey(email));
-            const snap = await fsTimeout(ref.get(), 8000, 'registrera användare');
+            const snap = await fsTimeout(ref.get(), 12000, 'registrera användare');
             const now = Date.now();
             const data = { email: email, name: name || '', lastSeen: now };
             if (!snap.exists || !snap.data().firstSeen) data.firstSeen = now;
-            await fsTimeout(ref.set(data, { merge:true }), 8000, 'registrera användare');
+            await fsTimeout(ref.set(data, { merge:true }), 12000, 'registrera användare');
         } catch(err){ console.warn('[MinTavla] Kunde inte registrera användare:', err); }
     }
 
@@ -4329,8 +4355,18 @@
     // Körs när någon är inloggad (både vid nytt klick och vid auto-återställd session)
     let _handlingSignIn = false;
     let _boardInitializedForUser = null; // FIX: håller reda på vilken användare tavlan redan är uppbyggd för
+    // NYTT: tydlig steg-för-steg-loggning (med förfluten tid) genom hela inloggningskedjan.
+    // Syns i webbläsarens konsol (F12 -> Console). Används för att i efterhand kunna se EXAKT
+    // vilket steg som senast startade men aldrig hann avsluta, om något oväntat skulle fastna.
+    let _loginLogT0 = 0;
+    function _loginLog(step){
+        if(!_loginLogT0) _loginLogT0 = Date.now();
+        try { console.info('[MinTavla][inloggning +' + (((Date.now()-_loginLogT0)/1000).toFixed(1)) + 's] ' + step); } catch(e){}
+    }
     async function handleSignedIn(user){
         if (_handlingSignIn) return; _handlingSignIn = true;
+        _loginLogT0 = Date.now();
+        _loginLog('startar för ' + (user && user.email));
         try {
             const email = user.email; const name = user.displayName || '';
             if (!isAllowedEmailDomain(email)){
@@ -4349,32 +4385,42 @@
             // inloggad session/användare - upprepade "inloggad"-händelser för SAMMA användare uppdaterar
             // bara admin-relaterat UI, utan att röra tavlan eller verktygsfickan alls.
             if (_boardInitializedForUser === email){
+                _loginLog('redan initierad för den här användaren - uppdaterar bara admin-UI');
                 await loadAdminEmails();
                 if(typeof applyAdminUIMode === 'function') applyAdminUIMode();
                 if(typeof updateAdminButton === 'function') updateAdminButton();
+                _loginLog('klart (redan initierad-vägen)');
                 return;
             }
+            _loginLog('hämtar adminlista...');
             await loadAdminEmails();
+            _loginLog('adminlista klar');
             if(typeof applyAdminUIMode === 'function') applyAdminUIMode(); // rätt ej-admin/viewer-klasser så fort listan finns
             // Borttagen/blockerad av admin?
+            _loginLog('kontrollerar åtkomst...');
             try {
-                const usnap = await fsTimeout(fbDB.collection('users').doc(emailKey(email)).get(), 8000, 'kontrollera åtkomst');
+                const usnap = await fsTimeout(fbDB.collection('users').doc(emailKey(email)).get(), 12000, 'kontrollera åtkomst');
+                _loginLog('åtkomstkontroll klar');
                 if (usnap.exists && usnap.data().blocked && !isAdminEmail(email)){
                     await fbAuth.signOut();
                     customAlert('Din åtkomst till Min Tavla har tagits bort. Kontakta administratören om det är fel.', '🔒');
                     showLoginButton();
                     return;
                 }
-            } catch(e){ /* om kontrollen inte går, släpp ändå in */ }
+            } catch(e){ _loginLog('åtkomstkontroll gav fel (släpper in ändå): ' + (e&&e.message)); }
             fbUser = user; currentUser = email; currentUserName = name || email;
             localStorage.setItem('classboardzUser', currentUser);
             applyAdminUIMode();
+            _loginLog('registrerar användare...');
             await registerUser(email, name);
+            _loginLog('användare registrerad');
             // NYTT: blockera all molnsparning och försök hämta tavlan upp till 3 gånger innan vi
             // ger upp - se kommentaren ovanför _cloudSyncBlocked och syncFromCloudWithRetry.
             _cloudSyncBlocked = true;
             _pendingSignedInUser = email;
+            _loginLog('hämtar tavlan från molnet...');
             const cloudFetchOk = await syncFromCloudWithRetry(email, 2);
+            _loginLog('molnhämtning klar, resultat: ' + cloudFetchOk);
             if (!cloudFetchOk){
                 // Misslyckades trots flera försök - visa ett tydligt val istället för att tyst
                 // fortsätta med en (möjligen tom) lokal tavla som om ingenting hänt.
