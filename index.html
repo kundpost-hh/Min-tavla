@@ -3979,6 +3979,13 @@
                 }
                 const now = Date.now();
                 payload.updatedAt = now;
+                // VIKTIGT: sätts HÄR, synkront, INNAN skrivningen ens skickas iväg - inte i .then()
+                // efteråt. Annars finns ett kort race-fönster där live-lyssnaren (startBoardLiveSync)
+                // hinner se vår EGEN nyss sparade ändring på servern innan den här variabeln hunnit
+                // uppdateras, och missuppfattar det som att "en annan dator" sparat - även när det
+                // bara är den här fliken. Genom att sätta värdet redan innan tx.set() går ut kan
+                // lyssnaren aldrig hinna se den nya updatedAt före vi själva vet om den.
+                _lastKnownCloudUpdatedAt = now;
                 tx.set(ref, payload, { merge: true });
                 return { conflict: false, updatedAt: now };
             });
@@ -3987,7 +3994,6 @@
                 _pendingRemoteBoardData = result.remoteData;
                 showRemoteUpdateBanner(true);
             } else {
-                _lastKnownCloudUpdatedAt = result.updatedAt;
                 setCloudSyncStatus('saved');
             }
         } catch(err){
@@ -15258,7 +15264,24 @@
                 namn:'Addition & subtraktion', emoji:'➕',
                 gen: function(niva){
                     const R = niva==='ak4' ? [10,100] : niva==='ak5' ? [50,500] : [100,2000];
-                    const typ = Math.random()<0.5 ? 'add' : 'sub';
+                    // NYTT: en tredje variant (val===2) tränar RUNDNINGSSTRATEGIN istället för att
+                    // bara räkna fram ett svar - eleven ser hur man runda ett av talen till närmaste
+                    // tiotal för att räkna smidigare, och justerar sedan tillbaka.
+                    const val = ri(0,2);
+                    if(val===2){
+                        let b = ri(Math.ceil(R[0]/10)*10+1, Math.floor(R[1]/10)*10-1);
+                        while(b%10===0) b = ri(Math.ceil(R[0]/10)*10+1, Math.floor(R[1]/10)*10-1);
+                        const b2 = Math.round(b/10)*10, diff = b2-b;
+                        const a = ri(R[0],R[1]);
+                        if(diff>0){
+                            // b avrundas UPPÅT (t.ex. 48 → 50) - då måste vi dra bort det vi lade till för mycket.
+                            return { fraga:'Räkna ut '+a+' + '+b+' med rundningsstrategin (runda '+b+' till '+b2+').', svar:a+' + '+b2+' = '+(a+b2)+', men vi lade till '+diff+' för mycket: '+(a+b2)+' − '+diff+' = '+(a+b) };
+                        }
+                        // b avrundas NEDÅT (t.ex. 43 → 40) - då måste vi lägga till det vi drog bort för mycket.
+                        const minskn = -diff;
+                        return { fraga:'Räkna ut '+a+' + '+b+' med rundningsstrategin (runda '+b+' till '+b2+').', svar:a+' + '+b2+' = '+(a+b2)+', men vi lade till '+minskn+' för lite: '+(a+b2)+' + '+minskn+' = '+(a+b) };
+                    }
+                    const typ = val===0 ? 'add' : 'sub';
                     if(typ==='add'){ const a=ri(R[0],R[1]), b=ri(R[0],R[1]); return { fraga:a+' + '+b+' =', svar:a+b }; }
                     const stor=ri(Math.round(R[0]*1.5),R[1]), liten=ri(R[0],stor-1); return { fraga:stor+' − '+liten+' =', svar:stor-liten };
                 }
@@ -15267,7 +15290,17 @@
                 namn:'Multiplikation & division', emoji:'✖️',
                 gen: function(niva){
                     const R = niva==='ak4' ? [2,10] : niva==='ak5' ? [2,12] : [2,20];
-                    const typ = Math.random()<0.5 ? 'mul' : 'div';
+                    // NYTT: en tredje variant (val===2) tränar DUBBELT-OCH-HÄLFTEN-strategin - man
+                    // halverar ena talet och dubblar det andra, vilket ofta gör multiplikationen enklare.
+                    const val = ri(0,2);
+                    if(val===2){
+                        const evenMax = Math.floor(R[1]/2)*2;
+                        const evenMin = R[0]%2===0 ? R[0] : R[0]+1;
+                        const a = ri(evenMin/2, evenMax/2)*2; // garanterat jämnt tal inom intervallet
+                        const b = ri(R[0],R[1]);
+                        return { fraga:'Räkna ut '+a+' × '+b+' med hjälp av dubbelt och hälften (halvera '+a+', dubbla '+b+').', svar:(a/2)+' × '+(b*2)+' = '+(a*b) };
+                    }
+                    const typ = val===0 ? 'mul' : 'div';
                     const a=ri(R[0],R[1]), b=ri(R[0],R[1]);
                     if(typ==='mul') return { fraga:a+' × '+b+' =', svar:a*b };
                     return { fraga:(a*b)+' ÷ '+b+' =', svar:a };
@@ -15296,48 +15329,96 @@
             },
             geo_matt: {
                 namn:'Geometri, mätning & klockan', emoji:'📐',
+                // Formbanken används av den nya "gissa formen"-varianten (val===3) - eleven får
+                // egenskaperna och ska själv komma på vilken form det är, istället för tvärtom.
+                FORMER: {
+                    ak4: [
+                        { namn:'Kvadrat', egenskaper:'4 lika långa sidor och 4 räta vinklar' },
+                        { namn:'Rektangel', egenskaper:'4 räta vinklar, men bara sidorna mitt emot varandra är lika långa' },
+                        { namn:'Triangel', egenskaper:'3 sidor och 3 hörn' },
+                        { namn:'Cirkel', egenskaper:'helt rund, inga hörn och inga raka sidor' }
+                    ],
+                    ak5: [
+                        { namn:'Kvadrat', egenskaper:'4 lika långa sidor och 4 räta vinklar' },
+                        { namn:'Rektangel', egenskaper:'4 räta vinklar, men bara sidorna mitt emot varandra är lika långa' },
+                        { namn:'Triangel', egenskaper:'3 sidor och 3 hörn' },
+                        { namn:'Cirkel', egenskaper:'helt rund, inga hörn och inga raka sidor' },
+                        { namn:'Femhörning', egenskaper:'5 sidor och 5 hörn' },
+                        { namn:'Sexhörning', egenskaper:'6 sidor och 6 hörn' }
+                    ],
+                    ak6: [
+                        { namn:'Liksidig triangel', egenskaper:'3 lika långa sidor och 3 lika stora vinklar' },
+                        { namn:'Likbent triangel', egenskaper:'2 lika långa sidor och 2 lika stora vinklar' },
+                        { namn:'Rätvinklig triangel', egenskaper:'en av vinklarna är exakt 90°' },
+                        { namn:'Romb', egenskaper:'4 lika långa sidor, men inga räta vinklar' },
+                        { namn:'Parallellogram', egenskaper:'2 par parallella sidor, men inga räta vinklar' },
+                        { namn:'Sexhörning', egenskaper:'6 sidor och 6 hörn' },
+                        { namn:'Åttahörning', egenskaper:'8 sidor och 8 hörn' }
+                    ]
+                },
                 gen: function(niva){
-                    const val = ri(0,2);
+                    const val = ri(0,3);
                     // FIX: area/omkrets/volym-svaren visade tidigare bara slutresultatet (t.ex. "24 cm²"),
                     // utan att visa vad som multiplicerades/adderades - visar nu alltid själva uträkningen
                     // med de riktiga talen (t.ex. "6 cm × 4 cm = 24 cm²").
+                    // NYTT: val===2 (tid mellan två klockslag) och val===3 (gissa formen utifrån
+                    // egenskaper) är nya frågevarianter, se kommentarerna vid respektive gren nedan.
+                    if(val===3){
+                        const banks = this.FORMER[niva] || this.FORMER.ak4;
+                        const f = banks[ri(0,banks.length-1)];
+                        return { fraga:'Vilken form har '+f.egenskaper+'? Vad heter den?', svar:f.namn };
+                    }
                     if(niva==='ak4'){
                         if(val===0){ const l=ri(3,20), b=ri(3,20); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:'2 × ('+l+' + '+b+') = '+(2*(l+b))+' cm' }; }
                         if(val===1){ const h=ri(1,12), halv=Math.random()<0.5; const fraga = halv ? ('Vad är klockan en halvtimme efter '+h+':00?') : ('Vad är klockan en timme efter '+h+':00?'); const svarH = (h%12)+1; const svar = halv ? (h+':30') : (svarH+':00'); return { fraga:fraga, svar:svar }; }
+                        // NYTT: tid mellan två klockslag - hela och halva timmar, samma dag (åk4-nivå).
+                        if(val===2){ const start=ri(6,12); const langd=[1,2,3,4,5][ri(0,4)]; const slut=start+langd; return { fraga:'Hur lång tid är det mellan klockan '+start+':00 och klockan '+slut+':00?', svar:slut+' − '+start+' = '+langd+' timmar' }; }
                         const l=ri(3,15), b=ri(3,15); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:l+' cm × '+b+' cm = '+(l*b)+' cm²' };
                     }
                     if(niva==='ak5'){
                         if(val===0){ const l=ri(10,40), b=ri(10,40); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är arean?', svar:l+' cm × '+b+' cm = '+(l*b)+' cm²' }; }
                         if(val===1){ const h=ri(1,12); const kvart=[15,30,45][ri(0,2)]; return { fraga:'Vad är klockan om vi lägger till '+kvart+' minuter till '+h+':00?', svar:h+':'+String(kvart).padStart(2,'0') }; }
+                        // NYTT: tid mellan två klockslag med minuter (t.ex. 9:15 till 11:45).
+                        if(val===2){ const startH=ri(7,14), startM=[0,15,30,45][ri(0,3)]; const langdMin=[30,45,60,75,90,105,120][ri(0,6)]; const totStart=startH*60+startM, totSlut=totStart+langdMin; const slutH=Math.floor(totSlut/60), slutM=totSlut%60; const langdTxt = langdMin>=60 ? (Math.floor(langdMin/60)+' tim'+(langdMin%60?' '+(langdMin%60)+' min':'')) : (langdMin+' min'); return { fraga:'Hur lång tid är det mellan klockan '+startH+':'+String(startM).padStart(2,'0')+' och klockan '+slutH+':'+String(slutM).padStart(2,'0')+'?', svar:langdTxt }; }
                         const bas=ri(6,30), hojd=ri(Math.ceil(4/2),Math.floor(20/2))*2; return { fraga:'En triangel har basen '+bas+' cm och höjden '+hojd+' cm. Vad är arean? (bas × höjd ÷ 2)', svar:bas+' × '+hojd+' ÷ 2 = '+(bas*hojd/2)+' cm²' };
                     }
                     if(val===0){ const l=ri(15,80), b=ri(15,80); return { fraga:'En rektangel är '+l+' cm lång och '+b+' cm bred. Vad är omkretsen?', svar:'2 × ('+l+' + '+b+') = '+(2*(l+b))+' cm' }; }
                     if(val===1){ const l=ri(4,15), b=ri(4,15), h=ri(2,10); return { fraga:'En låda är '+l+' cm lång, '+b+' cm bred och '+h+' cm hög. Vad är volymen? (l × b × h)', svar:l+' × '+b+' × '+h+' = '+(l*b*h)+' cm³' }; }
+                    // NYTT: tid mellan två klockslag, kan gå över lunch/eftermiddag (åk6-nivå, större spann).
+                    if(val===2){ const startH=ri(7,15), startM=[0,5,10,15,20,25,30,35,40,45,50,55][ri(0,11)]; const langdMin=ri(20,240); const totStart=startH*60+startM, totSlut=totStart+langdMin; const slutH=Math.floor(totSlut/60), slutM=totSlut%60; const langdTxt = langdMin>=60 ? (Math.floor(langdMin/60)+' tim'+(langdMin%60?' '+(langdMin%60)+' min':'')) : (langdMin+' min'); return { fraga:'Ett lektionspass börjar '+startH+':'+String(startM).padStart(2,'0')+' och slutar '+slutH+':'+String(slutM).padStart(2,'0')+'. Hur långt är passet?', svar:langdTxt }; }
                     const bas=ri(8,40), hojd=ri(Math.ceil(6/2),Math.floor(30/2))*2; return { fraga:'En triangel har basen '+bas+' cm och höjden '+hojd+' cm. Vad är arean?', svar:bas+' × '+hojd+' ÷ 2 = '+(bas*hojd/2)+' cm²' };
                 }
             },
             klurig: {
                 namn:'Klurig utmaning', emoji:'🧩',
                 gen: function(niva){
-                    const val = ri(0,3);
+                    const val = ri(0,5);
                     // FIX: samma sak här - kluriga textproblem visade bara slutsvaret, nu visas hela
                     // uträkningen steg för steg, så eleven ser hur man löser den typen av problem.
+                    // NYTT: val===4 (jämförelseproblem) och val===5 (tvåstegsproblem med multiplikation
+                    // + addition/subtraktion) är två nya varianter som ger mer variation totalt.
                     if(niva==='ak4'){
                         if(val===0){ const pris=ri(5,40), antal=ri(2,6); const kostnad=pris*antal; const pengar=kostnad+ri(10,150); return { fraga:'Alex har '+pengar+' kr. Hen köper '+antal+' block som kostar '+pris+' kr styck. Hur mycket pengar har Alex kvar?', svar:pris+' × '+antal+' = '+kostnad+' kr. '+pengar+' − '+kostnad+' = '+(pengar-kostnad)+' kr' }; }
                         if(val===1){ const elever=ri(20,30), grupper=[2,3,4,5][ri(0,3)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever i klassen. De delas in i lika stora grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever i klassen. Läraren delar dem i grupper om '+grupper+' elever. Hur många elever blir över?'); const svar = rest===0 ? (elever+' ÷ '+grupper+' = '+(elever/grupper)+' grupper') : (elever+' ÷ '+grupper+' = '+Math.floor(elever/grupper)+' grupper, '+rest+' elever över'); return { fraga:fraga, svar:svar }; }
                         if(val===2){ const start=ri(2000,2015), alder=ri(6,12); return { fraga:'Ebba föddes år '+start+'. Hur gammal är hon år '+(start+alder)+'?', svar:(start+alder)+' − '+start+' = '+alder+' år' }; }
-                        const a=ri(15,60), b=ri(15,60), c=ri(5,30); return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:a+' + '+b+' − '+c+' = '+(a+b-c)+' frukter' };
+                        if(val===3){ const a=ri(15,60), b=ri(15,60), c=ri(5,30); return { fraga:'En bonde har '+a+' äpplen och '+b+' päron. Hen säljer '+c+' av frukterna. Hur många frukter har bonden kvar totalt?', svar:a+' + '+b+' − '+c+' = '+(a+b-c)+' frukter' }; }
+                        if(val===4){ const eriks=ri(5,40), fler=ri(3,20); const systerns=eriks+fler; return { fraga:'Erik har '+eriks+' kulor. Hans syster har '+fler+' fler kulor än honom. Hur många kulor har de tillsammans?', svar:eriks+' + '+fler+' = '+systerns+' kulor (systern). '+eriks+' + '+systerns+' = '+(eriks+systerns)+' kulor tillsammans' }; }
+                        const paket=ri(2,8), perPaket=ri(3,10), extra=ri(1,15); return { fraga:'Klassen köper '+paket+' paket med '+perPaket+' pennor i varje. De får dessutom '+extra+' extra pennor. Hur många pennor blir det totalt?', svar:paket+' × '+perPaket+' = '+(paket*perPaket)+' pennor. '+(paket*perPaket)+' + '+extra+' = '+(paket*perPaket+extra)+' pennor' };
                     }
                     if(niva==='ak5'){
                         if(val===0){ const pris=ri(15,80), antal=ri(3,9); const kostnad=pris*antal; const pengar=kostnad+ri(50,400); return { fraga:'Jonas har '+pengar+' kr. Han köper '+antal+' böcker som kostar '+pris+' kr styck. Hur mycket pengar har han kvar?', svar:pris+' × '+antal+' = '+kostnad+' kr. '+pengar+' − '+kostnad+' = '+(pengar-kostnad)+' kr' }; }
                         if(val===1){ const elever=ri(60,120), grupper=[4,5,6,7,8][ri(0,4)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever på skolan som ska åka buss. Varje buss rymmer '+grupper+' elever och alla bussar fylls helt. Hur många bussar behövs?') : ('Det är '+elever+' elever som ska delas i grupper om '+grupper+'. Hur många elever blir över efter de fulla grupperna?'); const svar = rest===0 ? (elever+' ÷ '+grupper+' = '+(elever/grupper)+' bussar') : (elever+' ÷ '+grupper+' = '+Math.floor(elever/grupper)+' fulla grupper, '+rest+' elever över'); return { fraga:fraga, svar:svar }; }
                         if(val===2){ const start=ri(1990,2015), alder=ri(10,25); return { fraga:'Filip föddes år '+start+'. Hur gammal är han år '+(start+alder)+'?', svar:(start+alder)+' − '+start+' = '+alder+' år' }; }
-                        const a=ri(100,400), b=ri(100,400), c=ri(30,150); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+c+' pennor säljs. Hur många pennor finns kvar totalt?', svar:a+' + '+b+' − '+c+' = '+(a+b-c)+' pennor' };
+                        if(val===3){ const a=ri(100,400), b=ri(100,400), c=ri(30,150); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+c+' pennor säljs. Hur många pennor finns kvar totalt?', svar:a+' + '+b+' − '+c+' = '+(a+b-c)+' pennor' }; }
+                        if(val===4){ const barn=ri(20,150), fler=ri(10,80); const vuxen=barn+fler; return { fraga:'Ett bibliotek har '+barn+' barnböcker. Det har '+fler+' fler vuxenböcker än barnböcker. Hur många böcker har biblioteket totalt?', svar:barn+' + '+fler+' = '+vuxen+' vuxenböcker. '+barn+' + '+vuxen+' = '+(barn+vuxen)+' böcker totalt' }; }
+                        const paket=ri(4,15), perPaket=ri(6,25), extra=ri(5,60); return { fraga:'En affär tar emot '+paket+' lådor med '+perPaket+' äpplen i varje låda, plus '+extra+' lösa äpplen. Hur många äpplen är det totalt?', svar:paket+' × '+perPaket+' = '+(paket*perPaket)+' äpplen. '+(paket*perPaket)+' + '+extra+' = '+(paket*perPaket+extra)+' äpplen' };
                     }
                     if(val===0){ const pris=ri(50,300), antal=ri(4,12); const rabatt=[10,15,20,25][ri(0,3)]; const kostnadFore=pris*antal; const kostnadEfter=Math.round(kostnadFore*(100-rabatt)/100); return { fraga:'En klass köper '+antal+' biljetter á '+pris+' kr. De får '+rabatt+'% rabatt på hela summan. Vad kostar det totalt efter rabatt?', svar:pris+' × '+antal+' = '+kostnadFore+' kr. '+kostnadFore+' × (100 − '+rabatt+') ÷ 100 = '+kostnadEfter+' kr' }; }
                     if(val===1){ const elever=ri(150,400), grupper=[6,7,8,9,12][ri(0,4)]; const rest=elever%grupper; const fraga = rest===0 ? ('Det är '+elever+' elever på skolan. De delas jämnt i grupper om '+grupper+'. Hur många grupper blir det?') : ('Det är '+elever+' elever som delas i grupper om '+grupper+'. Hur många elever blir över?'); const svar = rest===0 ? (elever+' ÷ '+grupper+' = '+(elever/grupper)+' grupper') : (elever+' ÷ '+grupper+' = '+Math.floor(elever/grupper)+' grupper, '+rest+' elever över'); return { fraga:fraga, svar:svar }; }
                     if(val===2){ const start=ri(1980,2010), alder=ri(15,40); return { fraga:'Nora föddes år '+start+'. Hur gammal blir hon år '+(start+alder)+'?', svar:(start+alder)+' − '+start+' = '+alder+' år' }; }
-                    const a=ri(500,2000), b=ri(500,2000), pct=[10,20,25,50][ri(0,3)]; const salda=Math.round((a+b)*pct/100); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+pct+'% av alla pennor säljs. Hur många pennor säljs?', svar:'('+a+' + '+b+') × '+pct+' ÷ 100 = '+salda+' pennor' };
+                    if(val===3){ const a=ri(500,2000), b=ri(500,2000), pct=[10,20,25,50][ri(0,3)]; const salda=Math.round((a+b)*pct/100); return { fraga:'Ett lager har '+a+' röda och '+b+' blå pennor. '+pct+'% av alla pennor säljs. Hur många pennor säljs?', svar:'('+a+' + '+b+') × '+pct+' ÷ 100 = '+salda+' pennor' }; }
+                    if(val===4){ const fred=ri(200,900), fler=ri(50,400); const lord=fred+fler; return { fraga:'En biograf sålde '+fred+' biljetter på fredagen. På lördagen sålde de '+fler+' fler biljetter än på fredagen. Hur många biljetter sålde de sammanlagt de båda dagarna?', svar:fred+' + '+fler+' = '+lord+' biljetter (lördag). '+fred+' + '+lord+' = '+(fred+lord)+' biljetter totalt' }; }
+                    const paket=ri(5,20), perPaket=ri(10,50); const kopt=paket*perPaket; const sald=ri(10, Math.max(20, Math.floor(kopt*0.6))); return { fraga:'Ett lager tar emot '+paket+' lådor med '+perPaket+' böcker i varje. Sedan säljs '+sald+' böcker. Hur många böcker finns kvar?', svar:paket+' × '+perPaket+' = '+kopt+' böcker. '+kopt+' − '+sald+' = '+(kopt-sald)+' böcker kvar' };
                 }
             }
         };
@@ -15407,21 +15488,47 @@
                 { ord:'bok', klass:'Substantiv' }, { ord:'sova', klass:'Verb' }, { ord:'blå', klass:'Adjektiv' },
                 { ord:'lärare', klass:'Substantiv' }, { ord:'hoppa', klass:'Verb' }, { ord:'stor', klass:'Adjektiv' },
                 { ord:'skola', klass:'Substantiv' }, { ord:'läsa', klass:'Verb' }, { ord:'liten', klass:'Adjektiv' },
-                { ord:'katt', klass:'Substantiv' }, { ord:'skratta', klass:'Verb' }, { ord:'kall', klass:'Adjektiv' }
+                { ord:'katt', klass:'Substantiv' }, { ord:'skratta', klass:'Verb' }, { ord:'kall', klass:'Adjektiv' },
+                { ord:'fisk', klass:'Substantiv' }, { ord:'simma', klass:'Verb' }, { ord:'rolig', klass:'Adjektiv' },
+                { ord:'fågel', klass:'Substantiv' }, { ord:'cykla', klass:'Verb' }, { ord:'tråkig', klass:'Adjektiv' },
+                { ord:'vän', klass:'Substantiv' }, { ord:'måla', klass:'Verb' }, { ord:'mjuk', klass:'Adjektiv' },
+                { ord:'boll', klass:'Substantiv' }, { ord:'baka', klass:'Verb' }, { ord:'hård', klass:'Adjektiv' },
+                { ord:'mamma', klass:'Substantiv' }, { ord:'sjunga', klass:'Verb' }, { ord:'rund', klass:'Adjektiv' },
+                { ord:'pappa', klass:'Substantiv' }, { ord:'dansa', klass:'Verb' }, { ord:'lång', klass:'Adjektiv' },
+                { ord:'gata', klass:'Substantiv' }, { ord:'bygga', klass:'Verb' }, { ord:'kort', klass:'Adjektiv' },
+                { ord:'trädgård', klass:'Substantiv' }, { ord:'gräva', klass:'Verb' }, { ord:'söt', klass:'Adjektiv' },
+                { ord:'kompis', klass:'Substantiv' }, { ord:'klättra', klass:'Verb' }, { ord:'arg', klass:'Adjektiv' },
+                { ord:'park', klass:'Substantiv' }, { ord:'leka', klass:'Verb' }, { ord:'ledsen', klass:'Adjektiv' },
+                { ord:'fönster', klass:'Substantiv' }, { ord:'vinka', klass:'Verb' }, { ord:'törstig', klass:'Adjektiv' }
             ],
             ak5: [
                 { ord:'cykel', klass:'Substantiv' }, { ord:'simma', klass:'Verb' }, { ord:'nyfiken', klass:'Adjektiv' },
                 { ord:'dator', klass:'Substantiv' }, { ord:'rita', klass:'Verb' }, { ord:'trött', klass:'Adjektiv' },
                 { ord:'jag', klass:'Pronomen' }, { ord:'de', klass:'Pronomen' }, { ord:'vi', klass:'Pronomen' },
                 { ord:'sakta', klass:'Adverb' }, { ord:'ofta', klass:'Adverb' }, { ord:'idag', klass:'Adverb' },
-                { ord:'kompis', klass:'Substantiv' }, { ord:'cykla', klass:'Verb' }, { ord:'modig', klass:'Adjektiv' }
+                { ord:'kompis', klass:'Substantiv' }, { ord:'cykla', klass:'Verb' }, { ord:'modig', klass:'Adjektiv' },
+                { ord:'skog', klass:'Substantiv' }, { ord:'skriva', klass:'Verb' }, { ord:'ivrig', klass:'Adjektiv' },
+                { ord:'stad', klass:'Substantiv' }, { ord:'fråga', klass:'Verb' }, { ord:'stolt', klass:'Adjektiv' },
+                { ord:'familj', klass:'Substantiv' }, { ord:'svara', klass:'Verb' }, { ord:'arg', klass:'Adjektiv' },
+                { ord:'idrott', klass:'Substantiv' }, { ord:'tänka', klass:'Verb' }, { ord:'lugn', klass:'Adjektiv' },
+                { ord:'resa', klass:'Substantiv' }, { ord:'lyssna', klass:'Verb' }, { ord:'spännande', klass:'Adjektiv' },
+                { ord:'natur', klass:'Substantiv' }, { ord:'hjälpa', klass:'Verb' }, { ord:'vänlig', klass:'Adjektiv' },
+                { ord:'han', klass:'Pronomen' }, { ord:'hon', klass:'Pronomen' }, { ord:'den', klass:'Pronomen' },
+                { ord:'snart', klass:'Adverb' }, { ord:'alltid', klass:'Adverb' }, { ord:'aldrig', klass:'Adverb' }, { ord:'gärna', klass:'Adverb' }
             ],
             ak6: [
                 { ord:'under', klass:'Preposition' }, { ord:'mellan', klass:'Preposition' }, { ord:'genom', klass:'Preposition' },
                 { ord:'bakom', klass:'Preposition' }, { ord:'känsla', klass:'Substantiv' }, { ord:'fundera', klass:'Verb' },
                 { ord:'ovanlig', klass:'Adjektiv' }, { ord:'dessutom', klass:'Adverb' }, { ord:'någon', klass:'Pronomen' },
                 { ord:'ansvar', klass:'Substantiv' }, { ord:'diskutera', klass:'Verb' }, { ord:'medveten', klass:'Adjektiv' },
-                { ord:'sällan', klass:'Adverb' }, { ord:'vår', klass:'Pronomen' }
+                { ord:'sällan', klass:'Adverb' }, { ord:'vår', klass:'Pronomen' },
+                { ord:'möjlighet', klass:'Substantiv' }, { ord:'analysera', klass:'Verb' }, { ord:'komplex', klass:'Adjektiv' },
+                { ord:'erfarenhet', klass:'Substantiv' }, { ord:'reflektera', klass:'Verb' }, { ord:'betydelsefull', klass:'Adjektiv' },
+                { ord:'sammanhang', klass:'Substantiv' }, { ord:'samarbeta', klass:'Verb' }, { ord:'tillfällig', klass:'Adjektiv' },
+                { ord:'trots', klass:'Preposition' }, { ord:'enligt', klass:'Preposition' }, { ord:'inom', klass:'Preposition' },
+                { ord:'motivera', klass:'Verb' }, { ord:'utveckla', klass:'Verb' }, { ord:'ifrågasätta', klass:'Verb' },
+                { ord:'exempelvis', klass:'Adverb' }, { ord:'slutligen', klass:'Adverb' }, { ord:'troligtvis', klass:'Adverb' },
+                { ord:'denna', klass:'Pronomen' }, { ord:'dessa', klass:'Pronomen' }
             ]
         };
         const STAVNING_PAR = {
@@ -15429,57 +15536,83 @@
                 { ratt:'kyckling', fel:'kykling' }, { ratt:'choklad', fel:'sjoklad' }, { ratt:'stjärna', fel:'sjärna' },
                 { ratt:'tjugo', fel:'kjugo' }, { ratt:'äpple', fel:'äple' }, { ratt:'flicka', fel:'flika' },
                 { ratt:'skjorta', fel:'sjorta' }, { ratt:'gungar', fel:'gunggar' }, { ratt:'kanin', fel:'kannin' },
-                { ratt:'fjäril', fel:'fjäriel' }
+                { ratt:'fjäril', fel:'fjäriel' },
+                { ratt:'gitarr', fel:'jitarr' }, { ratt:'skidor', fel:'sjidor' }, { ratt:'köttbullar', fel:'kötbullar' },
+                { ratt:'apelsin', fel:'appelsin' }, { ratt:'jordgubbe', fel:'jordgube' }, { ratt:'gurka', fel:'gurcka' },
+                { ratt:'tjuv', fel:'kjuv' }, { ratt:'paraply', fel:'paraplyy' }
             ],
             ak5: [
                 { ratt:'restaurang', fel:'restorang' }, { ratt:'känguru', fel:'kenguru' }, { ratt:'misstag', fel:'mistag' },
                 { ratt:'sjuksköterska', fel:'sjuksköterksa' }, { ratt:'ambulans', fel:'amballans' }, { ratt:'schema', fel:'skema' },
                 { ratt:'utseende', fel:'utsende' }, { ratt:'känsla', fel:'kensla' }, { ratt:'lyckades', fel:'lykades' },
-                { ratt:'genast', fel:'jenast' }
+                { ratt:'genast', fel:'jenast' },
+                { ratt:'annorlunda', fel:'anorlunda' }, { ratt:'tillsammans', fel:'tilsammans' }, { ratt:'väninna', fel:'venninna' },
+                { ratt:'stjärnhimmel', fel:'sjärnhimmel' }, { ratt:'gymnastik', fel:'jymnastik' }, { ratt:'utrustning', fel:'utrusning' },
+                { ratt:'krokodil', fel:'krokkodil' }, { ratt:'begripa', fel:'begribba' }
             ],
             ak6: [
                 { ratt:'chaufför', fel:'chafför' }, { ratt:'parallell', fel:'paralell' }, { ratt:'nödvändig', fel:'nödvendig' },
                 { ratt:'genomskinlig', fel:'genomskilig' }, { ratt:'diskussion', fel:'diskusion' }, { ratt:'kommunicera', fel:'komunicera' },
                 { ratt:'necessär', fel:'nessesär' }, { ratt:'oberoende', fel:'oberonde' }, { ratt:'konsekvens', fel:'konskevens' },
-                { ratt:'självständig', fel:'sjelvständig' }
+                { ratt:'självständig', fel:'sjelvständig' },
+                { ratt:'intressant', fel:'intresant' }, { ratt:'möjlighet', fel:'möjlighe' }, { ratt:'sammanhang', fel:'samanhang' },
+                { ratt:'huvudsakligen', fel:'huvudsakeligen' }, { ratt:'kännetecken', fel:'kännetekken' }, { ratt:'förutsättning', fel:'förutsätning' },
+                { ratt:'ansvarsfull', fel:'ansvarsful' }, { ratt:'sammanfattning', fel:'samanfattning' }
             ]
         };
         const SYNONYM_PAR = {
             ak4: [
                 { ord:'glad', typ:'motsats', svar:'ledsen' }, { ord:'stor', typ:'motsats', svar:'liten' },
                 { ord:'snabb', typ:'motsats', svar:'långsam' }, { ord:'varm', typ:'motsats', svar:'kall' },
-                { ord:'ny', typ:'motsats', svar:'gammal' }, { ord:'hoppa', typ:'synonym', svar:'skutta' }
+                { ord:'ny', typ:'motsats', svar:'gammal' }, { ord:'hoppa', typ:'synonym', svar:'skutta' },
+                { ord:'trött', typ:'motsats', svar:'pigg' }, { ord:'full', typ:'motsats', svar:'tom' },
+                { ord:'titta', typ:'synonym', svar:'se / kolla' }, { ord:'ren', typ:'motsats', svar:'smutsig' },
+                { ord:'lätt', typ:'motsats', svar:'tung' }, { ord:'skratta', typ:'synonym', svar:'flina / le' }
             ],
             ak5: [
                 { ord:'titta', typ:'synonym', svar:'se / kolla' }, { ord:'fin', typ:'synonym', svar:'vacker / snygg' },
                 { ord:'rädd', typ:'synonym', svar:'skraj / skrämd' }, { ord:'prata', typ:'synonym', svar:'tala / snacka' },
                 { ord:'stark', typ:'motsats', svar:'svag' }, { ord:'lätt', typ:'motsats', svar:'svår' },
-                { ord:'högt', typ:'motsats', svar:'lågt' }
+                { ord:'högt', typ:'motsats', svar:'lågt' },
+                { ord:'snäll', typ:'synonym', svar:'vänlig / god' }, { ord:'smart', typ:'synonym', svar:'klok / begåvad' },
+                { ord:'tung', typ:'motsats', svar:'lätt' }, { ord:'tyst', typ:'motsats', svar:'högljudd' },
+                { ord:'jobbig', typ:'synonym', svar:'besvärlig / ansträngande' }, { ord:'kul', typ:'synonym', svar:'roligt / trevligt' }
             ],
             ak6: [
                 { ord:'modig', typ:'motsats', svar:'feg' }, { ord:'ärlig', typ:'motsats', svar:'oärlig' },
                 { ord:'noggrann', typ:'synonym', svar:'nogsam / precis' }, { ord:'envis', typ:'synonym', svar:'enveten / tjurig' },
                 { ord:'nyfiken', typ:'synonym', svar:'intresserad' }, { ord:'försiktig', typ:'motsats', svar:'vårdslös' },
-                { ord:'tydlig', typ:'motsats', svar:'otydlig' }, { ord:'vänlig', typ:'synonym', svar:'snäll / trevlig' }
+                { ord:'tydlig', typ:'motsats', svar:'otydlig' }, { ord:'vänlig', typ:'synonym', svar:'snäll / trevlig' },
+                { ord:'komplicerad', typ:'motsats', svar:'enkel' }, { ord:'entusiastisk', typ:'synonym', svar:'engagerad / ivrig' },
+                { ord:'betydelsefull', typ:'synonym', svar:'viktig' }, { ord:'optimistisk', typ:'motsats', svar:'pessimistisk' },
+                { ord:'effektiv', typ:'synonym', svar:'verkningsfull / ändamålsenlig' }
             ]
         };
         const MENING_BAS = {
             ak4: [
                 'det regnar ute', 'jag gillar att spela fotboll', 'min bästa kompis heter Alex',
                 'vi ska åka till mormor i helgen', 'skolan börjar klockan åtta', 'hunden heter bella',
-                'imorgon ska vi ha idrott', 'katten sitter i fönstret', 'vi läser en bok om rymden'
+                'imorgon ska vi ha idrott', 'katten sitter i fönstret', 'vi läser en bok om rymden',
+                'vi bakade kakor igår', 'min syster spelar piano', 'det snöar mycket i vinter',
+                'vi ska fira kalas på lördag', 'pappa lagar pannkakor till frukost'
             ],
             ak5: [
                 'vi cyklade till skolan och det regnade lite', 'min lillasyster gillar att rita och måla',
                 'vi ska ha matte och svenska idag', 'hunden sprang efter bollen i parken',
                 'jag glömde min matsäck hemma idag', 'vi åt lunch och sedan lekte vi ute',
-                'min mamma jobbar på sjukhuset och min pappa är lärare'
+                'min mamma jobbar på sjukhuset och min pappa är lärare',
+                'vi spelade fotboll efter skolan och sedan åt vi middag',
+                'min bror samlar på fotbollskort och har över hundra stycken',
+                'vi åkte till badhuset på lovet och simmade hela dagen'
             ],
             ak6: [
                 'eftersom det regnade stannade vi inne hela dagen', 'när vi kom hem lagade vi middag tillsammans',
                 'om du vill kan du följa med oss till biblioteket', 'trots att hon var trött tränade hon ändå',
                 'innan vi åkte hem städade vi klassrummet', 'medan läraren pratade satt alla tysta och lyssnade',
-                'även om det var kallt ute badade vi ändå'
+                'även om det var kallt ute badade vi ändå',
+                'fastän det var sent på kvällen fortsatte de att läsa',
+                'så snart läraren kom in blev det tyst i klassrummet',
+                'eftersom bussen var sen missade vi lektionens början'
             ]
         };
         const KLURIG_ORD = {
@@ -15492,7 +15625,15 @@
                 { del1:'sim', del2:'bassäng', ledtrad:'Där man badar inomhus.' },
                 { del1:'brand', del2:'bil', ledtrad:'Ett fordon med blåljus och en stege som skyndar sig till nödsituationer.' },
                 { del1:'glass', del2:'strut', ledtrad:'Det krispiga man håller i när man äter en kall sommargodis.' },
-                { del1:'snö', del2:'gubbe', ledtrad:'Får ofta en morot som näsa och en hatt på huvudet, och smälter när det blir varmt.' }
+                { del1:'snö', del2:'gubbe', ledtrad:'Får ofta en morot som näsa och en hatt på huvudet, och smälter när det blir varmt.' },
+                { del1:'jul', del2:'gran', ledtrad:'Ett träd man pyntar med lampor och stjärnor i december.' },
+                { del1:'vinter', del2:'jacka', ledtrad:'Kläder man tar på sig när det är kallt och snöar ute.' },
+                { del1:'fotbolls', del2:'plan', ledtrad:'Den gräsyta där man spelar en bollsport med mål i varje ände.' },
+                { del1:'köks', del2:'kniv', ledtrad:'Ett vasst redskap man använder för att skära mat.' },
+                { del1:'sovrums', del2:'dörr', ledtrad:'Den man stänger på kvällen innan man somnar.' },
+                { del1:'lek', del2:'plats', ledtrad:'Utomhusställe med gungor och rutschkana där barn brukar vara.' },
+                { del1:'regn', del2:'kappa', ledtrad:'Klädesplagg man tar på sig för att hålla sig torr när det duggregnar.' },
+                { del1:'sol', del2:'sken', ledtrad:'Det ljus och den värme som kommer från himlen en klar dag.' }
             ],
             ak5: [
                 { del1:'sommar', del2:'lov', ledtrad:'De veckorna på året då man badar mycket och slipper läxor.' },
@@ -15501,7 +15642,14 @@
                 { del1:'tand', del2:'borste', ledtrad:'Ett redskap man använder morgon och kväll i badrummet.' },
                 { del1:'fisk', del2:'mås', ledtrad:'En fågel som ofta syns vid havet och skriker högt.' },
                 { del1:'sjuk', del2:'hus', ledtrad:'Dit man åker med ambulans om något allvarligt händer.' },
-                { del1:'sopp', del2:'sked', ledtrad:'Ett bestick man behöver om middagen är flytande.' }
+                { del1:'sopp', del2:'sked', ledtrad:'Ett bestick man behöver om middagen är flytande.' },
+                { del1:'gymnastik', del2:'sal', ledtrad:'Rummet på skolan där man har idrott inomhus.' },
+                { del1:'sim', del2:'lärare', ledtrad:'Personen som lär barn att inte sjunka i vattnet.' },
+                { del1:'vatten', del2:'flaska', ledtrad:'Något man tar med sig för att dricka ur under en promenad.' },
+                { del1:'köks', del2:'fläkt', ledtrad:'Suger upp os och matos ovanför spisen.' },
+                { del1:'skol', del2:'gård', ledtrad:'Utomhusytan vid skolan där eleverna är på rasterna.' },
+                { del1:'mobil', del2:'telefon', ledtrad:'En bärbar apparat man kan ringa och skicka meddelanden med.' },
+                { del1:'sommar', del2:'stuga', ledtrad:'Ett hus många svenska familjer åker till på loven, ofta vid en sjö.' }
             ],
             ak6: [
                 { del1:'själv', del2:'förtroende', ledtrad:'Tron på sin egen förmåga.' },
@@ -15510,7 +15658,13 @@
                 { del1:'sam', del2:'arbete', ledtrad:'Det som krävs för att ett fotbollslag ska kunna vinna en match.' },
                 { del1:'själv', del2:'ständig', ledtrad:'Beskriver en elev som gör läxorna utan att bli påmind.' },
                 { del1:'val', del2:'frihet', ledtrad:'Att själv få bestämma vad man vill göra.' },
-                { del1:'yttrande', del2:'frihet', ledtrad:'Något viktigt i en demokrati, men som ofta saknas i en diktatur.' }
+                { del1:'yttrande', del2:'frihet', ledtrad:'Något viktigt i en demokrati, men som ofta saknas i en diktatur.' },
+                { del1:'miljö', del2:'vänlig', ledtrad:'Ett sätt att beskriva något som inte skadar naturen.' },
+                { del1:'framtids', del2:'tro', ledtrad:'Känslan av hopp och tillit inför det som komma skall.' },
+                { del1:'med', del2:'borgare', ledtrad:'En person som bor i en stad eller ett samhälle.' },
+                { del1:'jäm', del2:'ställdhet', ledtrad:'Att alla, oavsett kön, ska ha samma rättigheter och möjligheter.' },
+                { del1:'huvud', del2:'stad', ledtrad:'Den viktigaste staden i ett land, där regeringen ofta sitter.' },
+                { del1:'rätts', del2:'visning', ledtrad:'Det som sker i en domstol när en händelse ska utredas juridiskt.' }
             ]
         };
 
