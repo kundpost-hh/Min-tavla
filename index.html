@@ -1623,6 +1623,7 @@
     .lasf-typbadge{ display:inline-block; background:#eeeefb; color:#4644b8; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
     .lasf-tembadge{ display:inline-block; background:#fff4e0; color:#b06a00; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
     .lasf-ikonknapp{ border:1px solid #e2e2f2; background:#f4f4fb; border-radius:10px; padding:5px 9px; font-size:14px; cursor:pointer; line-height:1; transition:all .12s ease; flex-shrink:0; font-family:inherit; }
+    .lasf-ab-btn{ white-space:nowrap; font-weight:700; font-size:12.5px; padding:7px 12px; }
     .lasf-ikonknapp:hover{ border-color:#5856d6; }
     .lasf-ikonknapp.active{ background:#5856d6; border-color:#5856d6; color:#fff; }
     .lasf-timerchip{ background:#34c759; color:#fff; border:none; border-radius:999px; font-weight:800; font-size:12.5px; padding:6px 11px; cursor:pointer; font-family:inherit; }
@@ -20063,13 +20064,23 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             if(timerInt || timerSlut) uppdateraTimerChip();
             top.appendChild(timerBtn);
 
-            const printBtn = document.createElement('button'); printBtn.className='lasf-ikonknapp'; printBtn.textContent='🖨️'; printBtn.title='Skriv ut arbetsblad med text och frågor';
-            printBtn.onclick = skrivUt;
-            top.appendChild(printBtn);
-
-            const pdfBtn = document.createElement('button'); pdfBtn.className='lasf-ikonknapp'; pdfBtn.textContent='💾'; pdfBtn.title='Spara arbetsblad med text och frågor som PDF';
-            pdfBtn.onclick = ()=>sparaSomPDF(pdfBtn);
-            top.appendChild(pdfBtn);
+            // NYTT: tydligt märkt "Arbetsblad"-knapp istället för två små, lätt missade ikoner -
+            // öppnar en liten meny med samma två val som förut (skriv ut / spara som PDF), byggda
+            // av exakt samma buildArbetsbladInnehall()/skrivUt()/sparaSomPDF() som redan fanns.
+            const abBtn = document.createElement('button');
+            abBtn.className='lasf-ikonknapp lasf-ab-btn'; abBtn.textContent='📝 Arbetsblad'; abBtn.title='Skriv ut eller spara arbetsblad med text och uppgifter';
+            abBtn.onclick = ()=>{
+                const fanns = top.querySelector('.lasf-abmeny');
+                if(fanns){ fanns.remove(); return; }
+                const meny = document.createElement('div'); meny.className='lasf-abmeny lasf-timermeny';
+                const skrivUtBtn = document.createElement('button'); skrivUtBtn.textContent='🖨️ Skriv ut';
+                skrivUtBtn.onclick = (e)=>{ e.stopPropagation(); meny.remove(); skrivUt(); };
+                const pdfMenyBtn = document.createElement('button'); pdfMenyBtn.textContent='💾 Spara som PDF';
+                pdfMenyBtn.onclick = (e)=>{ e.stopPropagation(); meny.remove(); sparaSomPDF(pdfMenyBtn); };
+                meny.appendChild(skrivUtBtn); meny.appendChild(pdfMenyBtn);
+                top.appendChild(meny);
+            };
+            top.appendChild(abBtn);
             root.appendChild(top);
 
             // Sektionschips
