@@ -19529,11 +19529,49 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             html += skrivFragor('🟢 På raden – svaret står i texten', t.fragor.pa);
             html += skrivFragor('🟡 Mellan raderna – tänk efter', t.fragor.mellan);
             html += skrivFragor('🔴 Bortom raderna – koppla till dig själv', t.fragor.bortom);
+            // NYTT: Hitta i texten - varierar uppgiftsformen bort från vanliga frågor, eleven ska
+            // leta upp och skriva av rätt ställe i texten istället för att bara svara fritt.
+            if(t.hitta && t.hitta.length){
+                html += '<h2>🎯 Hitta i texten</h2><p style="font-size:12.5px;color:#555;margin:-4px 0 8px;">Leta upp svaret i texten och skriv av det.</p>';
+                t.hitta.forEach(h=>{ html += '<div class="fr">'+esc(h.label)+'</div><div class="linje"></div>'; });
+            }
+            // NYTT: Sortera händelser - en helt annan uppgiftstyp (numrera istället för att skriva
+            // svar), tränar händelseförlopp/kronologi i texten.
+            if(t.ordning && t.ordning.length){
+                const blandad = t.ordning.slice();
+                for(let i=blandad.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=blandad[i]; blandad[i]=blandad[j]; blandad[j]=tmp; }
+                html += '<h2>🔗 Sortera händelserna</h2><p style="font-size:12.5px;color:#555;margin:-4px 0 8px;">Skriv siffror (1, 2, 3 …) i rutorna så händelserna kommer i rätt ordning.</p>';
+                blandad.forEach(rad => { html += '<div class="ordn-rad"><span class="ordn-ruta"></span>'+esc(rad)+'</div>'; });
+            }
             html += '<h2>📝 Sammanfatta texten med egna ord</h2><div class="linje"></div><div class="linje"></div><div class="linje"></div><div class="linje"></div>';
+            // NYTT: Samtalsfrågor - för muntlig par-/gruppdiskussion, skrivs ut som en kort lista att
+            // ha bredvid sig snarare än ett skrivfält, eftersom de är tänkta att pratas igenom.
+            if(t.samtal && t.samtal.length){
+                html += '<h2>👥 Samtala med en kompis</h2><ol>'+t.samtal.map(s=>'<li>'+esc(s.q)+'</li>').join('')+'</ol>';
+            }
+            // NYTT: Quiz utskrivet i pappersvänligt format - flerval/sant-falskt/fyll-i-ordet/para ihop,
+            // fyra helt olika svarsformer som ger ytterligare variation i arbetsbladet.
+            if(t.quiz && t.quiz.length){
+                html += '<h2>🎲 Quiz</h2>';
+                t.quiz.forEach((f,i)=>{
+                    if(f.typ==='flerval'){
+                        html += '<div class="fr">'+(i+1)+'. '+esc(f.q)+'</div><ul class="quiz-alt">'+(f.alt||[]).map(a=>'<li><span class="ruta"></span>'+esc(a)+'</li>').join('')+'</ul>';
+                    } else if(f.typ==='sant'){
+                        html += '<div class="fr">'+(i+1)+'. '+esc(f.q)+'</div><ul class="quiz-alt"><li><span class="ruta"></span>Sant</li><li><span class="ruta"></span>Falskt</li></ul>';
+                    } else if(f.typ==='fyll'){
+                        html += '<div class="fr">'+(i+1)+'. '+esc(f.fore)+' __________ '+esc(f.efter)+'</div>';
+                        if(f.alt && f.alt.length) html += '<div style="font-size:12px;color:#666;margin:-2px 0 8px;">Välj bland: '+f.alt.map(esc).join(' · ')+'</div>';
+                    } else if(f.typ==='para'){
+                        html += '<div class="fr">'+(i+1)+'. Para ihop</div><table class="para-tabell"><tbody>'
+                            + f.par.map(p=>'<tr><td>'+esc(p[0])+'</td><td>______</td><td>'+esc(p[1])+'</td></tr>').join('')
+                            + '</tbody></table>';
+                    }
+                });
+            }
             html += '<h2>⭐ Självskattning</h2><div class="fr"><span class="ruta"></span>Jag förstod texten.</div><div class="fr"><span class="ruta"></span>Jag lärde mig nya ord.</div><div class="fr"><span class="ruta"></span>Jag kunde svara på frågorna.</div><div class="fr"><span class="ruta"></span>Jag behöver läsa en gång till.</div>';
             return { titel: t.titel, html: html };
         }
-        const ARBETSBLAD_CSS = 'body{font-family:Georgia,serif;max-width:720px;margin:24px auto;padding:0 18px;color:#222;line-height:1.6;}h1{font-size:22px;border-bottom:3px solid #5856d6;padding-bottom:6px;}h2{font-size:15px;margin:22px 0 8px;color:#4644b8;}.meta{color:#666;font-size:12px;margin-bottom:14px;}.text{border:1px solid #ccc;border-radius:8px;padding:14px 16px;font-size:14px;}.linje{border-bottom:1px solid #999;height:26px;}.fr{margin:8px 0 2px;font-size:13.5px;font-weight:bold;}ul{font-size:13px;}.ruta{display:inline-block;width:13px;height:13px;border:1.5px solid #444;margin-right:8px;vertical-align:-2px;}@media print{.noprint{display:none;}}';
+        const ARBETSBLAD_CSS = 'body{font-family:Georgia,serif;max-width:720px;margin:24px auto;padding:0 18px;color:#222;line-height:1.6;}h1{font-size:22px;border-bottom:3px solid #5856d6;padding-bottom:6px;}h2{font-size:15px;margin:22px 0 8px;color:#4644b8;}.meta{color:#666;font-size:12px;margin-bottom:14px;}.text{border:1px solid #ccc;border-radius:8px;padding:14px 16px;font-size:14px;}.linje{border-bottom:1px solid #999;height:26px;}.fr{margin:8px 0 2px;font-size:13.5px;font-weight:bold;}ul{font-size:13px;}.ruta{display:inline-block;width:13px;height:13px;border:1.5px solid #444;margin-right:8px;vertical-align:-2px;}.ordn-rad{display:flex;align-items:center;gap:10px;font-size:13.5px;margin:6px 0;padding:4px 0;border-bottom:1px dashed #ccc;}.ordn-ruta{display:inline-block;width:26px;height:26px;border:1.5px solid #444;border-radius:5px;flex:0 0 auto;}.quiz-alt{list-style:none;margin:2px 0 10px;padding:0;font-size:13px;}.quiz-alt li{margin:3px 0;}.para-tabell{border-collapse:collapse;font-size:13px;margin-bottom:10px;}.para-tabell td{padding:3px 8px;}@media print{.noprint{display:none;}}';
         function skrivUt(){
             const built = buildArbetsbladInnehall(); if(!built) return;
             let html = '<!DOCTYPE html><html lang="sv"><head><meta charset="utf-8"><title>Arbetsblad – '+esc(built.titel)+'</title>';
@@ -28911,7 +28949,15 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
     }
 
     function buildAiArbetsbladPrompt(f){
-        return "Du är en erfaren svensk lärare. Skapa ett FÄRDIGT, tryckbart arbetsblad på SVENSKA med flera VARIERADE uppgifter kring området nedan, som eleverna kan arbeta med på egen hand (blanda gärna olika typer: öppna frågor, kortsvarsfrågor, en skrivuppgift, fyll-i-luckan eller sant/falskt). Anpassa språk och svårighetsgrad efter årskursen och skriv ut ALLA uppgiftstexter/frågor i sin helhet, färdiga att använda direkt - inte bara typ av uppgift.\n\n"
+        return "Du är en erfaren svensk lärare. Skapa ett FÄRDIGT, tryckbart arbetsblad på SVENSKA med flera VARIERADE uppgifter kring området nedan, som eleverna kan arbeta med på egen hand. Anpassa språk och svårighetsgrad efter årskursen och skriv ut ALLA uppgiftstexter/frågor/påståenden i sin helhet, färdiga att använda direkt - inte bara typ av uppgift.\n\n"
+            + "Välj ut 5-8 uppgifter, av TYDLIGT OLIKA slag - blanda gärna bland dessa beprövade uppgiftstyper (välj de som passar området bäst, du behöver inte använda alla):\n"
+            + "- Sant eller falskt: 4-6 påståenden kopplade till området, eleven skriver 'Sant' eller 'Falskt' efter varje.\n"
+            + "- Fyll i rätt ord: en kort text eller några meningar med luckor, plus en ordbank med orden att välja bland (ange ordbanken i uppgiftstexten).\n"
+            + "- Hitta/stryk under: några meningar eller ett kort stycke där eleven ska hitta och stryka under ett visst slags ord eller detalj kopplat till området (t.ex. verb i dåtid, adjektiv, nyckelbegrepp).\n"
+            + "- Sortera i rätt ordning: 4-5 händelser/steg i fel ordning som eleven ska numrera (1, 2, 3...) i rätt följd - skriv ut dem med tomma hakparenteser [ ] framför varje rad.\n"
+            + "- Läs och svara: ett kort exempelstycke (2-4 meningar) skrivet direkt i uppgiften, följt av 3-4 konkreta frågor om det (t.ex. vem/var/när/vad, eller andra relevanta detaljfrågor).\n"
+            + "- Skriv en egen text/svar: en kort skrivuppgift kopplad till området, med tydliga tips om vad texten ska innehålla.\n"
+            + "- Para ihop / ordkunskap: t.ex. para ihop begrepp med förklaringar, eller kortsvarsfrågor - om inget av ovanstående passar bättre.\n\n"
             + "Ämne: " + f.amne + "\n"
             + "Område/tema: " + f.omrade + "\n"
             + "Årskurs: " + f.arskurs + "\n\n"
@@ -28919,10 +28965,9 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             + "{\n"
             + '  "titel": "Kort rubrik för arbetsbladet",\n'
             + '  "uppgifter": [\n'
-            + '    { "rubrik": "kort rubrik för uppgiften, t.ex. Uppgift 1", "text": "hela den färdiga uppgiftstexten/frågorna" }\n'
+            + '    { "rubrik": "kort rubrik för uppgiften, t.ex. \'Uppgift 1: Sant eller falskt?\'", "text": "hela den färdiga uppgiftstexten - instruktion, ev. ordbank/stycke, och alla påståenden/frågor/rader utskrivna i sin helhet" }\n'
             + '  ]\n'
-            + "}\n"
-            + "Skapa 5-8 uppgifter totalt, av varierade typer.";
+            + "}";
     }
 
     async function aiGenerateArbetsblad(prompt, apiKey){
