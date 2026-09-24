@@ -5810,6 +5810,12 @@
         old.forEach(m => { fbDB.collection('feed').doc(m.id).delete().catch(()=>{}); });
     }
     function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    // Tar bort emoji ur en text - används innan text ritas direkt i en PDF med jsPDF, eftersom
+    // PDF:s inbyggda standardtypsnitt (Helvetica m.fl.) saknar emoji-glyfer och annars visar tomma
+    // rutor. Rensar bort de vanligaste emoji-blocken och normaliserar mellanslag efteråt.
+    function stripEmoji(s){
+        return String(s||'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, '').replace(/\s+/g,' ').trim();
+    }
 
     // Delad, tålig JSON-tolkning för AI-genererade svar (används av alla "klistra in AI-svar"-widgetar).
     // AI-modeller gör ofta två saker som gör att strikt JSON.parse kraschar trots att svaret annars
@@ -19587,38 +19593,129 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         }
         // Renderar samma arbetsblad osynligt (utanför skärmen), skärmdumpar det med html2canvas och
         // lägger in det i en jsPDF - delat över flera A4-sidor om innehållet är för högt för en sida.
+        // NYTT: bygger PDF:en av riktig, markerbar/sökbar TEXT ritad direkt med jsPDF - istället för
+        // att som förut ta en skärmdump av HTML-arbetsbladet och limma in den som en bild. Fördelar:
+        // texten går att markera/kopiera/söka i, filen blir mycket mindre, och sidbrytningar kan
+        // aldrig råka klippa en textrad itu (varje rad/ruta kollar själv om den får plats innan den
+        // ritas - se ensureSpace() - annars hoppar den till en ny sida istället).
         async function sparaSomPDF(btn){
-            const built = buildArbetsbladInnehall(); if(!built) return;
-            const wrap=document.createElement('div');
-            wrap.style.cssText='position:fixed; left:-9999px; top:0; width:720px; background:#fff;';
-            wrap.innerHTML = '<style>'+ARBETSBLAD_CSS+'</style>'+built.html;
-            document.body.appendChild(wrap);
+            const t = aktuellText(); if(!t) return;
+            if(typeof jspdf === 'undefined' || !jspdf.jsPDF){ customAlert('Kunde inte skapa PDF just nu. Kontrollera internetanslutningen och försök igen.', '⚠️'); return; }
             const origTxt = btn ? btn.textContent : null;
             if(btn){ btn.disabled=true; btn.textContent='⏳'; }
             try{
-                if(!window.html2canvas) await _loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-                if(typeof jspdf === 'undefined' || !jspdf.jsPDF){ customAlert('Kunde inte skapa PDF just nu. Kontrollera internetanslutningen och försök igen.', '⚠️'); return; }
-                const canvas = await window.html2canvas(wrap, { backgroundColor:'#ffffff', scale:2, useCORS:true, logging:false });
                 const pdf = new jspdf.jsPDF({ orientation:'portrait', unit:'pt', format:'a4' });
                 const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
-                const margin = 24;
-                const usableW = pageW - margin*2;
-                const scale = usableW / canvas.width; // skala källpixlar -> PDF-punkter
-                const usableHpx = (pageH - margin*2) / scale; // hur många källpixlar (höjd) som får plats per sida
-                let renderedPx = 0, first = true;
-                while(renderedPx < canvas.height){
-                    const sliceH = Math.min(usableHpx, canvas.height - renderedPx);
-                    const sliceCanvas = document.createElement('canvas');
-                    sliceCanvas.width = canvas.width; sliceCanvas.height = sliceH;
-                    sliceCanvas.getContext('2d').drawImage(canvas, 0, renderedPx, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-                    if(!first) pdf.addPage(); first=false;
-                    pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, usableW, sliceH*scale);
-                    renderedPx += sliceH;
+                const margin = 48, contentW = pageW - margin*2;
+                let y = margin;
+
+                function ensureSpace(h){ if(y + h > pageH - margin){ pdf.addPage(); y = margin; } }
+                function h1(text){
+                    ensureSpace(34);
+                    pdf.setFont('helvetica','bold'); pdf.setFontSize(18); pdf.setTextColor(30,30,60);
+                    pdf.text(stripEmoji(text), margin, y); y += 20;
+                    pdf.setDrawColor(88,86,214); pdf.setLineWidth(1.5); pdf.line(margin, y, pageW-margin, y); y += 18;
                 }
-                try { pdf.setFontSize(9); pdf.setTextColor(150); const linkY=pageH-14; if(typeof pdf.textWithLink==='function') pdf.textWithLink('www.min-tavla.se', pageW/2, linkY, { url:'https://www.min-tavla.se', align:'center' }); else pdf.text('www.min-tavla.se', pageW/2, linkY, { align:'center' }); } catch(_){}
-                pdf.save(sanitizeFileName('Läsförståelse - '+built.titel, 'arbetsblad')+'.pdf');
-            } catch(e){ customAlert('Kunde inte skapa PDF:en just nu. Kontrollera internetanslutningen och försök igen.', '⚠️'); }
-            finally { wrap.remove(); if(btn){ btn.disabled=false; btn.textContent=origTxt; } }
+                function h2(text){
+                    ensureSpace(28);
+                    pdf.setFont('helvetica','bold'); pdf.setFontSize(13); pdf.setTextColor(70,68,184);
+                    pdf.text(stripEmoji(text), margin, y); y += 18;
+                }
+                function meta(text){
+                    ensureSpace(16);
+                    pdf.setFont('helvetica','normal'); pdf.setFontSize(9.5); pdf.setTextColor(120,120,120);
+                    pdf.text(text, margin, y); y += 16;
+                }
+                function paragraph(text, opts){
+                    opts = opts||{};
+                    pdf.setFont('helvetica', opts.bold?'bold':'normal'); pdf.setFontSize(opts.size||10.5); pdf.setTextColor(30,30,30);
+                    const lines = pdf.splitTextToSize(text, contentW - (opts.indent||0));
+                    lines.forEach(line => { ensureSpace(opts.lineH||14); pdf.text(line, margin+(opts.indent||0), y); y += (opts.lineH||14); });
+                    if(opts.gap) y += opts.gap;
+                }
+                function blankLine(){
+                    ensureSpace(20);
+                    pdf.setDrawColor(170,170,170); pdf.setLineWidth(0.7); pdf.line(margin, y, pageW-margin, y); y += 18;
+                }
+                function checkboxRow(text, boxSize){
+                    boxSize = boxSize||10;
+                    pdf.setFont('helvetica','normal'); pdf.setFontSize(10.5);
+                    const lines = pdf.splitTextToSize(text, contentW - 20);
+                    ensureSpace(16);
+                    pdf.setDrawColor(60,60,60); pdf.setLineWidth(1); pdf.rect(margin, y-9, boxSize, boxSize);
+                    pdf.setTextColor(30,30,30); pdf.text(lines[0]||'', margin+20, y); y += 16;
+                    for(let i=1;i<lines.length;i++){ ensureSpace(14); pdf.text(lines[i], margin+20, y); y += 14; }
+                }
+
+                h1('Läsförståelse: ' + t.titel);
+                meta(typNamn(t.typ) + ' · Nivå: ' + (st.niva==='latt'?'Lätt':(st.niva==='utmaning'?'Utmaning':'Mellan')) + ' · Namn: ________________________');
+
+                h2('Läs texten');
+                const raw = t.niv[st.niva] || t.niv.mellan || '';
+                raw.split(/\n\n+/).forEach(p => paragraph(p, {gap:6}));
+
+                if(t.begrepp && t.begrepp.length){
+                    h2('Ordbank');
+                    t.begrepp.forEach(b => paragraph('• ' + b.ord + ' – ' + b.forklaring, {gap:2}));
+                    y += 6;
+                }
+                function fragorBlock(rubrik, arr){
+                    if(!arr || !arr.length) return;
+                    h2(rubrik);
+                    arr.forEach((f,i) => { paragraph((i+1)+'. '+f.q, {bold:true, gap:4}); blankLine(); blankLine(); });
+                }
+                fragorBlock('På raden – svaret står i texten', t.fragor.pa);
+                fragorBlock('Mellan raderna – tänk efter', t.fragor.mellan);
+                fragorBlock('Bortom raderna – koppla till dig själv', t.fragor.bortom);
+
+                if(t.hitta && t.hitta.length){
+                    h2('Hitta i texten');
+                    paragraph('Leta upp svaret i texten och skriv av det.', {size:9.5, gap:6});
+                    t.hitta.forEach(hh => { paragraph(hh.label, {bold:true, gap:2}); blankLine(); });
+                }
+                if(t.ordning && t.ordning.length){
+                    const blandad = t.ordning.slice();
+                    for(let i=blandad.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=blandad[i]; blandad[i]=blandad[j]; blandad[j]=tmp; }
+                    h2('Sortera händelserna');
+                    paragraph('Skriv siffror (1, 2, 3 …) i rutorna så händelserna kommer i rätt ordning.', {size:9.5, gap:6});
+                    blandad.forEach(rad => checkboxRow(rad, 16));
+                    y += 6;
+                }
+
+                h2('Sammanfatta texten med egna ord');
+                blankLine(); blankLine(); blankLine(); blankLine();
+
+                if(t.samtal && t.samtal.length){
+                    h2('Samtala med en kompis');
+                    t.samtal.forEach((s,i) => paragraph((i+1)+'. '+s.q, {gap:4}));
+                    y += 4;
+                }
+                if(t.quiz && t.quiz.length){
+                    h2('Quiz');
+                    t.quiz.forEach((f,i) => {
+                        if(f.typ==='flerval'){ paragraph((i+1)+'. '+f.q, {bold:true, gap:4}); (f.alt||[]).forEach(a=>checkboxRow(a)); y+=4; }
+                        else if(f.typ==='sant'){ paragraph((i+1)+'. '+f.q, {bold:true, gap:4}); checkboxRow('Sant'); checkboxRow('Falskt'); y+=4; }
+                        else if(f.typ==='fyll'){ paragraph((i+1)+'. '+f.fore+' __________ '+f.efter, {bold:true, gap:2}); if(f.alt&&f.alt.length) paragraph('Välj bland: '+f.alt.join(' · '), {size:9, gap:6}); }
+                        else if(f.typ==='para'){ paragraph((i+1)+'. Para ihop', {bold:true, gap:4}); f.par.forEach(p => paragraph(p[0]+'   ______   '+p[1], {gap:2})); y+=4; }
+                    });
+                }
+
+                h2('Självskattning');
+                checkboxRow('Jag förstod texten.');
+                checkboxRow('Jag lärde mig nya ord.');
+                checkboxRow('Jag kunde svara på frågorna.');
+                checkboxRow('Jag behöver läsa en gång till.');
+
+                const pageCount = pdf.internal.getNumberOfPages();
+                for(let p=1; p<=pageCount; p++){
+                    pdf.setPage(p);
+                    pdf.setFont('helvetica','normal'); pdf.setFontSize(9); pdf.setTextColor(150,150,150);
+                    if(typeof pdf.textWithLink==='function') pdf.textWithLink('www.min-tavla.se', pageW/2, pageH-20, { url:'https://www.min-tavla.se', align:'center' });
+                    else pdf.text('www.min-tavla.se', pageW/2, pageH-20, { align:'center' });
+                }
+                pdf.save(sanitizeFileName('Läsförståelse - '+t.titel, 'arbetsblad')+'.pdf');
+            } catch(e){ customAlert('Kunde inte skapa PDF:en just nu. Försök igen.', '⚠️'); }
+            finally { if(btn){ btn.disabled=false; btn.textContent=origTxt; } }
         }
 
         // ---- HUVUDRENDER ----
@@ -31053,6 +31150,27 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
     }
 
     // Laddar ner en canvas som en PDF-fil till datorn (canvasen ritas in centrerad, anpassad till A4)
+    // Letar uppåt från idealY efter en nästan helt vit (tom) bildrad att bryta en PDF-sida vid,
+    // så att en flersidig, bildbaserad PDF-export aldrig råkar klippa en textrad mitt itu mellan
+    // två sidor. Samplar var 4:e pixel i raden (för hastighetens skull) och räknar en rad som "tom"
+    // om alla samplade pixlar är nästan vita. Hittas ingen tom rad inom sökfönstret returneras
+    // idealY oförändrat - bättre att klippa exakt på höjden än att söka för långt och förstöra layouten.
+    function findSafeBreakY(canvas, idealY, maxSearchUp){
+        try{
+            const ctx = canvas.getContext('2d');
+            const startY = Math.max(1, Math.floor(idealY));
+            const limitY = Math.max(1, startY - Math.max(20, maxSearchUp||120));
+            for(let y = startY; y > limitY; y--){
+                const row = ctx.getImageData(0, y, canvas.width, 1).data;
+                let blank = true;
+                for(let x = 0; x < row.length; x += 16){ // 4 pixlar per steg (4 kanaler/pixel)
+                    if(row[x] < 250 || row[x+1] < 250 || row[x+2] < 250){ blank = false; break; }
+                }
+                if(blank) return y;
+            }
+        } catch(e){ /* t.ex. CORS-begränsning på canvasen - använd då bara idealY som den är */ }
+        return idealY;
+    }
     function downloadCanvasAsPDF(canvas, filename){
         try{
             if(typeof jspdf === 'undefined' || !jspdf.jsPDF){ customAlert('Kunde inte skapa PDF just nu. Kontrollera internetanslutningen och försök igen.', '⚠️'); return; }
