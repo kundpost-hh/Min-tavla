@@ -12,8 +12,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Min Tavla">
-    <link rel="apple-touch-icon" href="icon-180-apple.png">
-    <link rel="icon" href="icon-192.png" type="image/png">
+    <!-- FIX: pekade tidigare på externa filer (icon-180-apple.png / icon-192.png) som inte finns
+         med i den här enda HTML-filen - webbläsaren visade då en trasig/generisk ikon i fliken.
+         En inbäddad SVG-ikon (data-URI) fungerar alltid, oavsett var filen läggs/öppnas ifrån. -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231a73e8'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle' fill='white' font-family='Arial,Helvetica,sans-serif' font-weight='bold'%3EM%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231a73e8'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle' fill='white' font-family='Arial,Helvetica,sans-serif' font-weight='bold'%3EM%3C/text%3E%3C/svg%3E" type="image/svg+xml">
 </head>
 <body>
 
@@ -5814,7 +5817,7 @@
     // PDF:s inbyggda standardtypsnitt (Helvetica m.fl.) saknar emoji-glyfer och annars visar tomma
     // rutor. Rensar bort de vanligaste emoji-blocken och normaliserar mellanslag efteråt.
     function stripEmoji(s){
-        return String(s||'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, '').replace(/\s+/g,' ').trim();
+        return String(s||'').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu, '').replace(/\s+/g,' ').trim();
     }
 
     // Delad, tålig JSON-tolkning för AI-genererade svar (används av alla "klistra in AI-svar"-widgetar).
@@ -19624,12 +19627,12 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 function meta(text){
                     ensureSpace(16);
                     pdf.setFont('helvetica','normal'); pdf.setFontSize(9.5); pdf.setTextColor(120,120,120);
-                    pdf.text(text, margin, y); y += 16;
+                    pdf.text(stripEmoji(text), margin, y); y += 16;
                 }
                 function paragraph(text, opts){
                     opts = opts||{};
                     pdf.setFont('helvetica', opts.bold?'bold':'normal'); pdf.setFontSize(opts.size||10.5); pdf.setTextColor(30,30,30);
-                    const lines = pdf.splitTextToSize(text, contentW - (opts.indent||0));
+                    const lines = pdf.splitTextToSize(stripEmoji(text), contentW - (opts.indent||0));
                     lines.forEach(line => { ensureSpace(opts.lineH||14); pdf.text(line, margin+(opts.indent||0), y); y += (opts.lineH||14); });
                     if(opts.gap) y += opts.gap;
                 }
@@ -19640,7 +19643,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 function checkboxRow(text, boxSize){
                     boxSize = boxSize||10;
                     pdf.setFont('helvetica','normal'); pdf.setFontSize(10.5);
-                    const lines = pdf.splitTextToSize(text, contentW - 20);
+                    const lines = pdf.splitTextToSize(stripEmoji(text), contentW - 20);
                     ensureSpace(16);
                     pdf.setDrawColor(60,60,60); pdf.setLineWidth(1); pdf.rect(margin, y-9, boxSize, boxSize);
                     pdf.setTextColor(30,30,30); pdf.text(lines[0]||'', margin+20, y); y += 16;
