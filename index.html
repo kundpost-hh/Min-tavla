@@ -6,6 +6,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Min Tavla</title>
+    <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
+         versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
+         längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
+    <script>window.BUILD_VERSION = '2026-09-27-synkfix1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -181,6 +185,12 @@
         </div>
     </div>
     <style>@keyframes mtSpin{ to { transform: rotate(360deg); } }</style>
+
+    <!-- Diskret versionsbadge - alltid synlig, oavsett inloggad eller ej. Gör det möjligt att
+         på några sekunder se om den här enheten kör den senaste filen som skickats, i stället
+         för att behöva gissa/fråga. Klick kopierar versionen (t.ex. till en supportfråga). -->
+    <div id="build-version-badge" onclick="try{navigator.clipboard.writeText(window.BUILD_VERSION||'');this.textContent='✔ kopierad';setTimeout(()=>{this.textContent=window.BUILD_VERSION||'';},1200);}catch(e){}" title="Klicka för att kopiera - jämför med senast skickade fil" style="position:fixed;left:6px;bottom:4px;z-index:99999;font-size:10px;color:#c7c7cc;font-family:monospace;background:rgba(255,255,255,0.6);padding:1px 5px;border-radius:4px;cursor:pointer;user-select:none;pointer-events:auto;"></div>
+    <script>document.getElementById('build-version-badge').textContent = window.BUILD_VERSION || '';</script>
 
     <button id="fullscreen-btn" onclick="toggleFullScreen()" title="Helskärm">⛶</button>
     <button id="pwa-install-btn" onclick="promptPwaInstall()" title="Installera Min Tavla som app" style="display:none;">📲 Installera app</button>
@@ -3560,6 +3570,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+    // BUILD_VERSION: uppdateras varje gång en ny fil skickas - gör det möjligt att på 2 sekunder
+    // se ("Om appen" i inställningarna, eller badgen längst ner i hörnet) om enheten du sitter vid
+    // faktiskt kör den senaste filen, eller en gammal version som glömts uppdatera någonstans.
+    // (Satt allra först i <head>, som window.BUILD_VERSION - läses bara in här.)
+    const BUILD_VERSION = window.BUILD_VERSION || '(okänd version)';
     let widgetCount = 0; let pagesListV6 = []; let currentPageIndexV6 = -1; let topZ = 100;
     window.isLoadingBoard = true; let currentUser = null; let currentUserName = '';
 
@@ -3785,7 +3800,21 @@
     // över riktig data om användaren hinner göra en ändring innan hämtningen är klar.
     let _cloudSyncBlocked = false;
 
-    function _hasUnsavedLocalWork(){ return !!cloudSyncTimer || _pendingCloudWrites > 0; }
+    // FIX (BUGG som orsakade att material "försvann"/inte syncades mellan enheter):
+    // _hasUnsavedLocalWork() kollade tidigare BARA om en sparning väntade (cloudSyncTimer) eller
+    // pågick just nu (_pendingCloudWrites) - inte om senaste sparningsförsöket faktiskt LYCKADES.
+    // När _writeBoardToCloud() upptäcker en KONFLIKT (molnet hann bli nyare) avbryts skrivningen
+    // MEDVETET utan att spara - men cloudSyncTimer blir null och _pendingCloudWrites går tillbaka
+    // till 0 ändå, precis som vid en lyckad sparning. Det gjorde att _hasUnsavedLocalWork() sa
+    // "inget osparat" trots att ändringen ALDRIG nått molnet. Nästa gång live-synken pollade (inom
+    // 25 sek) trodde den då att det var säkert att tyst skriva över den lokala vyn med den äldre
+    // molnversionen - och den osparade, nyss gjorda ändringen försvann spårlöst, utan varning.
+    // _localDirty håller nu reda på "har jag ändringar som INTE bekräftat sparats i molnet", satt
+    // true varje gång en sparning schemaläggs och bara false när en skrivning faktiskt LYCKAS (eller
+    // när vi medvetet hämtar/ansluter till molnets version istället, se _applyRemoteBoardData).
+    let _localDirty = false;
+
+    function _hasUnsavedLocalWork(){ return _localDirty || !!cloudSyncTimer || _pendingCloudWrites > 0; }
 
     function showRemoteUpdateBanner(show){
         const el = document.getElementById('remote-update-banner');
@@ -3798,6 +3827,9 @@
         cloudApplyData(d);
         _lastKnownCloudUpdatedAt = (typeof d.updatedAt === 'number') ? d.updatedAt : Date.now();
         _pendingRemoteBoardData = null;
+        // Vi hämtar nu MEDVETET in molnets version istället för vår egen - så vår ev. tidigare
+        // osparade/konflikt-blockerade lokala ändring är (medvetet) övergiven från och med nu.
+        _localDirty = false;
         showRemoteUpdateBanner(false);
         if(typeof initBoard === 'function') initBoard();
     }
@@ -4045,18 +4077,24 @@
                 setCloudSyncStatus('conflict');
                 _pendingRemoteBoardData = result.remoteData;
                 showRemoteUpdateBanner(true);
+                // VIKTIGT: _localDirty förblir MEDVETET true här - vår ändring nådde ALDRIG molnet,
+                // så den räknas fortfarande som osparad (se kommentaren vid _hasUnsavedLocalWork).
             } else {
                 setCloudSyncStatus('saved');
+                _localDirty = false; // bekräftat sparad i molnet - inget osparat kvar just nu
             }
         } catch(err){
             console.warn('[MinTavla] Molnsparning misslyckades:', err);
             setCloudSyncStatus('error');
+            // VIKTIGT: _localDirty förblir MEDVETET true - skrivningen misslyckades helt (t.ex.
+            // nätverksfel/timeout), så ändringen räknas fortfarande som osparad.
         } finally {
             _pendingCloudWrites--;
         }
     }
     function syncToCloud(){
         if (!window.cloudReady || !currentUser || window.isGuestMode) return;
+        _localDirty = true; // finns en ändring som inte bekräftat sparats i molnet ännu
         clearTimeout(cloudSyncTimer);
         setCloudSyncStatus('saving');
         cloudSyncTimer = setTimeout(()=>{ cloudSyncTimer = null; _writeBoardToCloud(); }, 1200);
@@ -4067,6 +4105,7 @@
     // riskera att en snabb sidladdning hinner före den vanliga 1,2s-fördröjningen.
     function syncToCloudImmediate(){
         if (!window.cloudReady || !currentUser || window.isGuestMode) return Promise.resolve();
+        _localDirty = true; // finns en ändring som inte bekräftat sparats i molnet ännu
         clearTimeout(cloudSyncTimer); cloudSyncTimer = null;
         setCloudSyncStatus('saving');
         return _writeBoardToCloud();
@@ -4705,7 +4744,7 @@
         const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(380px,92vw)'; box.style.textAlign='center';
         box.innerHTML = "<div style='font-size:42px;line-height:1;margin-bottom:8px;'>📋</div>"
             + "<div class='cal-popup-title' style='margin-bottom:2px;'>Min tavla</div>"
-            + "<div style='font-size:13px;color:#8e8e93;margin-bottom:16px;'>Version 1.0</div>"
+            + "<div style='font-size:13px;color:#8e8e93;margin-bottom:16px;'>Version 1.0 &middot; Build " + BUILD_VERSION + "</div>"
             + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;'>Ett lärarverktyg skapat av <b>Hussein Hirori</b> — för en enklare och roligare vardag i klassrummet.</div>"
             + "<div style='font-size:14px;color:#1d1d1f;line-height:1.55;margin-top:14px;'>För synpunkter och förslag:</div>"
             + "<a href='mailto:mintavla.se@gmail.com' id='about-email-link' style='display:inline-block;font-size:14px;color:#007aff;font-weight:700;text-decoration:none;margin-top:2px;'>mintavla.se@gmail.com</a>";
