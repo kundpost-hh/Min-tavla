@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-09-27-synkfix1';</script>
+    <script>window.BUILD_VERSION = '2026-09-30-synkfix2';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -32907,8 +32907,29 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
     // timer, så en pågående (men ännu inte bekräftad) sparning varnades aldrig för. Det var precis
     // det som gjorde att en snabb sidladdning direkt efter en ändring kunde tappa den ändringen.
     window.addEventListener('beforeunload', function(e){
-        if (cloudSyncTimer || _sharedToolbarPushTimer || _pendingCloudWrites > 0){
+        // FIX: inkluderar nu även _localDirty (inte bara cloudSyncTimer/_pendingCloudWrites) -
+        // annars varnades INTE om senaste sparningsförsöket stoppades av en konflikt (se
+        // _hasUnsavedLocalWork/_localDirty ovan) och man ändå hade en riktig osparad ändring kvar.
+        if (cloudSyncTimer || _sharedToolbarPushTimer || _pendingCloudWrites > 0 || _localDirty){
             e.preventDefault(); e.returnValue = '';
+        }
+    });
+    // NYTT (viktigt skydd mot att tyst tappa de allra sista sekundernas arbete): beforeunload
+    // varnar bara vid en medveten stängning/omladdning av FLIKEN - men i praktiken stänger många
+    // användare istället datorns LOCK (dvs datorn går i viloläge) eller växlar app/byter flik och
+    // lämnar den öppna sidan i bakgrunden. Webbläsaren kan då, för att spara minne, senare tysta
+    // "kasta ut" (discard) en bakgrundsflik helt - och en sparning som bara väntade på sin 1,2
+    // sekunders fördröjning (cloudSyncTimer) hinner då ALDRIG köras, utan minne av att den
+    // någonsin fanns, helt utan varningsdialog (den kräver ju att någon finns där för att svara).
+    // 'visibilitychange' (till skillnad från beforeunload) triggas TILLFÖRLITLIGT redan när fliken
+    // GÖMS (lock stängs, man byter app, minimerar) - INNAN webbläsaren hunnit kasta ut den. Så fort
+    // det händer och en sparning väntar, tvingar vi därför fram den DIREKT (utan att vänta ut
+    // fördröjningen) istället för att chansa på att flikens process fortfarande finns kvar om/när
+    // fördröjningen annars skulle ha löpt ut.
+    document.addEventListener('visibilitychange', function(){
+        if (document.visibilityState === 'hidden' && cloudSyncTimer){
+            clearTimeout(cloudSyncTimer); cloudSyncTimer = null;
+            _writeBoardToCloud();
         }
     });
     // FIX: när sidan laddas om håller webbläsaren ofta kvar en sista "stillbild" av hur sidan såg ut
