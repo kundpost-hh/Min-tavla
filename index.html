@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-09-30-synkfix2';</script>
+    <script>window.BUILD_VERSION = '2026-10-01-lasfsvar1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -19782,6 +19782,104 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             finally { if(btn){ btn.disabled=false; btn.textContent=origTxt; } }
         }
 
+        // ---- SPARA SOM WORD (.docx) ----
+        // NYTT: samma innehåll som PDF-arbetsbladet, men som ett RIKTIGT, redigerbart Word-dokument
+        // (öppnas i Word, eller laddas upp till Google Drive och öppnas som Google Dokument) - så
+        // eleven kan svara digitalt direkt i dokumentet istället för att skriva för hand. Svar som
+        // redan skrivits in i appen (se svarArrFor/st.samm, samma digitala svarsfält som i Frågor-
+        // och Hitta-sektionerna) följer med och fylls i automatiskt, så arbetet inte behöver göras
+        // dubbelt. Biblioteket (docx.js) laddas bara in vid behov, precis som jsPDF/html2canvas.
+        async function sparaSomWord(btn){
+            const t = aktuellText(); if(!t) return;
+            const origTxt = btn ? btn.textContent : null;
+            if(btn){ btn.disabled=true; btn.textContent='⏳'; }
+            try{
+                if(!window.docx || !window.docx.Document){
+                    await _loadScriptOnce('https://cdn.jsdelivr.net/npm/docx@9.8.1/dist/index.iife.js');
+                }
+                if(!window.docx || !window.docx.Document){
+                    customAlert('Kunde inte skapa Word-dokumentet just nu. Kontrollera internetanslutningen och försök igen.', '⚠️');
+                    return;
+                }
+                const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+                const children = [];
+                const h1 = (text)=> children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing:{ after:160 }, children:[ new TextRun({ text: text, bold:true, color:'1E1E3C' }) ] }));
+                const h2 = (text)=> children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing:{ before:220, after:100 }, children:[ new TextRun({ text: text, bold:true, color:'4644B8' }) ] }));
+                const meta = (text)=> children.push(new Paragraph({ spacing:{ after:200 }, children:[ new TextRun({ text: text, italics:true, color:'787878', size:19 }) ] }));
+                const body = (text, opts)=>{ opts=opts||{}; children.push(new Paragraph({ spacing:{ after: opts.gap!==undefined?opts.gap:120 }, children:[ new TextRun({ text: text, bold: !!opts.bold, size: opts.size||22 }) ] })); };
+                // Svarsraden: fylls i automatiskt om eleven redan skrivit svaret digitalt i appen,
+                // annars en ljusgrå, kursiv platshållartext som är lätt att se men lika lätt att
+                // skriva över/ta bort - precis som att klicka i ett tomt Word-fält.
+                const svarPara = (text)=> children.push(new Paragraph({ spacing:{ after:220 }, children:[ new TextRun({ text: text || '✍️ Skriv ditt svar här …', italics: !text, color: text ? '1D1D1F' : 'A0A0B0', size:21 }) ] }));
+
+                h1('📚 Läsförståelse: ' + t.titel);
+                meta(typNamn(t.typ) + ' · Nivå: ' + (st.niva==='latt'?'Lätt':(st.niva==='utmaning'?'Utmaning':'Mellan')) + ' · Namn: ________________________');
+
+                h2('📖 Läs texten');
+                const raw = t.niv[st.niva] || t.niv.mellan || '';
+                raw.split(/\n\n+/).forEach(p => body(p, {gap:160}));
+
+                if(t.begrepp && t.begrepp.length){
+                    h2('🔤 Ordbank');
+                    t.begrepp.forEach(b => body('• ' + b.ord + ' – ' + b.forklaring, {gap:40}));
+                }
+
+                function fragorBlock(rubrik, arr, kind){
+                    if(!arr || !arr.length) return;
+                    h2(rubrik);
+                    const svarArr = svarArrFor(t.id, kind, arr.length);
+                    arr.forEach((f,i) => { body((i+1)+'. '+f.q, {bold:true, gap:40}); svarPara(svarArr[i]); });
+                }
+                fragorBlock('🟢 På raden – svaret står i texten', t.fragor.pa, 'pa');
+                fragorBlock('🟡 Mellan raderna – tänk efter', t.fragor.mellan, 'mellan');
+                fragorBlock('🔴 Bortom raderna – koppla till dig själv', t.fragor.bortom, 'bortom');
+
+                if(t.hitta && t.hitta.length){
+                    h2('🎯 Hitta i texten');
+                    body('Leta upp svaret i texten och skriv av det.', {size:18, gap:100});
+                    const svarArr = svarArrFor(t.id, 'hitta', t.hitta.length);
+                    t.hitta.forEach((hh,i) => { body(hh.label, {bold:true, gap:40}); svarPara(svarArr[i]); });
+                }
+
+                if(t.ordning && t.ordning.length){
+                    h2('🔗 Sortera händelserna');
+                    body('Skriv siffror (1, 2, 3 …) framför raderna så händelserna kommer i rätt ordning.', {size:18, gap:100});
+                    const blandad = t.ordning.slice();
+                    for(let i=blandad.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=blandad[i]; blandad[i]=blandad[j]; blandad[j]=tmp; }
+                    blandad.forEach(rad => body('___  ' + rad, {gap:60}));
+                }
+
+                h2('📝 Sammanfatta texten med egna ord');
+                svarPara(st.samm || '');
+
+                if(t.samtal && t.samtal.length){
+                    h2('👥 Samtala med en kompis');
+                    t.samtal.forEach((s,i) => body((i+1)+'. '+samtalQ(s), {gap:60}));
+                }
+
+                if(t.quiz && t.quiz.length){
+                    h2('🎲 Quiz');
+                    t.quiz.forEach((f,i) => {
+                        if(f.typ==='flerval'){ body((i+1)+'. '+f.q, {bold:true, gap:40}); (f.alt||[]).forEach(a=>body('○ '+a, {gap:20})); }
+                        else if(f.typ==='sant'){ body((i+1)+'. '+f.q, {bold:true, gap:40}); body('○ Sant', {gap:20}); body('○ Falskt', {gap:60}); }
+                        else if(f.typ==='fyll'){ body((i+1)+'. '+f.fore+' __________ '+f.efter, {bold:true, gap:60}); }
+                        else if(f.typ==='para'){ body((i+1)+'. Para ihop', {bold:true, gap:40}); f.par.forEach(p => body(p[0]+'   ______   '+p[1], {gap:20})); }
+                    });
+                }
+
+                h2('⭐ Jag kan');
+                ['Jag förstod texten.','Jag lärde mig nya ord.','Jag kunde svara på frågorna.','Jag behöver läsa en gång till.'].forEach(s=> body('☐ '+s, {gap:60}));
+
+                const doc = new Document({ sections: [{ children:children }] });
+                const blob = await Packer.toBlob(doc);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = sanitizeFileName('Läsförståelse - '+t.titel, 'arbetsblad')+'.docx';
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 4000);
+            } catch(e){ console.warn('[MinTavla] Word-export misslyckades:', e); customAlert('Kunde inte skapa Word-dokumentet just nu. Försök igen.', '⚠️'); }
+            finally { if(btn){ btn.disabled=false; btn.textContent=origTxt; } }
+        }
+
         // ---- HUVUDRENDER ----
         function render(){
             tystna();
@@ -20238,7 +20336,11 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 skrivUtBtn.onclick = (e)=>{ e.stopPropagation(); meny.remove(); skrivUt(); };
                 const pdfMenyBtn = document.createElement('button'); pdfMenyBtn.textContent='💾 Spara som PDF';
                 pdfMenyBtn.onclick = (e)=>{ e.stopPropagation(); meny.remove(); sparaSomPDF(pdfMenyBtn); };
-                meny.appendChild(skrivUtBtn); meny.appendChild(pdfMenyBtn);
+                // NYTT: Word-export - samma innehåll, men som redigerbart dokument man kan svara
+                // digitalt i (Word, eller uppladdat till Google Drive och öppnat som Google Dokument).
+                const wordMenyBtn = document.createElement('button'); wordMenyBtn.textContent='📝 Spara som Word (.docx)';
+                wordMenyBtn.onclick = (e)=>{ e.stopPropagation(); meny.remove(); sparaSomWord(wordMenyBtn); };
+                meny.appendChild(skrivUtBtn); meny.appendChild(pdfMenyBtn); meny.appendChild(wordMenyBtn);
                 top.appendChild(meny);
             };
             top.appendChild(abBtn);
