@@ -1729,6 +1729,14 @@
 
     .lasf-sammtext{ width:100%; box-sizing:border-box; border:1px solid #e2e2f2; border-radius:12px; padding:10px 12px; font-size:14px; font-family:inherit; line-height:1.6; min-height:110px; resize:vertical; outline:none; user-select:text; }
     .lasf-sammtext:focus{ border-color:#5856d6; }
+    /* NYTT: digitalt svarsfält under varje fråga/uppgift (Frågor + Hitta i texten) - eleven kan
+       skriva sitt svar direkt i appen istället för (eller utöver) att skriva på ett utskrivet
+       arbetsblad. Sparas per text+fråga i widgetens state, precis som sammanfattnings-rutan. */
+    .lasf-svartext{ display:block; width:100%; box-sizing:border-box; border:1px solid #e2e2f2; border-radius:10px; padding:8px 10px; font-size:13.5px; font-family:inherit; line-height:1.5; min-height:54px; resize:vertical; outline:none; user-select:text; margin-top:8px; }
+    .lasf-svartext:focus{ border-color:#5856d6; }
+    .lasf-svartext::placeholder{ color:#b3b3c6; }
+    .lasf-rensa-svar-btn{ border:none; background:transparent; color:#8e8e93; font-weight:700; font-size:11.5px; padding:4px 2px; cursor:pointer; font-family:inherit; text-decoration:underline; }
+    .lasf-rensa-svar-btn:hover{ color:#48484a; }
     .lasf-sammraknare{ font-size:12.5px; font-weight:700; color:#7a7a94; }
     .lasf-sammraknare.ok{ color:#1e6b34; }
     .lasf-modell-bygg{ background:#f7f7fb; border:1px solid #ececf5; border-radius:12px; padding:10px 12px; margin-bottom:6px; }
@@ -19446,10 +19454,24 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
 
         // ---- sparat läge ----
         let st = { view:'home', textId:'', sektion:'las', niva:'mellan', zoom:16, dark:false, listaTyp:'', samtalIdx:0,
-                   samm:'', sammMal:3, sjalv:[false,false,false,false], kansla:'', egen:{titel:'', typ:'berattande', text:''} };
+                   samm:'', sammMal:3, sjalv:[false,false,false,false], kansla:'', egen:{titel:'', typ:'berattande', text:''}, svar:{} };
         if(config && config.data){ try{ st = Object.assign(st, JSON.parse(JSON.stringify(config.data))); }catch(e){} }
         if(!st.egen) st.egen = {titel:'', typ:'berattande', text:''};
         if(!Array.isArray(st.sjalv) || st.sjalv.length!==4) st.sjalv=[false,false,false,false];
+        // NYTT: st.svar lagrar elevens digitala svar, per text och frågetyp, så man kan skriva
+        // svaret direkt i appen (istället för eller utöver att skriva på ett utskrivet
+        // arbetsblad) - { [textId]: { pa:[...], mellan:[...], bortom:[...], hitta:[...] } }.
+        if(!st.svar || typeof st.svar!=='object') st.svar = {};
+        function svarObjFor(textId){
+            if(!st.svar[textId] || typeof st.svar[textId]!=='object') st.svar[textId] = {};
+            return st.svar[textId];
+        }
+        function svarArrFor(textId, kind, len){
+            const o = svarObjFor(textId);
+            if(!Array.isArray(o[kind])) o[kind] = [];
+            while(o[kind].length < len) o[kind].push('');
+            return o[kind];
+        }
         function sparaState(){ widget.dataset.lasf = JSON.stringify(st); if(typeof saveBoardState==='function') saveBoardState(); }
         widget.dataset.lasf = JSON.stringify(st);
 
@@ -20364,6 +20386,10 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             let akt = 'pa';
             const tabs = document.createElement('div'); tabs.className='lasf-fragtabs';
             const desc = document.createElement('div'); desc.className='lasf-fragdesc';
+            // NYTT: "Rensa mina svar" - rensar bara den flik (på/mellan/bortom-raderna) man står på
+            // just nu, för den aktuella texten. Praktiskt när nästa elev/grupp ska skriva på samma
+            // board, utan att röra de andra flikarnas svar eller andra texters svar.
+            const rensaBtn = document.createElement('button'); rensaBtn.type='button'; rensaBtn.className='lasf-rensa-svar-btn';
             const lista = document.createElement('div'); lista.className='lasf-root';
             tabsDef.forEach(td=>{
                 const b = document.createElement('button'); b.className='lasf-fragtab '+td.kl+(akt===td.id?' active':''); b.textContent=td.namn;
@@ -20373,10 +20399,30 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             function rita(){
                 const td = tabsDef.find(x=>x.id===akt);
                 desc.textContent = td.desc;
+                rensaBtn.textContent = '🗑️ Rensa mina svar i "'+td.namn.replace(/^\S+\s/,'')+'"';
+                rensaBtn.onclick = ()=>{
+                    customConfirm('Rensa alla skrivna svar i "'+td.namn.replace(/^\S+\s/,'')+'" för den här texten?', ()=>{
+                        const arr = svarArrFor(t.id, akt, (t.fragor[akt]||[]).length);
+                        for(let i=0;i<arr.length;i++) arr[i]='';
+                        sparaState(); rita();
+                    });
+                };
                 lista.innerHTML='';
+                const svarArr = svarArrFor(t.id, akt, (t.fragor[akt]||[]).length);
                 (t.fragor[akt]||[]).forEach((f,i)=>{
                     const kort = document.createElement('div'); kort.className='lasf-fraga';
                     kort.innerHTML = '<div class="lasf-f-q">'+(i+1)+'. '+esc(f.q)+'</div>';
+                    // NYTT: digitalt svarsfält - eleven kan skriva sitt svar direkt här i appen.
+                    // Sparas per text+fråga (se svarArrFor) så olika texter/frågor inte blandas ihop.
+                    const ta = document.createElement('textarea'); ta.className='lasf-svartext'; ta.placeholder='Skriv ditt svar här...';
+                    ta.value = svarArr[i] || '';
+                    let spTimer = null;
+                    ta.addEventListener('input', ()=>{
+                        svarArr[i] = ta.value; widget.dataset.lasf = JSON.stringify(st);
+                        if(spTimer) clearTimeout(spTimer);
+                        spTimer = setTimeout(()=>{ if(typeof saveBoardState==='function') saveBoardState(); }, 900);
+                    });
+                    kort.appendChild(ta);
                     if(akt==='pa' && f.a){
                         const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='💡 Visa svar';
                         btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=f.a; kort.appendChild(s); btn.remove(); };
@@ -20390,21 +20436,51 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 });
             }
             rita();
-            el.appendChild(tabs); el.appendChild(desc); el.appendChild(lista);
+            el.appendChild(tabs); el.appendChild(desc); el.appendChild(rensaBtn); el.appendChild(lista);
         }
 
         // ---- SEKTION: HITTA I TEXTEN ----
         function sekHitta(el, t){
-            (t.hitta||[]).forEach(h=>{
-                const kort = document.createElement('div'); kort.className='lasf-fraga';
-                kort.innerHTML = '<div class="lasf-f-q">'+esc(h.label)+'</div>';
-                if(h.svar){
-                    const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='💡 Visa förslag';
-                    btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=h.svar; kort.appendChild(s); btn.remove(); };
-                    kort.appendChild(btn);
-                }
-                el.appendChild(kort);
-            });
+            // NYTT: samma digitala svarsfält som i Frågor-sektionen + en "rensa"-knapp, så eleven
+            // kan skriva av det hittade stället direkt i appen istället för bara på papper.
+            if(t.hitta && t.hitta.length){
+                const rensaBtn = document.createElement('button'); rensaBtn.type='button'; rensaBtn.className='lasf-rensa-svar-btn';
+                rensaBtn.textContent = '🗑️ Rensa mina svar';
+                rensaBtn.onclick = ()=>{
+                    customConfirm('Rensa alla skrivna svar under "Hitta i texten" för den här texten?', ()=>{
+                        const arr = svarArrFor(t.id, 'hitta', t.hitta.length);
+                        for(let i=0;i<arr.length;i++) arr[i]='';
+                        sparaState(); ritaHitta();
+                    });
+                };
+                el.appendChild(rensaBtn);
+            }
+            const lista = document.createElement('div');
+            function ritaHitta(){
+                lista.innerHTML='';
+                const svarArr = svarArrFor(t.id, 'hitta', (t.hitta||[]).length);
+                (t.hitta||[]).forEach((h,i)=>{
+                    const kort = document.createElement('div'); kort.className='lasf-fraga';
+                    kort.innerHTML = '<div class="lasf-f-q">'+esc(h.label)+'</div>';
+                    const ta = document.createElement('textarea'); ta.className='lasf-svartext'; ta.placeholder='Skriv eller skriv av det du hittar i texten...';
+                    ta.value = svarArr[i] || '';
+                    let spTimer = null;
+                    ta.addEventListener('input', ()=>{
+                        svarArr[i] = ta.value; widget.dataset.lasf = JSON.stringify(st);
+                        if(spTimer) clearTimeout(spTimer);
+                        spTimer = setTimeout(()=>{ if(typeof saveBoardState==='function') saveBoardState(); }, 900);
+                    });
+                    kort.appendChild(ta);
+                    if(h.svar){
+                        const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='💡 Visa förslag';
+                        btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=h.svar; kort.appendChild(s); btn.remove(); };
+                        kort.appendChild(btn);
+                    }
+                    lista.appendChild(kort);
+                });
+            }
+            ritaHitta();
+            el.appendChild(lista);
             const fot = document.createElement('div'); fot.className='lasf-footnote'; fot.textContent='Gå tillbaka till läsvyn och peka i texten när ni hittar svaret!';
             el.appendChild(fot);
         }
