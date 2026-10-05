@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-05-backup1';</script>
+    <script>window.BUILD_VERSION = '2026-10-05-backup2';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3851,6 +3851,31 @@
             localStorage.setItem(key, JSON.stringify(backups));
         }catch(e){ console.warn('[MinTavla] Kunde inte säkerhetskopiera tavlan lokalt:', e); }
     }
+    // NYTT: hämtar molnets FAKTISKA senaste version direkt (en färsk nätverksförfrågan) innan en
+    // återställning (se openBoardBackupsDialog) skriver över den - till skillnad från
+    // _backupLocalBoardBeforeOverwrite ovan, som bara sparar den lokala cachen. Den lokala cachen
+    // kan i sällsynta fall vara någon sekund "efter" om en annan enhet hann spara precis innan man
+    // öppnade säkerhetskopior-dialogen. Så här är det garanterat att ALLT som gjorts på andra enheter
+    // fram till just nu finns kvar i en säkerhetskopia, även om återställningen sedan skriver över det.
+    async function _backupFreshCloudBoardBeforeOverwrite(){
+        try{
+            if(!currentUser || window.isGuestMode || !window.cloudReady){ _backupLocalBoardBeforeOverwrite(); return; }
+            const snap = await fsTimeout(fbDB.collection('boards').doc(emailKey(currentUser)).get(), 8000, 'hämta senaste version');
+            const board = (snap.exists && typeof snap.data().board === 'string') ? snap.data().board : null;
+            if(!board){ _backupLocalBoardBeforeOverwrite(); return; }
+            const key = 'mintavla_boardBackups_' + currentUser;
+            let backups = [];
+            try{ backups = JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){ backups = []; }
+            if(!Array.isArray(backups)) backups = [];
+            if(backups.length && backups[backups.length-1].board === board) return; // redan identisk med senaste kopian
+            backups.push({ ts: Date.now(), board: board });
+            if(backups.length > 6) backups = backups.slice(backups.length - 6);
+            localStorage.setItem(key, JSON.stringify(backups));
+        }catch(e){
+            console.warn('[MinTavla] Kunde inte hämta molnets senaste version för säkerhetskopia, säkerhetskopierar lokal cache istället:', e);
+            _backupLocalBoardBeforeOverwrite();
+        }
+    }
     // Tar emot och ritar upp en nyare molnversion (byggd om till widgetar på riktigt via initBoard()).
     function _applyRemoteBoardData(d){
         if(!d) return;
@@ -3898,8 +3923,9 @@
                 const btn = document.createElement('button');
                 btn.textContent = '↩️ Återställ'; btn.style.cssText = 'border:none;background:#eeeefb;color:#4644b8;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;cursor:pointer;';
                 btn.onclick = ()=>{
-                    customConfirm('Återställ tavlan till denna version (' + datumStr + ')? Det som finns på tavlan just nu skrivs över med denna säkerhetskopia - men sparas i sin tur som en ny säkerhetskopia innan dess, så inget går förlorat.', ()=>{
-                        _backupLocalBoardBeforeOverwrite();
+                    customConfirm('Återställ tavlan till denna version (' + datumStr + ')? Det som finns i molnet just nu - inklusive sådant som gjorts på ANDRA enheter - hämtas och sparas först som en egen säkerhetskopia, så inget går förlorat. Därefter skrivs molnet över med den här versionen.', async ()=>{
+                        btn.disabled = true; btn.textContent = 'Återställer...';
+                        await _backupFreshCloudBoardBeforeOverwrite();
                         localStorage.setItem('boardStateV6_' + currentUser, b.board);
                         _localDirty = true;
                         closeFn();
