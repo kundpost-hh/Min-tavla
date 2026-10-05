@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-01-lasfsvar1';</script>
+    <script>window.BUILD_VERSION = '2026-10-05-backup1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -258,6 +258,7 @@
             <div class="tool-pocket-title">Inställningar</div>
             <div class="tool-pocket-grid" id="settings-pocket-grid">
                 <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
+                <button class="tool-btn" onclick="openBoardBackupsDialog()"><div class="icon">🕓</div><div class="label">Säkerhetskopior</div></button>
             </div>
             <div class="tool-pocket-admin" id="settings-pocket-admin">
                 <button class="admin-btn lock-toggle-btn" id="lock-board-btn-settings" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
@@ -3829,9 +3830,31 @@
         if(el) el.style.display = show ? 'flex' : 'none';
     }
 
+    // NYTT: säkerhetskopia av den LOKALA tavlan, tagen precis innan den skrivs över av en version
+    // från molnet (se _applyRemoteBoardData nedan). Om den lokala versionen av någon anledning
+    // innehöll något som aldrig hann sparas i molnet (t.ex. på grund av ett tidigare känt fel, eller
+    // en enhet som stått oanvänd en tid på gammal kod) - finns den ändå kvar HÄR lokalt och går att
+    // återställa via Inställningar → 🕓 Säkerhetskopior, istället för att vara spårlöst borta.
+    // Sparar bara de senaste 6 kopiorna (äldst först, roterar bort överskottet).
+    function _backupLocalBoardBeforeOverwrite(){
+        try{
+            if(!currentUser || window.isGuestMode) return;
+            const current = localStorage.getItem('boardStateV6_' + currentUser);
+            if(!current) return; // tom tavla - inget att säkerhetskopiera
+            const key = 'mintavla_boardBackups_' + currentUser;
+            let backups = [];
+            try{ backups = JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){ backups = []; }
+            if(!Array.isArray(backups)) backups = [];
+            if(backups.length && backups[backups.length-1].board === current) return; // redan säkerhetskopierad, oförändrad sedan dess
+            backups.push({ ts: Date.now(), board: current });
+            if(backups.length > 6) backups = backups.slice(backups.length - 6);
+            localStorage.setItem(key, JSON.stringify(backups));
+        }catch(e){ console.warn('[MinTavla] Kunde inte säkerhetskopiera tavlan lokalt:', e); }
+    }
     // Tar emot och ritar upp en nyare molnversion (byggd om till widgetar på riktigt via initBoard()).
     function _applyRemoteBoardData(d){
         if(!d) return;
+        _backupLocalBoardBeforeOverwrite();
         cloudApplyData(d);
         _lastKnownCloudUpdatedAt = (typeof d.updatedAt === 'number') ? d.updatedAt : Date.now();
         _pendingRemoteBoardData = null;
@@ -3841,6 +3864,54 @@
         showRemoteUpdateBanner(false);
         if(typeof initBoard === 'function') initBoard();
     }
+    // NYTT: visar de senaste lokala säkerhetskopiorna (se _backupLocalBoardBeforeOverwrite) och låter
+    // läraren återställa en av dem om en molnuppdatering råkade skriva över något viktigt. Återställd
+    // kopia sparas sedan direkt till molnet igen, så den inte bara ligger kvar lokalt och riskerar att
+    // skrivas över på nytt av nästa automatiska synk.
+    window.openBoardBackupsDialog = function(){
+        if(!currentUser || window.isGuestMode){ customAlert('Säkerhetskopior finns bara för inloggade konton.', 'ℹ️'); return; }
+        let backups = [];
+        try{ backups = JSON.parse(localStorage.getItem('mintavla_boardBackups_' + currentUser) || '[]'); }catch(e){ backups = []; }
+        if(!Array.isArray(backups)) backups = [];
+        const ov = document.createElement('div'); ov.className = 'cal-popup-overlay';
+        const box = document.createElement('div'); box.className = 'cal-popup'; box.style.width = 'min(440px,92vw)';
+        let html = "<div class='cal-popup-title' style='margin-bottom:4px;'>🕓 Säkerhetskopior</div>"
+            + "<div style='font-size:12.5px;color:#8e8e93;margin-bottom:14px;line-height:1.5;'>Sparas automatiskt på den här enheten, precis innan en nyare version från en annan enhet hämtas in. Praktiskt om något försvinner oväntat - annars behövs de aldrig.</div>";
+        if(!backups.length){
+            html += "<div style='font-size:13.5px;color:#8e8e93;padding:10px 0;'>Inga säkerhetskopior ännu på den här enheten.</div>";
+        } else {
+            html += "<div id='bb-list' style='display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto;'></div>";
+        }
+        html += "<div style='margin-top:16px;text-align:right;'><button id='bb-close' style='border:none;background:#f2f2f7;color:#48484a;font-weight:700;font-size:13px;padding:8px 18px;border-radius:20px;cursor:pointer;'>Stäng</button></div>";
+        box.innerHTML = html;
+        ov.appendChild(box); document.body.appendChild(ov);
+        const closeFn = ()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        ov.onclick = (e)=>{ if(e.target===ov) closeFn(); };
+        box.querySelector('#bb-close').onclick = closeFn;
+        const list = box.querySelector('#bb-list');
+        if(list){
+            backups.slice().reverse().forEach(b=>{
+                const rad = document.createElement('div');
+                rad.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#f7f7fb;border:1px solid #ececf5;border-radius:12px;padding:10px 12px;';
+                const datumStr = new Date(b.ts).toLocaleString('sv-SE', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                rad.innerHTML = "<span style='font-size:13px;color:#1d1d1f;'>"+datumStr+"</span>";
+                const btn = document.createElement('button');
+                btn.textContent = '↩️ Återställ'; btn.style.cssText = 'border:none;background:#eeeefb;color:#4644b8;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;cursor:pointer;';
+                btn.onclick = ()=>{
+                    customConfirm('Återställ tavlan till denna version (' + datumStr + ')? Det som finns på tavlan just nu skrivs över med denna säkerhetskopia - men sparas i sin tur som en ny säkerhetskopia innan dess, så inget går förlorat.', ()=>{
+                        _backupLocalBoardBeforeOverwrite();
+                        localStorage.setItem('boardStateV6_' + currentUser, b.board);
+                        _localDirty = true;
+                        closeFn();
+                        if(typeof initBoard === 'function') initBoard();
+                        if(typeof syncToCloudImmediate === 'function') syncToCloudImmediate();
+                        customAlert('Tavlan återställd och sparas nu till molnet.', '↩️');
+                    });
+                };
+                rad.appendChild(btn); list.appendChild(rad);
+            });
+        }
+    };
     window.applyPendingRemoteBoard = function(){
         if(_pendingRemoteBoardData) _applyRemoteBoardData(_pendingRemoteBoardData);
     };
@@ -5008,7 +5079,7 @@
                 if (type === 'KLISTERLAPP') { state.data.title = w.querySelector('.sticky-title-input')?.value || ''; state.data.text = w.querySelector('.sticky-textarea')?.value || ''; }
                 else if (type === 'TEXTEDITOR') { state.data.html = w.querySelector('.editor-content')?.innerHTML || ''; }
                 else if (type === 'DAGSSCHEMA' || type === 'DAGENS SCHEMA') { state.data.rows = []; w.querySelectorAll('.schedule-row').forEach(r => { state.data.rows.push({ time: r.querySelector('.schedule-time-input')?.value || '', task: r.querySelector('.schedule-task-input')?.value || '', icon: r.querySelector('.schedule-icon-select')?.dataset.icon || 'skriv', color: r.querySelector('.schedule-color-strip')?.dataset.color || '#e5e5ea', fav: r.querySelector('.row-fav-btn')?.dataset.fav === '1', note: r.querySelector('.week-note-btn')?.dataset.note || '', hw: { type: r.querySelector('.row-hw-btn')?.dataset.hwType || '', text: r.querySelector('.row-hw-btn')?.dataset.hwText || '' } }); }); }
-                else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; const clk = w.querySelectorAll('.lesson-clock .pclock-digital'); const pT=(el)=>{ const t=(el?.textContent||'08:00').split(':'); return {h:(parseInt(t[0])||0)%24, m:parseInt(t[1])||0}; }; if(clk[0]) state.data.clock1=pT(clk[0]); if(clk[1]) state.data.clock2=pT(clk[1]); }
+                else if (type === 'LEKTIONSSCHEMA') { const inps = w.querySelectorAll('.lesson-header-input'); state.data.subj = inps[0]?.value || ''; state.data.cls = inps[1]?.value || ''; state.data.date = inps[2]?.value || ''; state.data.dateAuto = w.dataset.lessonDateAuto !== 'false'; state.data.goal = w.querySelector('.lesson-goal-input')?.value || ''; state.data.url = w.querySelector('.lesson-link-input')?.value || ''; state.data.tMin = w.querySelector('.lesson-timer-input')?.value || '10'; const cT = w.querySelectorAll('.lesson-card-title'); state.data.col1Title = cT[0]?.value || ''; state.data.col2Title = cT[1]?.value || ''; state.data.col3Title = cT[2]?.value || ''; const cC = w.querySelectorAll('.lesson-card-content'); state.data.col1Html = cC[0]?.innerHTML || ''; state.data.col2Html = cC[1]?.innerHTML || ''; state.data.col3Html = cC[2]?.innerHTML || ''; const clk = w.querySelectorAll('.lesson-clock .pclock-digital'); const pT=(el)=>{ const t=(el?.textContent||'08:00').split(':'); return {h:(parseInt(t[0])||0)%24, m:parseInt(t[1])||0}; }; if(clk[0]) state.data.clock1=pT(clk[0]); if(clk[1]) state.data.clock2=pT(clk[1]); }
                 else if (type === 'SKAPA GRUPPER' || type === 'SLUMPA NAMN' || type === 'DAGENS ORD') { state.data.list = w.querySelector('select')?.value || ''; state.data.text = w.querySelector('.name-input')?.value || ''; if(type === 'SKAPA GRUPPER') { state.data.count = w.querySelector('input[type="number"]')?.value || '4'; state.data.result = w.querySelector('.group-result')?.innerHTML || ''; } if(type === 'SLUMPA NAMN') { state.data.removeCb = w.querySelector('input[type="checkbox"]')?.checked || false; } if(type === 'DAGENS ORD') { state.data.result = w.querySelector('.name-result')?.innerHTML || ''; } }
                 else if (type === 'BEGREPPSKORT') { try{ state.data = JSON.parse(w.dataset.begrepp || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'NO-FRÅGA') { try{ state.data = JSON.parse(w.dataset.nofraga || '{}'); }catch(e){ state.data={}; } }
@@ -6389,8 +6460,37 @@
     function createLessonPlan(config) {
         const body = createWidget('LEKTIONSSCHEMA', 700, 'lesson-widget', config); const tr = document.createElement('div'); tr.className='lesson-top-row';
         const sVal=config&&config.data?config.data.subj:'Svenska', cVal=config&&config.data?config.data.cls:'4B';
-        let dt = new Date().toLocaleDateString('sv-SE', {weekday:'long', day:'numeric', month:'long'}); dt = dt.charAt(0).toUpperCase() + dt.slice(1); const dVal=config&&config.data?config.data.date:dt;
+        let dt = new Date().toLocaleDateString('sv-SE', {weekday:'long', day:'numeric', month:'long'}); dt = dt.charAt(0).toUpperCase() + dt.slice(1);
+        // FIX: visade tidigare alltid det SENAST SPARADE datumet vid omstart/omladdning (även om det
+        // var gårdagens, eller äldre) - det rättades först när dygnet skiftade EFTER att widgeten
+        // redan byggts om. Nu används bara det sparade datumet när läraren uttryckligen skrivit ett
+        // eget (dateAuto===false) - annars visas alltid dagens datum direkt, redan vid uppbyggnaden.
+        const dVal = (config && config.data && config.data.dateAuto===false) ? (config.data.date||'') : dt;
         tr.innerHTML = `<input type='text' class='lesson-header-input' value='${sVal}' placeholder='Ämne'><span class='lesson-header-sep'></span><input type='text' class='lesson-header-input' value='${cVal}' placeholder='Klass'><span class='lesson-header-sep'></span><input type='text' class='lesson-header-input lesson-date' value='${dVal}' placeholder='Datum'>`;
+        // NYTT: datumfältet uppdateras nu automatiskt när dygnet skiftar, även om widgeten redan är
+        // öppen (på en eller flera sidor samtidigt) och ingen laddar om sidan. Tidigare sattes
+        // datumet bara EN gång, vid skapandet - stod widgeten öppen över natten (t.ex. på en
+        // smartboard som aldrig stängs) visade den gårdagens datum tills man själv skrev om det
+        // eller sidan laddades om. Skriver läraren ett EGET datum för hand stängs auto-uppdateringen
+        // av för just den widgeten (sparas som dateAuto:false) - vi skriver aldrig över det någon
+        // valt manuellt.
+        const widgetEl = body.parentElement.parentElement;
+        const dateInput = tr.querySelector('.lesson-date');
+        let dateAuto = !(config && config.data && config.data.dateAuto === false);
+        widgetEl.dataset.lessonDateAuto = dateAuto ? 'true' : 'false';
+        let lastDateStr = new Date().toDateString();
+        dateInput.addEventListener('input', ()=>{ dateAuto = false; widgetEl.dataset.lessonDateAuto = 'false'; });
+        const dateAutoTimer = setInterval(()=>{
+            if(!document.body.contains(dateInput)){ clearInterval(dateAutoTimer); return; }
+            const nu = new Date(), nuStr = nu.toDateString();
+            if(nuStr === lastDateStr) return;
+            lastDateStr = nuStr;
+            if(!dateAuto) return; // läraren har skrivit ett eget datum - rör det inte
+            let nyttDt = nu.toLocaleDateString('sv-SE', {weekday:'long', day:'numeric', month:'long'});
+            nyttDt = nyttDt.charAt(0).toUpperCase() + nyttDt.slice(1);
+            dateInput.value = nyttDt;
+            saveBoardState();
+        }, 30000);
         const gr = document.createElement('div'); gr.className='lesson-goal-row'; gr.innerHTML=`<span class='lesson-goal-label'>Mål: </span><input type='text' class='lesson-goal-input' placeholder='Skriv lektionens mål...' value='${config&&config.data?config.data.goal:""}'>`;
         const cr = document.createElement('div'); cr.className='lesson-cols-row';
         function makeCard(t,h){ const cd=document.createElement('div'); cd.className='lesson-card'; cd.innerHTML=`<input type='text' class='lesson-card-title' value='${t}'><div class='lesson-card-content' contenteditable='true'>${h}</div>`; cr.appendChild(cd); }
@@ -6421,7 +6521,7 @@
             } saveBoardState();
         };
         // Två integrerade övningsklockor som sticker upp ovanför rubrikremsan, på vita pelare
-        const widgetEl = body.parentElement.parentElement;
+        // (widgetEl deklarerades redan ovanför, vid datumfältets auto-uppdatering)
         const pillar1=document.createElement('div'); pillar1.className='lesson-pillar lesson-pillar-1';
         const pillar2=document.createElement('div'); pillar2.className='lesson-pillar lesson-pillar-2';
         widgetEl.appendChild(pillar1); widgetEl.appendChild(pillar2);
