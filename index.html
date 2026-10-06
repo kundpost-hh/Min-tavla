@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-05-backup2';</script>
+    <script>window.BUILD_VERSION = '2026-10-06-aterkommande1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -13422,12 +13422,33 @@
         items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: new Date(Date.now()+mins*60000).toISOString(), text: text, fired:false });
         remSave(items); saveBoardState();
     }
+    // NYTT: återkommande påminnelser. En påminnelse kan ha it.repeat = 'weekly' (varje vecka) eller
+    // 'biweekly' (varannan vecka). Posten i minnet representerar alltid NÄSTA tillfälle; när den
+    // ringer markeras den som avfyrad och ett nytt tillfälle (+7 resp. +14 dagar, samma klockslag)
+    // skapas automatiskt. Kalendern visar nästa tillfälle och alla senare matchande dagar.
+    function remRepeatStep(it){ return (it && it.repeat==='weekly') ? 7 : (it && it.repeat==='biweekly') ? 14 : 0; }
+    function remRepeatLabel(it){ return (it && it.repeat==='weekly') ? 'varje vecka' : (it && it.repeat==='biweekly') ? 'varannan vecka' : ''; }
+    function remOccursOnDate(it, y, m0, d){
+        if(!it || it.fired) return false;
+        const w=new Date(it.when);
+        if(w.getFullYear()===y && w.getMonth()===m0 && w.getDate()===d) return true;
+        const step=remRepeatStep(it); if(!step) return false;
+        const a=Date.UTC(w.getFullYear(), w.getMonth(), w.getDate()), b=Date.UTC(y, m0, d);
+        return b>a && Math.round((b-a)/86400000)%step===0;
+    }
     function remCheckDue(){
         if(!currentUser) return;
         const items=remLoad(); const nowT=Date.now(); let changed=false;
-        items.forEach(it=>{
+        items.slice().forEach(it=>{
             if(!it.fired && new Date(it.when).getTime()<=nowT){
                 it.fired=true; changed=true;
+                const step=remRepeatStep(it);
+                if(step){
+                    // skapa nästa tillfälle (hoppar över ev. tillfällen som hann passera medan appen var stängd)
+                    const nx=new Date(it.when);
+                    do { nx.setDate(nx.getDate()+step); } while(nx.getTime()<=nowT);
+                    items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: nx.toISOString(), text: it.text, fired:false, repeat: it.repeat });
+                }
                 showReminderPopup(it, (mins)=>remSnooze(it.text, mins));
             }
         });
@@ -32304,11 +32325,9 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         const remSection=box.querySelector('.cal-popup-rem-section');
         const padT=n=>String(n).padStart(2,'0');
         function dayReminders(){
-            return remLoad().filter(it=>{
-                if(it.fired) return false;
-                const d=new Date(it.when);
-                return (d.getFullYear()+'-'+padT(d.getMonth()+1)+'-'+padT(d.getDate()))===dateKey;
-            }).sort((a,b)=> new Date(a.when)-new Date(b.when));
+            const pk=dateKey.split('-').map(Number);
+            const tod=x=>{ const d=new Date(x.when); return d.getHours()*60+d.getMinutes(); };
+            return remLoad().filter(it=>remOccursOnDate(it, pk[0], pk[1]-1, pk[2])).sort((a,b)=> tod(a)-tod(b));
         }
         function renderRemSection(){
             remSection.innerHTML='';
@@ -32319,26 +32338,31 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                     const d=new Date(it.when);
                     const row=document.createElement('div'); row.className='cal-popup-rem-item';
                     row.innerHTML="<span class='cal-popup-rem-time-label'>⏰ "+padT(d.getHours())+":"+padT(d.getMinutes())+"</span><span class='cal-popup-rem-text'></span>";
-                    row.querySelector('.cal-popup-rem-text').textContent=it.text||'';
-                    const del=document.createElement('button'); del.type='button'; del.className='cal-popup-rem-del'; del.textContent='✕'; del.title='Ta bort påminnelse';
+                    row.querySelector('.cal-popup-rem-text').textContent=(it.text||'')+(remRepeatLabel(it)?(' 🔁 '+remRepeatLabel(it)):'');
+                    const del=document.createElement('button'); del.type='button'; del.className='cal-popup-rem-del'; del.textContent='✕'; del.title=remRepeatLabel(it)?'Ta bort påminnelsen (hela serien)':'Ta bort påminnelse';
                     del.onclick=()=>{ remSave(remLoad().filter(x=>x.id!==it.id)); saveBoardState(); renderRemSection(); };
                     row.appendChild(del); wrap.appendChild(row);
                 });
                 remSection.appendChild(wrap);
             }
             const addRow=document.createElement('div'); addRow.className='cal-popup-rem-add-row';
+            addRow.style.flexWrap='wrap';
             const timeIn=document.createElement('input'); timeIn.type='time'; timeIn.className='cal-popup-rem-time'; timeIn.value='08:00';
+            const repSel=document.createElement('select'); repSel.className='cal-popup-rem-time'; repSel.title='Upprepa påminnelsen';
+            repSel.innerHTML="<option value=''>Engångs</option><option value='weekly'>🔁 Varje vecka</option><option value='biweekly'>🔁 Varannan vecka</option>";
             const remBtn=document.createElement('button'); remBtn.type='button'; remBtn.className='btn cal-popup-rem-btn'; remBtn.innerHTML='⏰ Påminn';
             remBtn.onclick=()=>{
                 if(!timeIn.value){ timeIn.focus(); return; }
                 const when=new Date(dateKey+'T'+timeIn.value);
                 if(isNaN(when.getTime())) return;
                 const items=remLoad();
-                items.push({ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: when.toISOString(), text: ta.value.trim(), fired:false });
+                const newRem={ id: Date.now()+'-'+Math.random().toString(16).slice(2), when: when.toISOString(), text: ta.value.trim(), fired:false };
+                if(repSel.value) newRem.repeat=repSel.value;
+                items.push(newRem);
                 remSave(items); saveBoardState();
                 renderRemSection();
             };
-            addRow.appendChild(timeIn); addRow.appendChild(remBtn);
+            addRow.appendChild(timeIn); addRow.appendChild(repSel); addRow.appendChild(remBtn);
             remSection.appendChild(addRow);
         }
         renderRemSection();
@@ -32490,7 +32514,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             if(hol){ cell.classList.add('cal-holiday'); cell.classList.add(hol.red?'cal-holiday-red':'cal-holiday-fest'); }
             if(today.getFullYear()===y && today.getMonth()===m && today.getDate()===dnum) cell.classList.add('cal-today');
             const dn=document.createElement('span'); dn.className='cal-dnum'; dn.textContent=dnum; cell.appendChild(dn);
-            const hasReminder = reminders && reminders.some(it=>{ if(it.fired) return false; const d=new Date(it.when); return d.getFullYear()===y && d.getMonth()===m && d.getDate()===dnum; });
+            const hasReminder = reminders && reminders.some(it=>remOccursOnDate(it, y, m, dnum));
             if(hasReminder){ const rb=document.createElement('span'); rb.className='cal-cell-reminder'; rb.textContent='⏰'; rb.title='Påminnelse inställd'; cell.appendChild(rb); }
             const ndEl=document.createElement('span'); ndEl.className='cal-nd'+(hol?' cal-holiday-label':''); ndEl.textContent=hol?hol.name:nd; cell.appendChild(ndEl);
             const noteObj=notes[key]; const text=noteObj?(noteObj.text||''):''; const tags=noteObj?(noteObj.tags||[]):[];
@@ -32551,7 +32575,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             const mmdd=pad(d.getMonth()+1)+'-'+pad(d.getDate());
             const nd=NAMEDAYS[mmdd]||''; const hol=swedishHolidaysForYear(d.getFullYear())[mmdd];
             const noteObj=notes[key]||{text:'',tags:[]};
-            const dayRems=remLoad().filter(it=>{ if(it.fired) return false; const dd=new Date(it.when); return dd.getFullYear()===d.getFullYear() && dd.getMonth()===d.getMonth() && dd.getDate()===d.getDate(); }).sort((a,b)=>new Date(a.when)-new Date(b.when));
+            const todMin=x=>{ const t=new Date(x.when); return t.getHours()*60+t.getMinutes(); };
+            const dayRems=remLoad().filter(it=>remOccursOnDate(it, d.getFullYear(), d.getMonth(), d.getDate())).sort((a,b)=>todMin(a)-todMin(b));
             const box=document.createElement('div'); box.className='cal-day-view';
             if(hol) box.classList.add(hol.red?'cal-holiday-red':'cal-holiday-fest');
             let html='';
@@ -32562,7 +32587,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             }
             if(dayRems.length){
                 const padT2=n=>String(n).padStart(2,'0');
-                html+="<div class='cal-day-view-reminders'>"+dayRems.map(it=>{ const dd=new Date(it.when); const t=padT2(dd.getHours())+':'+padT2(dd.getMinutes()); const txt=(it.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); return "<div class='cal-day-view-rem-item'>⏰ "+t+(txt?(' – '+txt):'')+"</div>"; }).join('')+"</div>";
+                html+="<div class='cal-day-view-reminders'>"+dayRems.map(it=>{ const dd=new Date(it.when); const t=padT2(dd.getHours())+':'+padT2(dd.getMinutes()); const txt=(it.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); return "<div class='cal-day-view-rem-item'>⏰ "+t+(txt?(' – '+txt):'')+(remRepeatLabel(it)?(' 🔁 '+remRepeatLabel(it)):'')+"</div>"; }).join('')+"</div>";
             }
             const escTxt=(noteObj.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
             html+="<div class='cal-day-view-note'>"+(escTxt?escTxt.replace(/\n/g,'<br>'):"<span class='cal-day-view-empty'>Inga anteckningar – klicka för att lägga till</span>")+"</div>";
