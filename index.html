@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-06-aterkommande1';</script>
+    <script>window.BUILD_VERSION = '2026-10-07-synklogg1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -259,6 +259,7 @@
             <div class="tool-pocket-grid" id="settings-pocket-grid">
                 <button class="tool-btn" onclick="createBgSelector()"><div class="icon">🎨</div><div class="label">Bakgrund</div></button>
                 <button class="tool-btn" onclick="openBoardBackupsDialog()"><div class="icon">🕓</div><div class="label">Säkerhetskopior</div></button>
+                <button class="tool-btn" onclick="openSyncLogDialog()"><div class="icon">🔍</div><div class="label">Synklogg</div></button>
             </div>
             <div class="tool-pocket-admin" id="settings-pocket-admin">
                 <button class="admin-btn lock-toggle-btn" id="lock-board-btn-settings" onclick="togglePresentationLock()"><div class="icon">🔓</div><div class="label">Lås tavla</div></button>
@@ -3825,6 +3826,50 @@
 
     function _hasUnsavedLocalWork(){ return _localDirty || !!cloudSyncTimer || _pendingCloudWrites > 0; }
 
+    // NYTT: SYNKLOGG - en kort, bestående logg (max 60 rader, sparas lokalt på den här enheten) över
+    // vad synken faktiskt gjort: sparningar, konflikter, fel, blockerade skrivningar och inhämtningar
+    // av molnversioner. Varje rad anger även hur många Lektionsschema-widgetar MED innehåll tavlan
+    // har, så att en plötslig minskning syns direkt. Visas under Inställningar -> Synklogg.
+    function _lessonContentCount(boardStr){
+        try{
+            const b = (typeof boardStr === 'string') ? JSON.parse(boardStr || '{}') : boardStr;
+            let n = 0;
+            ((b && b.pages) || []).forEach(p=>{ (p.widgets||[]).forEach(w=>{
+                if(w && w.type==='LEKTIONSSCHEMA' && w.data){
+                    const d = w.data;
+                    const txt = [d.goal, d.col1Html, d.col2Html, d.col3Html].join('').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim();
+                    if(txt) n++;
+                }
+            }); });
+            return n;
+        }catch(e){ return -1; }
+    }
+    function _syncLog(msg){
+        try{
+            const key = 'mintavla_syncLog_' + (currentUser || 'okand');
+            let log = []; try{ log = JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){ log = []; }
+            if(!Array.isArray(log)) log = [];
+            let lc = -1; try{ lc = _lessonContentCount(localStorage.getItem('boardStateV6_' + currentUser)); }catch(e){}
+            log.push({ ts: Date.now(), msg: msg + ' [lektionsschema med innehåll här: ' + lc + ']' });
+            if(log.length > 60) log = log.slice(log.length - 60);
+            localStorage.setItem(key, JSON.stringify(log));
+        }catch(e){}
+    }
+    window.openSyncLogDialog = function(){
+        let log = []; try{ log = JSON.parse(localStorage.getItem('mintavla_syncLog_' + (currentUser || 'okand')) || '[]'); }catch(e){ log = []; }
+        const ov = document.createElement('div'); ov.className = 'cal-popup-overlay';
+        const box = document.createElement('div'); box.className = 'cal-popup'; box.style.width = 'min(520px,94vw)';
+        const rows = log.slice().reverse().map(r=> new Date(r.ts).toLocaleString('sv-SE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'}) + '  ' + r.msg);
+        const text = 'Build ' + (window.BUILD_VERSION||'?') + '\n' + (rows.length ? rows.join('\n') : '(tom logg)');
+        box.innerHTML = "<div class='cal-popup-title'>🔍 Synklogg</div><div style='font-size:12px;color:#8e8e93;margin-bottom:8px;'>Visar vad synken gjort på den här enheten (senaste först). Skicka gärna en kopia om något försvinner.</div><textarea readonly style='width:100%;height:42vh;font-size:11px;font-family:monospace;border:1px solid #e0e0e6;border-radius:8px;padding:8px;box-sizing:border-box;'></textarea><div style='margin-top:12px;text-align:right;display:flex;gap:8px;justify-content:flex-end;'><button id='sl-copy' style='border:none;background:#eeeefb;color:#4644b8;font-weight:700;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;'>Kopiera</button><button id='sl-close' style='border:none;background:#f2f2f7;color:#48484a;font-weight:700;font-size:13px;padding:8px 18px;border-radius:20px;cursor:pointer;'>Stäng</button></div>";
+        box.querySelector('textarea').value = text;
+        ov.appendChild(box); document.body.appendChild(ov);
+        const closeFn = ()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        ov.onclick = (e)=>{ if(e.target===ov) closeFn(); };
+        box.querySelector('#sl-close').onclick = closeFn;
+        box.querySelector('#sl-copy').onclick = ()=>{ try{ navigator.clipboard.writeText(text); box.querySelector('#sl-copy').textContent='✔ Kopierad'; }catch(e){ box.querySelector('textarea').select(); } };
+    };
+
     function showRemoteUpdateBanner(show){
         const el = document.getElementById('remote-update-banner');
         if(el) el.style.display = show ? 'flex' : 'none';
@@ -3879,6 +3924,7 @@
     // Tar emot och ritar upp en nyare molnversion (byggd om till widgetar på riktigt via initBoard()).
     function _applyRemoteBoardData(d){
         if(!d) return;
+        _syncLog('FÖRE inhämtning av molnversion (moln-lektionsschema med innehåll: ' + _lessonContentCount(d.board) + ', osparat lokalt: ' + _hasUnsavedLocalWork() + ')');
         _backupLocalBoardBeforeOverwrite();
         cloudApplyData(d);
         _lastKnownCloudUpdatedAt = (typeof d.updatedAt === 'number') ? d.updatedAt : Date.now();
@@ -3888,6 +3934,7 @@
         _localDirty = false;
         showRemoteUpdateBanner(false);
         if(typeof initBoard === 'function') initBoard();
+        _syncLog('EFTER inhämtning av molnversion');
     }
     // NYTT: visar de senaste lokala säkerhetskopiorna (se _backupLocalBoardBeforeOverwrite) och låter
     // läraren återställa en av dem om en molnuppdatering råkade skriva över något viktigt. Återställd
@@ -4155,7 +4202,7 @@
     // det som redan sparats någon annanstans), och den nyare versionen visas istället.
     async function _writeBoardToCloud(){
         if (!window.cloudReady || !currentUser || window.isGuestMode) return;
-        if (_cloudSyncBlocked) { console.warn('[MinTavla] Molnsparning väntar - inledande hämtning har inte lyckats än.'); return; }
+        if (_cloudSyncBlocked) { console.warn('[MinTavla] Molnsparning väntar - inledande hämtning har inte lyckats än.'); _syncLog('SPARNING BLOCKERAD - inledande molnhämtning har inte lyckats, inget skickas till molnet'); return; }
         const payload = cloudGatherData();
         const ref = fbDB.collection('boards').doc(emailKey(currentUser));
         _pendingCloudWrites++;
@@ -4180,17 +4227,20 @@
             }), 15000, 'spara tavla');
             if (result.conflict){
                 setCloudSyncStatus('conflict');
+                _syncLog('KONFLIKT - molnet nyare, vår sparning avbröts (moln-lektionsschema med innehåll: ' + _lessonContentCount(result.remoteData && result.remoteData.board) + ')');
                 _pendingRemoteBoardData = result.remoteData;
                 showRemoteUpdateBanner(true);
                 // VIKTIGT: _localDirty förblir MEDVETET true här - vår ändring nådde ALDRIG molnet,
                 // så den räknas fortfarande som osparad (se kommentaren vid _hasUnsavedLocalWork).
             } else {
                 setCloudSyncStatus('saved');
+                _syncLog('sparat i molnet OK');
                 _localDirty = false; // bekräftat sparad i molnet - inget osparat kvar just nu
             }
         } catch(err){
             console.warn('[MinTavla] Molnsparning misslyckades:', err);
             setCloudSyncStatus('error');
+            _syncLog('SPARNING MISSLYCKADES: ' + (err && err.message));
             // VIKTIGT: _localDirty förblir MEDVETET true - skrivningen misslyckades helt (t.ex.
             // nätverksfel/timeout), så ändringen räknas fortfarande som osparad.
         } finally {
