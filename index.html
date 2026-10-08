@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-07-synklogg1';</script>
+    <script>window.BUILD_VERSION = '2026-10-08-gotd-week1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3382,6 +3382,15 @@
     .wheel-names { min-height:60px; }
 
     /* GREJ OF THE DAY WIDGET STILMALL */
+    /* Day/Week-flikar (Grej of the day / Grej of the week) */
+    .gotd-tabs { display:flex; gap:6px; margin-bottom:10px; background:#f1f5f9; padding:4px; border-radius:12px; }
+    .gotd-tab { flex:1; border:none; background:transparent; padding:8px 6px; border-radius:9px; font-size:14px; font-weight:800; color:#64748b; cursor:pointer; transition:background .15s,color .15s,box-shadow .15s; }
+    .gotd-tab:hover { color:#334155; }
+    .gotd-tab.gotd-tab-day.active { background:#fff; color:#7c3aed; box-shadow:0 1px 4px rgba(0,0,0,0.12); }
+    .gotd-tab.gotd-tab-week.active { background:#fff; color:#0284c7; box-shadow:0 1px 4px rgba(0,0,0,0.12); }
+    .gotw-week-badge { font-size:12.5px; font-weight:700; color:#0369a1; background:#e0f2fe; border:1px solid #bae6fd; border-radius:8px; padding:6px 10px; margin-bottom:8px; text-align:center; }
+    .gotw-result-card { color:#0369a1; font-size:15px; font-weight:bold; background:#e0f2fe; padding:10px 14px; border-radius:10px; border:1px solid #bae6fd; width:100%; box-sizing:border-box; cursor:pointer; }
+    .gotw-result-card:hover { filter:brightness(0.97); }
     .gotd-clue-box { background: rgba(124, 58, 237, 0.08); border: 1.5px solid rgba(124, 58, 237, 0.2); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; font-size: 15px; color: #333; line-height: 1.4; text-align: center; width: 100%; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
     .gotd-facts-box { display: flex; flex-direction: column; gap: 4px; width: 100%; margin-bottom: 4px; animation: popIn 0.2s ease-out; }
     .gotd-fact-item { background: #fdfafe; border: 1px dashed rgba(168, 85, 247, 0.4); border-radius: 6px; padding: 6px 10px; font-size: 13.5px; color: #444; line-height: 1.4; text-align: left; }
@@ -5328,6 +5337,12 @@
                     state.data.btnState = btnRoll ? btnRoll.dataset.state : 'roll';
                     state.data.currentFacts = btnRoll ? btnRoll.dataset.currentFacts : '';
                     state.data.currentAnswer = btnRoll ? btnRoll.dataset.currentAnswer : '';
+                    // Day/Week-läge + senaste platsen i Week
+                    state.data.mode = w.dataset.gotdMode || 'day';
+                    const wRes = w.querySelector('.gotw-result');
+                    state.data.weekResult = wRes ? wRes.innerHTML : '';
+                    state.data.weekIdx = wRes ? (wRes.dataset.idx || '') : '';
+                    state.data.weekLabel = wRes ? (wRes.dataset.label || '') : '';
                 }
                 return state;
     }
@@ -12537,6 +12552,355 @@
         requestAnimationFrame(()=>{ overlay.style.opacity='1'; box.style.transform='scale(1)'; });
     }
 
+    // ============================================================
+    // GREJ OF THE WEEK – VÄRLDENS MEST KÄNDA & EXOTISKA PLATSER
+    // 52 platser = en per vecka. Varje plats: ledtråd (l), 3 fakta (f),
+    // plats (n), land (c), emoji (e), Wikipedia-titel för bild (w) och
+    // en fördjupning (d) på minst 10 rader.
+    // ============================================================
+    const GOTW_PLACES = [
+        { n:'Eiffeltornet', c:'Frankrike (Paris)', e:'🗼', w:'Eiffel_Tower',
+          l:'Jag är ett järntorn som byggdes för en världsutställning – och skulle egentligen rivas efter 20 år',
+          f:['Jag är ungefär 330 meter hög','Jag glittrar varje timme när det blivit mörkt','Jag står i en stad som kallas ”ljusets stad”'],
+          d:['Eiffeltornet byggdes 1887–1889 till världsutställningen i Paris 1889.','Det är uppkallat efter Gustave Eiffel, vars företag konstruerade tornet.','Tornet består av cirka 18 000 järndelar som hålls ihop av ungefär 2,5 miljoner nitar.','Från början var det tänkt att stå i bara 20 år och sedan rivas.','Det räddades bland annat för att det var perfekt som radiomast.','Fram till 1930 var det världens högsta byggnadsverk.','När det är varmt utvidgas järnet så att toppen kan flytta sig flera centimeter.','Tornet målas om ungefär vart sjunde år och det går åt cirka 60 ton färg.','Det finns över 1 600 trappsteg upp till toppen, men besökare tar hissen sista biten.','Ungefär sju miljoner människor besöker tornet varje år.','Efter mörkrets inbrott glittrar tornet i fem minuter varje hel timme.'] },
+        { n:'Kinesiska muren', c:'Kina', e:'🧱', w:'Great_Wall_of_China',
+          l:'Jag slingrar mig över berg och dalar och byggdes för att stoppa fiender',
+          f:['Jag byggdes under ungefär 2 000 år','Med alla mina delar är jag över 20 000 km lång','Det är en myt att man kan se mig från rymden med blotta ögat'],
+          d:['Kinesiska muren är egentligen många murar som byggts under olika tider.','De första delarna byggdes redan för över 2 500 år sedan.','De mest kända och välbevarade delarna byggdes under Mingdynastin (1368–1644).','En mätning 2012 kom fram till att alla delar tillsammans är cirka 21 000 km långa.','Muren byggdes av jord, sten, trä och tegel – beroende på vad som fanns i närheten.','I vissa delar blandades klibbigt ris i bruket för att göra det starkare.','Längs muren finns vakttorn där soldater kunde skicka signaler med rök och eld.','Det är en myt att muren syns från rymden med blotta ögat – den är för smal.','Delen vid Badaling nära Peking är den mest besökta.','Muren blev ett UNESCO-världsarv 1987.'] },
+        { n:'Machu Picchu', c:'Peru', e:'⛰️', w:'Machu_Picchu',
+          l:'Jag är en hemlig stad högt uppe bland molnen som spanjorerna aldrig hittade',
+          f:['Jag byggdes av inkafolket','Jag ligger cirka 2 400 meter över havet','Mina stenar passar ihop utan murbruk'],
+          d:['Machu Picchu är en inkastad i Anderna i Peru.','Den byggdes runt år 1450, troligen åt inkahärskaren Pachacútec.','Staden övergavs ungefär hundra år senare, under den spanska erövringen.','Spanjorerna hittade aldrig staden, därför är den så välbevarad.','År 1911 blev den känd för världen genom amerikanen Hiram Bingham.','Inkafolket huggde stenarna så exakt att de passar ihop utan murbruk.','Byggnaderna klarar jordbävningar tack vare den skickliga tekniken.','Många vandrar dit på Inkaleden, en vandring på ungefär fyra dagar.','Lamor strövar fritt bland ruinerna.','Machu Picchu är ett av världens sju nya underverk sedan 2007.'] },
+        { n:'Taj Mahal', c:'Indien (Agra)', e:'🕌', w:'Taj_Mahal',
+          l:'Jag byggdes av en kejsare som ett minne av den han älskade mest',
+          f:['Jag är gjord av vit marmor','Jag skiftar färg beroende på ljuset','Jag ligger vid floden Yamuna'],
+          d:['Taj Mahal är ett gravmonument i staden Agra i Indien.','Det byggdes av stormogulen Shah Jahan till minne av hans fru Mumtaz Mahal.','Mumtaz Mahal dog 1631 och bygget pågick i ungefär 20 år.','Omkring 20 000 arbetare hjälpte till att bygga det.','Byggnaden är gjord av vit marmor med inlagda ädelstenar och halvädelstenar.','Marmorn ser rosa ut i gryningen, vit mitt på dagen och gyllene i månsken.','De fyra tornen (minareterna) lutar lite utåt så att de inte skulle falla på graven vid en jordbävning.','Allt är nästan helt symmetriskt – utom Shah Jahans egen grav som lades till senare.','Taj Mahal blev ett UNESCO-världsarv 1983.','Det räknas som ett av världens sju nya underverk.'] },
+        { n:'Pyramiderna i Giza', c:'Egypten', e:'🔺', w:'Giza_pyramid_complex',
+          l:'Jag är den enda av antikens sju underverk som fortfarande står kvar',
+          f:['Jag är över 4 500 år gammal','En sfinx vaktar mig','Jag byggdes som grav åt en farao'],
+          d:['Den stora pyramiden byggdes åt farao Cheops (Khufu) för ungefär 4 500 år sedan.','Den var från början cirka 146 meter hög.','I nästan 3 800 år var den världens högsta byggnad.','Den består av ungefär 2,3 miljoner stenblock.','Från början var pyramiden täckt av blank vit kalksten som glänste i solen.','Sidorna pekar nästan exakt mot norr, söder, öster och väster.','Forskare tror idag att den byggdes av betalda arbetare, inte av slavar.','Bredvid pyramiderna vilar Sfinxen, ett lejon med människohuvud.','Det finns tre stora pyramider i Giza och flera mindre.','Den stora pyramiden är det enda av antikens sju underverk som finns kvar.'] },
+        { n:'Colosseum', c:'Italien (Rom)', e:'🏛️', w:'Colosseum',
+          l:'Här kämpade gladiatorer medan tusentals människor jublade',
+          f:['Jag är nästan 2 000 år gammal','Jag kunde ta emot runt 50 000 åskådare','Under mitt golv fanns gångar och hissar för djur'],
+          d:['Colosseum är en amfiteater i Rom som byggdes åren 70–80 e.Kr.','Bygget startades av kejsar Vespasianus och avslutades av hans son Titus.','Det fick plats med omkring 50 000 åskådare.','Här hölls gladiatorstrider, djurjakter och andra skådespel.','Under arenagolvet fanns ett nät av tunnlar som kallas hypogeum.','Där väntade gladiatorer och vilda djur innan de hissades upp på arenan.','Ett stort tygtak kunde dras över publiken för att ge skugga.','Jordbävningar har skadat byggnaden genom åren.','Senare användes stenar från Colosseum för att bygga andra hus i Rom.','Colosseum är ett av världens sju nya underverk.'] },
+        { n:'Frihetsgudinnan', c:'USA (New York)', e:'🗽', w:'Statue_of_Liberty',
+          l:'Jag var en present från ett annat land och håller en fackla högt',
+          f:['Jag är gjord av koppar och har blivit grön','Min krona har sju strålar','Jag hälsade invandrare välkomna med båt'],
+          d:['Frihetsgudinnan var en gåva från Frankrike till USA och invigdes 1886.','Hon formgavs av den franske skulptören Frédéric Auguste Bartholdi.','Stålskelettet inuti konstruerades av Gustave Eiffel – samma som byggde Eiffeltornet.','Statyn är gjord av tunna kopparplåtar som från början var brunröda.','Kopparn har reagerat med luften och blivit grön.','Statyn är cirka 46 meter hög, och med sockeln cirka 93 meter.','Hon skeppades över havet i omkring 350 delar.','I handen håller hon en tavla med datumet 4 juli 1776 – USA:s självständighetsdag.','Kronans sju strålar sägs stå för världens sju hav och kontinenter.','Hon hälsade miljontals invandrare välkomna som kom med båt till New York.'] },
+        { n:'Stora barriärrevet', c:'Australien', e:'🐠', w:'Great_Barrier_Reef',
+          l:'Jag är det största levande byggnadsverket på jorden – byggt av små djur',
+          f:['Jag ligger i havet','Jag är över 2 000 km lång','Jag syns från rymden'],
+          d:['Stora barriärrevet ligger utanför Queenslands kust i nordöstra Australien.','Det är världens största korallrevssystem och över 2 300 km långt.','Revet består av omkring 2 900 enskilda rev och cirka 900 öar.','Det är byggt av miljarder små djur som kallas korallpolyper.','Revet är så stort att det syns från rymden.','Här lever omkring 1 500 fiskarter.','Även havssköldpaddor, delfiner, hajar och sjökor trivs här.','Varmare hav gör att korallerna kan blekas och dö.','Revet blev ett UNESCO-världsarv 1981.','Många forskare arbetar för att skydda revet för framtiden.'] },
+        { n:'Grand Canyon', c:'USA (Arizona)', e:'🏜️', w:'Grand_Canyon',
+          l:'Jag är en enorm ravin som en flod har grävt ut under miljontals år',
+          f:['Jag är mer än 1,8 km djup','Floden Colorado rinner i min botten','Mina klippor visar jordens historia i lager'],
+          d:['Grand Canyon ligger i delstaten Arizona i USA.','Kanjonen är cirka 446 km lång och på vissa ställen 29 km bred.','Den är på sina ställen mer än 1,8 km djup.','Coloradofloden har grävt ut den under ungefär 5–6 miljoner år.','De lägsta bergarterna är nästan 2 miljarder år gamla.','Klippväggarna visar jordens historia i färgglada lager.','Vädret kan skilja sig mycket mellan kanten och botten av kanjonen.','Den sällsynta kaliforniska kondoren, en jättestor gam, kan ses här.','Grand Canyon blev nationalpark 1919.','Varje år kommer omkring fem miljoner besökare.'] },
+        { n:'Galápagosöarna', c:'Ecuador', e:'🐢', w:'Galápagos_Islands',
+          l:'Mina djur hjälpte en berömd forskare att förstå hur arter utvecklas',
+          f:['Jag är en grupp vulkaniska öar','Här lever jättesköldpaddor','Jag ligger nära ekvatorn i Stilla havet'],
+          d:['Galápagosöarna ligger i Stilla havet, cirka 1 000 km väster om Ecuador.','Öarna har bildats av vulkaner.','Charles Darwin besökte öarna 1835 med skeppet Beagle.','Djuren här hjälpte honom att utveckla sin teori om evolution.','Jättesköldpaddorna kan bli över 100 år gamla och väga hundratals kilo.','Öarna har fått sitt namn efter ett gammalt spanskt ord för sköldpadda.','Havsleguanen är den enda ödla i världen som simmar och letar mat i havet.','Här finns blåfotade sulor – fåglar med knallblå fötter.','Galápagospingvinen lever längre norrut än någon annan pingvin.','Öarna var 1978 bland de allra första platserna som blev UNESCO-världsarv.'] },
+        { n:'Petra', c:'Jordanien', e:'🏺', w:'Petra',
+          l:'Jag är en stad som huggits direkt ut ur rosaröda klippor',
+          f:['Man kommer till mig genom en smal ravin','Min mest kända byggnad kallas ”Skattkammaren”','Jag var med i en Indiana Jones-film'],
+          d:['Petra är en forntida stad i öknen i södra Jordanien.','Den byggdes av ett folk som kallas nabatéer.','Byggnaderna är uthuggna direkt i den rosaröda sandstenen.','Därför kallas Petra ibland ”den rosa staden”.','Man kommer in genom Siq, en smal klippravin som är över en kilometer lång.','Den mest kända byggnaden, Al-Khazneh (Skattkammaren), är cirka 40 meter hög.','Nabatéerna byggde smarta kanaler och dammar för att samla regnvatten.','För européer var staden bortglömd fram till 1812.','Petra syns i filmen Indiana Jones och det sista korståget.','Petra är ett av världens sju nya underverk.'] },
+        { n:'Chichén Itzá', c:'Mexiko', e:'🐍', w:'Chichen_Itza',
+          l:'Två gånger om året kryper en skuggorm nerför min trappa',
+          f:['Jag byggdes av mayafolket','Min pyramid har 365 trappsteg','Jag ligger på Yucatánhalvön'],
+          d:['Chichén Itzá är en stor ruinstad som byggdes av mayafolket.','Den ligger på Yucatánhalvön i Mexiko.','Den mest kända byggnaden är pyramiden El Castillo, ungefär 30 meter hög.','Pyramiden har 91 trappsteg på varje sida plus ett översta steg – 365, lika många som årets dagar.','Vid vår- och höstdagjämningen bildar skuggor en orm som verkar krypa nerför trappan.','Pyramiden är tillägnad ormguden Kukulkán.','Här finns den största bollplanen för mayornas bollspel.','Klappar man händerna framför pyramiden låter ekot som fågelkvitter.','Chichén Itzá blev ett UNESCO-världsarv 1988.','Det är ett av världens sju nya underverk.'] },
+        { n:'Kristusstatyn', c:'Brasilien (Rio de Janeiro)', e:'✝️', w:'Christ_the_Redeemer_(statue)',
+          l:'Jag står med utsträckta armar högt över en stad med kända stränder',
+          f:['Jag står på berget Corcovado','Jag träffas av blixten flera gånger om året','Jag blev klar 1931'],
+          d:['Kristusstatyn står på berget Corcovado, cirka 700 meter över Rio de Janeiro.','Statyn är cirka 30 meter hög och står på en 8 meter hög sockel.','Armarna sträcker sig ungefär 28 meter från fingerspets till fingerspets.','Den blev klar 1931.','Statyn är gjord av armerad betong och täckt med små bitar täljsten.','Den franske skulptören Paul Landowski formgav den.','Statyn träffas av blixten flera gånger varje år.','Ibland måste fingrar och huvud lagas efter blixtnedslag.','Från statyn ser man stränderna Copacabana och Sockertoppen.','Kristusstatyn är ett av världens sju nya underverk.'] },
+        { n:'Angkor Wat', c:'Kambodja', e:'🛕', w:'Angkor_Wat',
+          l:'Jag är världens största religiösa byggnad och syns på ett lands flagga',
+          f:['Jag omges av en bred vallgrav','Jag byggdes för ungefär 900 år sedan','Jag var först hinduisk, sedan buddhistisk'],
+          d:['Angkor Wat är ett tempel i Kambodja och världens största religiösa monument.','Det byggdes i början av 1100-talet av kung Suryavarman II.','Från början var templet tillägnat den hinduiska guden Vishnu.','Senare blev det ett buddhistiskt tempel.','Templet omges av en vallgrav som är omkring 190 meter bred.','Väggarna är täckta av långa stenreliefer med berättelser och gudar.','Templets torn finns med på Kambodjas flagga.','Många kommer tidigt för att se soluppgången bakom tornen.','I närheten ligger Ta Prohm, där trädrötter växer över templets murar.','Angkor blev ett UNESCO-världsarv 1992.'] },
+        { n:'Mount Everest', c:'Nepal & Kina', e:'🏔️', w:'Mount_Everest',
+          l:'Jag är högre än alla andra berg på jorden',
+          f:['Jag är nästan 8 849 meter hög','Jag ligger i Himalaya','Jag besegrades första gången 1953'],
+          d:['Mount Everest är världens högsta berg, 8 848,86 meter över havet.','Berget ligger i Himalaya på gränsen mellan Nepal och Kina (Tibet).','I Nepal heter det Sagarmatha och i Tibet Chomolungma.','Edmund Hillary och sherpan Tenzing Norgay nådde toppen först, den 29 maj 1953.','Himalaya bildades när den indiska kontinentalplattan krockade med Asien.','Plattorna trycker fortfarande, så berget växer några millimeter per år.','Över 8 000 meter kallas ”dödszonen” eftersom luften har så lite syre.','De flesta klättrare använder syrgas på väg mot toppen.','Berget har fått sitt engelska namn efter lantmätaren George Everest.','Vid toppen kan vindarna bli starkare än en orkan.'] },
+        { n:'Victoriafallen', c:'Zambia & Zimbabwe', e:'💦', w:'Victoria_Falls',
+          l:'Mitt lokala namn betyder ”röken som dånar”',
+          f:['Jag är ett vattenfall i Afrika','Jag är över 1,7 km bred','Floden Zambezi störtar ner i mig'],
+          d:['Victoriafallen ligger på gränsen mellan Zambia och Zimbabwe.','Floden Zambezi störtar här ner cirka 108 meter.','Fallet är ungefär 1 700 meter brett.','Det räknas som världens största sammanhängande vattenridå.','Det lokala namnet Mosi-oa-Tunya betyder ”röken som dånar”.','Vattendimman syns på flera mils avstånd.','Upptäcktsresanden David Livingstone döpte fallet efter drottning Victoria 1855.','När månen är full kan man ibland se en ”månregnbåge” i dimman.','I Devil’s Pool kan modiga personer bada precis vid fallets kant när vattnet är lågt.','Fallen blev ett UNESCO-världsarv 1989.'] },
+        { n:'Uluru', c:'Australien', e:'🪨', w:'Uluru',
+          l:'Jag är en enorm röd klippa mitt i öknen som lyser vid solnedgången',
+          f:['Jag är helig för urbefolkningen','Jag är 348 meter hög','Jag kallades förr Ayers Rock'],
+          d:['Uluru är en enorm sandstensklippa mitt i Australiens öken.','Klippan är 348 meter hög och nästan 10 km runt.','Den kallades tidigare Ayers Rock.','Uluru är helig för anangufolket, som levt här i tusentals år.','Vid soluppgång och solnedgång skiftar klippan färg och kan lysa eldröd.','Färgen kommer från järn i stenen som har rostat.','Sedan oktober 2019 är det förbjudet att klättra upp på klippan.','I grottorna runt klippan finns gamla hällmålningar.','En stor del av berget tros ligga gömt under marken.','Uluru är ett UNESCO-världsarv.'] },
+        { n:'Santorini', c:'Grekland', e:'🏝️', w:'Santorini',
+          l:'Jag är en ö som formats av ett gigantiskt vulkanutbrott – med vita hus och blå kupoler',
+          f:['Jag ligger i Egeiska havet','Jag har stränder med svart och röd sand','Vissa tror att jag inspirerade sagan om Atlantis'],
+          d:['Santorini är en grekisk ö i Egeiska havet.','Ön formades av ett jättelikt vulkanutbrott för ungefär 3 600 år sedan.','Utbrottet var ett av de största i mänsklighetens historia.','Det lämnade efter sig en stor kittelformad dal fylld med havsvatten – en kaldera.','Vulkanen är fortfarande aktiv, och mitt i kalderan ligger vulkanön Nea Kameni.','Byn Oia är känd för sina vita hus, blå kupoler och vackra solnedgångar.','Här finns stränder med svart och röd sand från vulkanen.','Vinrankorna odlas som små korgar nära marken för att skyddas mot vinden.','Vissa tror att utbrottet inspirerade legenden om Atlantis.','Förr bar åsnor folk och saker upp för de branta trapporna.'] },
+        { n:'Bora Bora', c:'Franska Polynesien', e:'🌺', w:'Bora_Bora',
+          l:'Jag är en tropisk ö omringad av en turkos lagun och hus som står på styltor i vattnet',
+          f:['Jag ligger i Stilla havet','Mitt högsta berg är en gammal vulkan','Jag tillhör Frankrike'],
+          d:['Bora Bora är en ö i Franska Polynesien i Stilla havet.','Den ligger cirka 260 km nordväst om Tahiti.','Ön är resterna av en gammal vulkan.','Det högsta berget, Otemanu, är 727 meter högt.','Runt ön finns en turkos lagun och ett korallrev.','Bora Bora är känd för sina hotellhus på styltor ute i vattnet.','I lagunen kan man se rockor, sköldpaddor och ofarliga revhajar.','Under andra världskriget hade USA en bas på ön.','Här talar man franska och tahitiska.','Omkring 10 000 människor bor på ön.'] },
+        { n:'Geysir', c:'Island', e:'♨️', w:'Geysir',
+          l:'Jag har gett namn åt alla varma källor i världen som sprutar vatten mot himlen',
+          f:['Jag ligger på en ö i Nordatlanten','Min granne sprutar var 5–10:e minut','Mitt land ligger på en spricka mellan två kontinentalplattor'],
+          d:['Geysir är en varm källa i Haukadalur på Island.','Det engelska ordet ”geyser” och svenska ”gejser” kommer från dess namn.','Under sin storhetstid kunde Geysir spruta vatten 60–70 meter upp i luften.','Idag sprutar den sällan, men jordbävningar kan väcka den igen.','Grannen Strokkur sprutar ungefär var 5–10:e minut, ofta 15–20 meter högt.','Vattnet värms av het lava djupt under marken.','Island ligger på Mittatlantiska ryggen, där två kontinentalplattor glider isär.','Därför finns det många vulkaner och varma källor på Island.','Många hus på Island värms upp med varmt vatten från marken.','Geysir ingår i den populära turistrundan ”Gyllene cirkeln”.'] },
+        { n:'Sagrada Família', c:'Spanien (Barcelona)', e:'⛪', w:'Sagrada_Família',
+          l:'Jag är en kyrka som har byggts i mer än 140 år och ännu inte är helt klar',
+          f:['En berömd arkitekt ritade mig','Mina pelare liknar träd','Jag ska bli världens högsta kyrka'],
+          d:['Sagrada Família är en kyrka i Barcelona i Spanien.','Bygget började 1882.','Arkitekten Antoni Gaudí tog över projektet 1883 och ägnade resten av livet åt det.','Gaudí dog 1926 efter att ha blivit påkörd av en spårvagn.','Kyrkan är fortfarande inte helt färdig.','Inne i kyrkan liknar pelarna träd som grenar sig uppåt.','När Jesustornet är klart blir det cirka 172 meter högt – världens högsta kyrktorn.','Gaudí ville inte att den skulle bli högre än berget Montjuïc, ”Guds verk”.','Bygget betalas av besökarnas biljetter och gåvor.','Påven Benedictus XVI invigde kyrkan som basilika 2010.'] },
+        { n:'Neuschwanstein', c:'Tyskland', e:'🏰', w:'Neuschwanstein_Castle',
+          l:'Jag är ett sagoslott som inspirerade ett berömt Disneyslott',
+          f:['Jag byggdes av en kung som kallades sagokungen','Jag ligger i Bayerns berg','Jag blev aldrig helt färdig'],
+          d:['Neuschwanstein är ett slott i Bayern i södra Tyskland.','Bygget startade 1869 på uppdrag av kung Ludwig II.','Ludwig II kallas ”sagokungen” eftersom han älskade sagor och opera.','Slottet inspirerade Törnrosas slott i Disneys nöjesparker.','Kungen bodde där bara i drygt 170 dagar.','Han dog på mystiskt sätt 1886 i sjön Starnberger See.','Slottet blev aldrig helt färdigbyggt.','Bara några veckor efter kungens död öppnades det för besökare.','Det hade modern teknik för sin tid, till exempel centralvärme och rinnande vatten.','Idag besöker över en miljon människor slottet varje år.'] },
+        { n:'Burj Khalifa', c:'Förenade Arabemiraten (Dubai)', e:'🏙️', w:'Burj_Khalifa',
+          l:'Jag är världens högsta byggnad och sticker upp ur öknen som en nål',
+          f:['Jag är 828 meter hög','Jag har över 160 våningar','En filmstjärna klättrade på mig i en actionfilm'],
+          d:['Burj Khalifa ligger i Dubai i Förenade Arabemiraten.','Den är 828 meter hög och har varit världens högsta byggnad sedan 2010.','Byggnaden har över 160 våningar.','Formen är inspirerad av en ökenblomma.','Hissarna åker cirka 10 meter per sekund.','Toppen syns på nästan 100 kilometers avstånd.','Det tar flera månader att tvätta alla fönster.','Det är flera grader svalare högst upp än vid marken.','Tom Cruise klättrade på utsidan i filmen Mission: Impossible – Ghost Protocol.','Varje nyår skjuts ett stort fyrverkeri från byggnaden.'] },
+        { n:'Ha Long-bukten', c:'Vietnam', e:'🐉', w:'Ha_Long_Bay',
+          l:'Enligt sagan bildades mina öar när drakar spottade ut juveler i havet',
+          f:['Mitt namn betyder ”där draken steg ner”','Här finns tusentals kalkstensöar','Människor bor i flytande byar på mig'],
+          d:['Ha Long-bukten ligger i norra Vietnam.','Här reser sig nästan 2 000 öar av kalksten ur det gröna havet.','Namnet betyder ungefär ”där draken steg ner”.','Enligt en legend skickades drakar för att skydda landet.','De spottade ut juveler som blev till öarna.','Kalkstenen har formats under hundratals miljoner år.','Många öar har stora grottor, till exempel Sung Sot.','Förr fanns det flytande fiskebyar där människor bodde på vattnet.','Det är populärt att paddla kajak mellan öarna.','Bukten blev ett UNESCO-världsarv 1994.'] },
+        { n:'Moai på Påskön', c:'Chile', e:'🗿', w:'Moai',
+          l:'Vi är jättelika stenhuvuden på en av världens mest avlägsna öar',
+          f:['Vi är omkring 900 stycken','Vi har kroppar gömda under jorden','De flesta av oss tittar inåt land'],
+          d:['Moai är stora stenstatyer på Påskön (Rapa Nui) i Stilla havet.','Ön tillhör Chile och ligger cirka 3 500 km från fastlandet.','Det finns omkring 900 statyer.','De höggs ut av rapanuifolket för flera hundra år sedan.','De flesta huggna ur vulkanisk sten i stenbrottet Rano Raraku.','En vanlig moai är ungefär 4 meter hög och väger cirka 12 ton.','Många har kroppar som är begravda i jorden – de är inte bara huvuden.','De flesta tittar inåt land för att vaka över byarna.','Enligt sägnen ”gick” statyerna till sina platser.','Holländaren Jacob Roggeveen kom dit på påskdagen 1722 – därför heter ön Påskön.'] },
+        { n:'Salar de Uyuni', c:'Bolivien', e:'🪞', w:'Salar_de_Uyuni',
+          l:'Jag är världens största saltöken och förvandlas till en jättespegel när det regnar',
+          f:['Jag ligger nästan 3 700 meter över havet','Här finns ett hotell byggt av salt','Jag är så platt att satelliter kalibreras mot mig'],
+          d:['Salar de Uyuni är världens största saltslätt.','Den ligger i Bolivien, cirka 3 650 meter över havet.','Slätten är över 10 000 km² stor.','Den bildades när stora förhistoriska sjöar torkade ut.','När det regnar blir ytan som en gigantisk spegel som speglar himlen.','Den är så platt att den används för att kalibrera satelliter.','Under saltet finns stora mängder litium, som används i batterier.','Här finns hotell byggda av saltblock.','Rosa flamingos häckar i närheten.','Den platta ytan gör att man kan ta roliga perspektivbilder.'] },
+        { n:'Serengeti', c:'Tanzania', e:'🦁', w:'Serengeti',
+          l:'Mitt namn betyder ”de ändlösa slätterna” och här vandrar miljoner djur',
+          f:['Jag ligger i Östafrika','Gnuer vandrar här i jättelika hjordar','Lejon, elefanter och giraffer bor här'],
+          d:['Serengeti är ett stort område med gräsmarker i Tanzania.','Namnet kommer från massajernas språk och betyder ungefär ”ändlösa slätter”.','Serengeti nationalpark grundades 1951.','Varje år vandrar över en miljon gnuer tillsammans med zebror och gaseller.','Vandringen kallas ”den stora migrationen”.','Djuren följer regnet för att hitta färskt gräs.','Här lever ”de fem stora”: lejon, leopard, elefant, buffel och noshörning.','Serengeti har en av Afrikas största lejonstammar.','Området fortsätter in i Kenya, där det heter Masai Mara.','Serengeti blev ett UNESCO-världsarv 1981.'] },
+        { n:'Amazonas regnskog', c:'Sydamerika (främst Brasilien)', e:'🌳', w:'Amazon_rainforest',
+          l:'Jag är världens största regnskog och kallas ibland ”jordens lungor”',
+          f:['Jag breder ut mig över nio länder','En jättestor flod rinner genom mig','Här lever rosa delfiner'],
+          d:['Amazonas är världens största tropiska regnskog.','Den täcker cirka 5,5 miljoner km² – över tolv gånger Sveriges yta.','Regnskogen finns i nio länder, mest i Brasilien.','Här finns uppskattningsvis 390 miljarder träd.','Omkring en tiondel av alla kända arter på jorden lever här.','Amazonfloden för ut mer vatten till havet än någon annan flod.','I floden lever rosa floddelfiner och jättestora fiskar.','I skogen finns jaguarer, anakondor, aporna och färgglada papegojor.','Många ursprungsfolk har levt i regnskogen i tusentals år.','Skogsskövling är ett stort hot mot regnskogen.'] },
+        { n:'Venedig', c:'Italien', e:'🛶', w:'Venice',
+          l:'Jag är en stad där gatorna är kanaler och man åker båt istället för bil',
+          f:['Jag är byggd på över 100 små öar','Mina båtar kallas gondoler','Jag översvämmas ibland av högvatten'],
+          d:['Venedig är en stad i norra Italien.','Staden är byggd på 118 små öar i en lagun.','Den har omkring 150 kanaler och över 400 broar.','Husen står på miljontals träpålar nedslagna i botten.','I Venedig finns inga bilar – man går eller åker båt.','De klassiska båtarna heter gondoler och är svarta.','Ibland översvämmas staden av högvatten, som kallas ”acqua alta”.','Ett system av rörliga barriärer (MOSE) skyddar staden mot havet.','Under karnevalen bär människor vackra masker.','Rialtobron och Markusplatsen hör till de mest kända platserna.'] },
+        { n:'Stonehenge', c:'England', e:'🪨', w:'Stonehenge',
+          l:'Jag är en ring av jättestenar och ingen vet säkert varför jag byggdes',
+          f:['Jag är omkring 5 000 år gammal','Några av mina stenar fraktades över 200 km','Jag ligger i linje med midsommarens soluppgång'],
+          d:['Stonehenge är ett stenmonument i södra England.','Det byggdes i flera omgångar för ungefär 5 000–4 000 år sedan.','De största stenarna väger omkring 25 ton.','De mindre ”blåstenarna” hämtades från Wales, över 200 km bort.','Ingen vet säkert hur man flyttade stenarna utan hjul eller maskiner.','Liggande stenar på toppen sitter fast med fogar som i snickeri.','Monumentet är byggt i linje med solens uppgång vid midsommar.','Forskare tror att det användes för ceremonier och för att följa årstiderna.','Varje midsommar samlas tusentals människor för att se soluppgången.','Stonehenge blev ett UNESCO-världsarv 1986.'] },
+        { n:'Iguazúfallen', c:'Argentina & Brasilien', e:'🌈', w:'Iguazu_Falls',
+          l:'Jag består av hundratals vattenfall och mitt namn betyder ”stort vatten”',
+          f:['Jag ligger på gränsen mellan två länder','Min största del heter ”Djävulens strupe”','Jag är bredare än Niagarafallen'],
+          d:['Iguazúfallen ligger på gränsen mellan Argentina och Brasilien.','De består av ungefär 275 olika vattenfall.','Tillsammans är fallen nästan 3 km breda.','Namnet kommer från guaraníspråket och betyder ”stort vatten”.','Den största delen kallas Garganta del Diablo – ”Djävulens strupe”.','Där störtar vattnet ner cirka 80 meter.','När USA:s presidentfru Eleanor Roosevelt såg fallen ska hon ha sagt: ”Stackars Niagara!”','I regnskogen runt omkring lever näsbjörnar, tukaner och fjärilar.','Ofta bildas regnbågar i vattendimman.','Fallen valdes till ett av naturens sju nya underverk 2011.'] },
+        { n:'Fushimi Inari', c:'Japan (Kyoto)', e:'⛩️', w:'Fushimi_Inari-taisha',
+          l:'Jag har tusentals orangeröda portar som bildar tunnlar uppför ett berg',
+          f:['Jag är en helgedom','Rävstatyer vaktar mig','Mina portar heter torii'],
+          d:['Fushimi Inari är en shintohelgedom i Kyoto i Japan.','Den grundades redan år 711.','Den är tillägnad Inari, guden för ris och välstånd.','Helgedomen är känd för sina tusentals orangeröda portar, så kallade torii.','Portarna bildar långa tunnlar uppför berget Inari.','Varje port är en gåva från en person eller ett företag – namnet står skrivet på den.','Rävar anses vara Inaris budbärare, därför finns många rävstatyer här.','Vandringen upp till toppen och tillbaka tar ungefär 2–3 timmar.','Helgedomen är öppen dygnet runt.','Det finns tiotusentals Inari-helgedomar i Japan och detta är den viktigaste.'] },
+        { n:'Akropolis', c:'Grekland (Aten)', e:'🏛️', w:'Acropolis_of_Athens',
+          l:'Jag är en klippa med marmortempel där demokratins stad en gång hade sitt hjärta',
+          f:['Mitt mest kända tempel heter Parthenon','Jag tillägnades gudinnan Athena','Jag är omkring 2 500 år gammal'],
+          d:['Akropolis är en klippa mitt i Aten med flera antika byggnader.','Det mest kända templet, Parthenon, byggdes 447–432 f.Kr.','Det tillägnades gudinnan Athena, som staden fått sitt namn efter.','Bygget skedde när ledaren Perikles styrde i Aten.','Templet är byggt av vit marmor.','Pelarna är lite buktiga för att de ska se raka ut för ögat.','År 1687 exploderade krut som förvarades i templet och skadade det svårt.','På Erechtheion finns pelare formade som kvinnor, så kallade karyatider.','Många skulpturer från Parthenon finns idag på British Museum i London.','Akropolis blev ett UNESCO-världsarv 1987.'] },
+        { n:'Fuji', c:'Japan', e:'🗻', w:'Mount_Fuji',
+          l:'Jag är ett snöklätt vulkanberg och mitt lands mest kända symbol',
+          f:['Jag är 3 776 meter hög','Jag hade mitt senaste utbrott 1707','Man kan se mig från Tokyo när det är klart väder'],
+          d:['Fuji är Japans högsta berg, 3 776 meter högt.','Berget är en aktiv vulkan.','Det senaste utbrottet skedde 1707.','Fuji har en nästan perfekt kägelform och är ofta snöklädd på toppen.','På klara dagar kan man se berget från Tokyo, cirka 100 km bort.','Klättersäsongen är ungefär juli till september.','Hundratusentals människor klättrar upp varje år.','Många klättrar på natten för att se soluppgången från toppen.','Konstnären Hokusai målade berget i sin kända bildserie.','Fuji blev ett UNESCO-världsarv 2013.'] },
+        { n:'Döda havet', c:'Israel, Jordanien & Palestina', e:'🧂', w:'Dead_Sea',
+          l:'I mig kan du ligga och läsa en tidning medan du flyter',
+          f:['Jag är jordens lägsta punkt på land','Jag är nästan tio gånger saltare än havet','Inga fiskar kan leva i mig'],
+          d:['Döda havet är en saltsjö mellan Israel, Jordanien och Västbanken.','Stranden ligger över 430 meter under havsytan – jordens lägsta punkt på land.','Vattnet är nästan tio gånger saltare än vanligt havsvatten.','Därför flyter man lätt – man kan ligga och läsa en tidning.','Det är så salt att fiskar och växter inte kan leva där.','Bara några mikroorganismer klarar sig i vattnet.','Den svarta leran på stranden smörjs ofta på huden.','Sjön krymper med omkring en meter per år.','I grottor nära Qumran hittades 1947 de berömda Dödahavsrullarna.','Rullarna är bland världens äldsta bibeltexter.'] },
+        { n:'Sahara', c:'Nordafrika', e:'🐪', w:'Sahara',
+          l:'Jag är världens största varma öken – men för länge sedan var jag grön',
+          f:['Jag är ungefär lika stor som USA','Bara en del av mig är sanddyner','Mitt damm blåser ända till Amazonas'],
+          d:['Sahara är världens största varma öken.','Den är ungefär 9 miljoner km² – nästan lika stor som USA.','Öknen sträcker sig över elva länder i Nordafrika.','Bara ungefär en fjärdedel av Sahara är sanddyner – resten är sten och grus.','Vissa sanddyner kan bli över 150 meter höga.','På dagen kan det bli över 50 grader varmt, men nätterna kan vara kalla.','För mellan 11 000 och 5 000 år sedan var Sahara grönt med sjöar.','Hällristningar visar flodhästar och giraffer där det nu är öken.','Dammet från Sahara blåser över Atlanten och göder Amazonas regnskog.','Kameler kan klara sig länge utan vatten och lagrar fett i pucklarna.'] },
+        { n:'Bagan', c:'Myanmar', e:'🎈', w:'Bagan',
+          l:'Över mig svävar luftballonger i soluppgången över tusentals tempel',
+          f:['Jag var en gång huvudstad i ett mäktigt kungarike','Det finns över 2 000 tempel kvar här','Jag ligger vid floden Irrawaddy'],
+          d:['Bagan är en forntida stad i Myanmar.','Den var huvudstad i Paganriket för omkring 1 000 år sedan.','Mellan 1000- och 1200-talet byggdes över 10 000 tempel och pagoder här.','Idag finns fortfarande över 2 000 kvar.','Templen är byggda av tegel och många är täckta av guld.','Bagan ligger vid den stora floden Irrawaddy.','Vid soluppgången svävar ofta luftballonger över templen.','En jordbävning 2016 skadade flera av templen.','Bagan blev ett UNESCO-världsarv 2019.','Många tempel innehåller gamla väggmålningar och Buddhastatyer.'] },
+        { n:'Zhangjiajie', c:'Kina', e:'🌫️', w:'Zhangjiajie_National_Forest_Park',
+          l:'Mina stenpelare i dimman inspirerade de svävande bergen i filmen Avatar',
+          f:['Jag har tusentals höga stenpelare','Här finns en hiss på utsidan av en klippa','Jag var Kinas första nationella skogspark'],
+          d:['Zhangjiajie är en nationalpark i provinsen Hunan i Kina.','Den blev Kinas första nationella skogspark 1982.','Här finns tusentals höga pelare av sandsten.','De har formats av regn och vatten under miljontals år.','När dimman ligger ser det ut som om bergen svävar.','Landskapet inspirerade de svävande bergen i filmen Avatar.','En av pelarna har fått namnet ”Avatar Hallelujah Mountain”.','Bailonghissen åker 326 meter upp på utsidan av en klippa.','I närheten finns en lång glasbro högt över en ravin.','Området ingår i världsarvet Wulingyuan sedan 1992.'] },
+        { n:'Kappadokien', c:'Turkiet', e:'🎈', w:'Cappadocia',
+          l:'Mina klippor ser ut som älvtorn och människor har grävt hela städer under mig',
+          f:['Varje morgon fylls min himmel av luftballonger','Mina klippor är gjorda av vulkanaska','Här finns kyrkor uthuggna i berget'],
+          d:['Kappadokien är ett område mitt i Turkiet.','För länge sedan täckte vulkanutbrott landskapet med aska.','Askan blev mjuk sten som vind och regn har format till spetsiga torn.','Tornen kallas ”älvtorn” eller ”fairy chimneys”.','Människor har grävt bostäder, kyrkor och duvslag i klipporna.','Under marken finns hela städer, till exempel Derinkuyu.','Derinkuyu är flera våningar djup och kunde rymma tusentals människor.','I Göreme finns grottkyrkor med färgglada väggmålningar.','Nästan varje morgon stiger hundratals luftballonger mot himlen.','Kappadokien blev ett UNESCO-världsarv 1985.'] },
+        { n:'Lofoten', c:'Norge', e:'🎣', w:'Lofoten',
+          l:'Jag är en ögrupp norr om polcirkeln med röda fiskestugor och spetsiga berg',
+          f:['Här torkas fisk på stora ställningar','Solen går inte ner här på sommaren','Jag ligger i ett grannland till Sverige'],
+          d:['Lofoten är en ögrupp i norra Norge.','Öarna ligger norr om polcirkeln.','På sommaren skiner midnattssolen och solen går inte ner på flera veckor.','På vintern kan man se norrsken dansa på himlen.','Golfströmmen gör klimatet mildare än man kan tro så långt norrut.','Här har man fiskat torsk i över tusen år.','Fisken hängs på stora träställningar och torkas till torrfisk.','De små röda fiskestugorna kallas rorbuer.','Vid Borg har man hittat ett av de största vikingahusen som någonsin hittats.','Moskstraumen mellan öarna är en av världens starkaste tidvattenströmmar.'] },
+        { n:'Niagarafallen', c:'USA & Kanada', e:'🌊', w:'Niagara_Falls',
+          l:'Jag är tre vattenfall på gränsen mellan två länder och en kvinna åkte nerför mig i en tunna',
+          f:['Min största del ser ut som en hästsko','Turister åker båt nära mig','Mitt vatten används till elektricitet'],
+          d:['Niagarafallen ligger på gränsen mellan USA och Kanada.','De består av tre vattenfall: Horseshoe, American och Bridal Veil.','Horseshoe-fallet, ”hästskon”, är det största och cirka 50 meter högt.','Tusentals kubikmeter vatten störtar ner varje sekund.','En del av vattnet leds bort för att göra elektricitet.','På natten minskas vattenflödet ännu mer för kraftverken.','År 1901 blev 63-åriga Annie Edson Taylor först med att åka nerför fallet i en tunna – och överlevde.','Båtarna Maid of the Mist har kört turister nära fallen sedan 1846.','Fallen flyttar sig långsamt bakåt eftersom vattnet nöter på klippan.','Under väldigt kalla vintrar kan delar av fallet frysa till is.'] },
+        { n:'Antarktis', c:'Sydpolen', e:'🐧', w:'Antarctica',
+          l:'Jag är den kallaste platsen på jorden och ingen bor här för alltid',
+          f:['Nästan hela jag är täckt av is','Kejsarpingviner lever här','Jag är tekniskt sett en öken'],
+          d:['Antarktis är kontinenten runt Sydpolen.','Ungefär 98 procent av kontinenten är täckt av is.','Isen är på sina ställen nästan 5 km tjock.','Här finns ungefär 70 procent av allt sötvatten på jorden – fruset.','Den kallaste temperaturen som mätts på marken är −89,2 °C, 1983 vid Vostok.','Det faller väldigt lite nederbörd, så Antarktis räknas som en öken.','Ingen bor här för alltid, men forskare arbetar på forskningsstationer.','Norrmannen Roald Amundsen var först vid Sydpolen den 14 december 1911.','Antarktisfördraget från 1959 säger att kontinenten bara ska användas fredligt.','Kejsarpingviner ruvar sina ägg här mitt i den mörka vintern.'] },
+        { n:'Yellowstone', c:'USA', e:'🦬', w:'Yellowstone_National_Park',
+          l:'Jag var världens första nationalpark och under mig sover en supervulkan',
+          f:['Här finns hälften av världens gejsrar','Min mest kända gejser heter Old Faithful','Bisonoxar strövar fritt här'],
+          d:['Yellowstone blev världens första nationalpark 1872.','Parken ligger främst i delstaten Wyoming i USA.','Under parken finns en så kallad supervulkan.','Här finns över 10 000 varma källor, gejsrar och bubblande lerpölar.','Ungefär hälften av alla gejsrar i världen finns här.','Gejsern Old Faithful sprutar ungefär var 60–110:e minut.','Källan Grand Prismatic Spring lyser i regnbågens färger tack vare bakterier.','Här lever bisonoxar, grizzlybjörnar och älgar.','Vargar återinfördes i parken 1995.','Miljontals besökare kommer till Yellowstone varje år.'] },
+        { n:'Maldiverna', c:'Maldiverna', e:'🐋', w:'Maldives',
+          l:'Jag är världens lägst liggande land och består av över tusen korallöar',
+          f:['Jag ligger i Indiska oceanen','Mina öar är i genomsnitt bara drygt en meter över havet','Här kan stränderna lysa blått på natten'],
+          d:['Maldiverna är ett önation i Indiska oceanen, sydväst om Indien.','Landet består av omkring 1 190 korallöar.','Öarna är samlade i 26 atoller – ringformade korallrev.','Maldiverna är världens lägst liggande land.','Öarna ligger i genomsnitt bara drygt en meter över havet.','Därför är stigande havsnivåer ett stort hot.','År 2009 höll regeringen ett möte under vattnet för att visa på problemet.','På vissa stränder lyser vågorna blått på natten av självlysande plankton.','Här kan man se mantor och valhajar.','Huvudstaden heter Malé.'] },
+        { n:'Alhambra', c:'Spanien (Granada)', e:'🕌', w:'Alhambra',
+          l:'Mitt namn betyder ”den röda” och jag är ett palats fullt av mönster och fontäner',
+          f:['Jag byggdes av muslimska härskare','Jag har en gård med tolv lejon','Jag ligger framför snöklädda berg'],
+          d:['Alhambra är ett palats och en borg i Granada i södra Spanien.','Namnet kommer från arabiska och betyder ”den röda”.','Det byggdes mest på 1200- och 1300-talet av den muslimska nasriddynastin.','Väggarna är täckta av mönster, kakel och arabisk skrift.','Taken har detaljerade dekorationer som liknar droppstenar.','På Lejongården står en fontän som bärs upp av tolv stenlejon.','År 1492 erövrades Granada av Ferdinand och Isabella.','Det var det sista muslimska riket på den iberiska halvön.','Trädgårdarna Generalife är fulla av fontäner och blommor.','Alhambra blev ett UNESCO-världsarv 1984.'] },
+        { n:'Mont-Saint-Michel', c:'Frankrike', e:'⛪', w:'Mont-Saint-Michel',
+          l:'Jag är ett kloster på en ö som blir landfast när tidvattnet drar sig undan',
+          f:['Jag har några av Europas största tidvattenskillnader','Fiender kunde aldrig inta mig under ett långt krig','Jag tillägnades en ärkeängel'],
+          d:['Mont-Saint-Michel är en liten klippö i Normandie i Frankrike.','Här finns ett kloster som började byggas för över 1 000 år sedan.','Enligt legenden visade sig ärkeängeln Mikael för en biskop år 708.','Tidvattnet här är bland de största i Europa – upp till 14 meter skillnad.','Vid lågvatten kan man gå över sandbankarna, men det kan vara farligt.','Under hundraårskriget lyckades engelsmännen aldrig inta ön.','Efter franska revolutionen användes klostret som fängelse.','Sedan 2014 finns en bro som gör att havet kan flöda runt ön igen.','Bara några tiotal människor bor på ön.','Mont-Saint-Michel blev ett UNESCO-världsarv 1979.'] },
+        { n:'Plitvicesjöarna', c:'Kroatien', e:'💧', w:'Plitvice_Lakes_National_Park',
+          l:'Jag är sexton turkosa sjöar som rinner in i varandra genom vattenfall',
+          f:['Man går på träbryggor över mig','Mina färger skiftar mellan grönt och blått','Det är förbjudet att bada i mig'],
+          d:['Plitvicesjöarna är en nationalpark i Kroatien.','Parken bildades 1949 och är en av de äldsta i sydöstra Europa.','Här finns 16 sjöar i trappsteg som förbinds av vattenfall.','Mellan sjöarna växer naturliga dammar av kalksten, kallad travertin.','Dammarna växer med omkring en centimeter om året.','Sjöarna skiftar i turkost, grönt och blått beroende på mineraler och ljus.','Besökare går på träbryggor precis över vattnet.','Det är förbjudet att bada för att skydda naturen.','I skogarna runt omkring lever brunbjörnar och vargar.','Parken blev ett UNESCO-världsarv 1979.'] },
+        { n:'Borobudur', c:'Indonesien', e:'☸️', w:'Borobudur',
+          l:'Jag är världens största buddhistiska tempel och låg gömd under aska och djungel',
+          f:['Jag byggdes på 800-talet','Jag har 72 klockformade stupor på toppen','Jag ligger på ön Java'],
+          d:['Borobudur är världens största buddhistiska tempel.','Det ligger på ön Java i Indonesien.','Templet byggdes på 800-talet.','Det har 2 672 reliefer och över 500 Buddhastatyer.','På toppen står 72 klockformade stupor, var och en med en Buddha inuti.','Pilgrimer går runt templet våning för våning på väg mot toppen.','Hela vägen är flera kilometer lång.','Templet övergavs och täcktes av vulkanaska och djungel.','År 1814 började det grävas fram under britten Thomas Stamford Raffles.','Borobudur blev ett UNESCO-världsarv 1991.'] },
+        { n:'Kilimanjaro', c:'Tanzania', e:'🏔️', w:'Mount_Kilimanjaro',
+          l:'Jag är Afrikas högsta berg och har snö på toppen nära ekvatorn',
+          f:['Jag är 5 895 meter hög','Jag är en sovande vulkan','Man passerar flera klimatzoner när man klättrar på mig'],
+          d:['Kilimanjaro är Afrikas högsta berg, 5 895 meter högt.','Det ligger i Tanzania, nära gränsen till Kenya.','Det är världens högsta fristående berg.','Kilimanjaro är en vulkan med tre toppar: Kibo, Mawenzi och Shira.','Vulkanen sover men räknas inte som helt död.','Trots att berget ligger nära ekvatorn finns glaciärer på toppen.','Glaciärerna krymper snabbt på grund av klimatförändringar.','På vägen upp passerar man odlingar, regnskog, hedar, öken och is.','Man behöver inga klätterverktyg, men en bestigning tar ofta 5–9 dagar.','Första kända bestigningen gjordes 1889 av Hans Meyer och Ludwig Purtscheller.'] },
+        { n:'Sydney Opera House', c:'Australien (Sydney)', e:'🎭', w:'Sydney_Opera_House',
+          l:'Mitt tak ser ut som segel och mina takplattor tillverkades i Sverige',
+          f:['Jag ritades av en dansk arkitekt','Jag invigdes 1973','Jag ligger vid en berömd hamn'],
+          d:['Sydney Opera House ligger vid hamnen i Sydney i Australien.','Byggnaden ritades av den danske arkitekten Jørn Utzon.','Han vann en arkitekttävling 1957.','Taket ser ut som segel eller snäckskal.','Taket är täckt av över en miljon kakelplattor.','Plattorna tillverkades av Höganäs i Sverige!','Bygget tog mycket längre tid och kostade mycket mer än planerat.','Utzon lämnade projektet 1966 och fick aldrig se det färdigt på plats.','Drottning Elizabeth II invigde operahuset 1973.','Det blev ett UNESCO-världsarv 2007.'] },
+        { n:'Banff', c:'Kanada', e:'🏞️', w:'Banff_National_Park',
+          l:'Jag är Kanadas första nationalpark med turkosa sjöar bland Klippiga bergen',
+          f:['Varma källor gjorde att jag skyddades','Här finns sjöarna Lake Louise och Moraine Lake','Det finns broar byggda bara för djur'],
+          d:['Banff är Kanadas första nationalpark, grundad 1885.','Den ligger i Klippiga bergen i provinsen Alberta.','Parken skapades efter att järnvägsarbetare hittat varma källor.','Sjöar som Lake Louise och Moraine Lake är knallturkosa.','Färgen kommer från fint stenmjöl som glaciärerna malt ner.','Här lever grizzlybjörnar, svartbjörnar, vapitihjortar och bergsgetter.','Ibland går hjortar rakt genom staden Banff.','Över motorvägen finns broar som är byggda bara för djur.','Parken är en del av ett UNESCO-världsarv sedan 1985.','Miljontals besökare vandrar, åker skidor och paddlar här varje år.'] },
+        { n:'Sokotra', c:'Jemen', e:'🌂', w:'Socotra',
+          l:'Jag är en ö där träden ser ut som uppochnervända paraplyer – som från en annan planet',
+          f:['Mitt mest kända träd kallas drakblodsträd','Många av mina växter finns ingen annanstans','Jag ligger i Arabiska havet'],
+          d:['Sokotra är en ö i Arabiska havet som tillhör Jemen.','Ön har varit isolerad från fastlandet i miljontals år.','Därför har det utvecklats växter och djur som inte finns någon annanstans.','Ungefär en tredjedel av växtarterna finns bara på Sokotra.','Det mest kända trädet är drakblodsträdet, som ser ut som ett uppochnervänt paraply.','När man skär i barken rinner en röd kåda ut – ”drakblod”.','Kådan har länge använts som färg och medicin.','Här växer också flasklika träd med tjocka stammar.','Ön kallas ibland ”den mest utomjordiska platsen på jorden”.','Sokotra blev ett UNESCO-världsarv 2008.'] }
+    ];
+
+    // ISO-veckonummer (måndag = veckostart) – används för att välja "veckans plats"
+    function gotwIsoWeek(d){
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+    function gotwWeekIndex(){ return (gotwIsoWeek(new Date()) - 1) % GOTW_PLACES.length; }
+
+    // Bild från Wikipedia (laddas när internet finns; annars visas en snygg emoji-ruta).
+    // URL:en cachas i localStorage så att den inte behöver hämtas varje gång.
+    const _gotwImgMem = {};
+    function gotwFetchImage(place){
+        const key = place.w;
+        if(_gotwImgMem[key]) return _gotwImgMem[key];
+        let cached = null;
+        try{ cached = (JSON.parse(localStorage.getItem('gotwImgCache_')||'{}'))[key] || null; }catch(e){}
+        if(cached){ _gotwImgMem[key] = Promise.resolve(cached); return _gotwImgMem[key]; }
+        _gotwImgMem[key] = (async ()=>{
+            try{
+                const ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+                const to = setTimeout(()=>{ try{ ctrl && ctrl.abort(); }catch(e){} }, 8000);
+                const r = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(key), ctrl ? { signal: ctrl.signal } : {});
+                clearTimeout(to);
+                if(!r.ok) return null;
+                const j = await r.json();
+                let src = null;
+                if(j.thumbnail && j.thumbnail.source){
+                    src = j.thumbnail.source;
+                    if(src.indexOf('/thumb/') !== -1) src = src.replace(/\/(\d+)px-([^\/]+)$/, '/800px-$2');
+                } else if(j.originalimage && j.originalimage.source){ src = j.originalimage.source; }
+                if(src){ try{ const c = JSON.parse(localStorage.getItem('gotwImgCache_')||'{}'); c[key]=src; localStorage.setItem('gotwImgCache_', JSON.stringify(c)); }catch(e){} }
+                return src;
+            }catch(e){ return null; }
+        })();
+        return _gotwImgMem[key];
+    }
+
+    // Grej of the week - steg för steg: Ledtråd -> Fakta -> Plats (med bild) -> Fördjupning
+    function showGotwPopup(place, weekLabel){
+        const C = '#0284c7';
+        const wrapper = document.getElementById('cb-app-wrapper');
+        const overlay = document.createElement('div');
+        overlay.className = 'popup-overlay';
+        const box = document.createElement('div');
+        box.className = 'popup-box';
+        box.style.borderColor = C;
+        box.style.padding = '30px 40px';
+        box.style.maxWidth = '720px';
+        box.style.minWidth = '380px';
+        box.style.width = 'min(720px, 92vw)';
+        box.style.boxSizing = 'border-box';
+        box.style.maxHeight = '90vh';
+        box.style.overflowY = 'auto';
+        box.innerHTML = `
+            <div style="font-size:20px;font-weight:900;letter-spacing:2px;color:${C};text-transform:uppercase;margin-bottom:4px;">🌍 Grej of the week</div>
+            <div style="font-size:13px;font-weight:700;color:#64748b;margin-bottom:16px;">${weekLabel || 'Världens mest kända & exotiska platser'}</div>
+            <div class="gotw-pop-content" style="display:flex;flex-direction:column;gap:12px;align-items:stretch;text-align:left;"></div>
+            <button class="gotw-pop-btn" style="margin-top:24px;width:100%;padding:14px;font-size:18px;font-weight:800;background:${C};color:white;border:none;border-radius:12px;cursor:pointer;transition:transform 0.15s,filter 0.15s;">📖 Visa ledtrådar →</button>`;
+        overlay.appendChild(box);
+        wrapper.appendChild(overlay);
+
+        const content = box.querySelector('.gotw-pop-content');
+        const btn = box.querySelector('.gotw-pop-btn');
+        btn.onmouseover = ()=>{ btn.style.filter='brightness(1.1)'; btn.style.transform='scale(1.02)'; };
+        btn.onmouseout  = ()=>{ btn.style.filter='none'; btn.style.transform='scale(1)'; };
+        const imgPromise = gotwFetchImage(place); // börja hämta bilden direkt
+
+        content.innerHTML = `
+            <div style="font-size:14px;font-weight:800;color:${C};letter-spacing:1px;">📌 LEDTRÅD</div>
+            <div style="font-size:26px;font-weight:800;color:#1f2937;line-height:1.3;background:#e0f2fe;border:2px solid #bae6fd;border-radius:14px;padding:18px 22px;text-align:center;">${place.l}</div>`;
+
+        let step = 1;
+        const close = ()=>{ overlay.style.opacity='0'; box.style.transform='scale(0.5)'; setTimeout(()=>overlay.remove(),300); };
+        const head = (t)=>`<div style="font-size:14px;font-weight:800;color:${C};letter-spacing:1px;margin-top:6px;">${t}</div>`;
+
+        btn.onclick = (e)=>{
+            e.stopPropagation();
+            if(step === 1){
+                let html = head('🔎 FAKTA / LEDTRÅDAR');
+                place.f.forEach((f, i)=>{
+                    html += `<div style="font-size:19px;color:#334155;line-height:1.4;background:#f8fdff;border:1.5px dashed rgba(2,132,199,0.45);border-radius:10px;padding:12px 16px;animation:popIn 0.25s ease ${i*0.12}s both;">• ${f}</div>`;
+                });
+                content.insertAdjacentHTML('beforeend', html);
+                btn.innerHTML = '🌍 Visa platsen →';
+                box.scrollTop = box.scrollHeight;
+                step = 2;
+            } else if(step === 2){
+                content.insertAdjacentHTML('beforeend', head('🎯 PLATSEN') + `
+                    <div style="text-align:center;animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);">
+                        <div style="font-size:44px;font-weight:900;color:#ff3b30;line-height:1.1;text-shadow:2px 2px 0 rgba(0,0,0,0.08);">${place.e} ${place.n}</div>
+                        <div style="font-size:18px;font-weight:700;color:#475569;margin-top:6px;">📍 ${place.c}</div>
+                    </div>
+                    <div class="gotw-img-wrap" style="position:relative;width:100%;aspect-ratio:16/10;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#0ea5e9,#6366f1);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.18);">
+                        <div class="gotw-img-ph" style="font-size:96px;line-height:1;">${place.e}</div>
+                    </div>`);
+                const wrap = content.querySelector('.gotw-img-wrap');
+                imgPromise.then(src=>{
+                    if(!src || !wrap) return;
+                    const img = new Image();
+                    img.alt = place.n;
+                    img.referrerPolicy = 'no-referrer';
+                    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;';
+                    img.onload = ()=>{ img.style.opacity='1'; const ph = wrap.querySelector('.gotw-img-ph'); if(ph) ph.style.display='none'; };
+                    img.src = src;
+                    wrap.appendChild(img);
+                    wrap.insertAdjacentHTML('beforeend', `<div style="position:absolute;right:8px;bottom:6px;font-size:10px;color:#fff;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:6px;">Bild: Wikipedia</div>`);
+                });
+                spawnPopupConfetti(overlay);
+                btn.innerHTML = '📚 Läs mer om platsen →';
+                box.scrollTop = box.scrollHeight;
+                step = 3;
+            } else if(step === 3){
+                let html = head('📚 FÖRDJUPNING – ' + place.n.toUpperCase()) + `<ol style="margin:0;padding:14px 18px 14px 40px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;display:flex;flex-direction:column;gap:8px;">`;
+                place.d.forEach((t, i)=>{
+                    html += `<li style="font-size:17px;color:#1e293b;line-height:1.45;animation:popIn 0.25s ease ${Math.min(i,12)*0.06}s both;">${t}</li>`;
+                });
+                html += `</ol>`;
+                content.insertAdjacentHTML('beforeend', html);
+                btn.innerHTML = '✓ Klart!';
+                step = 4;
+                const last = content.lastElementChild; if(last && last.scrollIntoView) setTimeout(()=>last.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+            } else {
+                close();
+            }
+        };
+
+        overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
+        requestAnimationFrame(()=>{ overlay.style.opacity='1'; box.style.transform='scale(1)'; });
+    }
+
     // GREJ OF THE DAY WIDGET - HELT KLART OCH INTEGRERAT MED STEG-POPUP OCH MINNE
     // FIX: en inbyggd GOTD-lista "Skolord" (20 poster om skolans egen värld) som alltid ska finnas
     // med bland övriga sparade ämnen i rullgardinsmenyn - läggs in i savedGOTDLists_ automatiskt
@@ -12565,6 +12929,8 @@
     function createGOTD(config){
         const body = createWidget('GREJ OF THE DAY', 320, 'word-widget', config);
         body.innerHTML = `
+            <div class='gotd-tabs'><button class='gotd-tab gotd-tab-day active' data-mode='day'>☀️ Day</button><button class='gotd-tab gotd-tab-week' data-mode='week'>🌍 Week</button></div>
+            <div class='gotd-day-pane'>
             <button class='btn btn-secondary hover-menu gotd-edit-toggle' style='width:100%;margin-bottom:8px;'>👁️ Visa lista</button>
             <div class='gotd-edit-section' style='display:none;'>
                 <div class='list-selector-area'><select class='editor-select'></select><button class='btn btn-danger btn-del-g'>Ta bort</button></div>
@@ -12573,7 +12939,15 @@
             </div>
             <button class='btn btn-primary btn-roll-g' style='width:100%'>🎲 Slumpa grej!</button>
             <label class='hover-menu gotd-no-repeat-lbl' style='display:flex;align-items:center;gap:6px;font-size:12px;color:#666;margin:6px 0 2px;cursor:pointer;'><input type='checkbox' class='gotd-no-repeat'> Undvik upprepning just nu</label>
-            <div class='name-result' style='min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:18px;text-align:center;gap:6px;'></div>`;
+            <div class='name-result' style='min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:18px;text-align:center;gap:6px;'></div>
+            </div>
+            <div class='gotd-week-pane' style='display:none;'>
+                <div class='gotw-week-badge'>🌍 Vecka <b class='gotw-wk'></b> · Världens mest kända &amp; exotiska platser</div>
+                <button class='btn btn-primary gotw-btn-week' style='width:100%;background:#0284c7;'>🌍 Veckans plats</button>
+                <button class='btn btn-secondary gotw-btn-roll' style='width:100%;margin-top:6px;'>🎲 Slumpa plats</button>
+                <label class='hover-menu' style='display:flex;align-items:center;gap:6px;font-size:12px;color:#666;margin:6px 0 2px;cursor:pointer;'><input type='checkbox' class='gotw-no-repeat'> Undvik upprepning just nu</label>
+                <div class='gotw-result' style='min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:16px;text-align:center;gap:6px;'></div>
+            </div>`;
 
         const sel = body.querySelector('select'), txt = body.querySelector('textarea'), res = body.querySelector('.name-result'), ni = body.querySelector('.list-name-input'), btnRoll = body.querySelector('.btn-roll-g');
         const noRepeatCb = body.querySelector('.gotd-no-repeat');
@@ -12651,6 +13025,72 @@
                 }
             }, 80);
         };
+
+        // ===== DAY / WEEK-FLIKAR (Grej of the week = världens platser) =====
+        const dayPane = body.querySelector('.gotd-day-pane'), weekPane = body.querySelector('.gotd-week-pane');
+        const tabDay = body.querySelector('.gotd-tab-day'), tabWeek = body.querySelector('.gotd-tab-week');
+        const wRes = body.querySelector('.gotw-result'), wNoRepeat = body.querySelector('.gotw-no-repeat');
+        const wBtnWeek = body.querySelector('.gotw-btn-week'), wBtnRoll = body.querySelector('.gotw-btn-roll');
+        const wkNr = gotwIsoWeek(new Date());
+        body.querySelector('.gotw-wk').textContent = wkNr;
+        let gotwVisade = new Set();
+        const setMode = (m, silent)=>{
+            m = (m === 'week') ? 'week' : 'day';
+            widgetEl.dataset.gotdMode = m;
+            dayPane.style.display = m === 'day' ? '' : 'none';
+            weekPane.style.display = m === 'week' ? '' : 'none';
+            tabDay.classList.toggle('active', m === 'day');
+            tabWeek.classList.toggle('active', m === 'week');
+            if(!silent) saveBoardState();
+        };
+        tabDay.onclick = (e)=>{ e.stopPropagation(); setMode('day'); };
+        tabWeek.onclick = (e)=>{ e.stopPropagation(); setMode('week'); };
+        const showWeekPlace = (idx, label)=>{
+            const p = GOTW_PLACES[idx]; if(!p) return;
+            wRes.dataset.idx = String(idx);
+            wRes.dataset.label = label || '';
+            wRes.innerHTML = `<div class='gotw-result-card' title='Klicka för att visa igen'>📌 ${p.l}</div><div style='font-size:11px;color:#94a3b8;font-weight:600;'>Klicka på rutan för att visa igen</div>`;
+            saveBoardState();
+            showGotwPopup(p, label);
+        };
+        wRes.addEventListener('click', (e)=>{
+            if(!e.target.closest('.gotw-result-card')) return;
+            e.stopPropagation();
+            const i = parseInt(wRes.dataset.idx, 10);
+            if(!isNaN(i) && GOTW_PLACES[i]) showGotwPopup(GOTW_PLACES[i], wRes.dataset.label || '');
+        });
+        wBtnWeek.onclick = (e)=>{ e.stopPropagation(); showWeekPlace(gotwWeekIndex(), 'Veckans plats – vecka ' + wkNr); };
+        wBtnRoll.onclick = (e)=>{
+            e.stopPropagation();
+            const all = GOTW_PLACES.map((_, i)=>i);
+            wRes.innerHTML = '🎲 Slumpar...';
+            let ct = 0;
+            const iv = setInterval(()=>{
+                wRes.innerText = '🎲 ' + GOTW_PLACES[Math.floor(Math.random()*GOTW_PLACES.length)].l;
+                ct++;
+                if(ct > 10){
+                    clearInterval(iv);
+                    let pool = all;
+                    if(wNoRepeat && wNoRepeat.checked){
+                        const ovisade = all.filter(i=>!gotwVisade.has(i));
+                        if(ovisade.length === 0) gotwVisade.clear();
+                        pool = ovisade.length ? ovisade : all;
+                    }
+                    const idx = pool[Math.floor(Math.random()*pool.length)];
+                    if(wNoRepeat && wNoRepeat.checked) gotwVisade.add(idx);
+                    showWeekPlace(idx, 'Slumpad plats');
+                }
+            }, 80);
+        };
+        // Återställ sparat läge (Day/Week) och senaste plats
+        if(config && config.data){
+            if(config.data.weekResult) wRes.innerHTML = config.data.weekResult;
+            if(config.data.weekIdx !== undefined && config.data.weekIdx !== '') wRes.dataset.idx = config.data.weekIdx;
+            if(config.data.weekLabel) wRes.dataset.label = config.data.weekLabel;
+            setMode(config.data.mode || 'day', true);
+        } else {
+            setMode('day', true);
+        }
     }
 
     function createRandomName(config){
