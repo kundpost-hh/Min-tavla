@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-08-gotd-week2';</script>
+    <script>window.BUILD_VERSION = '2026-10-09-tre-nya1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -323,6 +323,9 @@
             <button class="tool-btn" data-cat="svenska" onclick="createOrdWidget()"><div class="icon">🃏</div><div class="label">Ord</div></button>
             <button class="tool-btn" data-cat="svenska" onclick="createKallkritik()"><div class="icon">🔍</div><div class="label">Källkritik</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createGOTD()"><div class="icon">🧠</div><div class="label">Grej of the day</div></button>
+            <button class="tool-btn" data-cat="svenska" onclick="createDiktamen()"><div class="icon">🎧</div><div class="label">Diktamen</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createEkvationsvag()"><div class="icon">⚖️</div><div class="label">Ekvationsvågen</div></button>
+            <button class="tool-btn" data-cat="matte" onclick="createVeckansProblem()"><div class="icon">🧩</div><div class="label">Veckans problem</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createFractionVisualizer()"><div class="icon">🔢</div><div class="label">Talformer</div></button>
             <button class="tool-btn" data-cat="matte" onclick="createBrakjamforelse()"><div class="icon">🍕</div><div class="label">Bråkjämförelse</div></button>
             <button class="tool-btn" onclick="createTableWidget()"><div class="icon">📊</div><div class="label">Tabell</div></button>
@@ -5344,6 +5347,9 @@
                     state.data.weekIdx = wRes ? (wRes.dataset.idx || '') : '';
                     state.data.weekLabel = wRes ? (wRes.dataset.label || '') : '';
                 }
+                else if (type === 'DIKTAMEN') { try{ state.data = JSON.parse(w.dataset.diktamen || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'EKVATIONSVÅGEN') { try{ state.data = JSON.parse(w.dataset.ekvvag || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'VECKANS PROBLEM') { try{ state.data = JSON.parse(w.dataset.veckansproblem || '{}'); }catch(e){ state.data={}; } }
                 return state;
     }
 
@@ -5430,6 +5436,9 @@
             else if (w.type === 'AVRUNDNING') createAvrundning(w);
             else if (w.type === 'BRÅKJÄMFÖRELSE') createBrakjamforelse(w);
             else if (w.type === 'GREJ OF THE DAY') createGOTD(w);
+            else if (w.type === 'DIKTAMEN') createDiktamen(w);
+            else if (w.type === 'EKVATIONSVÅGEN') createEkvationsvag(w);
+            else if (w.type === 'VECKANS PROBLEM') createVeckansProblem(w);
             else if (w.type === 'KALENDER') createCalendarWidget(w);
             else if (w.type === 'LUNCH') createLunchWidget(w);
             else if (w.type === 'KORSORD') createCrossword(w);
@@ -12923,6 +12932,551 @@
 
         overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
         requestAnimationFrame(()=>{ overlay.style.opacity='1'; box.style.transform='scale(1)'; });
+    }
+
+    // ============================================================
+    // DIKTAMEN – datorn läser upp ord/meningar (talsyntes, fungerar offline),
+    // eleverna skriver, sedan visas facit. Egna listor sparas lokalt.
+    // ============================================================
+    const DIKTAMEN_INBYGGDA = {
+        'Sj-ljud': 'sjö\nsju\nskjorta\nstjärna\nskina\nsked\nchoklad\ngarage\nstation\nsjunga',
+        'Tj-ljud': 'kjol\ntjugo\ntjej\ntjock\nkind\nkyrka\nkök\nkänna\nkedja\nköpa',
+        'Ng- och nk-ljud': 'lång\nsjunga\ntunga\nring\nsång\npengar\nfingrar\nbank\ntänka\nsjunka',
+        'Dubbelteckning': 'katt\nboll\nglass\nsimma\nkopp\nsitta\nvatten\nmössa\nsommar\nhoppa',
+        'Meningar åk 1–3': 'Katten sover i solen.\nVi ska bada i sjön i sommar.\nMin bror har en röd cykel.\nHunden springer efter bollen.\nJag tycker om att läsa böcker.\nI morgon ska vi gå till skogen.\nLisa och Omar spelar fotboll på rasten.\nDet regnar ute idag.',
+        'Meningar åk 4–6': 'På hösten faller löven från träden.\nEfter skolan cyklade Emma hem till sin kompis.\nVet du vad klockan är?\nVi köpte mjölk, bröd och äpplen i affären.\n”Kom hit!” ropade läraren.\nDen gamla stugan låg mitt i den mörka skogen.\nOm det blir sol i morgon ska vi åka till stranden.\nSverige har många sjöar och stora skogar.'
+    };
+    function dikEsc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function dikSwedishVoice(){
+        try{
+            const vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+            return vs.find(v=>/^sv/i.test(v.lang)) || vs.find(v=>/swed|svensk/i.test(v.name)) || null;
+        }catch(e){ return null; }
+    }
+    function createDiktamen(config){
+        const body = createWidget('DIKTAMEN', 360, 'dik-widget', config);
+        const widget = body.parentElement.parentElement;
+        const LS = 'savedDiktamenLists_';
+        const loadLists = ()=>{ let l={}; try{ l = JSON.parse(localStorage.getItem(LS)) || {}; }catch(e){} return l; };
+        const allLists = ()=> Object.assign({}, DIKTAMEN_INBYGGDA, loadLists());
+
+        let st = { list:'Sj-ljud', text: DIKTAMEN_INBYGGDA['Sj-ljud'], order:[], idx:-1, speed:0.85, shuffle:true, sayNr:true, twice:false };
+        if(config && config.data && typeof config.data.text === 'string') Object.assign(st, config.data);
+        const persist = ()=>{ widget.dataset.diktamen = JSON.stringify(st); saveBoardState(); };
+        widget.dataset.diktamen = JSON.stringify(st);
+
+        body.innerHTML = `
+            <button class='btn btn-secondary hover-menu dik-edit-toggle' style='width:100%;margin-bottom:8px;'>👁️ Visa lista</button>
+            <div class='dik-edit' style='display:none;'>
+                <div class='list-selector-area'><select class='editor-select dik-sel'></select><button class='btn btn-danger dik-del'>Ta bort</button></div>
+                <div class='save-list-area'><input type='text' class='list-name-input dik-name' placeholder='Namn på egen lista...'><button class='btn btn-secondary dik-save'>Spara</button></div>
+                <textarea class='name-input dik-txt' placeholder='Ett ord eller en mening per rad'></textarea>
+                <div style='display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#555;margin:6px 0 4px;align-items:center;'>
+                    <label style='display:flex;align-items:center;gap:6px;'>🐢 <input type='range' class='dik-speed' min='0.55' max='1.1' step='0.05' style='width:90px;'> 🐇</label>
+                    <label style='display:flex;align-items:center;gap:4px;cursor:pointer;'><input type='checkbox' class='dik-shuffle'> Blanda</label>
+                    <label style='display:flex;align-items:center;gap:4px;cursor:pointer;'><input type='checkbox' class='dik-nr'> Säg numret</label>
+                    <label style='display:flex;align-items:center;gap:4px;cursor:pointer;'><input type='checkbox' class='dik-twice'> Läs två gånger</label>
+                </div>
+            </div>
+            <div class='dik-stage' style='text-align:center;padding:10px 6px 4px;'>
+                <div class='dik-listname' style='font-size:12px;font-weight:700;color:#0f766e;background:#ccfbf1;border-radius:8px;padding:4px 8px;display:inline-block;margin-bottom:8px;'></div>
+                <div class='dik-counter' style='font-size:34px;font-weight:900;color:#1f2937;line-height:1.1;'></div>
+                <div class='dik-sub' style='font-size:13px;color:#64748b;margin:4px 0 10px;min-height:18px;'></div>
+                <div style='display:flex;gap:6px;'>
+                    <button class='btn btn-primary dik-main' style='flex:2;padding:10px;font-size:15px;background:#0f766e;'>▶ Starta</button>
+                    <button class='btn btn-secondary dik-again' style='flex:1;padding:10px;font-size:15px;' title='Läs samma igen'>🔁 Igen</button>
+                </div>
+                <div style='display:flex;gap:6px;margin-top:6px;'>
+                    <button class='btn btn-secondary dik-slow' style='flex:1;' title='Läs extra långsamt'>🐢 Långsamt</button>
+                    <button class='btn btn-secondary dik-facit' style='flex:1;'>📋 Facit</button>
+                    <button class='btn btn-secondary dik-reset' style='flex:1;'>↺ Börja om</button>
+                </div>
+                <div class='dik-warn' style='font-size:11px;color:#b45309;margin-top:6px;'></div>
+            </div>`;
+
+        const q = s=>body.querySelector(s);
+        const sel=q('.dik-sel'), txt=q('.dik-txt'), nameInp=q('.dik-name'), editToggle=q('.dik-edit-toggle'), editSec=q('.dik-edit');
+        const speed=q('.dik-speed'), cbShuffle=q('.dik-shuffle'), cbNr=q('.dik-nr'), cbTwice=q('.dik-twice');
+        const counter=q('.dik-counter'), sub=q('.dik-sub'), mainBtn=q('.dik-main'), listName=q('.dik-listname'), warn=q('.dik-warn');
+
+        const items = ()=> st.text.split('\n').map(x=>x.trim()).filter(x=>x.length>0);
+        const isSentences = ()=> items().some(x=>/\s/.test(x));
+        const unit = ()=> isSentences() ? 'Mening' : 'Ord';
+
+        const setEdit = (show)=>{ editSec.style.display = show ? 'block' : 'none'; editToggle.innerHTML = show ? '🙈 Dölj lista' : '👁️ Visa lista'; };
+        editToggle.onclick = (e)=>{ e.stopPropagation(); setEdit(editSec.style.display==='none'); };
+        widget.addEventListener('mouseleave', ()=>{ if(editSec.contains(document.activeElement)) return; setEdit(false); });
+
+        const fillSel = ()=>{
+            sel.innerHTML='';
+            const own = loadLists();
+            const g1=document.createElement('optgroup'); g1.label='Färdiga listor';
+            Object.keys(DIKTAMEN_INBYGGDA).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=k; g1.appendChild(o); });
+            sel.appendChild(g1);
+            const ownKeys = Object.keys(own);
+            if(ownKeys.length){ const g2=document.createElement('optgroup'); g2.label='Mina listor'; ownKeys.forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=k; g2.appendChild(o); }); sel.appendChild(g2); }
+            if(st.list && allLists()[st.list] !== undefined) sel.value = st.list;
+        };
+
+        const speak = (text, rate)=>{
+            if(!('speechSynthesis' in window)){ warn.textContent='Uppläsning stöds inte i den här webbläsaren.'; return; }
+            const ss = window.speechSynthesis; ss.cancel();
+            const v = dikSwedishVoice();
+            const mk = (t)=>{ const u=new SpeechSynthesisUtterance(t); u.lang='sv-SE'; if(v) u.voice=v; u.rate=rate||st.speed; return u; };
+            ss.speak(mk(text));
+            if(st.twice){ const pause=mk(' '); pause.volume=0; ss.speak(pause); ss.speak(mk(text)); }
+        };
+        const current = ()=>{ const a=items(); return (st.idx>=0 && st.idx<st.order.length) ? a[st.order[st.idx]] : null; };
+        const sayCurrent = (rate)=>{
+            const t = current(); if(!t) return;
+            speak((st.sayNr ? (unit()==='Ord'?'Ord ':'Mening ') + 'nummer ' + (st.idx+1) + '. ' : '') + t, rate);
+        };
+
+        const render = ()=>{
+            const n = items().length;
+            listName.textContent = '📝 ' + (st.list || 'Egen lista');
+            if(st.idx < 0){
+                counter.textContent = n + ' ' + (unit()==='Ord' ? 'ord' : 'meningar');
+                sub.textContent = 'Tryck Starta när alla har penna och papper redo';
+                mainBtn.innerHTML = '▶ Starta';
+            } else if(st.idx < n){
+                counter.textContent = unit() + ' ' + (st.idx+1) + ' / ' + n;
+                sub.textContent = 'Skriv det du hör – tryck Igen om du vill höra det en gång till';
+                mainBtn.innerHTML = st.idx+1 < n ? '⏭ Nästa' : '🏁 Klar';
+            } else {
+                counter.textContent = '🎉 Klart!';
+                sub.textContent = 'Alla ' + n + ' är upplästa – visa facit och rätta';
+                mainBtn.innerHTML = '📋 Visa facit';
+            }
+            if('speechSynthesis' in window && !dikSwedishVoice()) warn.textContent = 'Ingen svensk röst hittades – installera svenska i datorns talinställningar för bäst uttal.';
+            else if('speechSynthesis' in window) warn.textContent = '';
+        };
+
+        const start = ()=>{
+            const n = items().length; if(!n) return;
+            st.order = [...Array(n).keys()];
+            if(st.shuffle){ for(let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [st.order[i],st.order[j]]=[st.order[j],st.order[i]]; } }
+            st.idx = 0; persist(); render(); sayCurrent();
+        };
+        const showFacit = ()=>{
+            const a = items(); if(!a.length) return;
+            const order = st.order.length===a.length ? st.order : [...Array(a.length).keys()];
+            const wrapper = document.getElementById('cb-app-wrapper');
+            const overlay = document.createElement('div'); overlay.className='popup-overlay';
+            const box = document.createElement('div'); box.className='popup-box';
+            Object.assign(box.style,{borderColor:'#0f766e',padding:'28px 36px',maxWidth:'760px',width:'min(760px,92vw)',boxSizing:'border-box',maxHeight:'90vh',overflowY:'auto',textAlign:'left'});
+            const big = !isSentences();
+            box.innerHTML = `<div style="font-size:20px;font-weight:900;letter-spacing:2px;color:#0f766e;text-transform:uppercase;margin-bottom:4px;text-align:center;">📋 Facit – diktamen</div>
+                <div style="font-size:13px;font-weight:700;color:#64748b;margin-bottom:16px;text-align:center;">${dikEsc(st.list||'')}</div>
+                <ol style="margin:0;padding:12px 18px 12px 46px;background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:12px;${big?'columns:2;column-gap:40px;':''}">
+                ${order.map(i=>`<li style="font-size:${big?'28px':'21px'};font-weight:700;color:#134e4a;line-height:1.5;padding:2px 0;break-inside:avoid;">${dikEsc(a[i])}</li>`).join('')}
+                </ol>
+                <button class="dik-close" style="margin-top:20px;width:100%;padding:12px;font-size:17px;font-weight:800;background:#0f766e;color:#fff;border:none;border-radius:12px;cursor:pointer;">✓ Stäng</button>`;
+            overlay.appendChild(box); wrapper.appendChild(overlay);
+            const close = ()=>{ overlay.style.opacity='0'; box.style.transform='scale(0.5)'; setTimeout(()=>overlay.remove(),300); };
+            box.querySelector('.dik-close').onclick = (e)=>{ e.stopPropagation(); close(); };
+            overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
+            requestAnimationFrame(()=>{ overlay.style.opacity='1'; box.style.transform='scale(1)'; });
+        };
+
+        mainBtn.onclick = (e)=>{
+            e.stopPropagation();
+            const n = items().length; if(!n) return;
+            if(st.idx < 0 || st.order.length !== n){ start(); return; }
+            if(st.idx < n-1){ st.idx++; persist(); render(); sayCurrent(); return; }
+            if(st.idx === n-1){ st.idx = n; persist(); render(); try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(_){} return; }
+            showFacit();
+        };
+        q('.dik-again').onclick = (e)=>{ e.stopPropagation(); if(st.idx<0){ start(); return; } sayCurrent(); };
+        q('.dik-slow').onclick = (e)=>{ e.stopPropagation(); if(st.idx<0){ start(); return; } sayCurrent(Math.max(0.5, st.speed-0.3)); };
+        q('.dik-facit').onclick = (e)=>{ e.stopPropagation(); showFacit(); };
+        q('.dik-reset').onclick = (e)=>{ e.stopPropagation(); try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(_){} st.idx=-1; st.order=[]; persist(); render(); };
+
+        sel.onchange = ()=>{ const l=allLists(); if(l[sel.value]===undefined) return; st.list=sel.value; st.text=l[sel.value]; txt.value=st.text; st.idx=-1; st.order=[]; persist(); render(); };
+        txt.oninput = ()=>{ st.text = txt.value; st.idx=-1; st.order=[]; persist(); render(); };
+        q('.dik-save').onclick = ()=>{ const t=nameInp.value.trim(), c=txt.value.trim(); if(!t||!c) return; if(DIKTAMEN_INBYGGDA[t]!==undefined){ customAlert('Välj ett annat namn – det finns redan en färdig lista som heter så.','ℹ️'); return; } const l=loadLists(); l[t]=c; try{ localStorage.setItem(LS, JSON.stringify(l)); }catch(_){} nameInp.value=''; st.list=t; st.text=c; fillSel(); persist(); render(); };
+        q('.dik-del').onclick = ()=>{ if(DIKTAMEN_INBYGGDA[sel.value]!==undefined){ customAlert('De färdiga listorna kan inte tas bort – men du kan skapa egna.','ℹ️'); return; } customConfirm('Radera listan?', ()=>{ const l=loadLists(); delete l[sel.value]; try{ localStorage.setItem(LS, JSON.stringify(l)); }catch(_){} st.list='Sj-ljud'; st.text=DIKTAMEN_INBYGGDA['Sj-ljud']; txt.value=st.text; st.idx=-1; st.order=[]; fillSel(); persist(); render(); }); };
+        speed.oninput = ()=>{ st.speed = parseFloat(speed.value)||0.85; persist(); };
+        cbShuffle.onchange = ()=>{ st.shuffle = cbShuffle.checked; persist(); };
+        cbNr.onchange = ()=>{ st.sayNr = cbNr.checked; persist(); };
+        cbTwice.onchange = ()=>{ st.twice = cbTwice.checked; persist(); };
+
+        txt.value = st.text; speed.value = st.speed; cbShuffle.checked = st.shuffle; cbNr.checked = st.sayNr; cbTwice.checked = !!st.twice;
+        fillSel(); render();
+        try{ if(window.speechSynthesis && window.speechSynthesis.addEventListener) window.speechSynthesis.addEventListener('voiceschanged', render); }catch(_){}
+    }
+
+    // ============================================================
+    // EKVATIONSVÅGEN – likhetstecknet betyder "väger lika mycket".
+    // Läge "Uppgifter": ett hemligt tal (?) gör att vågen väger jämnt –
+    // eleverna gissar, vågen tippar om det blir fel. Läge "Fri våg":
+    // skriv två uttryck och se om de väger lika.
+    // ============================================================
+    function vagEval(expr){
+        let s = String(expr).replace(/[×·]/g,'*').replace(/[÷:]/g,'/').replace(/−/g,'-').replace(/,/g,'.');
+        if(!/^[0-9+\-*/().\s]+$/.test(s) || !/[0-9]/.test(s)) return null;
+        try{ const v = Function('"use strict";return (' + s + ')')(); return (typeof v==='number' && isFinite(v)) ? Math.round(v*1e6)/1e6 : null; }catch(e){ return null; }
+    }
+    function vagRi(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+    function vagNewTask(level){
+        let t, L, R, ans;
+        if(level==='latt'){
+            t = vagRi(1,3);
+            if(t===1){ const a=vagRi(1,10); ans=vagRi(1,10); L=`${a} + ?`; R=`${a+ans}`; }
+            else if(t===2){ const a=vagRi(1,10); ans=vagRi(1,10); L=`? + ${a}`; R=`${a+ans}`; }
+            else { const a=vagRi(2,9), b=vagRi(2,9); const c=vagRi(1,a+b-1); ans=a+b-c; L=`${a} + ${b}`; R=`${c} + ?`; }
+        } else if(level==='medel'){
+            t = vagRi(1,4);
+            if(t===1){ const a=vagRi(10,60); ans=vagRi(5,39); L=`${a} + ?`; R=`${a+ans}`; }
+            else if(t===2){ const a=vagRi(5,40), c=vagRi(5,50); ans=a+c; L=`? − ${a}`; R=`${c}`; }
+            else if(t===3){ const a=vagRi(20,99); ans=vagRi(2,a-2); L=`${a} − ?`; R=`${a-ans}`; }
+            else { const a=vagRi(10,50), b=vagRi(10,40); const c=vagRi(5,a+b-5); ans=a+b-c; L=`${a} + ${b}`; R=`? + ${c}`; }
+        } else {
+            t = vagRi(1,4);
+            if(t===1){ const k=vagRi(2,9); ans=vagRi(2,10); L=`${k} · ?`; R=`${k*ans}`; }
+            else if(t===2){ const k=vagRi(2,6), a=vagRi(1,20); ans=vagRi(2,10); L=`${k} · ? + ${a}`; R=`${k*ans+a}`; }
+            else if(t===3){ const a=vagRi(3,9), b=vagRi(3,9); const c=vagRi(1,a*b-1); ans=a*b-c; L=`${a} · ${b}`; R=`${c} + ?`; }
+            else { const a=vagRi(1,15); ans=vagRi(2,15); L=`? + ? + ${a}`; R=`${2*ans+a}`; }
+        }
+        if(Math.random()<0.5) [L,R]=[R,L]; // ibland står det okända talet till höger
+        return { L, R, ans };
+    }
+    function createEkvationsvag(config){
+        const body = createWidget('EKVATIONSVÅGEN', 440, 'vag-widget', config);
+        const widget = body.parentElement.parentElement;
+        let st = { mode:'uppg', level:'latt', L:'', R:'', ans:0, guess:null, solved:false, fL:'3 + 4', fR:'10 − 3', blocks:true };
+        if(config && config.data && config.data.mode) Object.assign(st, config.data);
+        if(!st.L){ Object.assign(st, vagNewTask(st.level)); }
+        const persist = ()=>{ widget.dataset.ekvvag = JSON.stringify(st); saveBoardState(); };
+        widget.dataset.ekvvag = JSON.stringify(st);
+
+        body.innerHTML = `
+            <div class='gotd-tabs vag-tabs'><button class='gotd-tab vag-tab' data-m='uppg'>⚖️ Uppgifter</button><button class='gotd-tab vag-tab' data-m='fri'>✏️ Fri våg</button></div>
+            <div class='vag-uppg-ctrl hover-menu' style='display:flex;gap:6px;margin-bottom:6px;'>
+                <select class='editor-select vag-level'><option value='latt'>Lätt (0–20)</option><option value='medel'>Medel (0–100)</option><option value='svar'>Svår (gånger)</option></select>
+                <button class='btn btn-primary vag-new' style='background:#7c3aed;'>🎲 Ny uppgift</button>
+            </div>
+            <div class='vag-fri-ctrl' style='display:none;gap:6px;margin-bottom:6px;align-items:center;'>
+                <input class='list-name-input vag-fl' style='flex:1;min-width:0;text-align:center;font-size:16px;font-weight:700;' placeholder='t.ex. 3 + 4'>
+                <span style='font-weight:900;color:#64748b;'>och</span>
+                <input class='list-name-input vag-fr' style='flex:1;min-width:0;text-align:center;font-size:16px;font-weight:700;' placeholder='t.ex. 10 − 3'>
+            </div>
+            <div class='vag-eq' style='text-align:center;font-size:26px;font-weight:900;color:#1f2937;margin:2px 0 0;letter-spacing:.5px;'></div>
+            <svg class='vag-svg' viewBox='0 0 420 250' style='width:100%;height:auto;display:block;'></svg>
+            <div class='vag-status' style='text-align:center;font-size:15px;font-weight:800;min-height:22px;margin:2px 0 8px;'></div>
+            <div class='vag-guess-row' style='display:flex;gap:6px;align-items:center;'>
+                <span style='font-weight:900;font-size:18px;color:#7c3aed;'>? =</span>
+                <input type='number' class='list-name-input vag-guess' style='flex:1;min-width:0;font-size:18px;font-weight:800;text-align:center;' placeholder='Gissa'>
+                <button class='btn btn-primary vag-test' style='background:#16a34a;padding:8px 12px;'>⚖️ Testa</button>
+                <button class='btn btn-secondary vag-show' style='padding:8px 10px;'>👁 Svar</button>
+            </div>
+            <label class='hover-menu' style='display:flex;align-items:center;gap:6px;font-size:12px;color:#666;margin-top:6px;cursor:pointer;'><input type='checkbox' class='vag-blocks'> Visa klossar (när talen är små)</label>`;
+
+        const q = s=>body.querySelector(s);
+        const svg=q('.vag-svg'), eqEl=q('.vag-eq'), status=q('.vag-status'), guessInp=q('.vag-guess');
+        const tabs=[...body.querySelectorAll('.vag-tab')], levelSel=q('.vag-level');
+        const fl=q('.vag-fl'), fr=q('.vag-fr'), cbBlocks=q('.vag-blocks');
+        const NS='http://www.w3.org/2000/svg';
+        const COLORS=['#3b82f6','#f59e0b','#10b981','#ef4444'];
+        let angle = 0, animId = null;
+
+        const sideValue = (expr, x)=>{ return vagEval(String(expr).replace(/\?/g, x===null||x===undefined ? 'NaN' : '('+x+')')); };
+        const pretty = (expr, x)=> String(expr).replace(/\?/g, (x===null||x===undefined) ? '?' : String(x));
+
+        // Delar upp ett uttryck i plustermer (för klossar). Returnerar null om det innehåller annat än +.
+        const plusTerms = (expr)=>{ const s=String(expr); if(/[−\-·*×÷/:()]/.test(s)) return null; return s.split('+').map(x=>x.trim()).filter(Boolean); };
+
+        function el(tag, attrs, parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+
+        function drawSide(g, cx, panY, expr, x, isLeft){
+            // Klossar ovanför vågskålen (bara för små plusuttryck)
+            const terms = plusTerms(expr);
+            let drewBlocks = false;
+            if(st.blocks && terms && st.mode==='uppg'){
+                const vals = terms.map(t=> t==='?' ? (x===null||x===undefined ? '?' : Number(x)) : Number(t));
+                const total = vals.reduce((s,v)=> s + (v==='?'?0:(isFinite(v)?v:0)), 0);
+                if(total <= 24 && vals.every(v=> v==='?' || (Number.isInteger(v) && v>=0))){
+                    drewBlocks = true;
+                    const size=9, gap=2, perRow=10;
+                    let cells=[];
+                    vals.forEach((v,ti)=>{
+                        if(v==='?'){ cells.push({bag:true}); }
+                        else { const col = (terms[ti]==='?') ? '#a855f7' : COLORS[ti%COLORS.length]; for(let i=0;i<v;i++) cells.push({col}); }
+                    });
+                    // rita: påsar som egna stora block, klossar i rader
+                    const bags = cells.filter(c=>c.bag).length, cubes = cells.filter(c=>!c.bag);
+                    const rows = Math.ceil(cubes.length/perRow);
+                    const w = Math.min(perRow, cubes.length)*(size+gap) + bags*(30+gap);
+                    let sx = cx - w/2, y0 = panY - 4;
+                    for(let b=0;b<bags;b++){
+                        el('rect',{x:sx, y:y0-30, width:30, height:30, rx:7, fill:'#7c3aed'}, g);
+                        const t=el('text',{x:sx+15, y:y0-9, 'text-anchor':'middle', 'font-size':20, 'font-weight':900, fill:'#fff'}, g); t.textContent='?';
+                        sx += 30+gap;
+                    }
+                    cubes.forEach((c,i)=>{
+                        const r=Math.floor(i/perRow), k=i%perRow;
+                        el('rect',{x:sx + k*(size+gap), y:y0 - (r+1)*(size+gap), width:size, height:size, rx:2, fill:c.col}, g);
+                    });
+                    const labelY = y0 - Math.max(rows*(size+gap), bags?30:0) - 8;
+                    const t=el('text',{x:cx, y:labelY, 'text-anchor':'middle', 'font-size':17, 'font-weight':800, fill:'#1f2937'}, g); t.textContent = pretty(expr, x);
+                }
+            }
+            if(!drewBlocks){
+                const txt = pretty(expr, x);
+                const fs = txt.length>10 ? 17 : 22;
+                // låda som "vikt"
+                const wbox = Math.max(56, txt.length*fs*0.58+18);
+                el('rect',{x:cx-wbox/2, y:panY-40, width:wbox, height:34, rx:8, fill:isLeft?'#dbeafe':'#fef3c7', stroke:isLeft?'#3b82f6':'#f59e0b', 'stroke-width':2}, g);
+                const t=el('text',{x:cx, y:panY-16, 'text-anchor':'middle', 'font-size':fs, 'font-weight':900, fill:'#1f2937'}, g); t.textContent = txt;
+            }
+        }
+
+        function draw(a){
+            svg.innerHTML='';
+            const px=210, py=62, arm=150, hang=78;
+            const rad = a*Math.PI/180;
+            // fot och pelare
+            el('rect',{x:150, y:232, width:120, height:12, rx:6, fill:'#94a3b8'}, svg);
+            el('path',{d:`M${px-16} 232 L${px-6} ${py+6} L${px+6} ${py+6} L${px+16} 232 Z`, fill:'#cbd5e1'}, svg);
+            const lx = px - arm*Math.cos(rad), ly = py - arm*Math.sin(rad);
+            const rx = px + arm*Math.cos(rad), ry = py + arm*Math.sin(rad);
+            el('line',{x1:lx, y1:ly, x2:rx, y2:ry, stroke:'#475569', 'stroke-width':7, 'stroke-linecap':'round'}, svg);
+            el('circle',{cx:px, cy:py, r:9, fill:'#334155'}, svg);
+            // visare
+            el('path',{d:`M${px} ${py-8} L${px-6} ${py-24} L${px+6} ${py-24} Z`, fill: Math.abs(a)<0.5 ? '#16a34a' : '#ef4444', transform:`rotate(${a} ${px} ${py})`}, svg);
+            [[lx,ly,true],[rx,ry,false]].forEach(([ex,ey,isL])=>{
+                const panY = ey + hang;
+                el('line',{x1:ex, y1:ey, x2:ex-48, y2:panY, stroke:'#94a3b8', 'stroke-width':2}, svg);
+                el('line',{x1:ex, y1:ey, x2:ex+48, y2:panY, stroke:'#94a3b8', 'stroke-width':2}, svg);
+                el('path',{d:`M${ex-62} ${panY} Q${ex} ${panY+26} ${ex+62} ${panY} Z`, fill:isL?'#3b82f6':'#f59e0b', opacity:0.9}, svg);
+                const g = el('g',{}, svg);
+                const expr = st.mode==='uppg' ? (isL?st.L:st.R) : (isL?st.fL:st.fR);
+                const x = st.mode==='uppg' ? (st.guess===null ? null : st.guess) : 0;
+                drawSide(g, ex, panY, expr, st.mode==='uppg' ? x : 0, isL);
+            });
+        }
+
+        function animateTo(target){
+            if(animId) cancelAnimationFrame(animId);
+            const from = angle, t0 = performance.now(), dur = 700;
+            const step = (now)=>{
+                const p = Math.min(1, (now-t0)/dur);
+                const e = 1 - Math.pow(1-p, 3);
+                // liten gungning på slutet
+                const wobble = p<1 ? Math.sin(p*Math.PI*3)*(1-p)*2.5 : 0;
+                angle = from + (target-from)*e + wobble;
+                draw(angle);
+                if(p<1) animId = requestAnimationFrame(step); else { angle = target; draw(angle); animId=null; }
+            };
+            animId = requestAnimationFrame(step);
+        }
+        const tiltFor = (Lv, Rv)=>{ if(Lv===null || Rv===null) return 0; const d = Lv - Rv; if(Math.abs(d)<1e-9) return 0; return -Math.sign(d)*Math.min(16, 5 + Math.abs(d)*0.8); };
+
+        function update(animate){
+            tabs.forEach(t=>t.classList.toggle('active', t.dataset.m===st.mode));
+            tabs.forEach(t=>{ t.style.color = t.classList.contains('active') ? '#7c3aed' : ''; });
+            q('.vag-uppg-ctrl').style.display = st.mode==='uppg' ? 'flex' : 'none';
+            q('.vag-fri-ctrl').style.display = st.mode==='fri' ? 'flex' : 'none';
+            q('.vag-guess-row').style.display = st.mode==='uppg' ? 'flex' : 'none';
+            let target = 0;
+            if(st.mode==='uppg'){
+                const _bal = st.guess===null || Math.abs((sideValue(st.L, st.guess)||0) - (sideValue(st.R, st.guess)||0)) < 1e-9;
+                const _sign = st.guess===null ? '<span style="color:#7c3aed;">=</span>' : (_bal ? '<span style="color:#16a34a;">=</span>' : '<span style="color:#dc2626;">≠</span>');
+                eqEl.innerHTML = `${dikEsc(pretty(st.L, st.guess))} ${_sign} ${dikEsc(pretty(st.R, st.guess))}`;
+                if(st.guess===null){
+                    // Med det hemliga talet väger vågen jämnt – vad är ? värt?
+                    target = 0;
+                    status.innerHTML = `<span style="color:#475569;">Vågen väger jämnt. Vilket tal är <span style="color:#7c3aed;">?</span></span>`;
+                } else {
+                    const Lv = sideValue(st.L, st.guess), Rv = sideValue(st.R, st.guess);
+                    target = tiltFor(Lv, Rv);
+                    if(target===0){ status.innerHTML = `<span style="color:#16a34a;">✅ I balans! ? = ${st.guess}</span>`; }
+                    else { status.innerHTML = `<span style="color:#dc2626;">❌ ${Lv>Rv ? 'Vänster' : 'Höger'} sida väger mer (${Lv} och ${Rv}) – försök igen!</span>`; }
+                }
+            } else {
+                const Lv = vagEval(st.fL), Rv = vagEval(st.fR);
+                if(Lv===null || Rv===null){
+                    eqEl.innerHTML = `<span style="color:#94a3b8;font-size:18px;">Skriv ett uttryck på varje sida</span>`;
+                    status.innerHTML = ''; target = 0;
+                } else {
+                    target = tiltFor(Lv, Rv);
+                    const sign = target===0 ? '=' : (Lv>Rv ? '>' : '<');
+                    eqEl.innerHTML = `${dikEsc(st.fL)} <span style="color:${target===0?'#16a34a':'#dc2626'};">${sign}</span> ${dikEsc(st.fR)}`;
+                    status.innerHTML = target===0 ? `<span style="color:#16a34a;">✅ Båda sidor är värda ${Lv} – likhetstecknet stämmer!</span>`
+                                                  : `<span style="color:#dc2626;">${Lv} och ${Rv} – sidorna väger inte lika, då får man inte skriva =</span>`;
+                }
+            }
+            if(animate===false){ angle = target; draw(angle); } else animateTo(target);
+        }
+
+        tabs.forEach(t=> t.onclick = (e)=>{ e.stopPropagation(); st.mode = t.dataset.m; persist(); update(); });
+        levelSel.onchange = ()=>{ st.level = levelSel.value; Object.assign(st, vagNewTask(st.level), {guess:null, solved:false}); guessInp.value=''; persist(); update(); };
+        q('.vag-new').onclick = (e)=>{ e.stopPropagation(); Object.assign(st, vagNewTask(st.level), {guess:null, solved:false}); guessInp.value=''; persist(); update(); };
+        const test = ()=>{ const v = parseFloat(String(guessInp.value).replace(',','.')); if(isNaN(v)) return; st.guess = v; st.solved = Math.abs(v-st.ans)<1e-9; persist(); update(); };
+        q('.vag-test').onclick = (e)=>{ e.stopPropagation(); test(); };
+        guessInp.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); test(); } });
+        q('.vag-show').onclick = (e)=>{ e.stopPropagation(); st.guess = st.ans; st.solved = true; guessInp.value = st.ans; persist(); update(); };
+        fl.oninput = ()=>{ st.fL = fl.value; persist(); update(); };
+        fr.oninput = ()=>{ st.fR = fr.value; persist(); update(); };
+        cbBlocks.onchange = ()=>{ st.blocks = cbBlocks.checked; persist(); update(false); };
+
+        levelSel.value = st.level; fl.value = st.fL; fr.value = st.fR; cbBlocks.checked = st.blocks !== false;
+        if(st.guess!==null && st.guess!==undefined) guessInp.value = st.guess; else st.guess = null;
+        update(false);
+    }
+
+    // ============================================================
+    // VECKANS PROBLEM – problemlösning steg för steg:
+    // Problem → Ledtråd 1 → Ledtråd 2 → Svar → Lösningsvägar.
+    // Två nivåer (åk 1–3 / åk 4–6), ett problem per vecka + slumpa.
+    // EPA-timer (Enskilt – Par – Alla) direkt i rutan.
+    // ============================================================
+    const VP_PROBLEM = {
+        lag: [
+            { t:'Bondgården', q:'På en bondgård finns hönor och grisar. Du räknar 5 huvuden och 14 ben. Hur många hönor och hur många grisar finns det?', h1:'Rita 5 huvuden. Varje djur har ett huvud.', h2:'Ge alla djur 2 ben först. Hur många ben blir då över?', a:'3 hönor och 2 grisar', s:['Rita: 5 djur med 2 ben var blir 10 ben. 4 ben är kvar. Varje gris behöver 2 ben till, alltså 2 grisar. Då är 3 djur hönor.','Pröva: 3 hönor (6 ben) + 2 grisar (8 ben) = 14 ben ✔'] },
+            { t:'Trappan', q:'Lisa hoppar uppför en trappa. Hon tar 2 trappsteg i varje hopp och är uppe efter 7 hopp. Hur många trappsteg har trappan?', h1:'Hur många steg kommer hon för varje hopp?', h2:'Räkna 2, 4, 6 … sju gånger.', a:'14 trappsteg', s:['Hoppa i tvåtal: 2, 4, 6, 8, 10, 12, 14.','Multiplikation: 7 · 2 = 14.'] },
+            { t:'Kolorna', q:'Ali har 12 kolor. Han delar dem lika mellan sig själv och sina 3 kompisar. Hur många kolor får var och en?', h1:'Hur många personer delar? Glöm inte Ali själv!', h2:'Dela ut en kola i taget till 4 personer.', a:'3 kolor var', s:['Rita 4 personer och dela ut 12 prickar en i taget – alla får 3.','Division: 12 / 4 = 3.'] },
+            { t:'Mynten', q:'Elsa har bara 5-kronor och 2-kronor. Hon har 4 mynt som tillsammans är värda 14 kr. Vilka mynt har hon?', h1:'Pröva med olika antal 5-kronor: 1, 2, 3 …', h2:'Om hon har två 5-kronor – hur mycket fattas då, och hur många mynt har hon kvar?', a:'Två 5-kronor och två 2-kronor', s:['Pröva systematiskt: 1 femma + 3 tvåor = 11 kr, 2 femmor + 2 tvåor = 14 kr ✔','5 + 5 = 10 och 2 + 2 = 4. 10 + 4 = 14 kr.'] },
+            { t:'Klosstornet', q:'Ett torn byggs så här: våning 1 har 1 kloss, våning 2 har 2 klossar, våning 3 har 3 klossar och så vidare. Hur många klossar behövs för ett torn med 6 våningar?', h1:'Skriv hur många klossar varje våning har.', h2:'Lägg ihop 1 + 2 + 3 + 4 + 5 + 6.', a:'21 klossar', s:['1 + 2 + 3 + 4 + 5 + 6 = 21.','Smart par: (1+6) + (2+5) + (3+4) = 7 + 7 + 7 = 21.'] },
+            { t:'Tankenötten', q:'Jag tänker på ett tal. Om jag lägger till 7 och sedan tar bort 3 får jag 15. Vilket tal tänker jag på?', h1:'Börja bakifrån – från 15.', h2:'Gör det motsatta: lägg tillbaka 3 och ta bort 7.', a:'11', s:['Baklänges: 15 + 3 = 18, 18 − 7 = 11.','Pröva: 11 + 7 = 18, 18 − 3 = 15 ✔'] },
+            { t:'Syskonen', q:'Mira är 7 år. Hennes bror är 3 år äldre. Hur gammal är brodern när Mira fyller 10?', h1:'Hur gammal är brodern nu?', h2:'Hur många år dröjer det tills Mira fyller 10?', a:'13 år', s:['Brodern är 10 nu. Om 3 år är Mira 10 och brodern 13.','Skillnaden är alltid 3 år: 10 + 3 = 13.'] },
+            { t:'Hälsa i hand', q:'4 kompisar hälsar på varandra genom att ta i hand. Alla tar i hand med alla, en gång var. Hur många handskakningar blir det?', h1:'Rita 4 prickar och dra ett streck för varje handskakning.', h2:'Den första hälsar på 3, den andra på 2 nya …', a:'6 handskakningar', s:['Rita en fyrhörning med båda diagonalerna – 6 streck.','3 + 2 + 1 = 6.'] },
+            { t:'Benen i rummet', q:'I ett rum finns 3 stolar och 2 bord. Stolar och bord har 4 ben var. På stolarna sitter 2 barn. Hur många ben finns det i rummet?', h1:'Räkna stolsben, bordsben och barnens ben var för sig.', h2:'Barn har 2 ben var.', a:'24 ben', s:['Stolar 3 · 4 = 12, bord 2 · 4 = 8, barn 2 · 2 = 4. 12 + 8 + 4 = 24.','Möbler: 5 st · 4 ben = 20, plus 4 barnben = 24.'] },
+            { t:'Pennaffären', q:'En penna kostar 4 kr och ett suddgummi kostar 3 kr. Du har 20 kr och köper 2 pennor och 2 suddgummin. Hur mycket pengar har du kvar?', h1:'Vad kostar 2 pennor? Vad kostar 2 suddgummin?', h2:'Lägg ihop och ta bort från 20 kr.', a:'6 kr', s:['Pennor 8 kr + sudd 6 kr = 14 kr. 20 − 14 = 6 kr.','En penna + ett sudd = 7 kr. Två par = 14 kr. 20 − 14 = 6 kr.'] },
+            { t:'Mönstret', q:'Ett mönster går så här: 🔺 🔵 🔵 🔺 🔵 🔵 🔺 🔵 🔵 … Vilken form har plats nummer 14?', h1:'Hur många former är det innan mönstret börjar om?', h2:'Trianglarna står på plats 1, 4, 7, 10, 13 …', a:'En blå cirkel 🔵', s:['Mönstret upprepas var 3:e. Triangel på 13 – då är plats 14 en cirkel.','Rita mönstret fram till plats 14 och räkna.'] },
+            { t:'Glasskiosken', q:'Kiosken har 3 sorters glass (choklad, jordgubb, vanilj) och 2 sorters strut (vanlig och choklad). Hur många olika glassar med en kula kan du välja?', h1:'Välj en strut först. Hur många glassorter passar i den?', h2:'Gör samma sak för den andra struten.', a:'6 olika', s:['Lista: vanlig+choklad, vanlig+jordgubb, vanlig+vanilj, chokladstrut+de tre = 6.','3 sorter · 2 strutar = 6.'] },
+            { t:'Trianglarna', q:'Några trianglar har tillsammans 18 hörn. Hur många trianglar är det?', h1:'Hur många hörn har en triangel?', h2:'Räkna i tretal tills du når 18.', a:'6 trianglar', s:['3, 6, 9, 12, 15, 18 – sex steg.','18 / 3 = 6.'] },
+            { t:'Bussen', q:'På en buss sitter 12 personer. Vid första hållplatsen går 5 av och 3 på. Vid andra hållplatsen går 4 av och 6 på. Hur många sitter på bussen nu?', h1:'Räkna en hållplats i taget.', h2:'Efter första hållplatsen sitter det 10 personer.', a:'12 personer', s:['12 − 5 + 3 = 10. 10 − 4 + 6 = 12.','Totalt gick 9 av och 9 på – lika många som från början!'] },
+            { t:'Kaninerna', q:'Varje kanin äter 2 morötter om dagen. Hur många morötter behöver 3 kaniner under en hel vecka?', h1:'Hur många morötter äter 3 kaniner på en dag?', h2:'En vecka har 7 dagar.', a:'42 morötter', s:['3 · 2 = 6 per dag. 6 · 7 = 42.','En kanin: 2 · 7 = 14 per vecka. Tre kaniner: 14 · 3 = 42.'] },
+            { t:'Två hemliga tal', q:'Två tal har summan 10 och skillnaden 4. Vilka är talen?', h1:'Skriv alla par som blir 10 tillsammans: 1 och 9, 2 och 8 …', h2:'Vilket par skiljer sig med 4?', a:'7 och 3', s:['Pröva paren: 7 + 3 = 10 och 7 − 3 = 4 ✔','Ta bort skillnaden: 10 − 4 = 6, dela: 3. Det andra är 3 + 4 = 7.'] },
+            { t:'Bion', q:'Filmen börjar 17.45 och är 1 timme och 30 minuter lång. Vilken tid slutar den?', h1:'Lägg till 1 timme först.', h2:'Sedan 30 minuter till – vad händer när du passerar hel timme?', a:'19.15', s:['17.45 + 1 h = 18.45. 18.45 + 30 min = 19.15.','17.45 + 15 min = 18.00. Kvar: 1 h 15 min → 19.15.'] },
+            { t:'Äpplena', q:'Sara har dubbelt så många äpplen som Leo. Tillsammans har de 12 äpplen. Hur många har var och en?', h1:'Om Leo har en hög äpplen har Sara två lika stora högar.', h2:'Hur många lika stora högar blir det totalt?', a:'Leo 4 och Sara 8', s:['3 lika högar = 12, en hög = 4. Leo 4, Sara 8.','Pröva: Leo 4 och Sara 8 → 8 är dubbelt så mycket som 4 och 4 + 8 = 12 ✔'] },
+            { t:'Siffersumman', q:'Hur många tvåsiffriga tal har siffersumman 5? (Exempel: 14, eftersom 1 + 4 = 5.)', h1:'Börja med tiotalssiffran 1: vilket tal blir det?', h2:'Fortsätt med tiotalssiffran 2, 3, 4, 5 …', a:'5 tal: 14, 23, 32, 41, 50', s:['Systematisk lista: 14, 23, 32, 41, 50.','Tiotalssiffran kan vara 1–5, och då bestäms entalssiffran.'] },
+            { t:'Grodan i brunnen', q:'En groda sitter i botten av en brunn som är 10 meter djup. Varje dag hoppar den upp 3 meter, men varje natt glider den ner 2 meter. Vilken dag kommer den upp ur brunnen?', h1:'Hur långt kommer grodan efter en hel dag och natt?', h2:'Tänk på den sista dagen – då glider den inte tillbaka!', a:'Dag 8', s:['Efter 7 dygn är grodan på 7 m. Dag 8 hoppar den 3 m och når 10 m.','Rita en tabell dag för dag: morgon och kväll.'] }
+        ],
+        mel: [
+            { t:'Hönor och kaniner', q:'På en gård finns hönor och kaniner. Tillsammans har de 30 huvuden och 74 ben. Hur många hönor och kaniner finns det?', h1:'Om alla 30 vore hönor – hur många ben skulle det bli?', h2:'Varje kanin har 2 ben mer än en höna.', a:'23 hönor och 7 kaniner', s:['30 · 2 = 60 ben. 74 − 60 = 14 ben över. 14 / 2 = 7 kaniner, 30 − 7 = 23 hönor.','Ekvation: h + k = 30 och 2h + 4k = 74.'] },
+            { t:'Största rektangeln', q:'En rektangel har omkretsen 24 cm och sidorna är hela centimeter. Vilken rektangel har störst area?', h1:'Längd + bredd måste bli hälften av omkretsen.', h2:'Gör en tabell: 1·11, 2·10, 3·9 …', a:'6 cm × 6 cm (en kvadrat), 36 cm²', s:['Tabell: 11, 20, 27, 32, 35, 36 cm² – störst vid 6 × 6.','Ju mer lika sidorna är, desto större blir arean.'] },
+            { t:'Pizzan', q:'Tre kompisar delar 2 pizzor lika. Hur stor del av en pizza får varje person? Svara med bråk.', h1:'Dela varje pizza i tre lika delar.', h2:'Hur många tredjedelar blir det totalt, och hur många får var och en?', a:'2/3 pizza var', s:['6 tredjedelar delat på 3 personer = 2 tredjedelar var.','2 / 3 = 2/3.'] },
+            { t:'Tåget', q:'Ett tåg kör med farten 90 km/h. Hur långt hinner det på 2 timmar och 20 minuter?', h1:'Hur långt kör tåget på 1 timme? På 20 minuter?', h2:'20 minuter är en tredjedel av en timme.', a:'210 km', s:['2 h: 180 km. 20 min: 90 / 3 = 30 km. Totalt 210 km.','90 km/h = 1,5 km per minut. 140 min · 1,5 = 210 km.'] },
+            { t:'Kulorna', q:'Fem elever har i genomsnitt 8 kulor var. En sjätte elev kommer, och då blir medelvärdet 9 kulor. Hur många kulor har den sjätte eleven?', h1:'Hur många kulor har de fem eleverna tillsammans?', h2:'Hur många kulor har alla sex tillsammans när medelvärdet är 9?', a:'14 kulor', s:['5 · 8 = 40. 6 · 9 = 54. 54 − 40 = 14.','Den nya eleven måste ge alla 6 en kula extra (6) och dessutom ha 8 själv: 8 + 6 = 14.'] },
+            { t:'Klassfesten', q:'10 personer kommer till en fest. Alla tar i hand med alla, en gång var. Hur många handskakningar blir det?', h1:'Börja med färre personer: 2, 3, 4 … Ser du ett mönster?', h2:'Den första hälsar på 9, den andra på 8 nya …', a:'45 handskakningar', s:['9 + 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1 = 45.','Alla hälsar på 9: 10 · 9 = 90, men varje handskakning räknas två gånger: 90 / 2 = 45.'] },
+            { t:'Det hemliga talet', q:'Jag är ett tresiffrigt tal. Hundratalssiffran är dubbelt så stor som entalssiffran. Tiotalssiffran är summan av de andra två. Siffersumman är 12. Vem är jag?', h1:'Kalla entalssiffran för e. Vad blir då hundratalssiffran?', h2:'Tiotalssiffran blir e + 2e = 3e. Hela siffersumman blir 6e.', a:'462', s:['6e = 12 → e = 2. Hundratal 4, tiotal 6, ental 2 → 462.','Pröva: e = 1 ger 231 (summa 6), e = 2 ger 462 (summa 12) ✔'] },
+            { t:'Rean', q:'En tröja kostar 400 kr. Priset sänks med 25 %. Sedan höjs det nya priset med 25 %. Vad kostar tröjan nu?', h1:'Vad är 25 % av 400 kr?', h2:'Räkna 25 % av det NYA priset.', a:'375 kr', s:['400 − 100 = 300. 300 + 75 = 375 kr.','Förändringsfaktor: 400 · 0,75 · 1,25 = 375.'] },
+            { t:'Den målade kuben', q:'En stor kub byggs av 3 × 3 × 3 små kuber och målas röd på utsidan. Hur många små kuber har exakt 2 röda sidor?', h1:'Var sitter de kuber som har 2 målade sidor – i hörnen, på kanterna eller mitt på sidorna?', h2:'Hur många kanter har en kub?', a:'12 kuber', s:['Varje kant har 1 kub i mitten med 2 röda sidor. En kub har 12 kanter → 12.','Totalt: 8 hörn (3 sidor), 12 kantkuber (2), 6 mittkuber (1), 1 i mitten (0) = 27.'] },
+            { t:'Klockvinkeln', q:'Hur stor är vinkeln mellan timvisaren och minutvisaren när klockan är exakt 4.00?', h1:'Ett helt varv är 360°. Hur många timmar är det på urtavlan?', h2:'Hur många grader är det mellan två timmar?', a:'120°', s:['360° / 12 = 30° per timme. 4 · 30° = 120°.','Kl 3 är det 90°, en timme till ger 30° mer: 120°.'] },
+            { t:'Mamma och dottern', q:'Mamma är 36 år och dottern är 8 år. Om hur många år är mamma exakt dubbelt så gammal som dottern?', h1:'Skillnaden i ålder är alltid densamma. Hur stor är den?', h2:'När mamma är dubbelt så gammal är dotterns ålder lika stor som skillnaden.', a:'Om 20 år (56 och 28)', s:['Skillnad 28 år → dottern ska vara 28. 28 − 8 = 20 år.','Ekvation: 36 + x = 2(8 + x) → x = 20.'] },
+            { t:'Receptet', q:'Ett recept för 4 personer behöver 300 g mjöl. Hur mycket mjöl behövs för 10 personer?', h1:'Hur mycket mjöl behövs för 1 person? Eller för 2 personer?', h2:'2 personer behöver 150 g.', a:'750 g', s:['1 person: 75 g. 10 personer: 750 g.','2 personer: 150 g. 10 personer = 5 · 150 = 750 g.'] },
+            { t:'Tändsticksmönstret', q:'Tändstickor läggs i en rad av kvadrater: 1 kvadrat kräver 4 stickor, 2 kvadrater 7 stickor, 3 kvadrater 10 stickor. Hur många stickor behövs för 20 kvadrater?', h1:'Hur många fler stickor behövs för varje ny kvadrat?', h2:'Den första kvadraten behöver en extra sticka.', a:'61 stickor', s:['Formel: 3n + 1. 3 · 20 + 1 = 61.','4 + 19 · 3 = 61.'] },
+            { t:'Spargrisen', q:'I en spargris finns bara 10-kronor och 5-kronor. Det är 15 mynt som tillsammans är värda 110 kr. Hur många av varje sort?', h1:'Om alla 15 vore 5-kronor – hur mycket vore det?', h2:'Varje 10-krona är värd 5 kr mer än en 5-krona.', a:'7 tiokronor och 8 femkronor', s:['15 · 5 = 75. 110 − 75 = 35. 35 / 5 = 7 tior, 8 femmor.','Pröva: 7 · 10 + 8 · 5 = 70 + 40 = 110 ✔'] },
+            { t:'Kulpåsen', q:'I en påse finns 3 röda, 5 blå och 2 gröna kulor. Du drar en kula utan att titta. Hur stor är sannolikheten att den är blå?', h1:'Hur många kulor finns det totalt?', h2:'Hur många av dem är blå?', a:'5/10 = 1/2 = 50 %', s:['Gynnsamma / möjliga = 5 / 10 = 1/2.','Hälften av kulorna är blå → 50 %.'] },
+            { t:'Staketet', q:'En kvadratisk trädgård har arean 81 m². Man sätter staket runt hela trädgården med en stolpe varje meter. Hur långt blir staketet och hur många stolpar behövs?', h1:'Vilket tal gånger sig självt blir 81?', h2:'Rita en liten kvadrat och räkna stolparna i hörnen noga.', a:'36 m staket och 36 stolpar', s:['Sidan är 9 m, omkretsen 4 · 9 = 36 m. Runt en sluten figur blir det lika många stolpar som meter: 36.','Varje sida får 9 mellanrum. Hörnstolparna delas av två sidor, så totalt 36.'] },
+            { t:'Sjuorna', q:'Hur många gånger skriver du siffran 7 när du skriver alla tal från 1 till 100?', h1:'Räkna först alla 7:or på entalsplatsen.', h2:'Räkna sedan alla 7:or på tiotalsplatsen (70–79).', a:'20 gånger', s:['Ental: 7, 17, …, 97 = 10 st. Tiotal: 70–79 = 10 st. Totalt 20 (77 räknas två gånger, en per siffra).','Lista alla och räkna – kolla särskilt talet 77.'] },
+            { t:'Cykelvägen', q:'Ella cyklar till skolan på 12 minuter med farten 15 km/h. Hur lång är vägen till skolan?', h1:'Hur stor del av en timme är 12 minuter?', h2:'12 min = 1/5 timme.', a:'3 km', s:['15 km/h · 1/5 h = 3 km.','15 km på 60 min → 1 km på 4 min → 12 min ger 3 km.'] },
+            { t:'Gauss summa', q:'Vad blir 1 + 2 + 3 + … + 99 + 100?', h1:'Para ihop det första och sista talet: 1 + 100.', h2:'Hur många sådana par finns det?', a:'5050', s:['50 par som var och ett blir 101: 50 · 101 = 5050.','Formel: n(n+1)/2 = 100 · 101 / 2 = 5050.'] },
+            { t:'Husdjuren', q:'Anna, Bo och Cem har varsitt husdjur: en hund, en katt och en fisk. Anna är allergisk mot djur med päls. Bo går på promenad med sitt djur varje dag. Vem har vilket djur?', h1:'Vilket djur saknar päls?', h2:'Vilket djur går man på promenad med?', a:'Anna – fisk, Bo – hund, Cem – katt', s:['Anna kan bara ha fisken. Bo promenerar – hunden. Kvar till Cem: katten.','Gör en tabell med namn och djur och kryssa bort det som inte går.'] }
+        ]
+    };
+    function vpPopup(p, label){
+        const C = '#059669';
+        const wrapper = document.getElementById('cb-app-wrapper');
+        const overlay = document.createElement('div'); overlay.className='popup-overlay';
+        const box = document.createElement('div'); box.className='popup-box';
+        Object.assign(box.style,{borderColor:C,padding:'30px 40px',maxWidth:'760px',width:'min(760px,92vw)',boxSizing:'border-box',maxHeight:'90vh',overflowY:'auto'});
+        box.innerHTML = `
+            <div style="font-size:20px;font-weight:900;letter-spacing:2px;color:${C};text-transform:uppercase;margin-bottom:4px;">🧩 Veckans problem</div>
+            <div style="font-size:13px;font-weight:700;color:#64748b;margin-bottom:16px;">${dikEsc(label||'')}</div>
+            <div class="vp-content" style="display:flex;flex-direction:column;gap:12px;align-items:stretch;text-align:left;"></div>
+            <div style="display:flex;gap:8px;margin-top:22px;">
+                <button class="vp-skip" style="flex:1;padding:14px;font-size:15px;font-weight:700;background:#e5e7eb;color:#374151;border:none;border-radius:12px;cursor:pointer;">🎯 Visa svaret direkt</button>
+                <button class="vp-btn" style="flex:2;padding:14px;font-size:18px;font-weight:800;background:${C};color:#fff;border:none;border-radius:12px;cursor:pointer;">💡 Ledtråd 1 →</button>
+            </div>`;
+        overlay.appendChild(box); wrapper.appendChild(overlay);
+        const content = box.querySelector('.vp-content'), btn = box.querySelector('.vp-btn'), skip = box.querySelector('.vp-skip');
+        const head = (t)=>`<div style="font-size:14px;font-weight:800;color:${C};letter-spacing:1px;margin-top:6px;">${t}</div>`;
+        const card = (t, bg, bd)=>`<div style="font-size:19px;color:#1f2937;line-height:1.45;background:${bg};border:1.5px ${bd};border-radius:12px;padding:14px 18px;animation:popIn 0.25s ease both;">${t}</div>`;
+        content.innerHTML = head('🧩 ' + dikEsc(p.t).toUpperCase()) + `<div style="font-size:24px;font-weight:700;color:#1f2937;line-height:1.4;background:#ecfdf5;border:2px solid #a7f3d0;border-radius:14px;padding:18px 22px;">${dikEsc(p.q)}</div>`;
+        let step = 1;
+        const close = ()=>{ overlay.style.opacity='0'; box.style.transform='scale(0.5)'; setTimeout(()=>overlay.remove(),300); };
+        const scroll = ()=>{ const last=content.lastElementChild; if(last && last.scrollIntoView) setTimeout(()=>last.scrollIntoView({behavior:'smooth',block:'nearest'}),50); };
+        const showAnswer = ()=>{
+            content.insertAdjacentHTML('beforeend', head('🎯 SVAR') + `<div style="font-size:34px;font-weight:900;color:#ff3b30;text-align:center;animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);">${dikEsc(p.a)}</div>`);
+            spawnPopupConfetti(overlay); btn.innerHTML='🛤️ Visa lösningsvägar →'; skip.style.display='none'; step = 4; scroll();
+        };
+        btn.onclick = (e)=>{
+            e.stopPropagation();
+            if(step===1){ content.insertAdjacentHTML('beforeend', head('💡 LEDTRÅD 1') + card(dikEsc(p.h1),'#fffbeb','dashed #fcd34d')); btn.innerHTML='💡 Ledtråd 2 →'; step=2; scroll(); }
+            else if(step===2){ content.insertAdjacentHTML('beforeend', head('💡 LEDTRÅD 2') + card(dikEsc(p.h2),'#fffbeb','dashed #fcd34d')); btn.innerHTML='🎯 Visa svaret →'; step=3; scroll(); }
+            else if(step===3){ showAnswer(); }
+            else if(step===4){
+                content.insertAdjacentHTML('beforeend', head('🛤️ LÖSNINGSVÄGAR') + p.s.map((s,i)=>card(`<b style="color:${C};">Sätt ${i+1}:</b> ${dikEsc(s)}`,'#f8fafc','solid #e2e8f0')).join('')
+                    + `<div style="font-size:14px;color:#64748b;font-style:italic;">💬 Hittade någon i klassen ett annat sätt? Låt dem visa på tavlan!</div>`);
+                btn.innerHTML='✓ Klart!'; step=5; scroll();
+            } else close();
+        };
+        skip.onclick = (e)=>{ e.stopPropagation(); if(step<4) showAnswer(); };
+        overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
+        requestAnimationFrame(()=>{ overlay.style.opacity='1'; box.style.transform='scale(1)'; });
+    }
+    function createVeckansProblem(config){
+        const body = createWidget('VECKANS PROBLEM', 340, 'vp-widget', config);
+        const widget = body.parentElement.parentElement;
+        let st = { lvl:'lag', idx:null, label:'', epaMin:3 };
+        if(config && config.data && config.data.lvl) Object.assign(st, config.data);
+        const persist = ()=>{ widget.dataset.veckansproblem = JSON.stringify(st); saveBoardState(); };
+        widget.dataset.veckansproblem = JSON.stringify(st);
+        const wk = (typeof gotwIsoWeek==='function') ? gotwIsoWeek(new Date()) : 1;
+
+        body.innerHTML = `
+            <div class='gotd-tabs'><button class='gotd-tab vp-tab' data-l='lag'>🐣 Åk 1–3</button><button class='gotd-tab vp-tab' data-l='mel'>🦉 Åk 4–6</button></div>
+            <div class='gotw-week-badge' style='color:#047857;background:#d1fae5;border-color:#a7f3d0;'>🧩 Vecka ${wk} · Problemlösning</div>
+            <button class='btn btn-primary vp-week' style='width:100%;background:#059669;padding:9px;font-size:14px;'>🧩 Veckans problem</button>
+            <button class='btn btn-secondary vp-roll' style='width:100%;margin-top:6px;'>🎲 Slumpa problem</button>
+            <div class='vp-result' style='min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:15px;text-align:center;gap:4px;margin-top:8px;'></div>
+            <div style='margin-top:6px;border-top:1px dashed #d1d5db;padding-top:8px;'>
+                <div style='display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:800;color:#475569;margin-bottom:6px;'>
+                    <span>⏱️ EPA-timer</span>
+                    <label class='hover-menu' style='font-weight:600;'>min/steg <select class='editor-select vp-min' style='padding:2px 4px;font-size:12px;'><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>8</option><option>10</option></select></label>
+                </div>
+                <div style='display:flex;gap:5px;'>
+                    <button class='btn btn-secondary vp-epa' data-s='E' style='flex:1;'>👤 Enskilt</button>
+                    <button class='btn btn-secondary vp-epa' data-s='P' style='flex:1;'>👥 Par</button>
+                    <button class='btn btn-secondary vp-epa' data-s='A' style='flex:1;'>🙌 Alla</button>
+                </div>
+                <div class='vp-timer' style='text-align:center;font-size:30px;font-weight:900;color:#047857;margin-top:6px;min-height:36px;font-variant-numeric:tabular-nums;'></div>
+            </div>`;
+        const q = s=>body.querySelector(s);
+        const tabs=[...body.querySelectorAll('.vp-tab')], res=q('.vp-result'), timerEl=q('.vp-timer'), minSel=q('.vp-min');
+        const list = ()=> VP_PROBLEM[st.lvl] || VP_PROBLEM.lag;
+        const lvlName = ()=> st.lvl==='mel' ? 'Åk 4–6' : 'Åk 1–3';
+        const renderTabs = ()=>{ tabs.forEach(t=>{ const a=t.dataset.l===st.lvl; t.classList.toggle('active',a); t.style.color = a ? '#059669' : ''; }); };
+        const renderRes = ()=>{
+            const p = (st.idx!==null && st.idx!==undefined) ? list()[st.idx] : null;
+            res.innerHTML = p ? `<div class='vp-card' style='color:#047857;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:10px 14px;width:100%;box-sizing:border-box;cursor:pointer;'>🧩 ${dikEsc(p.t)}</div><div style='font-size:11px;color:#94a3b8;font-weight:600;'>Klicka för att visa igen</div>` : '';
+        };
+        const open = (idx, label)=>{ st.idx=idx; st.label=label; persist(); renderRes(); vpPopup(list()[idx], label); };
+        tabs.forEach(t=> t.onclick=(e)=>{ e.stopPropagation(); st.lvl=t.dataset.l; st.idx=null; persist(); renderTabs(); renderRes(); });
+        q('.vp-week').onclick = (e)=>{ e.stopPropagation(); open((wk-1) % list().length, lvlName() + ' · Veckans problem – vecka ' + wk); };
+        q('.vp-roll').onclick = (e)=>{ e.stopPropagation(); let i; do{ i=Math.floor(Math.random()*list().length); }while(list().length>1 && i===st.idx); open(i, lvlName() + ' · Slumpat problem'); };
+        res.addEventListener('click', (e)=>{ if(!e.target.closest('.vp-card')) return; e.stopPropagation(); if(st.idx!==null && list()[st.idx]) vpPopup(list()[st.idx], st.label); });
+
+        // EPA-timer
+        let iv=null, left=0, phase='';
+        const PH = { E:'👤 Enskilt', P:'👥 Par', A:'🙌 Alla' };
+        const fmt = s=> Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+        const stopT = ()=>{ if(iv){ clearInterval(iv); iv=null; } };
+        const paint = ()=>{ timerEl.innerHTML = phase ? `<span style="font-size:14px;color:#475569;margin-right:8px;">${PH[phase]}</span>${left>0?fmt(left):'⏰ Tiden är slut!'}` : ''; timerEl.style.color = left>0 && left<=10 ? '#dc2626' : '#047857'; };
+        body.querySelectorAll('.vp-epa').forEach(b=> b.onclick=(e)=>{
+            e.stopPropagation();
+            if(phase===b.dataset.s && iv){ stopT(); phase=''; paint(); return; } // klick igen = stoppa
+            stopT(); phase=b.dataset.s;
+            if(phase==='A'){ left=0; timerEl.innerHTML = `<span style="font-size:18px;">🙌 Alla – dela era lösningar!</span>`; return; }
+            left = (parseInt(minSel.value,10)||3)*60; paint();
+            iv=setInterval(()=>{ if(!document.body.contains(widget)){ stopT(); return; } left--; paint(); if(left<=0){ stopT(); try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(); o.frequency.value=880; o.connect(c.destination); o.start(); setTimeout(()=>{o.stop();c.close();},400);}catch(_){} } },1000);
+        });
+        minSel.value = String(st.epaMin||3);
+        minSel.onchange = ()=>{ st.epaMin = parseInt(minSel.value,10)||3; persist(); };
+        renderTabs(); renderRes();
     }
 
     // GREJ OF THE DAY WIDGET - HELT KLART OCH INTEGRERAT MED STEG-POPUP OCH MINNE
@@ -33579,7 +34133,9 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             "createOverslagsrakning()",     // Överslagsräkning
             "createKoordinatsystem()",      // Koordinatsystem
             "createAvrundning()",           // Avrundning
-            "createMatteBegrepp()"          // MatteBegrepp
+            "createMatteBegrepp()",         // MatteBegrepp
+            "createEkvationsvag()",         // Ekvationsvågen
+            "createVeckansProblem()"        // Veckans problem
         ],
         'Svenska': [
             "createAlphabetWidget()",   // Alfabet
@@ -33594,7 +34150,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             "createSpellingBattle()",   // Stavningskamp
             "createCountryWidget()",    // Länder/Invånare
             "createKallkritik()",       // Källkritik
-            "createYrkenWidget()"       // Yrken
+            "createYrkenWidget()",      // Yrken
+            "createDiktamen()"          // Diktamen
         ],
         'NO': [
             "createBiologiMegaWidget()", // Biologi
