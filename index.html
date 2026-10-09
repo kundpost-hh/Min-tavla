@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-09-ordbygget-gissa1';</script>
+    <script>window.BUILD_VERSION = '2026-10-10-ailektion13';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -2269,6 +2269,18 @@
     .ai-lek-ab-add-btn { width:100%; margin-top:4px; }
     .ai-lek-pres-ta { width:100%; min-height:220px; border:1.5px solid #e0e0e6; border-radius:12px; padding:12px; font-size:12.5px; line-height:1.5; font-family:inherit; resize:vertical; box-sizing:border-box; white-space:pre-wrap; outline:none; }
     .ai-lek-pres-ta:focus { border-color:#7048e8; }
+    /* AI-LEKTION: minsta textstorlek 13px i hela widgeten (bara här - andra widgetar påverkas inte) */
+    .ai-lektion-widget .kw-edit-hint { font-size:13px; }
+    .ai-lektion-widget .ai-lek-lbl { font-size:13px; }
+    .ai-lektion-widget .ai-lek-head-meta { font-size:13px; }
+    .ai-lektion-widget .ai-lek-tab-btn { font-size:13px; }
+    .ai-lektion-widget .ai-lek-meta-inp { font-size:13px; }
+    .ai-lektion-widget .ai-lek-meta-inp-tid { width:58px; }
+    .ai-lektion-widget .ai-lek-meta-unit { font-size:13px; }
+    .ai-lektion-widget .ai-lek-pres-ta { font-size:13px; }
+    .ai-lektion-widget .ai-lek-card-title { font-size:13.5px; }
+    .ai-lektion-widget .ai-lek-card-text { font-size:13px; }
+    .ai-lektion-widget .kw-btn { font-size:13px; }
     .kw-gridwrap { width:100%; overflow-x:hidden; overflow-y:visible; margin-bottom:10px; display:flex; justify-content:center; }
     .kw-grid { display:grid; gap:2px; justify-content:center; margin:0 auto; }
     .kw-cell { width:var(--kw-cell); height:var(--kw-cell); position:relative; background:#fff; border:1.5px solid #9aa0aa; box-sizing:border-box; border-radius:3px; }
