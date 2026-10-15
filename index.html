@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-15-lektionsraddning1';</script>
+    <script>window.BUILD_VERSION = '2026-10-15-versionskoll1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -35483,6 +35483,72 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         }
         btn.onclick = (e)=>{ e.stopPropagation(); if(panel.classList.contains('open')){ panel.classList.remove('open'); return; } render(); panel.classList.add('open'); };
         document.addEventListener('pointerdown', (e)=>{ if(!panel.classList.contains('open')) return; if(panel.contains(e.target) || btn.contains(e.target)) return; panel.classList.remove('open'); }, true);
+    })();
+
+
+    /* =========================================================
+       VERSIONSKOLL – hindrar att en GAMMAL version av appen sparar över tavlan.
+       iPhone/iPad (hemskärmsapp) laddar inte om appen när man trycker på ikonen – den
+       fortsätter där den var, med koden från förra riktiga starten (ibland flera dagar
+       gammal). Här frågar vi servern efter versionsnumret (bara filens första 2 kB) när
+       appen startar, när den kommer tillbaka från bakgrunden och var 10:e minut.
+       - Vid start/återkomst: finns en nyare version laddas appen om DIREKT (innan man
+         hunnit ändra något), så en gammal version aldrig hinner spara.
+       - Mitt i arbetet: bara en banderoll "Ny version – tryck för att uppdatera".
+       Körs bara på webbservern (http/https), inte när filen öppnas direkt från datorn.
+       ========================================================= */
+    (function initVersionCheck(){
+        if(!/^https?:$/.test(location.protocol)) return;
+        const MY = String(window.BUILD_VERSION || '');
+        if(!MY) return;
+        let checking = false, lastCheck = 0, bannerShown = false;
+        const url = location.pathname + '?vcheck=1';
+        async function remoteVersion(){
+            const ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+            const to = setTimeout(()=>{ try{ ctrl && ctrl.abort(); }catch(_){} }, 6000);
+            try{
+                const r = await fetch(url, { cache:'no-store', headers:{ 'Range':'bytes=0-4095' }, signal: ctrl ? ctrl.signal : undefined });
+                if(!r.ok && r.status !== 206) return null;
+                const txt = (await r.text()).slice(0, 8000);
+                const m = /window\.BUILD_VERSION\s*=\s*'([^']+)'/.exec(txt);
+                return m ? m[1] : null;
+            }catch(e){ return null; } finally { clearTimeout(to); }
+        }
+        function showBanner(){
+            if(bannerShown) return; bannerShown = true;
+            const b = document.createElement('div');
+            b.id = 'new-version-banner';
+            b.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:100000;background:#16a34a;color:#fff;border-radius:22px;padding:10px 18px;font-size:14px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,0.25);cursor:pointer;';
+            b.textContent = '🔄 Ny version av Min Tavla – tryck här för att uppdatera';
+            b.onclick = ()=>{ try{ if(typeof syncToCloudImmediate === 'function') syncToCloudImmediate(); }catch(_){} setTimeout(()=>location.reload(), 600); };
+            document.body.appendChild(b);
+        }
+        // reload direkt – men aldrig i en loop (max en gång per ny version och 5 minuter)
+        function reloadNow(v){
+            try{
+                const k = 'mintavla_vreload';
+                const prev = JSON.parse(sessionStorage.getItem(k) || 'null');
+                if(prev && prev.v === v && Date.now() - prev.t < 5*60*1000){ showBanner(); return; }
+                sessionStorage.setItem(k, JSON.stringify({ v, t: Date.now() }));
+            }catch(_){}
+            location.reload();
+        }
+        async function check(mode){
+            if(checking) return; const gap = (mode === 'active') ? 60000 : (mode === 'resume' ? 1500 : 0); if(Date.now() - lastCheck < gap) return;
+            checking = true; lastCheck = Date.now();
+            try{
+                const v = await remoteVersion();
+                if(v && v !== MY && /^\d{4}-\d{2}-\d{2}/.test(v)){
+                    try{ if(typeof _syncLog === 'function') _syncLog('NY VERSION på servern: ' + v + ' (denna: ' + MY + ', ' + mode + ')'); }catch(_){}
+                    if(mode === 'start' || mode === 'resume') reloadNow(v); else showBanner();
+                }
+            } finally { checking = false; }
+        }
+        setTimeout(()=>check('start'), 1500);
+        document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') check('resume'); });
+        window.addEventListener('pageshow', (e)=>{ if(e.persisted) check('resume'); });
+        window.addEventListener('focus', ()=> check('resume'));
+        setInterval(()=>check('active'), 10*60*1000);
     })();
 
 </script>
