@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-15-ipad1';</script>
+    <script>window.BUILD_VERSION = '2026-10-15-dra-upp1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -5618,15 +5618,15 @@
         const _smallScreen = _vw <= 1024;
         if (config) {
             widget.style.width = config.w + 'px'; if (config.h) widget.style.height = config.h + 'px';
-            let _cx = config.x, _cy = Math.max(4, config.y);
+            let _cx = config.x, _cy = (config.y < 4) ? Math.max(-((config.h || 1200) / 2), config.y) : config.y;
             if (_smallScreen) {
                 // Håll inladdade widgetar inom synligt område på små skärmar.
                 const _wWidth = Math.min(config.w, _vw - 16);
                 widget.style.width = _wWidth + 'px';
                 _cx = Math.max(8, Math.min(config.x, _vw - _wWidth - 8));
-                _cy = Math.max(4, config.y);
+                _cy = (config.y < 4) ? Math.max(-((config.h || 1200) / 2), config.y) : config.y;
             }
-            widget.style.top = _cy + 'px'; widget.style.left = _cx + 'px';
+            widget.style.top = _cy + 'px'; widget.style.left = _cx + 'px'; if(_cy < 0){ setTimeout(()=>{ const m = widgetMinTop(widget); if((parseInt(widget.style.top)||0) < m) widget.style.top = m + 'px'; }, 0); }
             if(config.locked) widget.classList.add('locked');
         }
         else if (_smallScreen) {
@@ -5706,6 +5706,9 @@
         return body;
     }
     
+    // Hur långt upp en widget får dras: högst HALVA widgeten får gömmas ovanför skärmens överkant
+    // (så att man kan nå knappar längst ner i höga widgetar på små skärmar).
+    function widgetMinTop(el){ return -Math.round(((el && el.offsetHeight) || 0) / 2); }
     function makeDraggable(el, h) {
         let p1=0, p2=0, p3=0, p4=0;
         h.addEventListener('pointerdown', (e) => {
@@ -5719,7 +5722,7 @@
             const move = (ev) => {
                 if(el.classList.contains('locked') || (typeof canEditBoard === 'function' && !canEditBoard())) return; // låstes mitt i? avbryt direkt
                 if(!started){ if(Math.abs(ev.clientX-sX)+Math.abs(ev.clientY-sY) < 6) return; started=true; p3=ev.clientX; p4=ev.clientY; return; }
-                ev.preventDefault(); p1=p3-ev.clientX; p2=p4-ev.clientY; p3=ev.clientX; p4=ev.clientY; el.style.top = Math.max(4, el.offsetTop-p2)+"px"; el.style.left = (el.offsetLeft-p1)+"px";
+                ev.preventDefault(); p1=p3-ev.clientX; p2=p4-ev.clientY; p3=ev.clientX; p4=ev.clientY; el.style.top = Math.max(widgetMinTop(el), el.offsetTop-p2)+"px"; el.style.left = (el.offsetLeft-p1)+"px";
             };
             const up = () => { h.removeEventListener('pointermove',move); h.removeEventListener('pointerup',up); h.removeEventListener('pointercancel',up); if(started) saveBoardState(); };
             h.addEventListener('pointermove',move); h.addEventListener('pointerup',up); h.addEventListener('pointercancel',up);
@@ -5762,7 +5765,7 @@
                 }
                 ev.preventDefault();
                 el.style.left = (origLeft + dx) + 'px';
-                el.style.top = Math.max(4, origTop + dy) + 'px';
+                el.style.top = Math.max(widgetMinTop(el), origTop + dy) + 'px';
             };
             const up = () => {
                 inner.removeEventListener('pointermove', move);
@@ -35216,8 +35219,9 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 var maxLeft = Math.max(4, vw - rectW - 4);
                 if(left < 4) left = 4;
                 if(left > maxLeft) left = maxLeft;
-                if(top < 40) top = 40;
-                if(top > vh - 80) top = Math.max(40, vh - 80);
+                var minTop = -Math.round((w.offsetHeight || 0) / 2);
+                if(top < minTop) top = minTop;
+                if(top > vh - 80) top = Math.max(minTop, vh - 80);
                 w.style.left = left + 'px';
                 w.style.top = top + 'px';
             });
