@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-10-ailektion13';</script>
+    <script>window.BUILD_VERSION = '2026-10-15-lektion-play2';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -1284,6 +1284,10 @@
     .lesson-link-btn { background: #007aff; border: none; color: white; border-radius: 4px; cursor: pointer; padding: 0 10px; font-size: 12px; font-weight: bold; transition: 0.2s; }
     .lesson-link-btn:hover { filter: brightness(1.1); }
 
+    .lesson-yt-btn { flex-shrink:0; width:38px; height:38px; border-radius:50%; border:none; background:#ff0033; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.18); transition:transform .15s, filter .15s, background .2s; padding:0; }
+    .lesson-yt-btn:hover { filter:brightness(1.08); transform:scale(1.06); }
+    .lesson-yt-btn.playing { background:#1f2937; animation:lessonYtPulse 1.6s ease-in-out infinite; }
+    @keyframes lessonYtPulse { 0%,100%{ box-shadow:0 0 0 0 rgba(255,0,51,0.35);} 50%{ box-shadow:0 0 0 7px rgba(255,0,51,0);} }
     .lesson-timer-wrap { display: flex; gap: 8px; align-items: center; }
     .lesson-timer-input { width: 50px; background: white; border: 1px solid #d1d1d6; border-radius: 4px; color: #333; padding: 4px; text-align: center; font-size: 14px; font-weight: bold; outline: none; }
     .lesson-nowclock { flex-shrink: 0; font-family: monospace; font-size: 20px; font-weight: 900; color: #007aff; letter-spacing: 1px; padding: 3px 14px; background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; white-space: nowrap; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
@@ -6556,6 +6560,61 @@
       (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
     }
 
+    // Play/paus-knapp för Lektionsschemat. Använder en dold YouTube-spelare som styrs med
+    // postMessage (YouTube IFrame API utan extra skript). Spelaren skapas först vid första klicket.
+    function createLessonYtButton(videoId){
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'lesson-yt-btn';
+        btn.title = 'Spela / pausa musik';
+        let frame = null, playing = false, gotState = false, watch = null;
+        const ICON_PLAY = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
+        const ICON_PAUSE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2"/></svg>';
+        const paint = ()=>{ btn.innerHTML = playing ? ICON_PAUSE : ICON_PLAY; btn.classList.toggle('playing', playing); btn.setAttribute('aria-label', playing ? 'Pausa' : 'Spela'); };
+        const cmd = (func)=>{ try{ frame && frame.contentWindow && frame.contentWindow.postMessage(JSON.stringify({ event:'command', func, args:[] }), '*'); }catch(e){} };
+        const onMsg = (e)=>{
+            if(!frame || e.source !== frame.contentWindow) return;
+            let d = e.data; try{ if(typeof d === 'string') d = JSON.parse(d); }catch(_){ return; }
+            if(!d) return;
+            if(d.event === 'onReady' || d.event === 'initialDelivery'){ gotState = true; }
+            const st = (d.info && typeof d.info.playerState === 'number') ? d.info.playerState : (d.event==='onStateChange' ? d.info : undefined);
+            if(typeof st === 'number'){
+                gotState = true;
+                if(st === 1){ playing = true; paint(); }
+                else if(st === 2 || st === 0){ playing = false; paint(); }
+            }
+        };
+        const cleanup = ()=>{ try{ window.removeEventListener('message', onMsg); }catch(_){} if(frame){ frame.remove(); frame = null; } if(watch){ clearInterval(watch); watch = null; } };
+        const ensureFrame = ()=>{
+            if(frame) return;
+            frame = document.createElement('iframe');
+            const origin = (/^https?:$/.test(location.protocol) && location.origin && location.origin !== 'null') ? '&origin=' + encodeURIComponent(location.origin) : '';
+            frame.src = 'https://www.youtube.com/embed/' + videoId + '?enablejsapi=1&autoplay=1&playsinline=1&rel=0&controls=0' + origin;
+            frame.allow = 'autoplay; encrypted-media';
+            frame.setAttribute('aria-hidden', 'true');
+            frame.title = 'Musik';
+            // Ligger utanför skärmen (inte display:none – då vägrar YouTube spela)
+            frame.style.cssText = 'position:fixed;left:-10000px;top:0;width:240px;height:135px;border:0;opacity:0;pointer-events:none;';
+            (document.getElementById('cb-app-wrapper') || document.body).appendChild(frame);
+            window.addEventListener('message', onMsg);
+            frame.addEventListener('load', ()=>{ try{ frame.contentWindow.postMessage(JSON.stringify({ event:'listening', id: videoId }), '*'); }catch(e){} });
+            // Stäng spelaren om Lektionsschemat tas bort från tavlan
+            watch = setInterval(()=>{ if(!document.body.contains(btn)) cleanup(); }, 2000);
+            // Om YouTube inte svarar (t.ex. blockerat nätverk) – inget fönster öppnas, knappen går bara
+            // tillbaka till ▶ och visar en förklaring när man håller muspekaren över den.
+            setTimeout(()=>{ if(frame && !gotState){ cleanup(); playing = false; paint(); btn.title = 'Ljudet kunde inte startas – kontrollera internet och försök igen'; } }, 8000);
+        };
+        btn.onclick = (e)=>{
+            e.stopPropagation();
+            if(!frame){ btn.title = 'Spela / pausa musik'; ensureFrame(); playing = true; paint(); return; }   // första klicket: laddar och spelar
+            if(playing){ cmd('pauseVideo'); playing = false; } else { cmd('playVideo'); playing = true; }
+            paint();
+        };
+        btn.addEventListener('mousedown', e=>e.stopPropagation());
+        btn.addEventListener('touchstart', e=>e.stopPropagation(), { passive:true });
+        paint();
+        return btn;
+    }
     // Liten vridbar övningsklocka (används integrerat i lektionsschemat)
     function buildMiniPracticeClock(h0, m0, onChange){
         const wrap = document.createElement('div'); wrap.className='lesson-clock';
@@ -6620,7 +6679,9 @@
         const tw = document.createElement('div'); tw.className='lesson-timer-wrap'; const tin=document.createElement('input'); tin.type='number'; tin.className='lesson-timer-input'; tin.value=config&&config.data?config.data.tMin:'10'; const tb=document.createElement('button'); tb.className='lesson-timer-btn'; tb.innerText='Start';
         const pb = document.createElement('div'); pb.className='lesson-timer-progress-bg'; pb.style.display='none'; const pf = document.createElement('div'); pf.className='lesson-timer-progress-fill'; const pt = document.createElement('div'); pt.className='lesson-timer-text'; pb.appendChild(pf); pb.appendChild(pt); tw.appendChild(tin); tw.appendChild(tb); tw.appendChild(pb);
         const nowClock=document.createElement('div'); nowClock.className='lesson-nowclock'; const updNow=()=>{ nowClock.textContent=new Date().toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',hour12:false}); }; updNow(); const nowTimer=setInterval(()=>{ if(!document.body.contains(nowClock)){ clearInterval(nowTimer); return; } updNow(); },1000);
-        fr.appendChild(la); fr.appendChild(nowClock); fr.appendChild(tw); body.appendChild(tr); body.appendChild(gr); body.appendChild(cr); body.appendChild(fr);
+        // ▶/⏸ – spelar och pausar en fast YouTube-länk (dold spelare, bara ljudet hörs)
+        const ytBtn = createLessonYtButton('rpWwqFugjmo');
+        fr.appendChild(la); fr.appendChild(ytBtn); fr.appendChild(nowClock); fr.appendChild(tw); body.appendChild(tr); body.appendChild(gr); body.appendChild(cr); body.appendChild(fr);
         // FIX: dessa fält (ämne/klass/datum, mål, de tre rutornas rubrik+innehåll och länkfältet)
         // saknade koppling till saveBoardState - texten sparades aldrig automatiskt när man skrev,
         // bara när man startade timern eller drog klockvisarna. Skrev man här och laddade om sidan
