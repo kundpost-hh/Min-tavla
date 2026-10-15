@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-15-dra-upp1';</script>
+    <script>window.BUILD_VERSION = '2026-10-15-lektionsraddning1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -5812,6 +5812,18 @@
     // i renderSidePocket() så fort man är inne på en dags- eller lektionssida, och står annars kvar
     // på senaste dagen så länge man tittar på en vanlig/egen sida (t.ex. "Sida 1").
     let currentDayContextV6 = todayDayIndex();
+    // Läser ut vilken veckodag en lektionssida egentligen tillhör: i första hand ur id:t
+    // ("lesson-<dag>-<lektion>-..."), annars ur sidnamnet ("Tisdag – Lektion 2"). null = okänt.
+    let _repairedLessonPages = 0;
+    function _inferLessonDay(pg){
+        try{
+            const m = /^lesson-(\d)-(\d)-/.exec(String(pg.id || ''));
+            if(m && DAY_DEFS[+m[1]] && +m[2] === +pg.lesson) return +m[1];
+            const nm = String((pg.canvas && pg.canvas.dataset.pageName) || pg.name || '');
+            const d = DAY_DEFS.find(dd => nm.indexOf(dd.name + ' –') === 0 || nm.indexOf(dd.name + ' -') === 0);
+            return d ? d.idx : null;
+        }catch(e){ return null; }
+    }
     function ensureFixedPages(){
         const container = document.getElementById('canvas-container-v6');
         const dayPages = {}, lessonPages = {}, regular = [];
@@ -5825,8 +5837,34 @@
                 // för att vara 5 globala sidor delade av alla dagar. Gamla tavlor som sparades innan den
                 // här ändringen saknar day på sina lektionssidor - migrera dem till Måndag (dag 0) så
                 // inget innehåll försvinner, resten av veckans lektionssidor skapas tomma nedan.
-                if(!hasDay) pg.day = 0;
-                lessonPages[pg.day + '-' + pg.lesson] = pg;
+                // FIX (BUGG: lektioner "försvann" från tis-fre): om en tavla någon gång sparats UTAN dag på
+                // lektionssidorna (t.ex. av en äldre, cachad version av appen) hamnade ALLA 25 sidor på
+                // måndag - bara den sista per lektion syntes, de andra blev osynliga (men fanns kvar i
+                // datat). Nu läses sidans riktiga dag ut ur dess id ("lesson-<dag>-<lektion>-...") eller
+                // namn ("Tisdag – Lektion 2") så att varje sida hamnar på rätt dag igen.
+                const inferred = _inferLessonDay(pg);
+                if(inferred !== null && inferred !== pg.day){ pg.day = inferred; _repairedLessonPages++; }
+                else if(!hasDay) pg.day = 0;
+                const key = pg.day + '-' + pg.lesson;
+                if(lessonPages[key]){
+                    // Krock: två sidor på samma plats. Släng ALDRIG innehåll - sidan med innehåll får
+                    // platsen, den andra blir en vanlig, synlig sida ("Återfunnen ...") istället för osynlig.
+                    const cur = lessonPages[key];
+                    const hasW = x => !!(x.canvas && x.canvas.querySelector('.widget'));
+                    let loser = pg;
+                    if(!hasW(cur) && hasW(pg)){ lessonPages[key] = pg; loser = cur; }
+                    if(hasW(loser)){
+                        loser.lesson = undefined; loser.day = undefined;
+                        delete loser.canvas.dataset.lesson; delete loser.canvas.dataset.day;
+                        loser.name = 'Återfunnen – ' + ((loser.canvas.dataset.pageName || loser.name || 'lektion'));
+                        loser.canvas.dataset.pageName = loser.name;
+                        regular.push(loser); _repairedLessonPages++;
+                    } else if(loser.canvas && loser.canvas.parentNode){
+                        loser.canvas.parentNode.removeChild(loser.canvas); // tom dubblett - inget att rädda
+                    }
+                } else {
+                    lessonPages[key] = pg;
+                }
             } else if(hasDay){
                 dayPages[pg.day] = pg;
             } else {
@@ -35049,7 +35087,13 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                     p.widgets.forEach(w => spawnWidgetFromState(w));
                     cp.classList.remove('active');
                 });
+                _repairedLessonPages = 0;
                 newDays = ensureFixedPages();
+                if(_repairedLessonPages > 0){
+                    newDays += _repairedLessonPages; // sparar den reparerade tavlan direkt
+                    const _n = _repairedLessonPages;
+                    setTimeout(()=>{ try{ customAlert('Goda nyheter! ' + _n + ' lektionssid' + (_n===1?'a':'or') + ' som av misstag hamnat fel har flyttats tillbaka till rätt veckodag. Allt innehåll finns kvar.', '🛟'); }catch(e){} }, 1500);
+                }
                 // FIX: landade tidigare på "senast aktiva sidan" (activePageId), vilket gjorde det
                 // svårt att veta vilken sida man befann sig på vid inloggning (kunde vara Måndag,
                 // en lektionssida, eller vad som helst). Nu landar man ALLTID på Hem-sidan direkt -
