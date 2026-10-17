@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-15-versionskoll1';</script>
+    <script>window.BUILD_VERSION = '2026-10-17-minnessiffra1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -4005,6 +4005,7 @@
         const closeFn = ()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
         ov.onclick = (e)=>{ if(e.target===ov) closeFn(); };
         box.querySelector('#bb-close').onclick = closeFn;
+        try{ _renderCloudHistory(box, closeFn); }catch(_){}
         const list = box.querySelector('#bb-list');
         if(list){
             backups.slice().reverse().forEach(b=>{
@@ -4030,6 +4031,118 @@
             });
         }
     };
+
+    /* =========================================================
+       MOLNHISTORIK – versionshistorik av tavlan i molnet (alla enheter ser samma lista).
+       Sparas under boards/{konto}/history/:
+         - "dagskopia": dagens FÖRSTA sparning, skrivs aldrig över (senaste 30 dagarna)
+         - "tidskopia": en per 3-timmarsblock (senaste ~2 dygnen, 16 st)
+         - "_index": en liten lista (id, tid, antal lektioner med innehåll) så att listan går
+           snabbt att visa utan att hämta alla kopior.
+       Återställning går via samma säkra väg som lokala säkerhetskopior (molnets nuvarande
+       version sparas först som en lokal säkerhetskopia).
+       ========================================================= */
+    const HIST_KEEP_DAYS = 30, HIST_KEEP_BLOCKS = 16;
+    function _histPad(n){ return String(n).padStart(2,'0'); }
+    function _histIds(d){
+        const day = d.getFullYear() + '-' + _histPad(d.getMonth()+1) + '-' + _histPad(d.getDate());
+        return { day, block: day + '_' + _histPad(Math.floor(d.getHours()/3)*3) };
+    }
+    function _histRef(){ return fbDB.collection('boards').doc(emailKey(currentUser)).collection('history'); }
+    async function _saveCloudHistory(boardStr){
+        try{
+            if(!boardStr || !window.cloudReady || !currentUser || window.isGuestMode || !fbDB) return;
+            const deniedKey = 'mintavla_histDenied_' + currentUser;
+            const denied = parseInt(localStorage.getItem(deniedKey) || '0', 10);
+            if(denied && Date.now() - denied < 6*3600*1000) return; // nekad nyligen – försök igen om några timmar
+            const ids = _histIds(new Date());
+            const lastKey = 'mintavla_histLast_' + currentUser;
+            let last = {}; try{ last = JSON.parse(localStorage.getItem(lastKey) || '{}') || {}; }catch(_){ last = {}; }
+            if(last.day === ids.day && last.block === ids.block) return; // redan sparat för den här dagen/blocket
+            const base = _histRef(), idxRef = base.doc('_index');
+            const lessons = (typeof _lessonContentCount === 'function') ? _lessonContentCount(boardStr) : -1;
+            const now = Date.now();
+            let removed = [];
+            await fbDB.runTransaction(async (tx)=>{
+                const s = await tx.get(idxRef);
+                let items = (s.exists && Array.isArray(s.data().items)) ? s.data().items : [];
+                const doc = { board: boardStr, ts: now, lessons, build: String(window.BUILD_VERSION || '') };
+                if(!items.some(i => i.id === ids.day)){            // dagskopia: bara dagens första
+                    tx.set(base.doc(ids.day), Object.assign({ kind:'dag' }, doc));
+                    items.push({ id: ids.day, ts: now, lessons, kind: 'dag' });
+                }
+                if(last.block !== ids.block){                       // tidskopia: senaste i blocket
+                    tx.set(base.doc(ids.block), Object.assign({ kind:'tid' }, doc));
+                    items = items.filter(i => i.id !== ids.block);
+                    items.push({ id: ids.block, ts: now, lessons, kind: 'tid' });
+                }
+                // städa: behåll senaste 30 dagskopior och 16 tidskopior
+                const dag = items.filter(i=>i.kind==='dag').sort((a,b)=>b.ts-a.ts);
+                const tid = items.filter(i=>i.kind==='tid').sort((a,b)=>b.ts-a.ts);
+                removed = dag.slice(HIST_KEEP_DAYS).concat(tid.slice(HIST_KEEP_BLOCKS)).map(i=>i.id);
+                items = dag.slice(0, HIST_KEEP_DAYS).concat(tid.slice(0, HIST_KEEP_BLOCKS));
+                tx.set(idxRef, { items, updatedAt: now });
+            });
+            removed.forEach(id => { base.doc(id).delete().catch(()=>{}); });
+            localStorage.setItem(lastKey, JSON.stringify(ids));
+            try{ localStorage.removeItem(deniedKey); }catch(_){}
+            if(typeof _syncLog === 'function') _syncLog('molnhistorik sparad (' + ids.block + ')');
+        }catch(err){
+            const msg = String((err && (err.code || err.message)) || err);
+            if(/permission/i.test(msg)){ try{ localStorage.setItem('mintavla_histDenied_' + currentUser, String(Date.now())); }catch(_){} }
+            if(typeof _syncLog === 'function') _syncLog('MOLNHISTORIK MISSLYCKADES: ' + msg);
+        }
+    }
+    // Ritar "☁️ Molnhistorik" i säkerhetskopior-dialogen
+    async function _renderCloudHistory(box, closeFn){
+        if(!window.cloudReady || !fbDB || !currentUser || window.isGuestMode) return;
+        const sec = document.createElement('div');
+        sec.style.cssText = 'margin-top:16px;border-top:1px solid #ececf5;padding-top:12px;';
+        sec.innerHTML = "<div style='font-size:14px;font-weight:800;color:#1d1d1f;margin-bottom:4px;'>☁️ Molnhistorik <span style='font-weight:600;color:#8e8e93;font-size:12px;'>(samma på alla enheter)</span></div>"
+            + "<div class='ch-list' style='display:flex;flex-direction:column;gap:8px;max-height:36vh;overflow:auto;font-size:13px;color:#8e8e93;'>Hämtar…</div>";
+        const closeRow = box.lastElementChild;
+        box.insertBefore(sec, closeRow);
+        const list = sec.querySelector('.ch-list');
+        try{
+            const s = await fsTimeout(_histRef().doc('_index').get(), 10000, 'hämta molnhistorik');
+            const items = (s.exists && Array.isArray(s.data().items)) ? s.data().items.slice().sort((a,b)=>b.ts-a.ts) : [];
+            if(!items.length){ list.textContent = 'Ingen molnhistorik ännu – den byggs upp automatiskt när du arbetar (en kopia per dag och var tredje timme).'; return; }
+            list.innerHTML = '';
+            items.forEach(it=>{
+                const rad = document.createElement('div');
+                rad.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f2f8ff;border:1px solid #dbeafe;border-radius:12px;padding:10px 12px;';
+                const datumStr = new Date(it.ts).toLocaleString('sv-SE', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                rad.innerHTML = "<span style='font-size:13px;color:#1d1d1f;'>" + datumStr + " <span style='color:#8e8e93;font-size:11.5px;'>· " + (it.kind==='dag'?'dagskopia':'tidskopia') + (it.lessons>=0 ? ' · ' + it.lessons + ' lektioner med innehåll' : '') + "</span></span>";
+                const btn = document.createElement('button');
+                btn.textContent = '↩️ Återställ'; btn.style.cssText = 'flex-shrink:0;border:none;background:#e0edff;color:#1d4ed8;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;cursor:pointer;';
+                btn.onclick = ()=>{
+                    customConfirm('Återställ tavlan till molnkopian från ' + datumStr + '? Tavlan som den ser ut nu sparas först som en säkerhetskopia, så du kan ångra.', async ()=>{
+                        btn.disabled = true; btn.textContent = 'Hämtar...';
+                        try{
+                            const d = await fsTimeout(_histRef().doc(it.id).get(), 15000, 'hämta molnkopia');
+                            const board = d.exists ? d.data().board : null;
+                            if(!board){ customAlert('Kopian kunde inte hämtas.', '⚠️'); btn.disabled=false; btn.textContent='↩️ Återställ'; return; }
+                            await _backupFreshCloudBoardBeforeOverwrite();
+                            localStorage.setItem('boardStateV6_' + currentUser, board);
+                            _localDirty = true;
+                            closeFn();
+                            if(typeof initBoard === 'function') initBoard();
+                            if(typeof syncToCloudImmediate === 'function') syncToCloudImmediate();
+                            if(typeof _syncLog === 'function') _syncLog('ÅTERSTÄLLD från molnhistorik ' + it.id);
+                            customAlert('Tavlan återställd från molnhistoriken och sparas nu till molnet.', '↩️');
+                        }catch(e){ customAlert('Kunde inte hämta kopian: ' + (e && e.message), '⚠️'); btn.disabled=false; btn.textContent='↩️ Återställ'; }
+                    });
+                };
+                rad.appendChild(btn); list.appendChild(rad);
+            });
+        }catch(err){
+            const msg = String((err && (err.code || err.message)) || err);
+            list.innerHTML = /permission/i.test(msg)
+                ? "Molnhistoriken är inte aktiverad än – databasens säkerhetsregler behöver en liten ändring (se instruktionen från Claude)."
+                : "Kunde inte hämta molnhistoriken just nu (" + msg + ").";
+        }
+    }
+
     window.applyPendingRemoteBoard = function(){
         if(_pendingRemoteBoardData) _applyRemoteBoardData(_pendingRemoteBoardData);
     };
@@ -4281,6 +4394,7 @@
                 setCloudSyncStatus('saved');
                 _syncLog('sparat i molnet OK');
                 _localDirty = false; // bekräftat sparad i molnet - inget osparat kvar just nu
+                try{ _saveCloudHistory(payload.board); }catch(_){} // versionshistorik i molnet (max en per dag + var 3:e timme)
             }
         } catch(err){
             console.warn('[MinTavla] Molnsparning misslyckades:', err);
@@ -16926,7 +17040,9 @@
             uppGridEl.innerHTML='';
             if(uppExtraDigit!==null){
                 const ec=document.createElement('div'); ec.className='upp-col upp-extra';
-                ec.innerHTML = `<div class='upp-carry'></div><div class='upp-top'></div><div class='upp-bottom'></div><div class='upp-line'></div><div class='upp-result ${uppExtraRevealed?'revealed':''}'>${uppExtraRevealed?uppExtraDigit:''}</div>`;
+                // Minnessiffran från kolumnen längst till vänster står ovanför den extra kolumnen
+                const exCarry = ((uppOp==='+'||uppOp==='×') && uppN>0 && (0 >= uppN-uppStep)) ? `<span class='upp-chip upp-chip-carry'>${uppExtraDigit}</span>` : '';
+                ec.innerHTML = `<div class='upp-carry'>${exCarry}</div><div class='upp-top'></div><div class='upp-bottom'></div><div class='upp-line'></div><div class='upp-result ${uppExtraRevealed?'revealed':''}'>${uppExtraRevealed?uppExtraDigit:''}</div>`;
                 uppGridEl.appendChild(ec);
             }
             uppCols.forEach((c,i)=>{
@@ -16941,7 +17057,10 @@
                 // upp direkt tillsammans med den produkten/summan (t.ex. "+2" bredvid "1" när 7×3=21
                 // räknas ut), precis som när man räknar för hand. Längst till vänster (i===0) visas
                 // ingen egen minnessiffra här eftersom den redan blir den extra "uppExtraDigit"-rutan.
-                if((uppOp==='+'||uppOp==='×') && !isFirst && c.carryOut>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-carry'>+${c.carryOut}</span>`;
+                // FIX (lärarönskemål): minnessiffran ska stå OVANFÖR NÄSTA kolumn (den som ska räknas härnäst),
+                // inte ovanför kolumnen som räknade fram den. Ex. 8+12 i entalen = 20 -> 0 skrivs under
+                // entalen och 2 som minnessiffra ovanför tiotalen. Den visas direkt när högerkolumnen räknats.
+                if((uppOp==='+'||uppOp==='×') && i < uppN-1 && c.carryIn>0 && (i+1) >= uppN-uppStep) carryHtml = `<span class='upp-chip upp-chip-carry'>${c.carryIn}</span>`;
                 if(uppOp==='-' && c.borrowOut===1 && revealed) carryHtml = `<span class='upp-chip upp-chip-borrow'>+10</span>`;
                 let topHtml = `<span class='upp-digit'>${c.topDigit}</span>`;
                 if(uppOp==='-' && c.borrowIn>0 && revealed){
@@ -24739,7 +24858,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             gridEl.innerHTML='';
             if(extraDigit!==null){
                 const ec=document.createElement('div'); ec.className='upp-col upp-extra';
-                ec.innerHTML = `<div class='upp-carry'></div><div class='upp-top'></div><div class='upp-bottom'></div><div class='upp-line'></div><div class='upp-result ${extraRevealed?'revealed':''}'>${extraRevealed?extraDigit:''}</div>`;
+                const exCarry = ((op==='+'||op==='×') && n>0 && (0 >= n-step)) ? `<span class='upp-chip upp-chip-carry'>${extraDigit}</span>` : '';
+                ec.innerHTML = `<div class='upp-carry'>${exCarry}</div><div class='upp-top'></div><div class='upp-bottom'></div><div class='upp-line'></div><div class='upp-result ${extraRevealed?'revealed':''}'>${extraRevealed?extraDigit:''}</div>`;
                 gridEl.appendChild(ec);
             }
             cols.forEach((c,i)=>{
@@ -24747,7 +24867,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 const isFirst = i===0;
                 const colEl=document.createElement('div'); colEl.className='upp-col';
                 let carryHtml='';
-                if((op==='+'||op==='×') && c.carryIn>0 && revealed) carryHtml = `<span class='upp-chip upp-chip-carry'>+${c.carryIn}</span>`;
+                // Minnessiffran står ovanför NÄSTA kolumn och visas direkt när kolumnen till höger räknats.
+                if((op==='+'||op==='×') && i < n-1 && c.carryIn>0 && (i+1) >= n-step) carryHtml = `<span class='upp-chip upp-chip-carry'>${c.carryIn}</span>`;
                 if(op==='-' && c.borrowOut===1 && revealed) carryHtml = `<span class='upp-chip upp-chip-borrow'>+10</span>`;
                 let topHtml = `<span class='upp-digit'>${c.topDigit}</span>`;
                 if(op==='-' && c.borrowIn>0 && revealed){
