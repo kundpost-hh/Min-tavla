@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-18-problem-ak4c';</script>
+    <script>window.BUILD_VERSION = '2026-10-18-gaststat1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -4891,7 +4891,10 @@
         try {
             const snap = await fbDB.collection('stats').doc('guests').get();
             const d = snap.exists ? (snap.data()||{}) : {};
-            const byDate = d.byDate || {};
+            // Slå ihop dagar som sparats rätt (byDate.{datum}) med äldre besök som av misstag
+            // hamnade i egna fält med namnet "byDate.{datum}" (se FIX i enterGuestMode).
+            const byDate = Object.assign({}, d.byDate || {});
+            Object.keys(d).forEach(k=>{ const m = /^byDate\.(\d{4}-\d{2}-\d{2})$/.exec(k); if(m){ byDate[m[1]] = (byDate[m[1]] || 0) + (Number(d[k]) || 0); } });
             const total = d.total || 0;
             const today = byDate[todayKey()] || 0;
             let last7 = 0, last30 = 0;
@@ -5167,10 +5170,13 @@
         try {
             if (window.cloudReady && fbDB && typeof firebase!=='undefined' && firebase.firestore){
                 const dKey = todayKey();
+                // FIX: med set() tolkas en nyckel som 'byDate.2026-10-18' INTE som ett fält inuti
+                // byDate, utan blir ett eget fält med punkten i namnet - därför visade statistiken 0
+                // per dag. Ett nästlat objekt + merge:true räknar upp rätt fält inuti byDate.
                 fbDB.collection('stats').doc('guests').set({
                     total: firebase.firestore.FieldValue.increment(1),
-                    ['byDate.' + dKey]: firebase.firestore.FieldValue.increment(1)
-                }, { merge: true }).catch(()=>{});
+                    byDate: { [dKey]: firebase.firestore.FieldValue.increment(1) }
+                }, { merge: true }).catch((e)=>{ console.warn('[MinTavla] Gäststatistik kunde inte sparas:', e); });
             }
         } catch(e){}
         // Ge gästen en färdig exempel-klasslista att testa med direkt (t.ex. i Elever/Turordning),
