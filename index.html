@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-21-vag-xtal2';</script>
+    <script>window.BUILD_VERSION = '2026-10-21-upp-div2';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -1407,6 +1407,21 @@
     .upp-div-dcell { width: 30px; display: flex; flex-direction: column; align-items: center; }
     .upp-div-dcell .upp-carry { height: 16px; font-size: 11px; font-weight: 800; }
     .upp-div-dcell .upp-digit { font-size: 20px; font-weight: 700; color: #1f2937; }
+    /* NYTT: kort division i bråkform (svensk skolstandard) – kvot överst, streck, täljare, streck, nämnare under */
+    .upp-divf-wrap { display: inline-flex; flex-direction: column; align-items: stretch; margin: 0 auto; font-family: 'SF Mono', Consolas, monospace; }
+    .upp-divf-row { display: flex; gap: 2px; justify-content: center; padding: 0 6px; }
+    .upp-divf-row .upp-div-qcell { min-height: 30px; align-items: center; }
+    .upp-divf-line { border-top: 3px solid #1f2937; margin: 3px 0; }
+    .upp-divf-namnare { text-align: center; font-size: 22px; font-weight: 800; color: #1f2937; padding-top: 2px; }
+    .upp-divf-label { font-family: -apple-system, system-ui, sans-serif; font-size: 10px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: .4px; }
+    .upp-divf-grid { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 auto; }
+    .upp-divf-eq { padding-top: 16px; font-size: 26px; font-weight: 800; color: #1f2937; }
+    .upp-divf-kvot { padding-top: 30px; display: flex; flex-direction: column; align-items: center; }
+    .upp-divf-kvot .upp-divf-row { padding: 0; gap: 0; }
+    .upp-divf-kvot .upp-div-qcell { width: 18px; }
+    .upp-divf-wrap .upp-divf-row { padding: 0 4px; }
+    .upp-divf-grid .upp-div-dcell { width: 24px; }
+    .upp-divf-rest { font-size: 14px; font-weight: 800; color: #ff9500; margin-left: 5px; align-self: center; white-space: nowrap; }
     /* FORMLER */
     .formler-widget .widget-body { padding: 12px 14px; }
     .formler-search { width: 100%; border: 1px solid #d1d1d6; border-radius: 10px; padding: 8px 12px; font-size: 14px; font-family: inherit; outline: none; margin-bottom: 10px; box-sizing: border-box; }
@@ -17206,22 +17221,15 @@
         }
 
         function uppRenderDivision(){
+            // NYTT: bråkform – täljaren (med minnessiffror) över ett streck, nämnaren under, och kvoten efter likhetstecknet.
             uppGridEl.innerHTML='';
-            const wrap=document.createElement('div'); wrap.className='upp-div-wrap';
+            const grid=document.createElement('div'); grid.className='upp-divf-grid';
 
-            const qRow=document.createElement('div'); qRow.className='upp-div-qrow';
-            uppCols.forEach((c,i)=>{
-                const revealed = i < uppStep;
-                const qc=document.createElement('div'); qc.className='upp-div-qcell';
-                qc.innerHTML = `<span class='upp-result ${revealed?'revealed':''}'>${revealed?c.quotientDigit:''}</span>`;
-                qRow.appendChild(qc);
-            });
-            wrap.appendChild(qRow);
+            const labels=document.createElement('div'); labels.style.cssText='display:flex;flex-direction:column;justify-content:space-between;align-self:stretch;align-items:flex-end;padding:20px 0 6px;';
+            labels.innerHTML = `<span class='upp-divf-label'>täljare</span><span class='upp-divf-label'>nämnare</span>`;
 
-            const bodyRow=document.createElement('div'); bodyRow.className='upp-div-body';
-            const divisorEl=document.createElement('div'); divisorEl.className='upp-div-divisor'; divisorEl.textContent=String(uppDivisor);
-            bodyRow.appendChild(divisorEl);
-            const dividendRow=document.createElement('div'); dividendRow.className='upp-div-dividend-row';
+            const wrap=document.createElement('div'); wrap.className='upp-divf-wrap';
+            const dividendRow=document.createElement('div'); dividendRow.className='upp-divf-row';
             uppCols.forEach((c,i)=>{
                 const revealed = i < uppStep;
                 const cell=document.createElement('div'); cell.className='upp-div-dcell';
@@ -17230,9 +17238,29 @@
                 cell.innerHTML = `<div class='upp-carry'>${carryHtml}</div><div class='upp-digit'>${c.digit}</div>`;
                 dividendRow.appendChild(cell);
             });
-            bodyRow.appendChild(dividendRow);
-            wrap.appendChild(bodyRow);
-            uppGridEl.appendChild(wrap);
+            wrap.appendChild(dividendRow);
+            const line=document.createElement('div'); line.className='upp-divf-line'; wrap.appendChild(line);
+            const nam=document.createElement('div'); nam.className='upp-divf-namnare'; nam.textContent=String(uppDivisor);
+            wrap.appendChild(nam);
+
+            const eq=document.createElement('div'); eq.className='upp-divf-eq'; eq.textContent='=';
+
+            const kvot=document.createElement('div'); kvot.className='upp-divf-kvot';
+            const qRow=document.createElement('div'); qRow.className='upp-divf-row';
+            uppCols.forEach((c,i)=>{
+                const revealed = i < uppStep;
+                const qc=document.createElement('div'); qc.className='upp-div-qcell';
+                qc.innerHTML = `<span class='upp-result ${revealed?'revealed':''}'>${revealed?c.quotientDigit:''}</span>`;
+                qRow.appendChild(qc);
+            });
+            if(uppStep>=uppN && uppCols[uppN-1] && uppCols[uppN-1].remainderOut>0){
+                const r=document.createElement('span'); r.className='upp-divf-rest'; r.textContent='rest '+uppCols[uppN-1].remainderOut; qRow.appendChild(r);
+            }
+            kvot.appendChild(qRow);
+            const kl=document.createElement('span'); kl.className='upp-divf-label'; kl.textContent='kvot'; kvot.appendChild(kl);
+
+            grid.appendChild(labels); grid.appendChild(wrap); grid.appendChild(eq); grid.appendChild(kvot);
+            uppGridEl.appendChild(grid);
 
             const doneAll = uppStep>=uppN;
             if(doneAll){
