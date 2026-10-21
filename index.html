@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-18-gaststat1';</script>
+    <script>window.BUILD_VERSION = '2026-10-21-vag-xtal2';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -4027,7 +4027,12 @@
                         customAlert('Tavlan återställd och sparas nu till molnet.', '↩️');
                     });
                 };
-                rad.appendChild(btn); list.appendChild(rad);
+                const ib = document.createElement('button');
+                ib.textContent = '📄 Hämta sidor'; ib.title = 'Plocka ut enskilda sidor ur kopian utan att ersätta tavlan';
+                ib.style.cssText = 'border:none;background:#fff3d6;color:#92400e;font-weight:700;font-size:12px;padding:6px 10px;border-radius:999px;cursor:pointer;margin-right:6px;';
+                ib.onclick = ()=> openImportPagesDialog(b.board, datumStr);
+                const bw = document.createElement('span'); bw.style.cssText='display:flex;align-items:center;flex-shrink:0;'; bw.appendChild(ib); bw.appendChild(btn);
+                rad.appendChild(bw); list.appendChild(rad);
             });
         }
     };
@@ -4133,7 +4138,12 @@
                         }catch(e){ customAlert('Kunde inte hämta kopian: ' + (e && e.message), '⚠️'); btn.disabled=false; btn.textContent='↩️ Återställ'; }
                     });
                 };
-                rad.appendChild(btn); list.appendChild(rad);
+                const ib = document.createElement('button');
+                ib.textContent = '📄 Hämta sidor'; ib.title = 'Plocka ut enskilda sidor ur kopian utan att ersätta tavlan';
+                ib.style.cssText = 'flex-shrink:0;border:none;background:#fff3d6;color:#92400e;font-weight:700;font-size:12px;padding:6px 10px;border-radius:999px;cursor:pointer;';
+                ib.onclick = async ()=>{ ib.disabled = true; ib.textContent = 'Hämtar…'; try{ const d = await fsTimeout(_histRef().doc(it.id).get(), 15000, 'hämta molnkopia'); if(d.exists && d.data().board) openImportPagesDialog(d.data().board, datumStr); else customAlert('Kopian kunde inte hämtas.', '⚠️'); }catch(e){ customAlert('Kunde inte hämta kopian: ' + (e && e.message), '⚠️'); } ib.disabled = false; ib.textContent = '📄 Hämta sidor'; };
+                const bw = document.createElement('span'); bw.style.cssText='display:flex;gap:6px;align-items:center;flex-shrink:0;'; bw.appendChild(ib); bw.appendChild(btn);
+                rad.appendChild(bw); list.appendChild(rad);
             });
         }catch(err){
             const msg = String((err && (err.code || err.message)) || err);
@@ -4142,6 +4152,76 @@
                 : "Kunde inte hämta molnhistoriken just nu (" + msg + ").";
         }
     }
+
+
+    /* =========================================================
+       HÄMTA SIDOR FRÅN SÄKERHETSKOPIA – plocka ut enskilda sidor ur en säkerhetskopia
+       (lokal eller molnhistorik) och lägg till dem som NYA sidor, utan att ersätta tavlan.
+       ========================================================= */
+    function _pageLabelFromSaved(p){
+        if(p.home) return '🏠 Hem';
+        const hasDay = p.day!==undefined && p.day!==null && DAY_DEFS[p.day];
+        const hasLesson = p.lesson!==undefined && p.lesson!==null && LESSON_DEFS[p.lesson];
+        if(hasLesson) return (hasDay ? DAY_DEFS[p.day].name + ' – ' : '') + LESSON_DEFS[p.lesson].name;
+        if(hasDay) return DAY_DEFS[p.day].name;
+        return p.name || 'Egen sida';
+    }
+    function _widgetSummary(ws){
+        const names = {}; (ws||[]).forEach(w=>{ const t = String(w.type||'Widget'); const n = t.charAt(0) + t.slice(1).toLowerCase(); names[n] = (names[n]||0) + 1; });
+        return Object.keys(names).map(n => names[n] > 1 ? n + ' ×' + names[n] : n).join(', ');
+    }
+    function openImportPagesDialog(boardStr, sourceLabel){
+        let s = null; try{ s = JSON.parse(boardStr || '{}'); }catch(e){ s = null; }
+        const pages = (s && Array.isArray(s.pages)) ? s.pages.filter(p => (p.widgets||[]).length > 0) : [];
+        const ov = document.createElement('div'); ov.className = 'cal-popup-overlay'; ov.style.zIndex = '100000001'; // ovanpå säkerhetskopior-rutan
+        const box = document.createElement('div'); box.className = 'cal-popup'; box.style.width = 'min(520px,94vw)';
+        const existing = new Set(pagesListV6.map(pg => pg.id));
+        let html = "<div class='cal-popup-title' style='margin-bottom:4px;'>📄 Hämta sidor från kopian</div>"
+            + "<div style='font-size:12.5px;color:#8e8e93;margin-bottom:12px;line-height:1.5;'>Kopia: <b>" + sourceLabel + "</b>. Bocka i de sidor du vill få tillbaka – de läggs till som <b>nya sidor</b> på tavlan. Inget av det du har nu ändras.</div>";
+        if(!pages.length) html += "<div style='font-size:13.5px;color:#8e8e93;padding:10px 0;'>Den här kopian innehåller inga sidor med innehåll.</div>";
+        else html += "<div class='ip-list' style='display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow:auto;'></div>";
+        html += "<div style='margin-top:14px;display:flex;gap:8px;justify-content:flex-end;'><button class='ip-cancel' style='border:none;background:#f2f2f7;color:#48484a;font-weight:700;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;'>Avbryt</button>"
+            + (pages.length ? "<button class='ip-ok' style='border:none;background:#007aff;color:#fff;font-weight:800;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;'>📄 Lägg till valda sidor</button>" : "") + "</div>";
+        box.innerHTML = html; ov.appendChild(box); document.body.appendChild(ov);
+        const close = ()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        ov.onclick = (e)=>{ if(e.target === ov) close(); };
+        box.querySelector('.ip-cancel').onclick = close;
+        const list = box.querySelector('.ip-list');
+        if(list){
+            pages.forEach((p, i)=>{
+                const lbl = _pageLabelFromSaved(p);
+                const isOwn = !(p.home || (p.day!==undefined && p.day!==null) || (p.lesson!==undefined && p.lesson!==null));
+                const missing = !existing.has(p.id);
+                const row = document.createElement('label');
+                row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;background:' + (missing && isOwn ? '#fff8e6' : '#f7f7fb') + ';border:1px solid #ececf5;border-radius:12px;padding:9px 12px;cursor:pointer;';
+                row.innerHTML = "<input type='checkbox' data-i='" + i + "' style='margin-top:3px;width:18px;height:18px;flex-shrink:0;'" + (missing && isOwn ? ' checked' : '') + ">"
+                    + "<span style='font-size:13.5px;color:#1d1d1f;line-height:1.35;'><b>" + dikEsc(lbl) + "</b>"
+                    + (missing && isOwn ? " <span style='font-size:11px;font-weight:800;color:#b45309;background:#fde68a;border-radius:6px;padding:1px 6px;margin-left:4px;'>saknas på tavlan nu</span>" : "")
+                    + "<br><span style='font-size:12px;color:#6b7280;'>" + dikEsc(_widgetSummary(p.widgets)) + "</span></span>";
+                list.appendChild(row);
+            });
+        }
+        const ok = box.querySelector('.ip-ok');
+        if(ok) ok.onclick = ()=>{
+            const chosen = [...box.querySelectorAll('input[type=checkbox]:checked')].map(c => pages[+c.dataset.i]);
+            if(!chosen.length){ customAlert('Bocka i minst en sida först.', 'ℹ️'); return; }
+            const startIdx = currentPageIndexV6;
+            chosen.forEach(p=>{
+                createPageV6();                                    // ny, tom egen sida – blir aktiv
+                const pg = pagesListV6[pagesListV6.length - 1];
+                const nm = 'Återställd – ' + _pageLabelFromSaved(p);
+                pg.name = nm; pg.canvas.dataset.pageName = nm;
+                if(p.bgTheme !== undefined){ ALL_BG_THEME_CLASSES.forEach(c=>pg.canvas.classList.remove(c)); if(p.bgTheme) pg.canvas.classList.add(p.bgTheme); pg.canvas.dataset.bgTheme = p.bgTheme || ''; }
+                (p.widgets||[]).forEach(w => { try{ spawnWidgetFromState(w); }catch(e){ console.warn(e); } });
+            });
+            saveBoardState();
+            if(typeof renderSidePocket === 'function') renderSidePocket();
+            close();
+            customAlert(chosen.length + (chosen.length===1 ? ' sida har' : ' sidor har') + ' lagts till på tavlan (namn som börjar med "Återställd –"). Du hittar dem i sidlistan.', '📄');
+            if(typeof _syncLog === 'function') _syncLog('HÄMTADE ' + chosen.length + ' sidor från kopia ' + sourceLabel);
+        };
+    }
+    window.openImportPagesDialog = openImportPagesDialog;
 
     window.applyPendingRemoteBoard = function(){
         if(_pendingRemoteBoardData) _applyRemoteBoardData(_pendingRemoteBoardData);
@@ -13373,7 +13453,24 @@
         try{ const v = Function('"use strict";return (' + s + ')')(); return (typeof v==='number' && isFinite(v)) ? Math.round(v*1e6)/1e6 : null; }catch(e){ return null; }
     }
     function vagRi(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+    // NYTT: nivå "x-tal" – ekvationer med x, multiplikation och division (t.ex. 4x = 28, x/3 = 6, 3x + 5 = 20).
+    function vagNewTaskX(){
+        let L, R, ans; const t = vagRi(1,9);
+        if(t===1){ const k=vagRi(2,10); ans=vagRi(2,12); L=`${k} · ?`; R=`${k*ans}`; }
+        else if(t===2){ const k=vagRi(2,10), c=vagRi(2,12); ans=k*c; L=`? / ${k}`; R=`${c}`; }
+        else if(t===3){ const k=vagRi(2,9), a=vagRi(1,20); ans=vagRi(2,10); L=`${k} · ? + ${a}`; R=`${k*ans+a}`; }
+        else if(t===4){ const k=vagRi(2,9); ans=vagRi(2,10); const a=vagRi(1,k*ans-1); L=`${k} · ? − ${a}`; R=`${k*ans-a}`; }
+        else if(t===5){ const k=vagRi(2,6), c=vagRi(2,10), a=vagRi(1,15); ans=k*c; L=`? / ${k} + ${a}`; R=`${c+a}`; }
+        else if(t===6){ const k=vagRi(2,9); ans=vagRi(2,10); L=`${k*ans} / ?`; R=`${k}`; }
+        else if(t===7){ const k=vagRi(2,9), m=vagRi(2,9); ans=vagRi(2,9); const n=k*ans; // k·x = m·(n/m) bara om det går jämnt, annars a + b
+            const delare=[2,3,4,5,6,7,8,9].filter(d=>n%d===0 && n/d>1 && d!==k); if(delare.length){ const d=delare[vagRi(0,delare.length-1)]; L=`${k} · ?`; R=`${d} · ${n/d}`; } else { const a=vagRi(1,n-1); L=`${k} · ?`; R=`${a} + ${n-a}`; } }
+        else if(t===8){ const k=vagRi(2,6), m=vagRi(2,6); ans=k*m*vagRi(2,3); L=`? / ${k}`; R=`${ans/k/m} · ${m}`; }
+        else { const k=vagRi(2,5); ans=vagRi(2,10); const tot=(k+1)*ans; L=`${k} · ? + ?`; R=`${tot}`; }
+        if(Math.random()<0.5) [L,R]=[R,L];
+        return { L, R, ans, sym:'x' };
+    }
     function vagNewTask(level){
+        if(level==='xtal') return vagNewTaskX();
         let t, L, R, ans;
         if(level==='latt'){
             t = vagRi(1,3);
@@ -13387,14 +13484,16 @@
             else if(t===3){ const a=vagRi(20,99); ans=vagRi(2,a-2); L=`${a} − ?`; R=`${a-ans}`; }
             else { const a=vagRi(10,50), b=vagRi(10,40); const c=vagRi(5,a+b-5); ans=a+b-c; L=`${a} + ${b}`; R=`? + ${c}`; }
         } else {
-            t = vagRi(1,4);
+            t = vagRi(1,6);
             if(t===1){ const k=vagRi(2,9); ans=vagRi(2,10); L=`${k} · ?`; R=`${k*ans}`; }
+            else if(t===5){ const k=vagRi(2,9), c=vagRi(2,10); ans=k*c; L=`? / ${k}`; R=`${c}`; }
+            else if(t===6){ const k=vagRi(2,9); ans=vagRi(2,10); L=`${k*ans} / ?`; R=`${k}`; }
             else if(t===2){ const k=vagRi(2,6), a=vagRi(1,20); ans=vagRi(2,10); L=`${k} · ? + ${a}`; R=`${k*ans+a}`; }
             else if(t===3){ const a=vagRi(3,9), b=vagRi(3,9); const c=vagRi(1,a*b-1); ans=a*b-c; L=`${a} · ${b}`; R=`${c} + ?`; }
             else { const a=vagRi(1,15); ans=vagRi(2,15); L=`? + ? + ${a}`; R=`${2*ans+a}`; }
         }
         if(Math.random()<0.5) [L,R]=[R,L]; // ibland står det okända talet till höger
-        return { L, R, ans };
+        return { L, R, ans, sym:'?' };
     }
     function createEkvationsvag(config){
         const body = createWidget('EKVATIONSVÅGEN', 440, 'vag-widget', config);
@@ -13408,7 +13507,7 @@
         body.innerHTML = `
             <div class='gotd-tabs vag-tabs'><button class='gotd-tab vag-tab' data-m='uppg'>⚖️ Uppgifter</button><button class='gotd-tab vag-tab' data-m='fri'>✏️ Fri våg</button></div>
             <div class='vag-uppg-ctrl hover-menu' style='display:flex;gap:6px;margin-bottom:6px;'>
-                <select class='editor-select vag-level'><option value='latt'>Lätt (0–20)</option><option value='medel'>Medel (0–100)</option><option value='svar'>Svår (gånger)</option></select>
+                <select class='editor-select vag-level'><option value='latt'>Lätt (0–20)</option><option value='medel'>Medel (0–100)</option><option value='svar'>Svår (gånger & delat)</option><option value='xtal'>x-tal (gånger & delat)</option></select>
                 <button class='btn btn-primary vag-new' style='background:#7c3aed;'>🎲 Ny uppgift</button>
             </div>
             <div class='vag-fri-ctrl' style='display:none;gap:6px;margin-bottom:6px;align-items:center;'>
@@ -13420,7 +13519,7 @@
             <svg class='vag-svg' viewBox='0 0 420 250' style='width:100%;height:auto;display:block;'></svg>
             <div class='vag-status' style='text-align:center;font-size:15px;font-weight:800;min-height:22px;margin:2px 0 8px;'></div>
             <div class='vag-guess-row' style='display:flex;gap:6px;align-items:center;'>
-                <span style='font-weight:900;font-size:18px;color:#7c3aed;'>? =</span>
+                <span class='vag-sym' style='font-weight:900;font-size:18px;color:#7c3aed;'>? =</span>
                 <input type='number' class='list-name-input vag-guess' style='flex:1;min-width:0;font-size:18px;font-weight:800;text-align:center;' placeholder='Gissa'>
                 <button class='btn btn-primary vag-test' style='background:#16a34a;padding:8px 12px;'>⚖️ Testa</button>
                 <button class='btn btn-secondary vag-show' style='padding:8px 10px;'>👁 Svar</button>
@@ -13436,7 +13535,14 @@
         let angle = 0, animId = null;
 
         const sideValue = (expr, x)=>{ return vagEval(String(expr).replace(/\?/g, x===null||x===undefined ? 'NaN' : '('+x+')')); };
-        const pretty = (expr, x)=> String(expr).replace(/\?/g, (x===null||x===undefined) ? '?' : String(x));
+        const pretty = (expr, x)=>{
+            if(x===null||x===undefined){
+                if(st.sym==='x') return String(expr).replace(/\? \/ (\d+)/g,'x/$1').replace(/(\d+) \/ \?/g,'$1/x').replace(/\?/g,'x');
+                return String(expr).replace(/\?/g,'?');
+            }
+            return String(expr).replace(/\?/g, String(x));
+        };
+        const SYM = ()=> st.sym==='x' ? 'x' : '?';
 
         // Delar upp ett uttryck i plustermer (för klossar). Returnerar null om det innehåller annat än +.
         const plusTerms = (expr)=>{ const s=String(expr); if(/[−\-·*×÷/:()]/.test(s)) return null; return s.split('+').map(x=>x.trim()).filter(Boolean); };
@@ -13535,17 +13641,20 @@
             q('.vag-guess-row').style.display = st.mode==='uppg' ? 'flex' : 'none';
             let target = 0;
             if(st.mode==='uppg'){
-                const _bal = st.guess===null || Math.abs((sideValue(st.L, st.guess)||0) - (sideValue(st.R, st.guess)||0)) < 1e-9;
+                q('.vag-sym').textContent = SYM() + ' =';
+                const _lv0 = sideValue(st.L, st.guess), _rv0 = sideValue(st.R, st.guess);
+                const _bal = st.guess===null || (_lv0!==null && _rv0!==null && Math.abs(_lv0 - _rv0) < 1e-9);
                 const _sign = st.guess===null ? '<span style="color:#7c3aed;">=</span>' : (_bal ? '<span style="color:#16a34a;">=</span>' : '<span style="color:#dc2626;">≠</span>');
                 eqEl.innerHTML = `${dikEsc(pretty(st.L, st.guess))} ${_sign} ${dikEsc(pretty(st.R, st.guess))}`;
                 if(st.guess===null){
                     // Med det hemliga talet väger vågen jämnt – vad är ? värt?
                     target = 0;
-                    status.innerHTML = `<span style="color:#475569;">Vågen väger jämnt. Vilket tal är <span style="color:#7c3aed;">?</span></span>`;
+                    status.innerHTML = `<span style="color:#475569;">Vågen väger jämnt. Vilket tal är <span style="color:#7c3aed;">${SYM()}</span></span>`;
                 } else {
                     const Lv = sideValue(st.L, st.guess), Rv = sideValue(st.R, st.guess);
                     target = tiltFor(Lv, Rv);
-                    if(target===0){ status.innerHTML = `<span style="color:#16a34a;">✅ I balans! ? = ${st.guess}</span>`; }
+                    if(Lv===null || Rv===null){ target = 0; status.innerHTML = `<span style="color:#dc2626;">❌ Det går inte att dela med 0 – försök med ett annat tal!</span>`; }
+                    else if(target===0){ status.innerHTML = `<span style="color:#16a34a;">✅ I balans! ${SYM()} = ${st.guess}</span>`; }
                     else { status.innerHTML = `<span style="color:#dc2626;">❌ ${Lv>Rv ? 'Vänster' : 'Höger'} sida väger mer (${Lv} och ${Rv}) – försök igen!</span>`; }
                 }
             } else {
@@ -17326,6 +17435,136 @@
     // Uppgift 1-3 kommer från grundområdena, uppgift 4 är alltid extra klurig
     // (textproblem i två steg). Varje svar är gömt och visas när man klickar på det,
     // precis som i Räkna-widgeten (.rakna-ans).
+    // ============================================================
+    // STARTUPPGIFT MATEMATIK – extra: klockan med kvart & minuter + fler kluriga
+    // problem med flera räknesätt i samma fråga.
+    // ============================================================
+    function suRi(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+    function suVal(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    const SU_TIMORD = ['tolv','ett','två','tre','fyra','fem','sex','sju','åtta','nio','tio','elva','tolv'];
+    function suH12(h){ h = ((h % 12) + 12) % 12; return h === 0 ? 12 : h; }
+    function suDig(h,m){ return h + ':' + String(m).padStart(2,'0'); }
+    // Klockan i ord (svenska klockspråket). Bara för minuter i femsteg.
+    function suKlockOrd(h,m){
+        const nu = SU_TIMORD[suH12(h)], nasta = SU_TIMORD[suH12(h+1)];
+        switch(m){
+            case 0:  return 'klockan ' + nu;
+            case 5:  return 'fem över ' + nu;
+            case 10: return 'tio över ' + nu;
+            case 15: return 'kvart över ' + nu;
+            case 20: return 'tjugo över ' + nu;
+            case 25: return 'fem i halv ' + nasta;
+            case 30: return 'halv ' + nasta;
+            case 35: return 'fem över halv ' + nasta;
+            case 40: return 'tjugo i ' + nasta;
+            case 45: return 'kvart i ' + nasta;
+            case 50: return 'tio i ' + nasta;
+            case 55: return 'fem i ' + nasta;
+        }
+        return suDig(h,m);
+    }
+    function suTidTxt(min){ const h = Math.floor(min/60), m = min%60; if(!h) return m + ' min'; return h + ' tim' + (m ? ' ' + m + ' min' : ''); }
+    function suKlockUppgift(niva){
+        const minuter = niva==='ak4' ? [0,15,30,45,5,10,50,55] : [0,5,10,15,20,25,30,35,40,45,50,55];
+        const typ = suRi(0,3);
+        if(typ===0){ // ord -> siffror
+            const h = suRi(1,11), m = suVal(minuter.filter(x=>x!==0));
+            const ord = suKlockOrd(h,m);
+            return { fraga:'Skriv klockan "' + ord + '" med siffror (på förmiddagen).', svar: ord + ' = ' + suDig(h, m) };
+        }
+        if(typ===1){ // siffror -> ord
+            const h = suRi(1,11), m = suVal(minuter.filter(x=>x!==0));
+            return { fraga:'Hur säger man klockan ' + suDig(h,m) + ' med ord?', svar: suDig(h,m) + ' = ' + suKlockOrd(h,m) };
+        }
+        if(typ===2){ // lägg till minuter
+            const h = suRi(niva==='ak6'?7:1, niva==='ak6'?20:10);
+            const m = niva==='ak6' ? suRi(0,59) : suVal(niva==='ak4' ? [0,15,30,45] : [0,5,10,15,20,25,30,35,40,45,50,55]);
+            const d = niva==='ak4' ? suVal([15,30,45,60,75,90]) : (niva==='ak5' ? suVal([20,25,35,40,45,50,55,70,85,95,110]) : suRi(17,175));
+            const tot = h*60 + m + d, sh = Math.floor(tot/60) % 24, sm = tot % 60;
+            if(niva==='ak6'){
+                return { fraga:'Bussen går ' + suDig(h,m) + ' och resan tar ' + suTidTxt(d) + '. Vilken tid är du framme?', svar: suDig(h,m) + ' + ' + suTidTxt(d) + ' = ' + suDig(sh,sm) };
+            }
+            const startOrd = suKlockOrd(h,m);
+            return { fraga:'Klockan är ' + (m===0 ? startOrd.replace('klockan ','') : startOrd) + ' (' + suDig(h,m) + '). Vad är klockan ' + d + ' minuter senare?', svar: suDig(h,m) + ' + ' + d + ' min = ' + suDig(suH12(sh), sm) + (sm % 5 === 0 ? ' (' + suKlockOrd(sh,sm) + ')' : '') };
+        }
+        // tid mellan två klockslag
+        const step = niva==='ak4' ? 15 : (niva==='ak5' ? 5 : 1);
+        const h = suRi(niva==='ak6'?7:8, niva==='ak6'?15:11);
+        const m = niva==='ak6' ? suRi(0,59) : suVal(niva==='ak4' ? [0,15,30,45] : [0,5,10,15,20,25,30,35,40,45,50,55]);
+        const maxD = niva==='ak4' ? 150 : (niva==='ak5' ? 180 : 300);
+        const d = Math.max(step, Math.round(suRi(20, maxD) / step) * step);
+        const tot = h*60 + m + d, sh = Math.floor(tot/60), sm = tot % 60;
+        if(niva==='ak4'){
+            return { fraga:'Lektionen börjar ' + suKlockOrd(h,m) + ' och slutar ' + suKlockOrd(sh,sm) + '. Hur lång är lektionen?', svar: suDig(h,m) + ' → ' + suDig(sh,sm) + ' = ' + suTidTxt(d) };
+        }
+        return { fraga:'Hur lång tid är det mellan klockan ' + suDig(h,m) + ' och klockan ' + suDig(sh,sm) + '?', svar: suDig(h,m) + ' → ' + suDig(sh,sm) + ' = ' + suTidTxt(d) };
+    }
+
+    // Kluriga problem med flera räknesätt i samma fråga. s = 1 (lätt), 2 (medel), 3 (svår).
+    const SU_KLURIG_NY = [
+        // 1. Bio: × + −
+        (s)=>{ const pv = suVal(s===1?[60,70,80,90]:[85,95,110,120,135]), pb = suVal(s===1?[40,45,50,60]:[55,65,70,75,80]); const v = suRi(1, s===1?2:3), b = suRi(2, s===1?3:5); const tot = v*pv + b*pb; const betala = Math.ceil((tot+1)/100)*100 + (s===3?100:0);
+            return { fraga:'En vuxenbiljett kostar '+pv+' kr och en barnbiljett '+pb+' kr. Familjen köper '+v+' vuxen- och '+b+' barnbiljetter och betalar med '+betala+' kr. Hur mycket får de tillbaka?', svar:v+' × '+pv+' = '+(v*pv)+' kr. '+b+' × '+pb+' = '+(b*pb)+' kr. Totalt '+tot+' kr. '+betala+' − '+tot+' = '+(betala-tot)+' kr tillbaka' }; },
+        // 2. Godispåsar: × ÷
+        (s)=>{ const barn = suVal(s===1?[2,3,4,5]:[3,4,5,6,8]); const per = suRi(s===1?3:5, s===1?8:15); const tot = barn*per; const k = suVal([2,3,4,5,6].filter(x=>tot%x===0)) || 2; const pasar = tot/k;
+            return { fraga:'Det finns '+pasar+' godispåsar med '+k+' godisbitar i varje. Godiset delas lika mellan '+barn+' barn. Hur många bitar får varje barn?', svar:pasar+' × '+k+' = '+tot+' bitar. '+tot+' ÷ '+barn+' = '+per+' bitar var' }; },
+        // 3. Utflykt: ÷ +
+        (s)=>{ const elever = suVal(s===1?[20,25]:[24,25,30,32]); const perBuss = suRi(s===1?10:20, s===1?20:40); const buss = elever*perBuss; const intrade = suVal(s===1?[20,25,30]:[35,45,60,75]);
+            return { fraga:'Klassen ('+elever+' elever) åker på utflykt. Bussen kostar '+buss+' kr som delas lika, och inträdet kostar '+intrade+' kr per elev. Vad kostar utflykten för varje elev?', svar:buss+' ÷ '+elever+' = '+perBuss+' kr för bussen. '+perBuss+' + '+intrade+' = '+(perBuss+intrade)+' kr per elev' }; },
+        // 4. Sparande: × + −
+        (s)=>{ const har = suRi(s===1?20:100, s===1?80:400); const vecka = suVal(s===1?[10,15,20,25]:[30,40,50,75]); const v = suRi(3, s===1?6:10); const pris = Math.max(10, Math.round((har + vecka*v - suRi(5, s===1?40:120))/5)*5);
+            const kvar = har + vecka*v - pris;
+            return { fraga:'Maja har '+har+' kr. Hon sparar '+vecka+' kr i veckan i '+v+' veckor. Sedan köper hon ett spel för '+pris+' kr. Hur mycket pengar har hon kvar?', svar:vecka+' × '+v+' = '+(vecka*v)+' kr. '+har+' + '+(vecka*v)+' = '+(har+vecka*v)+' kr. '+(har+vecka*v)+' − '+pris+' = '+kvar+' kr kvar' }; },
+        // 5. Bakning: ÷ ×
+        (s)=>{ const gram = suVal(s===1?[200,300,400]:[300,360,480,600]); const pers = suVal(s===1?[8,12]:[6,10,14,18]); const per = gram/4;
+            return { fraga:'Ett recept för 4 personer behöver '+gram+' g mjöl. Hur mycket mjöl behövs för '+pers+' personer?', svar:gram+' ÷ 4 = '+per+' g per person. '+per+' × '+pers+' = '+(per*pers)+' g' }; },
+        // 6. Läsning: × −
+        (s)=>{ const sidor = suRi(s===1?60:150, s===1?120:400); const per = suRi(s===1?5:12, s===1?12:30); const dagar = suRi(3, Math.min(9, Math.floor((sidor-1)/per)));
+            return { fraga:'En bok har '+sidor+' sidor. Leo läser '+per+' sidor om dagen i '+dagar+' dagar. Hur många sidor har han kvar att läsa?', svar:per+' × '+dagar+' = '+(per*dagar)+' sidor lästa. '+sidor+' − '+(per*dagar)+' = '+(sidor-per*dagar)+' sidor kvar' }; },
+        // 7. Åldrar: × +
+        (s)=>{ const a = suRi(5, s===1?9:12); const k = suVal([3,4]); const y = suRi(2, s===1?6:15);
+            return { fraga:'Sara är '+a+' år. Hennes pappa är '+k+' gånger så gammal som hon. Hur gammal är pappan om '+y+' år?', svar:a+' × '+k+' = '+(a*k)+' år nu. '+(a*k)+' + '+y+' = '+(a*k+y)+' år' }; },
+        // 8. Pizza: × × −
+        (s)=>{ const p = suRi(2, s===1?4:8); const bitar = suVal([6,8]); const e = suRi(3, s===1?6:12); const b = suRi(1, Math.max(1, Math.min(3, Math.floor((p*bitar-1)/e))));
+            return { fraga:'Klassen beställer '+p+' pizzor som är skurna i '+bitar+' bitar var. '+e+' elever äter '+b+' bit'+(b>1?'ar':'')+' var. Hur många bitar blir över?', svar:p+' × '+bitar+' = '+(p*bitar)+' bitar. '+e+' × '+b+' = '+(e*b)+' uppätna. '+(p*bitar)+' − '+(e*b)+' = '+(p*bitar-e*b)+' bitar över' }; },
+        // 9. Minibussar: ÷ (avrunda uppåt) ×
+        (s)=>{ const e = suRi(s===1?18:40, s===1?30:90); const c = suVal(s===1?[8]:[8,9,12]); const kr = suVal(s===1?[200,300,500]:[450,600,750,900]); const bussar = Math.ceil(e/c);
+            return { fraga:e+' elever ska åka minibuss. Varje minibuss har plats för '+c+' elever och kostar '+kr+' kr att hyra. Vad kostar bussarna tillsammans?', svar:e+' ÷ '+c+' = '+Math.floor(e/c)+(e%c?' rest '+(e%c)+' → '+bussar+' bussar behövs':' bussar')+'. '+bussar+' × '+kr+' = '+(bussar*kr)+' kr' }; },
+        // 10. Stegräknare: + ×
+        (s)=>{ const x = suRi(s===1?500:1200, s===1?1500:4000); const y = suRi(s===1?500:1500, s===1?2000:5000); const d = suRi(3, s===1?5:7);
+            return { fraga:'Ali går '+x+' steg på förmiddagen och '+y+' steg på eftermiddagen. Han går lika mycket varje dag i '+d+' dagar. Hur många steg blir det sammanlagt?', svar:x+' + '+y+' = '+(x+y)+' steg per dag. '+(x+y)+' × '+d+' = '+((x+y)*d)+' steg' }; },
+        // 11. Prisjämförelse: × −
+        (s)=>{ const st = suVal(s===1?[8,10,12,15]:[12,15,18,25]); const pack = 3*st - suVal([3,5,6]); const antal = suVal(s===1?[6]:[6,9,12]);
+            return { fraga:'En juice kostar '+st+' kr styck, men ett 3-pack kostar '+pack+' kr. Hur mycket sparar man om man köper '+antal+' juicer i 3-pack i stället för styck?', svar:antal+' × '+st+' = '+(antal*st)+' kr styckvis. '+(antal/3)+' × '+pack+' = '+(antal/3*pack)+' kr i pack. '+(antal*st)+' − '+(antal/3*pack)+' = '+(antal*st-antal/3*pack)+' kr sparat' }; },
+        // 12. Räkneordning: flera räknesätt i ett uttryck
+        (s)=>{ if(s===1){ const a=suRi(2,20), b=suRi(2,9), c=suRi(2,9); return { fraga:'Räkna ut: '+a+' + '+b+' · '+c+' (tänk på räkneordningen!)', svar:'Gånger först: '+b+' · '+c+' = '+(b*c)+'. '+a+' + '+(b*c)+' = '+(a+b*c) }; }
+            if(s===2){ const a=suRi(2,12), b=suRi(2,12), c=suRi(2,6), d=suRi(1,Math.min(20,(a+b)*c-1)); return { fraga:'Räkna ut: ('+a+' + '+b+') · '+c+' − '+d, svar:'Parentesen först: '+a+' + '+b+' = '+(a+b)+'. '+(a+b)+' · '+c+' = '+((a+b)*c)+'. '+((a+b)*c)+' − '+d+' = '+((a+b)*c-d) }; }
+            const a=suRi(3,12), b=suRi(3,12), d=suVal([2,3,4,5,6]), c=d*suRi(2,Math.max(2,Math.min(12,a*b-1))), e=suRi(5,40); return { fraga:'Räkna ut: '+a+' · '+b+' − '+c+' / '+d+' + '+e, svar:'Gånger och delat först: '+a+' · '+b+' = '+(a*b)+' och '+c+' / '+d+' = '+(c/d)+'. Sedan från vänster: '+(a*b)+' − '+(c/d)+' = '+(a*b-c/d)+'. '+(a*b-c/d)+' + '+e+' = '+(a*b-c/d+e) }; },
+        // 13. Tankenöt baklänges: × + -> − ÷
+        (s)=>{ const x = suRi(2, s===1?10:25); const k = suRi(2, s===1?5:9); const t = suRi(3, s===1?20:60); const r = x*k + t;
+            return { fraga:'Jag tänker på ett tal. Jag multiplicerar det med '+k+' och lägger sedan till '+t+'. Då får jag '+r+'. Vilket tal tänker jag på?', svar:'Baklänges: '+r+' − '+t+' = '+(r-t)+'. '+(r-t)+' ÷ '+k+' = '+x }; },
+        // 14. Fruktaffären: × + −
+        (s)=>{ const pa = suVal(s===1?[3,4,5]:[4,6,7,8]), pb = suVal(s===1?[2,3,4]:[3,5,6]); const x = suRi(2, s===1?6:10), y = suRi(2, s===1?6:10); const tot = x*pa + y*pb; const bet = tot <= 50 ? 50 : (tot <= 100 ? 100 : 200);
+            return { fraga:'Ett äpple kostar '+pa+' kr och en banan '+pb+' kr. Noor köper '+x+' äpplen och '+y+' bananer och betalar med '+bet+' kr. Hur mycket får hon tillbaka?', svar:x+' × '+pa+' = '+(x*pa)+' kr. '+y+' × '+pb+' = '+(y*pb)+' kr. '+(x*pa)+' + '+(y*pb)+' = '+tot+' kr. '+bet+' − '+tot+' = '+(bet-tot)+' kr' }; },
+        // 15. Lagindelning: ÷ × +
+        (s)=>{ const lag = suRi(3, s===1?4:6); const sp = suVal(s===1?[5,6]:[7,9,11]); const res = suRi(1,3);
+            return { fraga:'På en turnering finns '+lag+' lag. Varje lag har '+sp+' spelare på planen och '+res+' reserv'+(res>1?'er':'')+'. Hur många spelare är det totalt?', svar:sp+' + '+res+' = '+(sp+res)+' spelare per lag. '+(sp+res)+' × '+lag+' = '+((sp+res)*lag)+' spelare' }; },
+        // 16. Extrajobb: × × −
+        (s)=>{ const kr = suVal(s===1?[20,25,30]:[45,60,75,90]); const tim = suRi(2, s===1?3:5); const dagar = suRi(2, s===1?4:6); const tjan = kr*tim*dagar; const kop = Math.round(tjan*suVal([0.4,0.5,0.6])/5)*5;
+            return { fraga:'Elias hjälper till i trädgården och får '+kr+' kr i timmen. Han jobbar '+tim+' timmar om dagen i '+dagar+' dagar. Sedan köper han en tröja för '+kop+' kr. Hur mycket pengar har han kvar?', svar:kr+' × '+tim+' = '+(kr*tim)+' kr per dag. '+(kr*tim)+' × '+dagar+' = '+tjan+' kr. '+tjan+' − '+kop+' = '+(tjan-kop)+' kr kvar' }; }
+    ];
+    // Undvik upprepning: kom ihåg de senaste typerna (per webbläsare) och välj bland de andra.
+    function suValjKlurigTyp(antalGamla){
+        const ids = []; for(let i=0;i<antalGamla;i++) ids.push('o'+i); SU_KLURIG_NY.forEach((_,i)=>ids.push('n'+i));
+        let recent = []; try{ recent = JSON.parse(localStorage.getItem('mintavla_suKlurigSenaste') || '[]'); }catch(e){ recent = []; }
+        if(!Array.isArray(recent)) recent = [];
+        let pool = ids.filter(id => recent.indexOf(id) === -1); if(!pool.length) pool = ids;
+        const id = pool[Math.floor(Math.random()*pool.length)];
+        recent.push(id); recent = recent.slice(-10);
+        try{ localStorage.setItem('mintavla_suKlurigSenaste', JSON.stringify(recent)); }catch(e){}
+        return id;
+    }
+
     function createStartuppgift(config){
         if(config===undefined) config=null;
         const body = createWidget('STARTUPPGIFT', 400, 'startuppgift-widget', config);
@@ -17448,6 +17687,8 @@
                     ]
                 },
                 gen: function(niva){
+                    // NYTT: ca var tredje gång en extra klockuppgift med kvart & minuter (klockan i ord, lägga till minuter, tid mellan klockslag).
+                    if(Math.random() < 0.35) return suKlockUppgift(niva);
                     const val = ri(0,3);
                     // FIX: area/omkrets/volym-svaren visade tidigare bara slutresultatet (t.ex. "24 cm²"),
                     // utan att visa vad som multiplicerades/adderades - visar nu alltid själva uträkningen
@@ -17482,8 +17723,14 @@
             },
             klurig: {
                 namn:'Klurig utmaning', emoji:'🧩',
+                // NYTT: väljer bland 6 gamla + 16 nya problemtyper (flera räknesätt i samma fråga) och undviker de senaste 10 typerna.
                 gen: function(niva){
-                    const val = ri(0,5);
+                    const id = suValjKlurigTyp(6);
+                    if(id.charAt(0)==='n') return SU_KLURIG_NY[parseInt(id.slice(1),10)](niva==='ak4'?1:(niva==='ak5'?2:3));
+                    return this.genGammal(niva, parseInt(id.slice(1),10));
+                },
+                genGammal: function(niva, tvingaVal){
+                    const val = (typeof tvingaVal==='number') ? tvingaVal : ri(0,5);
                     // FIX: samma sak här - kluriga textproblem visade bara slutsvaret, nu visas hela
                     // uträkningen steg för steg, så eleven ser hur man löser den typen av problem.
                     // NYTT: val===4 (jämförelseproblem) och val===5 (tvåstegsproblem med multiplikation
