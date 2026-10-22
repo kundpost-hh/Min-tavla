@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-21-quiz-abc1';</script>
+    <script>window.BUILD_VERSION = '2026-10-22-gotd-ai1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -2438,6 +2438,19 @@
     .poll-opt-correct { background:#d2f8dc !important; border-color:#34c759 !important; }
     .poll-opt-pct { font-weight:800; color:#555; font-size:13px; flex-shrink:0; }
     /* QUIZTÄVLING */
+    .qt-timer { display:flex; flex-direction:column; gap:6px; margin:4px 0 8px; }
+    .qt-timer-row { display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
+    .qt-timer-chip { border:1px solid #d1d1d6; background:#fff; color:#3a3a3c; border-radius:999px; padding:4px 11px; font-size:12.5px; font-weight:800; cursor:pointer; font-family:inherit; }
+    .qt-timer-chip.active { background:#ff3b30; border-color:#ff3b30; color:#fff; }
+    .qt-timer-ctrl { border:none; background:#f2f2f7; border-radius:8px; padding:4px 9px; font-size:13px; cursor:pointer; font-family:inherit; }
+    .qt-timer-display { display:flex; align-items:center; gap:10px; }
+    .qt-timer-num { font-size:26px; font-weight:900; color:#1d1d1f; min-width:64px; text-align:center; font-variant-numeric:tabular-nums; }
+    .qt-timer-bar { flex:1; height:12px; background:#e5e5ea; border-radius:999px; overflow:hidden; }
+    .qt-timer-fill { height:100%; background:#34c759; border-radius:999px; transition:width .2s linear, background .3s; }
+    .qt-timer.varning .qt-timer-fill { background:#ff9500; }
+    .qt-timer.slut .qt-timer-fill { background:#ff3b30; }
+    .qt-timer.slut .qt-timer-num { color:#ff3b30; animation:qtBlink .6s ease 3; }
+    @keyframes qtBlink { 50% { opacity:.25; transform:scale(1.15); } }
     .qt-opt-static .qt-opt-letter { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#ff3b30; color:#fff; font-weight:900; font-size:16px; margin-right:12px; flex-shrink:0; vertical-align:middle; }
     .qt-opt-static.poll-opt-correct .qt-opt-letter { background:#16a34a; }
     .qt-widget .widget-inner { background:#fff; }
@@ -12892,7 +12905,7 @@
     }
 
     // Grej of the day - steg för steg: Ledtråd -> Fakta -> Ord
-    function showGotdPopup(clue, facts, answer){
+    function showGotdPopup(clue, facts, answer, opts){
         facts = (facts || []).filter(f => f && f.trim().length > 0);
         const wrapper = document.getElementById('cb-app-wrapper');
         const overlay = document.createElement('div');
@@ -12945,6 +12958,21 @@
                 content.insertAdjacentHTML('beforeend',
                     `<div style="font-size:14px;font-weight:800;color:#7c3aed;letter-spacing:1px;margin-top:6px;">🎯 ORD</div>
                      <div style="font-size:46px;font-weight:900;color:#ff3b30;text-align:center;text-shadow:2px 2px 0 rgba(0,0,0,0.08);animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);">${answer}</div>`);
+                // NYTT: AI-grejer har en Wikipedia-titel - då visas en bild på svaret, samma som i Week.
+                if(opts && opts.wiki){
+                    content.insertAdjacentHTML('beforeend', `<div class="gotd-ai-img" style="position:relative;width:100%;aspect-ratio:16/10;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#a855f7,#6366f1);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.18);"><div class="gotw-img-ph" style="font-size:72px;line-height:1;">🖼️</div></div>`);
+                    const wrap = content.querySelector('.gotd-ai-img');
+                    const pl = { w: opts.wiki, n: answer };
+                    gotwFetchImage(pl).then(list=>{
+                        if(!wrap) return;
+                        if(!list || !list.length){ wrap.remove(); return; }
+                        let i=0; const img=new Image(); img.alt=String(answer||'');
+                        img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;';
+                        img.onload=()=>{ img.style.opacity='1'; const ph=wrap.querySelector('.gotw-img-ph'); if(ph) ph.style.display='none'; wrap.insertAdjacentHTML('beforeend', `<div style="position:absolute;right:8px;bottom:6px;font-size:10px;color:#fff;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:6px;">Bild: Wikipedia</div>`); gotwRememberImage(pl, img.src); box.scrollTop = box.scrollHeight; };
+                        img.onerror=()=>{ i++; if(i<list.length) img.src=list[i]; else wrap.remove(); };
+                        wrap.appendChild(img); img.src=list[0];
+                    });
+                }
                 spawnPopupConfetti(overlay);
                 btn.innerHTML = '✓ Klart!';
                 box.scrollTop = box.scrollHeight;
@@ -14410,6 +14438,152 @@
         + 'Jag visar när terminerna börjar och slutar / Jag visar också när loven är / Skolan planerar utifrån mig / Föräldrar och elever kollar ofta på mig / Läsårsschema\n'
         + 'Jag är gjord av papper / Jag samlar bilder på alla elever och lärare / Man kan bläddra i mig för att se vilka som går i skolan / Jag ges ofta ut en gång per år / Skolkatalog\n'
         + 'Jag är en liten väska eller ask / Pennor, suddgummi och linjal förvaras i mig / Jag ligger ofta i skolväskan / Du öppnar mig varje dag på lektionerna / Pennskrin';
+    // ============================================================
+    // NYTT: AI i Grej of the day (Day + Week). Samma två vägar som i Quiztävlingen:
+    // 1) kopiera frågan till Gemini och klistra in svaret, eller 2) ett klick med egen API-nyckel.
+    // Resultatet visas i EXAKT samma steg-popup som vanligt (ledtråd -> fakta -> ord/plats + bild).
+    // ============================================================
+    function gotdAiStr(v){ return String(v==null?'':v).replace(/\s+/g,' ').trim(); }
+    function gotdAiJson(text){
+        let t = String(text||'').trim().replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+        const a = t.indexOf('{'), b = t.lastIndexOf('}');
+        if(a>-1 && b>a){ try{ return JSON.parse(t.slice(a,b+1)); }catch(e){} }
+        return null;
+    }
+    function gotdAiParseDay(text){
+        const o = gotdAiJson(text);
+        let ledtrad='', fakta=[], ord='', wiki='';
+        if(o){
+            ledtrad = gotdAiStr(o.ledtrad||o.ledtråd||o.clue);
+            fakta = (Array.isArray(o.fakta)?o.fakta:(Array.isArray(o.facts)?o.facts:[])).map(gotdAiStr).filter(Boolean);
+            ord = gotdAiStr(o.ord||o.svar||o.answer);
+            wiki = gotdAiStr(o.wikipedia||o.wiki);
+        } else {
+            String(text||'').split(/\r?\n/).map(l=>l.replace(/^[\s*#>\-•]+/,'').replace(/\*\*/g,'').trim()).filter(Boolean).forEach(l=>{
+                let m;
+                if((m=l.match(/^LEDTR[ÅA]D\s*[:\-]\s*(.+)$/i))) ledtrad=m[1].trim();
+                else if((m=l.match(/^FAKTA\s*\d*\s*[:\-]\s*(.+)$/i))) fakta.push(m[1].trim());
+                else if((m=l.match(/^(?:ORD|SVAR)\s*[:\-]\s*(.+)$/i))) ord=m[1].trim();
+                else if((m=l.match(/^WIKIPEDIA\s*[:\-]\s*(.+)$/i))) wiki=m[1].trim();
+                else if(!ledtrad && /[\/|]/.test(l)){ const p=l.split(/[\/|]/).map(x=>x.trim()).filter(Boolean); if(p.length>=3){ ledtrad=p[0]; ord=p[p.length-1]; fakta=p.slice(1,-1); } }
+            });
+        }
+        fakta = fakta.slice(0,6);
+        if(!ledtrad || !ord) return null;
+        return { ledtrad, fakta, ord, wiki: wiki.replace(/ /g,'_') };
+    }
+    function gotdAiParseWeek(text){
+        const o = gotdAiJson(text);
+        let p = { n:'', c:'', e:'🌍', w:'', l:'', f:[], d:[] };
+        if(o){
+            p.n = gotdAiStr(o.plats||o.namn||o.name); p.c = gotdAiStr(o.land||o.country); p.e = gotdAiStr(o.emoji)||'🌍';
+            p.w = gotdAiStr(o.wikipedia||o.wiki); p.l = gotdAiStr(o.ledtrad||o.ledtråd||o.clue);
+            p.f = (Array.isArray(o.fakta)?o.fakta:[]).map(gotdAiStr).filter(Boolean);
+            p.d = (Array.isArray(o.fordjupning)?o.fordjupning:(Array.isArray(o.fördjupning)?o.fördjupning:[])).map(gotdAiStr).filter(Boolean);
+        } else {
+            let iFord=false;
+            String(text||'').split(/\r?\n/).map(l=>l.replace(/\*\*/g,'').trim()).filter(Boolean).forEach(l=>{
+                let m; const r = l.replace(/^[\s*#>\-•]+/,'').trim();
+                if((m=r.match(/^PLATS\s*[:\-]\s*(.+)$/i))){ p.n=m[1].trim(); iFord=false; }
+                else if((m=r.match(/^LAND\s*[:\-]\s*(.+)$/i))){ p.c=m[1].trim(); iFord=false; }
+                else if((m=r.match(/^EMOJI\s*[:\-]\s*(.+)$/i))){ p.e=m[1].trim(); iFord=false; }
+                else if((m=r.match(/^WIKIPEDIA\s*[:\-]\s*(.+)$/i))){ p.w=m[1].trim(); iFord=false; }
+                else if((m=r.match(/^LEDTR[ÅA]D\s*[:\-]\s*(.+)$/i))){ p.l=m[1].trim(); iFord=false; }
+                else if((m=r.match(/^FAKTA\s*\d*\s*[:\-]\s*(.+)$/i))){ p.f.push(m[1].trim()); iFord=false; }
+                else if(/^F[ÖO]RDJUPNING\s*[:\-]?\s*$/i.test(r)){ iFord=true; }
+                else if((m=r.match(/^F[ÖO]RDJUPNING\s*[:\-]\s*(.+)$/i))){ iFord=true; p.d.push(m[1].trim()); }
+                else if(iFord){ p.d.push(r.replace(/^\d+[\.\)]\s*/,'')); }
+            });
+        }
+        p.f = p.f.slice(0,6); p.d = p.d.slice(0,16);
+        if(!p.n || !p.l || !p.f.length) return null;
+        if(!p.c) p.c = '–';
+        p.w = (p.w || p.n).replace(/^https?:\/\/[^/]+\/wiki\//,'').replace(/ /g,'_');
+        if(!p.d.length) p.d = p.f.slice();
+        return p;
+    }
+    function gotdAiEscPlace(p){ const e=gotdEsc; return { n:e(p.n), c:e(p.c), e:e(p.e), w:p.w, l:e(p.l), f:p.f.map(e), d:p.d.map(e), ai:true }; }
+    const GOTD_AI_INSTR = {
+        day: "Du är en lärarassistent som gör en 'Grej of the day' för klassrummet: en gåta där eleverna ska lista ut ett ord/en sak. Returnera ENDAST giltig JSON i formen {\"ledtrad\":\"...\",\"fakta\":[\"...\",\"...\",\"...\"],\"ord\":\"...\",\"wikipedia\":\"...\"}. Regler: ledtrad är en kort gåtfull mening i jag-form som INTE avslöjar ordet. fakta är exakt 3 korta, sanna och intressanta fakta i jag-form som gradvis gör det lättare att gissa, utan att nämna ordet. ord är svaret (ett ord eller kort namn). wikipedia är den exakta titeln på ENGELSKA Wikipedias artikel om svaret (för bild), t.ex. \"Giraffe\". Allt annat på svenska. Om ingen årskurs anges, anta mellanstadiet (åk 4–6). Ingen annan text, ingen markdown.",
+        week: "Du är en lärarassistent som gör 'Grej of the week' om en känd eller exotisk plats i världen. Returnera ENDAST giltig JSON i formen {\"plats\":\"...\",\"land\":\"...\",\"emoji\":\"...\",\"wikipedia\":\"...\",\"ledtrad\":\"...\",\"fakta\":[\"...\",\"...\",\"...\"],\"fordjupning\":[\"...\"]}. Regler: plats är platsens svenska namn. land är landet (gärna med stad/region inom parentes). emoji är EN passande emoji. wikipedia är den exakta titeln på ENGELSKA Wikipedias artikel om platsen (för bild), t.ex. \"Machu_Picchu\". ledtrad är en gåtfull mening i jag-form som inte avslöjar platsen. fakta är exakt 3 korta ledtrådar i jag-form som gradvis gör det lättare att gissa, utan att nämna platsens namn. fordjupning är 10–12 sanna, intressanta och lättlästa meningar om platsen (historia, natur, kultur, rekord). Allt på svenska. Om ingen årskurs anges, anta mellanstadiet (åk 4–6). Om uppgiften inte nämner en specifik plats, välj själv en passande känd plats. Ingen annan text, ingen markdown."
+    };
+    function buildGotdChatPrompt(kind, desc){
+        desc = withArskurs(desc);
+        if(kind==='week') return 'Gör en "Grej of the week" om en plats: ' + desc.trim() + "\n\nSvara ENDAST i exakt detta format, varje del på en EGEN rad:\nPLATS: <platsens svenska namn>\nLAND: <land (stad/region)>\nEMOJI: <en emoji>\nWIKIPEDIA: <exakt titel på engelska Wikipedias artikel, t.ex. Machu_Picchu>\nLEDTRÅD: <gåtfull mening i jag-form som inte avslöjar platsen>\nFAKTA: <ledtråd 1 i jag-form>\nFAKTA: <ledtråd 2>\nFAKTA: <ledtråd 3>\nFÖRDJUPNING:\n- <mening 1>\n- <mening 2>\n(10–12 sanna, lättlästa meningar om platsen)\n\nAllt på svenska, mellanstadienivå om inget annat anges. Ingen annan text.";
+        return 'Gör en "Grej of the day" (en gåta) om: ' + desc.trim() + "\n\nSvara ENDAST i exakt detta format, varje del på en EGEN rad:\nLEDTRÅD: <gåtfull mening i jag-form som inte avslöjar svaret>\nFAKTA: <fakta 1 i jag-form, nämn inte svaret>\nFAKTA: <fakta 2>\nFAKTA: <fakta 3>\nORD: <svaret>\nWIKIPEDIA: <exakt titel på engelska Wikipedias artikel om svaret, t.ex. Giraffe>\n\nAllt på svenska, mellanstadienivå om inget annat anges. Ingen annan text.";
+    }
+    async function aiGenerateGotd(kind, userPrompt, apiKey){
+        userPrompt = withArskurs(userPrompt);
+        const models = ["gemini-2.0-flash","gemini-1.5-flash-latest","gemini-1.5-flash"];
+        const bodyObj = { contents:[{ parts:[{ text: GOTD_AI_INSTR[kind] + "\n\nUppgift: " + userPrompt }] }], generationConfig:{ temperature:0.9, responseMimeType:"application/json" } };
+        let lastErr='';
+        for(const m of models){
+            try{
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(apiKey);
+                const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(bodyObj) });
+                if(!r.ok){ const t=await r.text().catch(()=> ''); if(/API key not valid|API_KEY_INVALID|invalid.*key/i.test(t)) throw new Error('Ogiltig API-nyckel.'); lastErr='Servern svarade ' + r.status; continue; }
+                const data = await r.json();
+                const text = (((data.candidates||[])[0]||{}).content||{}).parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : '';
+                const res = kind==='week' ? gotdAiParseWeek(text) : gotdAiParseDay(text);
+                if(res) return res;
+                lastErr='Kunde inte tolka AI-svaret.';
+            }catch(e){ if(e && e.message==='Ogiltig API-nyckel.') throw e; lastErr=(e&&e.message)||'nätverksfel'; }
+        }
+        throw new Error(lastErr || 'Kunde inte kontakta AI-tjänsten.');
+    }
+    function openGotdAiDialog(kind, onResult){
+        const ov=document.createElement('div'); ov.className='cal-popup-overlay';
+        const box=document.createElement('div'); box.className='cal-popup'; box.style.width='min(520px,96vw)';
+        const close=()=>{ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+        const title=document.createElement('div'); title.className='cal-popup-title'; title.textContent = kind==='week' ? '✨ Skapa veckans plats med AI' : '✨ Skapa dagens grej med AI'; box.appendChild(title);
+        const ta=document.createElement('textarea'); ta.className='kw-ai-ta';
+        ta.placeholder = kind==='week' ? 'Vilken plats? T.ex.:\nMachu Picchu\nen känd plats i Afrika\nen vulkan som eleverna inte känner till' : 'Vad ska grejen handla om? T.ex.:\ngiraff\nett instrument\nnågot i rymden, åk 4';
+        box.appendChild(ta);
+        const status=document.createElement('div'); status.className='kw-ai-status';
+        const parse = (t)=> kind==='week' ? gotdAiParseWeek(t) : gotdAiParseDay(t);
+        const done = (res)=>{ close(); onResult(res); };
+
+        const sec1=document.createElement('div'); sec1.className='kw-ai-sec'; sec1.textContent='Alternativ 1 – via Gemini (gratis, du är redan inloggad i Google)'; box.appendChild(sec1);
+        const row1=document.createElement('div'); row1.className='kw-btnrow'; row1.style.margin='0 0 8px'; row1.style.justifyContent='flex-start';
+        const copyBtn=document.createElement('button'); copyBtn.className='kw-btn kw-btn-ai'; copyBtn.textContent='📋 Kopiera fråga & öppna Gemini';
+        copyBtn.onclick=()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv vad det ska handla om först.'; ta.focus(); return; } const full=buildGotdChatPrompt(kind, d);
+            const ok=()=>{ status.textContent='✅ Frågan är kopierad! Klistra in i Gemini, kopiera svaret och klistra in det nedan.'; };
+            try{ navigator.clipboard.writeText(full).then(ok, ()=>{ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den (Ctrl/Cmd+C), klistra sedan in i Gemini.'; }); }
+            catch(e){ ta.value=full; ta.select(); status.textContent='Markera texten i rutan och kopiera den, klistra sedan in i Gemini.'; }
+            window.open('https://gemini.google.com/app','geminiWin','noopener,width=460,height=600,left='+(screen.width-480)+',top=80,resizable=yes,scrollbars=yes'); };
+        row1.appendChild(copyBtn); box.appendChild(row1);
+        const pasteTa=document.createElement('textarea'); pasteTa.className='kw-ai-ta'; pasteTa.style.minHeight='100px'; pasteTa.placeholder='Klistra in Geminis svar här – det visas direkt...'; box.appendChild(pasteTa);
+        const tryPaste=()=>{ const r=parse(pasteTa.value); if(r) done(r); else status.textContent='⚠️ Kunde inte läsa svaret. Kolla att formatet stämmer (LEDTRÅD:, FAKTA: ...).'; };
+        pasteTa.addEventListener('paste', ()=>{ setTimeout(()=>{ if(parse(pasteTa.value)) tryPaste(); },60); });
+        const row1b=document.createElement('div'); row1b.className='kw-btnrow'; row1b.style.margin='8px 0 0'; row1b.style.justifyContent='flex-start';
+        const showBtn=document.createElement('button'); showBtn.className='kw-btn kw-btn-primary'; showBtn.textContent='Visa'; showBtn.onclick=tryPaste;
+        row1b.appendChild(showBtn); box.appendChild(row1b);
+
+        const orEl=document.createElement('div'); orEl.className='kw-ai-or'; orEl.textContent='— ELLER —'; box.appendChild(orEl);
+        const advBtn=document.createElement('button'); advBtn.className='kw-ai-adv'; advBtn.textContent='Alternativ 2 – ett klick varje gång (engångsnyckel, ~30 sek) ▾'; box.appendChild(advBtn);
+        const adv=document.createElement('div'); adv.style.display = aiKeyGet() ? 'block' : 'none'; box.appendChild(adv);
+        advBtn.onclick=()=>{ adv.style.display = adv.style.display==='none'?'block':'none'; };
+        const keyWrap=document.createElement('div'); adv.appendChild(keyWrap);
+        const keyInp=document.createElement('input'); keyInp.className='kw-ai-key'; keyInp.type='password'; keyInp.placeholder='Klistra in din Google AI (Gemini) API-nyckel';
+        const help=document.createElement('div'); help.className='kw-ai-help'; help.innerHTML="Hämta en gratis nyckel på <a href='https://aistudio.google.com/app/apikey' target='_blank' rel='noopener'>aistudio.google.com</a>. Nyckeln sparas bara på den här enheten.";
+        const showKeyField=()=>{ keyWrap.innerHTML=''; keyWrap.appendChild(keyInp); keyWrap.appendChild(help); };
+        if(aiKeyGet()){ const note=document.createElement('div'); note.className='kw-ai-help'; note.innerHTML="🔑 API-nyckel sparad. <a href='#' class='kw-ai-change'>Byt nyckel</a>"; keyWrap.appendChild(note); note.querySelector('.kw-ai-change').onclick=(e)=>{ e.preventDefault(); showKeyField(); }; }
+        else { showKeyField(); }
+        const row2=document.createElement('div'); row2.className='kw-btnrow'; row2.style.margin='8px 0 0'; row2.style.justifyContent='flex-start';
+        const keyBtn=document.createElement('button'); keyBtn.className='kw-btn kw-btn-ghost'; keyBtn.textContent='🔑 Skapa gratis nyckel'; keyBtn.onclick=()=>{ window.open('https://aistudio.google.com/app/apikey','_blank','noopener'); showKeyField(); status.textContent='Klicka "Create API key" i Google, kopiera nyckeln och klistra in den ovan.'; };
+        const autoBtn=document.createElement('button'); autoBtn.className='kw-btn kw-btn-ai'; autoBtn.textContent='Skapa automatiskt (ett klick)';
+        autoBtn.onclick=async ()=>{ const d=ta.value.trim(); if(!d){ status.textContent='Skriv vad det ska handla om först.'; return; } let key=aiKeyGet(); if(keyInp.parentNode){ const typed=keyInp.value.trim(); if(typed){ key=typed; aiKeySet(typed); } } if(!key){ status.textContent='Klistra in din API-nyckel.'; showKeyField(); return; }
+            autoBtn.disabled=true; status.innerHTML="<span class='kw-ai-spin'></span> AI skapar " + (kind==='week'?'platsen':'grejen') + "..."; try{ const r=await aiGenerateGotd(kind, d, key); autoBtn.disabled=false; done(r); }catch(e){ status.textContent='⚠️ '+((e&&e.message)||'Något gick fel.'); autoBtn.disabled=false; } };
+        row2.appendChild(keyBtn); row2.appendChild(autoBtn); adv.appendChild(row2);
+
+        box.appendChild(status);
+        const foot=document.createElement('div'); foot.className='kw-btnrow'; foot.style.marginTop='10px';
+        const cancel=document.createElement('button'); cancel.className='kw-btn kw-btn-ghost'; cancel.textContent='Stäng'; cancel.onclick=close; foot.appendChild(cancel); box.appendChild(foot);
+        ov.appendChild(box); ov.onclick=(e)=>{ if(e.target===ov) close(); };
+        (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
+        setTimeout(()=>ta.focus(),60);
+    }
+
     function createGOTD(config){
         const body = createWidget('GREJ OF THE DAY', 320, 'word-widget', config);
         body.innerHTML = `
@@ -14422,6 +14596,7 @@
                 <textarea class='name-input' placeholder='En grej per rad:&#10;Ledtråd / Fakta 1 / Fakta 2 / Fakta 3 / Ord&#10;&#10;Ex: Jag är rund åt alla håll / En boll har min form / Jag har inga kanter / Jag kan rulla / Klot'></textarea>
             </div>
             <button class='btn btn-primary btn-roll-g' style='width:100%'>🎲 Slumpa grej!</button>
+            <button class='btn btn-secondary gotd-ai-btn' style='width:100%;margin-top:6px;background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff;border:none;'>✨ Skapa grej med AI</button>
             <label class='hover-menu gotd-no-repeat-lbl' style='display:flex;align-items:center;gap:6px;font-size:12px;color:#666;margin:6px 0 2px;cursor:pointer;'><input type='checkbox' class='gotd-no-repeat'> Undvik upprepning just nu</label>
             <div class='name-result' style='min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:18px;text-align:center;gap:6px;'></div>
             </div>
@@ -14429,6 +14604,7 @@
                 <div class='gotw-week-badge'>🌍 Vecka <b class='gotw-wk'></b> · Världens mest kända &amp; exotiska platser</div>
                 <button class='btn btn-primary gotw-btn-week' style='width:100%;background:#0284c7;'>🌍 Veckans plats</button>
                 <button class='btn btn-secondary gotw-btn-roll' style='width:100%;margin-top:6px;'>🎲 Slumpa plats</button>
+                <button class='btn btn-secondary gotw-ai-btn' style='width:100%;margin-top:6px;background:linear-gradient(135deg,#0284c7,#7c3aed);color:#fff;border:none;'>✨ Skapa plats med AI</button>
                 <label class='hover-menu' style='display:flex;align-items:center;gap:6px;font-size:12px;color:#666;margin:6px 0 2px;cursor:pointer;'><input type='checkbox' class='gotw-no-repeat'> Undvik upprepning just nu</label>
                 <div class='gotw-result' style='min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:16px;text-align:center;gap:6px;'></div>
             </div>`;
@@ -14510,6 +14686,36 @@
             }, 80);
         };
 
+        // ===== NYTT: AI-grej (Day) =====
+        const visaAiDag = (g)=>{
+            const e=gotdEsc;
+            showGotdPopup(e(g.ledtrad), g.fakta.map(e), e(g.ord), { wiki:g.wiki });
+        };
+        body.querySelector('.gotd-ai-btn').onclick = (e)=>{
+            e.stopPropagation();
+            openGotdAiDialog('day', (g)=>{
+                res.innerHTML = `<div class='gotd-ai-card' data-ai='${gotdEsc(JSON.stringify(g)).replace(/'/g,'&#39;')}' title='Klicka för att visa igen' style='cursor:pointer;color:#7c3aed;font-size:15px;font-weight:bold;background:#f3e8ff;padding:10px 14px;border-radius:10px;border:1px solid #e9d5ff;width:100%;box-sizing:border-box;'>✨ ${gotdEsc(g.ledtrad)}</div>`
+                    + `<button type='button' class='btn btn-secondary gotd-ai-save hover-menu' style='font-size:12px;padding:5px 10px;'>➕ Lägg till i listan</button>`;
+                saveBoardState();
+                visaAiDag(g);
+            });
+        };
+        res.addEventListener('click', (e)=>{
+            const card = e.target.closest('.gotd-ai-card');
+            if(card){ e.stopPropagation(); try{ visaAiDag(JSON.parse(card.dataset.ai)); }catch(_){} return; }
+            const sp = e.target.closest('.gotd-ai-save');
+            if(sp){
+                e.stopPropagation();
+                const c = res.querySelector('.gotd-ai-card'); if(!c) return;
+                let g; try{ g = JSON.parse(c.dataset.ai); }catch(_){ return; }
+                const rad = [g.ledtrad].concat(g.fakta).concat([g.ord]).map(x=>String(x).replace(/[\/|]/g,'-')).join(' / ');
+                txt.value = (txt.value.trim() ? txt.value.replace(/\s+$/,'') + '\n' : '') + rad;
+                if(sel.value){ try{ const l=JSON.parse(localStorage.getItem('savedGOTDLists_'))||{}; l[sel.value]=txt.value; localStorage.setItem('savedGOTDLists_', JSON.stringify(l)); }catch(_){} }
+                sp.textContent = '✔ Tillagd' + (sel.value ? ' i "' + sel.value + '"' : ' i listan'); sp.disabled = true;
+                saveBoardState();
+            }
+        });
+
         // ===== DAY / WEEK-FLIKAR (Grej of the week = världens platser) =====
         const dayPane = body.querySelector('.gotd-day-pane'), weekPane = body.querySelector('.gotd-week-pane');
         const tabDay = body.querySelector('.gotd-tab-day'), tabWeek = body.querySelector('.gotd-tab-week');
@@ -14537,7 +14743,20 @@
             saveBoardState();
             showGotwPopup(p, label);
         };
+        // ===== NYTT: AI-plats (Week) - samma popup (ledtrådar, plats, bild, fördjupning) =====
+        body.querySelector('.gotw-ai-btn').onclick = (e)=>{
+            e.stopPropagation();
+            openGotdAiDialog('week', (p)=>{
+                const ep = gotdAiEscPlace(p);
+                wRes.dataset.idx = ''; wRes.dataset.label = 'AI-plats';
+                wRes.innerHTML = `<div class='gotw-result-card gotw-ai-card' data-ai='${gotdEsc(JSON.stringify(p)).replace(/'/g,'&#39;')}' title='Klicka för att visa igen'>✨ ${ep.l}</div><div style='font-size:11px;color:#94a3b8;font-weight:600;'>Klicka på rutan för att visa igen</div>`;
+                saveBoardState();
+                showGotwPopup(ep, 'AI-plats');
+            });
+        };
         wRes.addEventListener('click', (e)=>{
+            const aiCard = e.target.closest('.gotw-ai-card');
+            if(aiCard){ e.stopPropagation(); try{ showGotwPopup(gotdAiEscPlace(JSON.parse(aiCard.dataset.ai)), 'AI-plats'); }catch(_){} return; }
             if(!e.target.closest('.gotw-result-card')) return;
             e.stopPropagation();
             const i = parseInt(wRes.dataset.idx, 10);
@@ -30575,7 +30794,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                     if(rnd.correctIndex<0){ customAlert('Markera rätt svar på varje fråga.', '✏️'); return; }
                 }
                 state.teams.forEach(t=>t.score=0);
-                state.currentRound=0; state.revealed=false; state.mode='play'; selectedForPoint=new Set();
+                state.currentRound=0; state.revealed=false; state.mode='play'; selectedForPoint=new Set(); qtT.round=-1;
                 render(); persist();
             };
             roundBtns.appendChild(addRoundBtn); roundBtns.appendChild(startBtn); root.appendChild(roundBtns);
@@ -30649,12 +30868,79 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             setTimeout(()=>ta.focus(),60);
         }
 
+        // ---- NYTT: TIMER per fråga (Av / 20 s / 40 s / 1 min) ----
+        // Valet sparas med widgeten (state.timerSec). När en tid är vald startar nedräkningen direkt
+        // och sedan automatiskt vid varje ny fråga. Den stannar när rätt svar visas. När tiden är
+        // slut hörs tre korta pip och siffran blinkar rött - rätt svar visas INTE automatiskt.
+        let qtT = { total:0, left:0, running:false, endAt:0, round:-1, done:false };
+        let qtTimerIv = null;
+        const qtFmt = (sec)=>{ sec=Math.max(0,Math.ceil(sec)); return sec>=60 ? (Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')) : (sec+' s'); };
+        function qtPip(){
+            try{
+                const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+                const ac = new AC();
+                [0,0.3,0.6].forEach((t,i)=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='sine'; o.frequency.value = i===2 ? 660 : 880; g.gain.setValueAtTime(0.0001, ac.currentTime+t); g.gain.exponentialRampToValueAtTime(0.35, ac.currentTime+t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime+t+(i===2?0.5:0.2)); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+t); o.stop(ac.currentTime+t+0.55); });
+                setTimeout(()=>{ try{ ac.close(); }catch(e){} }, 1600);
+            }catch(e){}
+        }
+        function qtTimerStart(){ const sec=state.timerSec||0; if(!sec){ qtTimerStop(true); return; } qtT={ total:sec, left:sec, running:true, endAt:Date.now()+sec*1000, round:state.currentRound, done:false }; qtTimerLoop(); qtTimerPaint(); }
+        function qtTimerStop(nollstall){ if(qtT.running){ qtT.left=Math.max(0,(qtT.endAt-Date.now())/1000); } qtT.running=false; if(nollstall){ qtT={ total:0, left:0, running:false, endAt:0, round:state.currentRound, done:false }; } qtTimerPaint(); }
+        function qtTimerLoop(){
+            if(qtTimerIv) return;
+            qtTimerIv = setInterval(()=>{
+                if(!document.body.contains(root) || !root.querySelector('.qt-timer')){ clearInterval(qtTimerIv); qtTimerIv=null; qtT.running=false; qtT.round=-1; return; }
+                if(!qtT.running){ clearInterval(qtTimerIv); qtTimerIv=null; return; }
+                qtT.left = Math.max(0,(qtT.endAt-Date.now())/1000);
+                if(qtT.left<=0){ qtT.running=false; qtT.done=true; qtPip(); }
+                qtTimerPaint();
+            }, 200);
+        }
+        function qtTimerPaint(){
+            const box = root.querySelector('.qt-timer'); if(!box) return;
+            const num = box.querySelector('.qt-timer-num'), fill = box.querySelector('.qt-timer-fill'), pp = box.querySelector('.qt-timer-pp'), disp = box.querySelector('.qt-timer-display');
+            box.querySelectorAll('.qt-timer-chip').forEach(c=> c.classList.toggle('active', parseInt(c.dataset.s,10)===(state.timerSec||0)));
+            if(!state.timerSec){ disp.style.display='none'; return; }
+            disp.style.display='flex';
+            const total = qtT.total || state.timerSec, left = (qtT.total ? qtT.left : state.timerSec);
+            num.textContent = qtT.done ? '⏰ Slut!' : qtFmt(left);
+            fill.style.width = Math.max(0, Math.min(100, left/total*100)) + '%';
+            box.classList.toggle('varning', !qtT.done && left<=5 && left>0 && qtT.total>0);
+            box.classList.toggle('slut', qtT.done);
+            pp.textContent = qtT.running ? '⏸' : '▶';
+            pp.title = qtT.running ? 'Pausa' : (qtT.total && !qtT.done && qtT.left>0 ? 'Fortsätt' : 'Starta');
+        }
+        function renderTimer(parent){
+            const box=document.createElement('div'); box.className='qt-timer';
+            const row=document.createElement('div'); row.className='qt-timer-row';
+            const lbl=document.createElement('span'); lbl.textContent='⏱️'; lbl.style.fontSize='16px'; row.appendChild(lbl);
+            [[0,'Av'],[20,'20 s'],[40,'40 s'],[60,'1 min']].forEach(([sec,txt])=>{
+                const c=document.createElement('button'); c.type='button'; c.className='qt-timer-chip'; c.dataset.s=sec; c.textContent=txt;
+                c.onclick=()=>{ state.timerSec=sec; persist(); if(sec && !state.revealed) qtTimerStart(); else qtTimerStop(true); qtTimerPaint(); };
+                row.appendChild(c);
+            });
+            box.appendChild(row);
+            const disp=document.createElement('div'); disp.className='qt-timer-display';
+            const num=document.createElement('div'); num.className='qt-timer-num';
+            const bar=document.createElement('div'); bar.className='qt-timer-bar'; const fill=document.createElement('div'); fill.className='qt-timer-fill'; bar.appendChild(fill);
+            const pp=document.createElement('button'); pp.type='button'; pp.className='qt-timer-ctrl qt-timer-pp';
+            pp.onclick=()=>{ if(qtT.running){ qtTimerStop(false); } else if(qtT.total && !qtT.done && qtT.left>0){ qtT.running=true; qtT.endAt=Date.now()+qtT.left*1000; qtTimerLoop(); qtTimerPaint(); } else { qtTimerStart(); } };
+            const rs=document.createElement('button'); rs.type='button'; rs.className='qt-timer-ctrl'; rs.textContent='↺'; rs.title='Starta om timern'; rs.onclick=()=>{ qtTimerStart(); };
+            disp.appendChild(num); disp.appendChild(bar); disp.appendChild(pp); disp.appendChild(rs);
+            box.appendChild(disp);
+            parent.appendChild(box);
+            // Ny fråga -> starta automatiskt om en tid är vald. Rätt svar visat -> stoppa.
+            if(state.revealed){ if(qtT.running) qtTimerStop(false); }
+            else if(state.timerSec && qtT.round!==state.currentRound){ qtTimerStart(); }
+            qtTimerPaint();
+        }
+
         // ---- PLAY: visa en fråga i taget, avslöja rätt svar, dela ut poäng, gå vidare ----
         function renderPlay(){
             root.innerHTML='';
             renderScoreboard(root);
 
             const badge=document.createElement('div'); badge.className='qt-round-badge'; badge.textContent='Fråga '+(state.currentRound+1)+' av '+state.rounds.length; root.appendChild(badge);
+            renderTimer(root);
 
             const rnd = state.rounds[state.currentRound];
             const qEl=document.createElement('div'); qEl.className='qt-q-text'; qEl.textContent=rnd.question; root.appendChild(qEl);
@@ -30700,7 +30986,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             const footBtns=document.createElement('div'); footBtns.className='kw-btnrow hover-menu';
             const editBtn=document.createElement('button'); editBtn.className='kw-btn kw-btn-ghost'; editBtn.textContent='✏️ Redigera frågor'; editBtn.onclick=()=>{ state.mode='setup'; render(); persist(); };
             const restartBtn=document.createElement('button'); restartBtn.className='kw-btn kw-btn-warn'; restartBtn.textContent='🔄 Börja om';
-            restartBtn.onclick=()=>{ customConfirm('Nollställ poängen och börja om från fråga 1?', ()=>{ state.teams.forEach(t=>t.score=0); state.currentRound=0; state.revealed=false; selectedForPoint=new Set(); renderPlay(); persist(); }); };
+            restartBtn.onclick=()=>{ customConfirm('Nollställ poängen och börja om från fråga 1?', ()=>{ state.teams.forEach(t=>t.score=0); state.currentRound=0; state.revealed=false; selectedForPoint=new Set(); qtT.round=-1; renderPlay(); persist(); }); };
             footBtns.appendChild(editBtn); footBtns.appendChild(restartBtn); root.appendChild(footBtns);
         }
 
@@ -30751,7 +31037,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
 
             const btns=document.createElement('div'); btns.className='kw-btnrow';
             const againBtn=document.createElement('button'); againBtn.className='kw-btn kw-btn-primary'; againBtn.textContent='🔁 Spela igen (samma frågor)';
-            againBtn.onclick=()=>{ state.teams.forEach(t=>t.score=0); state.currentRound=0; state.revealed=false; selectedForPoint=new Set(); state.mode='play'; render(); persist(); };
+            againBtn.onclick=()=>{ state.teams.forEach(t=>t.score=0); state.currentRound=0; state.revealed=false; selectedForPoint=new Set(); qtT.round=-1; state.mode='play'; render(); persist(); };
             const newBtn=document.createElement('button'); newBtn.className='kw-btn kw-btn-ghost'; newBtn.textContent='✏️ Nya frågor';
             newBtn.onclick=()=>{ customConfirm('Rensa frågorna och gå tillbaka till redigering? Lagen behålls.', ()=>{ state.rounds=[qtEmptyRound()]; state.teams.forEach(t=>t.score=0); state.currentRound=0; state.revealed=false; state.mode='setup'; render(); persist(); }); };
             btns.appendChild(againBtn); btns.appendChild(newBtn); root.appendChild(btns);
