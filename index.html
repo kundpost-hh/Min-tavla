@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-22-gotd-ai1';</script>
+    <script>window.BUILD_VERSION = '2026-10-22-su-timer1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3024,7 +3024,7 @@
     @keyframes mathtool-fade { from{ opacity:0; } to{ opacity:1; } }
     .rakna-ans { min-width:64px; padding:2px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; cursor:pointer; user-select:none; }
     .rakna-ans:hover { background:#ffd98f; }
-    .rakna-ans.revealed { background:#d9f2df; color:#1f7a37; cursor:default; }
+    .rakna-ans.revealed { background:#d9f2df; color:#1f7a37; cursor:pointer; }
     .rakna-ans .enh-mal { color:#c98a2e; font-weight:800; margin-left:2px; }
     .rakna-next { width:100%; margin-top:10px; }
     .rakna-count { text-align:center; font-size:12px; font-weight:700; color:#b0b0b8; margin-top:8px; }
@@ -3044,7 +3044,8 @@
     .su-rad.su-klurig .su-fraga { font-size:14px; }
     .su-svar { min-width:74px; max-width:45%; text-align:center; padding:5px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; font-weight:800; font-size:13.5px; cursor:pointer; user-select:none; flex-shrink:0; word-break:break-word; line-height:1.4; }
     .su-svar:hover { background:#ffd98f; }
-    .su-svar.revealed { background:#d9f2df; color:#1f7a37; cursor:default; }
+    .su-svar.revealed { background:#d9f2df; color:#1f7a37; cursor:pointer; }
+    .su-svar.revealed:hover { background:#c3ebcd; }
     .su-berakning { margin-top:8px; font-size:12.5px; font-weight:600; color:#5a7a63; background:#eef8f0; border:1px solid #cdeed4; border-radius:8px; padding:6px 10px; }
 
     /* ---- TALLINJE ---- */
@@ -5981,7 +5982,7 @@
             // och klicket aldrig når fram. Vi letar uppåt efter ett element med egen onclick och
             // avbryter dragningen där, precis som för input/knappar ovan.
             let _clickEl = t;
-            while(_clickEl && _clickEl !== inner){ if(typeof _clickEl.onclick === 'function') return; _clickEl = _clickEl.parentElement; }
+            while(_clickEl && _clickEl !== inner){ if(typeof _clickEl.onclick === 'function' || _clickEl._doljFn) return; _clickEl = _clickEl.parentElement; }
             const startX = e.clientX, startY = e.clientY;
             const origLeft = el.offsetLeft, origTop = el.offsetTop;
             let dragging = false;
@@ -7034,6 +7035,52 @@
     // Bild + förklaring: Wikipedias öppna summary-API. Exempel + synonym: en egen,
     // fristående uppslagning mot sv.wiktionary.org (skild cache från de andra
     // ordboks-uppslagen i appen, se subWiktionary/subSynonymer ovan).
+    // ============================================================
+    // NYTT: "Täck svaret igen" - generellt för alla klickbara svarsrutor ("?" / "Visa svar" /
+    // "Visa gradtal" m.fl. i Startuppgift, Räkna, Pengar, Enheter, Geometri, Gångertabell ...).
+    // Första klicket visar svaret som vanligt. Precis innan det sparas hur rutan (och det som
+    // visas samtidigt i samma widget, t.ex. uträkning/förklaring) såg ut. Nästa klick på det
+    // visade svaret återställer allt, så svaret är täckt igen och kan visas på nytt.
+    // ============================================================
+    (function initDoljSvar(){
+        const SEL = '.rakna-ans, .su-svar, .hidden-ans, .gr-reveal';
+        const holderFor = (t)=>{
+            // Redan visat svar med sparat läge?
+            let n = t, d = 0;
+            while(n && d < 4){ if(n._doljFn && n.classList && (n.classList.contains('revealed') || n.querySelector && n.querySelector('.revealed'))) return { el:n, visad:true }; n = n.parentElement; d++; }
+            const ans = t.closest ? t.closest(SEL) : null; if(!ans) return null;
+            if(typeof ans.onclick === 'function') return { el:ans, visad:false };
+            const p = ans.parentElement; // t.ex. gångertabellens rad, där klicket sitter på raden
+            if(p && typeof p.onclick === 'function') return { el:p, visad:false };
+            return null;
+        };
+        document.addEventListener('click', (e)=>{
+            const t = e.target; if(!t || !t.closest) return;
+            const h = holderFor(t); if(!h) return;
+            const el = h.el;
+            if(h.visad){
+                e.stopImmediatePropagation(); e.preventDefault();
+                (el._doljSyskon||[]).forEach(s=>{ if(s.node.isConnected) s.node.innerHTML = s.html; });
+                (el._doljVisade||[]).forEach(x=>{ if(x.isConnected) x.style.display = 'none'; });
+                el.innerHTML = el._doljHtml; el.className = el._doljClass; el.style.cssText = el._doljCss; el.title = el._doljTitle || '';
+                el.onclick = el._doljFn;
+                el._doljFn = null;
+                return;
+            }
+            if(el.classList.contains('revealed') && !el.classList.contains('su-svar')) return; // visat utan sparat läge (t.ex. sparad tavla) - låt vara
+            // Spara läget innan svaret visas
+            el._doljFn = el.onclick; el._doljHtml = el.innerHTML; el._doljClass = el.className; el._doljCss = el.style.cssText; el._doljTitle = el.title;
+            const scope = el.closest('.widget') || el.parentElement || document.body;
+            const dolda = [...scope.querySelectorAll('*')].filter(x=> x.style && x.style.display === 'none');
+            const syskon = el.parentElement ? [...el.parentElement.children].filter(x=> x!==el).map(x=>({ node:x, html:x.innerHTML })) : [];
+            (window.queueMicrotask || ((f)=>setTimeout(f,0)))(()=>{
+                el._doljVisade = dolda.filter(x=> x.style.display !== 'none');
+                el._doljSyskon = syskon.filter(s=> s.node.innerHTML !== s.html);
+                if(el.isConnected && el._doljFn){ el.style.cursor = 'pointer'; el.title = 'Klicka för att täcka svaret igen'; }
+            });
+        }, true);
+    })();
+
     function gotdEsc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     async function gotdWikipedia(ord){
         const w=(ord||'').trim(); if(!w) return null; // ord kan också vara en exakt Wikipedia-sidtitel, t.ex. Valar
@@ -11168,6 +11215,10 @@
                 const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa facit';
                 revealBtn.onclick=()=>{ sktState.revealed=true; renderPlaySKT(); persist(); saveBoardState(); };
                 btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj facit';
+                hideBtn.onclick=()=>{ sktState.revealed=false; renderPlaySKT(); persist(); saveBoardState(); };
+                btns.appendChild(hideBtn);
             }
             sktRoot.appendChild(btns);
         }
@@ -17910,8 +17961,32 @@
         // widgetType och alla serialize/deserialize-kopplingar) lämnas orört, annars skulle redan
         // utplacerade Startuppgift-widgetar på lärares tavlor sluta gå att läsa in efter uppdateringen.
         const suHeaderSpan = widget.querySelector('.widget-header > span'); if(suHeaderSpan) suHeaderSpan.textContent = 'Startuppgift Matematik';
-        body.innerHTML = `<div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>🎯 Dagens uppgift</button><div class='su-lista'></div>`;
+        body.innerHTML = `<div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><div class='su-topprad' style='display:flex;gap:8px;align-items:center;'><button class='btn btn-primary su-btn' style='flex:1;min-width:0;'>🎯 Dagens uppgift</button><div class='lesson-timer-wrap su-timer'><button type='button' class='lesson-timer-btn su-t3'>3 min</button><button type='button' class='lesson-timer-btn su-t5'>5 min</button><div class='lesson-timer-progress-bg' style='display:none;'><div class='lesson-timer-progress-fill'></div><div class='lesson-timer-text'></div></div><button type='button' class='lesson-timer-btn su-tstop' style='display:none;'>Avbryt</button></div></div><div class='su-lista'></div>`;
         const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista'), nivaSelSU = body.querySelector('.su-niva');
+        // NYTT: timer 3/5 min till höger om "Dagens uppgift" - samma utseende och funktion som
+        // timern i Lektionsschema (stapel grön -> orange -> röd, pip + meddelande när tiden är slut).
+        (function suTimer(){
+            const t3=body.querySelector('.su-t3'), t5=body.querySelector('.su-t5'), stop=body.querySelector('.su-tstop');
+            const pb=body.querySelector('.su-timer .lesson-timer-progress-bg'), pf=pb.querySelector('.lesson-timer-progress-fill'), pt=pb.querySelector('.lesson-timer-text');
+            let iv=null, tot=0, left=0;
+            const visaVal=()=>{ t3.style.display=''; t5.style.display=''; pb.style.display='none'; stop.style.display='none'; };
+            const upd=()=>{ const m=Math.floor(left/60).toString().padStart(2,'0'), s=(left%60).toString().padStart(2,'0'); pt.innerText=m+':'+s; const pct=left/tot; pf.style.transform='scaleX('+pct+')'; pf.style.background=pct<0.2?'#ff3b30':pct<0.5?'#ff9500':'#4cd964'; };
+            const starta=(min)=>{
+                if(iv){ clearInterval(iv); iv=null; }
+                unlockAudio(); tot=min*60; left=tot;
+                t3.style.display='none'; t5.style.display='none'; pb.style.display='flex'; stop.style.display=''; stop.innerText='Avbryt';
+                pf.style.transition='none'; upd(); void pf.offsetWidth; pf.style.transition='transform 1s linear, background-color 1s ease';
+                iv=setInterval(()=>{
+                    if(!document.body.contains(body)){ clearInterval(iv); iv=null; return; }
+                    left--;
+                    if(left<=0){ clearInterval(iv); iv=null; pf.style.transform='scaleX(0)'; pt.innerText='00:00'; playTimerSound(); setTimeout(()=>customAlert('Tiden är slut! ⏰','⏰'),100); stop.innerText='Ny'; }
+                    else upd();
+                },1000);
+            };
+            t3.onclick=(e)=>{ e.stopPropagation(); starta(3); };
+            t5.onclick=(e)=>{ e.stopPropagation(); starta(5); };
+            stop.onclick=(e)=>{ e.stopPropagation(); if(iv){ clearInterval(iv); iv=null; } visaVal(); };
+        })();
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
         function gcdSU(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a||1; }
         // Bakåtkompatibelt: äldre sparade widgetar har hela svaret som en ren array (utan nivåval).
@@ -18118,7 +18193,7 @@
                 const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
                 const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
                 const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
-                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
+                sv.onclick=()=>{ const vis=sv.classList.toggle('revealed'); sv.textContent = vis ? u.svar : 'Visa svar'; sv.title = vis ? 'Klicka för att dölja svaret igen' : 'Klicka för att visa svaret'; };
                 rad2.appendChild(fr); rad2.appendChild(sv);
                 rad.appendChild(tagg); rad.appendChild(rad2);
                 lista.appendChild(rad);
@@ -18386,7 +18461,7 @@
                 const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
                 const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
                 const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
-                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
+                sv.onclick=()=>{ const vis=sv.classList.toggle('revealed'); sv.textContent = vis ? u.svar : 'Visa svar'; sv.title = vis ? 'Klicka för att dölja svaret igen' : 'Klicka för att visa svaret'; };
                 rad2.appendChild(fr); rad2.appendChild(sv);
                 rad.appendChild(tagg); rad.appendChild(rad2);
                 lista.appendChild(rad);
@@ -18604,7 +18679,8 @@
             }
             const nyBtn=document.createElement('button'); nyBtn.className='btn btn-secondary'; nyBtn.textContent='🎲 Ny uppgift'; nyBtn.onclick=nyUppgift;
             const svarBtn=document.createElement('button'); svarBtn.className='btn btn-secondary'; svarBtn.textContent='👁️ Visa svar';
-            svarBtn.onclick=()=>{ if(!uppgift) return; svarEl.style.display='block'; svarEl.innerHTML='<b>Svar:</b> '+uppgift.svar+'<br><span style="opacity:.75">'+uppgift.forklaring+'</span>'; };
+            svarBtn.onclick=()=>{ if(!uppgift) return; if(svarEl.style.display==='block'){ svarEl.style.display='none'; svarBtn.textContent='👁️ Visa svar'; return; } svarEl.style.display='block'; svarEl.innerHTML='<b>Svar:</b> '+uppgift.svar+'<br><span style="opacity:.75">'+uppgift.forklaring+'</span>'; svarBtn.textContent='🙈 Dölj svar'; };
+            new MutationObserver(()=>{ svarBtn.textContent = svarEl.style.display==='block' ? '🙈 Dölj svar' : '👁️ Visa svar'; }).observe(svarEl, { attributes:true, attributeFilter:['style'] });
             const visaBtn=document.createElement('button'); visaBtn.className='btn btn-primary'; visaBtn.textContent='📍 Visa på tallinjen';
             visaBtn.onclick=()=>{
                 if(!uppgift) return;
@@ -23062,11 +23138,11 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                     kort.appendChild(ta);
                     if(akt==='pa' && f.a){
                         const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='💡 Visa svar';
-                        btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=f.a; kort.appendChild(s); btn.remove(); };
+                        btn.onclick = ()=>{ let s=kort.querySelector(':scope > .lasf-f-svar'); if(s){ s.remove(); btn.textContent='💡 Visa svar'; return; } s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=f.a; kort.appendChild(s); btn.textContent='🙈 Dölj'; };
                         kort.appendChild(btn);
                     } else if(akt==='mellan' && f.tips){
                         const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='🔎 Ledtråd';
-                        btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent='Ledtråd: '+f.tips; kort.appendChild(s); btn.remove(); };
+                        btn.onclick = ()=>{ let s=kort.querySelector(':scope > .lasf-f-svar'); if(s){ s.remove(); btn.textContent='🔎 Ledtråd'; return; } s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent='Ledtråd: '+f.tips; kort.appendChild(s); btn.textContent='🙈 Dölj'; };
                         kort.appendChild(btn);
                     }
                     lista.appendChild(kort);
@@ -23110,7 +23186,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                     kort.appendChild(ta);
                     if(h.svar){
                         const btn = document.createElement('button'); btn.className='lasf-visa-btn'; btn.textContent='💡 Visa förslag';
-                        btn.onclick = ()=>{ const s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=h.svar; kort.appendChild(s); btn.remove(); };
+                        btn.onclick = ()=>{ let s=kort.querySelector(':scope > .lasf-f-svar'); if(s){ s.remove(); btn.textContent='💡 Visa förslag'; return; } s=document.createElement('div'); s.className='lasf-f-svar'; s.textContent=h.svar; kort.appendChild(s); btn.textContent='🙈 Dölj'; };
                         kort.appendChild(btn);
                     }
                     lista.appendChild(kort);
@@ -25919,7 +25995,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 const rad2=document.createElement('div'); rad2.className='su-fraga-rad';
                 const fr=document.createElement('div'); fr.className='su-fraga'; fr.textContent=u.fraga;
                 const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret';
-                sv.onclick=()=>{ sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null; };
+                sv.onclick=()=>{ const vis=sv.classList.toggle('revealed'); sv.textContent = vis ? u.svar : 'Visa svar'; sv.title = vis ? 'Klicka för att dölja svaret igen' : 'Klicka för att visa svaret'; };
                 rad2.appendChild(fr); rad2.appendChild(sv);
                 rad.appendChild(rad2);
                 lista.appendChild(rad);
@@ -27307,7 +27383,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             }
             const nyBtn=document.createElement('button'); nyBtn.className='btn btn-secondary'; nyBtn.textContent='🎲 Ny uppgift'; nyBtn.onclick=nyUppgift;
             const svarBtn=document.createElement('button'); svarBtn.className='btn btn-secondary'; svarBtn.textContent='👁️ Visa svar';
-            svarBtn.onclick=()=>{ if(!uppgift) return; svarEl.style.display='block'; svarEl.innerHTML='<b>Svar:</b> '+uppgift.svar+'<br><span style="opacity:.75">'+uppgift.forklaring+'</span>'; };
+            svarBtn.onclick=()=>{ if(!uppgift) return; if(svarEl.style.display==='block'){ svarEl.style.display='none'; svarBtn.textContent='👁️ Visa svar'; return; } svarEl.style.display='block'; svarEl.innerHTML='<b>Svar:</b> '+uppgift.svar+'<br><span style="opacity:.75">'+uppgift.forklaring+'</span>'; svarBtn.textContent='🙈 Dölj svar'; };
+            new MutationObserver(()=>{ svarBtn.textContent = svarEl.style.display==='block' ? '🙈 Dölj svar' : '👁️ Visa svar'; }).observe(svarEl, { attributes:true, attributeFilter:['style'] });
             const testaBtn=document.createElement('button'); testaBtn.className='btn btn-primary'; testaBtn.textContent='🎲 Testa i simulatorn';
             testaBtn.onclick=()=>{
                 if(!uppgift) return;
@@ -29019,7 +29096,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         }
         render();
         speakBtn.onclick = ()=> speakEnglish(current.en);
-        revealBtn.onclick = ()=>{ answerBox.style.display = 'block'; };
+        revealBtn.onclick = ()=>{ const vis = answerBox.style.display==='block'; answerBox.style.display = vis ? 'none' : 'block'; revealBtn.textContent = vis ? 'Visa svar' : '🙈 Dölj svar'; };
+        new MutationObserver(()=>{ revealBtn.textContent = answerBox.style.display==='block' ? '🙈 Dölj svar' : 'Visa svar'; }).observe(answerBox, { attributes:true, attributeFilter:['style'] });
         newBtn.onclick = ()=>{
             let next; do { next = ENG_WORDS[Math.floor(Math.random() * ENG_WORDS.length)]; } while(next.en === current.en && ENG_WORDS.length > 1);
             current = next; render();
@@ -29129,7 +29207,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         }
         rkModeSiffra.onclick = ()=> setMode('siffra');
         rkModeKlocka.onclick = ()=> setMode('klocka');
-        revealBtn.onclick = ()=>{ answerEl.style.display = 'block'; };
+        revealBtn.onclick = ()=>{ const vis = answerEl.style.display==='block'; answerEl.style.display = vis ? 'none' : 'block'; revealBtn.textContent = vis ? 'Visa svar' : '🙈 Dölj svar'; };
+        new MutationObserver(()=>{ revealBtn.textContent = answerEl.style.display==='block' ? '🙈 Dölj svar' : 'Visa svar'; }).observe(answerEl, { attributes:true, attributeFilter:['style'] });
         newBtn.onclick = ()=>{ if(mode === 'siffra') newSiffra(); else newKlocka(); };
         setMode('siffra');
     }
@@ -29199,7 +29278,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         function render(){ svEl.textContent = current.sv; answerBox.style.display = 'none'; enEl.textContent = current.en; }
         render();
         speakBtn.onclick = ()=> speakEnglish(current.en);
-        revealBtn.onclick = ()=>{ answerBox.style.display = 'block'; };
+        revealBtn.onclick = ()=>{ const vis = answerBox.style.display==='block'; answerBox.style.display = vis ? 'none' : 'block'; revealBtn.textContent = vis ? 'Visa svar' : '🙈 Dölj svar'; };
+        new MutationObserver(()=>{ revealBtn.textContent = answerBox.style.display==='block' ? '🙈 Dölj svar' : 'Visa svar'; }).observe(answerBox, { attributes:true, attributeFilter:['style'] });
         newBtn.onclick = ()=>{
             let next; do { next = ENG_PHRASES[Math.floor(Math.random() * ENG_PHRASES.length)]; } while(next.en === current.en && ENG_PHRASES.length > 1);
             current = next; render();
@@ -29255,7 +29335,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         function render(){ svEl.textContent = current.sv; answerBox.style.display = 'none'; enEl.textContent = current.en; }
         render();
         speakBtn.onclick = ()=> speakEnglish(current.en);
-        revealBtn.onclick = ()=>{ answerBox.style.display = 'block'; };
+        revealBtn.onclick = ()=>{ const vis = answerBox.style.display==='block'; answerBox.style.display = vis ? 'none' : 'block'; revealBtn.textContent = vis ? 'Visa svar' : '🙈 Dölj svar'; };
+        new MutationObserver(()=>{ revealBtn.textContent = answerBox.style.display==='block' ? '🙈 Dölj svar' : 'Visa svar'; }).observe(answerBox, { attributes:true, attributeFilter:['style'] });
         newBtn.onclick = ()=>{
             let next; do { next = ENG_SENTENCES[Math.floor(Math.random() * ENG_SENTENCES.length)]; } while(next.en === current.en && ENG_SENTENCES.length > 1);
             current = next; render();
@@ -29951,8 +30032,9 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 rowEl.appendChild(cell);
             });
         }
-        facitBtn.onclick = ()=> render(true);
-        newBtn.onclick = ()=>{ gen(); render(false); };
+        let monVisad = false;
+        facitBtn.onclick = ()=>{ monVisad = !monVisad; render(monVisad); facitBtn.textContent = monVisad ? '🙈 Dölj facit' : 'Visa facit'; };
+        newBtn.onclick = ()=>{ gen(); monVisad = false; facitBtn.textContent = 'Visa facit'; render(false); };
         gen(); render(false);
     }
     function createBildMegaWidget(config){
@@ -30113,8 +30195,9 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret och uträkningen';
                 const berak=document.createElement('div'); berak.className='su-berakning'; berak.style.display='none';
                 sv.onclick=()=>{
-                    sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null;
-                    berak.textContent='🧮 '+u.uträkning; berak.style.display='block';
+                    const vis=sv.classList.toggle('revealed');
+                    sv.textContent = vis ? u.svar : 'Visa svar'; sv.title = vis ? 'Klicka för att dölja svaret igen' : 'Klicka för att visa svaret och uträkningen';
+                    berak.textContent='🧮 '+u.uträkning; berak.style.display = vis ? 'block' : 'none';
                 };
                 rad2.appendChild(fr); rad2.appendChild(sv);
                 rad.appendChild(rad2);
@@ -30204,8 +30287,9 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 const sv=document.createElement('div'); sv.className='su-svar'; sv.textContent='Visa svar'; sv.title='Klicka för att visa svaret och uträkningen';
                 const berak=document.createElement('div'); berak.className='su-berakning'; berak.style.display='none';
                 sv.onclick=()=>{
-                    sv.textContent=u.svar; sv.classList.add('revealed'); sv.onclick=null;
-                    berak.textContent='🧮 '+u.uträkning; berak.style.display='block';
+                    const vis=sv.classList.toggle('revealed');
+                    sv.textContent = vis ? u.svar : 'Visa svar'; sv.title = vis ? 'Klicka för att dölja svaret igen' : 'Klicka för att visa svaret och uträkningen';
+                    berak.textContent='🧮 '+u.uträkning; berak.style.display = vis ? 'block' : 'none';
                 };
                 rad2.appendChild(fr); rad2.appendChild(sv);
                 rad.appendChild(rad2);
@@ -30526,6 +30610,10 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='✅ Visa rätt svar';
                 revealBtn.onclick=()=>{ state.revealed=true; renderPlay(); persist(); };
                 btns.appendChild(revealBtn);
+            } else if(state.quizMode && state.revealed){
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj rätt svar';
+                hideBtn.onclick=()=>{ state.revealed=false; renderPlay(); persist(); };
+                btns.appendChild(hideBtn);
             }
             root.appendChild(btns);
         }
@@ -30960,6 +31048,9 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 revealBtn.onclick=()=>{ state.revealed=true; selectedForPoint=new Set(); renderPlay(); persist(); };
                 root.appendChild(revealBtn);
             } else {
+                const hideAns=document.createElement('button'); hideAns.className='kw-btn kw-btn-ghost'; hideAns.style.width='100%'; hideAns.textContent='🙈 Dölj rätt svar';
+                hideAns.onclick=()=>{ state.revealed=false; selectedForPoint=new Set(); renderPlay(); persist(); };
+                root.appendChild(hideAns);
                 const hint=document.createElement('div'); hint.className='kw-edit-hint'; hint.textContent='Vilka lag svarade rätt? Klicka för att välja, klicka igen för att avmarkera.'; root.appendChild(hint);
                 const awardRow=document.createElement('div'); awardRow.className='qt-award-row';
                 state.teams.forEach((t,i)=>{
@@ -31269,6 +31360,10 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa facit';
                 revealBtn.onclick=()=>{ state.revealed=true; renderPlay(); persist(); };
                 btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj facit';
+                hideBtn.onclick=()=>{ state.revealed=false; renderPlay(); persist(); };
+                btns.appendChild(hideBtn);
             }
             // FIX: istället för att behöva klicka Redigera → Slumpa exempel → Starta för varje ny
             // AI-genererad fråga, visas nu en direkt "Nästa fråga"-knapp här i spelvyn så länge det
@@ -31469,6 +31564,10 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                 const revealBtn=document.createElement('button'); revealBtn.className='kw-btn kw-btn-green'; revealBtn.textContent='👁️ Visa facit';
                 revealBtn.onclick=()=>{ state.revealed=true; renderPlay(); persist(); };
                 btns.appendChild(revealBtn);
+            } else {
+                const hideBtn=document.createElement('button'); hideBtn.className='kw-btn kw-btn-ghost'; hideBtn.textContent='🙈 Dölj facit';
+                hideBtn.onclick=()=>{ state.revealed=false; renderPlay(); persist(); };
+                btns.appendChild(hideBtn);
             }
             root.appendChild(btns);
         }
