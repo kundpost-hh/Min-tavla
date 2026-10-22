@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-22-su-timer1';</script>
+    <script>window.BUILD_VERSION = '2026-10-22-korsord-ord1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -2314,6 +2314,13 @@
     .kw-clue-col ol { margin:0; padding:0; list-style:none; font-size:12px; }
     .kw-clue-col li { margin-bottom:4px; line-height:1.35; color:#333; }
     .kw-clue-col li b { color:#1d1d1f; }
+    /* NYTT: klicka på en ledtråd (eller numret i rutnätet) för att visa facit för just det ordet */
+    .kw-clue-col li.kw-clue-click { cursor:pointer; border-radius:6px; padding:1px 4px; margin-left:-4px; transition:background .15s; }
+    .kw-clue-col li.kw-clue-click:hover { background:#eef6ff; }
+    .kw-clue-col li.kw-clue-shown { background:#d9f2df; }
+    .kw-clue-col li.kw-clue-shown::after { content:' ✓'; color:#1f7a37; font-weight:800; }
+    .kw-cell .kw-num.kw-num-click { pointer-events:auto; cursor:pointer; padding:0 2px; border-radius:3px; z-index:2; }
+    .kw-cell .kw-num.kw-num-click:hover { background:#007aff; color:#fff; }
     .ordgomma-widget .widget-inner { background:#fff; }
     .og-root { display:flex; flex-direction:column; width:100%; font-size:13px; --og-cell:32px; }
     .og-edit-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
@@ -34317,12 +34324,25 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             lay.placed.forEach(p=>{ for(let i=0;i<p.word.length;i++){ const r=p.dir==='A'?p.r:p.r+i, c=p.dir==='A'?p.c+i:p.c; letterAt[r+','+c]=p.word[i]; } numAt[p.r+','+p.c]=p.num; });
             const wrap=document.createElement('div'); wrap.className='kw-gridwrap';
             const g=document.createElement('div'); g.className='kw-grid'; g.style.gridTemplateColumns='repeat('+lay.cols+', var(--kw-cell))';
+            // NYTT: facit ord för ord. shownWords = t.ex. {'A1':true,'D3':true}
+            const shownWords = {};
+            const cellsOf=(p)=>{ const out=[]; for(let i=0;i<p.word.length;i++){ out.push((p.dir==='A'?p.r:p.r+i)+','+(p.dir==='A'?p.c+i:p.c)); } return out; };
+            const applyWordFacit=()=>{
+                const visa = {};
+                lay.placed.forEach(p=>{ if(shownWords[p.dir+p.num]) cellsOf(p).forEach(k=>visa[k]=true); });
+                g.querySelectorAll('.kw-input').forEach(inp=>{ const cell=inp.parentElement, k=inp.dataset.k;
+                    if(visa[k]){ inp.value=inp.dataset.ans; cell.classList.add('kw-facit'); }
+                    else if(cell.classList.contains('kw-facit')){ inp.value=state.answers[k]||''; cell.classList.remove('kw-facit'); } });
+                root.querySelectorAll('.kw-clue-col li[data-w]').forEach(li=> li.classList.toggle('kw-clue-shown', !!shownWords[li.dataset.w]));
+            };
+            const toggleWord=(key)=>{ if(shownWords[key]) delete shownWords[key]; else shownWords[key]=true; applyWordFacit(); };
+            const toggleNum=(num)=>{ const keys=lay.placed.filter(p=>p.num===num).map(p=>p.dir+p.num); const allaVisas=keys.every(k=>shownWords[k]); keys.forEach(k=>{ if(allaVisas) delete shownWords[k]; else shownWords[k]=true; }); applyWordFacit(); };
             const focusCell=(r,c)=>{ const el=g.querySelector('.kw-input[data-k="'+r+','+c+'"]'); if(el){ el.focus(); el.select&&el.select(); return true; } return false; };
             for(let r=0;r<lay.rows;r++){ for(let c=0;c<lay.cols;c++){
                 const k=r+','+c; const cell=document.createElement('div');
                 if(letterAt[k]){
                     cell.className='kw-cell';
-                    if(numAt[k]){ const n=document.createElement('span'); n.className='kw-num'; n.textContent=numAt[k]; cell.appendChild(n); }
+                    if(numAt[k]){ const n=document.createElement('span'); n.className='kw-num kw-num-click'; n.textContent=numAt[k]; n.title='Klicka för att visa/dölja facit för nummer '+numAt[k]; n.onmousedown=(e)=>{ e.preventDefault(); e.stopPropagation(); }; n.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); toggleNum(numAt[k]); }; cell.appendChild(n); }
                     const inp=document.createElement('input'); inp.className='kw-input'; inp.maxLength=1; inp.dataset.k=k; inp.dataset.ans=letterAt[k]; inp.value=state.answers[k]||'';
                     inp.oninput=()=>{ inp.value=inp.value.toUpperCase().replace(/[^A-ZÅÄÖ]/g,''); state.answers[k]=inp.value; cell.classList.remove('kw-facit'); if(inp.value) focusCell(r,c+1); persistSoon(); };
                     cell.appendChild(inp);
@@ -34332,7 +34352,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             wrap.appendChild(g); root.appendChild(wrap);
             // ledtrådar
             const cl=document.createElement('div'); cl.className='kw-clues';
-            const mkCol=(title,dir)=>{ const col=document.createElement('div'); col.className='kw-clue-col'; const h=document.createElement('h4'); h.textContent=title; col.appendChild(h); const ol=document.createElement('ol'); lay.placed.filter(p=>p.dir===dir).sort((a,b)=>a.num-b.num).forEach(p=>{ const li=document.createElement('li'); li.innerHTML='<b>'+p.num+'.</b> '+(p.clue?p.clue:'—'); ol.appendChild(li); }); col.appendChild(ol); return col; };
+            const mkCol=(title,dir)=>{ const col=document.createElement('div'); col.className='kw-clue-col'; const h=document.createElement('h4'); h.textContent=title; col.appendChild(h); const ol=document.createElement('ol'); lay.placed.filter(p=>p.dir===dir).sort((a,b)=>a.num-b.num).forEach(p=>{ const li=document.createElement('li'); li.innerHTML='<b>'+p.num+'.</b> '+(p.clue?p.clue:'—'); li.className='kw-clue-click'; li.dataset.w=p.dir+p.num; li.title='Klicka för att visa/dölja facit för '+p.num+' '+(dir==='A'?'vågrätt':'lodrätt'); li.onclick=()=>toggleWord(p.dir+p.num); ol.appendChild(li); }); col.appendChild(ol); return col; };
             cl.appendChild(mkCol('Vågrätt','A')); cl.appendChild(mkCol('Lodrätt','D')); root.appendChild(cl);
             // knappar
             const btns=document.createElement('div'); btns.className='kw-btnrow hover-menu';
@@ -34341,8 +34361,8 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             const prnt=document.createElement('button'); prnt.className='kw-btn kw-btn-ghost'; prnt.textContent='🖨️ Skriv ut'; prnt.title='Skriv ut korsordet utan facit'; prnt.onclick=()=>printCrossword(state.layout, state.title, showing);
             const saveImg=document.createElement('button'); saveImg.className='kw-btn kw-btn-ghost'; saveImg.textContent='💾 Spara PDF'; saveImg.title='Spara korsordet som PDF utan facit'; saveImg.onclick=()=>saveCrosswordAsImage(state.layout, state.title, showing);
             const facit=document.createElement('button'); facit.className='kw-btn kw-btn-green'; facit.textContent='Visa facit';
-            facit.onclick=()=>{ showing=!showing; g.querySelectorAll('.kw-input').forEach(inp=>{ const cell=inp.parentElement; if(showing){ inp.value=inp.dataset.ans; cell.classList.add('kw-facit'); } else { inp.value=state.answers[inp.dataset.k]||''; cell.classList.remove('kw-facit'); } }); facit.textContent=showing?'Dölj facit':'Visa facit'; prnt.title = showing ? 'Skriv ut korsordet med facit' : 'Skriv ut korsordet utan facit'; saveImg.title = showing ? 'Spara korsordet som PDF med facit' : 'Spara korsordet som PDF utan facit'; };
-            const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.answers={}; g.querySelectorAll('.kw-input').forEach(inp=>{ inp.value=''; inp.parentElement.classList.remove('kw-facit'); }); showing=false; facit.textContent='Visa facit'; prnt.title='Skriv ut korsordet utan facit'; saveImg.title='Spara korsordet som PDF utan facit'; persist(); };
+            facit.onclick=()=>{ showing=!showing; Object.keys(shownWords).forEach(k=>delete shownWords[k]); if(showing) lay.placed.forEach(p=>shownWords[p.dir+p.num]=true); root.querySelectorAll('.kw-clue-col li[data-w]').forEach(li=> li.classList.toggle('kw-clue-shown', showing)); g.querySelectorAll('.kw-input').forEach(inp=>{ const cell=inp.parentElement; if(showing){ inp.value=inp.dataset.ans; cell.classList.add('kw-facit'); } else { inp.value=state.answers[inp.dataset.k]||''; cell.classList.remove('kw-facit'); } }); facit.textContent=showing?'Dölj facit':'Visa facit'; prnt.title = showing ? 'Skriv ut korsordet med facit' : 'Skriv ut korsordet utan facit'; saveImg.title = showing ? 'Spara korsordet som PDF med facit' : 'Spara korsordet som PDF utan facit'; };
+            const clr=document.createElement('button'); clr.className='kw-btn kw-btn-warn'; clr.textContent='Rensa'; clr.onclick=()=>{ state.answers={}; Object.keys(shownWords).forEach(k=>delete shownWords[k]); root.querySelectorAll('.kw-clue-col li[data-w]').forEach(li=> li.classList.remove('kw-clue-shown')); g.querySelectorAll('.kw-input').forEach(inp=>{ inp.value=''; inp.parentElement.classList.remove('kw-facit'); }); showing=false; facit.textContent='Visa facit'; prnt.title='Skriv ut korsordet utan facit'; saveImg.title='Spara korsordet som PDF utan facit'; persist(); };
             const shuffle=document.createElement('button'); shuffle.className='kw-btn kw-btn-ghost'; shuffle.textContent='🔀 Nytt utseende'; shuffle.onclick=()=>{ const arr=state.entries.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp; } const lay2=buildCrossword(arr); if(lay2){ state.layout=lay2; state.answers={}; render(); persist(); } };
             const aiBtn2=document.createElement('button'); aiBtn2.className='kw-btn kw-btn-ai'; aiBtn2.textContent='✨ AI'; aiBtn2.title='Skapa nytt korsord med AI'; aiBtn2.onclick=openAiDialog;
             btns.appendChild(edit); btns.appendChild(aiBtn2); btns.appendChild(prnt); btns.appendChild(saveImg); btns.appendChild(facit); btns.appendChild(clr); btns.appendChild(shuffle); root.appendChild(btns);
