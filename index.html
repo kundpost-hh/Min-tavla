@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-02-skrivregler1';</script>
+    <script>window.BUILD_VERSION = '2026-11-02-sv-blad1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3076,6 +3076,10 @@
     .su-fraga-rad { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
     .su-fraga { font-size:15px; font-weight:700; color:#333; flex:1; min-width:0; }
     .su-rad.su-klurig .su-fraga { font-size:14px; }
+    .su-bladrad { display:flex; align-items:center; justify-content:center; gap:8px; margin:6px 0 2px; }
+    .su-blad-lbl { font-size:12px; font-weight:800; color:#7c3aed; letter-spacing:.2px; }
+    .su-blad-nav { border:none; background:#f2f2f7; color:#3a3a3c; border-radius:8px; width:26px; height:24px; cursor:pointer; font-size:11px; }
+    .su-blad-nav:hover { background:#e5e5ea; }
     .su-svar { white-space:pre-line; min-width:74px; max-width:45%; text-align:center; padding:5px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; font-weight:800; font-size:13.5px; cursor:pointer; user-select:none; flex-shrink:0; word-break:break-word; line-height:1.4; }
     .su-svar:hover { background:#ffd98f; }
     .su-svar.revealed { background:#d9f2df; color:#1f7a37; cursor:pointer; }
@@ -18637,14 +18641,15 @@
         if(config===undefined) config=null;
         const body = createWidget('STARTUPPGIFT SVENSKA', 400, 'startuppgift-widget', config);
         const widget = body.parentElement.parentElement;
-        body.innerHTML = `<div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>📖 Dagens uppgift</button><div class='su-lista'></div>`;
+        body.innerHTML = `<div class='hover-menu' style='margin-bottom:10px;'><select class='editor-select su-niva' style='width:100%;'><option value='ak4'>Lätt</option><option value='ak5'>Medel</option><option value='ak6'>Svår</option></select></div><button class='btn btn-primary su-btn' style='width:100%'>📖 Nytt blad</button><div class='su-bladrad'><button type='button' class='su-blad-nav su-blad-prev hover-menu' title='Föregående blad'>◀</button><span class='su-blad-lbl'></span><button type='button' class='su-blad-nav su-blad-next hover-menu' title='Nästa blad'>▶</button></div><div class='su-lista'></div>`;
         const btn = body.querySelector('.su-btn'), lista = body.querySelector('.su-lista'), nivaSelSU = body.querySelector('.su-niva');
         const ri = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
         const val = (arr)=> arr[ri(0, arr.length-1)];
         // Bakåtkompatibelt: äldre sparade widgetar har hela svaret som en ren array (utan nivåval).
         // Nya sparningar lagras som {niva, uppgifter}. Båda format läses in korrekt här.
-        let initialUppgifter = null;
+        let initialUppgifter = null, initialBlad = null;
         if(config && config.data){
+            if(typeof config.data.blad === 'number') initialBlad = config.data.blad;
             if(Array.isArray(config.data) && config.data.length){ initialUppgifter = config.data; }
             else if(config.data.uppgifter && Array.isArray(config.data.uppgifter)){
                 initialUppgifter = config.data.uppgifter;
@@ -18897,6 +18902,111 @@
             ]
         };
 
+        // ===== NYTT: fler uppgifter, så att varje blad kan få helt egna frågor =====
+        STAVNING_PAR.ak4.push({ ratt:'cykel', fel:'sykel' }, { ratt:'ägg', fel:'äg' }, { ratt:'hjärta', fel:'järta' }, { ratt:'sked', fel:'sjed' }, { ratt:'mjölk', fel:'mjölck' }, { ratt:'kjol', fel:'tjol' });
+        STAVNING_PAR.ak5.push({ ratt:'journalist', fel:'jornalist' }, { ratt:'garage', fel:'garasch' }, { ratt:'station', fel:'stasjon' }, { ratt:'spännande', fel:'spänande' }, { ratt:'egentligen', fel:'egenligen' }, { ratt:'telefon', fel:'tellefon' });
+        STAVNING_PAR.ak6.push({ ratt:'tillfälle', fel:'tilfälle' }, { ratt:'gemensam', fel:'jemensam' }, { ratt:'professionell', fel:'proffesionell' }, { ratt:'engagemang', fel:'engasjemang' }, { ratt:'vetenskaplig', fel:'vetenskapelig' }, { ratt:'fenomen', fel:'fenomän' });
+        SYNONYM_PAR.ak4.push(
+            { ord:'mörk', typ:'motsats', svar:'ljus' }, { ord:'öppen', typ:'motsats', svar:'stängd' }, { ord:'börja', typ:'motsats', svar:'sluta' },
+            { ord:'ge', typ:'motsats', svar:'ta' }, { ord:'hård', typ:'motsats', svar:'mjuk' }, { ord:'våt', typ:'motsats', svar:'torr' },
+            { ord:'springa', typ:'synonym', svar:'rusa / spurta' }, { ord:'arg', typ:'synonym', svar:'sur / ilsken' }, { ord:'säga', typ:'synonym', svar:'berätta / yttra' },
+            { ord:'gråta', typ:'synonym', svar:'lipa / snyfta' }, { ord:'kompis', typ:'synonym', svar:'vän / polare' }, { ord:'tidig', typ:'motsats', svar:'sen' });
+        SYNONYM_PAR.ak5.push(
+            { ord:'börja', typ:'synonym', svar:'starta / inleda' }, { ord:'sluta', typ:'synonym', svar:'avsluta / upphöra' }, { ord:'dum', typ:'motsats', svar:'klok' },
+            { ord:'billig', typ:'motsats', svar:'dyr' }, { ord:'lugn', typ:'motsats', svar:'orolig / stressad' }, { ord:'säker', typ:'motsats', svar:'osäker' },
+            { ord:'snabb', typ:'synonym', svar:'kvick / rask' }, { ord:'ilsken', typ:'synonym', svar:'arg / sur' }, { ord:'bred', typ:'motsats', svar:'smal' },
+            { ord:'djup', typ:'motsats', svar:'grund' }, { ord:'ofta', typ:'motsats', svar:'sällan' });
+        SYNONYM_PAR.ak6.push(
+            { ord:'generös', typ:'motsats', svar:'snål' }, { ord:'ödmjuk', typ:'motsats', svar:'högfärdig / skrytsam' }, { ord:'förvånad', typ:'synonym', svar:'överraskad / häpen' },
+            { ord:'ovanlig', typ:'synonym', svar:'sällsynt' }, { ord:'tacksam', typ:'motsats', svar:'otacksam' }, { ord:'frivillig', typ:'motsats', svar:'obligatorisk / tvungen' },
+            { ord:'samarbeta', typ:'synonym', svar:'jobba tillsammans' }, { ord:'ständig', typ:'synonym', svar:'konstant / jämn' }, { ord:'positiv', typ:'motsats', svar:'negativ' },
+            { ord:'tillåta', typ:'motsats', svar:'förbjuda' }, { ord:'orolig', typ:'synonym', svar:'bekymrad / nervös' });
+        SKRIVREGLER.ak4.push(
+            { f:'mormor bor i umeå', r:'Mormor bor i Umeå.', g:'Städer skrivs med stor bokstav' },
+            { f:'vilken färg gillar du bäst', r:'Vilken färg gillar du bäst?', g:'Frågor slutar med frågetecken' },
+            { f:'vad stor du har blivit', r:'Vad stor du har blivit!', g:'Utrop slutar med utropstecken' },
+            { f:'vi tog med bullar saft och kakor', r:'Vi tog med bullar, saft och kakor.', g:'Komma i uppräkning – inget komma före ”och”' },
+            { f:'min lärare heter anders', r:'Min lärare heter Anders.', g:'Namn skrivs med stor bokstav' },
+            { f:'i maj fyller ella år', r:'I maj fyller Ella år.', g:'Månader liten bokstav – namn stor bokstav' });
+        SKRIVREGLER.ak5.push(
+            { f:'jag ringde maja men hon svarade inte', r:'Jag ringde Maja, men hon svarade inte.', g:'Komma före ”men” och namn med stor bokstav' },
+            { f:'läraren undrade vem som hade glömt sin jacka', r:'Läraren undrade vem som hade glömt sin jacka.', g:'Indirekt fråga – punkt, inte frågetecken' },
+            { f:'vem har ätit upp min glass', r:'Vem har ätit upp min glass?', g:'Frågor slutar med frågetecken' },
+            { f:'på midsommar dansar vi runt midsommarstången', r:'På midsommar dansar vi runt midsommarstången.', g:'Högtider skrivs med liten bokstav' },
+            { f:'min kusin pratar både svenska och arabiska', r:'Min kusin pratar både svenska och arabiska.', g:'Språk skrivs med liten bokstav' },
+            { f:'vi åkte till danmark och sedan till tyskland', r:'Vi åkte till Danmark och sedan till Tyskland.', g:'Länder skrivs med stor bokstav' },
+            { f:'hej vad kul att se dig', r:'Hej, vad kul att se dig!', g:'Komma efter hälsningsord och utropstecken vid utrop' },
+            { f:'vi fiskade i göta älv i somras', r:'Vi fiskade i Göta älv i somras.', g:'I namn på älvar får bara första ordet stor bokstav' },
+            { f:'jag vill ha pizza men min bror vill ha tacos', r:'Jag vill ha pizza, men min bror vill ha tacos.', g:'Komma före ”men”' });
+        SKRIVREGLER.ak6.push(
+            { f:'innan vi åkte hem städade vi klassrummet', r:'Innan vi åkte hem, städade vi klassrummet.', g:'Komma efter en bisats som står först i meningen' },
+            { f:'medan läraren pratade satt alla tysta', r:'Medan läraren pratade, satt alla tysta.', g:'Komma efter en bisats som står först i meningen' },
+            { f:'så snart klockan ringde sprang alla ut', r:'Så snart klockan ringde, sprang alla ut.', g:'Komma efter en bisats som står först i meningen' },
+            { f:'akta dig skrek emil', r:'”Akta dig!” skrek Emil.', g:'Anföringstecken runt repliken – utropstecknet står innanför' },
+            { f:'har du sett min mobil frågade sofia', r:'”Har du sett min mobil?” frågade Sofia.', g:'Frågetecknet står innanför anföringstecknen' },
+            { f:'vi ses i morgon sa tränaren', r:'”Vi ses i morgon”, sa tränaren.', g:'Anföringstecken och komma efter repliken' },
+            { f:'mamma sa att middagen var klar', r:'Mamma sa att middagen var klar.', g:'Indirekt anföring (”sa att …”) – inga anföringstecken' },
+            { f:'vi läste harry potter på svenskalektionen', r:'Vi läste Harry Potter på svenskalektionen.', g:'Titlar och namn på figurer med stor bokstav – skolämnen med liten' },
+            { f:'eftersom tåget var försenat kom vi för sent till malmö', r:'Eftersom tåget var försenat, kom vi för sent till Malmö.', g:'Komma efter bisats först – städer med stor bokstav' },
+            { f:'om det blir sol i morgon ska vi bada sa pappa', r:'”Om det blir sol i morgon ska vi bada”, sa pappa.', g:'Direkt anföring – anföringstecken och komma efter repliken' });
+        KLURIG_ORD.ak4.push(
+            { del1:'is', del2:'hockey', ledtrad:'En sport på skridskor med klubba och puck.' },
+            { del1:'tand', del2:'läkare', ledtrad:'Personen som tittar in i din mun och lagar hål.' },
+            { del1:'rymd', del2:'raket', ledtrad:'Den skjuts iväg mot stjärnorna med astronauter ombord.' },
+            { del1:'kanel', del2:'bulle', ledtrad:'Ett gott bakverk som har en egen dag den 4 oktober.' },
+            { del1:'sand', del2:'låda', ledtrad:'Där små barn bygger slott på lekplatsen.' },
+            { del1:'ägg', del2:'kopp', ledtrad:'Något man ställer det kokta frukostägget i.' },
+            { del1:'fågel', del2:'bo', ledtrad:'Ett litet hem av kvistar högt uppe i ett träd.' });
+        KLURIG_ORD.ak5.push(
+            { del1:'flyg', del2:'plats', ledtrad:'Där man checkar in innan en resa i luften.' },
+            { del1:'bad', del2:'handduk', ledtrad:'Det stora, mjuka tyget man torkar sig med efter simningen.' },
+            { del1:'tåg', del2:'station', ledtrad:'Där man väntar på perrongen innan resan på räls.' },
+            { del1:'skriv', del2:'bord', ledtrad:'Möbeln man sitter vid när man gör läxan.' },
+            { del1:'regn', del2:'skog', ledtrad:'En varm och fuktig skog där massor av djur och växter lever.' },
+            { del1:'polis', del2:'bil', ledtrad:'Ett fordon med blåljus som används av dem som ser till att lagen följs.' },
+            { del1:'rygg', del2:'säck', ledtrad:'Väskan man bär på ryggen till skolan.' },
+            { del1:'kyl', del2:'skåp', ledtrad:'Där mjölk och smör förvaras så att det håller sig kallt.' },
+            { del1:'fyr', del2:'torn', ledtrad:'Ett högt torn vid kusten som lyser för båtarna i mörkret.' },
+            { del1:'tvätt', del2:'maskin', ledtrad:'Den snurrar kläderna rena.' });
+        KLURIG_ORD.ak6.push(
+            { del1:'folk', del2:'omröstning', ledtrad:'När alla som får rösta säger ja eller nej i en viktig fråga.' },
+            { del1:'miljö', del2:'förstöring', ledtrad:'Det som händer när naturen skadas av människor.' },
+            { del1:'väder', del2:'prognos', ledtrad:'Meteorologernas gissning om morgondagens väder.' },
+            { del1:'sol', del2:'energi', ledtrad:'Kraft som hämtas från himlens stora lampa, bland annat med paneler.' },
+            { del1:'vind', del2:'kraft', ledtrad:'El som tillverkas av snurrande vingar på höga torn.' },
+            { del1:'kärn', del2:'kraft', ledtrad:'Ett sätt att göra el genom att klyva atomer.' },
+            { del1:'barn', del2:'konventionen', ledtrad:'Överenskommelsen om barns rättigheter som blev svensk lag 2020.' },
+            { del1:'natur', del2:'reservat', ledtrad:'Ett skyddat område där djur och växter får vara i fred.' },
+            { del1:'grund', del2:'lag', ledtrad:'Den viktigaste lagen i ett land, som skyddar demokratin.' },
+            { del1:'tids', del2:'linje', ledtrad:'En linje som visar händelser i ordning, ofta i historia.' },
+            { del1:'livs', del2:'medel', ledtrad:'Ett annat ord för den mat man köper i affären.' });
+
+        // ===== NYTT: färdiga BLAD – varje blad är ett paket med egna, unika frågor =====
+        // Bladen byggs i en fast (seedad) ordning, så "Blad 5" alltid är samma blad på alla datorer.
+        // Inom en nivå delar två blad aldrig någon fråga. "Nytt blad" går igenom alla blad i slumpad
+        // ordning innan något blad kommer tillbaka (sparas per dator).
+        function suSeed(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+        function suPerm(n, rnd){ const a=[...Array(n).keys()]; for(let i=n-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+        const SU_BLAD = {};
+        ['ak4','ak5','ak6'].forEach((niva, ni)=>{
+            const rnd = suSeed(4711 + ni*97);
+            const O=ORDKLASS_ORD[niva], S=STAVNING_PAR[niva], Y=SYNONYM_PAR[niva], M=SKRIVREGLER[niva], K=KLURIG_ORD[niva];
+            const n = Math.min(O.length, S.length, Y.length, M.length, K.length);
+            const pO=suPerm(O.length,rnd), pS=suPerm(S.length,rnd), pY=suPerm(Y.length,rnd), pM=suPerm(M.length,rnd), pK=suPerm(K.length,rnd);
+            SU_BLAD[niva] = [];
+            for(let i=0;i<n;i++){
+                const o=O[pO[i]], p=S[pS[i]], y=Y[pY[i]], m=M[pM[i]], k=K[pK[i]];
+                const omvant = rnd()<0.5;
+                SU_BLAD[niva].push([
+                    { omrade:'Ordklasser', emoji:'🔤', klurig:false, fraga:'Vilken ordklass tillhör ordet "'+o.ord+'"?', svar:o.klass },
+                    { omrade:'Stavning', emoji:'✏️', klurig:false, fraga:'Vilket är rätt stavat: "'+(omvant?p.ratt:p.fel)+'" eller "'+(omvant?p.fel:p.ratt)+'"?', svar:p.ratt },
+                    { omrade:'Synonymer & motsatsord', emoji:'🔁', klurig:false, fraga: y.typ==='motsats' ? ('Vad är motsatsen till "'+y.ord+'"?') : ('Ge ett ord med samma betydelse som "'+y.ord+'" (synonym).'), svar:y.svar },
+                    { omrade:'Meningsbyggnad', emoji:'✍️', klurig:false, fraga:'Skriv meningen rätt med stora bokstäver och skiljetecken: "'+m.f+'"', svar:m.r+'\n📏 '+m.g },
+                    { omrade:'Ordgåta', emoji:'🧩', klurig:true, fraga:'Gåta: Jag är ett sammansatt ord. '+k.ledtrad+' Vad är jag?', svar:k.del1+k.del2 }
+                ]);
+            }
+        });
+
         const OMRADEN = {
             ordklass: {
                 namn:'Ordklasser', emoji:'🔤',
@@ -18946,14 +19056,38 @@
                 rad.appendChild(tagg); rad.appendChild(rad2);
                 lista.appendChild(rad);
             });
-            widget.dataset.startuppgiftSve = JSON.stringify({ niva: nivaSelSU.value, uppgifter: uppgifter });
+            widget.dataset.startuppgiftSve = JSON.stringify({ niva: nivaSelSU.value, blad: bladNr, uppgifter: uppgifter });
         }
 
-        btn.onclick=()=>{ renderUppgifter(dagensUppgifter()); saveBoardState(); };
-        nivaSelSU.onchange=()=>{ renderUppgifter(dagensUppgifter()); saveBoardState(); };
+        // ---- Blad-hantering ----
+        let bladNr = -1;
+        const bladLbl = body.querySelector('.su-blad-lbl');
+        const bladLista = ()=> SU_BLAD[nivaSelSU.value] || SU_BLAD.ak4;
+        const nivaNamn = ()=> ({ak4:'Lätt',ak5:'Medel',ak6:'Svår'})[nivaSelSU.value] || '';
+        function visaBlad(i){
+            const L = bladLista(); if(!L.length) return;
+            bladNr = ((i % L.length) + L.length) % L.length;
+            renderUppgifter(L[bladNr]);
+            bladLbl.textContent = '📄 Blad ' + (bladNr+1) + ' av ' + L.length + ' · ' + nivaNamn();
+        }
+        const PASE_KEY = 'mintavla_suSvBladPase';
+        function nyttBlad(){
+            const niva = nivaSelSU.value, N = bladLista().length;
+            let p = {}; try{ p = JSON.parse(localStorage.getItem(PASE_KEY) || '{}') || {}; }catch(e){ p = {}; }
+            let pase = Array.isArray(p[niva]) ? p[niva].filter(x=> x>=0 && x<N) : [];
+            if(!pase.length){ pase=[...Array(N).keys()]; for(let i=pase.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pase[i],pase[j]]=[pase[j],pase[i]]; } if(pase.length>1 && pase[0]===bladNr) pase.push(pase.shift()); }
+            const nr = pase.shift(); p[niva] = pase;
+            if(!window.isGuestMode){ try{ localStorage.setItem(PASE_KEY, JSON.stringify(p)); }catch(e){} }
+            visaBlad(nr);
+        }
+        btn.onclick=()=>{ nyttBlad(); saveBoardState(); };
+        nivaSelSU.onchange=()=>{ bladNr=-1; nyttBlad(); saveBoardState(); };
+        body.querySelector('.su-blad-prev').onclick=(e)=>{ e.stopPropagation(); visaBlad(bladNr-1); saveBoardState(); };
+        body.querySelector('.su-blad-next').onclick=(e)=>{ e.stopPropagation(); visaBlad(bladNr+1); saveBoardState(); };
 
-        if(initialUppgifter){ renderUppgifter(initialUppgifter); }
-        else { renderUppgifter(dagensUppgifter()); }
+        if(initialBlad !== null && initialBlad >= 0){ visaBlad(initialBlad); }
+        else if(initialUppgifter){ renderUppgifter(initialUppgifter); bladLbl.textContent = 'Tryck på 📖 Nytt blad för ett färdigt blad'; }
+        else { nyttBlad(); }
     }
     window.createStartuppgiftSvenska = createStartuppgiftSvenska;
 
