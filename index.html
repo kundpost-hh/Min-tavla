@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-02-skamt1';</script>
+    <script>window.BUILD_VERSION = '2026-11-02-skrivregler1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -369,6 +369,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createQuizTavling()"><div class="icon">🏆</div><div class="label">Quiztävling</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createSkamt()"><div class="icon">😂</div><div class="label">Skämt</div></button>
+            <button class="tool-btn" data-cat="lek" onclick="createGator()"><div class="icon">🧩</div><div class="label">Gåtor</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="21" height="21" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
         </div>
 
@@ -2724,6 +2725,16 @@
     .skamt-knappar .skamt-ny { flex:1; }
     .skamt-knappar .skamt-las { flex:0 0 auto; padding-left:12px; padding-right:12px; }
     .skamt-info { text-align:center; font-size:11px; color:#8e8e93; margin-top:6px; }
+    /* GÅTOR (bygger på Skämt-stilen) */
+    .gator-widget .widget-body { padding:12px 14px; }
+    .gator-kort { background:linear-gradient(135deg,#e0f2fe,#ede9fe); border-color:#a5b4fc; }
+    .gator-tagg { color:#4338ca; border-color:#c7d2fe; }
+    .gator-fraga { font-size:19px; }
+    .gator-ledtrad { font-size:15px; font-weight:700; color:#92400e; background:#fffbeb; border:1.5px dashed #fcd34d; border-radius:10px; padding:8px 10px; animation:popIn .3s ease; }
+    .gator-svar { color:#4338ca; border-color:#a5b4fc; }
+    .gator-widget .gator-visa { flex:1.3; background:#4f46e5; }
+    .gator-widget .gator-tips, .gator-widget .gator-ny { flex:1; }
+    .gator-widget .gator-las { flex:0 0 auto; padding-left:12px; padding-right:12px; }
     /* BRAIN BREAK WIDGET */
     .bb-widget { min-width: 320px; }
     .bb-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
@@ -3065,7 +3076,7 @@
     .su-fraga-rad { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
     .su-fraga { font-size:15px; font-weight:700; color:#333; flex:1; min-width:0; }
     .su-rad.su-klurig .su-fraga { font-size:14px; }
-    .su-svar { min-width:74px; max-width:45%; text-align:center; padding:5px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; font-weight:800; font-size:13.5px; cursor:pointer; user-select:none; flex-shrink:0; word-break:break-word; line-height:1.4; }
+    .su-svar { white-space:pre-line; min-width:74px; max-width:45%; text-align:center; padding:5px 12px; border-radius:10px; background:#ffe9c2; color:#b57400; font-weight:800; font-size:13.5px; cursor:pointer; user-select:none; flex-shrink:0; word-break:break-word; line-height:1.4; }
     .su-svar:hover { background:#ffd98f; }
     .su-svar.revealed { background:#d9f2df; color:#1f7a37; cursor:pointer; }
     .su-svar.revealed:hover { background:#c3ebcd; }
@@ -5550,6 +5561,7 @@
                 else if (type === 'IDROTT') { state.data.tab = w.dataset.idrottTab || 'rorelse'; }
                 else if (type === 'MUSIK') { state.data.tab = w.dataset.musikTab || 'rytm'; }
                 else if (type === 'BILD & SLÖJD') { state.data.tab = w.dataset.bildTab || 'rittema'; }
+                else if (type === 'GÅTOR') { try{ state.data = JSON.parse(w.dataset.gator || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'SKÄMT') { try{ state.data = JSON.parse(w.dataset.skamt || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
@@ -5689,6 +5701,7 @@
             else if (w.type === 'BILD & SLÖJD') createBildMegaWidget(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
             else if (w.type === 'SKÄMT') createSkamt(w);
+            else if (w.type === 'GÅTOR') createGator(w);
             // FIX: "Lugn & ro"-widgeten (andningspaus) gick att lägga till från verktygslådan, men
             // saknades helt här i återställningslogiken - den försvann alltså tyst varje gång sidan
             // laddades om, eftersom inget kändes igen den och byggde upp den på nytt.
@@ -15193,6 +15206,192 @@
     }
     window.createSkamt = createSkamt;
 
+    // ============================================================
+    // GÅTOR – gåtor för åk 4. Gåtan visas, ledtråd och svar döljs tills man klickar.
+    // "Påse"-slumpning: alla gåtor (i vald kategori) kommer en gång innan någon upprepas.
+    // ============================================================
+    const GATOR_BANK = [
+        // ---- VAD ÄR DET? ----
+        { k:'Vad är det?', q:'Jag har städer men inga hus, skogar men inga träd och vatten men inga fiskar. Vad är jag?', a:'En karta!', h:'Du kan hitta mig i en atlas.' },
+        { k:'Vad är det?', q:'Vad har tänder men kan inte bita?', a:'En kam!', h:'Du använder den på morgonen i håret.' },
+        { k:'Vad är det?', q:'Vad har fyra ben men kan inte gå?', a:'Ett bord (eller en stol)!', h:'Du sitter vid den när du äter.' },
+        { k:'Vad är det?', q:'Vad har ett öga men kan inte se?', a:'En nål!', h:'Man trär en tråd genom ögat.' },
+        { k:'Vad är det?', q:'Vad blir blötare ju mer det torkar?', a:'En handduk!', h:'Du använder den efter duschen.' },
+        { k:'Vad är det?', q:'Vad går och går men har inga fötter?', a:'Klockan!', h:'Den tickar.' },
+        { k:'Vad är det?', q:'Vad kan man fånga men aldrig kasta?', a:'En förkylning!', h:'Atjoo!' },
+        { k:'Vad är det?', q:'Vad blir större ju mer man tar bort?', a:'Ett hål!', h:'Tänk på att gräva.' },
+        { k:'Vad är det?', q:'Vad är fullt av hål men kan ändå hålla vatten?', a:'En svamp (disksvamp)!', h:'Den finns vid diskbänken.' },
+        { k:'Vad är det?', q:'Vad kan resa jorden runt men stannar hela tiden i ett hörn?', a:'Ett frimärke!', h:'Det sitter på ett brev.' },
+        { k:'Vad är det?', q:'Vad går sönder så fort man säger dess namn?', a:'Tystnaden!', h:'Det är det du hör när ingen pratar.' },
+        { k:'Vad är det?', q:'Vad har en hals men inget huvud?', a:'En flaska!', h:'Man kan dricka ur den.' },
+        { k:'Vad är det?', q:'Ju mer du tar, desto mer lämnar du efter dig. Vad är det?', a:'Fotsteg!', h:'Tänk på att gå i snö.' },
+        { k:'Vad är det?', q:'Vad går upp men kommer aldrig ner igen?', a:'Din ålder!', h:'Det händer på din födelsedag.' },
+        { k:'Vad är det?', q:'Vad är ditt, men används mest av andra?', a:'Ditt namn!', h:'Andra säger det när de ropar på dig.' },
+        { k:'Vad är det?', q:'Vad kan du hålla utan att använda händerna?', a:'Ett löfte!', h:'Man kan också bryta det.' },
+        { k:'Vad är det?', q:'Vad har många ringar men inga fingrar?', a:'Ett träd!', h:'Ringarna visar hur gammalt det är.' },
+        { k:'Vad är det?', q:'Vad springer runt hela gården utan att röra sig?', a:'Staketet!', h:'Det står runt tomten.' },
+        { k:'Vad är det?', q:'Vad är alltid framför dig men går aldrig att se?', a:'Framtiden!', h:'Det är det som inte har hänt än.' },
+        { k:'Vad är det?', q:'Vad är svart när du köper det, rött när du använder det och grått när du slänger det?', a:'Grillkol!', h:'Det används på sommaren när man grillar.' },
+        { k:'Vad är det?', q:'Vad kan fylla ett helt rum men tar ingen plats alls?', a:'Ljus!', h:'Tryck på strömbrytaren.' },
+        { k:'Vad är det?', q:'Vad har en nacke och två armar men inget huvud och inga händer?', a:'En tröja!', h:'Du har den på dig.' },
+        { k:'Vad är det?', q:'Vad har en svans och flyger högt, men har varken vingar eller fjädrar?', a:'En drake (pappersdrake)!', h:'Man håller i ett snöre när det blåser.' },
+        { k:'Vad är det?', q:'Vad har sex sidor och 21 prickar?', a:'En tärning!', h:'Den används i spel. 1+2+3+4+5+6 = ?' },
+        { k:'Vad är det?', q:'Vad har ett skal, en vita och en gula?', a:'Ett ägg!', h:'Hönan lägger det.' },
+        { k:'Vad är det?', q:'Vad har ett öra men hör ingenting?', a:'En kopp! (Handtaget kallas öra.)', h:'Du dricker varm choklad ur den.' },
+        { k:'Vad är det?', q:'Vad har en kam men är ingen frisör?', a:'En tupp!', h:'Den galer på morgonen.' },
+        { k:'Vad är det?', q:'Vad har hatt och fot men inget huvud och inga tår?', a:'En svamp (i skogen)!', h:'Man plockar den på hösten.' },
+        { k:'Vad är det?', q:'Vad har en fot men inga tår, och är jättehögt?', a:'Ett berg!', h:'Man kan klättra upp på toppen.' },
+        { k:'Vad är det?', q:'Vad har rygg och blad men är varken djur eller träd?', a:'En bok!', h:'Du läser i den.' },
+        { k:'Vad är det?', q:'Vad har ett huvud men ingen hjärna?', a:'En spik (eller ett kålhuvud)!', h:'Man slår på den med en hammare.' },
+        { k:'Vad är det?', q:'Vad har en tunga men kan inte smaka?', a:'En sko!', h:'Tungan sitter under skosnöret.' },
+        { k:'Vad är det?', q:'Vad måste man bryta innan man kan använda det?', a:'Ett ägg!', h:'Man gör det när man bakar.' },
+        { k:'Vad är det?', q:'Vad har sju hål och sitter på din kropp?', a:'Ditt huvud! (2 ögon, 2 öron, 2 näsborrar och 1 mun)', h:'Räkna på ditt eget ansikte.' },
+        { k:'Vad är det?', q:'Vad kan gå rakt igenom ett fönster utan att göra hål i det?', a:'Ljuset (solstrålar)!', h:'Det kommer från solen.' },
+        { k:'Vad är det?', q:'Vad köper man för att äta med, men äter aldrig själv?', a:'Bestick (gaffel, kniv och sked)!', h:'De ligger bredvid tallriken.' },
+        { k:'Vad är det?', q:'Jag syns i vattnet men blir aldrig blöt. Vad är jag?', a:'Spegelbilden!', h:'Titta ner i en stilla sjö.' },
+        // ---- VAD ÄR JAG? (natur & djur) ----
+        { k:'Natur & djur', q:'Jag flyger utan vingar och gråter utan ögon. Vad är jag?', a:'Ett moln!', h:'Jag finns på himlen och kan ge regn.' },
+        { k:'Natur & djur', q:'Ju mer det finns av mig, desto mindre ser du. Vad är jag?', a:'Mörker!', h:'Det blir så på natten.' },
+        { k:'Natur & djur', q:'Jag är lätt som en fjäder, men inte ens den starkaste kan hålla mig länge. Vad är jag?', a:'Andetaget!', h:'Försök hålla det så länge du kan…' },
+        { k:'Natur & djur', q:'Jag har en mynning men pratar aldrig, och en bädd men sover aldrig. Vad är jag?', a:'En flod!', h:'Jag rinner ut i havet.' },
+        { k:'Natur & djur', q:'Jag faller från himlen men slår mig aldrig. Vad är jag?', a:'Snö (eller regn)!', h:'Det är vått eller vitt.' },
+        { k:'Natur & djur', q:'Jag har ett öga men kan inte se, och jag snurrar runt med väldig fart. Vad är jag?', a:'En orkan!', h:'En jättestark storm.' },
+        { k:'Natur & djur', q:'Jag syns bara när det är mörkt, men jag är ingen lampa. Vad är jag?', a:'En stjärna!', h:'Titta upp på natthimlen.' },
+        { k:'Natur & djur', q:'Ju varmare det blir, desto mindre blir jag. Vad är jag?', a:'En snögubbe (eller en isbit)!', h:'Jag har ofta en morot som näsa.' },
+        { k:'Natur & djur', q:'Jag har en krona men är ingen kung. Vad är jag?', a:'Ett träd!', h:'Kronan är grön på sommaren.' },
+        { k:'Natur & djur', q:'Jag är en fågel som inte kan flyga, men jag simmar jättebra och bor där det är kallt. Vad är jag?', a:'En pingvin!', h:'Jag ser ut att ha frack.' },
+        { k:'Natur & djur', q:'Jag har åtta ben och spinner – men jag är ingen katt. Vad är jag?', a:'En spindel!', h:'Jag bygger nät.' },
+        { k:'Natur & djur', q:'Jag bär mitt hus på ryggen och går väldigt långsamt. Vad är jag?', a:'En snigel!', h:'Jag lämnar ett slemspår efter mig.' },
+        { k:'Natur & djur', q:'Jag sover hela vintern och älskar honung. Vad är jag?', a:'En björn!', h:'Jag är stor och brun.' },
+        { k:'Natur & djur', q:'Jag har vingar men är ingen fågel, och jag flyger på natten. Vad är jag?', a:'En fladdermus!', h:'Jag hänger upp och ner när jag sover.' },
+        { k:'Natur & djur', q:'Jag bär min unge i en ficka på magen. Vad är jag?', a:'En känguru!', h:'Jag hoppar runt i Australien.' },
+        { k:'Natur & djur', q:'Jag har taggar men är ingen kaktus, och jag rullar ihop mig när jag blir rädd. Vad är jag?', a:'En igelkott!', h:'Jag gillar att äta sniglar.' },
+        { k:'Natur & djur', q:'Jag kan byta färg för att smälta in där jag är. Vad är jag?', a:'En kameleont!', h:'Jag är en ödla med lång tunga.' },
+        { k:'Natur & djur', q:'Ibland är jag rund och hel, ibland ser du bara en liten bit av mig. Vad är jag?', a:'Månen!', h:'Jag lyser på natthimlen.' },
+        { k:'Natur & djur', q:'Jag har randig päls och är världens största kattdjur. Vad är jag?', a:'En tiger!', h:'Mina ränder är svarta och orange.' },
+        { k:'Natur & djur', q:'Jag var först en larv, sedan en puppa och nu flyger jag. Vad är jag?', a:'En fjäril!', h:'Mina vingar är ofta färgglada.' },
+        { k:'Natur & djur', q:'Jag har långa öron, skuttar fram och gillar morötter. Vad är jag?', a:'En kanin (eller en hare)!', h:'Jag har en liten bomullsvit svans.' },
+        { k:'Natur & djur', q:'Jag har en yvig svans, klättrar i träd och samlar nötter inför vintern. Vad är jag?', a:'En ekorre!', h:'Jag är ofta röd eller brun.' },
+        // ---- MATTE & LOGIK ----
+        { k:'Matte & logik', q:'Vilken siffra blir större om du vänder den upp och ner?', a:'6 – den blir 9!', h:'Prova att rita siffrorna och vänd pappret.' },
+        { k:'Matte & logik', q:'Tre katter fångar tre möss på tre minuter. Hur lång tid tar det för 100 katter att fånga 100 möss?', a:'Tre minuter! Varje katt fångar en mus på tre minuter.', h:'Hur lång tid tar det för en katt att fånga en mus?' },
+        { k:'Matte & logik', q:'Hur många gånger kan du ta 5 från 25?', a:'En gång – sedan är det ju 20 kvar!', h:'Läs frågan noga…' },
+        { k:'Matte & logik', q:'Vilka tal skrivs med lika många bokstäver som talet är värt?', a:'Tre (t-r-e) och fyra (f-y-r-a)!', h:'Skriv talen med bokstäver och räkna.' },
+        { k:'Matte & logik', q:'Jag är ett tal. Dubblar du mig och lägger till 3 blir det 17. Vilket tal är jag?', a:'7! (7 · 2 = 14, 14 + 3 = 17)', h:'Räkna baklänges: 17 − 3 = ?' },
+        { k:'Matte & logik', q:'En tegelsten väger 1 kg plus en halv tegelsten. Hur mycket väger en hel tegelsten?', a:'2 kg! Halva stenen väger 1 kg.', h:'Om 1 kg + en halv sten = en hel sten, vad väger en halv sten?' },
+        { k:'Matte & logik', q:'Hur många månader har 30 dagar?', a:'11! Alla utom februari har minst 30 dagar.', h:'Det handlar om att ha 30 dagar – inte exakt 30.' },
+        { k:'Matte & logik', q:'Två pappor och två söner fiskar. Alla får en fisk var, men det blir bara tre fiskar. Hur går det ihop?', a:'De är bara tre: farfar, pappa och son!', h:'En person kan vara både pappa och son.' },
+        { k:'Matte & logik', q:'Vilket väger mest – 1 000 gram eller 1 kilo?', a:'Lika mycket! 1 kg = 1 000 g.', h:'Hur många gram är ett kilo?' },
+        { k:'Matte & logik', q:'Jag är ett tresiffrigt tal. Mina tiotal är 5 mer än mina ental, och mina hundratal är 8 mindre än mina tiotal. Vem är jag?', a:'194!', h:'Tiotalssiffran kan inte vara större än 9.' },
+        { k:'Matte & logik', q:'En bonde har 17 får. Alla utom 9 springer iväg. Hur många får är kvar?', a:'9!', h:'”Alla utom 9” …' },
+        { k:'Matte & logik', q:'Det tar 5 minuter att koka ett ägg. Hur lång tid tar det att koka 3 ägg?', a:'5 minuter – om de kokas samtidigt!', h:'Får det plats fler ägg i kastrullen?' },
+        { k:'Matte & logik', q:'Vilket tal kommer härnäst: 2, 4, 8, 16, …?', a:'32! Talet dubblas varje gång.', h:'Jämför varje tal med talet före.' },
+        { k:'Matte & logik', q:'Vilket tal kommer härnäst: 1, 1, 2, 3, 5, 8, …?', a:'13! Lägg ihop de två talen före (5 + 8).', h:'1 + 1 = 2, 1 + 2 = 3 …' },
+        { k:'Matte & logik', q:'Jag är dubbelt så gammal som min syster. Hon är 5 år nu. Hur gammal är jag när hon fyller 10?', a:'15 år! Jag är 10 nu och vi blir lika mycket äldre.', h:'Hur gammal är jag nu?' },
+        { k:'Matte & logik', q:'En snigel ska upp ur en 10 meter djup brunn. På dagen kryper den 3 m upp, på natten glider den 2 m ner. Vilken dag kommer den upp?', a:'Dag 8! Efter 7 dygn är den 7 m upp, och dag 8 kryper den 3 m till.', h:'Den sista dagen glider den inte tillbaka.' },
+        { k:'Matte & logik', q:'Vad är 10 + 10 · 0?', a:'10! Gånger räknas först: 10 · 0 = 0, och 10 + 0 = 10.', h:'Tänk på räkneordningen.' },
+        { k:'Matte & logik', q:'Det ligger 3 äpplen på bordet och du tar 2. Hur många äpplen har du?', a:'2 – det är ju du som tog dem!', h:'Frågan är hur många DU har.' },
+        { k:'Matte & logik', q:'Vad är hälften av 2 + 2?', a:'3! Hälften av 2 är 1, och 1 + 2 = 3.', h:'Ta hälften först.' },
+        { k:'Matte & logik', q:'Hur många gånger förekommer siffran 9 bland talen 1 till 100?', a:'20 gånger! (9, 19, 29 … 89, och 90–99 där 99 har två nior)', h:'Glöm inte talen i 90-serien.' },
+        { k:'Matte & logik', q:'Om du springer förbi den som ligger tvåa i ett lopp, vilken plats har du då?', a:'Tvåa!', h:'Du tar hans plats.' },
+        { k:'Matte & logik', q:'Ett lag vann med 3–0, men ingen man gjorde något mål. Hur gick det till?', a:'Det var ett damlag!', h:'Tänk på vilka som spelade.' },
+        // ---- ORD & BOKSTÄVER ----
+        { k:'Ord & bokstäver', q:'Vilket ord blir kortare om man lägger till två bokstäver?', a:'Kort – lägg till -are så blir det ”kortare”!', h:'Svaret finns i frågan.' },
+        { k:'Ord & bokstäver', q:'Vilket ord stavas alltid fel?', a:'”Fel”!', h:'Läs frågan bokstavligt.' },
+        { k:'Ord & bokstäver', q:'Vilken bokstav kan man dricka?', a:'T (te)!', h:'Varm dryck i en kopp.' },
+        { k:'Ord & bokstäver', q:'Vilken bokstav kan man bo på mitt i havet?', a:'Ö!', h:'Gotland är en.' },
+        { k:'Ord & bokstäver', q:'Vilken bokstav rinner genom landskapet?', a:'Å!', h:'Mindre än en flod.' },
+        { k:'Ord & bokstäver', q:'Vad finns mitt i Sverige?', a:'Bokstaven R! (S-v-e-R-i-g-e)', h:'Titta på själva ordet.' },
+        { k:'Ord & bokstäver', q:'Vilken båt heter samma sak framlänges som baklänges?', a:'Kajak!', h:'Man paddlar den.' },
+        { k:'Ord & bokstäver', q:'Nämn ett namn som är samma framlänges och baklänges.', a:'Anna, Otto eller Ada!', h:'Ett vanligt flicknamn med fyra bokstäver.' },
+        { k:'Ord & bokstäver', q:'Hur många bokstäver finns det i alfabetet?', a:'9! A-l-f-a-b-e-t-e-t.', h:'Räkna bokstäverna i själva ordet.' },
+        { k:'Ord & bokstäver', q:'Jag finns i ”sol” och i ”snö”, men inte i ”moln”. Vilken bokstav är jag?', a:'S!', h:'Jämför orden bokstav för bokstav.' },
+        { k:'Ord & bokstäver', q:'Jag finns tre gånger i ”mamma” men aldrig i ”pappa”. Vilken bokstav är jag?', a:'M!', h:'Stava ordet mamma.' },
+        { k:'Ord & bokstäver', q:'Vilken bokstav säger man när man blir förvånad?', a:'O! (Oj! Åh!)', h:'Munnen blir rund.' },
+        // ---- KLURINGAR ----
+        { k:'Kluringar', q:'En tupp värper ett ägg på toppen av ett tak. Åt vilket håll rullar ägget?', a:'Inget håll – tuppar värper inte ägg!', h:'Vem är det som värper ägg?' },
+        { k:'Kluringar', q:'Ett eltåg åker norrut och vinden blåser söderut. Åt vilket håll blåser röken?', a:'Ingen rök alls – eltåg ryker inte!', h:'Vad drivs tåget med?' },
+        { k:'Kluringar', q:'Kalles mamma har fyra barn: Vår, Sommar och Höst. Vad heter det fjärde barnet?', a:'Kalle!', h:'Läs början av gåtan igen.' },
+        { k:'Kluringar', q:'Två barn föddes samma dag, samma år, av samma mamma – men de är inte tvillingar. Hur kan det vara så?', a:'De är trillingar (det finns ett barn till)!', h:'Det kan födas fler än två.' },
+        { k:'Kluringar', q:'Vilken var världens största ö innan Grönland upptäcktes?', a:'Grönland – den fanns ju där ändå!', h:'Öar försvinner inte för att ingen sett dem.' },
+        { k:'Kluringar', q:'Om du har mig vill du dela mig, men om du delar mig har du mig inte längre. Vad är jag?', a:'En hemlighet!', h:'Viska…' },
+        { k:'Kluringar', q:'Hur kan du kasta en boll så att den stannar och kommer tillbaka till dig, utan att den studsar eller slår i något?', a:'Kasta den rakt upp i luften!', h:'Tyngdkraften hjälper till.' },
+        { k:'Kluringar', q:'Vad har fyra ben på morgonen, två ben mitt på dagen och tre ben på kvällen?', a:'Människan! Bebisen kryper, vuxna går och gamla har käpp.', h:'Morgon, dag och kväll är livets delar.' },
+        { k:'Kluringar', q:'Vad är det enda man aldrig kan äta till frukost?', a:'Lunch och middag!', h:'Tänk på dagens måltider.' },
+        { k:'Kluringar', q:'Hur många födelsedagar har en vanlig människa?', a:'En! Alla andra är födelsedagsfiranden. 🎂', h:'Hur många gånger föds man?' },
+        { k:'Kluringar', q:'En man gick ut i regnet utan paraply och utan mössa, men inte ett hårstrå på hans huvud blev blött. Hur?', a:'Han var flintskallig!', h:'Hur mycket hår har han?' },
+        { k:'Kluringar', q:'Vilket är tyngst – ett kilo fjädrar eller ett kilo stenar?', a:'Lika tunga! Båda väger ett kilo.', h:'Titta på vikten, inte på materialet.' },
+        { k:'Kluringar', q:'En pappa har sex döttrar och varje dotter har en bror. Hur många barn har pappan?', a:'Sju! Alla döttrar har samma bror.', h:'Är det samma bror?' },
+        { k:'Kluringar', q:'Vilken månad har 28 dagar?', a:'Alla månader!', h:'Minst 28 …' },
+        { k:'Kluringar', q:'Vad kan du se i mörkret men aldrig när det är ljust?', a:'Stjärnorna!', h:'Titta upp en klar natt.' },
+        { k:'Kluringar', q:'Vad är det som alltid kommer men aldrig är här?', a:'I morgon!', h:'När den kommer heter den idag.' }
+    ];
+    function createGator(config){
+        const body = createWidget('GÅTOR', 360, 'gator-widget', config);
+        const widget = body.parentElement.parentElement;
+        const kats = ['Alla'].concat([...new Set(GATOR_BANK.map(s=>s.k))]);
+        let st = { kat:'Alla', id:-1, visad:false, ledtrad:false };
+        if(config && config.data && typeof config.data.id === 'number') Object.assign(st, config.data);
+        const persist = ()=>{ widget.dataset.gator = JSON.stringify(st); saveBoardState(); };
+        widget.dataset.gator = JSON.stringify(st);
+        body.innerHTML = `
+            <div class='hover-menu skamt-top'><select class='editor-select gator-kat'>${kats.map(k=>`<option value='${k}'>${k==='Alla'?'🧩 Alla gåtor':k}</option>`).join('')}</select></div>
+            <div class='skamt-kort gator-kort'>
+                <div class='skamt-tagg gator-tagg'></div>
+                <div class='skamt-fraga gator-fraga'></div>
+                <div class='gator-ledtrad' style='display:none;'></div>
+                <div class='skamt-svar gator-svar' style='display:none;'></div>
+            </div>
+            <div class='skamt-knappar'>
+                <button type='button' class='btn btn-secondary gator-tips'>💡 Ledtråd</button>
+                <button type='button' class='btn btn-primary gator-visa'>🔑 Visa svaret</button>
+                <button type='button' class='btn btn-secondary gator-ny'>🎲 Ny gåta</button>
+                <button type='button' class='btn btn-secondary gator-las' title='Läs upp gåtan'>🔊</button>
+            </div>
+            <div class='skamt-info gator-info'></div>`;
+        const q = s=>body.querySelector(s);
+        const katSel=q('.gator-kat'), taggEl=q('.gator-tagg'), fragaEl=q('.gator-fraga'), tipsEl=q('.gator-ledtrad'), svarEl=q('.gator-svar'),
+              tipsBtn=q('.gator-tips'), visaBtn=q('.gator-visa'), nyBtn=q('.gator-ny'), lasBtn=q('.gator-las'), info=q('.gator-info');
+        const LS='mintavla_gatorPase';
+        const pool = ()=> GATOR_BANK.map((s,i)=>i).filter(i=> st.kat==='Alla' || GATOR_BANK[i].k===st.kat);
+        function nasta(){
+            const ids = pool(); if(!ids.length) return -1;
+            let pase=[]; try{ const p=JSON.parse(localStorage.getItem(LS)||'{}'); pase = Array.isArray(p[st.kat]) ? p[st.kat] : []; }catch(e){}
+            pase = pase.filter(i=> ids.indexOf(i)>-1);
+            if(!pase.length){ pase = ids.slice(); for(let i=pase.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pase[i],pase[j]]=[pase[j],pase[i]]; } if(pase.length>1 && pase[0]===st.id){ pase.push(pase.shift()); } }
+            const id = pase.shift();
+            if(!window.isGuestMode){ try{ const p=JSON.parse(localStorage.getItem(LS)||'{}'); p[st.kat]=pase; localStorage.setItem(LS, JSON.stringify(p)); }catch(e){} }
+            return id;
+        }
+        function render(){
+            katSel.value = st.kat;
+            const s = GATOR_BANK[st.id];
+            if(!s){ taggEl.textContent=''; fragaEl.textContent='Tryck på 🎲 Ny gåta!'; tipsEl.style.display='none'; svarEl.style.display='none'; return; }
+            taggEl.textContent = s.k;
+            fragaEl.textContent = s.q;
+            tipsEl.textContent = '💡 ' + (s.h || '');
+            tipsEl.style.display = (st.ledtrad && s.h) ? 'block' : 'none';
+            tipsBtn.style.display = s.h ? '' : 'none';
+            tipsBtn.textContent = st.ledtrad ? '🙈 Dölj ledtråd' : '💡 Ledtråd';
+            svarEl.textContent = s.a;
+            svarEl.style.display = st.visad ? 'block' : 'none';
+            visaBtn.textContent = st.visad ? '🙈 Dölj svaret' : '🔑 Visa svaret';
+            info.textContent = (st.kat==='Alla' ? 'Alla kategorier' : st.kat) + ' · ' + pool().length + ' gåtor';
+        }
+        tipsBtn.onclick = (e)=>{ e.stopPropagation(); st.ledtrad = !st.ledtrad; render(); persist(); };
+        visaBtn.onclick = (e)=>{ e.stopPropagation(); st.visad = !st.visad; render(); persist(); };
+        nyBtn.onclick = (e)=>{ e.stopPropagation(); try{ window.speechSynthesis && speechSynthesis.cancel(); }catch(_){}
+            fragaEl.classList.remove('skamt-pop'); void fragaEl.offsetWidth; fragaEl.classList.add('skamt-pop');
+            st.id = nasta(); st.visad = false; st.ledtrad = false; render(); persist(); };
+        katSel.onchange = ()=>{ st.kat = katSel.value; st.id = nasta(); st.visad = false; st.ledtrad = false; render(); persist(); };
+        lasBtn.onclick = (e)=>{ e.stopPropagation(); const s=GATOR_BANK[st.id]; if(!s || !window.speechSynthesis) return;
+            try{ speechSynthesis.cancel(); const tal=(t)=>{ const u=new SpeechSynthesisUtterance(t.replace(/[–”“]/g,' ')); u.lang='sv-SE'; const v=(typeof dikSwedishVoice==='function')?dikSwedishVoice():null; if(v) u.voice=v; u.rate=0.95; return u; };
+                speechSynthesis.speak(tal(s.q)); if(st.ledtrad && s.h) speechSynthesis.speak(tal('Ledtråd: '+s.h)); if(st.visad) speechSynthesis.speak(tal('Svar: '+s.a)); }catch(_){} };
+        if(st.id<0 || !GATOR_BANK[st.id]) st.id = nasta();
+        render();
+    }
+    window.createGator = createGator;
+
     function createImageWidget(config){
         const body = createWidget('BILD', 300, '', config);
         const widget = body.parentElement.parentElement;
@@ -18560,6 +18759,64 @@
                 { ord:'effektiv', typ:'synonym', svar:'verkningsfull / ändamålsenlig' }
             ]
         };
+        // NYTT: Meningsbyggnad med olika skrivregler (stor bokstav i namn/platser, liten bokstav för
+        // veckodagar/månader/språk, punkt, frågetecken, utropstecken, komma och anföringstecken).
+        // Varje uppgift har felskriven mening (f), rätt mening (r) och vilken regel det gäller (g).
+        const SKRIVREGLER = {
+            ak4: [
+                { f:'min kompis heter emma', r:'Min kompis heter Emma.', g:'Stor bokstav först och i namn, punkt sist' },
+                { f:'hunden heter bella', r:'Hunden heter Bella.', g:'Djurnamn skrivs med stor bokstav' },
+                { f:'vi bor i linköping', r:'Vi bor i Linköping.', g:'Städer skrivs med stor bokstav' },
+                { f:'sverige är ett land i europa', r:'Sverige är ett land i Europa.', g:'Länder och världsdelar skrivs med stor bokstav' },
+                { f:'leo och sara spelar fotboll', r:'Leo och Sara spelar fotboll.', g:'Namn skrivs med stor bokstav' },
+                { f:'vi läste en bok av astrid lindgren', r:'Vi läste en bok av Astrid Lindgren.', g:'För- och efternamn skrivs med stor bokstav' },
+                { f:'vad heter din lärare', r:'Vad heter din lärare?', g:'Frågor slutar med frågetecken' },
+                { f:'vilken dag är det idag', r:'Vilken dag är det idag?', g:'Frågor slutar med frågetecken' },
+                { f:'har du sett min katt', r:'Har du sett min katt?', g:'Frågor slutar med frågetecken' },
+                { f:'vart ska du åka på sportlovet', r:'Vart ska du åka på sportlovet?', g:'Frågor slutar med frågetecken' },
+                { f:'vad roligt det var', r:'Vad roligt det var!', g:'Utrop slutar med utropstecken' },
+                { f:'akta dig', r:'Akta dig!', g:'Varningar och utrop slutar med utropstecken' },
+                { f:'hjälp mig', r:'Hjälp mig!', g:'Utrop slutar med utropstecken' },
+                { f:'jag köpte äpplen bananer och päron', r:'Jag köpte äpplen, bananer och päron.', g:'Komma i uppräkning – men inget komma före ”och”' },
+                { f:'min hund kan sitta ligga och rulla runt', r:'Min hund kan sitta, ligga och rulla runt.', g:'Komma i uppräkning' },
+                { f:'vi har idrott på måndag och torsdag', r:'Vi har idrott på måndag och torsdag.', g:'Veckodagar skrivs med liten bokstav' },
+                { f:'på lördag ska vi åka till stockholm', r:'På lördag ska vi åka till Stockholm.', g:'Veckodagar liten bokstav – städer stor bokstav' },
+                { f:'i juli åker vi till gotland', r:'I juli åker vi till Gotland.', g:'Månader liten bokstav – öar och platser stor bokstav' }
+            ],
+            ak5: [
+                { f:'jag ville gå ut men det regnade', r:'Jag ville gå ut, men det regnade.', g:'Komma före ”men”' },
+                { f:'emma ville spela kort men oskar ville läsa', r:'Emma ville spela kort, men Oskar ville läsa.', g:'Komma före ”men” och stor bokstav i namn' },
+                { f:'vet du vad klockan är', r:'Vet du vad klockan är?', g:'Frågor slutar med frågetecken' },
+                { f:'mamma frågade om jag hade gjort läxan', r:'Mamma frågade om jag hade gjort läxan.', g:'Någon berättar om en fråga (indirekt fråga) – då blir det punkt, inte frågetecken' },
+                { f:'kan du hjälpa mig med läxan', r:'Kan du hjälpa mig med läxan?', g:'Frågor slutar med frågetecken' },
+                { f:'vi har svenska matte och engelska på fredag', r:'Vi har svenska, matte och engelska på fredag.', g:'Komma i uppräkning – skolämnen och veckodagar med liten bokstav' },
+                { f:'nils bor i göteborg och hans kusin bor i malmö', r:'Nils bor i Göteborg och hans kusin bor i Malmö.', g:'Namn och städer skrivs med stor bokstav' },
+                { f:'i december firar vi jul och nyår', r:'I december firar vi jul och nyår.', g:'Månader och högtider skrivs med liten bokstav' },
+                { f:'min farfar kommer från norge och pratar norska', r:'Min farfar kommer från Norge och pratar norska.', g:'Länder stor bokstav – språk liten bokstav' },
+                { f:'vi simmade i vättern förra sommaren', r:'Vi simmade i Vättern förra sommaren.', g:'Sjöar skrivs med stor bokstav' },
+                { f:'oj vad du har vuxit', r:'Oj, vad du har vuxit!', g:'Komma efter ett utropsord (oj, ja, nej) och utropstecken vid utrop' },
+                { f:'ja jag kommer gärna', r:'Ja, jag kommer gärna.', g:'Komma efter ”ja” och ”nej” i början' },
+                { f:'nej tack jag är mätt', r:'Nej tack, jag är mätt.', g:'Komma efter ”nej tack”' },
+                { f:'vilken tur att det blev sol', r:'Vilken tur att det blev sol!', g:'Utrop slutar med utropstecken' },
+                { f:'på tisdag ska klass 5b åka till kolmården', r:'På tisdag ska klass 5b åka till Kolmården.', g:'Veckodagar liten bokstav – platsnamn stor bokstav' }
+            ],
+            ak6: [
+                { f:'eftersom det regnade stannade vi inne', r:'Eftersom det regnade, stannade vi inne.', g:'Komma efter en bisats som står först i meningen' },
+                { f:'när vi kom hem lagade vi middag', r:'När vi kom hem, lagade vi middag.', g:'Komma efter en bisats som står först i meningen' },
+                { f:'om du vill kan du följa med', r:'Om du vill, kan du följa med.', g:'Komma efter en bisats som står först i meningen' },
+                { f:'trots att hon var trött tränade hon', r:'Trots att hon var trött, tränade hon.', g:'Komma efter en bisats som står först i meningen' },
+                { f:'jag gillar glass men jag tål inte laktos', r:'Jag gillar glass, men jag tål inte laktos.', g:'Komma före ”men”' },
+                { f:'kom hit ropade läraren', r:'”Kom hit!” ropade läraren.', g:'Anföringstecken runt det någon säger (direkt anföring)' },
+                { f:'jag är hungrig sa lisa', r:'”Jag är hungrig”, sa Lisa.', g:'Anföringstecken runt repliken, komma efter och stor bokstav i namnet' },
+                { f:'ska vi gå frågade ali', r:'”Ska vi gå?” frågade Ali.', g:'Frågetecknet står innanför anföringstecknen' },
+                { f:'vad ska du göra på påsklovet undrade mormor', r:'”Vad ska du göra på påsklovet?” undrade mormor.', g:'Direkt anföring med fråga – högtider med liten bokstav' },
+                { f:'pappa sa att vi skulle äta klockan sex', r:'Pappa sa att vi skulle äta klockan sex.', g:'Indirekt anföring (”sa att …”) – inga anföringstecken' },
+                { f:'vi har en hund två katter och tre kaniner', r:'Vi har en hund, två katter och tre kaniner.', g:'Komma i uppräkning' },
+                { f:'astrid lindgren skrev pippi långstrump', r:'Astrid Lindgren skrev Pippi Långstrump.', g:'Namn på personer och figurer skrivs med stor bokstav' },
+                { f:'förenta nationerna har sitt huvudkontor i new york', r:'Förenta nationerna har sitt huvudkontor i New York.', g:'I namn på organisationer får bara första ordet stor bokstav – men i stadsnamn som New York får båda' },
+                { f:'i augusti börjar skolan igen sa rektorn', r:'”I augusti börjar skolan igen”, sa rektorn.', g:'Anföringstecken, komma efter repliken och månader med liten bokstav' }
+            ]
+        };
         const MENING_BAS = {
             ak4: [
                 'det regnar ute', 'jag gillar att spela fotboll', 'min bästa kompis heter Alex',
@@ -18655,7 +18912,7 @@
             },
             mening: {
                 namn:'Meningsbyggnad', emoji:'✍️',
-                gen: function(niva){ const m = val(MENING_BAS[niva]); const ratt = m.charAt(0).toUpperCase() + m.slice(1) + '.'; return { fraga:'Skriv om meningen enligt skrivreglerna: "'+m+'"', svar:ratt }; }
+                gen: function(niva){ const m = val(SKRIVREGLER[niva] || SKRIVREGLER.ak4); return { fraga:'Skriv meningen rätt med stora bokstäver och skiljetecken: "'+m.f+'"', svar: m.r + '\n📏 ' + m.g }; }
             },
             klurig: {
                 namn:'Ordgåta', emoji:'🧩',
@@ -35841,6 +36098,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             "createGOTD()",            // Grej of the day
             "createBrainBreak()",      // Brain Break
             "createSkamt()",           // Skämt
+            "createGator()",           // Gåtor
             "createWordOfTheDay()"     // Dagens ord
         ],
         'Matematik': [
