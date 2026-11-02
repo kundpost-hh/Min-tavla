@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-10-22-korsord-ord1';</script>
+    <script>window.BUILD_VERSION = '2026-11-02-skamt1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -368,6 +368,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createQuizPoll()"><div class="icon">🗳️</div><div class="label">Omröstning</div></button>
             <button class="tool-btn" data-cat="klassrum" onclick="createQuizTavling()"><div class="icon">🏆</div><div class="label">Quiztävling</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
+            <button class="tool-btn" data-cat="lek" onclick="createSkamt()"><div class="icon">😂</div><div class="label">Skämt</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="21" height="21" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
         </div>
 
@@ -2708,6 +2709,21 @@
     .popup-confetti { position: absolute; width: 10px; height: 10px; top: -20px; box-shadow: 0 0 5px currentColor; animation: pop-confetti-fall linear infinite; }
     @keyframes pop-confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
 
+    /* SKÄMT */
+    .skamt-widget .widget-body { padding:12px 14px; }
+    .skamt-top { margin-bottom:8px; }
+    .skamt-top select { width:100%; }
+    .skamt-kort { background:linear-gradient(135deg,#fff7d6,#ffe9f2); border:2px solid #ffd166; border-radius:16px; padding:16px 16px 14px; text-align:center; min-height:120px; display:flex; flex-direction:column; justify-content:center; gap:10px; }
+    .skamt-tagg { align-self:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:#b45309; background:#fff; border:1px solid #fde68a; border-radius:999px; padding:2px 10px; }
+    .skamt-tagg:empty { display:none; }
+    .skamt-fraga { font-size:20px; font-weight:800; color:#1f2937; line-height:1.35; }
+    .skamt-svar { font-size:20px; font-weight:800; color:#db2777; line-height:1.35; background:#fff; border-radius:12px; padding:10px 12px; border:2px dashed #f9a8d4; animation:popIn .35s cubic-bezier(.175,.885,.32,1.275); }
+    .skamt-pop { animation:popIn .3s ease; }
+    .skamt-knappar { display:flex; gap:6px; margin-top:10px; }
+    .skamt-knappar .skamt-visa { flex:1.3; background:#db2777; }
+    .skamt-knappar .skamt-ny { flex:1; }
+    .skamt-knappar .skamt-las { flex:0 0 auto; padding-left:12px; padding-right:12px; }
+    .skamt-info { text-align:center; font-size:11px; color:#8e8e93; margin-top:6px; }
     /* BRAIN BREAK WIDGET */
     .bb-widget { min-width: 320px; }
     .bb-widget .widget-inner { background: transparent !important; box-shadow: none !important; border: none !important; }
@@ -5534,6 +5550,7 @@
                 else if (type === 'IDROTT') { state.data.tab = w.dataset.idrottTab || 'rorelse'; }
                 else if (type === 'MUSIK') { state.data.tab = w.dataset.musikTab || 'rytm'; }
                 else if (type === 'BILD & SLÖJD') { state.data.tab = w.dataset.bildTab || 'rittema'; }
+                else if (type === 'SKÄMT') { try{ state.data = JSON.parse(w.dataset.skamt || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
                 else if (type === 'VIDEO') { state.data.kind = w.dataset.videoKind || ''; state.data.src = w.dataset.videoSrc || ''; }
@@ -5671,6 +5688,7 @@
             else if (w.type === 'MUSIK') createMusikMegaWidget(w);
             else if (w.type === 'BILD & SLÖJD') createBildMegaWidget(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
+            else if (w.type === 'SKÄMT') createSkamt(w);
             // FIX: "Lugn & ro"-widgeten (andningspaus) gick att lägga till från verktygslådan, men
             // saknades helt här i återställningslogiken - den försvann alltså tyst varje gång sidan
             // laddades om, eftersom inget kändes igen den och byggde upp den på nytt.
@@ -14988,6 +15006,193 @@
         }
     }
 
+    // ============================================================
+    // SKÄMT – snälla skämt och gåtor för åk 4. Fråga först, poängen döljs tills man klickar.
+    // "Påse"-slumpning: alla skämt (i vald kategori) kommer en gång innan något upprepas.
+    // ============================================================
+    const SKAMT_BANK = [
+        // ---- DJUR ----
+        { k:'Djur', q:'Varför kan inte elefanter använda datorer?', a:'De är rädda för musen!' },
+        { k:'Djur', q:'Vad kallar man en hund som har feber?', a:'En varmkorv!' },
+        { k:'Djur', q:'Vad heter en björn som inte har några tänder?', a:'En gummibjörn!' },
+        { k:'Djur', q:'Vad är svart, vitt och rött?', a:'En zebra som har bränt sig i solen!' },
+        { k:'Djur', q:'Vad sa den ena kon till den andra kon?', a:'– Muuu! – Det var precis det jag skulle säga!' },
+        { k:'Djur', q:'Varför gick hönan över vägen?', a:'För att komma till andra sidan!' },
+        { k:'Djur', q:'Vad säger en snigel som åker på en sköldpaddas rygg?', a:'Wiiiiii, vad fort det går!' },
+        { k:'Djur', q:'Vad får man om man korsar en ko med en studsmatta?', a:'Milkshake!' },
+        { k:'Djur', q:'Vilket djur kan räkna till tusen?', a:'Tusenfotingen!' },
+        { k:'Djur', q:'Vilket djur är bäst på att städa?', a:'Dammråttan!' },
+        { k:'Djur', q:'Varför har giraffen så lång hals?', a:'För att fötterna luktar så illa!' },
+        { k:'Djur', q:'Vad är grått, har en snabel och en resväska?', a:'En elefant som ska åka på semester!' },
+        { k:'Djur', q:'Varför kommer snigeln aldrig för sent hem?', a:'Den har alltid med sig huset!' },
+        { k:'Djur', q:'Vad får man om man korsar en hund med en miniräknare?', a:'En kompis man alltid kan räkna med!' },
+        { k:'Djur', q:'Vad säger ugglan när den har tappat bort något?', a:'Hu-var? Hu-var är det?' },
+        { k:'Djur', q:'Varför spelar fiskar aldrig tennis?', a:'De är rädda för nätet!' },
+        { k:'Djur', q:'Vad är det värsta som kan hända en tusenfoting?', a:'Att få skoskav!' },
+        { k:'Djur', q:'Vad säger grisen som har legat för länge i solen?', a:'Nu är jag bacon!' },
+        { k:'Djur', q:'Vad kallar man ett får utan ben?', a:'Ett moln!' },
+        { k:'Djur', q:'Varför sjunger fåglarna så tidigt på morgonen?', a:'De har inga väckarklockor!' },
+        { k:'Djur', q:'Varför har bina så klibbigt hår?', a:'De använder honungskam!' },
+        // ---- SKOLAN ----
+        { k:'Skolan', q:'Varför tog eleven med sig en stege till skolan?', a:'Hon ville börja på högstadiet!' },
+        { k:'Skolan', q:'Varför var matteboken så ledsen?', a:'Den hade alldeles för många problem!' },
+        { k:'Skolan', q:'Varför var linjalen så populär?', a:'Den höll alltid måttet!' },
+        { k:'Skolan', q:'Vad sa sexan till nian?', a:'Varför står du på huvudet?' },
+        { k:'Skolan', q:'Varför är sexan rädd för sjuan?', a:'För att sju – åt – nio!' },
+        { k:'Skolan', q:'Vad sa nollan till åttan?', a:'Vilket snyggt bälte du har!' },
+        { k:'Skolan', q:'Läraren: – Var ligger Sverige?', a:'Eleven: – På sidan 34 i boken!' },
+        { k:'Skolan', q:'Läraren: – Varför kom du för sent idag?', a:'– Det stod på skylten: ”Skola – kör sakta!”' },
+        { k:'Skolan', q:'Läraren: – Om du har 10 kr och ber din pappa om 10 kr till, hur mycket har du då?', a:'– 10 kr. – Men du kan ju inte räkna! – Du känner inte min pappa!' },
+        { k:'Skolan', q:'Läraren: – Kan du säga ett ord med jättemånga bokstäver?', a:'– Brevlåda!' },
+        { k:'Skolan', q:'Vad sa suddgummit till pennan?', a:'Lugn, jag tar hand om dina misstag!' },
+        { k:'Skolan', q:'Varför kastade Kalle ut klockan genom fönstret?', a:'Han ville se tiden flyga!' },
+        { k:'Skolan', q:'Läraren: – Om jag delar ett äpple i fyra delar och en banan i fyra delar, vad får jag då?', a:'– Fruktsallad!' },
+        { k:'Skolan', q:'Pappa: – Vad lärde du dig i skolan idag?', a:'– Inte tillräckligt. Jag måste gå dit igen i morgon!' },
+        { k:'Skolan', q:'Varför har läraren solglasögon i klassrummet?', a:'Eleverna är så smarta att det bländar!' },
+        { k:'Skolan', q:'Vad sa den ena kritan till den andra?', a:'Vi ses vid tavlan!' },
+        { k:'Skolan', q:'Varför är miniräknaren så omtyckt?', a:'Man kan alltid räkna med den!' },
+        { k:'Skolan', q:'Vad sa cirkeln till triangeln?', a:'Varför är du alltid så kantig?' },
+        { k:'Skolan', q:'Läraren: – Vad är hälften av åtta?', a:'– Uppifrån eller från sidan? Uppifrån blir det 0, från sidan blir det 3!' },
+        { k:'Skolan', q:'Läraren: – Nämn två pronomen!', a:'– Vem, jag? – Helt rätt!' },
+        { k:'Skolan', q:'Varför blev pennan skickad till rektorn?', a:'Den hade skrivit på väggen!' },
+        // ---- MAT ----
+        { k:'Mat', q:'Vad är grönt och har hjul?', a:'Gräs. Jag ljög om hjulen!' },
+        { k:'Mat', q:'Vad är ett spökes favoritmat?', a:'Spökhetti!' },
+        { k:'Mat', q:'Vad är gult och ser ut som en banan?', a:'En banan!' },
+        { k:'Mat', q:'Varför blev tomaten alldeles röd?', a:'Den såg gurkan byta om!' },
+        { k:'Mat', q:'Vilken fisk är alltid på dåligt humör?', a:'Surströmmingen!' },
+        { k:'Mat', q:'Varför har citronen inga kompisar?', a:'Den är alltid så sur!' },
+        { k:'Mat', q:'Varför var pannkakan så trött?', a:'Den hade blivit vänd hela natten!' },
+        { k:'Mat', q:'Varför gick kakan till doktorn?', a:'Den kände sig lite smulig!' },
+        { k:'Mat', q:'Vad är rött och åker upp och ner?', a:'En tomat i en hiss!' },
+        { k:'Mat', q:'Vad sa sylten till brödet?', a:'Jag har verkligen fastnat för dig!' },
+        { k:'Mat', q:'Vad är det enda man aldrig kan äta till frukost?', a:'Lunch och middag!' },
+        { k:'Mat', q:'Varför gick bananen till doktorn?', a:'Den skalade av sig hela tiden!' },
+        { k:'Mat', q:'Vad sa korven när den lades på grillen?', a:'Nu blir det hett om öronen!' },
+        // ---- GÅTOR ----
+        { k:'Gåtor', q:'Vad går och går men kommer aldrig fram till dörren?', a:'Klockan!' },
+        { k:'Gåtor', q:'Vad har tänder men kan aldrig bita?', a:'En kam!' },
+        { k:'Gåtor', q:'Vad blir blötare ju mer det torkar?', a:'En handduk!' },
+        { k:'Gåtor', q:'Vad har fyra ben men kan inte gå?', a:'Ett bord!' },
+        { k:'Gåtor', q:'Vad har ett öga men kan inte se?', a:'En nål!' },
+        { k:'Gåtor', q:'Vad kan man fånga men aldrig kasta?', a:'En förkylning!' },
+        { k:'Gåtor', q:'Vad går upp men kommer aldrig ner igen?', a:'Din ålder!' },
+        { k:'Gåtor', q:'Vilken månad har 28 dagar?', a:'Alla månader!' },
+        { k:'Gåtor', q:'Vad är ditt, men används mest av andra?', a:'Ditt namn!' },
+        { k:'Gåtor', q:'Vad rinner men har inga ben?', a:'Näsan!' },
+        { k:'Gåtor', q:'Vad blir större ju mer man tar bort?', a:'Ett hål!' },
+        { k:'Gåtor', q:'Vad är fullt av hål men kan ändå hålla vatten?', a:'En svamp!' },
+        { k:'Gåtor', q:'Vad kan resa jorden runt men stannar hela tiden i ett hörn?', a:'Ett frimärke!' },
+        { k:'Gåtor', q:'Vad går sönder så fort man säger dess namn?', a:'Tystnaden!' },
+        { k:'Gåtor', q:'Vad väger mest – ett kilo fjädrar eller ett kilo stenar?', a:'Lika mycket! Båda väger ett kilo.' },
+        { k:'Gåtor', q:'En pappa har sex döttrar och varje dotter har en bror. Hur många barn har pappan?', a:'Sju! Alla döttrar har samma bror.' },
+        { k:'Gåtor', q:'Vad kan du hålla utan att röra med händerna?', a:'Ett löfte!' },
+        { k:'Gåtor', q:'Vilket ord stavas alltid fel?', a:'”Fel”!' },
+        { k:'Gåtor', q:'Vad har många ringar men inga fingrar?', a:'Ett träd!' },
+        { k:'Gåtor', q:'Vad springer runt hela gården utan att röra sig?', a:'Staketet!' },
+        { k:'Gåtor', q:'Vad har en hals men inget huvud?', a:'En flaska!' },
+        { k:'Gåtor', q:'Vad är alltid framför dig men går aldrig att se?', a:'Framtiden!' },
+        { k:'Gåtor', q:'Vad har både huvudända och fotända men ingen kropp?', a:'En säng!' },
+        { k:'Gåtor', q:'Vad är lätt att komma in i men svårt att komma ur?', a:'Problem!' },
+        { k:'Gåtor', q:'Vilken bokstav kan man dricka?', a:'T (te)!' },
+        { k:'Gåtor', q:'Vilken bokstav kan man bo på mitt i havet?', a:'Ö!' },
+        { k:'Gåtor', q:'Vilken bokstav rinner genom landskapet?', a:'Å!' },
+        { k:'Gåtor', q:'Ju mer du tar, desto mer lämnar du efter dig. Vad är det?', a:'Fotsteg!' },
+        // ---- TEKNIK ----
+        { k:'Teknik', q:'Varför gick datorn till tandläkaren?', a:'Den hade fått blåtand!' },
+        { k:'Teknik', q:'Vad är datorns favoritsnacks?', a:'Mikrochips!' },
+        { k:'Teknik', q:'Varför blev datorn förkyld?', a:'Någon hade lämnat Windows öppet!' },
+        { k:'Teknik', q:'Vad sa mobilen till laddaren?', a:'Du ger mig så mycket energi!' },
+        { k:'Teknik', q:'Vad är datorns favoritdans?', a:'Disk-o!' },
+        { k:'Teknik', q:'Varför var datorn så trött?', a:'Den hade för många flikar öppna!' },
+        { k:'Teknik', q:'Varför var datormusen så populär?', a:'Den klickade med alla!' },
+        { k:'Teknik', q:'Varför var robotens mamma så nöjd?', a:'Han städade sitt rum på 0,3 sekunder!' },
+        // ---- KALLE & DOKTORN ----
+        { k:'Kalle & doktorn', q:'Kalle: – Mamma, får jag gå ut och leka? Mamma: – Med de där hålen i byxorna?', a:'Kalle: – Nej, med Lisa!' },
+        { k:'Kalle & doktorn', q:'Kalle: – Pappa, kan du skriva i mörkret? Pappa: – Ja, det tror jag.', a:'Kalle: – Bra! Kan du släcka lampan och skriva under mitt prov?' },
+        { k:'Kalle & doktorn', q:'Doktorn: – Du hostar mycket bättre idag!', a:'– Ja, jag har övat hela natten!' },
+        { k:'Kalle & doktorn', q:'– Doktorn, doktorn, jag tror att jag är en hund! – Hur länge har du trott det?', a:'– Ända sedan jag var valp!' },
+        { k:'Kalle & doktorn', q:'– Doktorn, doktorn, ingen bryr sig om mig!', a:'– Nästa!' },
+        { k:'Kalle & doktorn', q:'– Doktorn, doktorn, jag tror att jag är osynlig!', a:'– Vem sa det?' },
+        { k:'Kalle & doktorn', q:'– Doktorn, doktorn, jag har tappat minnet! – Sedan när då?', a:'– Sedan när vadå?' },
+        { k:'Kalle & doktorn', q:'Mamma: – Kalle, varför har du en tom kartong i kylskåpet?', a:'Kalle: – Ifall någon vill ha ingenting!' },
+        // ---- BLANDAT ----
+        { k:'Blandat', q:'Vad sa den ena väggen till den andra väggen?', a:'Vi ses i hörnet!' },
+        { k:'Blandat', q:'Vad sa havet till stranden?', a:'Ingenting – det bara vinkade!' },
+        { k:'Blandat', q:'Vad säger en snögubbe till en annan snögubbe?', a:'Känner du också lukten av morötter?' },
+        { k:'Blandat', q:'Vad gör snögubben på sommaren?', a:'Han smälter in!' },
+        { k:'Blandat', q:'Varför är spöken så dåliga på att ljuga?', a:'Man ser rakt igenom dem!' },
+        { k:'Blandat', q:'Vad är en vampyrs favoritfrukt?', a:'Blodapelsin!' },
+        { k:'Blandat', q:'Varför slåss aldrig skelett med varandra?', a:'De har inte magen till det!' },
+        { k:'Blandat', q:'Vad är en pirats favoritbokstav?', a:'Arrrrr!' },
+        { k:'Blandat', q:'Vad sa trafikljuset till bilen?', a:'Titta inte, jag byter om!' },
+        { k:'Blandat', q:'Vad kallar man en bumerang som inte kommer tillbaka?', a:'En pinne!' },
+        { k:'Blandat', q:'Varför var molnet så glatt?', a:'Det hade precis fått en regnbåge!' },
+        { k:'Blandat', q:'Varför satte Kalle in sin klocka på banken?', a:'Han ville spara tid!' },
+        { k:'Blandat', q:'Vad sa nålen till tråden?', a:'Följ mig!' },
+        { k:'Blandat', q:'Varför tog Lisa med sig en penna till sängen?', a:'Hon ville rita sina drömmar!' },
+        { k:'Blandat', q:'Varför satte mannen pengar i frysen?', a:'Han ville ha kalla kontanter!' },
+        { k:'Blandat', q:'Vad sa paraplyet till regnet?', a:'Du kan inte komma åt mig!' },
+    ];
+    function createSkamt(config){
+        const body = createWidget('SKÄMT', 360, 'skamt-widget', config);
+        const widget = body.parentElement.parentElement;
+        const kats = ['Alla'].concat([...new Set(SKAMT_BANK.map(s=>s.k))]);
+        let st = { kat:'Alla', id:-1, visad:false };
+        if(config && config.data && typeof config.data.id === 'number') Object.assign(st, config.data);
+        const persist = ()=>{ widget.dataset.skamt = JSON.stringify(st); saveBoardState(); };
+        widget.dataset.skamt = JSON.stringify(st);
+        body.innerHTML = `
+            <div class='hover-menu skamt-top'><select class='editor-select skamt-kat'>${kats.map(k=>`<option value='${k}'>${k==='Alla'?'😂 Alla skämt':k}</option>`).join('')}</select></div>
+            <div class='skamt-kort'>
+                <div class='skamt-tagg'></div>
+                <div class='skamt-fraga'></div>
+                <div class='skamt-svar' style='display:none;'></div>
+            </div>
+            <div class='skamt-knappar'>
+                <button type='button' class='btn btn-primary skamt-visa'>😂 Visa svaret</button>
+                <button type='button' class='btn btn-secondary skamt-ny'>🎲 Nytt skämt</button>
+                <button type='button' class='btn btn-secondary skamt-las' title='Läs upp skämtet'>🔊</button>
+            </div>
+            <div class='skamt-info'></div>`;
+        const q = s=>body.querySelector(s);
+        const katSel=q('.skamt-kat'), taggEl=q('.skamt-tagg'), fragaEl=q('.skamt-fraga'), svarEl=q('.skamt-svar'), visaBtn=q('.skamt-visa'), nyBtn=q('.skamt-ny'), lasBtn=q('.skamt-las'), info=q('.skamt-info');
+        const LS='mintavla_skamtPase';
+        const pool = ()=> SKAMT_BANK.map((s,i)=>i).filter(i=> st.kat==='Alla' || SKAMT_BANK[i].k===st.kat);
+        function nasta(){
+            const ids = pool(); if(!ids.length) return -1;
+            let pase=[]; try{ const p=JSON.parse(localStorage.getItem(LS)||'{}'); pase = Array.isArray(p[st.kat]) ? p[st.kat] : []; }catch(e){}
+            pase = pase.filter(i=> ids.indexOf(i)>-1);
+            if(!pase.length){ pase = ids.slice(); for(let i=pase.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pase[i],pase[j]]=[pase[j],pase[i]]; } if(pase.length>1 && pase[0]===st.id){ pase.push(pase.shift()); } }
+            const id = pase.shift();
+            if(!window.isGuestMode){ try{ const p=JSON.parse(localStorage.getItem(LS)||'{}'); p[st.kat]=pase; localStorage.setItem(LS, JSON.stringify(p)); }catch(e){} }
+            return id;
+        }
+        function render(){
+            katSel.value = st.kat;
+            const s = SKAMT_BANK[st.id];
+            if(!s){ taggEl.textContent=''; fragaEl.textContent='Tryck på 🎲 Nytt skämt!'; svarEl.style.display='none'; visaBtn.style.display='none'; info.textContent = SKAMT_BANK.length+' skämt finns'; return; }
+            taggEl.textContent = s.k;
+            fragaEl.textContent = s.q;
+            svarEl.textContent = s.a;
+            svarEl.style.display = st.visad ? 'block' : 'none';
+            visaBtn.style.display = '';
+            visaBtn.textContent = st.visad ? '🙈 Dölj svaret' : '😂 Visa svaret';
+            const ids = pool(); info.textContent = (st.kat==='Alla' ? 'Alla kategorier' : st.kat) + ' · ' + ids.length + ' skämt';
+        }
+        visaBtn.onclick = (e)=>{ e.stopPropagation(); st.visad = !st.visad; render(); persist(); };
+        nyBtn.onclick = (e)=>{ e.stopPropagation(); try{ window.speechSynthesis && speechSynthesis.cancel(); }catch(_){}
+            fragaEl.classList.remove('skamt-pop'); void fragaEl.offsetWidth; fragaEl.classList.add('skamt-pop');
+            st.id = nasta(); st.visad = false; render(); persist(); };
+        katSel.onchange = ()=>{ st.kat = katSel.value; st.id = nasta(); st.visad = false; render(); persist(); };
+        lasBtn.onclick = (e)=>{ e.stopPropagation(); const s=SKAMT_BANK[st.id]; if(!s || !window.speechSynthesis) return;
+            try{ speechSynthesis.cancel(); const tal=(t)=>{ const u=new SpeechSynthesisUtterance(t.replace(/–/g,',')); u.lang='sv-SE'; const v=(typeof dikSwedishVoice==='function')?dikSwedishVoice():null; if(v) u.voice=v; u.rate=0.95; return u; };
+                speechSynthesis.speak(tal(s.q)); if(st.visad) speechSynthesis.speak(tal(s.a)); }catch(_){} };
+        if(st.id<0 || !SKAMT_BANK[st.id]) st.id = nasta();
+        render();
+    }
+    window.createSkamt = createSkamt;
+
     function createImageWidget(config){
         const body = createWidget('BILD', 300, '', config);
         const widget = body.parentElement.parentElement;
@@ -17351,7 +17556,8 @@
                         <option value='+'>+</option>
                         <option value='-'>−</option>
                         <option value='×'>×</option>
-                        <option value='÷'>÷</option>
+                        <option value='÷'>÷ utan rest</option>
+                        <option value='÷r'>÷ med rest</option>
                     </select>
                     <input type='number' class='upp-in upp-b' placeholder='Tal 2' min='0'>
                     <button class='btn btn-primary upp-starta'>Starta</button>
@@ -17649,7 +17855,10 @@
             if(isNaN(a)||isNaN(b)||a<0||b<0){ uppStatusEl.textContent='Skriv två positiva heltal i båda fälten.'; return false; }
             if(operation==='-' && b>a){ uppStatusEl.textContent='Tal 2 måste vara mindre än eller lika med Tal 1 vid subtraktion.'; return false; }
             if(operation==='×' && Math.min(String(a).length,String(b).length)>1){ uppStatusEl.textContent='Vid multiplikation ska ett av talen vara en ensiffrig siffra (kort multiplikation).'; return false; }
-            if(operation==='÷' && (b<1||b>9)){ uppStatusEl.textContent='Vid division ska Tal 2 (nämnaren) vara en ensiffrig siffra 1–9 (kort division).'; return false; }
+            if((operation==='÷' || operation==='÷r') && (b<1||b>9)){ uppStatusEl.textContent='Vid division ska Tal 2 (nämnaren) vara en ensiffrig siffra 1–9 (kort division).'; return false; }
+            // NYTT: division i två delar - "÷ utan rest" (går jämnt ut) och "÷ med rest".
+            if(operation==='÷' && a % b !== 0){ uppStatusEl.innerHTML='<b>'+a+' ÷ '+b+'</b> går inte jämnt ut (det blir rest '+(a%b)+'). Välj <b>÷ med rest</b> eller ändra talen.'; return false; }
+            if(operation==='÷r') operation='÷'; // samma uppställning - resten visas efter kvoten
             uppBuild(a,b,operation);
             uppStegBtn.disabled=false; uppAllaBtn.disabled=false; uppOmBtn.disabled=false;
             return true;
@@ -17660,8 +17869,14 @@
             const digitsN=parseInt(uppSiffrorSel.value,10), operation=uppOpSel.value;
             const max=Math.pow(10,digitsN)-1, min=Math.pow(10,digitsN-1);
             let a=Math.floor(Math.random()*(max-min+1))+min, b;
-            if(operation==='×' || operation==='÷'){ b=Math.floor(Math.random()*8)+2; }
+            if(operation==='×' || operation==='÷' || operation==='÷r'){ b=Math.floor(Math.random()*8)+2; }
             else { b=Math.floor(Math.random()*(max-min+1))+min; if(operation==='-' && b>a){ const t=a; a=b; b=t; } }
+            if(operation==='÷'){ // utan rest: täljaren = nämnaren × ett heltal, med valt antal siffror
+                const qMin=Math.ceil(min/b), qMax=Math.floor(max/b);
+                a = b * (qMin + Math.floor(Math.random()*(qMax-qMin+1)));
+            } else if(operation==='÷r'){ // med rest: slumpa tills det inte går jämnt ut
+                let f=0; while(a % b === 0 && f++ < 50){ a=Math.floor(Math.random()*(max-min+1))+min; }
+            }
             uppAIn.value=a; uppBIn.value=b;
             uppStartaMed(a,b,operation); saveBoardState();
         };
@@ -17671,8 +17886,9 @@
 
         if(config && config.data && config.data.uppData && config.data.uppData.started){
             const ud = config.data.uppData;
-            uppAIn.value=ud.a; uppBIn.value=ud.b; uppOpSel.value=ud.op||'+';
             const a=parseInt(ud.a,10), b=parseInt(ud.b,10);
+            if(ud.op==='÷' && b>0 && a % b !== 0) ud.op='÷r'; // äldre sparad division med rest
+            uppAIn.value=ud.a; uppBIn.value=ud.b; uppOpSel.value=ud.op||'+';
             if(uppStartaMed(a,b,ud.op||'+')){
                 uppStep = Math.min(ud.step||0, uppN); uppExtraRevealed=!!ud.extraRevealed;
                 uppRender(); uppSyncData();
@@ -35624,6 +35840,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             "createElevWidget()",      // Elever
             "createGOTD()",            // Grej of the day
             "createBrainBreak()",      // Brain Break
+            "createSkamt()",           // Skämt
             "createWordOfTheDay()"     // Dagens ord
         ],
         'Matematik': [
