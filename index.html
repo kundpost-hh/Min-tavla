@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-02-sv-blad1';</script>
+    <script>window.BUILD_VERSION = '2026-11-04-tala-stod1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3151,6 +3151,11 @@
     /* ---- TAL & LYSSNA ---- */
     .tal-ctrl { display:flex; gap:6px; margin-bottom:12px; align-items:center; }
     .tal-ctrl select { flex:1; }
+    /* NYTT: stödfrågor under frågorna i Tala-widgetarna */
+    .tala-q { display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; }
+    .tala-stod { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:6px; }
+    .tala-stod-lbl { font-size:12px; font-weight:800; color:#6b7280; margin-right:2px; }
+    .tala-stod-chip { font-size:14px; font-weight:700; color:#4338ca; background:#fff; border:1.5px solid #c7d2fe; border-radius:999px; padding:3px 11px; line-height:1.35; }
     .tal-fraga-ruta { background:linear-gradient(135deg,#eef4ff,#f4f0fb); border:1px solid #e2e4f0; border-radius:16px; padding:22px 18px; min-height:96px; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:14px; }
     .tal-fraga-ruta .tal-fraga-txt { font-size:22px; font-weight:900; color:#2a2350; line-height:1.3; }
     .tal-fraga-ruta .tal-placeholder { font-size:15px; color:#8a8aa0; font-weight:600; }
@@ -10280,6 +10285,120 @@
     // Slumpar fram en taluppgift och startar en nedräkning (standard 1 minut) när
     // frågan visas. Eleven talar om ämnet medan tiden räknas ner. Ljudsignal när
     // tiden är ute. Timern styrs (paus/starta om) men startar automatiskt vid ny fråga.
+    // ============================================================
+    // NYTT: Stödfrågor (enkla följdfrågor som Varför? Hur? Vem?) till frågorna i Tala-widgetarna.
+    // Väljs utifrån vad frågan handlar om. Visas under frågan så eleverna kan prata längre.
+    // ============================================================
+    function talaStodfragor(text, typ){
+        const t = String(text||'').toLowerCase();
+        const har = (...ord)=> ord.some(o=> t.indexOf(o) > -1);
+        // Särskilt anpassade stödfrågor för vissa frågor (kollas först)
+        const SAR = [
+            ['superkraft', ['Vilken superkraft väljer du?','Vad skulle du göra med den?','Varför just den?']],
+            ['gjort i sommar', ['Vad gjorde du?','Vem var med?','Varför var det så roligt?']],
+            ['drömhus', ['Hur ser huset ut?','Var ligger det?','Vilket rum är bäst och varför?']],
+            ['plats jag vill besöka', ['Var ligger platsen?','Varför vill du åka dit?','Vad vill du göra där?']],
+            ['land skulle du vilja besöka', ['Vilket land väljer du?','Varför just dit?','Vad vill du göra där?']],
+            ['favoritleksak', ['Hur såg den ut?','Vem fick du den av?','Varför tyckte du om den?']],
+            ['morgonrutin', ['Vad gör du först?','Varför gör du så?','Hur känns det efteråt?']],
+            ['favoritsemester', ['Vart åkte ni?','Vad gjorde ni där?','Varför var den bäst?']],
+            ['byta namn', ['Vilket namn skulle du välja?','Varför just det namnet?','Vad skulle dina kompisar säga?']],
+            ['vilket djur jag skulle vara', ['Vilket djur väljer du?','Varför just det djuret?','Vad skulle du göra som det djuret?']],
+            ['vilket djur skulle du vilja vara', ['Vilket djur väljer du?','Varför just det djuret?','Vad skulle du göra som det djuret?']],
+            ['träffa vem som helst', ['Vem skulle du träffa?','Varför just hen?','Vad skulle du fråga?']],
+            ['husdjur imorgon', ['Vilket djur väljer du?','Varför just det?','Hur skulle du ta hand om det?']],
+            ['resa vart som helst', ['Vart skulle du resa?','Varför just dit?','Vad skulle du göra där?']],
+            ['en önskan', ['Vad skulle du önska?','Varför just det?','Hur skulle det bli då?']],
+            ['eget företag', ['Vad skulle företaget göra?','Vem skulle vilja köpa det?','Vad skulle det heta?']],
+            ['hittade en skatt', ['Var hittade du den?','Vad fanns i skatten?','Vad skulle du göra med den?']],
+            ['resa i tiden', ['Till vilken tid skulle du resa?','Varför just dit?','Vad skulle du göra där?']],
+            ['stolt', ['Vad gjorde du?','Hur gjorde du det?','Varför är du stolt över det?']],
+            ['modig', ['Vad hände?','Varför var det läskigt?','Hur kändes det efteråt?']],
+            ['trygg', ['Var är det?','Hur ser det ut där?','Varför känner du dig trygg där?']],
+            ['plats jag känner mig glad', ['Var är det?','Vad gör du där?','Varför blir du glad där?']],
+            ['regnig dag', ['Vad gör du då?','Varför gillar du det?','Vem är du med?']],
+            ['lärt mig nyligen', ['Vad lärde du dig?','Hur lärde du dig det?','Varför var det bra att kunna?']],
+            ['förvånar', ['Vad förvånade dig?','Varför blev du förvånad?','Vad hände sedan?']],
+            ['vill göra i sommar', ['Vad vill du göra?','Varför vill du det?','Vem vill du göra det med?']],
+            ['skolan blev inställd', ['Vad skulle du göra först?','Vem skulle du vara med?','Varför just det?']],
+            ['bra kompis', ['Kan du ge ett exempel?','Varför är det viktigt?','Hur kan du själv vara en bra kompis?']],
+            ['vad vill du bli', ['Varför vill du bli det?','Vad behöver man kunna då?','Hur länge har du velat det?']],
+            ['drömyrke', ['Varför vill du bli det?','Vad behöver man kunna då?','Hur länge har du velat det?']],
+            ['på rasten', ['Vem är du med?','Varför är det roligt?','Var på skolgården gör ni det?']],
+            ['öde ö', ['Vad tar du med dig?','Varför just det?','Vad skulle du sakna mest?']],
+            ['firar du', ['Vem vill du ha med?','Vad vill du äta?','Vad är det bästa med kalaset?']],
+            ['dag riktigt bra', ['Kan du ge ett exempel?','Vem är med en riktigt bra dag?','Hur känns det då?']],
+            ['uppfinn', ['Vad skulle uppfinningen göra?','Vem skulle ha nytta av den?','Hur skulle den se ut?']],
+            ['bra lärare', ['Kan du ge ett exempel?','Varför är det viktigt?','Hur kan eleverna hjälpa läraren?']],
+            ['laga till en kompis', ['Vilken maträtt väljer du?','Hur lagar man den?','Varför tror du att kompisen gillar den?']],
+            ['plats mysig', ['Kan du ge ett exempel?','Var är det mysigast för dig?','Vad behövs för att det ska bli mysigt?']],
+            ['drömdag', ['Vad gör du på morgonen?','Vem är med dig?','Vad är det bästa med dagen?']],
+            ['senaste lektionen', ['Vilket ämne var det?','Vad gjorde ni först, sedan och sist?','Vad lärde du dig?']],
+            ['ser upp till', ['Vem är det?','Vad gör personen?','Varför ser du upp till hen?']],
+            ['i helgen', ['Vad gjorde du?','Vem var du med?','Vad var roligast?']],
+            ['helgens planer', ['Fråga: Vad ska du göra?','Fråga: Vem ska du vara med?','Fråga: Vad ser du mest fram emot?']],
+            ['bästa vän', ['Vad heter hen?','Vad gör ni tillsammans?','Varför är hen en bra vän?']],
+            ['min familj', ['Vilka finns i din familj?','Vad gör ni tillsammans?','Vad är roligast med dem?']],
+            ['bra på', ['Hur lärde du dig det?','Hur länge har du hållit på?','Varför tycker du om det?']],
+            ['årstid', ['Varför gillar du den årstiden?','Vad brukar du göra då?','Hur är vädret då?']],
+            ['färg', ['Varför gillar du den färgen?','Vad har du som är i den färgen?','Vad får färgen dig att tänka på?']],
+            ['roligast', ['Vad är det?','Varför är det så roligt?','Vem gör du det med?']],
+            ['roligaste', ['Vad är det?','Varför är det så roligt?','Vem gör du det med?']],
+            ['skulle du vilja', ['Ja eller nej?','Varför eller varför inte?','Vad skulle vara bäst med det?']]
+        ];
+        if(t.indexOf('hellre') > -1) return ['Vad väljer du?','Varför valde du det?','Finns det något dåligt med ditt val?'];
+        for(const [nyckel, fr] of SAR){ if(t.indexOf(nyckel) > -1 && typ!=='Diskutera' && typ!=='Intervjua') return fr; }
+        // Muntliga uppgifter (Prata) styrs först av uppgiftstypen
+        if(typ==='Diskutera' && / eller /.test(t)) return ['Vad väljer du?','Varför tycker du så?','Vad skulle någon som tycker tvärtom säga?'];
+        if(typ==='Diskutera') return ['Vad tycker du – ja eller nej?','Varför tycker du så?','Vad skulle någon som tycker tvärtom säga?'];
+        if(typ==='Intervjua') return ['Börja med att fråga: Vad …?','Följ upp: Varför då?','Följ upp: Hur länge / hur ofta?'];
+        if(typ==='Återberätta'){
+            if(har('regler')) return ['Hur börjar spelet?','Hur vinner man?','Vad får man inte göra?'];
+            return ['Vem handlar det om?','Vad hände först, sedan och sist?','Hur slutade det?'];
+        }
+        if(typ==='Samtala') return ['Varför är det viktigt?','Hur kan man göra?','Kan ni ge ett exempel?'];
+        // Hellre-frågor och val
+        if(har('hellre') || /(bättre|roligare|finast|bäst) .* eller /.test(t)) return ['Vad väljer du?','Varför valde du det?','Finns det något dåligt med ditt val?'];
+        if(/^(är |vad tycker)/.test(t)) return ['Varför tycker du så?','Kan du ge ett exempel?','Vad tror du att andra tycker?'];
+        // Känslor
+        if(har('rädd','arg','ledsen','lugn','trygg','glad','stolt','modig'))
+            return ['Kan du ge ett exempel?','Varför känns det så?','Vad brukar du göra då?'];
+        // Fantasi: om jag …
+        if(/^(om |vad skulle|vad gör du om|vilken superkraft|vilket djur skulle)/.test(t) || har('om jag ','om du '))
+            return ['Vad skulle du göra först?','Varför just det?','Hur skulle det kännas?'];
+        // Minnen och händelser
+        if(har('minne','minns','äventyr','rolig sak jag gjort','bästa dag','födelsedag','i sommar','i helgen','en gång','hittills','en dag '))
+            return ['När hände det?','Vem var med?','Hur kändes det?'];
+        // Lära sig, drömmar och framtid
+        if(har('lära','bättre på','drömyrke','vill bli','dröm','uppfinn','företag','vill göra','vill besöka','vill bli när'))
+            return ['Varför vill du det?','Hur kan du göra för att det ska bli så?','Vem kan hjälpa dig?'];
+        // Personer
+        if(har('vän','kompis','familj','person','lärare','ser upp till'))
+            return ['Vem tänker du på?','Varför är det viktigt?','Kan du ge ett exempel?'];
+        // Djur
+        if(har('djur','husdjur'))
+            return ['Hur ser djuret ut?','Vad äter det och var bor det?','Varför gillar du det djuret?'];
+        // Platser
+        if(har('plats','ställe','land','stad','hem','ö ','drömhus','bo '))
+            return ['Var ligger det?','Hur ser det ut där?','Varför tycker du om det?'];
+        // Mat
+        if(har('mat','godis','maträtt','smakar'))
+            return ['Hur smakar det?','När brukar du äta det?','Varför gillar du det?'];
+        // Åsiktsfrågor (Är det …? Vad tycker du …?)
+        if(/^(är |vad tycker)/.test(t) || har('viktigt','bra med','bästa med','roligast','roligaste'))
+            return ['Varför tycker du så?','Kan du ge ett exempel?','Vad tror du att andra tycker?'];
+        // Favoriter och saker man gillar
+        if(har('favorit','bästa','gillar','tycker om','bra på','hobby','spel','sport','film','bok','musik','låt','sång','färg','årstid','saga','leksak'))
+            return ['Varför gillar du det?','Hur länge har du gillat det?','Vad är det bästa med det?'];
+        if(typ==='Berätta') return ['Vad är det?','Varför valde du det?','Hur känns det när du tänker på det?'];
+        return ['Varför?','Hur då?','Kan du ge ett exempel?'];
+    }
+    function talaStodHtml(text, typ){
+        const esc = (s)=> String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+        return `<div class='tala-stod'><span class='tala-stod-lbl'>💭 Stödfrågor:</span>${talaStodfragor(text, typ).map(f=>`<span class='tala-stod-chip'>${esc(f)}</span>`).join('')}</div>`;
+    }
+    window.talaStodfragor = talaStodfragor;
+
     function createSpeakListen(config){
         if(config===undefined) config=null;
         const body = createWidget('TALA OCH LYSSNA', 360, 'tal-widget', config);
@@ -10335,7 +10454,7 @@
             uppdatera(); tickId=setInterval(uppdatera, 200);
         }
         function visaFraga(fraga, startaOcksa){
-            fragaRuta.innerHTML = `<span class='tal-fraga-txt'>${fraga}</span>`;
+            fragaRuta.innerHTML = `<div class='tala-q'><span class='tal-fraga-txt'>${fraga}</span>${talaStodHtml(fraga)}</div>`;
             if(startaOcksa) startaTimer();
         }
         function talBuzz(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; if(!window._remAC) window._remAC=new AC(); const ctx=window._remAC; if(ctx.state==='suspended') ctx.resume().catch(()=>{}); [0,0.18,0.36].forEach(d=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=660; const t=ctx.currentTime+d; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.16,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.15); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.16); }); }catch(e){} }
@@ -10394,7 +10513,7 @@
             if(config.data.fraga){ aktuellFraga=config.data.fraga; visaFraga(aktuellFraga); }
         }
         function syncData(){ widget.dataset.samtalaFraga = aktuellFraga; widget.dataset.samtalaTid = tidSel.value; }
-        function visaFraga(f){ fragaRuta.innerHTML = `<span class='sam-fraga-txt'>${f}</span>`; }
+        function visaFraga(f){ fragaRuta.innerHTML = `<div class='tala-q'><span class='sam-fraga-txt'>${f}</span>${talaStodHtml(f)}</div>`; }
         function stoppaTimer(){ if(tickId){ clearInterval(tickId); tickId=null; } }
         function fmtTid(ms){ const s=Math.max(0,Math.ceil(ms/1000)); const m=Math.floor(s/60), r=s%60; return m>0 ? (m+':'+String(r).padStart(2,'0')) : String(r); }
         function uppdatera(){
@@ -10598,7 +10717,7 @@
             uppdateraTL(); tickIdTL=setInterval(uppdateraTL, 200);
         }
         function visaFragaTL(fraga, startaOcksa){
-            fragaRutaTL.innerHTML = `<span class='tal-fraga-txt'>${fraga}</span>`;
+            fragaRutaTL.innerHTML = `<div class='tala-q'><span class='tal-fraga-txt'>${fraga}</span>${talaStodHtml(fraga)}</div>`;
             if(startaOcksa) startaTimerTL();
         }
         function talBuzz(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; if(!window._remAC) window._remAC=new AC(); const ctx=window._remAC; if(ctx.state==='suspended') ctx.resume().catch(()=>{}); [0,0.18,0.36].forEach(d=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=660; const t=ctx.currentTime+d; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.16,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.15); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.16); }); }catch(e){} }
@@ -10623,7 +10742,7 @@
             if(d.tid) tidSelSam.value=d.tid;
             if(d.fraga){ aktuellFragaSam=d.fraga; visaFragaSam(aktuellFragaSam); }
         }
-        function visaFragaSam(f){ fragaRutaSam.innerHTML = `<span class='sam-fraga-txt'>${f}</span>`; }
+        function visaFragaSam(f){ fragaRutaSam.innerHTML = `<div class='tala-q'><span class='sam-fraga-txt'>${f}</span>${talaStodHtml(f)}</div>`; }
         function stoppaTimerSam(){ if(tickIdSam){ clearInterval(tickIdSam); tickIdSam=null; } }
         function uppdateraSam(){
             const kvar = deadlineSam - Date.now();
@@ -10660,7 +10779,7 @@
             const i=FRAGOR_PRATA.findIndex(x=>x.f===config.data.prata.fraga);
             if(i>=0){ idxAktuellPrata=i; visaFragaPrata(FRAGOR_PRATA[i]); }
         }
-        function visaFragaPrata(q){ typElPrata.textContent = q.e+' '+q.t; fragaRutaPrata.innerHTML = `<span class='prata-fraga-txt'>${q.f}</span>`; }
+        function visaFragaPrata(q){ typElPrata.textContent = q.e+' '+q.t; fragaRutaPrata.innerHTML = `<div class='tala-q'><span class='prata-fraga-txt'>${q.f}</span>${talaStodHtml(q.f, q.t)}</div>`; }
         function slumpaFragaPrata(){
             let i; do { i=Math.floor(Math.random()*FRAGOR_PRATA.length); } while(FRAGOR_PRATA.length>1 && i===idxAktuellPrata);
             idxAktuellPrata=i; visaFragaPrata(FRAGOR_PRATA[i]); persist(); saveBoardState();
@@ -10748,7 +10867,7 @@
             if(i>=0){ idxAktuell=i; visaFraga(FRAGOR[i]); }
         }
         function syncData(){ widget.dataset.prataFraga = (idxAktuell>=0? FRAGOR[idxAktuell].f : ''); }
-        function visaFraga(q){ typEl.textContent = q.e+' '+q.t; fragaRuta.innerHTML = `<span class='prata-fraga-txt'>${q.f}</span>`; }
+        function visaFraga(q){ typEl.textContent = q.e+' '+q.t; fragaRuta.innerHTML = `<div class='tala-q'><span class='prata-fraga-txt'>${q.f}</span>${talaStodHtml(q.f, q.t)}</div>`; }
         function slumpaFraga(){
             let i; do { i=Math.floor(Math.random()*FRAGOR.length); } while(FRAGOR.length>1 && i===idxAktuell);
             idxAktuell=i; visaFraga(FRAGOR[i]); syncData(); saveBoardState();
@@ -10869,7 +10988,7 @@
             if(config.data.fraga){ aktuellFraga=config.data.fraga; visaFraga(aktuellFraga); }
         }
         function syncData(){ widget.dataset.skrivFraga = aktuellFraga; widget.dataset.skrivTid = tidSel.value; }
-        function visaFraga(f){ fragaRuta.innerHTML = `<span class='sam-fraga-txt'>${f}</span>`; }
+        function visaFraga(f){ fragaRuta.innerHTML = `<div class='tala-q'><span class='sam-fraga-txt'>${f}</span>${talaStodHtml(f)}</div>`; }
         function stoppaTimer(){ if(tickId){ clearInterval(tickId); tickId=null; } }
         function fmtTid(ms){ const s=Math.max(0,Math.ceil(ms/1000)); const m=Math.floor(s/60), r=s%60; return m+':'+String(r).padStart(2,'0'); }
         function uppdatera(){
@@ -29269,7 +29388,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         let egnaFragor=[];
         let fragKalla='standard';
         if(ctx.state.skrivTid) tidSel.value = ctx.state.skrivTid;
-        function visaFraga(f){ fragaRuta.innerHTML = `<span class='sam-fraga-txt'>${f}</span>`; }
+        function visaFraga(f){ fragaRuta.innerHTML = `<div class='tala-q'><span class='sam-fraga-txt'>${f}</span>${talaStodHtml(f)}</div>`; }
         if(aktuellFraga) visaFraga(aktuellFraga);
         function syncData(){ ctx.state.skrivFraga = aktuellFraga; ctx.state.skrivTid = tidSel.value; ctx.persist(); }
         function stoppaTimer(){ if(tickId){ clearInterval(tickId); tickId=null; } }
