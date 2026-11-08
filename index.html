@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-04-tala-stod1';</script>
+    <script>window.BUILD_VERSION = '2026-11-08-tack-igen1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3038,6 +3038,7 @@
     .dt-random-btn:hover { background:#2d2d44; }
     .dt-facts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:min(360px,50vh); overflow-y:auto; padding-right:2px; }
     .dt-fact-card { background:#fff; border:1.5px solid #ececf0; border-radius:14px; padding:12px 14px; transition:border-color .15s,background .15s; }
+    .dt-fact-card { cursor:pointer; }
     .dt-fact-card.dt-fact-hidden { cursor:pointer; }
     .dt-fact-card.dt-fact-hidden:hover { border-color:#007aff; background:#f5faff; }
     .dt-fact-card.dt-fact-hidden .dt-fact-val { display:none; }
@@ -7278,20 +7279,37 @@
         </div>`;
     }
     function wireGotdKort(container, word){
+        // NYTT: varje ruta kan visas OCH täckas igen. Knappen står kvar och växlar mellan
+        // "Visa …" och "🙈 Dölj". "Visa allt" växlar på samma sätt till "Dölj allt".
+        const ETIKETT = { bild:'🖼️ Visa bild', exempel:'📝 Visa exempel', forklaring:'💬 Visa förklaring', synonym:'🔄 Visa synonym' };
+        const allBtn = container.querySelector('.gotd-reveal-all');
+        const synka = ()=>{
+            let allaVisas = true;
+            container.querySelectorAll('.gotd-panel').forEach(panel=>{
+                const btn = panel.querySelector('.gotd-reveal-btn'), bodyEl = panel.querySelector('.gotd-panel-body');
+                if(!btn || !bodyEl) return;
+                const vis = bodyEl.style.display !== 'none';
+                if(!vis) allaVisas = false;
+                btn.style.display = '';
+                btn.textContent = vis ? '🙈 Dölj' : (ETIKETT[panel.dataset.kind] || '👁️ Visa');
+            });
+            if(allBtn) allBtn.textContent = allaVisas ? '🙈 Dölj allt' : '👁️ Visa allt';
+        };
         container.querySelectorAll('.gotd-panel').forEach(panel=>{
             const btn = panel.querySelector('.gotd-reveal-btn');
             const bodyEl = panel.querySelector('.gotd-panel-body');
             if(!btn || !bodyEl) return;
-            btn.onclick = ()=>{ bodyEl.style.display='block'; btn.style.display='none'; saveBoardState(); };
+            btn.onclick = ()=>{ bodyEl.style.display = (bodyEl.style.display === 'none') ? 'block' : 'none'; synka(); saveBoardState(); };
         });
-        const allBtn = container.querySelector('.gotd-reveal-all');
         if(allBtn){
             allBtn.onclick = ()=>{
-                container.querySelectorAll('.gotd-panel-body').forEach(b=> b.style.display='block');
-                container.querySelectorAll('.gotd-reveal-btn').forEach(b=> b.style.display='none');
-                saveBoardState();
+                const bodies = [...container.querySelectorAll('.gotd-panel-body')];
+                const allaVisas = bodies.every(b=> b.style.display !== 'none');
+                bodies.forEach(b=> b.style.display = allaVisas ? 'none' : 'block');
+                synka(); saveBoardState();
             };
         }
+        synka();
     }
     // FIX: förklaringar/bilder som hämtas härifrån kommer från Wikipedia/Wiktionary (CC BY-SA),
     // vilket kräver källhänvisning när innehållet återges - lägger till en liten synlig länk till
@@ -16598,7 +16616,7 @@
                 card.innerHTML = "<div class='dt-fact-label'></div><div class='dt-fact-val'></div><div class='dt-fact-hint'>👁️ Tryck för att visa</div>";
                 card.querySelector('.dt-fact-label').textContent = label;
                 card.querySelector('.dt-fact-val').textContent = val;
-                card.onclick=()=>{ card.classList.remove('dt-fact-hidden'); };
+                card.onclick=()=>{ const dold=card.classList.toggle('dt-fact-hidden'); card.title = dold ? '' : 'Tryck för att täcka svaret igen'; };
                 factsGrid.appendChild(card);
             });
             // Faktorer - egen bred ruta, döljs på samma sätt tills man klickar, och kan sedan
@@ -16620,7 +16638,7 @@
                 toggleBtn.textContent = expanded ? '▲' : '…';
             }
             toggleBtn.onclick=(e)=>{ e.stopPropagation(); expanded=!expanded; renderFaktorVal(); };
-            fCard.onclick=()=>{ fCard.classList.remove('dt-fact-hidden'); };
+            fCard.onclick=()=>{ const dold=fCard.classList.toggle('dt-fact-hidden'); fCard.title = dold ? '' : 'Tryck för att täcka svaret igen'; };
             renderFaktorVal();
             factsGrid.appendChild(fCard);
         }
@@ -20347,7 +20365,7 @@
             taskEl.innerHTML='';
             const q=document.createElement('span'); q.textContent=uppgift.t;
             const a=document.createElement('span'); a.className='rakna-ans';
-            if(avslojad){ a.textContent=uppgift.s; a.classList.add('revealed'); }
+            if(avslojad){ a.textContent=uppgift.s; a.classList.add('revealed'); a.title='Klicka för att täcka svaret igen'; a.style.cursor='pointer'; a.onclick=()=>{ avslojad=false; renderTask(); }; }
             else { a.textContent='?'; a.title='Klicka för att visa svaret'; a.onclick=()=>{ avslojad=true; stoppaTimer(); timerEl.style.display='none'; renderTask(); }; }
             taskEl.appendChild(q); taskEl.appendChild(a);
         }
@@ -20825,7 +20843,7 @@
             const t=document.createElement('span'); t.className='verb-tempus'; t.textContent=tempus; r.appendChild(t);
             if(dolj){
                 const a=document.createElement('span'); a.className='rakna-ans'; a.textContent='?'; a.title='Klicka för att visa';
-                a.onclick=()=>{ if(htmlForm){ a.outerHTML=htmlForm; } else { a.textContent=form; a.classList.add('revealed'); a.onclick=null; } };
+                a.onclick=()=>{ if(htmlForm){ a.innerHTML=htmlForm; } else { a.textContent=form; } a.classList.add('revealed'); a.onclick=null; };
                 r.appendChild(a);
             } else if(htmlForm){ r.insertAdjacentHTML('beforeend', htmlForm); }
             else { const f=document.createElement('span'); f.className='verb-form'; f.textContent=form; r.appendChild(f); }
@@ -21358,7 +21376,8 @@
             // FIX: yrkesnamnet döljs bakom en klickbar "tryck för att visa"-etikett tills man
             // själv väljer att avslöja svaret - bra för att testa eleverna innan facit visas.
             const nameHint=document.createElement('button'); nameHint.type='button'; nameHint.className='yrke-namn-hint'; nameHint.textContent='👁️ Tryck för att visa yrket';
-            nameHint.onclick=()=>{ h2.textContent = item.namn; };
+            nameHint.onclick=(e)=>{ e.stopPropagation(); h2.textContent = item.namn; h2.style.cursor='pointer'; h2.title='Klicka för att täcka yrket igen';
+                h2.onclick=()=>{ h2.textContent=''; h2.appendChild(nameHint); h2.onclick=null; h2.style.cursor=''; h2.title=''; }; };
             h2.appendChild(nameHint);
             const cl=document.createElement('button'); cl.className='figx-close'; cl.textContent='✕'; cl.title='Stäng'; cl.onclick=stang;
             head.appendChild(h2); head.appendChild(cl); box.appendChild(head);
