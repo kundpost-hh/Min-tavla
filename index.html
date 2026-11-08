@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-08-tack-igen1';</script>
+    <script>window.BUILD_VERSION = '2026-11-08-dagenstal2';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -16598,13 +16598,22 @@
             const cards = [];
             cards.push(['Udda / Jämnt', n%2===0 ? 'Jämnt' : 'Udda']);
             cards.push([kompisLabel(), String(rangeMax - n)]);
-            cards.push(['Hälften', String(n/2)]);
+            cards.push(['Hälften', String(n/2).replace('.',',')]);
             cards.push(['Dubbelt', String(n*2)]);
             cards.push(['Grannar', (n-1)+' och '+(n+1)]);
             cards.push(['Närmaste 10-tal', String(dtNarmasteRunt(n,10))]);
             if(rangeMax>=100) cards.push(['Närmaste 100-tal', String(dtNarmasteRunt(n,100))]);
             cards.push(['Primtal?', n<2 ? 'Nej' : (dtArPrimtal(n) ? 'Ja' : 'Nej')]);
-            cards.push(['Romerska siffror', dtRomerska(n)]);
+            // NYTT (ersätter Romerska siffror): positionsvärde, siffersumma, ×10, delbarhet och kvadrattal
+            const H=Math.floor(n/100)%10, T=Math.floor(n/10)%10, E=n%10, Tu=Math.floor(n/1000);
+            const pos = (Tu ? Tu+' tusental, ' : '') + (n>=100 ? H+' hundratal, ' : '') + (n>=10 ? T+' tiotal, ' : '') + E+' ental';
+            cards.push(['Värdet av siffrorna', pos]);
+            cards.push(['Siffersumma', String(n).split('').join(' + ') + (n>=10 ? ' = '+String(n).split('').reduce((a,b)=>a+(+b),0) : '')]);
+            cards.push(['Gånger 10', String(n*10)]);
+            const delbar = [2,3,5,10].filter(d=> n>0 && n%d===0);
+            cards.push(['Delbart med 2, 3, 5, 10?', n===0 ? 'Alla (0 går jämnt)' : (delbar.length ? delbar.join(', ') : 'Inget av dem')]);
+            const rot = Math.round(Math.sqrt(n));
+            cards.push(['Kvadrattal?', rot*rot===n ? 'Ja ('+rot+' · '+rot+')' : 'Nej']);
             cards.push(['I ord', dtTalIOrd(n)]);
             cards.push(['På engelska', dtTalPaEngelska(n)]);
             // FIX: svaren döljs nu tills man själv klickar för att visa dem, ett och ett - bra för
@@ -16669,6 +16678,10 @@
                 "<div><b>Närmaste 10-/100-tal</b> - vilket runt tal som ligger närmast.</div>"+
                 "<div><b>Primtal</b> - ett tal större än 1 som bara går jämnt att dela med 1 och sig själv.</div>"+
                 "<div><b>Faktorer</b> - alla tal som går jämnt att dela Dagens Tal med.</div>"+
+                "<div><b>Värdet av siffrorna</b> - hur många tusental, hundratal, tiotal och ental talet består av.</div>"+
+                "<div><b>Siffersumma</b> - alla siffror i talet adderade. Är siffersumman delbar med 3, så är talet det också!</div>"+
+                "<div><b>Delbart</b> - talet går att dela jämnt, utan rest.</div>"+
+                "<div><b>Kvadrattal</b> - ett tal som blir när man multiplicerar ett tal med sig själv, t.ex. 16 = 4 · 4.</div>"+
                 "</div><div class='cal-popup-btns'></div>";
             const btns=box.querySelector('.cal-popup-btns');
             const closeBtn=document.createElement('button'); closeBtn.className='btn btn-primary'; closeBtn.textContent='Stäng';
