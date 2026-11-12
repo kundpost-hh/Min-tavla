@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-11-lasf-sidnr1';</script>
+    <script>window.BUILD_VERSION = '2026-11-12-grattis-ljud1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -6897,7 +6897,9 @@
 
     // Play/paus-knapp för Lektionsschemat. Använder en dold YouTube-spelare som styrs med
     // postMessage (YouTube IFrame API utan extra skript). Spelaren skapas först vid första klicket.
-    function createLessonYtButton(videoId){
+    function createLessonYtButton(videoId, opts){
+        opts = opts || {};
+        let reservAktiv = false, sawPlaying = false; // NYTT: spelar inbyggd melodi i stället (om YouTube vägrar)
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'lesson-yt-btn';
@@ -6912,10 +6914,12 @@
             let d = e.data; try{ if(typeof d === 'string') d = JSON.parse(d); }catch(_){ return; }
             if(!d) return;
             if(d.event === 'onReady' || d.event === 'initialDelivery'){ gotState = true; }
+            // NYTT: YouTube säger ifrån (t.ex. fel 101/150 = ägaren tillåter inte inbäddning)
+            if(d.event === 'onError'){ startaReserv('YouTube-fel ' + d.info); return; }
             const st = (d.info && typeof d.info.playerState === 'number') ? d.info.playerState : (d.event==='onStateChange' ? d.info : undefined);
             if(typeof st === 'number'){
                 gotState = true;
-                if(st === 1){ playing = true; paint(); }
+                if(st === 1){ playing = true; sawPlaying = true; paint(); }
                 else if(st === 2 || st === 0){ playing = false; paint(); }
             }
         };
@@ -6934,13 +6938,20 @@
             window.addEventListener('message', onMsg);
             frame.addEventListener('load', ()=>{ try{ frame.contentWindow.postMessage(JSON.stringify({ event:'listening', id: videoId }), '*'); }catch(e){} });
             // Stäng spelaren om Lektionsschemat tas bort från tavlan
-            watch = setInterval(()=>{ if(!document.body.contains(btn)) cleanup(); }, 2000);
+            watch = setInterval(()=>{ if(!document.body.contains(btn)){ cleanup(); if(reservAktiv && opts.reserv) opts.reserv.stop(); } }, 2000);
             // Om YouTube inte svarar (t.ex. blockerat nätverk) – inget fönster öppnas, knappen går bara
             // tillbaka till ▶ och visar en förklaring när man håller muspekaren över den.
-            setTimeout(()=>{ if(frame && !gotState){ cleanup(); playing = false; paint(); btn.title = 'Ljudet kunde inte startas – kontrollera internet och försök igen'; } }, 8000);
+            setTimeout(()=>{ if(frame && (opts.reserv ? (!sawPlaying && playing) : !gotState)){ if(opts.reserv){ startaReserv('inget svar från YouTube'); } else { cleanup(); playing = false; paint(); btn.title = 'Ljudet kunde inte startas – kontrollera internet och försök igen'; } } }, opts.reserv ? 6000 : 8000);
         };
+        function startaReserv(orsak){
+            if(!opts.reserv || reservAktiv) { if(!opts.reserv){ cleanup(); playing=false; paint(); btn.title='Ljudet kunde inte startas'; } return; }
+            try{ console.warn('[MinTavla] YouTube-ljudet kunde inte spelas (' + orsak + ') – spelar inbyggd melodi i stället.'); }catch(_){}
+            cleanup(); reservAktiv = true; playing = true; opts.reserv.start(); paint();
+            btn.title = 'Spelar inbyggd melodi (YouTube-låten gick inte att spela)';
+        }
         btn.onclick = (e)=>{
             e.stopPropagation();
+            if(reservAktiv){ if(playing){ opts.reserv.stop(); playing=false; } else { opts.reserv.start(); playing=true; } paint(); return; }
             if(!frame){ btn.title = 'Spela / pausa musik'; ensureFrame(); playing = true; paint(); return; }   // första klicket: laddar och spelar
             if(playing){ cmd('pauseVideo'); playing = false; } else { cmd('playVideo'); playing = true; }
             paint();
@@ -35985,6 +35996,48 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
     }
     let _grPlayerSeq = 0;
 
+    // NYTT: inbyggd födelsedagsmelodi (WebAudio) – reserv när YouTube inte kan spela, fungerar även offline.
+    function grattisMelodi(){
+        // [ton (MIDI-nummer), längd i taktslag]
+        const N = [[67,.75],[67,.25],[69,1],[67,1],[72,1],[71,2],
+                   [67,.75],[67,.25],[69,1],[67,1],[74,1],[72,2],
+                   [67,.75],[67,.25],[79,1],[76,1],[72,1],[71,1],[69,2],
+                   [77,.75],[77,.25],[76,1],[72,1],[74,1],[72,2.5]];
+        let ac=null, gain=null, timer=null, aktiv=false;
+        const BPM = 120, slag = 60/BPM;
+        const hz = (m)=> 440*Math.pow(2,(m-69)/12);
+        function spelaVarv(){
+            if(!aktiv) return;
+            let t = ac.currentTime + 0.05;
+            N.forEach(([m,l])=>{
+                const d = l*slag;
+                [1,2].forEach((ov,i)=>{ // grundton + svag överton = mjuk speldoseklang
+                    const o=ac.createOscillator(), g=ac.createGain();
+                    o.type = i ? 'sine' : 'triangle'; o.frequency.value = hz(m)*ov;
+                    const v = i ? 0.06 : 0.22;
+                    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t+Math.max(0.18, d*0.95));
+                    o.connect(g); g.connect(gain); o.start(t); o.stop(t+d+0.05);
+                });
+                t += d;
+            });
+            const total = (t - ac.currentTime) + 1.2; // liten paus innan den börjar om
+            timer = setTimeout(spelaVarv, total*1000);
+        }
+        return {
+            start(){
+                try{
+                    const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+                    if(!ac){ ac = new AC(); gain = ac.createGain(); gain.gain.value = 0.9; gain.connect(ac.destination); }
+                    if(ac.state === 'suspended') ac.resume();
+                    if(aktiv) return; aktiv = true; gain.gain.cancelScheduledValues(ac.currentTime); gain.gain.setValueAtTime(0.9, ac.currentTime); spelaVarv();
+                }catch(e){}
+            },
+            stop(){
+                aktiv = false; if(timer){ clearTimeout(timer); timer=null; }
+                try{ if(ac){ const a0=ac, g0=gain; ac=null; gain=null; g0.gain.setValueAtTime(g0.gain.value, a0.currentTime); g0.gain.linearRampToValueAtTime(0, a0.currentTime+0.15); setTimeout(()=>{ try{ a0.close(); }catch(_){} }, 250); } }catch(e){}
+            }
+        };
+    }
     // ---- GRATTIS / FÖDELSEDAG ----
     function createBirthdayWidget(config){
         if(config===undefined)config=null;
@@ -35999,27 +36052,13 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         inp.oninput = saveBoardState;
 
         // Bakgrundsmusik (YouTube – endast ljud, spelaren är dold)
-        const musicBtn = document.createElement('button'); musicBtn.type='button'; musicBtn.className='grattis-music-btn'; musicBtn.title='Spela bakgrundsmusik'; musicBtn.innerHTML = GR_PLAY_SVG;
+        // FIX: spelaren var bara 1×1 pixel stor. YouTube vägrar spela så små inbäddade spelare, så
+        // inget ljud hördes. Nu används samma spelare som i Lektionsschemat (240×135 utanför skärmen),
+        // och om YouTube ändå inte vill spela låten (t.ex. om ägaren stängt av inbäddning eller
+        // YouTube är blockerat i skolans nätverk) spelas en inbyggd "Happy Birthday"-melodi i stället.
+        const musicBtn = createLessonYtButton('xw5TP7HpCx0', { reserv: grattisMelodi() });
+        musicBtn.className = 'grattis-music-btn';
         inp.insertAdjacentElement('afterend', musicBtn);
-        const ytHost = document.createElement('div'); ytHost.id = 'gr-yt-' + (++_grPlayerSeq); ytHost.style.cssText = 'position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;pointer-events:none;'; container.appendChild(ytHost);
-        let ytPlayer = null, ytPlaying = false, ytCreating = false;
-        const setMusicState = (s)=>{ ytPlaying = (s==='play'); musicBtn.classList.toggle('playing', s==='play'); musicBtn.classList.toggle('loading', s==='load'); musicBtn.innerHTML = (s==='play') ? GR_PAUSE_SVG : GR_PLAY_SVG; musicBtn.title = (s==='play') ? 'Pausa musiken' : 'Spela bakgrundsmusik'; };
-        musicBtn.onclick = ()=>{
-            if(ytPlayer){ if(ytPlaying){ try{ytPlayer.pauseVideo();}catch(e){} setMusicState('pause'); } else { try{ytPlayer.playVideo();}catch(e){} setMusicState('play'); } return; }
-            if(ytCreating) return; ytCreating = true; setMusicState('load');
-            const loadGuard = setTimeout(()=>{ if(!ytPlayer){ ytCreating=false; setMusicState('pause'); } }, 9000);
-            ensureYouTubeAPI(()=>{
-                if(!document.body.contains(body)){ clearTimeout(loadGuard); return; }
-                ytPlayer = new YT.Player(ytHost.id, { height:'1', width:'1', videoId:'xw5TP7HpCx0',
-                    playerVars:{ autoplay:1, controls:0, disablekb:1, fs:0, modestbranding:1, rel:0, playsinline:1 },
-                    events:{
-                        'onReady':(e)=>{ clearTimeout(loadGuard); ytCreating=false; try{ e.target.setVolume(70); e.target.playVideo(); }catch(err){} setMusicState('play'); },
-                        'onStateChange':(e)=>{ if(e.data===YT.PlayerState.ENDED){ try{ e.target.seekTo(0); e.target.playVideo(); }catch(err){} } else if(e.data===YT.PlayerState.PLAYING){ setMusicState('play'); } else if(e.data===YT.PlayerState.PAUSED){ setMusicState('pause'); } },
-                        'onError':()=>{ clearTimeout(loadGuard); ytCreating=false; setMusicState('pause'); }
-                    }
-                });
-            });
-        };
         if(config && config.data && config.data.name) inp.value = config.data.name;
         const colors=['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5856d6','#ff2d55','#a64dff'];
         // Kontinuerligt glitterregn (CSS-animationen loopar oändligt – spruta ut bitarna en gång)
