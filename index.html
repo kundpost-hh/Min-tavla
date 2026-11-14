@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-12-grattis-ljud1';</script>
+    <script>window.BUILD_VERSION = '2026-11-14-kortdiv1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -17922,6 +17922,7 @@
                         <option value='×'>×</option>
                         <option value='÷'>÷ utan rest</option>
                         <option value='÷r'>÷ med rest</option>
+                        <option value='kd'>Kort division (utan minnessiffra)</option>
                     </select>
                     <input type='number' class='upp-in upp-b' placeholder='Tal 2' min='0'>
                     <button class='btn btn-primary upp-starta'>Starta</button>
@@ -18219,9 +18220,15 @@
             if(isNaN(a)||isNaN(b)||a<0||b<0){ uppStatusEl.textContent='Skriv två positiva heltal i båda fälten.'; return false; }
             if(operation==='-' && b>a){ uppStatusEl.textContent='Tal 2 måste vara mindre än eller lika med Tal 1 vid subtraktion.'; return false; }
             if(operation==='×' && Math.min(String(a).length,String(b).length)>1){ uppStatusEl.textContent='Vid multiplikation ska ett av talen vara en ensiffrig siffra (kort multiplikation).'; return false; }
-            if((operation==='÷' || operation==='÷r') && (b<1||b>9)){ uppStatusEl.textContent='Vid division ska Tal 2 (nämnaren) vara en ensiffrig siffra 1–9 (kort division).'; return false; }
+            if((operation==='÷' || operation==='÷r' || operation==='kd') && (b<1||b>9)){ uppStatusEl.textContent='Vid division ska Tal 2 (nämnaren) vara en ensiffrig siffra 1–9 (kort division).'; return false; }
             // NYTT: division i två delar - "÷ utan rest" (går jämnt ut) och "÷ med rest".
             if(operation==='÷' && a % b !== 0){ uppStatusEl.innerHTML='<b>'+a+' ÷ '+b+'</b> går inte jämnt ut (det blir rest '+(a%b)+'). Välj <b>÷ med rest</b> eller ändra talen.'; return false; }
+            // NYTT: "Kort division (utan minnessiffra)" - varje siffra i täljaren går jämnt att dela med nämnaren
+            if(operation==='kd'){
+                const fel = String(a).split('').filter(d=> (+d) % b !== 0);
+                if(a===0 || fel.length){ uppStatusEl.innerHTML='<b>'+a+' ÷ '+b+'</b> behöver minnessiffror. Vid <b>Kort division (utan minnessiffra)</b> ska varje siffra i täljaren gå jämnt att dela med '+b+' – t.ex. '+(b<=4 ? [b*2,b,b*2].map(x=>x>9?b:x).join('') : (b+'0'+b))+' ÷ '+b+'.'; return false; }
+                operation='÷';
+            }
             if(operation==='÷r') operation='÷'; // samma uppställning - resten visas efter kvoten
             uppBuild(a,b,operation);
             uppStegBtn.disabled=false; uppAllaBtn.disabled=false; uppOmBtn.disabled=false;
@@ -18234,6 +18241,16 @@
             const max=Math.pow(10,digitsN)-1, min=Math.pow(10,digitsN-1);
             let a=Math.floor(Math.random()*(max-min+1))+min, b;
             if(operation==='×' || operation==='÷' || operation==='÷r'){ b=Math.floor(Math.random()*8)+2; }
+            else if(operation==='kd'){ // mest 2, 3 och 4 (då blir det fler olika tal), ibland 5–9
+                b = Math.random()<0.75 ? [2,3,4][Math.floor(Math.random()*3)] : 5+Math.floor(Math.random()*5);
+                const mojliga = []; for(let d=b; d<=9; d+=b) mojliga.push(d); // siffror som går jämnt (utom 0)
+                let txt='';
+                for(let i=0;i<digitsN;i++){
+                    const nolla = i>0 && Math.random()<(mojliga.length===1 ? 0.35 : 0.12);
+                    txt += nolla ? '0' : String(mojliga[Math.floor(Math.random()*mojliga.length)]);
+                }
+                a = parseInt(txt,10);
+            }
             else { b=Math.floor(Math.random()*(max-min+1))+min; if(operation==='-' && b>a){ const t=a; a=b; b=t; } }
             if(operation==='÷'){ // utan rest: täljaren = nämnaren × ett heltal, med valt antal siffror
                 const qMin=Math.ceil(min/b), qMax=Math.floor(max/b);
