@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-19-lektion-lank2';</script>
+    <script>window.BUILD_VERSION = '2026-11-19-lektion-lank3';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -6919,6 +6919,19 @@
         if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return 'mailto:'+u;
         return 'https://' + u.replace(/^\/+/, '');
     }
+    // NYTT: länkar öppnas i ett eget fönster (inte en ny flik), centrerat och ungefär 80 % av skärmen.
+    // Samma fönster återanvänds, så nästa länk öppnas i samma ruta i stället för att det blir många.
+    function mtLankOppna(url){
+        const sw = window.screen.availWidth || 1280, sh = window.screen.availHeight || 800;
+        const w = Math.round(Math.min(1200, sw*0.8)), h = Math.round(Math.min(850, sh*0.8));
+        const x = Math.round((window.screenX||0) + ((window.outerWidth||sw) - w)/2), y = Math.round((window.screenY||0) + ((window.outerHeight||sh) - h)/2);
+        let f = MT_LANK.fonster;
+        if(f && !f.closed){ try{ f.location.href = url; f.focus(); return; }catch(e){} }
+        f = null;
+        try{ f = window.open(url, 'mintavlaLank', 'popup=yes,width='+w+',height='+h+',left='+Math.max(0,x)+',top='+Math.max(0,y)+',resizable=yes,scrollbars=yes'); }catch(e){}
+        if(f){ MT_LANK.fonster = f; try{ f.focus(); }catch(e){} } // (opener behålls - annars får tavlan inte byta sida i samma fönster)
+        else { window.open(url, '_blank', 'noopener'); } // popup-blockerare: öppna som vanlig flik
+    }
     function mtLankDolj(){ if(MT_LANK.pop){ MT_LANK.pop.remove(); MT_LANK.pop=null; } }
     function mtLankAnkare(range){
         let n = range ? range.commonAncestorContainer : null;
@@ -6960,7 +6973,7 @@
             MT_LANK.falt.dispatchEvent(new Event('input', { bubbles:true }));
         };
         if(befintlig){
-            pop.appendChild(knapp('↗ Öppna', ()=>{ window.open(befintlig.href, '_blank', 'noopener'); mtLankDolj(); }));
+            pop.appendChild(knapp('↗ Öppna', ()=>{ mtLankOppna(befintlig.href); mtLankDolj(); }));
             pop.appendChild(knapp('✏️ Ändra', ()=> visaFalt(befintlig.getAttribute('href'))));
             pop.appendChild(knapp('🗑 Ta bort länk', ()=>{ const t=document.createTextNode(befintlig.textContent); befintlig.replaceWith(t); mtLankDolj(); falt.dispatchEvent(new Event('input', { bubbles:true })); }, 'mt-lank-del'));
         } else {
@@ -6987,7 +7000,7 @@
             const a = e.target.closest && e.target.closest('a[href]'); if(!a) return;
             const s = window.getSelection(); if(s && !s.isCollapsed) return;
             e.preventDefault(); e.stopPropagation();
-            window.open(a.href, '_blank', 'noopener');
+            mtLankOppna(a.href);
         });
         falt.querySelectorAll('a[href]').forEach(a=>{ a.setAttribute('target','_blank'); a.setAttribute('rel','noopener'); a.title = 'Klicka för att öppna: ' + a.getAttribute('href'); });
     }
