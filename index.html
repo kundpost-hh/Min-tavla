@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-19-lektion-lank1';</script>
+    <script>window.BUILD_VERSION = '2026-11-19-lektion-lank2';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -6992,7 +6992,9 @@
         falt.querySelectorAll('a[href]').forEach(a=>{ a.setAttribute('target','_blank'); a.setAttribute('rel','noopener'); a.title = 'Klicka för att öppna: ' + a.getAttribute('href'); });
     }
     document.addEventListener('mousedown', (e)=>{ if(MT_LANK.pop && !MT_LANK.pop.contains(e.target)) mtLankDolj(); }, true);
-    window.addEventListener('scroll', mtLankDolj, true);
+    // FIX: när en lång adress klistras in rullar textfältet i sidled, och det scroll-eventet stängde
+    // rutan. Nu stängs den bara när sidan/tavlan rullar - inte när något inne i rutan rullar.
+    window.addEventListener('scroll', (e)=>{ if(MT_LANK.pop && e.target && e.target.nodeType===1 && MT_LANK.pop.contains(e.target)) return; if(MT_LANK.pop && MT_LANK.pop.contains(document.activeElement)) return; /* iPad: tangentbordet rullar sidan när man skriver */ mtLankDolj(); }, true);
 
     function createLessonYtButton(videoId, opts){
         opts = opts || {};
