@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-14-kortdiv1';</script>
+    <script>window.BUILD_VERSION = '2026-11-19-lektion-lank1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -1275,6 +1275,14 @@
     .lesson-cols-row { display: flex; gap: 12px; flex-grow: 1; height: 100%; min-height: 180px; }
     .lesson-card { background: #fafafe; border: 1px solid #e5e5ea; border-radius: 10px; padding: 12px; flex: 1; display: flex; flex-direction: column; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
     .lesson-card-title { background: transparent; border: none; color: #ff3b30; font-size: 17px; font-weight: bold; font-family: inherit; outline: none; margin-bottom: 8px; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    /* NYTT: länk-popup för markerad text */
+    .lesson-card-content a { color:#007aff; text-decoration:underline; cursor:pointer; }
+    .mt-lank-pop { position:fixed; z-index:100000002; display:flex; gap:4px; align-items:center; background:#1f2937; padding:5px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.28); animation:popIn .15s ease; font-family:-apple-system,system-ui,sans-serif; }
+    .mt-lank-btn { border:none; background:transparent; color:#fff; font-size:13px; font-weight:700; padding:6px 9px; border-radius:7px; cursor:pointer; white-space:nowrap; font-family:inherit; }
+    .mt-lank-btn:hover { background:rgba(255,255,255,.14); }
+    .mt-lank-ok { background:#007aff; } .mt-lank-ok:hover { background:#0a84ff; }
+    .mt-lank-del { color:#ff9f9a; }
+    .mt-lank-inp { width:220px; border:none; border-radius:7px; padding:7px 9px; font-size:13px; outline:none; font-family:inherit; }
     .lesson-card-content { flex-grow: 1; outline: none; color: #222; font-size: 15px; font-weight: 500; line-height: 1.6; overflow-y: auto; }
 
     /* LEKTIONSSCHEMA - BOTTENRAD MED TIMER (ljust) */
@@ -6897,6 +6905,95 @@
 
     // Play/paus-knapp för Lektionsschemat. Använder en dold YouTube-spelare som styrs med
     // postMessage (YouTube IFrame API utan extra skript). Spelaren skapas först vid första klicket.
+    // ============================================================
+    // NYTT: Länk-popup för markerad text (används i Lektionsschemats tre rutor).
+    // Markera ett ord -> en liten ruta "🔗 Skapa länk" visas ovanför. Klistra in adressen -> ordet
+    // blir en blå länk som öppnas i en ny flik när man klickar på den. Markerar man en befintlig
+    // länk kan man öppna, ändra eller ta bort den.
+    // ============================================================
+    const MT_LANK = { pop:null, range:null, falt:null };
+    function mtLankNormalisera(u){
+        u = String(u||'').trim(); if(!u) return '';
+        if(/^(javascript|data|vbscript):/i.test(u)) return '';
+        if(/^mailto:/i.test(u) || /^https?:\/\//i.test(u)) return u;
+        if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return 'mailto:'+u;
+        return 'https://' + u.replace(/^\/+/, '');
+    }
+    function mtLankDolj(){ if(MT_LANK.pop){ MT_LANK.pop.remove(); MT_LANK.pop=null; } }
+    function mtLankAnkare(range){
+        let n = range ? range.commonAncestorContainer : null;
+        if(n && n.nodeType===3) n = n.parentNode;
+        return n && n.closest ? n.closest('a[href]') : null;
+    }
+    function mtLankVisa(falt){
+        const sel = window.getSelection();
+        if(!sel || !sel.rangeCount) return mtLankDolj();
+        const range = sel.getRangeAt(0);
+        if(!falt.contains(range.commonAncestorContainer)) return mtLankDolj();
+        const befintlig = mtLankAnkare(range);
+        if(range.collapsed && !befintlig) return mtLankDolj();
+        MT_LANK.range = range.cloneRange(); MT_LANK.falt = falt;
+        mtLankDolj();
+        const r = (range.collapsed && befintlig) ? befintlig.getBoundingClientRect() : range.getBoundingClientRect();
+        const pop = document.createElement('div'); pop.className='mt-lank-pop';
+        const knapp = (txt, fn, cls)=>{ const b=document.createElement('button'); b.type='button'; b.className='mt-lank-btn'+(cls?' '+cls:''); b.textContent=txt; b.addEventListener('mousedown', e=>{ e.preventDefault(); e.stopPropagation(); }); b.onclick=(e)=>{ e.stopPropagation(); fn(); }; return b; };
+        const visaFalt = (forval)=>{
+            pop.innerHTML='';
+            const inp=document.createElement('input'); inp.type='text'; inp.className='mt-lank-inp'; inp.placeholder='Klistra in adressen, t.ex. www.ur.se'; inp.value=forval||'';
+            const ok=knapp('Skapa', ()=>skapa(inp.value), 'mt-lank-ok');
+            const avbryt=knapp('✕', mtLankDolj, 'mt-lank-x');
+            inp.onkeydown=(e)=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); skapa(inp.value); } else if(e.key==='Escape'){ mtLankDolj(); } };
+            ['mousedown','pointerdown','touchstart'].forEach(ev=> inp.addEventListener(ev, e=>e.stopPropagation(), {passive:true}));
+            pop.appendChild(inp); pop.appendChild(ok); pop.appendChild(avbryt);
+            setTimeout(()=>{ inp.focus(); inp.select(); }, 20);
+        };
+        const skapa = (adress)=>{
+            const url = mtLankNormalisera(adress);
+            if(!url){ mtLankDolj(); return; }
+            const s=window.getSelection(); s.removeAllRanges(); s.addRange(MT_LANK.range);
+            const a0 = mtLankAnkare(MT_LANK.range);
+            if(a0){ a0.setAttribute('href', url); }
+            else { document.execCommand('createLink', false, url); }
+            MT_LANK.falt.querySelectorAll('a[href]').forEach(a=>{ a.setAttribute('target','_blank'); a.setAttribute('rel','noopener'); a.title = 'Klicka för att öppna: ' + a.getAttribute('href'); });
+            s.removeAllRanges();
+            mtLankDolj();
+            MT_LANK.falt.dispatchEvent(new Event('input', { bubbles:true }));
+        };
+        if(befintlig){
+            pop.appendChild(knapp('↗ Öppna', ()=>{ window.open(befintlig.href, '_blank', 'noopener'); mtLankDolj(); }));
+            pop.appendChild(knapp('✏️ Ändra', ()=> visaFalt(befintlig.getAttribute('href'))));
+            pop.appendChild(knapp('🗑 Ta bort länk', ()=>{ const t=document.createTextNode(befintlig.textContent); befintlig.replaceWith(t); mtLankDolj(); falt.dispatchEvent(new Event('input', { bubbles:true })); }, 'mt-lank-del'));
+        } else {
+            const sel0 = range.toString().trim();
+            pop.appendChild(knapp('🔗 Skapa länk', ()=> visaFalt(/^(https?:\/\/|www\.)\S+$/i.test(sel0) ? sel0 : '')));
+        }
+        ['mousedown','pointerdown','touchstart','click'].forEach(ev=> pop.addEventListener(ev, e=>e.stopPropagation(), {passive:true}));
+        document.body.appendChild(pop);
+        const pw = pop.offsetWidth, ph = pop.offsetHeight;
+        let x = r.left + r.width/2 - pw/2, y = r.top - ph - 8;
+        if(y < 6) y = r.bottom + 8;
+        x = Math.max(6, Math.min(window.innerWidth - pw - 6, x));
+        pop.style.left = x + 'px'; pop.style.top = y + 'px';
+        MT_LANK.pop = pop;
+    }
+    function mtLankKoppla(falt){
+        if(!falt || falt._mtLank) return; falt._mtLank = true;
+        const kolla = ()=> setTimeout(()=> mtLankVisa(falt), 10);
+        falt.addEventListener('mouseup', kolla);
+        falt.addEventListener('keyup', (e)=>{ if(e.shiftKey || e.key && e.key.indexOf('Arrow')===0) kolla(); });
+        falt.addEventListener('touchend', ()=> setTimeout(()=> mtLankVisa(falt), 350));
+        // Klick på en länk (utan att markera) öppnar den i en ny flik
+        falt.addEventListener('click', (e)=>{
+            const a = e.target.closest && e.target.closest('a[href]'); if(!a) return;
+            const s = window.getSelection(); if(s && !s.isCollapsed) return;
+            e.preventDefault(); e.stopPropagation();
+            window.open(a.href, '_blank', 'noopener');
+        });
+        falt.querySelectorAll('a[href]').forEach(a=>{ a.setAttribute('target','_blank'); a.setAttribute('rel','noopener'); a.title = 'Klicka för att öppna: ' + a.getAttribute('href'); });
+    }
+    document.addEventListener('mousedown', (e)=>{ if(MT_LANK.pop && !MT_LANK.pop.contains(e.target)) mtLankDolj(); }, true);
+    window.addEventListener('scroll', mtLankDolj, true);
+
     function createLessonYtButton(videoId, opts){
         opts = opts || {};
         let reservAktiv = false, sawPlaying = false; // NYTT: spelar inbyggd melodi i stället (om YouTube vägrar)
@@ -7034,7 +7131,7 @@
         // (eller bytte dag) utan att röra timern försvann det man skrivit. Nu sparas allt löpande,
         // precis som i övriga widgetar (t.ex. Klisterlapp).
         body.querySelectorAll('.lesson-header-input, .lesson-goal-input, .lesson-card-title, .lesson-link-input, .lesson-timer-input').forEach(el=>{ el.oninput = saveBoardState; });
-        body.querySelectorAll('.lesson-card-content').forEach(el=>{ el.addEventListener('input', saveBoardState); });
+        body.querySelectorAll('.lesson-card-content').forEach(el=>{ el.addEventListener('input', saveBoardState); mtLankKoppla(el); });
         let lT=null, lTot=0, lLeft=0;
         tb.onclick=()=>{
             if(lT){ clearInterval(lT); lT=null; tb.innerText='Start'; tin.style.display='block'; pb.style.display='none'; }
