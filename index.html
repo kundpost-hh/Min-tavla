@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-19-lektion-lank3';</script>
+    <script>window.BUILD_VERSION = '2026-11-22-julkalender1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -369,6 +369,7 @@
             <button class="tool-btn" data-cat="klassrum" onclick="createQuizTavling()"><div class="icon">🏆</div><div class="label">Quiztävling</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createBrainBreak()"><div class="icon">🕺</div><div class="label">Brain Break</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createSkamt()"><div class="icon">😂</div><div class="label">Skämt</div></button>
+            <button class="tool-btn" data-cat="lek" onclick="createJulkalender()"><div class="icon">🎄</div><div class="label">Julkalender</div></button>
             <button class="tool-btn" data-cat="lek" onclick="createGator()"><div class="icon">🧩</div><div class="label">Gåtor</div></button>
             <button class="tool-btn" onclick="createQRCode()"><div class="icon"><svg viewBox="0 0 100 100" width="21" height="21" style="display:block;margin:0 auto;"><g fill="#3a3a3c"><rect x="5" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="14" width="10" height="10"/><rect x="67" y="5" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="76" y="14" width="10" height="10"/><rect x="5" y="67" width="28" height="28" fill="none" stroke="#3a3a3c" stroke-width="7"/><rect x="14" y="76" width="10" height="10"/><rect x="45" y="9" width="9" height="9"/><rect x="45" y="27" width="9" height="9"/><rect x="50" y="50" width="9" height="9"/><rect x="68" y="50" width="9" height="9"/><rect x="86" y="50" width="9" height="9"/><rect x="50" y="68" width="9" height="9"/><rect x="68" y="68" width="9" height="9"/><rect x="86" y="86" width="9" height="9"/><rect x="50" y="86" width="9" height="9"/><rect x="68" y="86" width="9" height="9"/></g></svg></div><div class="label">QR-Kod</div></button>
         </div>
@@ -2718,6 +2719,36 @@
     .popup-confetti { position: absolute; width: 10px; height: 10px; top: -20px; box-shadow: 0 0 5px currentColor; animation: pop-confetti-fall linear infinite; }
     @keyframes pop-confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
 
+    /* JULKALENDER */
+    .jul-widget .widget-body { padding:10px 12px 12px; }
+    .jul-ram { position:relative; overflow:hidden; border-radius:16px; padding:16px 14px 14px; background:radial-gradient(ellipse at top, #2f6fb3 0%, #173d6b 60%, #0f2a4b 100%); color:#fff; }
+    .jul-ram[data-k='vardegrund'] { background:radial-gradient(ellipse at top, #2f7d4f 0%, #1b5032 60%, #113520 100%); }
+    .jul-snow { position:absolute; inset:0; pointer-events:none; opacity:.55; background-image:radial-gradient(#fff 1.2px, transparent 1.6px), radial-gradient(#fff 1px, transparent 1.4px); background-size:46px 46px, 29px 29px; background-position:0 0, 13px 19px; }
+    .jul-rubrik { position:relative; text-align:center; font-size:28px; font-weight:900; color:#fff; text-shadow:0 2px 0 #b71c1c, 0 4px 12px rgba(0,0,0,.35); letter-spacing:.3px; }
+    .jul-ram[data-k='vardegrund'] .jul-rubrik { text-shadow:0 2px 0 #b8860b, 0 4px 12px rgba(0,0,0,.35); }
+    .jul-under { position:relative; text-align:center; font-size:14px; font-weight:700; color:#fde68a; margin:2px 0 12px; }
+    .jul-grid { position:relative; display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; }
+    .jul-dagnamn { text-align:center; font-size:12px; font-weight:800; color:#fff; background:rgba(255,255,255,.16); border-radius:8px; padding:4px 0; }
+    .jul-tom { min-height:122px; border-radius:12px; border:2px dashed rgba(255,255,255,.18); }
+    .jul-lucka { min-height:122px; perspective:700px; cursor:pointer; }
+    .jul-lucka-inne { position:relative; width:100%; height:100%; min-height:122px; transition:transform .55s cubic-bezier(.3,.7,.3,1); transform-style:preserve-3d; }
+    .jul-lucka.oppen .jul-lucka-inne { transform:rotateY(180deg); }
+    .jul-dorr, .jul-innehall { position:absolute; inset:0; border-radius:12px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:6px; box-sizing:border-box; }
+    .jul-dorr { background:linear-gradient(145deg,#d32f2f,#9a1b1b); border:2px solid #f6c453; box-shadow:inset 0 0 0 3px rgba(255,255,255,.12), 0 4px 10px rgba(0,0,0,.3); }
+    .jul-lucka:nth-child(even) .jul-dorr { background:linear-gradient(145deg,#2e7d32,#1b4d1e); }
+    .jul-dorr::before { content:''; position:absolute; left:50%; top:0; bottom:0; width:8px; transform:translateX(-50%); background:rgba(246,196,83,.85); }
+    .jul-dorr::after { content:''; position:absolute; top:50%; left:0; right:0; height:8px; transform:translateY(-50%); background:rgba(246,196,83,.85); }
+    .jul-dorr-nr { position:relative; z-index:1; font-size:34px; font-weight:900; color:#fff; background:rgba(0,0,0,.28); border-radius:50%; width:52px; height:52px; display:flex; align-items:center; justify-content:center; text-shadow:0 2px 4px rgba(0,0,0,.35); }
+    .jul-dorr-dag { position:relative; z-index:1; margin-top:4px; font-size:11px; font-weight:800; color:#fff; background:rgba(0,0,0,.35); border-radius:6px; padding:1px 6px; }
+    .jul-innehall { transform:rotateY(180deg); background:#fffdf6; border:2px solid #f6c453; color:#1f2937; gap:3px; }
+    .jul-datum { font-size:11px; font-weight:800; color:#6b7280; }
+    .jul-titel { font-size:14px; font-weight:900; line-height:1.15; }
+    .jul-text { font-size:13px; font-weight:600; line-height:1.25; }
+    .jul-lucka.idag .jul-dorr { animation:julPuls 1.6s ease-in-out infinite; }
+    @keyframes julPuls { 0%,100% { box-shadow:0 0 0 0 rgba(253,230,138,.9), 0 4px 10px rgba(0,0,0,.3); } 50% { box-shadow:0 0 0 7px rgba(253,230,138,0), 0 4px 10px rgba(0,0,0,.3); } }
+    .jul-fot { position:relative; margin:12px auto 0; max-width:460px; text-align:center; background:#fff; color:#b71c1c; border:3px solid #c62828; border-radius:14px; padding:8px 12px; font-size:14px; font-weight:700; }
+    .jul-ram[data-k='vardegrund'] .jul-fot { color:#14532d; border-color:#b8860b; }
+    .jul-ctrl { display:flex; gap:6px; justify-content:center; margin-top:8px; }
     /* SKÄMT */
     .skamt-widget .widget-body { padding:12px 14px; }
     .skamt-top { margin-bottom:8px; }
@@ -5580,6 +5611,7 @@
                 else if (type === 'MUSIK') { state.data.tab = w.dataset.musikTab || 'rytm'; }
                 else if (type === 'BILD & SLÖJD') { state.data.tab = w.dataset.bildTab || 'rittema'; }
                 else if (type === 'GÅTOR') { try{ state.data = JSON.parse(w.dataset.gator || '{}'); }catch(e){ state.data={}; } }
+                else if (type === 'JULKALENDER') { try{ state.data = JSON.parse(w.dataset.julkal || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'SKÄMT') { try{ state.data = JSON.parse(w.dataset.skamt || '{}'); }catch(e){ state.data={}; } }
                 else if (type === 'BRAIN BREAK') { try { state.data.videos = JSON.parse(w.dataset.videos || '[]'); } catch(e){ state.data.videos = []; } }
                 else if (type === 'BILD') { state.data.src = w.dataset.imgSrc || ''; }
@@ -5719,6 +5751,7 @@
             else if (w.type === 'BILD & SLÖJD') createBildMegaWidget(w);
             else if (w.type === 'BRAIN BREAK') createBrainBreak(w);
             else if (w.type === 'SKÄMT') createSkamt(w);
+            else if (w.type === 'JULKALENDER') createJulkalender(w);
             else if (w.type === 'GÅTOR') createGator(w);
             // FIX: "Lugn & ro"-widgeten (andningspaus) gick att lägga till från verktygslådan, men
             // saknades helt här i återställningslogiken - den försvann alltså tyst varje gång sidan
@@ -15656,6 +15689,115 @@
     }
     window.createGator = createGator;
 
+    // ============================================================
+    // JULKALENDER – två kalendrar (Klädsel & Värdegrund) i varsin flik.
+    // Luckorna är stängda och märkta med datum. Klick öppnar luckan, nytt klick stänger den igen.
+    // Vilka luckor som är öppna sparas med tavlan.
+    // ============================================================
+    const JUL_KAL = {
+        kladsel: {
+            flik:'🧣 Klädsel', rubrik:'Julens klädalmanacka', under:'Nedräkningen till jullovet har börjat!',
+            fot:'<b>Allt är frivilligt!</b> Du behöver inte köpa några kläder. Gör som du vill och använd det du har.',
+            dagar:{
+                1:{ t:'Röda dagen', f:'Ha på dig något rött.', c:'#c62828' },
+                2:{ t:'Glitteronsdag', f:'Ha något som glittrar.', c:'#b7791f' },
+                3:{ t:'Tokiga julsockor', f:'Ta på dig roliga eller omaka strumpor.', c:'#2e7d32' },
+                4:{ t:'Huvudbonad', f:'Välj en tomteluva, renhorn eller en tokig mössa.', c:'#c62828' },
+                7:{ t:'Skogens dag', f:'Klä dig i grönt.', c:'#2e7d32' },
+                8:{ t:'Julmys', f:'Ta på dig myskläder eller raggsockor.', c:'#c62828' },
+                9:{ t:'Paketdagen', f:'Klä dig som ett julpaket med en rosett eller ett band.', c:'#8d5a2b' },
+                10:{ t:'Accessoarer', f:'Ha en fluga, slips eller rosett.', c:'#c62828' },
+                11:{ t:'Luciaglitter', f:'Ta på dig glitter och en tomteluva.', c:'#1b5e20' },
+                14:{ t:'Julgransdagen', f:'Klä dig i grönt och pynta med färgglada band eller rosetter.', c:'#2e7d32' },
+                15:{ t:'Julbelysning', f:'Ha något som lyser eller fina reflexer.', c:'#e09b00' },
+                16:{ t:'Tomteverkstan', f:'Ta på dig snickarbyxor, förkläde eller nissekläder.', c:'#c62828' },
+                17:{ t:'Jultröjan', f:'Ta på dig en rolig eller fin jultröja.', c:'#2e7d32' },
+                18:{ t:'Maxad jul!', f:'Blanda gärna dina juliga favoritplagg!', c:'#c62828' }
+            }
+        },
+        vardegrund: {
+            flik:'💛 Värdegrund', rubrik:'Värdegrundskalender i december', under:'Räkna ner till jullovet.',
+            fot:'<b>Lys upp december</b> genom att göra snälla handlingar varje dag.',
+            dagar:{
+                1:{ f:'Le mot någon.' }, 2:{ f:'Bjud in en person till lek.' }, 3:{ f:'Ge en komplimang.' }, 4:{ f:'Hjälp en kompis.' },
+                7:{ f:'Fråga hur någon mår.' }, 8:{ f:'Säg tack.' }, 9:{ f:'Rita ett hjärta till någon.' }, 10:{ f:'Städa lite extra.' }, 11:{ f:'Dela med dig.' },
+                14:{ f:'Hjälp en kompis att städa.' }, 15:{ f:'Säg något du är bra på.' }, 16:{ f:'Hjälp en vuxen.' }, 17:{ f:'Gör någon glad.' }, 18:{ f:'Önska någon en fin dag.' }
+            }
+        }
+    };
+    function createJulkalender(config){
+        const body = createWidget('JULKALENDER', 640, 'jul-widget', config);
+        const widget = body.parentElement.parentElement;
+        let st = { flik:'kladsel', oppna:{ kladsel:[], vardegrund:[] } };
+        if(config && config.data){ if(config.data.flik) st.flik = config.data.flik; if(config.data.oppna) st.oppna = Object.assign(st.oppna, config.data.oppna); }
+        const persist = ()=>{ widget.dataset.julkal = JSON.stringify(st); saveBoardState(); };
+        widget.dataset.julkal = JSON.stringify(st);
+        const VECKODAG = ['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'];
+        // Året för december: före juli räknas förra årets december (t.ex. om tavlan öppnas i januari)
+        const nu = new Date(); const ar = nu.getMonth() >= 6 ? nu.getFullYear() : nu.getFullYear() - 1;
+        body.innerHTML = `
+            <div class='hover-menu mathtool-tabs jul-tabs'>${Object.keys(JUL_KAL).map(k=>`<button type='button' class='btn mathtool-tab-btn jul-tab' data-k='${k}'>${JUL_KAL[k].flik}</button>`).join('')}</div>
+            <div class='jul-ram'>
+                <div class='jul-snow'></div>
+                <div class='jul-rubrik'></div>
+                <div class='jul-under'></div>
+                <div class='jul-grid'></div>
+                <div class='jul-fot'></div>
+            </div>
+            <div class='hover-menu jul-ctrl'><button type='button' class='btn btn-secondary jul-idag'>🎄 Öppna fram till idag</button><button type='button' class='btn btn-secondary jul-stang'>🔒 Stäng alla luckor</button></div>`;
+        const q = s=>body.querySelector(s);
+        const grid = q('.jul-grid');
+        function render(){
+            const kal = JUL_KAL[st.flik];
+            body.querySelectorAll('.jul-tab').forEach(b=> b.classList.toggle('btn-primary', b.dataset.k===st.flik));
+            q('.jul-ram').dataset.k = st.flik;
+            q('.jul-rubrik').textContent = kal.rubrik;
+            q('.jul-under').textContent = kal.under;
+            q('.jul-fot').innerHTML = kal.fot;
+            grid.innerHTML = ['Måndag','Tisdag','Onsdag','Torsdag','Fredag'].map(d=>`<div class='jul-dagnamn'>${d}</div>`).join('');
+            // Måndag 30/11 före den 1:a, sedan vardagarna 1–18 december
+            const forsta = new Date(ar, 11, 1).getDay(); // 0 = söndag
+            const tomma = (forsta + 6) % 7; // antal vardagsrutor före den 1:a
+            for(let i=0;i<tomma && i<5;i++) grid.insertAdjacentHTML('beforeend', `<div class='jul-tom'></div>`);
+            const idag = (nu.getMonth()===11 && nu.getFullYear()===ar) ? nu.getDate() : 0;
+            for(let d=1; d<=18; d++){
+                const wd = new Date(ar, 11, d).getDay(); if(wd===0 || wd===6) continue;
+                const innehall = kal.dagar[d];
+                const oppen = st.oppna[st.flik].indexOf(d) > -1;
+                const el = document.createElement('div');
+                el.className = 'jul-lucka' + (oppen ? ' oppen' : '') + (d===idag ? ' idag' : '');
+                el.title = oppen ? 'Klicka för att stänga luckan' : 'Klicka för att öppna luckan';
+                el.innerHTML = `
+                    <div class='jul-lucka-inne'>
+                        <div class='jul-dorr'><div class='jul-dorr-nr'>${d}</div><div class='jul-dorr-dag'>${VECKODAG[wd]} ${d}/12</div></div>
+                        <div class='jul-innehall'>
+                            <div class='jul-datum'>${VECKODAG[wd]} ${d}/12</div>
+                            ${innehall && innehall.t ? `<div class='jul-titel' style='color:${innehall.c||'#c62828'}'>${innehall.t}</div>` : ''}
+                            <div class='jul-text'>${innehall ? innehall.f : '🎁'}</div>
+                        </div>
+                    </div>`;
+                el.onclick = (e)=>{
+                    e.stopPropagation();
+                    const lista = st.oppna[st.flik]; const i = lista.indexOf(d);
+                    if(i>-1) lista.splice(i,1); else lista.push(d);
+                    el.classList.toggle('oppen'); el.title = el.classList.contains('oppen') ? 'Klicka för att stänga luckan' : 'Klicka för att öppna luckan';
+                    persist();
+                };
+                grid.appendChild(el);
+            }
+        }
+        body.querySelectorAll('.jul-tab').forEach(b=> b.onclick = (e)=>{ e.stopPropagation(); st.flik = b.dataset.k; render(); persist(); });
+        q('.jul-stang').onclick = (e)=>{ e.stopPropagation(); st.oppna[st.flik] = []; render(); persist(); };
+        q('.jul-idag').onclick = (e)=>{ e.stopPropagation();
+            const sista = (nu.getMonth()===11 && nu.getFullYear()===ar) ? nu.getDate() : (nu > new Date(ar,11,31) ? 31 : 0);
+            st.oppna[st.flik] = Object.keys(JUL_KAL[st.flik].dagar).map(Number).filter(d=> d<=sista);
+            render(); persist();
+            if(!sista) q('.jul-under').textContent = 'Det är inte december än – luckorna öppnas med ett klick.';
+        };
+        render();
+    }
+    window.createJulkalender = createJulkalender;
+
     function createImageWidget(config){
         const body = createWidget('BILD', 300, '', config);
         const widget = body.parentElement.parentElement;
@@ -18035,6 +18177,7 @@
                         <option value='÷'>÷ utan rest</option>
                         <option value='÷r'>÷ med rest</option>
                         <option value='kd'>Kort division (utan minnessiffra)</option>
+                        <option value='kdm'>Kort division (med minnessiffra)</option>
                     </select>
                     <input type='number' class='upp-in upp-b' placeholder='Tal 2' min='0'>
                     <button class='btn btn-primary upp-starta'>Starta</button>
@@ -18332,13 +18475,19 @@
             if(isNaN(a)||isNaN(b)||a<0||b<0){ uppStatusEl.textContent='Skriv två positiva heltal i båda fälten.'; return false; }
             if(operation==='-' && b>a){ uppStatusEl.textContent='Tal 2 måste vara mindre än eller lika med Tal 1 vid subtraktion.'; return false; }
             if(operation==='×' && Math.min(String(a).length,String(b).length)>1){ uppStatusEl.textContent='Vid multiplikation ska ett av talen vara en ensiffrig siffra (kort multiplikation).'; return false; }
-            if((operation==='÷' || operation==='÷r' || operation==='kd') && (b<1||b>9)){ uppStatusEl.textContent='Vid division ska Tal 2 (nämnaren) vara en ensiffrig siffra 1–9 (kort division).'; return false; }
+            if((operation==='÷' || operation==='÷r' || operation==='kd' || operation==='kdm') && (b<1||b>9)){ uppStatusEl.textContent='Vid division ska Tal 2 (nämnaren) vara en ensiffrig siffra 1–9 (kort division).'; return false; }
             // NYTT: division i två delar - "÷ utan rest" (går jämnt ut) och "÷ med rest".
             if(operation==='÷' && a % b !== 0){ uppStatusEl.innerHTML='<b>'+a+' ÷ '+b+'</b> går inte jämnt ut (det blir rest '+(a%b)+'). Välj <b>÷ med rest</b> eller ändra talen.'; return false; }
             // NYTT: "Kort division (utan minnessiffra)" - varje siffra i täljaren går jämnt att dela med nämnaren
             if(operation==='kd'){
                 const fel = String(a).split('').filter(d=> (+d) % b !== 0);
                 if(a===0 || fel.length){ uppStatusEl.innerHTML='<b>'+a+' ÷ '+b+'</b> behöver minnessiffror. Vid <b>Kort division (utan minnessiffra)</b> ska varje siffra i täljaren gå jämnt att dela med '+b+' – t.ex. '+(b<=4 ? [b*2,b,b*2].map(x=>x>9?b:x).join('') : (b+'0'+b))+' ÷ '+b+'.'; return false; }
+                operation='÷';
+            }
+            // NYTT: "Kort division (med minnessiffra)" - går jämnt ut men ger minst en minnessiffra
+            if(operation==='kdm'){
+                if(a % b !== 0){ uppStatusEl.innerHTML='<b>'+a+' ÷ '+b+'</b> går inte jämnt ut (rest '+(a%b)+'). Välj <b>÷ med rest</b> eller ändra talen.'; return false; }
+                if(String(a).split('').every(d=> (+d) % b === 0)){ uppStatusEl.innerHTML='<b>'+a+' ÷ '+b+'</b> ger ingen minnessiffra. Välj <b>Kort division (utan minnessiffra)</b> eller ändra talen.'; return false; }
                 operation='÷';
             }
             if(operation==='÷r') operation='÷'; // samma uppställning - resten visas efter kvoten
@@ -18353,6 +18502,15 @@
             const max=Math.pow(10,digitsN)-1, min=Math.pow(10,digitsN-1);
             let a=Math.floor(Math.random()*(max-min+1))+min, b;
             if(operation==='×' || operation==='÷' || operation==='÷r'){ b=Math.floor(Math.random()*8)+2; }
+            else if(operation==='kdm'){ // går jämnt ut, minst en minnessiffra, första siffran >= nämnaren (ingen nolla först i kvoten)
+                let f=0;
+                do {
+                    b = 2 + Math.floor(Math.random()*8);
+                    const qMin=Math.ceil(min/b), qMax=Math.floor(max/b);
+                    a = b * (qMin + Math.floor(Math.random()*(qMax-qMin+1)));
+                    f++;
+                } while(f<300 && (+String(a)[0] < b || String(a).split('').every(d=> (+d) % b === 0)));
+            }
             else if(operation==='kd'){ // mest 2, 3 och 4 (då blir det fler olika tal), ibland 5–9
                 b = Math.random()<0.75 ? [2,3,4][Math.floor(Math.random()*3)] : 5+Math.floor(Math.random()*5);
                 const mojliga = []; for(let d=b; d<=9; d+=b) mojliga.push(d); // siffror som går jämnt (utom 0)
@@ -36556,6 +36714,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             "createGOTD()",            // Grej of the day
             "createBrainBreak()",      // Brain Break
             "createSkamt()",           // Skämt
+            "createJulkalender()",     // Julkalender
             "createGator()",           // Gåtor
             "createWordOfTheDay()"     // Dagens ord
         ],
