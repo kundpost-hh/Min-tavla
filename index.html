@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-22-julkalender1';</script>
+    <script>window.BUILD_VERSION = '2026-11-22-julkalender2';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -2748,6 +2748,21 @@
     @keyframes julPuls { 0%,100% { box-shadow:0 0 0 0 rgba(253,230,138,.9), 0 4px 10px rgba(0,0,0,.3); } 50% { box-shadow:0 0 0 7px rgba(253,230,138,0), 0 4px 10px rgba(0,0,0,.3); } }
     .jul-fot { position:relative; margin:12px auto 0; max-width:460px; text-align:center; background:#fff; color:#b71c1c; border:3px solid #c62828; border-radius:14px; padding:8px 12px; font-size:14px; font-weight:700; }
     .jul-ram[data-k='vardegrund'] .jul-fot { color:#14532d; border-color:#b8860b; }
+    .jul-ram[data-k='matte'] { background:radial-gradient(ellipse at top, #7b3fb8 0%, #4a2378 60%, #2f1650 100%); }
+    .jul-ram[data-k='saga'] { background:radial-gradient(ellipse at top, #b3412f 0%, #7a2418 60%, #4d140c 100%); }
+    .jul-etikett { font-size:11px; font-weight:800; color:#fff; background:#c62828; border-radius:999px; padding:1px 8px; }
+    .jul-las { font-size:12px; font-weight:700; color:#6b7280; margin-top:2px; }
+    .jul-ov { position:fixed; inset:0; z-index:100000001; background:rgba(10,20,40,.55); display:flex; align-items:center; justify-content:center; padding:20px; animation:popIn .2s ease; }
+    .jul-ruta { width:min(640px, 94vw); max-height:90vh; overflow:auto; background:#fffdf6; border:4px solid #f6c453; border-radius:22px; padding:20px 24px; box-shadow:0 20px 60px rgba(0,0,0,.4); font-family:-apple-system,system-ui,sans-serif; }
+    .jul-ruta-topp { display:flex; justify-content:space-between; align-items:center; }
+    .jul-ruta-datum { font-size:13px; font-weight:800; color:#fff; background:#c62828; border-radius:999px; padding:3px 12px; }
+    .jul-ruta[data-k='matte'] .jul-ruta-datum { background:#6d28d9; }
+    .jul-ruta-x { border:none; background:#f2f2f7; border-radius:50%; width:32px; height:32px; font-size:15px; cursor:pointer; }
+    .jul-ruta-titel { font-size:26px; font-weight:900; color:#b71c1c; margin:12px 0 8px; }
+    .jul-ruta[data-k='matte'] .jul-ruta-titel { color:#6d28d9; }
+    .jul-ruta-text { font-size:22px; font-weight:600; line-height:1.5; color:#1f2937; }
+    .jul-ruta-svar { margin-top:14px; font-size:21px; font-weight:800; color:#15803d; background:#ecfdf3; border:2px dashed #86efac; border-radius:14px; padding:10px 14px; animation:popIn .3s ease; }
+    .jul-ruta-knappar { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
     .jul-ctrl { display:flex; gap:6px; justify-content:center; margin-top:8px; }
     /* SKÄMT */
     .skamt-widget .widget-body { padding:12px 14px; }
@@ -15723,12 +15738,52 @@
                 7:{ f:'Fråga hur någon mår.' }, 8:{ f:'Säg tack.' }, 9:{ f:'Rita ett hjärta till någon.' }, 10:{ f:'Städa lite extra.' }, 11:{ f:'Dela med dig.' },
                 14:{ f:'Hjälp en kompis att städa.' }, 15:{ f:'Säg något du är bra på.' }, 16:{ f:'Hjälp en vuxen.' }, 17:{ f:'Gör någon glad.' }, 18:{ f:'Önska någon en fin dag.' }
             }
+        },
+        matte: {
+            flik:'🧮 Matte', rubrik:'Mattekalendern', under:'En julig mattenöt varje dag!', popup:true, etikett:'Mattenöt',
+            fot:'<b>Tänk själv först</b> – prata sedan med en kompis. Klicka på <b>Visa svar</b> när alla har räknat.',
+            dagar:{
+                1:{ t:'Renarnas last', f:'Tomten har 48 paket och 6 renar. Alla renar drar lika många paket. Hur många paket drar varje ren?', s:'8 paket (48 ÷ 6 = 8)' },
+                2:{ t:'Pepparkaksplåten', f:'På en plåt ligger 5 rader med 7 pepparkakor i varje rad. Hur många pepparkakor ligger på plåten?', s:'35 pepparkakor (5 · 7 = 35)' },
+                3:{ t:'Nedräkning', f:'Idag är det den 3 december. Hur många dagar är det kvar till julafton den 24 december?', s:'21 dagar (24 − 3 = 21)' },
+                4:{ t:'Julkorten', f:'Lisa köper 3 julkort som kostar 12 kr styck. Hon betalar med en 50-lapp. Hur mycket får hon tillbaka?', s:'14 kr (3 · 12 = 36 och 50 − 36 = 14)' },
+                7:{ t:'Granen', f:'En julgran är 2 meter hög. Stjärnan i toppen är 15 cm. Hur högt blir det tillsammans i centimeter?', s:'215 cm (200 cm + 15 cm)' },
+                8:{ t:'Nissarnas verkstad', f:'Nissarna slår in 125 paket på förmiddagen och 98 paket på eftermiddagen. Hur många paket slår de in under dagen?', s:'223 paket (125 + 98 = 223)' },
+                9:{ t:'Lussekatterna', f:'Ett recept ger 24 lussekatter. Klassen har 27 elever och alla ska få en. Hur många lussekatter fattas?', s:'3 lussekatter (27 − 24 = 3)' },
+                10:{ t:'Luciatåget', f:'Luciatåget går in klockan 8:45 och håller på i 25 minuter. Vad är klockan när det är slut?', s:'9:10 (8:45 + 15 min = 9:00, + 10 min = 9:10)' },
+                11:{ t:'Julklappsresan', f:'Tomten har 100 julklappar. Han delar ut hälften i Sverige och en fjärdedel i Norge. Hur många julklappar har han kvar?', s:'25 julklappar (50 + 25 = 75 och 100 − 75 = 25)' },
+                14:{ t:'Adventsljusen', f:'Första advent tänds 1 ljus, andra advent 2 ljus, tredje advent 3 ljus och fjärde advent 4 ljus. Hur många ljuständningar blir det sammanlagt?', s:'10 (1 + 2 + 3 + 4 = 10)' },
+                15:{ t:'Renen springer', f:'En ren springer 9 km på en timme. Hur långt springer den på 6 timmar?', s:'54 km (9 · 6 = 54)' },
+                16:{ t:'Pepparkakshjärtan', f:'Klassen har 28 elever. Varje elev bakar 3 pepparkakshjärtan. Hur många hjärtan blir det?', s:'84 hjärtan (28 · 3 = 84)' },
+                17:{ t:'Julklappsköp', f:'En julklapp kostar 89 kr och en annan kostar 145 kr. Hur mycket kostar de tillsammans?', s:'234 kr (89 + 145 = 234)' },
+                18:{ t:'Julmönstret', f:'Mönstret fortsätter: 🎄 ⭐ ⭐ 🎄 ⭐ ⭐ 🎄 ⭐ ⭐ … Vilken symbol står på plats nummer 20?', s:'⭐ – mönstret har 3 delar. 20 = 6 · 3 + 2, så plats 20 är samma som plats 2.' }
+            }
+        },
+        saga: {
+            flik:'📖 Julsaga', rubrik:'Det försvunna julljuset', under:'En julsaga i 14 delar – en ny del varje dag', popup:true, etikett:'Del',
+            fot:'<b>Vad tror du händer härnäst?</b> Gissa innan nästa lucka öppnas!',
+            dagar:{
+                1:{ t:'Stjärnan som slocknade', f:'I klass 4B hade alla längtat efter december. Men när Elsa kom till skolan den första december såg hon något konstigt: stjärnan i klassrumsfönstret lyste inte längre. Bredvid fönstret låg ett litet rött ullsnöre … och ett spår av pepparkakssmulor som ledde ut i korridoren!' },
+                2:{ t:'Den hemliga dörren', f:'Elsa och hennes kompis Omar följde smulorna. De gick förbi matsalen, förbi idrottssalen och stannade vid en liten dörr som ingen av dem hade sett förut. På dörren satt en skylt: ”Endast för nissar”. Plötsligt hörde de någon nysa där inne. – Atjoo!' },
+                3:{ t:'Nissen Pyts', f:'Omar knackade försiktigt. Dörren gled upp, och där stod en pytteliten nisse med alldeles för stor luva. – Jag heter Pyts, viskade nissen. Jag har gjort något dumt. Jag lånade ljuset från er stjärna … och nu har jag tappat bort det!' },
+                4:{ t:'Ett viktigt uppdrag', f:'Pyts berättade att ljuset var ett magiskt julljus som tomten själv hade gett skolan för länge sedan. – Om det inte är tillbaka före jullovet blir det ingen julstämning här i år, sa Pyts. Elsa och Omar tittade på varandra. – Vi hjälper dig! sa de samtidigt. Men var skulle de börja leta?' },
+                7:{ t:'I biblioteket', f:'Pyts mindes att han senast haft ljuset i skolbiblioteket. Där var det tyst och halvmörkt. Mellan två hyllor glimmade något svagt. Elsa sträckte fram handen – men det var bara en blank julgranskula. Då hörde de ett prasslande ljud bakom bokvagnen …' },
+                8:{ t:'Katten Majros', f:'Bakom bokvagnen satt skolans gamla katt Majros. Hon hade något glittrande i munnen! – Det där har jag letat efter! sa Pyts. Men när han gick fram skuttade Majros iväg, ut genom den öppna dörren mot skolgården.' },
+                9:{ t:'Spåren i snön', f:'Ute på skolgården hade det snöat. Kattspåren gick rakt mot den stora granen vid staketet. Under granen låg det glittrande föremålet. Omar plockade upp det. Det var inte ljuset – det var en lapp av guldpapper med texten: ”Ljuset finns där det är varmast.”' },
+                10:{ t:'Där det är varmast', f:'– Där det är varmast? sa Elsa. Det måste vara köket! De smög in i skolköket där kocken Berit bakade lussekatter. Det doftade saffran. Pyts pekade mot det översta skåpet och viskade: – Jag ser ett sken där uppe … men det är så högt!' },
+                11:{ t:'Den kalla lyktan', f:'Omar hittade en pall. Elsa höll i den medan Omar klättrade upp. Bakom en burk med pepparkakor låg en liten lykta som lyste svagt. Men när Omar lyfte ner den blev den alldeles kall och mörk. – Den har tappat sin kraft, sa Pyts ledsamt.' },
+                14:{ t:'Ljusets hemlighet', f:'Pyts förklarade: – Julljuset lyser bara när människor är snälla mot varandra. Någon på skolan har nog varit ledsen eller ensam länge. Elsa tänkte på Noah i parallellklassen, som alltid satt ensam på rasterna. – Jag tror att jag vet vad vi ska göra, sa hon.' },
+                15:{ t:'En snögubbe', f:'På rasten gick Elsa och Omar fram till Noah och frågade om han ville vara med och bygga en snögubbe. Noah log försiktigt och nickade. I Omars ficka började lyktan bli varm – och ett litet, litet sken tändes!' },
+                16:{ t:'Snälla handlingar', f:'Hela klass 4B bestämde sig för att göra snälla saker. De hjälpte till i matsalen, skrev fina lappar till varandra och bjöd in alla till lek. För varje snäll handling lyste lyktan lite starkare. Men Pyts såg fortfarande orolig ut. – Det behövs en sak till, sa han.' },
+                17:{ t:'Någon som tror', f:'– Ljuset måste sättas tillbaka i stjärnan av någon som verkligen tror på julen, sa Pyts. Alla tittade på varandra. Då räckte Noah försiktigt upp handen. – Jag tror på julen, sa han tyst. Han tog lyktan i båda händerna och gick fram mot fönstret …' },
+                18:{ t:'God jul!', f:'När Noah höll lyktan mot stjärnan flög ett gyllene ljus upp och fyllde hela klassrummet. Stjärnan lyste starkare än någonsin! I fönstret syntes en liten nisse som vinkade och försvann ut i snön. På bänken låg en lapp: ”Tack 4B! Ni har den varmaste klassen jag vet. God jul! /Pyts” – SLUT. God jul och trevligt jullov!' }
+            }
         }
     };
     function createJulkalender(config){
         const body = createWidget('JULKALENDER', 640, 'jul-widget', config);
         const widget = body.parentElement.parentElement;
-        let st = { flik:'kladsel', oppna:{ kladsel:[], vardegrund:[] } };
+        let st = { flik:'kladsel', oppna:{ kladsel:[], vardegrund:[], matte:[], saga:[] } };
         if(config && config.data){ if(config.data.flik) st.flik = config.data.flik; if(config.data.oppna) st.oppna = Object.assign(st.oppna, config.data.oppna); }
         const persist = ()=>{ widget.dataset.julkal = JSON.stringify(st); saveBoardState(); };
         widget.dataset.julkal = JSON.stringify(st);
@@ -15772,19 +15827,57 @@
                         <div class='jul-dorr'><div class='jul-dorr-nr'>${d}</div><div class='jul-dorr-dag'>${VECKODAG[wd]} ${d}/12</div></div>
                         <div class='jul-innehall'>
                             <div class='jul-datum'>${VECKODAG[wd]} ${d}/12</div>
+                            ${kal.popup ? `<div class='jul-etikett'>${kal.etikett} ${Object.keys(kal.dagar).map(Number).sort((a,b)=>a-b).indexOf(d)+1}</div>` : ''}
                             ${innehall && innehall.t ? `<div class='jul-titel' style='color:${innehall.c||'#c62828'}'>${innehall.t}</div>` : ''}
-                            <div class='jul-text'>${innehall ? innehall.f : '🎁'}</div>
+                            ${kal.popup ? `<div class='jul-las'>👆 Klicka för att ${st.flik==='saga'?'läsa':'visa'}</div>` : `<div class='jul-text'>${innehall ? innehall.f : '🎁'}</div>`}
                         </div>
                     </div>`;
                 el.onclick = (e)=>{
                     e.stopPropagation();
                     const lista = st.oppna[st.flik]; const i = lista.indexOf(d);
+                    // NYTT: Matte och Julsaga har mer text - de visas stort i en ruta. Luckan stängs via rutan.
+                    if(kal.popup){
+                        if(i===-1){ lista.push(d); el.classList.add('oppen'); el.title='Klicka för att visa igen'; persist(); }
+                        julVisaRuta(kal, d, ()=>{ const j=st.oppna[st.flik].indexOf(d); if(j>-1) st.oppna[st.flik].splice(j,1); el.classList.remove('oppen'); el.title='Klicka för att öppna luckan'; persist(); });
+                        return;
+                    }
                     if(i>-1) lista.splice(i,1); else lista.push(d);
                     el.classList.toggle('oppen'); el.title = el.classList.contains('oppen') ? 'Klicka för att stänga luckan' : 'Klicka för att öppna luckan';
                     persist();
                 };
                 grid.appendChild(el);
             }
+        }
+        function julVisaRuta(kal, d, stangLucka){
+            const inn = kal.dagar[d]; if(!inn) return;
+            const nr = Object.keys(kal.dagar).map(Number).sort((a,b)=>a-b).indexOf(d)+1;
+            const wd = new Date(ar, 11, d).getDay();
+            const ov = document.createElement('div'); ov.className='jul-ov';
+            ov.innerHTML = `<div class='jul-ruta' data-k='${st.flik}'>
+                <div class='jul-ruta-topp'><span class='jul-ruta-datum'>${VECKODAG[wd]} ${d}/12 · ${kal.etikett} ${nr}</span><button type='button' class='jul-ruta-x' title='Stäng'>✕</button></div>
+                <div class='jul-ruta-titel'>${inn.t||''}</div>
+                <div class='jul-ruta-text'>${inn.f}</div>
+                ${inn.s ? `<div class='jul-ruta-svar' style='display:none;'>✅ ${inn.s}</div>` : ''}
+                <div class='jul-ruta-knappar'>
+                    ${inn.s ? `<button type='button' class='btn btn-primary jul-ruta-visa'>👁️ Visa svar</button>` : ''}
+                    <button type='button' class='btn btn-secondary jul-ruta-las'>🔊 Läs upp</button>
+                    <button type='button' class='btn btn-secondary jul-ruta-stang'>🔒 Stäng luckan</button>
+                </div></div>`;
+            const tal = ()=>{ try{ window.speechSynthesis && speechSynthesis.cancel(); }catch(_){} };
+            const stang = ()=>{ tal(); ov.remove(); };
+            ov.onclick = (e)=>{ if(e.target===ov) stang(); };
+            ov.querySelector('.jul-ruta-x').onclick = stang;
+            ov.querySelector('.jul-ruta-stang').onclick = ()=>{ stang(); stangLucka(); };
+            const vb = ov.querySelector('.jul-ruta-visa');
+            if(vb) vb.onclick = ()=>{ const sv=ov.querySelector('.jul-ruta-svar'); const vis = sv.style.display==='none'; sv.style.display = vis ? 'block' : 'none'; vb.textContent = vis ? '🙈 Dölj svar' : '👁️ Visa svar'; };
+            ov.querySelector('.jul-ruta-las').onclick = ()=>{
+                if(!window.speechSynthesis) return; tal();
+                const sv = ov.querySelector('.jul-ruta-svar');
+                const text = (inn.t ? inn.t + '. ' : '') + inn.f + (sv && sv.style.display!=='none' ? ' Svar: ' + inn.s : '');
+                const u = new SpeechSynthesisUtterance(text.replace(/[–”“]/g,' ').replace(/·/g,' gånger ').replace(/÷/g,' delat med ')); u.lang='sv-SE'; u.rate=0.92;
+                const v=(typeof dikSwedishVoice==='function')?dikSwedishVoice():null; if(v) u.voice=v; speechSynthesis.speak(u);
+            };
+            (document.getElementById('cb-app-wrapper')||document.body).appendChild(ov);
         }
         body.querySelectorAll('.jul-tab').forEach(b=> b.onclick = (e)=>{ e.stopPropagation(); st.flik = b.dataset.k; render(); persist(); });
         q('.jul-stang').onclick = (e)=>{ e.stopPropagation(); st.oppna[st.flik] = []; render(); persist(); };
