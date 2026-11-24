@@ -9,7 +9,7 @@
     <!-- BUILD_VERSION sätts här, allra först, så den finns tillgänglig även för den lilla
          versionsbadgen längre ner i <body> (som annars skulle rendera innan huvudskriptet
          längre ner hunnit köras). Samma värde läses in i huvudskriptet nedan. -->
-    <script>window.BUILD_VERSION = '2026-11-22-julkalender2';</script>
+    <script>window.BUILD_VERSION = '2026-11-24-lasf-rubriker1';</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <meta name="mobile-web-app-capable" content="yes">
@@ -1653,6 +1653,8 @@
     .bio-begrepp-pill:hover{ background:#d7f3df; border-color:#3cb45f; }
 
     /* ---- LÄSFÖRSTÅELSE ---- */
+    .lasf-rubrikrad { font-weight:800; }
+    .lasf-p.lasf-p-rubrik { margin-bottom:.25em; font-size:1.06em; }
     .lasf-widget .widget-header{ background:#ff3b30 !important; }
     .lasf-body{ padding:14px 14px 12px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; overflow-x:hidden; }
     .lasf-root{ display:flex; flex-direction:column; gap:10px; }
@@ -23202,6 +23204,33 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         throw new Error(lastErr || 'Kunde inte kontakta AI-tjänsten.');
     }
 
+    // NYTT: känner igen underrubriker i texter (främst faktatexter): en kort rad först i ett stycke
+    // som inte slutar med punkt/frågetecken/utropstecken. Sådana rader visas i fetstil – i widgeten,
+    // på arbetsbladet, vid utskrift och i PDF/Word.
+    function lasfRensaRubrik(rad){ return String(rad||'').trim().replace(/^#{1,4}\s*/,'').replace(/^\*\*(.+)\*\*$/,'$1').trim(); }
+    function lasfArRubrik(rad, nasta, fakta, dikt){
+        if(dikt && nasta !== undefined && nasta !== null) return false; // i dikter räknas bara ensamma rader (titeln)
+        const ra = String(rad||'').trim();
+        const markdown = /^#{1,4}\s+\S/.test(ra) || /^\*\*.+\*\*$/.test(ra);   // "## Rubrik" eller "**Rubrik**" (t.ex. från AI)
+        const r = lasfRensaRubrik(ra);
+        if(r.length < 2 || r.length > 80) return false;
+        if(markdown) return true;
+        if(!/^[A-ZÅÄÖÉ0-9]/.test(r)) return false;
+        if(/:$/.test(r)) return r.length <= 45;                   // t.ex. "Du behöver:"
+        if(fakta && /\?$/.test(r) && r.length <= 45 && nasta !== undefined) return true; // frågerubrik i faktatext, t.ex. "Vad äter igelkotten?"
+        if(/[.!?;,…”"»)]$/.test(r)) return false;                 // vanlig mening
+        if(r.split(/\s+/).length > 12) return false;
+        // Står det fler rader direkt under (utan tom rad) måste nästa rad se ut som vanlig text –
+        // annars är det t.ex. en dikt där raderna saknar punkt.
+        if(nasta !== undefined && nasta !== null){ const n = String(nasta).trim(); if(!(/[.!?:…”"»)]$/.test(n) || n.length > 80)) return false; }
+        return true;
+    }
+    // Delar ett stycke i { rubrik, resten } (rubrik = null om stycket inte börjar med en rubrikrad)
+    function lasfDelaStycke(stycke, fakta, dikt){
+        const rader = String(stycke).split(/\n/);
+        if(lasfArRubrik(rader[0], rader.length>1 ? rader[1] : null, fakta, dikt)) return { rubrik: lasfRensaRubrik(rader[0]), resten: rader.slice(1).join('\n') };
+        return { rubrik: null, resten: stycke };
+    }
     function createLasforstaelse(config){
         if(config===undefined) config=null;
         const body = createWidget('LÄSFÖRSTÅELSE', 780, 'lasf-widget', config);
@@ -23358,7 +23387,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
         function buildArbetsbladInnehall(){
             const t = aktuellText(); if(!t) return null;
             const raw = t.niv[st.niva] || t.niv.mellan || '';
-            const stycken = raw.split(/\n\n+/).map(p=>'<p>'+esc(p).replace(/\n/g,'<br>')+'</p>').join('');
+            const stycken = raw.split(/\n\n+/).map(p=>{ const d=lasfDelaStycke(p, t.typ==='faktatext', t.typ==='dikt'); if(d.rubrik && !d.resten.trim()) return '<p class="rubrik"><strong>'+esc(d.rubrik)+'</strong></p>'; return '<p>'+(d.rubrik ? '<strong>'+esc(d.rubrik)+'</strong><br>' : '')+esc(d.resten).replace(/\n/g,'<br>')+'</p>'; }).join('');
             let html = '<h1>📚 Läsförståelse: '+esc(t.titel)+'</h1>';
             html += '<div class="meta">'+esc(typNamn(t.typ))+' · Nivå: '+esc(st.niva==='latt'?'Lätt':(st.niva==='utmaning'?'Utmaning':'Mellan'))+' · Namn: ________________________</div>';
             html += '<h2>📖 Läs texten</h2><div class="text">'+stycken+'</div>';
@@ -23483,7 +23512,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
 
                 h2('Läs texten');
                 const raw = t.niv[st.niva] || t.niv.mellan || '';
-                raw.split(/\n\n+/).forEach(p => paragraph(p, {gap:6}));
+                raw.split(/\n\n+/).forEach(p => { const d=lasfDelaStycke(p, t.typ==='faktatext', t.typ==='dikt'); if(d.rubrik) paragraph(d.rubrik, {gap: d.resten.trim()?1:4, bold:true, size:11.5}); if(d.resten.trim()) paragraph(d.resten, {gap:6}); });
 
                 if(t.begrepp && t.begrepp.length){
                     h2('Ordbank');
@@ -23587,7 +23616,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
 
                 h2('📖 Läs texten');
                 const raw = t.niv[st.niva] || t.niv.mellan || '';
-                raw.split(/\n\n+/).forEach(p => body(p, {gap:160}));
+                raw.split(/\n\n+/).forEach(p => { const d=lasfDelaStycke(p, t.typ==='faktatext', t.typ==='dikt'); if(d.rubrik) body(d.rubrik, {gap: d.resten.trim()?40:80, bold:true, size:24}); if(d.resten.trim()) body(d.resten, {gap:160}); });
 
                 if(t.begrepp && t.begrepp.length){
                     h2('🔤 Ordbank');
@@ -24166,11 +24195,16 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
             const rubrikEl = document.createElement('div'); rubrikEl.className='lasf-lastitel'; rubrikEl.textContent = t.bild+' '+t.titel; reader.appendChild(rubrikEl);
             raw.split(/\n\n+/).forEach(stycke=>{
                 const p = document.createElement('p'); p.className='lasf-p';
-                stycke.split(/\n/).forEach((rad, ri)=>{
+                const _rader = stycke.split(/\n/);
+                const forstaArRubrik = lasfArRubrik(_rader[0], _rader.length>1 ? _rader[1] : null, t.typ==='faktatext', t.typ==='dikt');
+                if(forstaArRubrik) _rader[0] = lasfRensaRubrik(_rader[0]);
+                if(forstaArRubrik && stycke.split(/\n/).length===1) p.classList.add('lasf-p-rubrik');
+                _rader.forEach((rad, ri)=>{
                     if(ri>0) p.appendChild(document.createElement('br'));
+                    const mal = (ri===0 && forstaArRubrik) ? (()=>{ const b=document.createElement('strong'); b.className='lasf-rubrikrad'; p.appendChild(b); return b; })() : p;
                     rad.split(/(\s+)/).forEach(tok=>{
                         if(tok==='') return;
-                        if(/^\s+$/.test(tok)){ p.appendChild(document.createTextNode(tok)); return; }
+                        if(/^\s+$/.test(tok)){ mal.appendChild(document.createTextNode(tok)); return; }
                         const ren = tok.replace(/^[^0-9A-Za-zÅÄÖåäöÉé]+|[^0-9A-Za-zÅÄÖåäöÉé]+$/g,'').toLowerCase();
                         const sp = document.createElement('span'); sp.className='lasf-w'; sp.textContent=tok;
                         const b = map[ren];
@@ -24180,7 +24214,7 @@ Utflykten blev en oförglömlig dag fylld av äventyr, frisk skogsluft och gemen
                             if(markMode){ sp.classList.toggle('lasf-marked'); return; }
                             if(b) visaOrdkort(b);
                         };
-                        p.appendChild(sp);
+                        mal.appendChild(sp);
                     });
                 });
                 reader.appendChild(p);
